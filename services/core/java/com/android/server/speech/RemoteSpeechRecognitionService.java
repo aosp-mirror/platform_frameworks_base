@@ -125,10 +125,12 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                 }
             });
 
+            // Eager local evaluation to avoid reading a different or null value at closure-run-time
+            final DelegatingListener listenerToStart = this.mDelegatingListener;
             run(service ->
                     service.startListening(
                             recognizerIntent,
-                            mDelegatingListener,
+                            listenerToStart,
                             attributionSource));
         }
     }
@@ -162,7 +164,9 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
             mRecordingInProgress = false;
 
-            run(service -> service.stopListening(mDelegatingListener));
+            // Eager local evaluation to avoid reading a different or null value at closure-run-time
+            final DelegatingListener listenerToStop = this.mDelegatingListener;
+            run(service -> service.stopListening(listenerToStop));
         }
     }
 

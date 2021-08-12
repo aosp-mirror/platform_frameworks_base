@@ -85,6 +85,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
@@ -94,15 +95,18 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSDetailDisplayer;
+import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -289,6 +293,14 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private FragmentHostManager mFragmentHostManager;
     @Mock
     private QuickAccessWalletController mQuickAccessWalletController;
+    @Mock
+    private NotificationRemoteInputManager mNotificationRemoteInputManager;
+    @Mock
+    private RemoteInputController mRemoteInputController;
+    @Mock
+    private RecordingController mRecordingController;
+    @Mock
+    private ControlsComponent mControlsComponent;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -360,16 +372,17 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mKeyguardBypassController,
                         mDozeParameters,
                         mUnlockedScreenOffAnimationController);
+        mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
                 coordinator,
                 mKeyguardBypassController, mHeadsUpManager,
                 mock(NotificationRoundnessManager.class),
+                mConfigurationController,
                 mStatusBarStateController,
                 mFalsingManager,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake());
-        mConfigurationController = new ConfigurationControllerImpl(mContext);
         when(mKeyguardStatusViewComponentFactory.build(any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
@@ -384,6 +397,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
                 .thenReturn(mKeyguardBottomArea);
+        when(mNotificationRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+        when(mRemoteInputController.isRemoteInputActive()).thenReturn(false);
 
         reset(mView);
 
@@ -425,9 +440,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFragmentService,
                 mContentResolver,
                 mQuickAccessWalletController,
+                mRecordingController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mNotificationRemoteInputManager,
+                mControlsComponent);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

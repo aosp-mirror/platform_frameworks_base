@@ -19,14 +19,11 @@ package com.android.systemui.biometrics;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.annotation.NonNull;
-import android.hardware.biometrics.BiometricSourceType;
+import android.content.res.Configuration;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
-import androidx.annotation.Nullable;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -36,36 +33,32 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
- *
- * Highlights the udfps icon when:
- * - Face authentication has failed
- * - Face authentication has been run for > 2 seconds
  */
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
-    private static final long AFTER_FACE_AUTH_HINT_DELAY = 2000;
-
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final DelayableExecutor mExecutor;
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
+    @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final UdfpsController mUdfpsController;
 
-    @Nullable private Runnable mCancelDelayedHintRunnable;
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
-    private boolean mHintShown;
     private int mStatusBarState;
     private float mTransitionToFullShadeProgress;
+    private float mLastDozeAmount;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -85,6 +78,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
+            @NonNull ConfigurationController configurationController,
             @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -92,6 +86,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mExecutor = mainDelayableExecutor;
         mKeyguardViewMediator = keyguardViewMediator;
         mLockScreenShadeTransitionController = transitionController;
+        mConfigurationController = configurationController;
         mUdfpsController = udfpsController;
     }
 
@@ -103,11 +98,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mHintShown = false;
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        updateFaceDetectRunning(mKeyguardUpdateMonitor.isFaceDetectionRunning());
-
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
+        mLastDozeAmount = dozeAmount;
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
         mStatusBarStateController.addCallback(mStateListener);
 
@@ -117,6 +109,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
+        mConfigurationController.addCallback(mConfigurationListener);
         updateAlpha();
         updatePauseAuth();
 
@@ -127,19 +120,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
-        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mFaceDetectRunning = false;
 
         mStatusBarStateController.removeCallback(mStateListener);
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
+        mConfigurationController.removeCallback(mConfigurationListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
-        }
-
-        if (mCancelDelayedHintRunnable != null) {
-            mCancelDelayedHintRunnable.run();
-            mCancelDelayedHintRunnable = null;
         }
     }
 
@@ -155,7 +143,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mAlpha=" + mView.getAlpha());
         pw.println("mUdfpsRequested=" + mUdfpsRequested);
         pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
-        pw.println("mView.mUdfpsRequestedColor=" + mView.mUdfpsRequestedColor);
     }
 
     /**
@@ -170,12 +157,17 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mShowingUdfpsBouncer = show;
         updatePauseAuth();
         if (mShowingUdfpsBouncer) {
-            mView.animateUdfpsBouncer(() ->
-                    mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true));
+            if (mStatusBarState == StatusBarState.SHADE_LOCKED) {
+                mView.animateInUdfpsBouncer(null);
+            }
+
+            if (mKeyguardViewManager.isOccluded()) {
+                mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+            }
+
             mView.announceForAccessibility(mView.getContext().getString(
                     R.string.accessibility_fingerprint_bouncer));
         } else {
-            mView.animateAwayUdfpsBouncer(null);
             mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
         return true;
@@ -205,7 +197,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return true;
         }
 
-        if (mInputBouncerHiddenAmount < .4f || mIsBouncerVisible) {
+        if (mInputBouncerHiddenAmount < .5f || mIsBouncerVisible) {
             return true;
         }
 
@@ -235,36 +227,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
     }
 
-    private void cancelDelayedHint() {
-        if (mCancelDelayedHintRunnable != null) {
-            mCancelDelayedHintRunnable.run();
-            mCancelDelayedHintRunnable = null;
-        }
-    }
-
-    private void updateFaceDetectRunning(boolean running) {
-        if (mFaceDetectRunning == running) {
-            return;
-        }
-
-        // show udfps hint a few seconds after face auth started running
-        if (!mFaceDetectRunning && running && !mHintShown && mCancelDelayedHintRunnable == null) {
-            // Face detect started running, show udfps hint after a delay
-            mCancelDelayedHintRunnable = mExecutor.executeDelayed(() -> showHint(false),
-                    AFTER_FACE_AUTH_HINT_DELAY);
-        }
-
-        mFaceDetectRunning = running;
-    }
-
-    private void showHint(boolean forceShow) {
-        cancelDelayedHint();
-        if (!mHintShown || forceShow) {
-            mHintShown = true;
-            mView.animateHint();
-        }
-    }
-
     /**
      * Set the progress we're currently transitioning to the full shade. 0.0f means we're not
      * transitioning yet, while 1.0f means we've fully dragged down.
@@ -277,8 +239,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private void updateAlpha() {
         // fade icon on transition to showing bouncer
         int alpha = mShowingUdfpsBouncer ? 255
-                : Math.abs((int) MathUtils.constrainedMap(0f, 255f, .4f, .7f,
-                        mInputBouncerHiddenAmount));
+                : (int) MathUtils.constrain(
+                    MathUtils.map(.5f, .9f, 0f, 255f, mInputBouncerHiddenAmount),
+                    0f, 255f);
         alpha *= (1.0f - mTransitionToFullShadeProgress);
         mView.setUnpausedAlpha(alpha);
     }
@@ -287,8 +250,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             new StatusBarStateController.StateListener() {
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
-            if (linear != 0) showUdfpsBouncer(false);
+            if (mLastDozeAmount < linear) {
+                showUdfpsBouncer(false);
+            }
             mView.onDozeAmountChanged(linear, eased);
+            mLastDozeAmount = linear;
             updatePauseAuth();
         }
 
@@ -299,31 +265,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             updatePauseAuth();
         }
     };
-
-    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
-            new KeyguardUpdateMonitorCallback() {
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        updateFaceDetectRunning(running);
-                    }
-                }
-
-                public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        // show udfps hint when face auth fails
-                        showHint(true);
-                    }
-                }
-
-                public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
-                    if (biometricSourceType == BiometricSourceType.FACE) {
-                        // cancel delayed hint if face auth succeeded
-                        cancelDelayedHint();
-                    }
-                }
-            };
 
     private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
             new StatusBarKeyguardViewManager.AlternateAuthInterceptor() {
@@ -351,7 +292,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public boolean isAnimating() {
-                    return mView.isAnimating();
+                    return false;
                 }
 
                 @Override
@@ -362,6 +303,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public boolean onTouch(MotionEvent event) {
+                    if (mTransitionToFullShadeProgress != 0) {
+                        return false;
+                    }
                     return mUdfpsController.onTouch(event);
                 }
 
@@ -387,6 +331,29 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 @Override
                 public void dump(PrintWriter pw) {
                     pw.println(getTag());
+                }
+            };
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onUiModeChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onThemeChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onOverlayChanged() {
+                    mView.updateColor();
+                }
+
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    mView.updateColor();
                 }
             };
 }

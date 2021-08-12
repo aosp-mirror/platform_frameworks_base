@@ -18,7 +18,6 @@ package com.android.server.appsearch;
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 import static android.os.Process.INVALID_UID;
 
-import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
@@ -60,7 +59,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.stats.StatsCollector;
 import com.android.server.appsearch.util.PackageUtil;
 import com.android.server.usage.StorageStatsManagerLocal;
 import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
@@ -82,7 +83,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/** TODO(b/142567528): add comments when implement this class */
+/**
+ * The main service implementation which contains AppSearch's platform functionality.
+ * @hide
+ */
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
     private final Context mContext;
@@ -118,6 +122,13 @@ public class AppSearchManagerService extends SystemService {
         registerReceivers();
         LocalManagerRegistry.getManager(StorageStatsManagerLocal.class)
                 .registerStorageStatsAugmenter(new AppSearchStorageStatsAugmenter(), TAG);
+    }
+
+    @Override
+    public void onBootPhase(/* @BootPhase */ int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            StatsCollector.getInstance(mContext, EXECUTOR);
+        }
     }
 
     private void registerReceivers() {
@@ -361,6 +372,12 @@ public class AppSearchManagerService extends SystemService {
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback,
                             AppSearchResult.newSuccessfulResult(setSchemaResponse.getBundle()));
+
+                    // setSchema will sync the schemas in the request to AppSearch, any existing
+                    // schemas which  is not included in the request will be delete if we force
+                    // override incompatible schemas. And all documents of these types will be
+                    // deleted as well. We should checkForOptimize for these deletion.
+                    checkForOptimize(instance);
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -502,6 +519,10 @@ public class AppSearchManagerService extends SystemService {
                     // Now that the batch has been written. Persist the newly written data.
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
+
+                    // The existing documents with same ID will be deleted, so there may be some
+                    // resources that could be released after optimize().
+                    checkForOptimize(instance, /*mutateBatchSize=*/ documentBundles.size());
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -774,7 +795,7 @@ public class AppSearchManagerService extends SystemService {
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     SearchResultPage searchResultPage =
-                            instance.getAppSearchImpl().getNextPage(nextPageToken);
+                            instance.getAppSearchImpl().getNextPage(packageName, nextPageToken);
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -800,7 +821,7 @@ public class AppSearchManagerService extends SystemService {
                     verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
-                    instance.getAppSearchImpl().invalidateNextPageToken(nextPageToken);
+                    instance.getAppSearchImpl().invalidateNextPageToken(packageName, nextPageToken);
                 } catch (Throwable t) {
                     Log.e(TAG, "Unable to invalidate the query page token", t);
                 }
@@ -850,7 +871,7 @@ public class AppSearchManagerService extends SystemService {
                                                 .getGenericDocument().getBundle());
                             }
                             searchResultPage = instance.getAppSearchImpl().getNextPage(
-                                    searchResultPage.getNextPageToken());
+                                    packageName, searchResultPage.getNextPageToken());
                         }
                     }
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
@@ -1020,6 +1041,8 @@ public class AppSearchManagerService extends SystemService {
                     // Now that the batch has been written. Persist the newly written data.
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
+
+                    checkForOptimize(instance, ids.size());
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -1089,6 +1112,8 @@ public class AppSearchManagerService extends SystemService {
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.LITE);
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
+
+                    checkForOptimize(instance);
                 } catch (Throwable t) {
                     ++operationFailureCount;
                     statusCode = throwableToFailedResult(t).getResultCode();
@@ -1329,43 +1354,26 @@ public class AppSearchManagerService extends SystemService {
     /**
      * Helper for dealing with incoming user arguments to system service calls.
      *
-     * <p>Takes care of checking permissions and converting USER_CURRENT to the actual current user.
-     *
      * @param requestedUser The user which the caller is requesting to execute as.
      * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      */
     @NonNull
     private UserHandle handleIncomingUser(@NonNull UserHandle requestedUser, int callingUid) {
-        int callingPid = Binder.getCallingPid();
         UserHandle callingUser = UserHandle.getUserHandleForUid(callingUid);
         if (callingUser.equals(requestedUser)) {
             return requestedUser;
         }
+
         // Duplicates UserController#ensureNotSpecialUser
         if (requestedUser.getIdentifier() < 0) {
             throw new IllegalArgumentException(
                     "Call does not support special user " + requestedUser);
         }
-        boolean canInteractAcrossUsers = mContext.checkPermission(
-                Manifest.permission.INTERACT_ACROSS_USERS,
-                callingPid,
-                callingUid) == PackageManager.PERMISSION_GRANTED;
-        if (!canInteractAcrossUsers) {
-            canInteractAcrossUsers = mContext.checkPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    callingPid,
-                    callingUid) == PackageManager.PERMISSION_GRANTED;
-        }
-        if (canInteractAcrossUsers) {
-            return requestedUser;
-        }
+
         throw new SecurityException(
-                "Permission denied while calling from uid " + callingUid
-                        + " with " + requestedUser + "; Need to run as either the calling user ("
-                        + callingUser + "), or with one of the following permissions: "
-                        + Manifest.permission.INTERACT_ACROSS_USERS + " or "
-                        + Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                "Requested user, " + requestedUser + ", is not the same as the calling user, "
+                        + callingUser + ".");
     }
 
     /**
@@ -1468,5 +1476,47 @@ public class AppSearchManagerService extends SystemService {
                 Log.e(TAG, "Unable to augment storage stats for " + userHandle, t);
             }
         }
+    }
+
+    private void checkForOptimize(AppSearchUserInstance instance, int mutateBatchSize) {
+        EXECUTOR.execute(() -> {
+            long totalLatencyStartMillis = SystemClock.elapsedRealtime();
+            OptimizeStats.Builder builder = new OptimizeStats.Builder();
+            try {
+                instance.getAppSearchImpl().checkForOptimize(mutateBatchSize, builder);
+            } catch (AppSearchException e) {
+                Log.w(TAG, "Error occurred when check for optimize", e);
+            } finally {
+                OptimizeStats oStats = builder
+                        .setTotalLatencyMillis(
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis))
+                        .build();
+                if (oStats.getOriginalDocumentCount() > 0) {
+                    // see if optimize has been run by checking originalDocumentCount
+                    instance.getLogger().logStats(oStats);
+                }
+            }
+        });
+    }
+
+    private void checkForOptimize(AppSearchUserInstance instance) {
+        EXECUTOR.execute(() -> {
+            long totalLatencyStartMillis = SystemClock.elapsedRealtime();
+            OptimizeStats.Builder builder = new OptimizeStats.Builder();
+            try {
+                instance.getAppSearchImpl().checkForOptimize(builder);
+            } catch (AppSearchException e) {
+                Log.w(TAG, "Error occurred when check for optimize", e);
+            } finally {
+                OptimizeStats oStats = builder
+                        .setTotalLatencyMillis(
+                                (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis))
+                        .build();
+                if (oStats.getOriginalDocumentCount() > 0) {
+                    // see if optimize has been run by checking originalDocumentCount
+                    instance.getLogger().logStats(oStats);
+                }
+            }
+        });
     }
 }

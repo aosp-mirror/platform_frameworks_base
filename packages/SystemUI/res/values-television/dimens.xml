@@ -18,10 +18,6 @@
     <!-- Opacity at which the background for the shutdown UI will be drawn. -->
     <item name="shutdown_scrim_behind_alpha" format="float" type="dimen">1.0</item>
 
-    <dimen name="privacy_chip_icon_margin">3dp</dimen>
-    <dimen name="privacy_chip_icon_padding">8dp</dimen>
-    <dimen name="privacy_chip_icon_size">13dp</dimen>
-
     <dimen name="bottom_sheet_padding_horizontal">32dp</dimen>
     <dimen name="bottom_sheet_padding_vertical">24dp</dimen>
 
@@ -42,6 +38,22 @@
 
     <dimen name="bottom_sheet_min_height">208dp</dimen>
     <dimen name="bottom_sheet_margin">24dp</dimen>
-    <dimen name="bottom_sheet_background_blur_radius">120dp</dimen>
+    <dimen name="bottom_sheet_background_blur_radius">37dp</dimen>
+
+    <dimen name="privacy_chip_margin">12dp</dimen>
+    <dimen name="privacy_chip_icon_margin_in_between">9dp</dimen>
+    <dimen name="privacy_chip_padding_horizontal">9dp</dimen>
+    <dimen name="privacy_chip_icon_size">12dp</dimen>
+    <dimen name="privacy_chip_height">24dp</dimen>
+    <dimen name="privacy_chip_min_width">30dp</dimen>
+    <dimen name="privacy_chip_radius">12dp</dimen>
+
+    <dimen name="privacy_chip_dot_size">8dp</dimen>
+    <dimen name="privacy_chip_dot_radius">4dp</dimen>
+    <dimen name="privacy_chip_dot_margin_horizontal">8dp</dimen>
+
+    <dimen name="privacy_chip_dot_bg_width">24dp</dimen>
+    <dimen name="privacy_chip_dot_bg_height">18dp</dimen>
+    <dimen name="privacy_chip_dot_bg_radius">9dp</dimen>
 
 </resources>

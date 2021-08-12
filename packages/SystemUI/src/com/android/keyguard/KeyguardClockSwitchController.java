@@ -20,9 +20,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.WallpaperManager;
-import android.content.res.Resources;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -189,10 +187,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     .getDimensionPixelSize(R.dimen.below_clock_padding_end);
             mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
-            // ... but above the large clock
-            lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
-            mLargeClockFrame.setLayoutParams(lp);
+            updateClockLayout();
 
             View nic = mView.findViewById(
                     R.id.left_aligned_notification_icon_container);
@@ -235,6 +230,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     public void onDensityOrFontScaleChanged() {
         mView.onDensityOrFontScaleChanged();
+
+        updateClockLayout();
+    }
+
+    private void updateClockLayout() {
+        if (mSmartspaceController.isEnabled()) {
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
+                    MATCH_PARENT);
+            lp.topMargin = getContext().getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_large_clock_top_margin);
+            mLargeClockFrame.setLayoutParams(lp);
+        }
     }
 
     /**
@@ -356,37 +363,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private ColorExtractor.GradientColors getGradientColors() {
         return mColorExtractor.getColors(WallpaperManager.FLAG_LOCK);
-    }
-
-    // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
-    // This is an optimization to ensure we only recompute the patterns when the inputs change.
-    private static final class Patterns {
-        static String sClockView12;
-        static String sClockView24;
-        static String sCacheKey;
-
-        static void update(Resources res) {
-            final Locale locale = Locale.getDefault();
-            final String clockView12Skel = res.getString(R.string.clock_12hr_format);
-            final String clockView24Skel = res.getString(R.string.clock_24hr_format);
-            final String key = locale.toString() + clockView12Skel + clockView24Skel;
-            if (key.equals(sCacheKey)) return;
-
-            sClockView12 = DateFormat.getBestDateTimePattern(locale, clockView12Skel);
-            // CLDR insists on adding an AM/PM indicator even though it wasn't in the skeleton
-            // format.  The following code removes the AM/PM indicator if we didn't want it.
-            if (!clockView12Skel.contains("a")) {
-                sClockView12 = sClockView12.replaceAll("a", "").trim();
-            }
-
-            sClockView24 = DateFormat.getBestDateTimePattern(locale, clockView24Skel);
-
-            // Use fancy colon.
-            sClockView24 = sClockView24.replace(':', '\uee01');
-            sClockView12 = sClockView12.replace(':', '\uee01');
-
-            sCacheKey = key;
-        }
     }
 
     private int getCurrentLayoutDirection() {

@@ -44,6 +44,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isWorkProfileOn() {
+        return false;
+    }
+
+    @Override
     public boolean isProfileOwnerOfOrganizationOwnedDevice() {
         return false;
     }

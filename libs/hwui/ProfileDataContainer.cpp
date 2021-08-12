@@ -27,7 +27,7 @@
 namespace android {
 namespace uirenderer {
 
-void ProfileDataContainer::freeData() {
+void ProfileDataContainer::freeData() REQUIRES(mJankDataMutex) {
     if (mIsMapped) {
         munmap(mData, sizeof(ProfileData));
     } else {

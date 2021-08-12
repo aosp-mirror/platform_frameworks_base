@@ -20,6 +20,7 @@ import static android.graphics.Matrix.MSCALE_X;
 import static android.graphics.Matrix.MSCALE_Y;
 import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
@@ -775,8 +776,10 @@ public abstract class WallpaperService extends Service {
                 WallpaperColors color = colors.get(i);
                 RectF area = regions.get(i);
                 if (color == null || area == null) {
-                    Log.wtf(TAG, "notifyLocalColorsChanged null values. color: "
-                            + color + " area " + area);
+                    if (DEBUG) {
+                        Log.e(TAG, "notifyLocalColorsChanged null values. color: "
+                                + color + " area " + area);
+                    }
                     continue;
                 }
                 try {
@@ -1024,12 +1027,17 @@ public abstract class WallpaperService extends Service {
                             mBbqSurfaceControl = new SurfaceControl.Builder()
                                     .setName("Wallpaper BBQ wrapper")
                                     .setHidden(false)
+                                    // TODO(b/192291754)
+                                    .setMetadata(METADATA_WINDOW_TYPE, TYPE_WALLPAPER)
                                     .setBLASTLayer()
                                     .setParent(mSurfaceControl)
                                     .setCallsite("Wallpaper#relayout")
                                     .build();
                             updateSurfaceDimming();
                         }
+                        // Propagate transform hint from WM so we can use the right hint for the
+                        // first frame.
+                        mBbqSurfaceControl.setTransformHint(mSurfaceControl.getTransformHint());
                         Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
                                 mSurfaceSize.y, mFormat);
                         // If blastSurface == null that means it hasn't changed since the last
@@ -1570,6 +1578,7 @@ public abstract class WallpaperService extends Service {
                         + page.getBitmap().getWidth() + " x " + page.getBitmap().getHeight());
             }
             for (RectF area: page.getAreas()) {
+                if (area == null) continue;
                 RectF subArea = generateSubRect(area, pageIndx, numPages);
                 Bitmap b = page.getBitmap();
                 int x = Math.round(b.getWidth() * subArea.left);
@@ -1933,6 +1942,7 @@ public abstract class WallpaperService extends Service {
     }
 
     private boolean isValid(RectF area) {
+        if (area == null) return false;
         boolean valid = area.bottom > area.top && area.left < area.right
                 && LOCAL_COLOR_BOUNDS.contains(area);
         return valid;

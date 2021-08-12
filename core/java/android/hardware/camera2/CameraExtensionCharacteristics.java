@@ -25,6 +25,7 @@ import android.graphics.ImageFormat;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
+import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.SizeList;
@@ -357,6 +358,27 @@ public final class CameraExtensionCharacteristics {
             }
         }
 
+        public void initializeSession(IInitializeSessionCallback cb) throws RemoteException {
+            synchronized (mLock) {
+                if (mProxy != null) {
+                    mProxy.initializeSession(cb);
+                }
+            }
+        }
+
+        public void releaseSession() {
+            synchronized (mLock) {
+                if (mProxy != null) {
+                    try {
+                        mProxy.releaseSession();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to release session! Extension service does"
+                                + " not respond!");
+                    }
+                }
+            }
+        }
+
         public boolean areAdvancedExtensionsSupported() {
             return mSupportsAdvancedExtensions;
         }
@@ -407,6 +429,20 @@ public final class CameraExtensionCharacteristics {
      */
     public static void unregisterClient(long clientId) {
         CameraExtensionManagerGlobal.get().unregisterClient(clientId);
+    }
+
+    /**
+     * @hide
+     */
+    public static void initializeSession(IInitializeSessionCallback cb) throws RemoteException {
+        CameraExtensionManagerGlobal.get().initializeSession(cb);
+    }
+
+    /**
+     * @hide
+     */
+    public static void releaseSession() {
+        CameraExtensionManagerGlobal.get().releaseSession();
     }
 
     /**

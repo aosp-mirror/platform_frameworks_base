@@ -32,8 +32,10 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
 
     // These MUST not change, as they are the stable API between here and device admin specified
     // by the component below.
-    private static final String ACTION_LEARN_MORE = "android.settings.LEARN_MORE";
-    private static final String EXTRA_FROM_BIOMETRIC_SETUP = "from_biometric_setup";
+    private static final String ACTION_LEARN_MORE =
+            "android.intent.action.MANAGE_RESTRICTED_SETTING";
+    private static final String EXTRA_SETTING_KEY = "extra_setting";
+    private static final String EXTRA_SETTING_VALUE = "biometric_disabled_by_admin_controller";
 
     BiometricActionDisabledByAdminController(
             DeviceAdminStringProvider stringProvider) {
@@ -62,9 +64,9 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
         return (dialog, which) -> {
             Log.d(TAG, "Positive button clicked, component: " + enforcedAdmin.component);
             final Intent intent = new Intent(ACTION_LEARN_MORE)
-                    .setComponent(enforcedAdmin.component)
-                    .putExtra(EXTRA_FROM_BIOMETRIC_SETUP, true)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    .putExtra(EXTRA_SETTING_KEY, EXTRA_SETTING_VALUE)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .setPackage(enforcedAdmin.component.getPackageName());
             context.startActivity(intent);
         };
     }

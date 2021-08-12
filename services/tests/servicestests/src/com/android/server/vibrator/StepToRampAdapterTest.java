@@ -48,7 +48,7 @@ public class StepToRampAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        mAdapter = new StepToRampAdapter(/* rampDownDuration= */ 0);
+        mAdapter = new StepToRampAdapter();
     }
 
     @Test
@@ -101,8 +101,6 @@ public class StepToRampAdapterTest {
 
     @Test
     public void testStepAndRampSegments_withoutPwleCapability_keepsListUnchanged() {
-        mAdapter = new StepToRampAdapter(50);
-
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
@@ -178,160 +176,6 @@ public class StepToRampAdapterTest {
         VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
         assertEquals(0, mAdapter.apply(segments, 0, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownEndingAtNonZero_noRampDownAdded() {
-        int rampDownDuration = 50;
-        mAdapter = new StepToRampAdapter(rampDownDuration);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 1, /* duration= */ 100)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.8f,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 100));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndShortZeroSegment_replaceWithRampDown() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 20),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 20),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(2, mAdapter.apply(segments, 2, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndLongZeroSegment_splitAndAddRampDown() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 150),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 50),
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 100),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        // Repeat index fixed after intermediate steps added
-        assertEquals(3, mAdapter.apply(segments, 2, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndNoZeroSegment_noRampDownAdded() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30),
-                new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30),
-                new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndRepeatToNonZeroSegment_noRampDownAdded() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(0, mAdapter.apply(segments, 0, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndRepeatToShortZeroSegment_skipAndAppendRampDown() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 20),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 20),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 20));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        // Shift repeat index to the right to use append instead of zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, vibratorInfo));
-
-        assertEquals(expectedSegments, segments);
-    }
-
-    @Test
-    public void testStepSegments_withRampDownAndRepeatToLongZeroSegment_splitAndAppendRampDown() {
-        mAdapter = new StepToRampAdapter(50);
-
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 120),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 1, /* duration= */ 30)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                // Split long zero segment to skip part of it.
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 50),
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 70),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 50));
-
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        // Shift repeat index to the right to use append with part of the zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, vibratorInfo));
 
         assertEquals(expectedSegments, segments);
     }

@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"WLAN"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"WLAN 通话"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"关闭"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"已关闭"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"通过 WLAN 进行通话"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"通过移动网络进行通话"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"仅限 WLAN"</string>
@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 服务"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"传感器通知服务"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight 服务"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"时区检测器（无网络连接）"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 时间更新服务"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"音乐识别管理器服务"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"系统将清空您的设备"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"请试试其他指纹"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"光线太亮"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"请尝试调整指纹"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"请在每次放手指时略微更改手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"已验证指纹"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未注册任何指纹。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"此设备没有指纹传感器。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"传感器已暂时停用。"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"无法使用指纹传感器。请联系维修服务提供商"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"使用指纹"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"使用指纹或屏幕锁定凭据"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指纹图标"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"人脸解锁"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"重新注册您的面孔"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"要提升识别精确度，请重新注册您的面孔"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"人脸解锁存在问题"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"请点按以删除您的脸部模型，然后再添加您的脸部模型"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"设置人脸解锁"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"脸部对准手机即可将其解锁"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"设置更多解锁方式"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"点按即可添加指纹"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指纹解锁"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"无法使用指纹传感器"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"请联系维修服务提供商。"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"无法捕获准确的人脸数据，请重试。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度过高，请尝试使用较柔和的亮度。"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"亮度不足，请尝试将光线调亮。"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"权限请求"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"应用对帐号 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"“<xliff:g id="APP">%1$s</xliff:g>”请求获得以下帐号的访问权限：\n<xliff:g id="ACCOUNT">%2$s</xliff:g>。"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"您目前是在工作资料之外使用此应用"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"您目前是在工作资料内使用此应用"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"输入法"</string>
@@ -1693,8 +1696,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同时按住两个音量键几秒钟，即可开启<xliff:g id="SERVICE">%1$s</xliff:g>无障碍功能。这样做可能会改变您设备的工作方式。\n\n您可以在“设置”&gt;“无障碍”中将此快捷方式更改为开启另一项功能。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"开启"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"开启"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"关闭"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"已开启"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"已关闭"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您开启<xliff:g id="SERVICE">%1$s</xliff:g>，您的设备将无法使用屏幕锁定功能来增强数据加密效果。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
@@ -2284,10 +2287,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"现在您可以放大屏幕上的部分内容"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在“设置”中开启"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"关闭"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"取消禁用设备麦克风"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"取消禁用设备摄像头"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"针对&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;及所有应用和服务"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"取消禁用"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"解锁设备麦克风"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"解锁设备摄像头"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"允许“&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;”及所有应用和服务使用"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"解锁"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"传感器隐私权"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"应用图标"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"应用品牌图片"</string>

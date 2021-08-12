@@ -425,9 +425,10 @@ public class StagingManager {
 
         for (StagedSession apexSession : apexSessions) {
             String packageName = apexSession.getPackageName();
-            if (!mApexManager.isApkInApexInstallSuccess(packageName)) {
+            String errorMsg = mApexManager.getApkInApexInstallError(packageName);
+            if (errorMsg != null) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Failed to install apk-in-apex of " + packageName);
+                        "Failed to install apk-in-apex of " + packageName + " : " + errorMsg);
             }
         }
     }
@@ -737,31 +738,31 @@ public class StagingManager {
                     continue;
                 }
 
-                // New session cannot have same package name as one of the active sessions
-                if (stagedSession.sessionContains(s -> s.getPackageName().equals(packageName))) {
-                    if (isRollback) {
-                        // If the new session is a rollback, then it gets priority. The existing
-                        // session is failed to unblock rollback.
-                        final StagedSession root = stagedSession;
-                        if (!ensureActiveApexSessionIsAborted(root)) {
-                            Slog.e(TAG, "Failed to abort apex session " + root.sessionId());
-                            // Safe to ignore active apex session abort failure since session
-                            // will be marked failed on next step and staging directory for session
-                            // will be deleted.
-                        }
-                        root.setSessionFailed(
-                                SessionInfo.STAGED_SESSION_CONFLICT,
-                                "Session was blocking rollback session: " + session.sessionId());
-                        Slog.i(TAG, "Session " + root.sessionId() + " is marked failed due to "
-                                + "blocking rollback session: " + session.sessionId());
-                    } else {
-                        throw new PackageManagerException(
-                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                                "Package: " + session.getPackageName() + " in session: "
-                                        + session.sessionId()
-                                        + " has been staged already by session: "
-                                        + stagedSession.sessionId(), null);
+                if (isRollback && !isRollback(stagedSession)) {
+                    // If the new session is a rollback, then it gets priority. The existing
+                    // session is failed to reduce risk and avoid an SDK extension dependency
+                    // violation.
+                    final StagedSession root = stagedSession;
+                    if (!ensureActiveApexSessionIsAborted(root)) {
+                        Slog.e(TAG, "Failed to abort apex session " + root.sessionId());
+                        // Safe to ignore active apex session abort failure since session
+                        // will be marked failed on next step and staging directory for session
+                        // will be deleted.
                     }
+                    root.setSessionFailed(
+                            SessionInfo.STAGED_SESSION_CONFLICT,
+                            "Session was failed by rollback session: " + session.sessionId());
+                    Slog.i(TAG, "Session " + root.sessionId() + " is marked failed due to "
+                            + "rollback session: " + session.sessionId());
+                } else if (stagedSession.sessionContains(
+                        s -> s.getPackageName().equals(packageName))) {
+                    // New session cannot have same package name as one of the active sessions
+                    throw new PackageManagerException(
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "Package: " + session.getPackageName() + " in session: "
+                                    + session.sessionId()
+                                    + " has been staged already by session: "
+                                    + stagedSession.sessionId(), null);
                 }
 
                 // Staging multiple root sessions is not allowed if device doesn't support
@@ -774,6 +775,26 @@ public class StagingManager {
                 }
             }
         }
+    }
+
+    /**
+     * Returns id of a committed and non-finalized stated session that contains same
+     * {@code packageName}, or {@code -1} if no sessions have this {@code packageName} staged.
+     */
+    int getSessionIdByPackageName(@NonNull String packageName) {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                StagedSession stagedSession = mStagedSessions.valueAt(i);
+                if (!stagedSession.isCommitted() || stagedSession.isDestroyed()
+                        || stagedSession.isInTerminalState()) {
+                    continue;
+                }
+                if (stagedSession.getPackageName().equals(packageName)) {
+                    return stagedSession.sessionId();
+                }
+            }
+        }
+        return -1;
     }
 
     @VisibleForTesting
@@ -955,13 +976,17 @@ public class StagingManager {
                 continue;
             } else if (isApexSessionFailed(apexSession)) {
                 hasFailedApexSession = true;
-                String errorMsg = "APEX activation failed. Check logcat messages from apexd "
-                        + "for more information.";
                 if (!TextUtils.isEmpty(apexSession.crashingNativeProcess)) {
                     prepareForLoggingApexdRevert(session, apexSession.crashingNativeProcess);
-                    errorMsg = "Session reverted due to crashing native process: "
-                            + apexSession.crashingNativeProcess;
                 }
+                String errorMsg = "APEX activation failed.";
+                final String reasonForRevert = getReasonForRevert();
+                if (!TextUtils.isEmpty(reasonForRevert)) {
+                    errorMsg += " Reason: " + reasonForRevert;
+                } else if (!TextUtils.isEmpty(apexSession.errorMessage)) {
+                    errorMsg += " Error: " + apexSession.errorMessage;
+                }
+                Slog.d(TAG, errorMsg);
                 session.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
                 continue;
             } else if (apexSession.isActivated || apexSession.isSuccess) {

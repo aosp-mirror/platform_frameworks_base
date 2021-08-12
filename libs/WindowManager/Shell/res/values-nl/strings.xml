@@ -45,10 +45,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Bovenste scherm 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Bovenste scherm 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Onderste scherm op volledig scherm"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bediening met één hand gebruiken"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bediening met 1 hand gebruiken"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Als je wilt afsluiten, swipe je omhoog vanaf de onderkant van het scherm of tik je ergens boven de app"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bediening met één hand starten"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bediening met één hand afsluiten"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bediening met 1 hand starten"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bediening met 1 hand afsluiten"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-bubbels"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Overloop"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Weer toevoegen aan stack"</string>

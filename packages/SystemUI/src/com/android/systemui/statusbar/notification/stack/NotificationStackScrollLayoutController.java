@@ -885,10 +885,6 @@ public class NotificationStackScrollLayoutController {
         mView.setDozeAmount(amount);
     }
 
-    public float getWakeUpHeight() {
-        return mView.getWakeUpHeight();
-    }
-
     public int getSpeedBumpIndex() {
         return mView.getSpeedBumpIndex();
     }
@@ -1456,6 +1452,13 @@ public class NotificationStackScrollLayoutController {
     public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
             int bottomRadius) {
         mView.setRoundedClippingBounds(left, top, right, bottom, topRadius, bottomRadius);
+    }
+
+    /**
+     * Request an animation whenever the toppadding changes next
+     */
+    public void animateNextTopPaddingChange() {
+        mView.animateNextTopPaddingChange();
     }
 
     /**

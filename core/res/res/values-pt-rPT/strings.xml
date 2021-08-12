@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Serviço GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serviço de notificações do sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serviço de crepúsculo"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detetor do fuso horário (sem conetividade)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviço de atualização da hora GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serviço do gestor de reconhecimento de música"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"O seu dispositivo será apagado"</string>
@@ -267,8 +266,8 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Som desativado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"O som está ativado"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo de avião"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"O modo de voo está ativado"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"O modo de voo está desativado"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Modo de avião ativado"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Modo de avião desativado"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Definições"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistência"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. de voz"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Experimente outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Está demasiado claro"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Experimente ajustar"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Altere a posição do seu dedo ligeiramente de cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"A impressão digital foi autenticada."</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registada."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem sensor de impressões digitais."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporariamente desativado."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilizar a impressão digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utilizar o bloqueio de ecrã ou a impressão digital"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícone de impressão digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueio facial"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Volte a inscrever o seu rosto"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para melhorar o reconhecimento, volte a inscrever o seu rosto."</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema com o Desbloqueio facial"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para eliminar o seu modelo de rosto e, em seguida, adicione o seu rosto novamente"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configure o Desbloqueio facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o telemóvel ao olhar para ele"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Não é possível utilizar o sensor de impressões digitais"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visite um fornecedor de serviços de reparação."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Imp. capt. dados rosto precisos. Tente novamente."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Demasiado clara. Experimente uma luz mais suave."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Demasiado escura. Experimente local com mais luz."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Recusar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permissão solicitada"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permissão solicitada\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorização solicitada pela app <xliff:g id="APP">%1$s</xliff:g>\npara a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Está a utilizar esta app fora do seu perfil de trabalho"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Está a utilizar esta app no seu perfil de trabalho"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de entrada"</string>

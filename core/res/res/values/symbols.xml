@@ -395,6 +395,7 @@
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
   <java-symbol type="integer" name="config_supportsNonResizableMultiWindow" />
   <java-symbol type="integer" name="config_respectsActivityMinWidthHeightMultiWindow" />
+  <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportHeight" />
   <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportWidth" />
   <java-symbol type="integer" name="config_largeScreenSmallestScreenWidthDp" />
   <java-symbol type="bool" name="config_useLegacySplit" />
@@ -489,6 +490,7 @@
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
+  <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -559,6 +561,7 @@
   <java-symbol type="string" name="notification_title" />
   <java-symbol type="string" name="other_networks_no_internet" />
   <java-symbol type="string" name="permission_request_notification_with_subtitle" />
+  <java-symbol type="string" name="permission_request_notification_for_app_with_subtitle" />
   <java-symbol type="string" name="prepend_shortcut_label" />
   <java-symbol type="string" name="private_dns_broken_detailed" />
   <java-symbol type="string" name="paste_as_plain_text" />
@@ -2525,6 +2528,7 @@
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
   <java-symbol type="string" name="fingerprint_acquired_too_slow" />
   <java-symbol type="string" name="fingerprint_acquired_too_fast" />
+  <java-symbol type="string" name="fingerprint_acquired_too_bright" />
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
   <java-symbol type="string" name="fingerprint_error_user_canceled" />
@@ -2541,6 +2545,9 @@
   <java-symbol type="string" name="fingerprint_error_security_update_required" />
   <java-symbol type="string" name="fingerprint_error_bad_calibration" />
   <java-symbol type="string" name="fingerprint_acquired_immobile" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_name" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_title" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_content" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
@@ -3362,7 +3369,7 @@
   <java-symbol type="string" name="config_batterymeterBoltPath" />
   <java-symbol type="string" name="config_batterymeterPowersavePath" />
   <java-symbol type="bool" name="config_batterymeterDualTone" />
-  <java-symbol type="string" name="config_signalXPath" />
+  <java-symbol type="string" name="config_signalAttributionPath" />
   <java-symbol type="dimen" name="config_signalCutoutWidthFraction" />
   <java-symbol type="dimen" name="config_signalCutoutHeightFraction" />
 
@@ -4019,6 +4026,11 @@
   <java-symbol type="bool" name="config_bugReportHandlerEnabled" />
   <java-symbol type="string" name="config_defaultBugReportHandlerApp" />
 
+  <!-- For profcollect report uploader -->
+  <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
   <!-- For Accessibility system actions -->
@@ -4156,6 +4168,7 @@
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />
   <java-symbol type="drawable" name="ic_no_apps" />
+  <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
@@ -4408,4 +4421,8 @@
   <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
 
   <java-symbol type="dimen" name="config_wallpaperDimAmount" />
+
+  <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
+
+  <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
 </resources>

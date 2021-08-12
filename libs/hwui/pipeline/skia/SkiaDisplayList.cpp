@@ -47,6 +47,12 @@ void SkiaDisplayList::syncContents(const WebViewSyncData& data) {
     }
 }
 
+void SkiaDisplayList::onRemovedFromTree() {
+    for (auto& functor : mChildFunctors) {
+        functor->onRemovedFromTree();
+    }
+}
+
 bool SkiaDisplayList::reuseDisplayList(RenderNode* node) {
     reset();
     node->attachAvailableList(this);

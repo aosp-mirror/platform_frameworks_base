@@ -39,7 +39,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -50,8 +49,6 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
@@ -59,8 +56,10 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
+import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
@@ -332,54 +331,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         // Do Nothing
     }
 
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        setupAccessibilityActions(info);
-    }
-
-    @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        fadeIn();
-
-        final Rect bounds = getAvailableBounds();
-        if (action == R.id.action_move_top_left) {
-            setShapeType(ShapeType.OVAL);
-            snapToLocation(bounds.left, bounds.top);
-            return true;
-        }
-
-        if (action == R.id.action_move_top_right) {
-            setShapeType(ShapeType.OVAL);
-            snapToLocation(bounds.right, bounds.top);
-            return true;
-        }
-
-        if (action == R.id.action_move_bottom_left) {
-            setShapeType(ShapeType.OVAL);
-            snapToLocation(bounds.left, bounds.bottom);
-            return true;
-        }
-
-        if (action == R.id.action_move_bottom_right) {
-            setShapeType(ShapeType.OVAL);
-            snapToLocation(bounds.right, bounds.bottom);
-            return true;
-        }
-
-        if (action == R.id.action_move_to_edge_and_hide) {
-            setShapeType(ShapeType.HALF_OVAL);
-            return true;
-        }
-
-        if (action == R.id.action_move_out_edge_and_show) {
-            setShapeType(ShapeType.OVAL);
-            return true;
-        }
-
-        return super.performAccessibilityAction(action, arguments);
-    }
-
     void show() {
         if (isShowing()) {
             return;
@@ -526,43 +477,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mUiHandler.postDelayed(() -> mFadeOutAnimator.start(), FADE_EFFECT_DURATION_MS);
     }
 
-    private void setupAccessibilityActions(AccessibilityNodeInfo info) {
-        final Resources res = mContext.getResources();
-        final AccessibilityAction moveTopLeft =
-                new AccessibilityAction(R.id.action_move_top_left,
-                        res.getString(
-                                R.string.accessibility_floating_button_action_move_top_left));
-        info.addAction(moveTopLeft);
-
-        final AccessibilityAction moveTopRight =
-                new AccessibilityAction(R.id.action_move_top_right,
-                        res.getString(
-                                R.string.accessibility_floating_button_action_move_top_right));
-        info.addAction(moveTopRight);
-
-        final AccessibilityAction moveBottomLeft =
-                new AccessibilityAction(R.id.action_move_bottom_left,
-                        res.getString(
-                                R.string.accessibility_floating_button_action_move_bottom_left));
-        info.addAction(moveBottomLeft);
-
-        final AccessibilityAction moveBottomRight =
-                new AccessibilityAction(R.id.action_move_bottom_right,
-                        res.getString(
-                                R.string.accessibility_floating_button_action_move_bottom_right));
-        info.addAction(moveBottomRight);
-
-        final int moveEdgeId = mShapeType == ShapeType.OVAL
-                ? R.id.action_move_to_edge_and_hide
-                : R.id.action_move_out_edge_and_show;
-        final int moveEdgeTextResId = mShapeType == ShapeType.OVAL
-                ? R.string.accessibility_floating_button_action_move_to_edge_and_hide_to_half
-                : R.string.accessibility_floating_button_action_move_out_edge_and_show;
-        final AccessibilityAction moveToOrOutEdge =
-                new AccessibilityAction(moveEdgeId, res.getString(moveEdgeTextResId));
-        info.addAction(moveToOrOutEdge);
-    }
-
     private boolean onTouched(MotionEvent event) {
         final int action = event.getAction();
         final int currentX = (int) event.getX();
@@ -685,6 +599,15 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mListView.setLayoutManager(layoutManager);
         mListView.addOnItemTouchListener(this);
         mListView.animate().setInterpolator(new OvershootInterpolator());
+        mListView.setAccessibilityDelegateCompat(new RecyclerViewAccessibilityDelegate(mListView) {
+            @NonNull
+            @Override
+            public AccessibilityDelegateCompat getItemDelegate() {
+                return new ItemDelegateCompat(this,
+                        AccessibilityFloatingMenuView.this);
+            }
+        });
+
         updateListViewWith(mLastConfiguration);
 
         addView(mListView);

@@ -17,6 +17,7 @@
 package com.android.server.compat;
 
 import static android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.compat.OverrideAllowedState.ALLOWED;
@@ -116,7 +117,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         }
         ApplicationInfo applicationInfo;
         try {
-            applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+            applicationInfo = packageManager.getApplicationInfo(packageName, MATCH_ANY_USER);
         } catch (NameNotFoundException e) {
             return new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1);
         }

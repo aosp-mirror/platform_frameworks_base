@@ -26,8 +26,8 @@
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"通知"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"电池电量可能很快就要耗尽"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；根据您的使用情况，大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；根据您的使用情况，大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"剩余 <xliff:g id="PERCENTAGE">%s</xliff:g>。省电模式已开启。"</string>
     <string name="invalid_charger" msgid="4370074072117767416">"无法通过 USB 充电。请使用设备随附的充电器。"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"无法通过 USB 充电"</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"无法识别人脸。请改用指纹。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"使用指纹验证身份后才能继续"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"无法识别指纹。请改用屏幕锁定功能。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在查找您的面孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"面孔图标"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"兼容性缩放按钮。"</string>
@@ -211,8 +213,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"信号强度为两格。"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"信号强度为三格。"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"信号满格。"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"开启。"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"关闭。"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"已开启。"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"已关闭。"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"已连接。"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"正在连接。"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
@@ -221,14 +223,14 @@
     <string name="accessibility_no_sim" msgid="1140839832913084973">"无 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"移动数据"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"移动数据已开启"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"关闭"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飞行模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已开启。"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"没有 SIM 卡。"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"打开电量详情"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"电池电量为百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"电池电量为 <xliff:g id="PERCENTAGE">%1$s</xliff:g>，根据您的使用情况，大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"电池电量为 <xliff:g id="PERCENTAGE">%1$s</xliff:g>，根据您的使用情况，大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"正在充电，已完成 <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%。"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"系统设置。"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"通知。"</string>
@@ -426,15 +428,13 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要取消禁用设备麦克风吗？"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要取消禁用设备摄像头吗？"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要取消禁用设备摄像头和麦克风吗？"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解锁设备麦克风吗？"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解锁设备摄像头吗？"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要解锁设备摄像头和麦克风吗？"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"这将会为所有获准使用您麦克风的应用和服务启用这项权限。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"这将会为所有获准使用您摄像头的应用和服务启用这项权限。"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您摄像头或麦克风的应用和服务启用这项权限。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您的摄像头或麦克风的应用和服务启用这项权限。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"设备"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑动可切换应用"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖动可快速切换应用"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切换概览"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"已充满"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"正在充电"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="tap_again" msgid="1315420114387908655">"请再点按一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"按一下即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"添加用户"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新用户"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"要移除访客吗？"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"要重置访客会话吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"重置"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"开始设置，享受更加快捷安全的手机购物体验"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"解锁设备才能付款"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"未设置"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"添加卡"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"正在更新"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解锁设备即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"获取您的卡片时出现问题，请稍后重试"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"锁定屏幕设置"</string>
@@ -707,8 +707,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"不静音"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"不静音也不屏蔽"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"高级通知设置"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"开启"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"关闭"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"已开启"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"已关闭"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"您将不会再看到这些通知"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"移至边缘并隐藏"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"移至边缘以外并显示"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"开启/关闭"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"家居控制"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择要添加控制器的应用"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">已添加 <xliff:g id="NUMBER_1">%s</xliff:g> 个控件。</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"请在收到一些消息后再回来查看"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"您近期的对话将显示在此处"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"优先对话"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"近期对话"</string>
     <string name="okay" msgid="6490552955618608554">"确定"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"查看近期的消息、未接电话和状态更新"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"对话"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>发送了一条消息"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"勿扰模式已暂停通知"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g>发送了一条消息：<xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>发送了一张图片"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>更新了状态：<xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"在线"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"点按即可了解详情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未设置闹钟"</string>

@@ -518,24 +518,25 @@ public class Vcn extends Handler {
     }
 
     private String getLogPrefix() {
-        return "[" + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup) + "] ";
+        return "["
+                + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
+                + "-"
+                + System.identityHashCode(this)
+                + "] ";
     }
 
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, getLogPrefix() + msg);
-            LOCAL_LOG.log(getLogPrefix() + "VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
     }
 
     private void logErr(String msg) {
@@ -595,7 +596,12 @@ public class Vcn extends Handler {
     /** Retrieves the network score for a VCN Network */
     // Package visibility for use in VcnGatewayConnection and VcnNetworkProvider
     static NetworkScore getNetworkScore() {
-        return new NetworkScore.Builder().setLegacyInt(VCN_LEGACY_SCORE_INT).build();
+        // TODO(b/193687515): Stop setting TRANSPORT_PRIMARY, define a TRANSPORT_VCN, and set in
+        //                    NetworkOffer/NetworkAgent.
+        return new NetworkScore.Builder()
+                .setLegacyInt(VCN_LEGACY_SCORE_INT)
+                .setTransportPrimary(true)
+                .build();
     }
 
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */

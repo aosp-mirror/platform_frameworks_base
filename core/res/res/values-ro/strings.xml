@@ -204,7 +204,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Serviciul GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serviciu pentru notificări de la senzori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serviciul Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de fus orar (fără conexiune)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviciul de actualizare a orei bazat pe GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serviciu de gestionare a recunoașterii de melodii"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Datele de pe dispozitiv vor fi șterse"</string>
@@ -352,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite aplicației să extindă sau să restrângă bara de stare."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"să afișeze notificări ca activități pe ecran complet pe un dispozitiv blocat"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permite aplicației să afișeze notificări ca activități pe ecran complet pe un dispozitiv blocat"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalează comenzi rapide"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalarea de comenzi rapide"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite unei aplicații să adauge comenzi rapide pe ecranul de pornire, fără intervenția utilizatorului."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"dezinstalează comenzi rapide"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite aplicației să elimine comenzi rapide de pe ecranul de pornire, fără intervenția utilizatorului."</string>
@@ -588,6 +587,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Încercați altă amprentă"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Prea luminos"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Încercați să ajustați"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Schimbați ușor poziția degetului de fiecare dată"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Amprentă autentificată"</string>
@@ -604,8 +604,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nu au fost înregistrate amprente."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzorul este dezactivat temporar."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nu se poate folosi senzorul de amprentă. Vizitați un furnizor de servicii de reparații."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Folosiți amprenta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Folosiți amprenta sau blocarea ecranului"</string>
@@ -615,12 +614,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Pictograma amprentă"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Deblocare facială"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Reînregistrați-vă chipul"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pentru a îmbunătăți recunoașterea, reînregistrați-vă chipul"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problemă cu Deblocarea facială"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Atingeți pentru a șterge modelul facial, apoi adăugați din nou fața"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurați Deblocarea facială"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Deblocați-vă telefonul uitându-vă la acesta"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurați mai multe moduri de deblocare"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Atingeți ca să adăugați o amprentă"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Deblocare cu amprenta"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nu se poate folosi senzorul de amprentă"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizitați un furnizor de servicii de reparații."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nu s-a putut fotografia fața cu precizie. Încercați din nou."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Prea luminos. Încercați o lumină mai slabă."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Prea întunecat. Încercați o lumină mai puternică."</string>
@@ -1500,6 +1502,7 @@
     <string name="deny" msgid="6632259981847676572">"Refuzați"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permisiune solicitată"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permisiune solicitată\npentru contul <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permisiune solicitată de <xliff:g id="APP">%1$s</xliff:g>\npentru contul <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Utilizați această aplicație în afara profilului de serviciu"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Utilizați această aplicație în profilul de serviciu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metodă de intrare"</string>

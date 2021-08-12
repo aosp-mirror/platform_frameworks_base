@@ -24,7 +24,6 @@ import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.annotation.UiThread;
 
@@ -140,7 +139,6 @@ class ImageTileSet {
      *               getHeight()).
      */
     Bitmap toBitmap(Rect bounds) {
-        Log.d(TAG, "exporting with bounds: " + bounds);
         if (mTiles.isEmpty()) {
             return null;
         }

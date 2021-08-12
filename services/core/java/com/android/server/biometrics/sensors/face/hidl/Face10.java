@@ -47,6 +47,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
@@ -57,6 +58,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
@@ -68,7 +70,6 @@ import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
-import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
@@ -88,8 +89,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Supports a single instance of the {@link android.hardware.biometrics.face.V1_0} or
- * its extended minor versions.
+ * Supports a single instance of the {@link android.hardware.biometrics.face.V1_0} or its extended
+ * minor versions.
  */
 public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
@@ -325,7 +326,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     }
 
-    @VisibleForTesting Face10(@NonNull Context context,
+    @VisibleForTesting
+    Face10(@NonNull Context context,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull BiometricScheduler scheduler) {
@@ -355,7 +357,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public Face10(@NonNull Context context, @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         this(context, sensorProps, lockoutResetDispatcher,
-                new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */));
+                new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
+                        null /* gestureAvailabilityTracker */));
     }
 
     @Override
@@ -570,16 +573,16 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
-            @Nullable NativeHandle surfaceHandle, boolean debugConsent) {
+            @Nullable Surface previewSurface, boolean debugConsent) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            ReEnrollNotificationUtils.cancelNotification(mContext);
+            BiometricNotificationUtils.cancelReEnrollNotification(mContext);
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, surfaceHandle, mSensorId);
+                    ENROLL_TIMEOUT_SEC, previewSurface, mSensorId);
 
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
@@ -619,7 +622,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication) {
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -627,7 +630,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
                     cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication);
+                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication,
+                    isKeyguardBypassEnabled);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -857,8 +861,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     /**
-     * Schedules the {@link FaceUpdateActiveUserClient} without posting the work onto the
-     * handler. Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
+     * Schedules the {@link FaceUpdateActiveUserClient} without posting the work onto the handler.
+     * Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
      * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
      * this operation on the same lambda/runnable as those operations so that the ordering is
      * correct.

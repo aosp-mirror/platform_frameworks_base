@@ -133,13 +133,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
-        // TODO(b/186164881): remove
-        // START TEMP HACK
-        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
-        int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-        mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp, identity.uid,
-                identity.packageName, identity.attributionTag, reason);
-        // END TEMP HACK
+        enforcePermissionForDataDelivery(mContext, identity, RECORD_AUDIO,
+                reason);
         enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
                 reason);
     }
@@ -167,8 +162,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
 
     /**
      * Throws a {@link SecurityException} if originator permanently doesn't have the given
-     * permission, or a {@link ServiceSpecificException} with a {@link
-     * Status#TEMPORARY_PERMISSION_DENIED} if caller originator doesn't have the given permission.
+     * permission.
+     * Soft (temporary) denials are considered OK for preflight purposes.
      *
      * @param context    A {@link Context}, used for permission checks.
      * @param identity   The identity to check.
@@ -180,13 +175,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
                 return;
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
-                        String.format("Failed to obtain permission %s for identity %s", permission,
-                                ObjectPrinter.print(identity, true, 16)));
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-                throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
                         String.format("Failed to obtain permission %s for identity %s", permission,
                                 ObjectPrinter.print(identity, true, 16)));
             default:

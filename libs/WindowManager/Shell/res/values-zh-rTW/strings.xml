@@ -46,7 +46,7 @@
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"以 30% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"以全螢幕顯示底部畫面"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用單手模式"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上的任何位置"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上方的任何位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"啟動單手模式"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"結束單手模式"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」對話框的設定"</string>

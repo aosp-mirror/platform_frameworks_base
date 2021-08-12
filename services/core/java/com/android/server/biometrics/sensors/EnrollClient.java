@@ -38,7 +38,6 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     protected final byte[] mHardwareAuthToken;
     protected final int mTimeoutSec;
     protected final BiometricUtils mBiometricUtils;
-    private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
 
@@ -50,15 +49,13 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     public EnrollClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            int timeoutSec, int statsModality, int sensorId,
-            boolean shouldVibrate) {
+            int timeoutSec, int statsModality, int sensorId, boolean shouldVibrate) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
-        mShouldVibrate = shouldVibrate;
     }
 
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {

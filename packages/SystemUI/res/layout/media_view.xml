@@ -185,7 +185,7 @@
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
         android:paddingTop="@dimen/qs_media_enabled_seekbar_vertical_padding"
         android:layout_marginTop="-22dp"
-        android:paddingBottom="0dp"
+        android:paddingBottom="2dp"
         android:splitTrack="false" />
 
     <!-- Song name -->
@@ -238,7 +238,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="48dp"
@@ -263,8 +263,8 @@
         android:background="@drawable/qs_media_light_source"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_info_spacing"
-        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="48dp"
@@ -287,7 +287,7 @@
         android:background="@drawable/qs_media_light_source"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constrainedWidth="true"

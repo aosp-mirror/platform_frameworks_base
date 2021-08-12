@@ -773,12 +773,13 @@ public class NotificationManagerService extends SystemService {
                     mAssistants.resetDefaultFromConfig();
                     continue;
                 }
+                // TODO(b/192450820): re-enable when "user set" isn't over triggering
                 //User selected different NAS, need onboarding
-                enqueueNotificationInternal(getContext().getPackageName(),
+                /*enqueueNotificationInternal(getContext().getPackageName(),
                         getContext().getOpPackageName(), Binder.getCallingUid(),
                         Binder.getCallingPid(), TAG,
                         SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE,
-                        createNASUpgradeNotification(userId), userId);
+                        createNASUpgradeNotification(userId), userId);*/
             }
         }
     }
@@ -6193,8 +6194,10 @@ public class NotificationManagerService extends SystemService {
         // Fix the notification as best we can.
         try {
             fixNotification(notification, pkg, tag, id, userId);
-
         } catch (Exception e) {
+            if (notification.isForegroundService()) {
+                throw new SecurityException("Invalid FGS notification", e);
+            }
             Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
@@ -6205,7 +6208,7 @@ public class NotificationManagerService extends SystemService {
         // FGS-related situation up front, outside of any locks so it's safe to call into
         // the Activity Manager.
         final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
-                notification, id, pkg, userId);
+                notification, tag, id, pkg, userId);
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
             // because the service lifecycle logic has retained responsibility for its
@@ -11072,8 +11075,6 @@ public class NotificationManagerService extends SystemService {
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
             if (blockTrampoline(uid)) {
-                // Post toast() call to mHandler to offload PM lookup from the activity start path
-                mHandler.post(() -> toast(packageName, uid));
                 Slog.e(TAG, logcatMessage + " blocked");
                 return false;
             } else {
@@ -11096,20 +11097,6 @@ public class NotificationManagerService extends SystemService {
             // trampolines are blocked.
             return tokens.contains(ALLOWLIST_TOKEN)
                     && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
-        }
-
-        private void toast(String packageName, int uid) {
-            final CharSequence label;
-            try {
-                label = mPackageManagerClient.getApplicationLabel(
-                        mPackageManager.getApplicationInfo(packageName, 0,
-                                UserHandle.getUserId(uid)));
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unexpected exception obtaining app label from PackageManager", e);
-                return;
-            }
-            mUiHandler.post(() -> Toast.makeText(getUiContext(),
-                    label + " launch blocked\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
         }
     }
 }

@@ -169,6 +169,19 @@ public abstract class PackageSettingBase extends SettingBase {
         doCopy(base);
     }
 
+    // A copy constructor used to create snapshots.  The boolean is present only to
+    // match up with the constructor in PackageSetting.
+    PackageSettingBase(PackageSettingBase orig, boolean snapshot) {
+        super(orig);
+        name = orig.name;
+        realName = orig.realName;
+        doCopy(orig);
+        // Clone the user states.
+        for (int i = 0; i < mUserState.size(); i++) {
+            mUserState.put(mUserState.keyAt(i), new PackageUserState(mUserState.valueAt(i)));
+        }
+    }
+
     public void setInstallerPackageName(String packageName) {
         installSource = installSource.setInstallerPackage(packageName);
         onChanged();
@@ -305,6 +318,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setInstalled(boolean inst, int userId) {
         modifyUserState(userId).installed = inst;
+        onChanged();
     }
 
     boolean getInstalled(int userId) {
@@ -317,6 +331,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setInstallReason(int installReason, int userId) {
         modifyUserState(userId).installReason = installReason;
+        onChanged();
     }
 
     int getUninstallReason(int userId) {
@@ -325,10 +340,13 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setUninstallReason(@UninstallReason int uninstallReason, int userId) {
         modifyUserState(userId).uninstallReason = uninstallReason;
+        onChanged();
     }
 
     boolean setOverlayPaths(OverlayPaths overlayPaths, int userId) {
-        return modifyUserState(userId).setOverlayPaths(overlayPaths);
+        boolean returnValue = modifyUserState(userId).setOverlayPaths(overlayPaths);
+        onChanged();
+        return returnValue;
     }
 
     OverlayPaths getOverlayPaths(int userId) {
@@ -337,7 +355,10 @@ public abstract class PackageSettingBase extends SettingBase {
 
     boolean setOverlayPathsForLibrary(String libName, OverlayPaths overlayPaths,
             int userId) {
-        return modifyUserState(userId).setSharedLibraryOverlayPaths(libName, overlayPaths);
+        boolean returnValue =  modifyUserState(userId)
+                .setSharedLibraryOverlayPaths(libName, overlayPaths);
+        onChanged();
+        return returnValue;
     }
 
     Map<String, OverlayPaths> getOverlayPathsForLibrary(int userId) {
@@ -386,6 +407,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setCeDataInode(long ceDataInode, int userId) {
         modifyUserState(userId).ceDataInode = ceDataInode;
+        onChanged();
     }
 
     boolean getStopped(int userId) {
@@ -394,6 +416,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setStopped(boolean stop, int userId) {
         modifyUserState(userId).stopped = stop;
+        onChanged();
     }
 
     boolean getNotLaunched(int userId) {
@@ -402,6 +425,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setNotLaunched(boolean stop, int userId) {
         modifyUserState(userId).notLaunched = stop;
+        onChanged();
     }
 
     boolean getHidden(int userId) {
@@ -410,6 +434,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setHidden(boolean hidden, int userId) {
         modifyUserState(userId).hidden = hidden;
+        onChanged();
     }
 
     int getDistractionFlags(int userId) {
@@ -418,6 +443,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setDistractionFlags(int distractionFlags, int userId) {
         modifyUserState(userId).distractionFlags = distractionFlags;
+        onChanged();
     }
 
     boolean getSuspended(int userId) {
@@ -478,6 +504,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setInstantApp(boolean instantApp, int userId) {
         modifyUserState(userId).instantApp = instantApp;
+        onChanged();
     }
 
     boolean getVirtulalPreload(int userId) {
@@ -486,6 +513,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setVirtualPreload(boolean virtualPreload, int userId) {
         modifyUserState(userId).virtualPreload = virtualPreload;
+        onChanged();
     }
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
@@ -538,20 +566,24 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setEnabledComponents(ArraySet<String> components, int userId) {
         modifyUserState(userId).enabledComponents = components;
+        onChanged();
     }
 
     void setDisabledComponents(ArraySet<String> components, int userId) {
         modifyUserState(userId).disabledComponents = components;
+        onChanged();
     }
 
     void setEnabledComponentsCopy(ArraySet<String> components, int userId) {
         modifyUserState(userId).enabledComponents = components != null
                 ? new ArraySet<String>(components) : null;
+        onChanged();
     }
 
     void setDisabledComponentsCopy(ArraySet<String> components, int userId) {
         modifyUserState(userId).disabledComponents = components != null
                 ? new ArraySet<String>(components) : null;
+        onChanged();
     }
 
     PackageUserState modifyUserStateComponents(int userId, boolean disabled, boolean enabled) {
@@ -573,10 +605,12 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void addDisabledComponent(String componentClassName, int userId) {
         modifyUserStateComponents(userId, true, false).disabledComponents.add(componentClassName);
+        onChanged();
     }
 
     void addEnabledComponent(String componentClassName, int userId) {
         modifyUserStateComponents(userId, false, true).enabledComponents.add(componentClassName);
+        onChanged();
     }
 
     boolean enableComponentLPw(String componentClassName, int userId) {
@@ -584,6 +618,9 @@ public abstract class PackageSettingBase extends SettingBase {
         boolean changed = state.disabledComponents != null
                 ? state.disabledComponents.remove(componentClassName) : false;
         changed |= state.enabledComponents.add(componentClassName);
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -592,6 +629,9 @@ public abstract class PackageSettingBase extends SettingBase {
         boolean changed = state.enabledComponents != null
                 ? state.enabledComponents.remove(componentClassName) : false;
         changed |= state.disabledComponents.add(componentClassName);
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -601,6 +641,9 @@ public abstract class PackageSettingBase extends SettingBase {
                 ? state.disabledComponents.remove(componentClassName) : false;
         changed |= state.enabledComponents != null
                 ? state.enabledComponents.remove(componentClassName) : false;
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -692,6 +735,7 @@ public abstract class PackageSettingBase extends SettingBase {
     PackageSettingBase setPath(@NonNull File path) {
         this.mPath = path;
         this.mPathString = path.toString();
+        onChanged();
         return this;
     }
 
@@ -713,7 +757,9 @@ public abstract class PackageSettingBase extends SettingBase {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public boolean overrideNonLocalizedLabelAndIcon(@NonNull ComponentName component,
             @Nullable String label, @Nullable Integer icon, @UserIdInt int userId) {
-        return modifyUserState(userId).overrideLabelAndIcon(component, label, icon);
+        boolean returnValue = modifyUserState(userId).overrideLabelAndIcon(component, label, icon);
+        onChanged();
+        return returnValue;
     }
 
     /**
@@ -723,6 +769,7 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void resetOverrideComponentLabelIcon(@UserIdInt int userId) {
         modifyUserState(userId).resetOverrideComponentLabelIcon();
+        onChanged();
     }
 
     /**
@@ -732,6 +779,7 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void setSplashScreenTheme(@UserIdInt int userId, @Nullable String themeName) {
         modifyUserState(userId).splashScreenTheme = themeName;
+        onChanged();
     }
 
     /**
@@ -767,6 +815,7 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void setStatesOnCommit() {
         incrementalStates.onCommit(IncrementalManager.isIncrementalPath(getPathString()));
+        onChanged();
     }
 
     /**
@@ -774,6 +823,7 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void setIncrementalStatesCallback(IncrementalStates.Callback callback) {
         incrementalStates.setCallback(callback);
+        onChanged();
     }
 
     /**
@@ -782,6 +832,7 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void setLoadingProgress(float progress) {
         incrementalStates.setProgress(progress);
+        onChanged();
     }
 
     public long getFirstInstallTime() {

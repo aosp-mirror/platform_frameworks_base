@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.os.SystemClock
+import android.os.Trace
 import android.util.IndentingPrintWriter
 import android.util.Log
 import android.util.MathUtils
@@ -88,13 +89,12 @@ class NotificationShadeDepthController @Inject constructor(
     private var prevShadeDirection = 0
     private var prevShadeVelocity = 0f
 
+    // Only for dumpsys
+    private var lastAppliedBlur = 0
+
     @VisibleForTesting
     var shadeSpring = DepthAnimation()
     var shadeAnimation = DepthAnimation()
-
-    @VisibleForTesting
-    var globalActionsSpring = DepthAnimation()
-    var showingHomeControls: Boolean = false
 
     @VisibleForTesting
     var brightnessMirrorSpring = DepthAnimation()
@@ -126,7 +126,7 @@ class NotificationShadeDepthController @Inject constructor(
      * When launching an app from the shade, the animations progress should affect how blurry the
      * shade is, overriding the expansion amount.
      */
-    var ignoreShadeBlurUntilHidden: Boolean = false
+    var blursDisabledForAppLaunch: Boolean = false
         set(value) {
             if (field == value) {
                 return
@@ -135,6 +135,10 @@ class NotificationShadeDepthController @Inject constructor(
             scheduleUpdate()
 
             if (shadeSpring.radius == 0 && shadeAnimation.radius == 0) {
+                return
+            }
+            // Do not remove blurs when we're re-enabling them
+            if (!value) {
                 return
             }
             shadeSpring.animateTo(0)
@@ -174,37 +178,34 @@ class NotificationShadeDepthController @Inject constructor(
                 blurUtils.minBlurRadius, blurUtils.maxBlurRadius)
         var combinedBlur = (shadeSpring.radius * INTERACTION_BLUR_FRACTION +
                 normalizedBlurRadius * ANIMATION_BLUR_FRACTION).toInt()
-        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsPanelExpansion))
+        val qsExpandedRatio = qsPanelExpansion * shadeExpansion
+        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
 
-        if (ignoreShadeBlurUntilHidden) {
-            if (shadeRadius == 0f) {
-                ignoreShadeBlurUntilHidden = false
-            } else {
-                shadeRadius = 0f
-            }
+        if (blursDisabledForAppLaunch) {
+            shadeRadius = 0f
         }
 
-        // Home controls have black background, this means that we should not have blur when they
-        // are fully visible, otherwise we'll enter Client Composition unnecessarily.
-        var globalActionsRadius = globalActionsSpring.radius
-        if (showingHomeControls) {
-            globalActionsRadius = 0
-        }
-        var blur = max(shadeRadius.toInt(), globalActionsRadius)
+        var blur = shadeRadius.toInt()
 
         // Make blur be 0 if it is necessary to stop blur effect.
-        if (scrimsVisible || !blurUtils.supportsBlursOnWindows()) {
+        if (scrimsVisible) {
             blur = 0
         }
         val zoomOut = blurUtils.ratioOfBlurRadius(blur)
 
+        if (!blurUtils.supportsBlursOnWindows()) {
+            blur = 0
+        }
+
         // Brightness slider removes blur, but doesn't affect zooms
         blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
 
-        val opaque = scrimsVisible && !ignoreShadeBlurUntilHidden
+        val opaque = scrimsVisible && !blursDisabledForAppLaunch
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
+        lastAppliedBlur = blur
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
                 wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
@@ -216,6 +217,7 @@ class NotificationShadeDepthController @Inject constructor(
         }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOut)
+            it.onBlurRadiusChanged(blur)
         }
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
@@ -271,13 +273,13 @@ class NotificationShadeDepthController @Inject constructor(
             if (isDozing) {
                 shadeSpring.finishIfRunning()
                 shadeAnimation.finishIfRunning()
-                globalActionsSpring.finishIfRunning()
                 brightnessMirrorSpring.finishIfRunning()
             }
         }
 
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
+            scheduleUpdate()
         }
     }
 
@@ -427,20 +429,18 @@ class NotificationShadeDepthController @Inject constructor(
                 !keyguardStateController.isKeyguardFadingAway
     }
 
-    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View?) {
-        globalActionsSpring.animateTo(blurUtils.blurRadiusOfRatio(visibility), dialogView)
-    }
-
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()
             it.println("shadeRadius: ${shadeSpring.radius}")
             it.println("shadeAnimation: ${shadeAnimation.radius}")
-            it.println("globalActionsRadius: ${globalActionsSpring.radius}")
             it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
-            it.println("ignoreShadeBlurUntilHidden: $ignoreShadeBlurUntilHidden")
+            it.println("blursDisabledForAppLaunch: $blursDisabledForAppLaunch")
+            it.println("qsPanelExpansion: $qsPanelExpansion")
+            it.println("transitionToFullShadeProgress: $transitionToFullShadeProgress")
+            it.println("lastAppliedBlur: $lastAppliedBlur")
         }
     }
 
@@ -525,5 +525,8 @@ class NotificationShadeDepthController @Inject constructor(
          * Current wallpaper zoom out, where 0 is the closest, and 1 the farthest
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
+
+        @JvmDefault
+        fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }

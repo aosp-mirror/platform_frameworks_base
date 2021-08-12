@@ -272,6 +272,9 @@
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
 
+    <!-- Be allowed to send commands to Flinger via SurfaceControl. -->
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+
     <!-- Restore settings (used by QS) even if they have been modified -->
     <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
 
@@ -280,6 +283,8 @@
 
     <!-- Permission for Smartspace. -->
     <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
+
+    <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -449,6 +454,7 @@
         <!-- started from SensoryPrivacyService -->
         <activity android:name=".sensorprivacy.SensorUseStartedActivity"
                   android:exported="true"
+                  android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true">
@@ -604,7 +610,8 @@
         </activity>
 
         <activity android:name=".people.widget.LaunchConversationActivity"
-            android:windowDisablePreview="true" />
+            android:windowDisablePreview="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
 
         <!-- People Space Widget -->
         <receiver
@@ -629,6 +636,9 @@
             android:exported="true"
             android:permission="android.permission.GET_PEOPLE_TILE_PREVIEW">
         </provider>
+
+        <service android:name=".people.PeopleBackupFollowUpJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <!-- a gallery of delicious treats -->
         <service

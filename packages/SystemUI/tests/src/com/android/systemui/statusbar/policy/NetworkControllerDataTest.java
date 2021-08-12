@@ -113,7 +113,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
                 mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                mock(CarrierConfigTracker.class));
+                mock(CarrierConfigTracker.class), mFeatureFlags);
         setupNetworkController();
 
         setupDefaultSignal();
@@ -133,9 +133,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING, NO_DATA_STRING);
+                false, true, NO_DATA_STRING, NO_DATA_STRING, false);
     }
 
     @Test
@@ -148,9 +148,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING, NO_DATA_STRING);
+                false, true, NO_DATA_STRING, NO_DATA_STRING, false);
     }
 
     @Test
@@ -164,9 +164,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING, false);
     }
 
     @Test
@@ -180,9 +180,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING, false);
     }
 
     @Test
@@ -198,8 +198,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         TestableLooper.get(this).processAllMessages();
 
         // Don't show the X until the device is setup.
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
-                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false);
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false, false, null, null, false);
     }
 
     @Test
@@ -216,8 +216,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         setConnectivityViaCallbackInNetworkController(
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
-        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_G,
-                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false);
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_G,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false, false, null, null, false);
     }
 
     @Test

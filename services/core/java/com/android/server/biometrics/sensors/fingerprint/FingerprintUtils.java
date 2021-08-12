@@ -18,9 +18,11 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_IMAGER_DIRTY;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_IMMOBILE;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_INSUFFICIENT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_PARTIAL;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_BRIGHT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_FAST;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_SLOW;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
@@ -188,6 +190,8 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
             case FINGERPRINT_ACQUIRED_TOO_FAST:
             case FINGERPRINT_ACQUIRED_VENDOR:
             case FINGERPRINT_ACQUIRED_START:
+            case FINGERPRINT_ACQUIRED_TOO_BRIGHT:
+            case FINGERPRINT_ACQUIRED_IMMOBILE:
                 return true;
 
             default:

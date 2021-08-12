@@ -29,7 +29,6 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.widget.Button;
 
 import com.android.systemui.R;
@@ -68,8 +67,12 @@ public class TileQueryHelper {
     private boolean mFinished;
 
     @Inject
-    public TileQueryHelper(Context context, UserTracker userTracker,
-            @Main Executor mainExecutor, @Background Executor bgExecutor) {
+    public TileQueryHelper(
+            Context context,
+            UserTracker userTracker,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor
+    ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
@@ -114,19 +117,11 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        // TODO(b/174753536): Move it into the config file.
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-            possibleTiles.remove("cell");
-            possibleTiles.remove("wifi");
-        } else {
-            possibleTiles.remove("internet");
-        }
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
             // Do not include CustomTile. Those will be created by `addPackageTiles`.
             if (spec.startsWith(CustomTile.PREFIX)) continue;
-            // TODO(b/174753536): Move it into the config file.
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;

@@ -1229,7 +1229,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         RunningTaskInfo info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertEquals(activity.appToken, info.topActivityToken);
         assertTrue(info.topActivityInSizeCompat);
 
         // Ensure task info show top activity that is not in foreground as not in size compat.
@@ -1240,7 +1239,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertEquals(activity.appToken, info.topActivityToken);
         assertFalse(info.topActivityInSizeCompat);
 
         // Ensure task info show non size compat top activity as not in size compat.
@@ -1252,7 +1250,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertEquals(activity.appToken, info.topActivityToken);
         assertFalse(info.topActivityInSizeCompat);
     }
 

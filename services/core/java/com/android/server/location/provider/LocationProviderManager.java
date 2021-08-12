@@ -155,7 +155,7 @@ public class LocationProviderManager extends
     private static final float FASTEST_INTERVAL_JITTER_PERCENTAGE = .10f;
 
     // max absolute jitter allowed for min update interval evaluation
-    private static final int MAX_FASTEST_INTERVAL_JITTER_MS = 5 * 1000;
+    private static final int MAX_FASTEST_INTERVAL_JITTER_MS = 30 * 1000;
 
     // minimum amount of request delay in order to respect the delay, below this value the request
     // will just be scheduled immediately
@@ -538,7 +538,7 @@ public class LocationProviderManager extends
 
                 mPermitted = permitted;
 
-                if (mForeground) {
+                if (mPermitted) {
                     EVENT_LOG.logProviderClientPermitted(mName, getIdentity());
                 } else {
                     EVENT_LOG.logProviderClientUnpermitted(mName, getIdentity());
@@ -735,8 +735,12 @@ public class LocationProviderManager extends
             if (mExpirationRealtimeMs <= registerTimeMs) {
                 onAlarm();
             } else if (mExpirationRealtimeMs < Long.MAX_VALUE) {
+                // Set WorkSource to null in order to ensure the alarm wakes up the device even when
+                // it is idle. Do this when the cost of waking up the device is less than the power
+                // cost of not performing the actions set off by the alarm, such as unregistering a
+                // location request.
                 mAlarmHelper.setDelayedAlarm(mExpirationRealtimeMs - registerTimeMs, this,
-                        getRequest().getWorkSource());
+                        null);
             }
 
             // start listening for provider enabled/disabled events
@@ -1122,8 +1126,12 @@ public class LocationProviderManager extends
             if (mExpirationRealtimeMs <= registerTimeMs) {
                 onAlarm();
             } else if (mExpirationRealtimeMs < Long.MAX_VALUE) {
+                // Set WorkSource to null in order to ensure the alarm wakes up the device even when
+                // it is idle. Do this when the cost of waking up the device is less than the power
+                // cost of not performing the actions set off by the alarm, such as unregistering a
+                // location request.
                 mAlarmHelper.setDelayedAlarm(mExpirationRealtimeMs - registerTimeMs, this,
-                        getRequest().getWorkSource());
+                        null);
             }
         }
 
@@ -1995,7 +2003,11 @@ public class LocationProviderManager extends
                     }
                 }
             };
-            mAlarmHelper.setDelayedAlarm(delayMs, mDelayedRegister, newRequest.getWorkSource());
+            // Set WorkSource to null in order to ensure the alarm wakes up the device even when it
+            // is idle. Do this when the cost of waking up the device is less than the power cost of
+            // not performing the actions set off by the alarm, such as unregistering a location
+            // request.
+            mAlarmHelper.setDelayedAlarm(delayMs, mDelayedRegister, null);
         }
 
         return true;

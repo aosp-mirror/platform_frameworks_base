@@ -28,7 +28,6 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.PerformanceHintManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -856,36 +855,6 @@ public class HardwareRenderer {
         callback.onPictureCaptured(picture);
     }
 
-    /** called by native */
-    static PerformanceHintManager.Session createHintSession(int[] tids) {
-        PerformanceHintManager performanceHintManager =
-                ProcessInitializer.sInstance.getHintManager();
-        if (performanceHintManager == null) {
-            return null;
-        }
-        // Native code will always set a target duration before reporting actual durations.
-        // So this is just a placeholder value that's never used.
-        long targetDurationNanos = 16666667;
-        return performanceHintManager.createHintSession(tids, targetDurationNanos);
-    }
-
-    /** called by native */
-    static void updateTargetWorkDuration(PerformanceHintManager.Session session,
-            long targetDurationNanos) {
-        session.updateTargetWorkDuration(targetDurationNanos);
-    }
-
-    /** called by native */
-    static void reportActualWorkDuration(PerformanceHintManager.Session session,
-            long actualDurationNanos) {
-        session.reportActualWorkDuration(actualDurationNanos);
-    }
-
-    /** called by native */
-    static void closeHintSession(PerformanceHintManager.Session session) {
-        session.close();
-    }
-
    /**
      * Interface used to receive callbacks when Webview requests a surface control.
      *
@@ -912,7 +881,7 @@ public class HardwareRenderer {
          * @param aSurfaceControlNativeObj ASurfaceControl native object handle
          * @param frame The id of the frame being drawn.
          */
-        void onMergeTransaction(long aSurfaceTranactionNativeObj,
+        boolean onMergeTransaction(long aSurfaceTranactionNativeObj,
                                 long aSurfaceControlNativeObj, long frame);
     }
 
@@ -1152,7 +1121,6 @@ public class HardwareRenderer {
         private boolean mIsolated = false;
         private Context mContext;
         private String mPackageName;
-        private PerformanceHintManager mPerformanceHintManager;
         private IGraphicsStats mGraphicsStatsService;
         private IGraphicsStatsCallback mGraphicsStatsCallback = new IGraphicsStatsCallback.Stub() {
             @Override
@@ -1162,10 +1130,6 @@ public class HardwareRenderer {
         };
 
         private ProcessInitializer() {
-        }
-
-        synchronized PerformanceHintManager getHintManager() {
-            return mPerformanceHintManager;
         }
 
         synchronized void setPackageName(String name) {
@@ -1218,10 +1182,6 @@ public class HardwareRenderer {
 
             initDisplayInfo();
 
-            // HintManager and HintSession are designed to be accessible from isoalted processes
-            // so not checking for isolated process here.
-            initHintSession();
-
             nSetIsHighEndGfx(ActivityManager.isHighEndGfx());
             // Defensively clear out the context in case we were passed a context that can leak
             // if we live longer than it, e.g. an activity context.
@@ -1265,11 +1225,6 @@ public class HardwareRenderer {
             mDisplayInitialized = true;
         }
 
-        private void initHintSession() {
-            if (mContext == null) return;
-            mPerformanceHintManager = mContext.getSystemService(PerformanceHintManager.class);
-        }
-
         private void rotateBuffer() {
             nRotateProcessStatsBuffer();
             requestBuffer();
@@ -1303,6 +1258,11 @@ public class HardwareRenderer {
      * @hide
      */
     public static native void preload();
+
+    /**
+     * @hide
+     */
+    public static native boolean isWebViewOverlaysEnabled();
 
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);

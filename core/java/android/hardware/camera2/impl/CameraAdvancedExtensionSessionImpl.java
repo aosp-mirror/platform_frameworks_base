@@ -35,9 +35,11 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.extension.CameraOutputConfig;
 import android.hardware.camera2.extension.CameraSessionConfig;
+import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.IImageProcessorImpl;
+import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IRequestCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.ISessionProcessorImpl;
@@ -89,6 +91,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private Surface mClientCaptureSurface;
     private CameraCaptureSession mCaptureSession = null;
     private ISessionProcessorImpl mSessionProcessor = null;
+    private final InitializeSessionHandler mInitializeHandler;
 
     private boolean mInitialized;
 
@@ -181,6 +184,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
+        mInitializeHandler = new InitializeSessionHandler();
     }
 
     /**
@@ -442,9 +446,10 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
     }
 
-    public void release() {
+    public void release(boolean skipCloseNotification) {
+        boolean notifyClose = false;
+
         synchronized (mInterfaceLock) {
-            mInitialized = false;
             mHandlerThread.quitSafely();
 
             if (mSessionProcessor != null) {
@@ -459,7 +464,12 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
+                if (mInitialized) {
+                    notifyClose = true;
+                    CameraExtensionCharacteristics.releaseSession();
+                }
             }
+            mInitialized = false;
 
             for (ImageReader reader : mReaderMap.values()) {
                 reader.close();
@@ -468,6 +478,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
             mClientRepeatingRequestSurface = null;
             mClientCaptureSurface = null;
+        }
+
+        if (notifyClose && !skipCloseNotification) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallbacks.onClosed(
+                        CameraAdvancedExtensionSessionImpl.this));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -478,7 +498,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
         }
 
-        release();
+        release(true /*skipCloseNotification*/);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -494,15 +514,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             android.hardware.camera2.CameraCaptureSession.StateCallback {
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
-            release();
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallbacks.onClosed(
-                       CameraAdvancedExtensionSessionImpl.this));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            release(false /*skipCloseNotification*/);
         }
 
         @Override
@@ -512,9 +524,24 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         @Override
         public void onConfigured(@NonNull CameraCaptureSession session) {
-            boolean status = true;
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
+                try {
+                    CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to initialize session! Extension service does"
+                            + " not respond!");
+                    notifyConfigurationFailure();
+                }
+            }
+        }
+    }
+
+    private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
+        @Override
+        public void onSuccess() {
+            boolean status = true;
+            synchronized (mInterfaceLock) {
                 try {
                     mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
                     mInitialized = true;
@@ -522,7 +549,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     Log.e(TAG, "Failed to start capture session,"
                             + " extension service does not respond!");
                     status = false;
-                    session.close();
+                    mCaptureSession.close();
                 }
             }
 
@@ -537,6 +564,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             } else {
                 notifyConfigurationFailure();
             }
+        }
+
+        @Override
+        public void onFailure() {
+            mCaptureSession.close();
+            Log.e(TAG, "Failed to initialize proxy service session!"
+                    + " This can happen when trying to configure multiple "
+                    + "concurrent extension sessions!");
+            notifyConfigurationFailure();
         }
     }
 
@@ -781,6 +817,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     Log.e(TAG,"Failed to parcel buffer fence!");
                 }
             }
+            parcelImage.width = img.getWidth();
+            parcelImage.height = img.getHeight();
             parcelImage.format = img.getFormat();
             parcelImage.timestamp = img.getTimestamp();
             parcelImage.transform = img.getTransform();

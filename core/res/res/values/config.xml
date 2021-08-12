@@ -1894,6 +1894,9 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- Flag indicating whether the volume panel should show remote sessions. -->
+    <bool name="config_volumeShowRemoteSessions">true</bool>
+
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
@@ -3367,8 +3370,7 @@
     <integer name="config_vibrationWaveformRampStepDuration">5</integer>
 
     <!-- The duration (in milliseconds) that should be applied to waveform vibrations that ends in
-         non-zero amplitudes, . The waveform will
-         be played as a PWLE instead of on/off calls if this value is set. -->
+         non-zero amplitudes, to bring the vibrator amplitude down to zero using this timing. -->
     <integer name="config_vibrationWaveformRampDownDuration">0</integer>
 
     <!-- Number of retries Cell Data should attempt for a given error code before
@@ -3584,13 +3586,21 @@
     -->
     <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
 
-    <!-- This value is only used when the device checks activity min width/height to determine if it
+    <!-- This value is only used when the device checks activity min height to determine if it
          can be shown in multi windowing modes.
-         If the activity min width/height is greater than this percentage of the display smallest
-         width, it will not be allowed to be shown in multi windowing modes.
+         If the activity min height is greater than this percentage of the display height in
+         portrait, it will not be allowed to be shown in multi windowing modes.
          The value should be between [0 - 1].
     -->
-    <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.3</item>
+    <item name="config_minPercentageMultiWindowSupportHeight" format="float" type="dimen">0.3</item>
+
+    <!-- This value is only used when the device checks activity min width to determine if it
+         can be shown in multi windowing modes.
+         If the activity min width is greater than this percentage of the display width in
+         landscape, it will not be allowed to be shown in multi windowing modes.
+         The value should be between [0 - 1].
+    -->
+    <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.5</item>
 
     <!-- If the display smallest screen width is greater or equal to this value, we will treat it
          as a large screen device, which will have some multi window features enabled by default.
@@ -4398,14 +4408,14 @@
         M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
 
-    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
-    <string name="config_signalXPath" translatable="false">
-        M22,16.41L20.59,15l-2.09,2.09L16.41,15L15,16.41l2.09,2.09L15,20.59L16.41,22l2.09-2.08L20.59,22L22,20.59l-2.08-2.09   L22,16.41z
+    <!-- Attribution path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalAttributionPath" translatable="false">
+        M20,10h2v8h-2z M20,20h2v2h-2z
     </string>
     <!-- config_signalCutout{Height,Width}Fraction define fraction of the 24x24 canvas that
-         should be cut out to display config_signalXPath.-->
-    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">11</item>
-    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">11</item>
+         should be cut out to display config_signalAttributionPath. -->
+    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">7</item>
+    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">17</item>
 
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
      and a second time clipped to the fill level to indicate charge -->
@@ -4632,6 +4642,15 @@
     <!-- The package name for the default bug report handler app from power menu short press. This app must be allowlisted. -->
     <string name="config_defaultBugReportHandlerApp" translatable="false"></string>
 
+    <!-- When true, enables the allowlisted app to upload profcollect reports. -->
+    <bool name="config_profcollectReportUploaderEnabled">false</bool>
+
+    <!-- The package name for the default profcollect report uploader app. This app must be allowlisted. -->
+    <string name="config_defaultProfcollectReportUploaderApp" translatable="false"></string>
+
+    <!-- The action name for the default profcollect report uploader app. -->
+    <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
@@ -4785,7 +4804,7 @@
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
         ignored and 0 is used. -->
-    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">100dp</dimen>
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">31dp</dimen>
 
     <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
         the Option 3 is selected for R.integer.config_letterboxBackgroundType.
@@ -5018,4 +5037,11 @@
     <!-- The amount of dimming to apply to wallpapers with mid range luminance. 0 displays
          the wallpaper at full brightness. 1 displays the wallpaper as fully black. -->
     <item name="config_wallpaperDimAmount" format="float" type="dimen">0.05</item>
+
+    <!-- The default number of times per second that the seconds hand on AnalogClock ticks. If set
+         to 0, the seconds hand will be disabled. -->
+    <integer name="config_defaultAnalogClockSecondsHandFps">1</integer>
+
+    <!-- the number of the max cached processes in the system. -->
+    <integer name="config_customizedMaxCachedProcesses">32</integer>
 </resources>

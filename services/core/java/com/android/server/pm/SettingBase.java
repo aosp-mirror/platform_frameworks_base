@@ -22,12 +22,13 @@ import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.LegacyPermissionState;
+import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
 import com.android.server.utils.Watcher;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public abstract class SettingBase implements Watchable {
+public abstract class SettingBase implements Watchable, Snappable {
     // TODO: make this variable protected, or even private with a getter and setter.
     // Simply making it protected or private requires that the name be changed to conformm
     // to the Android naming convention, and that touches quite a few files.

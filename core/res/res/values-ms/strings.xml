@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Perkhidmatan GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Perkhidmatan Pemberitahuan Penderia"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Perkhidmatan Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Pengesan Zon Waktu (Tiada kesambungan)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Perkhidmatan Kemaskinian Waktu GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Perkhidmatan Pengurus Pengecaman Muzik"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Peranti anda akan dipadam"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Tukar sedikit kedudukan jari anda setiap kali pergerakan dilakukan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tiada cap jari didaftarkan."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Peranti ini tiada penderia cap jari."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Penderia dilumpuhkan sementara."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Tidak boleh menggunakan penderia cap jari. Lawati penyedia pembaikan"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gunakan cap jari"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gunakan cap jari atau kunci skrin"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon cap jari"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Buka Kunci Wajah"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan semula wajah anda"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk meningkatkan pengecaman, sila daftarkan semula wajah anda"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isu dengan Buka Kunci Wajah"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketik untuk memadamkan model wajah anda, kemudian tambahkan wajah anda semula"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Sediakan Buka Kunci Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci telefon anda dengan melihat telefon anda"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Sediakan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambahkan cap jari"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka Kunci Cap Jari"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak boleh menggunakan penderia cap jari"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Lawati penyedia pembaikan."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Cuba pencahayaan yang lebih cerah."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Nafi"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Kebenaran diminta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Kebenaran diminta\nuntuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Kebenaran diminta oleh <xliff:g id="APP">%1$s</xliff:g>\nuntuk akaun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Anda menggunakan apl ini di luar profil kerja anda"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Anda menggunakan apl ini dalam profil kerja anda"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Kaedah input"</string>
@@ -1946,7 +1949,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maksimumkan"</string>
     <string name="close_button_text" msgid="10603510034455258">"Tutup"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"Jawapan"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Jawab"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Tolak"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Tamatkan Panggilan"</string>
@@ -2092,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Pemberitahuan ini berada di kedudukan lebih tinggi. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Pemberitahuan ini berada di kedudukan lebih rendah. Ketik untuk memberikan maklum balas."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Pemberitahuan dipertingkatkan"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Tindakan dan balasan yang dicadangkan kini disediakan oleh pemberitahuan yang dipertingkatkan. Pemberitahuan Boleh Suai Android tidak disokong lagi."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Cadangan tindakan dan balasan kini diberikan oleh pemberitahuan dipertingkatkan. Pemberitahuan Boleh Suai Android tidak disokong lagi."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Matikan"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ketahui lebih lanjut"</string>

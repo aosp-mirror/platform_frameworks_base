@@ -44,6 +44,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -1163,18 +1164,24 @@ public final class PermissionManager {
      * that doesn't participate in an attribution chain.
      *
      * @param source The attribution source to register.
+     * @return The registered new attribution source.
      *
      * @see #isRegisteredAttributionSource(AttributionSource)
      *
      * @hide
      */
     @TestApi
-    public void registerAttributionSource(@NonNull AttributionSource source) {
+    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+        // We use a shared static token for sources that are not registered since the token's
+        // only used for process death detection. If we are about to use the source for security
+        // enforcement we need to replace the binder with a unique one.
+        final AttributionSource registeredSource = source.withToken(new Binder());
         try {
-            mPermissionManager.registerAttributionSource(source);
+            mPermissionManager.registerAttributionSource(registeredSource.asState());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return registeredSource;
     }
 
     /**
@@ -1189,7 +1196,7 @@ public final class PermissionManager {
      */
     public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
         try {
-            return mPermissionManager.isRegisteredAttributionSource(source);
+            return mPermissionManager.isRegisteredAttributionSource(source.asState());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

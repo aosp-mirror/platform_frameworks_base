@@ -57,5 +57,11 @@ oneway interface IHotwordDetectionService {
         in IContentCaptureManager contentCaptureManager,
         in ContentCaptureOptions options);
 
+    /**
+     * Simply requests the service to trigger the callback, so that the system can check its
+     * identity.
+     */
+    void ping(in IRemoteCallback callback);
+
     void stopDetection();
 }

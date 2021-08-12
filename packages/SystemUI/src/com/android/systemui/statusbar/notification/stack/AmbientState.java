@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 
 import javax.inject.Inject;
@@ -43,6 +44,7 @@ public class AmbientState {
     private static final boolean NOTIFICATIONS_HAVE_SHADOWS = false;
 
     private final SectionProvider mSectionProvider;
+    private final BypassController mBypassController;
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
@@ -158,8 +160,10 @@ public class AmbientState {
     @Inject
     public AmbientState(
             Context context,
-            @NonNull SectionProvider sectionProvider) {
+            @NonNull SectionProvider sectionProvider,
+            @NonNull BypassController bypassController) {
         mSectionProvider = sectionProvider;
+        mBypassController = bypassController;
         reload(context);
     }
 
@@ -295,6 +299,13 @@ public class AmbientState {
         } else {
             mOverScrollBottomAmount = amount;
         }
+    }
+
+    /**
+     * Is bypass currently enabled?
+     */
+    public boolean isBypassEnabled() {
+        return mBypassController.isBypassEnabled();
     }
 
     public float getOverScrollAmount(boolean top) {

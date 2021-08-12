@@ -28,39 +28,23 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
-import androidx.dynamicanimation.animation.FloatPropertyCompat;
-import androidx.dynamicanimation.animation.SpringForce;
-
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.wm.shell.animation.PhysicsAnimator;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link QuickStatusBarHeader}
  */
-public class QSContainerImpl extends FrameLayout {
+public class QSContainerImpl extends FrameLayout implements Dumpable {
 
     private final Point mSizePoint = new Point();
-    private static final FloatPropertyCompat<QSContainerImpl> BACKGROUND_BOTTOM =
-            new FloatPropertyCompat<QSContainerImpl>("backgroundBottom") {
-                @Override
-                public float getValue(QSContainerImpl qsImpl) {
-                    return qsImpl.getBackgroundBottom();
-                }
-
-                @Override
-                public void setValue(QSContainerImpl background, float value) {
-                    background.setBackgroundBottom((int) value);
-                }
-            };
-    private static final PhysicsAnimator.SpringConfig BACKGROUND_SPRING
-            = new PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_MEDIUM,
-            SpringForce.DAMPING_RATIO_LOW_BOUNCY);
     private int mFancyClippingTop;
     private int mFancyClippingBottom;
     private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
     private  final Path mFancyClippingPath = new Path();
-    private int mBackgroundBottom = 0;
     private int mHeightOverride = -1;
     private View mQSDetail;
     private QuickStatusBarHeader mHeader;
@@ -71,7 +55,6 @@ public class QSContainerImpl extends FrameLayout {
     private int mSideMargins;
     private boolean mQsDisabled;
     private int mContentPadding = -1;
-    private boolean mAnimateBottomOnNextLayout;
     private int mNavBarInset = 0;
     private boolean mClippingEnabled;
 
@@ -86,31 +69,12 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
-        mHeader.getHeaderQsPanel().setMediaVisibilityChangedListener((visible) -> {
-            if (mHeader.getHeaderQsPanel().isShown()) {
-                mAnimateBottomOnNextLayout = true;
-            }
-        });
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
     public boolean hasOverlappingRendering() {
         return false;
-    }
-
-    void onMediaVisibilityChanged(boolean qsVisible) {
-        mAnimateBottomOnNextLayout = qsVisible;
-    }
-
-    private void setBackgroundBottom(int value) {
-        // We're saving the bottom separately since otherwise the bottom would be overridden in
-        // the layout and the animation wouldn't properly start at the old position.
-        mBackgroundBottom = value;
-    }
-
-    private float getBackgroundBottom() {
-        return mBackgroundBottom;
     }
 
     @Override
@@ -186,8 +150,7 @@ public class QSContainerImpl extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        updateExpansion(mAnimateBottomOnNextLayout /* animate */);
-        mAnimateBottomOnNextLayout = false;
+        updateExpansion();
         updateClippingPath();
     }
 
@@ -230,31 +193,12 @@ public class QSContainerImpl extends FrameLayout {
     }
 
     public void updateExpansion() {
-        updateExpansion(false /* animate */);
-    }
-
-    public void updateExpansion(boolean animate) {
         int height = calculateContainerHeight();
         int scrollBottom = calculateContainerBottom();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + scrollBottom);
         int qsDetailBottomMargin = ((MarginLayoutParams) mQSDetail.getLayoutParams()).bottomMargin;
         mQSDetail.setBottom(getTop() + scrollBottom - qsDetailBottomMargin);
-        updateBackgroundBottom(scrollBottom, animate);
-    }
-
-    private void updateBackgroundBottom(int height, boolean animated) {
-        PhysicsAnimator<QSContainerImpl> physicsAnimator = PhysicsAnimator.getInstance(this);
-        if (physicsAnimator.isPropertyAnimating(BACKGROUND_BOTTOM) || animated) {
-            // An animation is running or we want to animate
-            // Let's make sure to set the currentValue again, since the call below might only
-            // start in the next frame and otherwise we'd flicker
-            BACKGROUND_BOTTOM.setValue(this, BACKGROUND_BOTTOM.getValue(this));
-            physicsAnimator.spring(BACKGROUND_BOTTOM, height, BACKGROUND_SPRING).start();
-        } else {
-            BACKGROUND_BOTTOM.setValue(this, height);
-        }
-
     }
 
     protected int calculateContainerHeight() {
@@ -275,7 +219,7 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
-        mQSPanelContainer.setScrollingEnabled(expansion > 0.0f);
+        mQSPanelContainer.setScrollingEnabled(expansion > 0f);
         updateExpansion();
     }
 
@@ -355,5 +299,12 @@ public class QSContainerImpl extends FrameLayout {
         mFancyClippingPath.addRoundRect(0, mFancyClippingTop, getWidth(),
                 mFancyClippingBottom, mFancyClippingRadii, Path.Direction.CW);
         invalidate();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(getClass().getSimpleName() + " updateClippingPath: top("
+                + mFancyClippingTop + ") bottom(" + mFancyClippingBottom  + ") mClippingEnabled("
+                + mClippingEnabled + ")");
     }
 }

@@ -30,9 +30,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.settings.UserContextProvider;
@@ -78,12 +78,12 @@ public class ScreenRecordDialog extends Activity {
 
         setContentView(R.layout.screen_record_dialog);
 
-        Button cancelBtn = findViewById(R.id.button_cancel);
+        TextView cancelBtn = findViewById(R.id.button_cancel);
         cancelBtn.setOnClickListener(v -> {
             finish();
         });
 
-        Button startBtn = findViewById(R.id.button_start);
+        TextView startBtn = findViewById(R.id.button_start);
         startBtn.setOnClickListener(v -> {
             requestScreenCapture();
             finish();

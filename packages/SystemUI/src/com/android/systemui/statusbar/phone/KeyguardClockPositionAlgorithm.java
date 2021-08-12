@@ -211,7 +211,7 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getStackScrollerPadding(int clockYPosition) {
         if (mBypassEnabled) {
-            return mUnlockedStackScrollerPadding;
+            return (int) (mUnlockedStackScrollerPadding + mOverStretchAmount);
         } else if (mIsSplitShade) {
             return clockYPosition;
         } else {
@@ -234,7 +234,9 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY(float panelExpansion, float darkAmount) {
         float clockYRegular = getExpandedPreferredClockY();
-        float clockYBouncer = -mKeyguardStatusHeight;
+
+        // Dividing the height creates a smoother transition when the user swipes up to unlock
+        float clockYBouncer = -mKeyguardStatusHeight / 3.0f;
 
         // Move clock up while collapsing the shade
         float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(panelExpansion);

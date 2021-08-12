@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-palvelu"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Anturin ilmoituspalvelu"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight-palvelu"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Aikavyöhykkeen tunnistin (ei yhteyttä)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS-ajanpäivityspalvelu"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Musiikintunnistuksen ylläpitopalvelu"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Laitteen tiedot poistetaan"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Antaa sovelluksen laajentaa tai tiivistää tilarivin."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"näyttää ilmoituksia koko näytön tapahtumina lukitulla laitteella"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Sallii sovelluksen näyttää ilmoituksia koko näytön tapahtumina lukitulla laitteella"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"asentaa pikakuvakkeita"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Pikakuvakkeiden asentaminen"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Antaa sovelluksen lisätä aloitusruudun pikakuvakkeita ilman käyttäjän toimia."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"poista pikakuvakkeita"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Antaa sovelluksen poistaa aloitusruudun pikakuvakkeita ilman käyttäjän toimia."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Kokeile muuttaa asentoa"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Liikuta sormeasi hieman joka kerralla"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sormenjälki tunnistettu"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Sormenjälkiä ei ole otettu käyttöön."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Laitteessa ei ole sormenjälkitunnistinta."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Tunnistin poistettu väliaikaisesti käytöstä."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Sormenjälkitunnistinta ei voi käyttää. Ota yhteys korjauspalveluun"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Sormi <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Käytä sormenjälkeä"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Käytä sormenjälkeä tai näytön lukitusta"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sormenjälkikuvake"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Kasvojentunnistusavaus"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Lisää kasvot uudelleen"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Lisää kasvosi uudelleen tunnistamisen parantamiseksi"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Face Unlockiin liittyvä ongelma"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Poista kasvomalli napauttamalla ja lisää sitten kasvosi uudelleen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ota kasvojentunnistusavaus käyttöön"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avaa puhelimesi lukitus katsomalla laitetta"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Ota käyttöön lisää tapoja avata lukitus"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Napauta lisätäksesi sormenjälki"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sormenjälkiavaus"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sormenjälkitunnistinta ei voi käyttää"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Ota yhteys korjauspalveluun."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tarkan kasvodatan tallennus epäonnistui. Yritä uudelleen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liian kirkasta. Kokeile pehmeämpää valaistusta."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Liian pimeää. Kokeile kirkkaampaa valaistusta."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Kiellä"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Lupa pyydetty"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Pyydetään lupaa\ntilille <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> pyytänyt pääsyä\ntilille <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Käytät sovellusta muulla kuin työprofiililla"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Käytät sovellusta työprofiililla"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Syöttötapa"</string>
