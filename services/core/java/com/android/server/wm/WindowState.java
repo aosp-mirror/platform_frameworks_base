@@ -5974,7 +5974,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // since a generic WindowContainer only needs to wait for its
         // children to finish and is immediately ready from its own
         // perspective but at the WindowState level we need to wait for ourselves
-        // to draw even if the children draw first our don't need to sync, so we start
+        // to draw even if the children draw first or don't need to sync, so we start
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
         requestRedrawForSync();
@@ -5983,6 +5983,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
             BLAST_TIMEOUT_DURATION);
         return true;
+    }
+
+    @Override
+    boolean isSyncFinished() {
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mViewVisibility == View.GONE) {
+            // Don't wait for GONE windows. However, we don't alter the state in case the window
+            // becomes un-gone while the syncset is still active.
+            return true;
+        }
+        return super.isSyncFinished();
     }
 
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {

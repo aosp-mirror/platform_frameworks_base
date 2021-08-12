@@ -44,6 +44,7 @@ import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -106,6 +107,14 @@ public abstract class WMShellBaseModule {
     static DisplayController provideDisplayController(Context context,
             IWindowManager wmService, @ShellMainThread ShellExecutor mainExecutor) {
         return new DisplayController(context, wmService, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DisplayInsetsController provideDisplayInsetsController( IWindowManager wmService,
+            DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new DisplayInsetsController(wmService, displayController, mainExecutor);
     }
 
     @WMSingleton
@@ -452,7 +461,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellInitImpl provideShellInitImpl(DisplayImeController displayImeController,
+    static ShellInitImpl provideShellInitImpl(DisplayController displayController,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
@@ -465,7 +476,9 @@ public abstract class WMShellBaseModule {
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellInitImpl(displayImeController,
+        return new ShellInitImpl(displayController,
+                displayImeController,
+                displayInsetsController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 bubblesOptional,

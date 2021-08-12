@@ -12,6 +12,7 @@ import com.android.systemui.Dependency
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.FooterActionsController.ExpansionState
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
@@ -29,7 +30,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-class QSFooterActionsControllerTest : LeakCheckedTest() {
+class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var userManager: UserManager
     @Mock
@@ -47,10 +48,10 @@ class QSFooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
     @Mock
-    private lateinit var controller: QSFooterActionsController
+    private lateinit var controller: FooterActionsController
 
     private val metricsLogger: MetricsLogger = FakeMetricsLogger()
-    private lateinit var view: QSFooterActionsView
+    private lateinit var view: FooterActionsView
     private val falsingManager: FalsingManagerFake = FalsingManagerFake()
 
     @Before
@@ -60,12 +61,13 @@ class QSFooterActionsControllerTest : LeakCheckedTest() {
         val fakeTunerService = Dependency.get(TunerService::class.java) as FakeTunerService
 
         view = LayoutInflater.from(context)
-                .inflate(R.layout.qs_footer_actions, null) as QSFooterActionsView
+                .inflate(R.layout.footer_actions, null) as FooterActionsView
 
-        controller = QSFooterActionsController(view, qsPanelController, activityStarter,
+        controller = FooterActionsController(view, qsPanelController, activityStarter,
                 userManager, userInfoController, multiUserSwitchController,
                 deviceProvisionedController, falsingManager, metricsLogger, fakeTunerService,
-                globalActionsDialog, uiEventLogger, showPMLiteButton = true)
+                globalActionsDialog, uiEventLogger, showPMLiteButton = true,
+                buttonsVisibleState = ExpansionState.EXPANDED)
         controller.init()
         controller.onViewAttached()
     }

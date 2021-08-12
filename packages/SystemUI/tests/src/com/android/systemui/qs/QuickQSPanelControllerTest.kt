@@ -68,6 +68,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var quickQsBrightnessController: QuickQSBrightnessController
+    @Mock
+    private lateinit var footerActionsController: FooterActionsController
 
     private lateinit var controller: QuickQSPanelController
 
@@ -90,7 +92,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 qsLogger,
                 dumpManager,
-                quickQsBrightnessController
+                quickQsBrightnessController,
+                footerActionsController
         )
 
         controller.init()

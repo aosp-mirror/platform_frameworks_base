@@ -224,6 +224,7 @@ cc_library_shared {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
+                "android_window_WindowInfosListener.cpp",
             ],
 
             static_libs: [
@@ -236,6 +237,7 @@ cc_library_shared {
                 "libgrallocusage",
                 "libscrypt_static",
                 "libstatssocket_lazy",
+                "libskia",
             ],
 
             shared_libs: [

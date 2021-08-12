@@ -46,6 +46,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -99,6 +100,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private CharSequence mUnlockedLabel;
     @NonNull private CharSequence mLockedLabel;
     @Nullable private final Vibrator mVibrator;
+    @Nullable private final AuthRippleController mAuthRippleController;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -135,7 +137,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull ConfigurationController configurationController,
             @NonNull @Main DelayableExecutor executor,
-            @Nullable Vibrator vibrator
+            @Nullable Vibrator vibrator,
+            @Nullable AuthRippleController authRippleController
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -148,6 +151,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mConfigurationController = configurationController;
         mExecutor = executor;
         mVibrator = vibrator;
+        mAuthRippleController = authRippleController;
 
         final Context context = view.getContext();
         mUnlockIcon = mView.getContext().getResources().getDrawable(
@@ -538,6 +542,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                     // pre-emptively set to true to hide view
                     mIsBouncerShowing = true;
+                    if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
+                        mAuthRippleController.showRipple(FINGERPRINT);
+                    }
                     updateVisibility();
                     mKeyguardViewController.showBouncer(/* scrim */ true);
                 }
