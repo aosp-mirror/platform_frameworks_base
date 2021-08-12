@@ -543,7 +543,7 @@ final class InputMonitor {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
                     mRecentsAnimationInputConsumer.show(mInputTransaction,
-                            recentsAnimationController.getHighestLayerTask());
+                            recentsAnimationController.getHighestLayerActivity());
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
             }
