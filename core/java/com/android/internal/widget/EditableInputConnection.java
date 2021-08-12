@@ -99,6 +99,12 @@ public class EditableInputConnection extends BaseInputConnection
     }
 
     @Override
+    public void endComposingRegionEditInternal() {
+        // The ContentCapture service is interested in Composing-state changes.
+        mTextView.notifyContentCaptureTextChanged();
+    }
+
+    @Override
     public void closeConnection() {
         super.closeConnection();
         synchronized(this) {

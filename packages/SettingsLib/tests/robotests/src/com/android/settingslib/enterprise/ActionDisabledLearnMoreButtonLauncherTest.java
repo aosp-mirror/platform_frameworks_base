@@ -181,18 +181,20 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     @Test
     public void testSetupLearnMoreButtonToLaunchHelpPage_nullContext() {
         assertThrows(NullPointerException.class,
-                () -> mLauncher.setupLearnMoreButtonToLaunchHelpPage(/* context= */ null, URL));
+                () -> mLauncher.setupLearnMoreButtonToLaunchHelpPage(
+                        /* context= */ null, URL, CONTEXT_USER));
     }
 
     @Test
     public void testSetupLearnMoreButtonToLaunchHelpPage_nullUrl() {
         assertThrows(NullPointerException.class,
-                () -> mLauncher.setupLearnMoreButtonToLaunchHelpPage(mContext, /* url= */ null));
+                () -> mLauncher.setupLearnMoreButtonToLaunchHelpPage(
+                        mContext, /* url= */ null, CONTEXT_USER));
     }
 
     @Test
     public void testSetupLearnMoreButtonToLaunchHelpPage() {
-        mLauncher.setupLearnMoreButtonToLaunchHelpPage(mContext, URL);
+        mLauncher.setupLearnMoreButtonToLaunchHelpPage(mContext, URL, CONTEXT_USER);
         tapLearnMore();
 
         verify(mContext).startActivityAsUser(mIntentCaptor.capture(), eq(CONTEXT_USER));

@@ -662,6 +662,26 @@ public final class AutofillManagerService
         return false;
     }
 
+    /**
+     * Requests a count of saved passwords from the current service.
+     *
+     * @return {@code true} if the request succeeded
+     */
+    // Called by Shell command
+    boolean requestSavedPasswordCount(@UserIdInt int userId, @NonNull IResultReceiver receiver) {
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            if (service != null) {
+                service.requestSavedPasswordCount(receiver);
+                return true;
+            } else if (sVerbose) {
+                Slog.v(TAG, "requestSavedPasswordCount(): no service for " + userId);
+            }
+        }
+        return false;
+    }
+
     private void setLoggingLevelsLocked(boolean debug, boolean verbose) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;

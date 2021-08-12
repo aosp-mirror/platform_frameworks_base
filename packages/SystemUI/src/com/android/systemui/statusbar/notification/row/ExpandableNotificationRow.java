@@ -35,6 +35,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -85,6 +86,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -252,6 +254,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnAppClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
+    private Path mExpandingClipPath;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -284,7 +287,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mGroupExpansionChanging = true;
                 final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
                 boolean nowExpanded = mGroupExpansionManager.toggleGroupExpansion(mEntry);
-                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
+                mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
                 onExpansionChanged(true /* userAction */, wasExpanded);
@@ -307,7 +310,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     setUserExpanded(nowExpanded);
                 }
                 notifyHeightChanged(true);
-                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
+                mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_EXPANDER,
                         nowExpanded);
             }
@@ -836,6 +839,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
         if (mExpandAnimationRunning && !isChildInGroup && mNotificationParent != null) {
             mNotificationParent.setChildIsExpanding(false);
+            mNotificationParent.setExpandingClipPath(null);
             mNotificationParent.setExtraWidthForClipping(0.0f);
             mNotificationParent.setMinimumHeightForClipping(0);
         }
@@ -2032,7 +2036,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setTranslationZ(translationZ);
         float extraWidthForClipping = params.getWidth() - getWidth();
         setExtraWidthForClipping(extraWidthForClipping);
-        int top = params.getTop();
+        int top;
+        if (params.getStartRoundedTopClipping() > 0) {
+            // If we were clipping initially, let's interpolate from the start position to the
+            // top. Otherwise, we just take the top directly.
+            float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                    params.getProgress(0,
+                            NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
+            float startTop = params.getStartNotificationTop();
+            top = (int) Math.min(MathUtils.lerp(startTop,
+                    params.getTop(), expandProgress),
+                    startTop);
+        } else {
+            top = params.getTop();
+        }
+        int actualHeight = params.getBottom() - top;
+        setActualHeight(actualHeight);
         int startClipTopAmount = params.getStartClipTopAmount();
         int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, params.getProgress());
         if (mNotificationParent != null) {
@@ -2061,13 +2080,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             setClipTopAmount(clipTopAmount);
         }
         setTranslationY(top);
-        setActualHeight(params.getHeight());
 
         mTopRoundnessDuringExpandAnimation = params.getTopCornerRadius() / mOutlineRadius;
         mBottomRoundnessDuringExpandAnimation = params.getBottomCornerRadius() / mOutlineRadius;
         invalidateOutline();
 
-        mBackgroundNormal.setExpandAnimationParams(params);
+        mBackgroundNormal.setExpandAnimationSize(params.getWidth(), actualHeight);
     }
 
     public void setExpandAnimationRunning(boolean expandAnimationRunning) {
@@ -2464,7 +2482,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
-        if (intrinsicBefore != getIntrinsicHeight() && intrinsicBefore != 0) {
+        if (intrinsicBefore != getIntrinsicHeight()
+                && (intrinsicBefore != 0 || getActualHeight() > 0)) {
             notifyHeightChanged(true  /* needsAnimation */);
         }
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
@@ -3045,7 +3064,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public interface OnExpandClickListener {
-        void onExpandClicked(NotificationEntry clickedEntry, boolean nowExpanded);
+        void onExpandClicked(NotificationEntry clickedEntry, View clickedView, boolean nowExpanded);
     }
 
     @Override
@@ -3079,6 +3098,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return !hasNoRounding();
         }
         return super.childNeedsClipping(child);
+    }
+
+    /**
+     * Set a clip path to be set while expanding the notification. This is needed to nicely
+     * clip ourselves during the launch if we were clipped rounded in the beginning
+     */
+    public void setExpandingClipPath(Path path) {
+        mExpandingClipPath = path;
+        invalidate();
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        canvas.save();
+        if (mExpandingClipPath != null && (mExpandAnimationRunning || mChildIsExpanding)) {
+            // If we're launching a notification, let's clip if a clip rounded to the clipPath
+            canvas.clipPath(mExpandingClipPath);
+        }
+        super.dispatchDraw(canvas);
+        canvas.restore();
     }
 
     @Override

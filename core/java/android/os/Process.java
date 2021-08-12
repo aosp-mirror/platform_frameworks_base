@@ -34,12 +34,9 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 
-import java.io.BufferedReader;
 import java.io.FileDescriptor;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -1472,43 +1469,4 @@ public class Process {
     }
 
     private static native int nativePidFdOpen(int pid, int flags) throws ErrnoException;
-
-    /**
-     * Checks if a process corresponding to a specific pid owns any file locks.
-     * @param pid The process ID for which we want to know the existence of file locks.
-     * @return true If the process holds any file locks, false otherwise.
-     * @throws IOException if /proc/locks can't be accessed.
-     *
-     * @hide
-     */
-    public static boolean hasFileLocks(int pid) throws Exception {
-        BufferedReader br = null;
-
-        try {
-            br = new BufferedReader(new FileReader("/proc/locks"));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                StringTokenizer st = new StringTokenizer(line);
-
-                for (int i = 0; i < 5 && st.hasMoreTokens(); i++) {
-                    String str = st.nextToken();
-                    try {
-                        if (i == 4 && Integer.parseInt(str) == pid) {
-                            return true;
-                        }
-                    } catch (NumberFormatException nfe) {
-                        throw new Exception("Exception parsing /proc/locks at \" "
-                                + line +  " \", token #" + i);
-                    }
-                }
-            }
-
-            return false;
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-        }
-    }
 }

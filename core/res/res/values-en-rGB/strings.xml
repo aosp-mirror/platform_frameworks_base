@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS service"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Time zone detector (no connectivity)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS time update service"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Music recognition manager service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Your device will be erased"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Try another fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Too bright"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Try adjusting"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Change the position of your finger slightly each time"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerprint authenticated"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No fingerprints enrolled."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"This device does not have a fingerprint sensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporarily disabled."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Can’t use fingerprint sensor. Visit a repair provider"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Use fingerprint"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Use fingerprint or screen lock"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerprint icon"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Re-enrol your face"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"To improve recognition, please re-enrol your face"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Issue with Face Unlock"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tap to delete your face model, then add your face again"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Set up Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Can’t use fingerprint sensor"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visit a repair provider."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Couldn’t capture accurate face data. Try again."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Too bright. Try gentler lighting."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Too dark. Try brighter lighting."</string>
@@ -698,8 +700,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"bind to a dream service"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"invoke the carrier-provided configuration app"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"invoke the operator-provided configuration app"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Allows the holder to invoke the operator-provided configuration app. Should never be needed for normal apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"listen for observations on network conditions"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Allows an application to listen for observations on network conditions. Should never be needed for normal apps."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"change input device calibration"</string>
@@ -710,8 +712,8 @@
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Allows this application to receive information about current Android Beam transfers"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"remove DRM certificates"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Allows an application to remove DRM certficates. Should never be needed for normal apps."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"bind to a carrier messaging service"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"bind to an operator messaging service"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Allows the holder to bind to the top-level interface of an operator messaging service. Should never be needed for normal apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bind to operator services"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Allows the holder to bind to operator services. Should never be needed for normal apps."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"access Do Not Disturb"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Deny"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permission requested"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permission requested\nfor account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permission requested by <xliff:g id="APP">%1$s</xliff:g>\nfor account <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"You\'re using this app outside of your work profile"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"You\'re using this app in your work profile"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Input Method"</string>
@@ -1652,7 +1655,7 @@
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Enter SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Enter PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Enter Password"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM is now disabled. Enter PUK code to continue. Contact carrier for details."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM is now disabled. Enter PUK code to continue. Contact operator for details."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Enter desired PIN code"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirm desired PIN code"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Unlocking SIM card…"</string>

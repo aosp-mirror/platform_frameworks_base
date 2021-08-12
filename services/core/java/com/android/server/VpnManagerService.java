@@ -26,6 +26,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IVpnManager;
@@ -38,6 +40,7 @@ import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.util.NetdService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.INetworkManagementService;
@@ -311,6 +314,26 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
     }
 
+    // TODO : Move to a static lib to factorize with Vpn.java
+    private int getAppUid(final String app, final int userId) {
+        final PackageManager pm = mContext.getPackageManager();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return pm.getPackageUidAsUser(app, userId);
+        } catch (NameNotFoundException e) {
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void verifyCallingUidAndPackage(String packageName, int callingUid) {
+        final int userId = UserHandle.getUserId(callingUid);
+        if (getAppUid(packageName, userId) != callingUid) {
+            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
+        }
+    }
+
     /**
      * Starts the VPN based on the stored profile for the given package
      *
@@ -322,7 +345,9 @@ public class VpnManagerService extends IVpnManager.Stub {
      */
     @Override
     public void startVpnProfile(@NonNull String packageName) {
-        final int user = UserHandle.getUserId(mDeps.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             throwIfLockdownEnabled();
             mVpns.get(user).startVpnProfile(packageName);
@@ -339,7 +364,9 @@ public class VpnManagerService extends IVpnManager.Stub {
      */
     @Override
     public void stopVpnProfile(@NonNull String packageName) {
-        final int user = UserHandle.getUserId(mDeps.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             mVpns.get(user).stopVpnProfile(packageName);
         }
@@ -348,9 +375,18 @@ public class VpnManagerService extends IVpnManager.Stub {
     /**
      * Start legacy VPN, controlling native daemons as needed. Creates a
      * secondary thread to perform connection work, returning quickly.
+     *
+     * Legacy VPN is deprecated starting from Android S. So this API shouldn't be called if the
+     * initial SDK version of device is Android S+. Otherwise, UnsupportedOperationException will be
+     * thrown.
      */
+    @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
     @Override
     public void startLegacyVpn(VpnProfile profile) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.S
+                && VpnProfile.isLegacyType(profile.type)) {
+            throw new UnsupportedOperationException("Legacy VPN is deprecated");
+        }
         int user = UserHandle.getUserId(mDeps.getCallingUid());
         // Note that if the caller is not system (uid >= Process.FIRST_APPLICATION_UID),
         // the code might not work well since getActiveNetwork might return null if the uid is

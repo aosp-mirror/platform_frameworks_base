@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obličej se nepodařilo rozpoznat. Použijte místo něj otisk prstu."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Pokračujte přiložením prstu"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Otisk prstu se nepodařilo rozpoznat. Použijte místo něj zámek obrazovky."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Hledáme vás…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona obličeje"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
@@ -437,8 +439,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát či mikrofon."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Zařízení"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Přejetím nahoru přepnete aplikace"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Přetažením doprava rychle přepnete aplikace"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Přepnout přehled"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Nabito"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Nabíjení"</string>
@@ -458,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Oznámení otevřete opětovným klepnutím"</string>
     <string name="tap_again" msgid="1315420114387908655">"Znovu klepněte"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Stisknutím otevřete"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC vyžaduje odemknutou obrazovku"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zařízení patří vaší organizaci"</string>
@@ -484,12 +485,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Přidat uživatele"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nový uživatel"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstranit hosta?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Veškeré aplikace a data v této relaci budou vymazána."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstranit"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Vítejte zpět v relaci hosta!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relaci pokračovat?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začít znovu"</string>
@@ -524,7 +521,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiché"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichá oznámení"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Oznámení"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
@@ -679,7 +676,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavte si rychlejší a bezpečnější platby pomocí telefonu"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobrazit vše"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odemknout a zaplatit"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Není nastaveno"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Přidat kartu"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Aktualizace"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavení obrazovky uzamčení"</string>
@@ -738,7 +736,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Dál upozorňovat"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Vypnout oznámení"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Ticho"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Tiché"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Výchozí"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaticky"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
@@ -751,10 +749,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stav:&lt;/b&gt; priorita snížena na Tiché"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno výše"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno níže"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, deaktivuje režim Nerušit"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části oznámení konverzace a jako profilový obrázek na obrazovce uzamčení, má podobu bubliny a deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, deaktivuje režim Nerušit"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny a deaktivuje režim Nerušit"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
@@ -1057,7 +1055,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Přesunout k okraji a skrýt"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Přesunout okraj ven a zobrazit"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"přepnout"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Ovládání domácnosti"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládání zařízení"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Vyberte aplikaci, pro kterou chcete přidat ovládací prvky"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Byly přidány <xliff:g id="NUMBER_1">%s</xliff:g> ovládací prvky.</item>
@@ -1131,7 +1129,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Otevřít konverzaci"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgety konverzací"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnutím na konverzaci ji přidáte na plochu"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Vraťte se sem, až dostanete nějaké zprávy"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Tady se zobrazí vaše nedávné konverzace"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritní konverzace"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Poslední konverzace"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1160,8 +1158,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Zobrazit poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzace"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pozastaveno funkcí Nerušit"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> posílá obrázek"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> má aktualizaci stavu: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Dostupné"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problém s načtením měřiče baterie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím zobrazíte další informace"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Budík nenastaven"</string>

@@ -57,16 +57,19 @@ class FakeSession implements ScrollCaptureClient.Session {
 
     private int mScrollDelta;
     private int mPageHeight;
+    private int mTargetHeight;
 
     FakeSession(int pageHeight, float maxPages, int tileHeight, int visiblePageTop,
-            int visiblePageBottom, int availableTop, int availableBottom) {
+            int visiblePageBottom, int availableTop, int availableBottom,
+            int maxTiles) {
         mPageHeight = pageHeight;
         mTileHeight = tileHeight;
         mAvailable = new Rect(0, availableTop, getPageWidth(), availableBottom);
         mAvailableTop = new Rect(mAvailable);
         mAvailableTop.inset(0, 0, 0, pageHeight);
         mVisiblePage = new Rect(0, visiblePageTop, getPageWidth(), visiblePageBottom);
-        mMaxTiles = (int) Math.ceil((pageHeight * maxPages) / mTileHeight);
+        mTargetHeight = (int) (pageHeight * maxPages);
+        mMaxTiles = maxTiles;
     }
 
     private static Image mockImage() {
@@ -155,6 +158,11 @@ class FakeSession implements ScrollCaptureClient.Session {
     @Override
     public int getMaxTiles() {
         return mMaxTiles;
+    }
+
+    @Override
+    public int getTargetHeight() {
+        return mTargetHeight;
     }
 
     @Override

@@ -22,7 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.appsearch.util.BundleUtil;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.app.appsearch.util.IndentingStringBuilder;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -49,12 +49,6 @@ import java.util.Set;
  */
 public class GenericDocument {
     private static final String TAG = "AppSearchGenericDocumen";
-
-    /** The maximum number of elements in a repeatable field. */
-    private static final int MAX_REPEATED_PROPERTY_LENGTH = 100;
-
-    /** The maximum {@link String#length} of a {@link String} field. */
-    private static final int MAX_STRING_LENGTH = 20_000;
 
     /** The maximum number of indexed properties a document can have. */
     private static final int MAX_INDEXED_PROPERTIES = 16;
@@ -134,17 +128,6 @@ public class GenericDocument {
     @NonNull
     public Bundle getBundle() {
         return mBundle;
-    }
-
-    /**
-     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    @NonNull
-    public String getUri() {
-        return getId();
     }
 
     /** Returns the unique identifier of the {@link GenericDocument}. */
@@ -861,6 +844,7 @@ public class GenericDocument {
      *
      * @hide
      */
+    // TODO(b/171882200): Expose this API in Android T
     @NonNull
     public GenericDocument.Builder<GenericDocument.Builder<?>> toBuilder() {
         Bundle clonedBundle = BundleUtil.deepCopy(mBundle);
@@ -890,121 +874,101 @@ public class GenericDocument {
     @Override
     @NonNull
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        appendGenericDocumentString(this, /*indentLevel=*/ 0, stringBuilder);
+        IndentingStringBuilder stringBuilder = new IndentingStringBuilder();
+        appendGenericDocumentString(stringBuilder);
         return stringBuilder.toString();
     }
 
-    private static void appendGenericDocumentString(
-            @NonNull GenericDocument document, int indentLevel, @NonNull StringBuilder builder) {
-        Objects.requireNonNull(document);
+    /**
+     * Appends a debug string for the {@link GenericDocument} instance to the given string builder.
+     *
+     * @param builder the builder to append to.
+     */
+    void appendGenericDocumentString(@NonNull IndentingStringBuilder builder) {
         Objects.requireNonNull(builder);
 
-        builder.append(getIndent(indentLevel)).append("{\n");
+        builder.append("{\n");
+        builder.increaseIndentLevel();
 
-        String indent1 = getIndent(indentLevel + 1);
-
-        builder.append(indent1)
-                .append("namespace: \"")
-                .append(document.getNamespace())
-                .append("\",\n");
-
-        builder.append(indent1).append("id: \"").append(document.getId()).append("\",\n");
-
-        builder.append(indent1).append("score: ").append(document.getScore()).append(",\n");
-
-        builder.append(indent1)
-                .append("schemaType: \"")
-                .append(document.getSchemaType())
-                .append("\",\n");
-
-        builder.append(indent1)
-                .append("creationTimestampMillis: ")
-                .append(document.getCreationTimestampMillis())
+        builder.append("namespace: \"").append(getNamespace()).append("\",\n");
+        builder.append("id: \"").append(getId()).append("\",\n");
+        builder.append("score: ").append(getScore()).append(",\n");
+        builder.append("schemaType: \"").append(getSchemaType()).append("\",\n");
+        builder.append("creationTimestampMillis: ")
+                .append(getCreationTimestampMillis())
                 .append(",\n");
+        builder.append("timeToLiveMillis: ").append(getTtlMillis()).append(",\n");
 
-        builder.append(indent1)
-                .append("timeToLiveMillis: ")
-                .append(document.getTtlMillis())
-                .append(",\n");
+        builder.append("properties: {\n");
 
-        builder.append(indent1).append("properties: {\n");
-
-        String[] sortedProperties = document.getPropertyNames().toArray(new String[0]);
+        String[] sortedProperties = getPropertyNames().toArray(new String[0]);
         Arrays.sort(sortedProperties);
 
         for (int i = 0; i < sortedProperties.length; i++) {
-            Object property = document.getProperty(sortedProperties[i]);
-            builder.append(getIndent(indentLevel + 2))
-                    .append("\"")
-                    .append(sortedProperties[i])
-                    .append("\"")
-                    .append(": ");
-            appendPropertyString(property, indentLevel + 2, builder);
+            Object property = getProperty(sortedProperties[i]);
+            builder.increaseIndentLevel();
+            appendPropertyString(sortedProperties[i], property, builder);
             if (i != sortedProperties.length - 1) {
                 builder.append(",\n");
             }
+            builder.decreaseIndentLevel();
         }
 
         builder.append("\n");
-        builder.append(indent1).append("}");
+        builder.append("}");
 
+        builder.decreaseIndentLevel();
         builder.append("\n");
-        builder.append(getIndent(indentLevel)).append("}");
+        builder.append("}");
     }
 
     /**
-     * Appends a string for the given property to the given builder.
+     * Appends a debug string for the given document property to the given string builder.
      *
+     * @param propertyName name of property to create string for.
      * @param property property object to create string for.
-     * @param indentLevel base indent level for property.
      * @param builder the builder to append to.
      */
-    private static void appendPropertyString(
-            @NonNull Object property, int indentLevel, @NonNull StringBuilder builder) {
+    private void appendPropertyString(
+            @NonNull String propertyName,
+            @NonNull Object property,
+            @NonNull IndentingStringBuilder builder) {
+        Objects.requireNonNull(propertyName);
         Objects.requireNonNull(property);
         Objects.requireNonNull(builder);
 
-        builder.append("[");
+        builder.append("\"").append(propertyName).append("\": [");
         if (property instanceof GenericDocument[]) {
             GenericDocument[] documentValues = (GenericDocument[]) property;
             for (int i = 0; i < documentValues.length; ++i) {
                 builder.append("\n");
-                appendGenericDocumentString(documentValues[i], indentLevel + 1, builder);
+                builder.increaseIndentLevel();
+                documentValues[i].appendGenericDocumentString(builder);
                 if (i != documentValues.length - 1) {
-                    builder.append(", ");
+                    builder.append(",");
                 }
                 builder.append("\n");
+                builder.decreaseIndentLevel();
             }
-            builder.append(getIndent(indentLevel));
+            builder.append("]");
         } else {
             int propertyArrLength = Array.getLength(property);
             for (int i = 0; i < propertyArrLength; i++) {
                 Object propertyElement = Array.get(property, i);
                 if (propertyElement instanceof String) {
-                    builder.append("\"").append(propertyElement).append("\"");
+                    builder.append("\"").append((String) propertyElement).append("\"");
                 } else if (propertyElement instanceof byte[]) {
                     builder.append(Arrays.toString((byte[]) propertyElement));
                 } else {
-                    builder.append(propertyElement);
+                    builder.append(propertyElement.toString());
                 }
                 if (i != propertyArrLength - 1) {
                     builder.append(", ");
+                } else {
+                    builder.append("]");
                 }
             }
         }
-
-        builder.append("]");
-    }
-
-    /** Appends a string for given indent level to the given builder. */
-    @NonNull
-    private static String getIndent(int indentLevel) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < indentLevel; ++i) {
-            builder.append("  ");
-        }
-        return builder.toString();
     }
 
     /**
@@ -1187,8 +1151,8 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code String} values of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed
-         *     maximum repeated property length, or if a passed in {@code String} is {@code null}.
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@code
+         *     String} is {@code null}.
          */
         @NonNull
         public BuilderType setPropertyString(@NonNull String name, @NonNull String... values) {
@@ -1206,7 +1170,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code boolean} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyBoolean(@NonNull String name, @NonNull boolean... values) {
@@ -1223,7 +1186,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code long} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyLong(@NonNull String name, @NonNull long... values) {
@@ -1240,7 +1202,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code double} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyDouble(@NonNull String name, @NonNull double... values) {
@@ -1257,8 +1218,8 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code byte[]} of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed
-         *     maximum repeated property length, or if a passed in {@code byte[]} is {@code null}.
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@code
+         *     byte[]} is {@code null}.
          */
         @NonNull
         public BuilderType setPropertyBytes(@NonNull String name, @NonNull byte[]... values) {
@@ -1276,8 +1237,7 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@link GenericDocument} values of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed if
-         *     provided values exceed maximum repeated property length, or if a passed in {@link
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@link
          *     GenericDocument} is {@code null}.
          */
         @NonNull
@@ -1308,36 +1268,23 @@ public class GenericDocument {
 
         private void putInPropertyBundle(@NonNull String name, @NonNull String[] values)
                 throws IllegalArgumentException {
-            validateRepeatedPropertyLength(name, values.length);
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
                     throw new IllegalArgumentException("The String at " + i + " is null.");
-                } else if (values[i].length() > MAX_STRING_LENGTH) {
-                    throw new IllegalArgumentException(
-                            "The String at "
-                                    + i
-                                    + " length is: "
-                                    + values[i].length()
-                                    + ", which exceeds length limit: "
-                                    + MAX_STRING_LENGTH
-                                    + ".");
                 }
             }
             mProperties.putStringArray(name, values);
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull boolean[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putBooleanArray(name, values);
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull double[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putDoubleArray(name, values);
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull long[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putLongArray(name, values);
         }
 
@@ -1348,7 +1295,6 @@ public class GenericDocument {
          * into ArrayList<Bundle>, and each elements will contain a one dimension byte[].
          */
         private void putInPropertyBundle(@NonNull String name, @NonNull byte[][] values) {
-            validateRepeatedPropertyLength(name, values.length);
             ArrayList<Bundle> bundles = new ArrayList<>(values.length);
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
@@ -1362,7 +1308,6 @@ public class GenericDocument {
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull GenericDocument[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             Parcelable[] documentBundles = new Parcelable[values.length];
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
@@ -1371,18 +1316,6 @@ public class GenericDocument {
                 documentBundles[i] = values[i].mBundle;
             }
             mProperties.putParcelableArray(name, documentBundles);
-        }
-
-        private static void validateRepeatedPropertyLength(@NonNull String name, int length) {
-            if (length > MAX_REPEATED_PROPERTY_LENGTH) {
-                throw new IllegalArgumentException(
-                        "Repeated property \""
-                                + name
-                                + "\" has length "
-                                + length
-                                + ", which exceeds the limit of "
-                                + MAX_REPEATED_PROPERTY_LENGTH);
-            }
         }
 
         /** Builds the {@link GenericDocument} object. */

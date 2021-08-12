@@ -41,6 +41,7 @@
     <dimen name="keyguard_security_view_lateral_margin">20dp</dimen>
 
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
+    <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->
@@ -88,6 +89,7 @@
 
     <!-- Spacing around each button used for PIN view -->
     <dimen name="num_pad_key_width">72dp</dimen>
+    <dimen name="num_pad_entry_row_margin_bottom">16dp</dimen>
     <dimen name="num_pad_row_margin_bottom">6dp</dimen>
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 

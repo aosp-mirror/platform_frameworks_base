@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alisin ang bisita"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"I-reset ang bisita"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Bisita"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"I-reset ang session ng bisita?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"I-reset"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Nire-reset ang bisita…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Kumuha ng larawan"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pumili ng larawan"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Pumili ng larawan"</string>

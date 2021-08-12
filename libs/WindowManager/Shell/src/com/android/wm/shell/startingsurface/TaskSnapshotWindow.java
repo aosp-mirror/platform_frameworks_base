@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -63,6 +64,7 @@ import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -116,11 +118,15 @@ public class TaskSnapshotWindow {
     private static final boolean DEBUG = StartingSurfaceDrawer.DEBUG_TASK_SNAPSHOT;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
 
+    private static final long DELAY_REMOVAL_TIME_GENERAL = 100;
+    private static final long DELAY_REMOVAL_TIME_IME_VISIBLE = 350;
+
     //tmp vars for unused relayout params
     private static final Point TMP_SURFACE_SIZE = new Point();
 
     private final Window mWindow;
     private final Runnable mClearWindowHandler;
+    private final long mDelayRemovalTime;
     private final ShellExecutor mSplashScreenExecutor;
     private final SurfaceControl mSurfaceControl;
     private final IWindowSession mSession;
@@ -132,8 +138,10 @@ public class TaskSnapshotWindow {
     private final RectF mTmpDstFrame = new RectF();
     private final CharSequence mTitle;
     private boolean mHasDrawn;
+    private long mShownTime;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
+    private final int mActivityType;
     private final int mStatusBarColor;
     private final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
     private final int mOrientationOnCreation;
@@ -190,6 +198,7 @@ public class TaskSnapshotWindow {
         final Point taskSize = snapshot.getTaskSize();
         final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
+        final int activityType = runningTaskInfo.topActivityType;
         final int displayId = runningTaskInfo.displayId;
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
@@ -207,10 +216,13 @@ public class TaskSnapshotWindow {
             taskDescription.setBackgroundColor(WHITE);
         }
 
+        final long delayRemovalTime = snapshot.hasImeSurface() ? DELAY_REMOVAL_TIME_IME_VISIBLE
+                : DELAY_REMOVAL_TIME_GENERAL;
+
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
-                windowFlags, windowPrivateFlags, taskBounds, orientation,
-                topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
+                windowFlags, windowPrivateFlags, taskBounds, orientation, activityType,
+                delayRemovalTime, topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState mTmpInsetsState = new InsetsState();
@@ -248,7 +260,8 @@ public class TaskSnapshotWindow {
     public TaskSnapshotWindow(SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, InsetsState topWindowInsetsState, Runnable clearWindowHandler,
+            int currentOrientation, int activityType, long delayRemovalTime,
+            InsetsState topWindowInsetsState, Runnable clearWindowHandler,
             ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
@@ -264,8 +277,14 @@ public class TaskSnapshotWindow {
                 windowPrivateFlags, appearance, taskDescription, 1f, topWindowInsetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
+        mActivityType = activityType;
+        mDelayRemovalTime = delayRemovalTime;
         mTransaction = new SurfaceControl.Transaction();
         mClearWindowHandler = clearWindowHandler;
+    }
+
+    int getBackgroundColor() {
+        return mBackgroundPaint.getColor();
     }
 
     /**
@@ -286,6 +305,17 @@ public class TaskSnapshotWindow {
     }
 
     void remove() {
+        final long now = SystemClock.uptimeMillis();
+        if ((now - mShownTime < mDelayRemovalTime)
+                // Show the latest content as soon as possible for unlocking to home.
+                && mActivityType != ACTIVITY_TYPE_HOME) {
+            final long delayTime = mShownTime + mDelayRemovalTime - now;
+            mSplashScreenExecutor.executeDelayed(() -> remove(), delayTime);
+            if (DEBUG) {
+                Slog.d(TAG, "Defer removing snapshot surface in " + delayTime);
+            }
+            return;
+        }
         try {
             if (DEBUG) {
                 Slog.d(TAG, "Removing snapshot surface, mHasDrawn: " + mHasDrawn);
@@ -326,6 +356,7 @@ public class TaskSnapshotWindow {
         } else {
             drawSizeMatchSnapshot();
         }
+        mShownTime = SystemClock.uptimeMillis();
         mHasDrawn = true;
         reportDrawn();
 

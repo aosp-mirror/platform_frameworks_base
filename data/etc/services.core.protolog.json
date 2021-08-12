@@ -151,6 +151,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1963363332": {
+      "message": "Restart top activity process of Task taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "-1949279037": {
       "message": "Attempted to add input method window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -162,12 +168,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
-    },
-    "-1939358269": {
-      "message": "mRecentScreenshotAnimator finish",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
     "-1938839202": {
       "message": "SURFACE LEAK DESTROY: %s",
@@ -3498,12 +3498,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "1984470582": {
-      "message": "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/TaskScreenshotAnimatable.java"
     },
     "1984782949": {
       "message": ">>> OPEN TRANSACTION animate",

@@ -45,7 +45,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val statusBarStateControllerImpl: StatusBarStateControllerImpl,
     private val keyguardViewMediatorLazy: dagger.Lazy<KeyguardViewMediator>,
-    private val keyguardStateController: KeyguardStateController
+    private val keyguardStateController: KeyguardStateController,
+    private val dozeParameters: dagger.Lazy<DozeParameters>
 ) : WakefulnessLifecycle.Observer {
     private val handler = Handler()
 
@@ -55,9 +56,16 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private var lightRevealAnimationPlaying = false
     private var aodUiAnimationPlaying = false
 
+    /**
+     * The result of our decision whether to play the screen off animation in
+     * [onStartedGoingToSleep], or null if we haven't made that decision yet or aren't going to
+     * sleep.
+     */
+    private var decidedToAnimateGoingToSleep: Boolean? = null
+
     private val lightRevealAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
         duration = LIGHT_REVEAL_ANIMATION_DURATION
-        interpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
+        interpolator = Interpolators.LINEAR
         addUpdateListener { lightRevealScrim.revealAmount = it.animatedValue as Float }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator?) {
@@ -119,11 +127,17 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                     // Run the callback given to us by the KeyguardVisibilityHelper.
                     after.run()
+
+                    // Done going to sleep, reset this flag.
+                    decidedToAnimateGoingToSleep = null
                 }
                 .start()
     }
 
     override fun onStartedWakingUp() {
+        // Waking up, so reset this flag.
+        decidedToAnimateGoingToSleep = null
+
         lightRevealAnimator.cancel()
         handler.removeCallbacksAndMessages(null)
     }
@@ -135,18 +149,24 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         lightRevealAnimationPlaying = false
         aodUiAnimationPlaying = false
 
-        // Make sure the status bar is in the correct keyguard state, forcing it if necessary. This
-        // is required if the screen off animation is cancelled, since it might be incorrectly left
-        // in the KEYGUARD or SHADE states depending on when it was cancelled and whether 'lock
-        // instantly' is enabled. We need to force it so that the state is set even if we're going
-        // from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have changed parts of the UI
-        // (such as showing AOD in the shade) without actually changing the StatusBarState. This
-        // ensures that the UI definitely reflects the desired state.
-        statusBar.updateIsKeyguard(true /* force */)
+        // If we can't control the screen off animation, we shouldn't mess with the StatusBar's
+        // keyguard state unnecessarily.
+        if (dozeParameters.get().canControlUnlockedScreenOff()) {
+            // Make sure the status bar is in the correct keyguard state, forcing it if necessary.
+            // This is required if the screen off animation is cancelled, since it might be
+            // incorrectly left in the KEYGUARD or SHADE states depending on when it was cancelled
+            // and whether 'lock instantly' is enabled. We need to force it so that the state is set
+            // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
+            // changed parts of the UI (such as showing AOD in the shade) without actually changing
+            // the StatusBarState. This ensures that the UI definitely reflects the desired state.
+            statusBar.updateIsKeyguard(true /* force */)
+        }
     }
 
     override fun onStartedGoingToSleep() {
-        if (shouldPlayUnlockedScreenOffAnimation()) {
+        if (dozeParameters.get().shouldControlUnlockedScreenOff()) {
+            decidedToAnimateGoingToSleep = true
+
             lightRevealAnimationPlaying = true
             lightRevealAnimator.start()
 
@@ -156,6 +176,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // Show AOD. That'll cause the KeyguardVisibilityHelper to call #animateInKeyguard.
                 statusBar.notificationPanelViewController.showAodUi()
             }, ANIMATE_IN_KEYGUARD_DELAY)
+        } else {
+            decidedToAnimateGoingToSleep = false
         }
     }
 
@@ -164,6 +186,16 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * on the current state of the device.
      */
     fun shouldPlayUnlockedScreenOffAnimation(): Boolean {
+        // If we explicitly already decided not to play the screen off animation, then never change
+        // our mind.
+        if (decidedToAnimateGoingToSleep == false) {
+            return false
+        }
+
+        if (!dozeParameters.get().canControlUnlockedScreenOff()) {
+            return false
+        }
+
         // We only play the unlocked screen off animation if we are... unlocked.
         if (statusBarStateControllerImpl.state != StatusBarState.SHADE) {
             return false
@@ -171,9 +203,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
-        // disable it if the notification panel is expanded.
+        // disable it if the notification panel is not fully collapsed.
         if (!this::statusBar.isInitialized ||
-                statusBar.notificationPanelViewController.isFullyExpanded) {
+                !statusBar.notificationPanelViewController.isFullyCollapsed) {
             return false
         }
 

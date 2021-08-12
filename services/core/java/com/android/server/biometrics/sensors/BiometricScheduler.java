@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -48,14 +49,66 @@ import java.util.Locale;
 
 /**
  * A scheduler for biometric HAL operations. Maintains a queue of {@link BaseClientMonitor}
- * operations, without caring about its implementation details. Operations may perform one or more
+ * operations, without caring about its implementation details. Operations may perform zero or more
  * interactions with the HAL before finishing.
+ *
+ * We currently assume (and require) that each biometric sensor have its own instance of a
+ * {@link BiometricScheduler}. See {@link CoexCoordinator}.
  */
 public class BiometricScheduler {
 
     private static final String BASE_TAG = "BiometricScheduler";
     // Number of recent operations to keep in our logs for dumpsys
     protected static final int LOG_NUM_RECENT_OPERATIONS = 50;
+
+    /**
+     * Unknown sensor type. This should never be used, and is a sign that something is wrong during
+     * initialization.
+     */
+    public static final int SENSOR_TYPE_UNKNOWN = 0;
+
+    /**
+     * Face authentication.
+     */
+    public static final int SENSOR_TYPE_FACE = 1;
+
+    /**
+     * Any UDFPS type. See {@link FingerprintSensorPropertiesInternal#isAnyUdfpsType()}.
+     */
+    public static final int SENSOR_TYPE_UDFPS = 2;
+
+    /**
+     * Any other fingerprint sensor. We can add additional definitions in the future when necessary.
+     */
+    public static final int SENSOR_TYPE_FP_OTHER = 3;
+
+    @IntDef({SENSOR_TYPE_UNKNOWN, SENSOR_TYPE_FACE, SENSOR_TYPE_UDFPS, SENSOR_TYPE_FP_OTHER})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SensorType {}
+
+    public static @SensorType int sensorTypeFromFingerprintProperties(
+            @NonNull FingerprintSensorPropertiesInternal props) {
+        if (props.isAnyUdfpsType()) {
+            return SENSOR_TYPE_UDFPS;
+        }
+
+        return SENSOR_TYPE_FP_OTHER;
+    }
+
+    public static String sensorTypeToString(@SensorType int sensorType) {
+        switch (sensorType) {
+            case SENSOR_TYPE_UNKNOWN:
+                return "Unknown";
+            case SENSOR_TYPE_FACE:
+                return "Face";
+            case SENSOR_TYPE_UDFPS:
+                return "Udfps";
+            case SENSOR_TYPE_FP_OTHER:
+                return "OtherFp";
+            default:
+                return "UnknownUnknown";
+        }
+    }
 
     /**
      * Contains all the necessary information for a HAL operation.
@@ -110,11 +163,21 @@ public class BiometricScheduler {
         @Nullable final BaseClientMonitor.Callback mClientCallback;
         @OperationState int mState;
 
-        Operation(@NonNull BaseClientMonitor clientMonitor,
-                @Nullable BaseClientMonitor.Callback callback) {
-            this.mClientMonitor = clientMonitor;
-            this.mClientCallback = callback;
-            mState = STATE_WAITING_IN_QUEUE;
+        Operation(
+                @NonNull BaseClientMonitor clientMonitor,
+                @Nullable BaseClientMonitor.Callback callback
+        ) {
+            this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
+        }
+
+        protected Operation(
+                @NonNull BaseClientMonitor clientMonitor,
+                @Nullable BaseClientMonitor.Callback callback,
+                @OperationState int state
+        ) {
+            mClientMonitor = clientMonitor;
+            mClientCallback = callback;
+            mState = state;
         }
 
         public boolean isHalOperation() {
@@ -197,6 +260,7 @@ public class BiometricScheduler {
     }
 
     @NonNull protected final String mBiometricTag;
+    private final @SensorType int mSensorType;
     @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
     @NonNull protected final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -208,6 +272,7 @@ public class BiometricScheduler {
     private int mTotalOperationsHandled;
     private final int mRecentOperationsLimit;
     @NonNull private final List<Integer> mRecentOperations;
+    @NonNull private final CoexCoordinator mCoexCoordinator;
 
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
@@ -216,6 +281,12 @@ public class BiometricScheduler {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
+
+            if (clientMonitor instanceof AuthenticationClient) {
+                mCoexCoordinator.addAuthenticationClient(mSensorType,
+                        (AuthenticationClient<?>) clientMonitor);
+            }
+
             if (mCurrentOperation.mClientCallback != null) {
                 mCurrentOperation.mClientCallback.onClientStarted(clientMonitor);
             }
@@ -238,6 +309,11 @@ public class BiometricScheduler {
                 }
 
                 Slog.d(getTag(), "[Finishing] " + clientMonitor + ", success: " + success);
+                if (clientMonitor instanceof AuthenticationClient) {
+                    mCoexCoordinator.removeAuthenticationClient(mSensorType,
+                            (AuthenticationClient<?>) clientMonitor);
+                }
+
                 mCurrentOperation.mState = Operation.STATE_FINISHED;
 
                 if (mCurrentOperation.mClientCallback != null) {
@@ -261,10 +337,12 @@ public class BiometricScheduler {
     }
 
     @VisibleForTesting
-    BiometricScheduler(@NonNull String tag,
+    BiometricScheduler(@NonNull String tag, @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull IBiometricService biometricService, int recentOperationsLimit) {
+            @NonNull IBiometricService biometricService, int recentOperationsLimit,
+            @NonNull CoexCoordinator coexCoordinator) {
         mBiometricTag = tag;
+        mSensorType = sensorType;
         mInternalCallback = new InternalCallback();
         mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
         mPendingOperations = new ArrayDeque<>();
@@ -272,18 +350,22 @@ public class BiometricScheduler {
         mCrashStates = new ArrayDeque<>();
         mRecentOperationsLimit = recentOperationsLimit;
         mRecentOperations = new ArrayList<>();
+        mCoexCoordinator = coexCoordinator;
     }
 
     /**
      * Creates a new scheduler.
      * @param tag for the specific instance of the scheduler. Should be unique.
+     * @param sensorType the sensorType that this scheduler is handling.
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
      *                                      (such as fingerprint swipe).
      */
     public BiometricScheduler(@NonNull String tag,
+            @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-        this(tag, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS);
+        this(tag, sensorType, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS,
+                CoexCoordinator.getInstance());
     }
 
     /**
@@ -569,6 +651,9 @@ public class BiometricScheduler {
         final boolean isCorrectClient = isAuthenticationOrDetectionOperation(mCurrentOperation);
         final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
 
+        Slog.d(getTag(), "cancelAuthenticationOrDetection, isCorrectClient: " + isCorrectClient
+                + ", tokenMatches: " + tokenMatches);
+
         if (isCorrectClient && tokenMatches) {
             Slog.d(getTag(), "Cancelling: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);
@@ -632,6 +717,7 @@ public class BiometricScheduler {
 
     public void dump(PrintWriter pw) {
         pw.println("Dump of BiometricScheduler " + getTag());
+        pw.println("Type: " + mSensorType);
         pw.println("Current operation: " + mCurrentOperation);
         pw.println("Pending operations: " + mPendingOperations.size());
         for (Operation operation : mPendingOperations) {

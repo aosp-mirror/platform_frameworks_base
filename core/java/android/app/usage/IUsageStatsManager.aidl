@@ -68,5 +68,5 @@ interface IUsageStatsManager {
     void reportUserInteraction(String packageName, int userId);
     int getUsageSource();
     void forceUsageSourceSettingRead();
-    long getLastTimeAnyComponentUsed(String packageName);
+    long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
 }

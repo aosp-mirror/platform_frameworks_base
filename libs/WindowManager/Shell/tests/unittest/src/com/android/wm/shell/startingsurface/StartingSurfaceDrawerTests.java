@@ -15,6 +15,8 @@
  */
 package com.android.wm.shell.startingsurface;
 
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
@@ -91,11 +93,12 @@ public class StartingSurfaceDrawerTests {
 
         @Override
         protected boolean addWindow(int taskId, IBinder appToken,
-                View view, WindowManager wm, WindowManager.LayoutParams params) {
+                View view, WindowManager wm, WindowManager.LayoutParams params, int suggestType) {
             // listen for addView
             mAddWindowForTask = taskId;
             mViewThemeResId = view.getContext().getThemeResId();
-            return true;
+            // Do not wait for background color
+            return false;
         }
 
         @Override
@@ -145,9 +148,11 @@ public class StartingSurfaceDrawerTests {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, android.R.style.Theme);
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
+                STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any());
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
+                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
         mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId, null, null, false);
@@ -161,9 +166,11 @@ public class StartingSurfaceDrawerTests {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
+                STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any());
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
+                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
         assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);
     }
 
@@ -207,6 +214,7 @@ public class StartingSurfaceDrawerTests {
         final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
+        windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
         return windowInfo;
     }

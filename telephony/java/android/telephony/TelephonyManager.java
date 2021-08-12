@@ -13965,7 +13965,12 @@ public class TelephonyManager {
         IBooleanConsumer aidlConsumer = callback == null ? null : new IBooleanConsumer.Stub() {
             @Override
             public void accept(boolean result) {
-                executor.execute(() -> callback.accept(result));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> callback.accept(result));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
 
@@ -15104,8 +15109,8 @@ public class TelephonyManager {
 
     /**
      * Indicates that the thermal mitigation request could not power off the radio due to the device
-     * either being in an active voice call, device pending an emergency call, or any other state
-     * that would dissallow powering off of radio.
+     * either being in an active emergency voice call, device pending an emergency call, or any
+     * other state that would disallow powering off of radio.
      *
      * @hide
      */

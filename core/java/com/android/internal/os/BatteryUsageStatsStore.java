@@ -69,6 +69,7 @@ public class BatteryUsageStatsStore {
 
     private final Context mContext;
     private final BatteryStatsImpl mBatteryStats;
+    private boolean mSystemReady;
     private final File mStoreDir;
     private final File mLockFile;
     private final AtomicFile mConfigFile;
@@ -95,7 +96,18 @@ public class BatteryUsageStatsStore {
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(mContext, mBatteryStats);
     }
 
-    private void prepareForBatteryStatsReset() {
+    /**
+     * Notifies BatteryUsageStatsStore that the system server is ready.
+     */
+    public void onSystemReady() {
+        mSystemReady = true;
+    }
+
+    private void prepareForBatteryStatsReset(int resetReason) {
+        if (resetReason == BatteryStatsImpl.RESET_REASON_CORRUPT_FILE || !mSystemReady) {
+            return;
+        }
+
         final List<BatteryUsageStats> stats =
                 mBatteryUsageStatsProvider.getBatteryUsageStats(BATTERY_USAGE_STATS_QUERY);
         if (stats.isEmpty()) {

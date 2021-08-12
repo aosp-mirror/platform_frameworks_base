@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Servizio GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizio di notifica dei sensori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizio Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Rilevatore di fuso orario (connessione a Internet non necessaria)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servizio di aggiornamento dell\'orario GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Servizio di gestione del riconoscimento della musica"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
@@ -253,9 +252,9 @@
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Segnalazione di bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
-    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapporto interattivo"</string>
+    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Report interattivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Rapporto completo"</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Report completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
       <item quantity="other">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_1">%d</xliff:g> secondi.</item>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova con un\'altra impronta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Troppa luce"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova a regolare"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia leggermente la posizione del dito ogni volta"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impronta autenticata"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nessuna impronta digitale registrata."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Questo dispositivo non dispone di sensore di impronte."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensore temporaneamente disattivato."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Impossibile usare il sensore di impronte digitali. Contatta un fornitore di servizi di riparazione"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usa l\'impronta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usa l\'impronta o il blocco schermo"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Sblocco con il volto"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registra di nuovo il volto"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per migliorare il riconoscimento, registra di nuovo il tuo volto"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Sblocco con il volto"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tocca per eliminare il tuo modello del volto e poi riaggiungi il tuo volto"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura lo sblocco con il volto"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Sblocca il telefono guardandolo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura altri modi per sbloccare"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tocca per aggiungere un\'impronta"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sblocco con l\'impronta"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Impossibile utilizzare il sensore di impronte digitali"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Contatta un fornitore di servizi di riparazione."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Impossibile acquisire dati viso accurati. Riprova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Troppa luce. Prova con una luce più soft."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Troppo buio. Prova con più luce."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Rifiuta"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Autorizzazione richiesta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Autorizzazione richiesta\nper l\'account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorizzazione richiesta da <xliff:g id="APP">%1$s</xliff:g>\nper l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Stai utilizzando l\'app al di fuori del tuo profilo di lavoro"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Stai utilizzando l\'app nel tuo profilo di lavoro"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metodo inserimento"</string>
@@ -2282,7 +2285,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nuove impostazioni per l\'ingrandimento"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ora puoi ingrandire parte dello schermo"</string>
-    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva nelle Impostazioni"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva in Impostazioni"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Sblocca il microfono del dispositivo"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Sblocca la fotocamera del dispositivo"</string>

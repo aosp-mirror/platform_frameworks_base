@@ -37,6 +37,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
@@ -119,6 +120,8 @@ class RebootEscrowManager {
      */
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT = 3;
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS = 30;
+    // 3 minutes. It's enough for the default 3 retries with 30 seconds interval
+    private static final int DEFAULT_WAKE_LOCK_TIMEOUT_MILLIS = 180_000;
 
     @IntDef(prefix = {"ERROR_"}, value = {
             ERROR_NONE,
@@ -186,6 +189,9 @@ class RebootEscrowManager {
     private final Callbacks mCallbacks;
 
     private final RebootEscrowKeyStoreManager mKeyStoreManager;
+
+    PowerManager.WakeLock mWakeLock;
+
 
     interface Callbacks {
         boolean isUserSecure(int userId);
@@ -279,6 +285,11 @@ class RebootEscrowManager {
             return mRebootEscrowProvider;
         }
 
+        PowerManager.WakeLock getWakeLock() {
+            final PowerManager pm = mContext.getSystemService(PowerManager.class);
+            return pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RebootEscrowManager");
+        }
+
         public RebootEscrowProviderInterface getRebootEscrowProvider() {
             return mRebootEscrowProvider;
         }
@@ -363,6 +374,13 @@ class RebootEscrowManager {
                     + " skipping loading escrow data");
             clearMetricsStorage();
             return;
+        }
+
+        // Acquire the wake lock to make sure our scheduled task will run.
+        mWakeLock = mInjector.getWakeLock();
+        if (mWakeLock != null) {
+            mWakeLock.setReferenceCounted(false);
+            mWakeLock.acquire(DEFAULT_WAKE_LOCK_TIMEOUT_MILLIS);
         }
 
         mInjector.post(retryHandler, () -> loadRebootEscrowDataWithRetry(
@@ -519,6 +537,10 @@ class RebootEscrowManager {
         // Clear the saved reboot escrow provider
         mInjector.clearRebootEscrowProvider();
         clearMetricsStorage();
+
+        if (mWakeLock != null) {
+            mWakeLock.release();
+        }
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey(SecretKey kk) throws IOException {

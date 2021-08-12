@@ -291,7 +291,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     private OnTuneEventListener mOnTuneEventListener;
     @Nullable
-    private Executor mOnTunerEventExecutor;
+    private Executor mOnTuneEventExecutor;
     @Nullable
     private ScanCallback mScanCallback;
     @Nullable
@@ -300,6 +300,10 @@ public class Tuner implements AutoCloseable  {
     private OnResourceLostListener mOnResourceLostListener;
     @Nullable
     private Executor mOnResourceLostListenerExecutor;
+
+    private final Object mOnTuneEventLock = new Object();
+    private final Object mScanCallbackLock = new Object();
+    private final Object mOnResourceLostListenerLock = new Object();
 
     private Integer mDemuxHandle;
     private Integer mFrontendCiCamHandle;
@@ -347,7 +351,6 @@ public class Tuner implements AutoCloseable  {
             mHandler = createEventHandler();
         }
 
-        mHandler = createEventHandler();
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile();
         profile.tvInputSessionId = tvInputSessionId;
@@ -399,18 +402,22 @@ public class Tuner implements AutoCloseable  {
      */
     public void setResourceLostListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull OnResourceLostListener listener) {
-        Objects.requireNonNull(executor, "OnResourceLostListener must not be null");
-        Objects.requireNonNull(listener, "executor must not be null");
-        mOnResourceLostListener = listener;
-        mOnResourceLostListenerExecutor = executor;
+        synchronized (mOnResourceLostListenerLock) {
+            Objects.requireNonNull(executor, "OnResourceLostListener must not be null");
+            Objects.requireNonNull(listener, "executor must not be null");
+            mOnResourceLostListener = listener;
+            mOnResourceLostListenerExecutor = executor;
+        }
     }
 
     /**
      * Removes the listener for resource lost.
      */
     public void clearResourceLostListener() {
-        mOnResourceLostListener = null;
-        mOnResourceLostListenerExecutor = null;
+        synchronized (mOnResourceLostListenerLock) {
+            mOnResourceLostListener = null;
+            mOnResourceLostListenerExecutor = null;
+        }
     }
 
     /**
@@ -516,6 +523,8 @@ public class Tuner implements AutoCloseable  {
             mDemuxHandle = null;
         }
 
+        mTunerResourceManager.unregisterClientProfile(mClientId);
+
     }
 
     /**
@@ -617,10 +626,12 @@ public class Tuner implements AutoCloseable  {
                     break;
                 }
                 case MSG_RESOURCE_LOST: {
-                    if (mOnResourceLostListener != null
+                    synchronized (mOnResourceLostListenerLock) {
+                        if (mOnResourceLostListener != null
                                 && mOnResourceLostListenerExecutor != null) {
-                        mOnResourceLostListenerExecutor.execute(
-                                () -> mOnResourceLostListener.onResourceLost(Tuner.this));
+                            mOnResourceLostListenerExecutor.execute(
+                                    () -> mOnResourceLostListener.onResourceLost(Tuner.this));
+                        }
                     }
                     break;
                 }
@@ -651,8 +662,10 @@ public class Tuner implements AutoCloseable  {
      */
     public void setOnTuneEventListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull OnTuneEventListener eventListener) {
-        mOnTuneEventListener = eventListener;
-        mOnTunerEventExecutor = executor;
+        synchronized (mOnTuneEventLock) {
+            mOnTuneEventListener = eventListener;
+            mOnTuneEventExecutor = executor;
+        }
     }
 
     /**
@@ -662,9 +675,10 @@ public class Tuner implements AutoCloseable  {
      * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
      */
     public void clearOnTuneEventListener() {
-        mOnTuneEventListener = null;
-        mOnTunerEventExecutor = null;
-
+        synchronized (mOnTuneEventLock) {
+            mOnTuneEventListener = null;
+            mOnTuneEventExecutor = null;
+        }
     }
 
     /**
@@ -746,32 +760,34 @@ public class Tuner implements AutoCloseable  {
     @Result
     public int scan(@NonNull FrontendSettings settings, @ScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
-        /**
-         * Scan can be called again for blink scan if scanCallback and executor are same as before.
-         */
-        if (((mScanCallback != null) && (mScanCallback != scanCallback))
+        synchronized (mScanCallbackLock) {
+            // Scan can be called again for blink scan if scanCallback and executor are same as
+            //before.
+            if (((mScanCallback != null) && (mScanCallback != scanCallback))
                 || ((mScanCallbackExecutor != null) && (mScanCallbackExecutor != executor))) {
-            throw new IllegalStateException(
+                throw new IllegalStateException(
                     "Different Scan session already in progress.  stopScan must be called "
                         + "before a new scan session can be " + "started.");
-        }
-        mFrontendType = settings.getType();
-        if (mFrontendType == FrontendSettings.TYPE_DTMB) {
-            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
-                    TunerVersionChecker.TUNER_VERSION_1_1, "Scan with DTMB Frontend")) {
-                return RESULT_UNAVAILABLE;
             }
-        }
-        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
-            mScanCallback = scanCallback;
-            mScanCallbackExecutor = executor;
-            mFrontendInfo = null;
-            FrameworkStatsLog
+            mFrontendType = settings.getType();
+            if (mFrontendType == FrontendSettings.TYPE_DTMB) {
+                if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_1_1,
+                        "Scan with DTMB Frontend")) {
+                    return RESULT_UNAVAILABLE;
+                }
+            }
+            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+                mScanCallback = scanCallback;
+                mScanCallbackExecutor = executor;
+                mFrontendInfo = null;
+                FrameworkStatsLog
                     .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                         FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__SCANNING);
-            return nativeScan(settings.getType(), settings, scanType);
+                return nativeScan(settings.getType(), settings, scanType);
+            }
+            return RESULT_UNAVAILABLE;
         }
-        return RESULT_UNAVAILABLE;
     }
 
     /**
@@ -787,14 +803,15 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int cancelScanning() {
-        FrameworkStatsLog
-                .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
+        synchronized (mScanCallbackLock) {
+            FrameworkStatsLog.write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                     FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__SCAN_STOPPED);
 
-        int retVal = nativeStopScan();
-        mScanCallback = null;
-        mScanCallbackExecutor = null;
-        return retVal;
+            int retVal = nativeStopScan();
+            mScanCallback = null;
+            mScanCallbackExecutor = null;
+            return retVal;
+        }
     }
 
     private boolean requestFrontend() {
@@ -1049,8 +1066,10 @@ public class Tuner implements AutoCloseable  {
 
     private void onFrontendEvent(int eventType) {
         Log.d(TAG, "Got event from tuning. Event type: " + eventType);
-        if (mOnTunerEventExecutor != null && mOnTuneEventListener != null) {
-            mOnTunerEventExecutor.execute(() -> mOnTuneEventListener.onTuneEvent(eventType));
+        synchronized (mOnTuneEventLock) {
+            if (mOnTuneEventExecutor != null && mOnTuneEventListener != null) {
+                mOnTuneEventExecutor.execute(() -> mOnTuneEventListener.onTuneEvent(eventType));
+            }
         }
 
         Log.d(TAG, "Wrote Stats Log for the events from tuning.");
@@ -1071,114 +1090,149 @@ public class Tuner implements AutoCloseable  {
 
     private void onLocked() {
         Log.d(TAG, "Wrote Stats Log for locked event from scanning.");
-        FrameworkStatsLog
-                .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
-                    FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__LOCKED);
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
+                FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__LOCKED);
 
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onLocked());
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onLocked());
+            }
         }
     }
 
     private void onScanStopped() {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onScanStopped());
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onScanStopped());
+            }
         }
     }
 
     private void onProgress(int percent) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onProgress(percent));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onProgress(percent));
+            }
         }
     }
 
     private void onFrequenciesReport(int[] frequency) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
+            }
         }
     }
 
     private void onSymbolRates(int[] rate) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
+            }
         }
     }
 
     private void onHierarchy(int hierarchy) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
+            }
         }
     }
 
     private void onSignalType(int signalType) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
+            }
         }
     }
 
     private void onPlpIds(int[] plpIds) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
+            }
         }
     }
 
     private void onGroupIds(int[] groupIds) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
+            }
         }
     }
 
     private void onInputStreamIds(int[] inputStreamIds) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
+            }
         }
     }
 
     private void onDvbsStandard(int dvbsStandandard) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
+            }
         }
     }
 
     private void onDvbtStandard(int dvbtStandard) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandardReported(dvbtStandard));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onDvbtStandardReported(dvbtStandard));
+            }
         }
     }
 
     private void onAnalogSifStandard(int sif) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
+            }
         }
     }
 
     private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
+            }
         }
     }
 
     private void onModulationReported(int modulation) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onModulationReported(modulation));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onModulationReported(modulation));
+            }
         }
     }
 
     private void onPriorityReported(boolean isHighPriority) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onPriorityReported(isHighPriority));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onPriorityReported(isHighPriority));
+            }
         }
     }
 
     private void onDvbcAnnexReported(int dvbcAnnex) {
-        if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(
-                    () -> mScanCallback.onDvbcAnnexReported(dvbcAnnex));
+        synchronized (mScanCallbackLock) {
+            if (mScanCallbackExecutor != null && mScanCallback != null) {
+                mScanCallbackExecutor.execute(
+                        () -> mScanCallback.onDvbcAnnexReported(dvbcAnnex));
+            }
         }
     }
 

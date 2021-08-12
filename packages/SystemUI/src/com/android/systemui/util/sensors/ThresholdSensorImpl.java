@@ -230,14 +230,16 @@ class ThresholdSensorImpl implements ThresholdSensor {
             mExecution = execution;
         }
 
-
         Builder setSensorDelay(int sensorDelay) {
             mSensorDelay = sensorDelay;
             return this;
         }
-
-        Builder setSensorResourceId(int sensorResourceId) {
-            setSensorType(mResources.getString(sensorResourceId));
+        /**
+         * If requiresWakeUp is false, the first sensor with sensorType (regardless of whether the
+         * sensor is a wakeup sensor or not) will be set.
+         */
+        Builder setSensorResourceId(int sensorResourceId, boolean requireWakeUp) {
+            setSensorType(mResources.getString(sensorResourceId), requireWakeUp);
             return this;
         }
 
@@ -259,8 +261,12 @@ class ThresholdSensorImpl implements ThresholdSensor {
             return this;
         }
 
-        Builder setSensorType(String sensorType) {
-            Sensor sensor = findSensorByType(sensorType);
+        /**
+         * If requiresWakeUp is false, the first sensor with sensorType (regardless of whether the
+         * sensor is a wakeup sensor or not) will be set.
+         */
+        Builder setSensorType(String sensorType, boolean requireWakeUp) {
+            Sensor sensor = findSensorByType(sensorType, requireWakeUp);
             if (sensor != null) {
                 setSensor(sensor);
             }
@@ -310,7 +316,8 @@ class ThresholdSensorImpl implements ThresholdSensor {
                     mThresholdValue, mThresholdLatchValue, mSensorDelay);
         }
 
-        private Sensor findSensorByType(String sensorType) {
+        @VisibleForTesting
+        Sensor findSensorByType(String sensorType, boolean requireWakeUp) {
             if (sensorType.isEmpty()) {
                 return null;
             }
@@ -320,7 +327,9 @@ class ThresholdSensorImpl implements ThresholdSensor {
             for (Sensor s : sensorList) {
                 if (sensorType.equals(s.getStringType())) {
                     sensor = s;
-                    break;
+                    if (!requireWakeUp || sensor.isWakeUpSensor()) {
+                        break;
+                    }
                 }
             }
 

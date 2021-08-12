@@ -117,6 +117,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.StatFs;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
@@ -132,6 +133,19 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.security.metrics.CrashStats;
+import android.security.metrics.IKeystoreMetrics;
+import android.security.metrics.KeyCreationWithAuthInfo;
+import android.security.metrics.KeyCreationWithGeneralInfo;
+import android.security.metrics.KeyCreationWithPurposeAndModesInfo;
+import android.security.metrics.KeyOperationWithGeneralInfo;
+import android.security.metrics.KeyOperationWithPurposeAndModesInfo;
+import android.security.metrics.Keystore2AtomWithOverflow;
+import android.security.metrics.KeystoreAtom;
+import android.security.metrics.KeystoreAtomPayload;
+import android.security.metrics.RkpErrorStats;
+import android.security.metrics.RkpPoolStats;
+import android.security.metrics.StorageStats;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
 import android.telephony.SubscriptionInfo;
@@ -373,6 +387,10 @@ public class StatsPullAtomService extends SystemService {
 
     private SelectedProcessCpuThreadReader mSurfaceFlingerProcessCpuThreadReader;
 
+    // Only access via getIKeystoreMetricsService
+    @GuardedBy("mKeystoreLock")
+    private IKeystoreMetrics mIKeystoreMetrics;
+
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
@@ -428,6 +446,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mAttributedAppOpsLock = new Object();
     private final Object mSettingsStatsLock = new Object();
     private final Object mInstalledIncrementalPackagesLock = new Object();
+    private final Object mKeystoreLock = new Object();
 
     public StatsPullAtomService(Context context) {
         super(context);
@@ -435,6 +454,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private native void initializeNativePullers();
+
     /**
      * Use of this StatsPullAtomCallbackImpl means we avoid one class per tagId, which we would
      * get if we used lambdas.
@@ -703,6 +723,17 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mInstalledIncrementalPackagesLock) {
                             return pullInstalledIncrementalPackagesLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
+                    case FrameworkStatsLog.RKP_POOL_STATS:
+                    case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
+                    case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
+                    case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO:
+                    case FrameworkStatsLog.KEYSTORE2_ATOM_WITH_OVERFLOW:
+                    case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_PURPOSE_AND_MODES_INFO:
+                    case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_GENERAL_INFO:
+                    case FrameworkStatsLog.RKP_ERROR_STATS:
+                    case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
+                        return pullKeystoreAtoms(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -795,6 +826,8 @@ public class StatsPullAtomService extends SystemService {
 
         mSurfaceFlingerProcessCpuThreadReader =
                 new SelectedProcessCpuThreadReader("/system/bin/surfaceflinger");
+
+        getIKeystoreMetricsService();
     }
 
     void registerEventListeners() {
@@ -887,6 +920,16 @@ public class StatsPullAtomService extends SystemService {
         registerBatteryCycleCount();
         registerSettingsStats();
         registerInstalledIncrementalPackages();
+        registerKeystoreStorageStats();
+        registerRkpPoolStats();
+        registerKeystoreKeyCreationWithGeneralInfo();
+        registerKeystoreKeyCreationWithAuthInfo();
+        registerKeystoreKeyCreationWithPurposeModesInfo();
+        registerKeystoreAtomWithOverflow();
+        registerKeystoreKeyOperationWithPurposeAndModesInfo();
+        registerKeystoreKeyOperationWithGeneralInfo();
+        registerRkpErrorStats();
+        registerKeystoreCrashStats();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -968,6 +1011,28 @@ public class StatsPullAtomService extends SystemService {
                 }
             }
             return mThermalService;
+        }
+    }
+
+    private IKeystoreMetrics getIKeystoreMetricsService() {
+        synchronized (mKeystoreLock) {
+            if (mIKeystoreMetrics == null) {
+                mIKeystoreMetrics = IKeystoreMetrics.Stub.asInterface(
+                        ServiceManager.getService("android.security.metrics"));
+                if (mIKeystoreMetrics != null) {
+                    try {
+                        mIKeystoreMetrics.asBinder().linkToDeath(() -> {
+                            synchronized (mKeystoreLock) {
+                                mIKeystoreMetrics = null;
+                            }
+                        }, /* flags */ 0);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "linkToDeath with IKeystoreMetrics failed", e);
+                        mIKeystoreMetrics = null;
+                    }
+                }
+            }
+            return mIKeystoreMetrics;
         }
     }
 
@@ -4003,6 +4068,277 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerKeystoreStorageStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_STORAGE_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerRkpPoolStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.RKP_POOL_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreKeyCreationWithGeneralInfo() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreKeyCreationWithAuthInfo() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreKeyCreationWithPurposeModesInfo() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreAtomWithOverflow() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_ATOM_WITH_OVERFLOW,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreKeyOperationWithPurposeAndModesInfo() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_PURPOSE_AND_MODES_INFO,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreKeyOperationWithGeneralInfo() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_GENERAL_INFO,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerRkpErrorStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.RKP_ERROR_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    private void registerKeystoreCrashStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_CRASH_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
+    int parseKeystoreStorageStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.storageStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            StorageStats atom = atomWrapper.payload.getStorageStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_STORAGE_STATS, atom.storage_type,
+                    atom.size, atom.unused_size));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseRkpPoolStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.rkpPoolStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            RkpPoolStats atom = atomWrapper.payload.getRkpPoolStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.RKP_POOL_STATS, atom.security_level, atom.expiring,
+                    atom.unassigned, atom.attested, atom.total));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreKeyCreationWithGeneralInfo(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag()
+                    != KeystoreAtomPayload.keyCreationWithGeneralInfo) {
+                return StatsManager.PULL_SKIP;
+            }
+            KeyCreationWithGeneralInfo atom = atomWrapper.payload.getKeyCreationWithGeneralInfo();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO, atom.algorithm,
+                    atom.key_size, atom.ec_curve, atom.key_origin, atom.error_code,
+                    atom.attestation_requested, atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreKeyCreationWithAuthInfo(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.keyCreationWithAuthInfo) {
+                return StatsManager.PULL_SKIP;
+            }
+            KeyCreationWithAuthInfo atom = atomWrapper.payload.getKeyCreationWithAuthInfo();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO, atom.user_auth_type,
+                    atom.log10_auth_key_timeout_seconds, atom.security_level, atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+
+    int parseKeystoreKeyCreationWithPurposeModesInfo(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag()
+                    != KeystoreAtomPayload.keyCreationWithPurposeAndModesInfo) {
+                return StatsManager.PULL_SKIP;
+            }
+            KeyCreationWithPurposeAndModesInfo atom =
+                    atomWrapper.payload.getKeyCreationWithPurposeAndModesInfo();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO,
+                    atom.algorithm, atom.purpose_bitmap,
+                    atom.padding_mode_bitmap, atom.digest_bitmap, atom.block_mode_bitmap,
+                    atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreAtomWithOverflow(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag()
+                    != KeystoreAtomPayload.keystore2AtomWithOverflow) {
+                return StatsManager.PULL_SKIP;
+            }
+            Keystore2AtomWithOverflow atom = atomWrapper.payload.getKeystore2AtomWithOverflow();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_ATOM_WITH_OVERFLOW, atom.atom_id,
+                    atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreKeyOperationWithPurposeModesInfo(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag()
+                    != KeystoreAtomPayload.keyOperationWithPurposeAndModesInfo) {
+                return StatsManager.PULL_SKIP;
+            }
+            KeyOperationWithPurposeAndModesInfo atom =
+                    atomWrapper.payload.getKeyOperationWithPurposeAndModesInfo();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_PURPOSE_AND_MODES_INFO,
+                    atom.purpose, atom.padding_mode_bitmap, atom.digest_bitmap,
+                    atom.block_mode_bitmap, atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreKeyOperationWithGeneralInfo(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag()
+                    != KeystoreAtomPayload.keyOperationWithGeneralInfo) {
+                return StatsManager.PULL_SKIP;
+            }
+            KeyOperationWithGeneralInfo atom = atomWrapper.payload.getKeyOperationWithGeneralInfo();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_GENERAL_INFO, atom.outcome,
+                    atom.error_code, atom.key_upgraded, atom.security_level, atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseRkpErrorStats(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.rkpErrorStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            RkpErrorStats atom = atomWrapper.payload.getRkpErrorStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.RKP_ERROR_STATS, atom.rkpError, atomWrapper.count));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseKeystoreCrashStats(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.crashStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            CrashStats atom = atomWrapper.payload.getCrashStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_CRASH_STATS, atom.count_of_crash_events));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int pullKeystoreAtoms(int atomTag, List<StatsEvent> pulledData) {
+        IKeystoreMetrics keystoreMetricsService = getIKeystoreMetricsService();
+        if (keystoreMetricsService == null) {
+            Slog.w(TAG, "Keystore service is null");
+            return StatsManager.PULL_SKIP;
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            KeystoreAtom[] atoms = keystoreMetricsService.pullMetrics(atomTag);
+            switch (atomTag) {
+                case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
+                    return parseKeystoreStorageStats(atoms, pulledData);
+                case FrameworkStatsLog.RKP_POOL_STATS:
+                    return parseRkpPoolStats(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
+                    return parseKeystoreKeyCreationWithGeneralInfo(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
+                    return parseKeystoreKeyCreationWithAuthInfo(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO:
+                    return parseKeystoreKeyCreationWithPurposeModesInfo(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_ATOM_WITH_OVERFLOW:
+                    return parseKeystoreAtomWithOverflow(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_PURPOSE_AND_MODES_INFO:
+                    return parseKeystoreKeyOperationWithPurposeModesInfo(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_GENERAL_INFO:
+                    return parseKeystoreKeyOperationWithGeneralInfo(atoms, pulledData);
+                case FrameworkStatsLog.RKP_ERROR_STATS:
+                    return parseRkpErrorStats(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
+                    return parseKeystoreCrashStats(atoms, pulledData);
+                default:
+                    Slog.w(TAG, "Unsupported keystore atom: " + atomTag);
+                    return StatsManager.PULL_SKIP;
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from keystore service. Cannot pull.", e);
+            return StatsManager.PULL_SKIP;
+        } catch (ServiceSpecificException e) {
+            Slog.e(TAG, "pulling keystore metrics failed", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     // Thermal event received from vendor thermal management subsystem

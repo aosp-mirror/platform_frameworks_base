@@ -206,7 +206,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Usługa GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usługa powiadomień czujnika"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usługa Zmierzch"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Wykrywanie strefy czasowej (brak połączenia)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Usługa synchronizacji czasu na podstawie sygnału GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Usługa menedżera rozpoznawania muzyki"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Twoje urządzenie zostanie wyczyszczone"</string>
@@ -251,7 +250,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Wyłącz"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Przycisk zasilania"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Uruchom ponownie"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Nagły przypadek"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Połączenie alarmowe"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Zgłoś błąd"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Zakończ sesję"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Zrzut ekranu"</string>
@@ -355,7 +354,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Pozwala aplikacji na rozwijanie lub zwijanie paska stanu."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"wyświetlaj powiadomienia w trybie pełnoekranowym na zablokowanym urządzeniu"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Zezwala na wyświetlanie przez aplikacje powiadomień w trybie pełnoekranowym na zablokowanym urządzeniu"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalowanie skrótów"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalowanie skrótów"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Pozwala aplikacji dodawać skróty na ekranie głównym bez interwencji użytkownika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinstalowywanie skrótów"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Pozwala aplikacji usuwać skróty z ekranu głównego bez interwencji użytkownika."</string>
@@ -591,6 +590,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Użyj odcisku innego palca"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zbyt jasno"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Popraw"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Za każdym razem lekko zmieniaj ułożenie palca"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
@@ -607,8 +607,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nie zarejestrowano odcisków palców."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"To urządzenie nie jest wyposażone w czytnik linii papilarnych."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Czujnik jest tymczasowo wyłączony."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nie można użyć czytnika linii papilarnych. Odwiedź serwis."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Używaj odcisku palca"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Używaj odcisku palca lub blokady ekranu"</string>
@@ -618,12 +617,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odcisku palca"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Rozpoznawanie twarzy"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Zarejestruj swoją twarz ponownie"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem z rozpoznawaniem twarzy"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Kliknij, aby usunąć model twarzy, a następnie ponownie dodaj skan twarzy"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Skonfiguruj rozpoznawanie twarzy"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Popatrz na ekran telefonu, aby go odblokować"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Skonfiguruj więcej sposobów odblokowywania"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Kliknij, aby dodać odcisk palca"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nie można użyć czytnika linii papilarnych"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Zbyt ciemno. Spróbuj w jaśniejszym świetle."</string>
@@ -1520,6 +1522,7 @@
     <string name="deny" msgid="6632259981847676572">"Odmów"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Prośba o pozwolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Prośba o pozwolenie\ndotyczące konta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> prosi o uprawnienia\ndotyczące konta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Używasz tej aplikacji poza profilem służbowym"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Używasz tej aplikacji w swoim profilu służbowym"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Sposób wprowadzania tekstu"</string>
@@ -2162,7 +2165,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym dane osobowe takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje osobiste takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>

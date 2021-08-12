@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjänst"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Tidszondetektering (ingen anslutning)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Tjänst för uppdatering av GNSS-tid"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Tjänst för hantering av musikidentifiering"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheten kommer att rensas"</string>
@@ -573,7 +572,7 @@
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentiseringen avbröts"</string>
-    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pinkod, grafiskt lösenord eller lösenord har inte angetts"</string>
+    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pinkod, mönster eller lösenord har inte angetts"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fortsätt med hjälp av ditt skärmlås"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Testa att justera fingeravtrycket"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Flytta fingret lite varje gång"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrycket har autentiserats"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Inga fingeravtryck har registrerats."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Enheten har ingen fingeravtryckssensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensorn har tillfälligt inaktiverats."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Det går inte att använda fingeravtryckssensorn. Besök ett reparationsställe"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Använd ditt fingeravtryck"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Använd ditt fingeravtryck eller skärmlåset"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon för fingeravtryck"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ansiktslås"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrera ansiktet på nytt"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Gör om registreringen av ansiktet så att ansiktsigenkänningen ska fungera bättre"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem med ansiktslås"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tryck för att radera ansiktsmodellen och lägg sedan till ansiktet igen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurera ansiktslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås upp telefonen genom att titta på den"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurera fler sätt att låsa upp"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryck för att lägga till ett fingeravtryck"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingeravtryckslås"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Det går inte att använda fingeravtryckssensorn"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besök ett reparationsställe."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
@@ -879,7 +881,7 @@
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"Skärmen har låsts."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryck på Menu för att låsa upp eller ringa nödsamtal."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryck på Menu för att låsa upp."</string>
-    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rita grafiskt lösenord för att låsa upp"</string>
+    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rita mönster för att låsa upp"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nödsamtal"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tillbaka till samtal"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Korrekt!"</string>
@@ -923,7 +925,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Glömt ditt grafiska lösenord?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Lås upp konto"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"För många försök med grafiskt lösenord"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"För många försök med mönster"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Logga in med ditt Google-konto om du vill låsa upp."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Användarnamn (e-post)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Lösenord"</string>
@@ -934,12 +936,12 @@
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"Lås upp"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"Ljud på"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"Ljud av"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"Skriver grafiskt lösenord"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"Grafiskt lösenord har tagits bort"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"Ritar mönster"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"Mönster har tagits bort"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6746676335293144163">"En cell har lagts till"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"Cell <xliff:g id="CELL_INDEX">%1$s</xliff:g> har lagts till"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"Grafiskt lösenord har slutförts"</string>
-    <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"Fält för grafiskt lösenord."</string>
+    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"Mönster har slutförts"</string>
+    <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"Fält för mönster."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. Widget %2$d av %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"Lägg till en widget."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"Tom"</string>
@@ -955,13 +957,13 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widgeten <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> har tagits bort."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expandera upplåsningsytan."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Lås upp genom att dra."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Lås upp med grafiskt lösenord."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Lås upp med mönster."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Ansiktslås."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Lås upp med PIN-kod."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Lås upp med SIM-kortets pinkod."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Lås upp med SIM-kortets PUK-kod."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"Lås upp med lösenord."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Fält för grafiskt lösenord."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Fält för mönster."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"Fält med dragreglage."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"ABC"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Neka"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Begärd behörighet"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Begärd behörighet\nför kontot <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Behörighet har begärts av <xliff:g id="APP">%1$s</xliff:g>\nför kontot <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din jobbprofil"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du använder den här appen i din jobbprofil"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Indatametod"</string>
@@ -1641,7 +1644,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", säker"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Har du glömt ditt grafiska lösenord?"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Fel grafiskt lösenord"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"Fel mönster"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Fel lösenord"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Fel PIN-kod"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1661,7 +1664,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-koden ska vara åtta siffror."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Ange rätt PUK-kod igen. Om försöken upprepas inaktiveras SIM-kortet permanent."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-koderna stämmer inte överens"</string>
-    <string name="kg_login_too_many_attempts" msgid="699292728290654121">"För många försök med grafiskt lösenord"</string>
+    <string name="kg_login_too_many_attempts" msgid="699292728290654121">"För många försök med mönster"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Logga in med ditt Google-konto om du vill låsa upp."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Användarnamn (e-post)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Lösenord"</string>
@@ -1952,7 +1955,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Lägg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkommande samtal"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Pågående samtal"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Ett inkommande samtal förhandsgranskas"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Ett inkommande samtal filtreras"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> har valts</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>

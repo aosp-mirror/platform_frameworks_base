@@ -579,6 +579,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
         }
 
+        if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_RPM) != 0) {
+            // Collect the latest low power stats without holding the mStats lock.
+            mStats.fillLowPowerStats();
+        }
+
         final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
         final BluetoothActivityEnergyInfo bluetoothInfo = awaitControllerInfo(bluetoothReceiver);
         ModemActivityInfo modemInfo = null;

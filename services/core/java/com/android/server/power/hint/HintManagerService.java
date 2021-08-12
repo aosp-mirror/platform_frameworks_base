@@ -17,6 +17,7 @@
 package com.android.server.power.hint;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.content.Context;
 import android.os.Binder;
@@ -33,12 +34,16 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /** An hint service implementation that runs in System Server process. */
 public final class HintManagerService extends SystemService {
@@ -56,6 +61,8 @@ public final class HintManagerService extends SystemService {
 
     private final NativeWrapper mNativeWrapper;
 
+    private final ActivityManagerInternal mAmInternal;
+
     @VisibleForTesting final IHintManager.Stub mService = new BinderService();
 
     public HintManagerService(Context context) {
@@ -70,6 +77,8 @@ public final class HintManagerService extends SystemService {
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
         mUidObserver = new UidObserver();
+        mAmInternal = Objects.requireNonNull(
+                LocalServices.getService(ActivityManagerInternal.class));
     }
 
     @VisibleForTesting
@@ -85,7 +94,7 @@ public final class HintManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(Context.PERFORMANCE_HINT_SERVICE, mService, /* allowIsolated= */ true);
+        publishBinderService(Context.PERFORMANCE_HINT_SERVICE, mService);
     }
 
     @Override
@@ -243,12 +252,34 @@ public final class HintManagerService extends SystemService {
         return mService;
     }
 
-    private boolean checkTidValid(int tgid, int [] tids) {
-        // Make sure all tids belongs to the same process.
+    private boolean checkTidValid(int uid, int tgid, int [] tids) {
+        // Make sure all tids belongs to the same UID (including isolated UID),
+        // tids can belong to different application processes.
+        List<Integer> eligiblePids = null;
+        // To avoid deadlock, do not call into AMS if the call is from system.
+        if (uid != Process.SYSTEM_UID) {
+            eligiblePids = mAmInternal.getIsolatedProcesses(uid);
+        }
+        if (eligiblePids == null) {
+            eligiblePids = new ArrayList<>();
+        }
+        eligiblePids.add(tgid);
+
         for (int threadId : tids) {
-            if (!Process.isThreadInProcess(tgid, threadId)) {
-                return false;
+            final String[] procStatusKeys = new String[] {
+                    "Uid:",
+                    "Tgid:"
+            };
+            long[] output = new long[procStatusKeys.length];
+            Process.readProcLines("/proc/" + threadId + "/status", procStatusKeys, output);
+            int uidOfThreadId = (int) output[0];
+            int pidOfThreadId = (int) output[1];
+
+            // use PID check for isolated processes, use UID check for non-isolated processes.
+            if (eligiblePids.contains(pidOfThreadId) || uidOfThreadId == uid) {
+                continue;
             }
+            return false;
         }
         return true;
     }
@@ -264,27 +295,25 @@ public final class HintManagerService extends SystemService {
             Preconditions.checkArgument(tids.length != 0, "tids should"
                     + " not be empty.");
 
-            int uid = Binder.getCallingUid();
-            int tid = Binder.getCallingPid();
-            int pid = Process.getThreadGroupLeader(tid);
-
+            final int callingUid = Binder.getCallingUid();
+            final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!checkTidValid(pid, tids)) {
-                    throw new SecurityException("Some tid doesn't belong to the process");
+                if (!checkTidValid(callingUid, callingTgid, tids)) {
+                    throw new SecurityException("Some tid doesn't belong to the application");
                 }
 
-                long halSessionPtr = mNativeWrapper.halCreateHintSession(pid, uid, tids,
-                        durationNanos);
+                long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
+                        tids, durationNanos);
                 if (halSessionPtr == 0) return null;
 
-                AppHintSession hs = new AppHintSession(uid, pid, tids, token,
+                AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
                         halSessionPtr, durationNanos);
                 synchronized (mLock) {
-                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(uid);
+                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
                         tokenMap = new ArrayMap<>(1);
-                        mActiveSessions.put(uid, tokenMap);
+                        mActiveSessions.put(callingUid, tokenMap);
                     }
                     tokenMap.put(token, hs);
                     return hs;

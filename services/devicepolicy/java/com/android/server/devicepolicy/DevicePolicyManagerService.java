@@ -3827,10 +3827,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 isProfileOwner(caller) || isDeviceOwner(caller) || isSystemUid(caller)
                 || isPasswordLimitingAdminTargetingP(caller));
 
-        final boolean qualityMayApplyToParent =
-                canSetPasswordQualityOnParent(who.getPackageName(), caller);
-        if (!qualityMayApplyToParent) {
-            Preconditions.checkCallAuthorization(!parent,
+        if (parent) {
+            Preconditions.checkCallAuthorization(
+                    canSetPasswordQualityOnParent(who.getPackageName(), caller),
                     "Profile Owner may not apply password quality requirements device-wide");
         }
 
@@ -3856,7 +3855,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (passwordPolicy.quality != quality) {
                     passwordPolicy.quality = quality;
                     ap.mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
-                    ap.mPasswordPolicyAppliesToParent = qualityMayApplyToParent;
                     resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
@@ -4588,8 +4586,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
+        final List<ActiveAdmin> admins;
         synchronized (getLockObject()) {
-            final List<ActiveAdmin> admins;
             if (deviceWideOnly) {
                 admins = getActiveAdminsForUserAndItsManagedProfilesLocked(userId,
                         /* shouldIncludeProfileAdmins */ (user) -> false);
@@ -4597,16 +4595,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
             }
             for (ActiveAdmin admin : admins) {
-                final boolean isAdminOfUser = userId == admin.getUserHandle().getIdentifier();
-                // Use the password metrics from the admin in one of three cases:
-                // (1) The admin is of the user we're getting the minimum metrics for. The admin
-                //     always affects the user it's managing. This applies also to the parent
-                //     ActiveAdmin instance: It'd have the same user handle.
-                // (2) The mPasswordPolicyAppliesToParent field is true: That indicates the
-                //     call to setPasswordQuality was made by an admin that may affect the parent.
-                if (isAdminOfUser || admin.mPasswordPolicyAppliesToParent) {
-                    adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
-                }
+                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
         }
         return PasswordMetrics.merge(adminMetrics);
@@ -4821,7 +4810,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.mPasswordComplexity = passwordComplexity;
                     // Reset the password policy.
                     admin.mPasswordPolicy = new PasswordPolicy();
-                    admin.mPasswordPolicyAppliesToParent = true;
                     updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());
@@ -15003,8 +14991,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setNetworkLoggingActiveInternal(boolean active) {
-        synchronized (getLockObject()) {
-            mInjector.binderWithCleanCallingIdentity(() -> {
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            boolean shouldSendNotification = false;
+            synchronized (getLockObject()) {
                 if (active) {
                     if (mNetworkLogger == null) {
                         final int affectedUserId = getNetworkLoggingAffectedUser();
@@ -15019,17 +15008,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 + " service not being available yet.");
                     }
                     maybePauseDeviceWideLoggingLocked();
-                    sendNetworkLoggingNotificationLocked();
+                    shouldSendNotification = shouldSendNetworkLoggingNotificationLocked();
                 } else {
                     if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
                         Slogf.wtf(LOG_TAG, "Network logging could not be stopped due to the logging"
                                 + " service not being available yet.");
                     }
                     mNetworkLogger = null;
-                    mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
                 }
-            });
-        }
+            }
+            if (active) {
+                if (shouldSendNotification) {
+                    mHandler.post(() -> sendNetworkLoggingNotification());
+                }
+            } else {
+                mHandler.post(() -> mInjector.getNotificationManager().cancel(
+                        SystemMessage.NOTE_NETWORK_LOGGING));
+            }
+        });
     }
 
     private @UserIdInt int getNetworkLoggingAffectedUser() {
@@ -15187,20 +15183,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void sendNetworkLoggingNotificationLocked() {
+    /**
+     * Returns whether it's time to post another network logging notification. When returning true,
+     * this method has the side-effect of updating the recorded last network logging notification
+     * time to now.
+     */
+    private boolean shouldSendNetworkLoggingNotificationLocked() {
         ensureLocked();
         // Send a network logging notification if the admin is a device owner, not profile owner.
         final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
         if (deviceOwner == null || !deviceOwner.isNetworkLoggingEnabled) {
-            return;
+            return false;
         }
         if (deviceOwner.numNetworkLoggingNotifications
                 >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
-            return;
+            return false;
         }
         final long now = System.currentTimeMillis();
         if (now - deviceOwner.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
-            return;
+            return false;
         }
         deviceOwner.numNetworkLoggingNotifications++;
         if (deviceOwner.numNetworkLoggingNotifications
@@ -15209,6 +15210,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
         }
+        saveSettingsLocked(deviceOwner.getUserHandle().getIdentifier());
+        return true;
+    }
+
+    private void sendNetworkLoggingNotification() {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         intent.setPackage(pm.getSystemUiServiceComponent().getPackageName());
@@ -15227,7 +15233,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
         mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
-        saveSettingsLocked(deviceOwner.getUserHandle().getIdentifier());
     }
 
     /**
@@ -17553,9 +17558,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         final boolean usbEnabled;
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            usbEnabled = admin != null && admin.mUsbDataSignalingEnabled;
+            usbEnabled = isUsbDataSignalingEnabledInternalLocked();
         }
         if (!mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getUsbManager().enableUsbDataSignal(usbEnabled))) {

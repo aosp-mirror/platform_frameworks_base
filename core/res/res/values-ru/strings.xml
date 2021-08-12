@@ -206,7 +206,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сервис для обработки уведомлений от датчиков"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Сервис для определения наступления сумерек"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Определитель часового пояса (работает без Интернета)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Синхронизация времени с помощью ГНСС"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Сервис управления распознаванием музыки"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Все данные с устройства будут удалены"</string>
@@ -591,6 +590,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Попробуйте сохранить отпечаток другого пальца."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Слишком светло."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Попробуйте изменить положение пальца."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Каждый раз немного меняйте положение пальца."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
@@ -607,8 +607,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Нет отсканированных отпечатков пальцев"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На этом устройстве нет сканера отпечатков пальцев."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сканер отпечатков пальцев временно отключен."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Невозможно использовать сканер отпечатков пальцев. Обратитесь в сервисный центр."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Отпечаток <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Использовать отпечаток пальца"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Использовать отпечаток пальца или блокировку экрана"</string>
@@ -618,12 +617,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок отпечатка пальца"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Зарегистрируйте лицо ещё раз"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Чтобы улучшить распознавание лица, зарегистрируйте его ещё раз"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Ошибка фейсконтроля"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нажмите, чтобы удалить модель лица, а затем добавьте ее снова."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройка фейсконтроля"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Вы сможете разблокировать телефон, просто посмотрев на него."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройте другие способы разблокировки"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Нажмите, чтобы добавить отпечаток пальца."</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблокировка по отпечатку пальца"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Невозможно использовать сканер отпечатков пальцев"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Обратитесь в сервисный центр."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не удалось собрать данные. Повторите попытку."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Слишком светло. Сделайте освещение менее ярким."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Слишком темно. Сделайте освещение ярче."</string>
@@ -1520,6 +1522,7 @@
     <string name="deny" msgid="6632259981847676572">"Отклонить"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Разрешение запрошено"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Требуется разрешение\nдля аккаунта <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Разрешение запрошено приложением \"<xliff:g id="APP">%1$s</xliff:g>\"\nдля аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Это приложение используется в личном профиле"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Вы перешли в рабочий профиль"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Способ ввода"</string>
@@ -2162,7 +2165,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Отключить"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Подробнее"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивные уведомления заменены улучшенными. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе имена контактов, сообщения и другие личные данные. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки и управлять режимом \"Не беспокоить\"."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 доступны улучшенные уведомления. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе имена контактов, сообщения и другие личные данные. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки и управлять режимом \"Не беспокоить\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>

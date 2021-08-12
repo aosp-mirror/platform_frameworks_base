@@ -52,9 +52,26 @@
     <include layout="@layout/dock_info_bottom_area_overlay" />
 
     <com.android.keyguard.LockIconView
+        android:id="@+id/lock_icon_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/lock_icon_view" />
+        android:layout_gravity="center">
+        <!-- Background protection -->
+        <ImageView
+            android:id="@+id/lock_icon_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/fingerprint_bg"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/lock_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/lock_icon_padding"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"/>
+    </com.android.keyguard.LockIconView>
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"

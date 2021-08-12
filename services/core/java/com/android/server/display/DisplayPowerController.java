@@ -96,7 +96,6 @@ import java.io.PrintWriter;
  */
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks,
         DisplayWhiteBalanceController.Callbacks {
-    private static final String TAG = "DisplayPowerController";
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
@@ -149,8 +148,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
-    private static final Uri BRIGHTNESS_FLOAT_URI =
-            Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
+    private final String TAG;
 
     private final Object mLock = new Object();
 
@@ -393,7 +391,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The last brightness that was set by the user and not temporary. Set to
     // PowerManager.BRIGHTNESS_INVALID_FLOAT when a brightness has yet to be recorded.
-    private float mLastUserSetScreenBrightness;
+    private float mLastUserSetScreenBrightness = Float.NaN;
 
     // The screen brightness setting has changed but not taken effect yet. If this is different
     // from the current screen brightness setting then this is coming from something other than us
@@ -424,6 +422,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary adjustment set.
     private float mTemporaryAutoBrightnessAdjustment;
 
+    // Whether a reduce bright colors (rbc) change has been initiated by the user. We want to
+    // retain the current backlight level when rbc is toggled, since rbc additionally makes the
+    // screen appear dimmer using screen colors rather than backlight levels, and therefore we
+    // don't actually want to compensate for this by then in/decreasing the backlight when
+    // toggling this feature.
+    // This should be false during system start up.
+    private boolean mPendingUserRbcChange;
+
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
     private ObjectAnimator mColorFadeOffAnimator;
@@ -445,6 +451,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             Runnable onBrightnessChangeRunnable) {
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
+        TAG = "DisplayPowerController[" + mDisplayId + "]";
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mHandler = new DisplayControllerHandler(handler.getLooper());
@@ -506,7 +513,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
-        mHbmController = createHbmController();
+        mHbmController = createHbmControllerLocked();
 
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
@@ -555,24 +562,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
             boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
                 @Override
-                public void onReduceBrightColorsActivationChanged(boolean activated) {
-                    applyReduceBrightColorsSplineAdjustment();
+                public void onReduceBrightColorsActivationChanged(boolean activated,
+                        boolean userInitiated) {
+                    applyReduceBrightColorsSplineAdjustment(userInitiated);
                 }
 
                 @Override
                 public void onReduceBrightColorsStrengthChanged(int strength) {
-                    applyReduceBrightColorsSplineAdjustment();
+                    applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
                 }
             });
             if (active) {
-                applyReduceBrightColorsSplineAdjustment();
+                applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
             }
         } else {
             mCdsi = null;
         }
     }
 
-    private void applyReduceBrightColorsSplineAdjustment() {
+    private void applyReduceBrightColorsSplineAdjustment(boolean userInitiated) {
         if (mBrightnessMapper == null) {
             Log.w(TAG, "No brightness mapping available to recalculate splines");
             return;
@@ -583,6 +591,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
         }
         mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
+        mPendingUserRbcChange = userInitiated;
+        sendUpdatePowerState();
     }
 
     /**
@@ -709,6 +719,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final String uniqueId = device.getUniqueId();
         final DisplayDeviceConfig config = device.getDisplayDeviceConfig();
         final IBinder token = device.getDisplayTokenLocked();
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         mHandler.post(() -> {
             if (mDisplayDevice == device) {
                 return;
@@ -716,7 +727,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mDisplayDevice = device;
             mUniqueDisplayId = uniqueId;
             mDisplayDeviceConfig = config;
-            loadFromDisplayDeviceConfig(token);
+            loadFromDisplayDeviceConfig(token, info);
         });
     }
 
@@ -757,7 +768,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private void loadFromDisplayDeviceConfig(IBinder token) {
+    private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         loadAmbientLightSensor();
@@ -766,7 +777,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
-        mHbmController.resetHbmData(token, mDisplayDeviceConfig.getHighBrightnessModeData());
+        mHbmController.resetHbmData(info.width, info.height, token,
+                mDisplayDeviceConfig.getHighBrightnessModeData());
     }
 
     private void sendUpdatePowerState() {
@@ -914,7 +926,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void reloadReduceBrightColours() {
         if (mCdsi != null && mCdsi.isReduceBrightColorsActivated()) {
-            applyReduceBrightColorsSplineAdjustment();
+            applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
         }
     }
 
@@ -956,7 +968,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean mustNotify;
         final int previousPolicy;
         boolean mustInitialize = false;
-        boolean shouldSaveBrightnessInfo = true;
         int brightnessAdjustmentFlags = 0;
         mBrightnessReasonTemp.set(null);
         synchronized (mLock) {
@@ -1087,7 +1098,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (state == Display.STATE_OFF) {
             brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_SCREEN_OFF);
-            shouldSaveBrightnessInfo = false;
         }
 
         // Always use the VR brightness when in the VR state.
@@ -1205,6 +1215,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 brightnessAdjustmentFlags = 0;
             }
         } else {
+            // Any non-auto-brightness values such as override or temporary should still be subject
+            // to clamping so that they don't go beyond the current max as specified by HBM
+            // Controller.
+            brightnessState = clampScreenBrightness(brightnessState);
             mAppliedAutoBrightness = false;
             brightnessAdjustmentFlags = 0;
         }
@@ -1212,9 +1226,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Use default brightness when dozing unless overridden.
         if ((Float.isNaN(brightnessState))
                 && Display.isDozeState(state)) {
-            brightnessState = mScreenBrightnessDozeConfig;
+            brightnessState = clampScreenBrightness(mScreenBrightnessDozeConfig);
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
-            shouldSaveBrightnessInfo = false;
         }
 
         // Apply manual brightness.
@@ -1229,12 +1242,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_MANUAL);
         }
 
-        // Save out the brightness info now that the brightness state for this iteration has been
-        // finalized and before we send out notifications about the brightness changing.
-        if (shouldSaveBrightnessInfo) {
-            saveBrightnessInfo(brightnessState);
-
-        }
+        // The current brightness to use has been calculated at this point (minus the adjustments
+        // like low-power and dim), and HbmController should be notified so that it can accurately
+        // calculate HDR or HBM levels. We specifically do it here instead of having HbmController
+        // listen to the brightness setting because certain brightness sources (just as an app
+        // override) are not saved to the setting, but should be reflected in HBM
+        // calculations.
+        mHbmController.onBrightnessChanged(brightnessState);
 
         if (updateScreenBrightnessSetting) {
             // Tell the rest of the system about the new brightness in case we had to change it
@@ -1244,6 +1258,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // it means in absolute terms.
             putScreenBrightnessSetting(brightnessState, /* updateCurrent */ true);
         }
+
+        // We save the brightness info *after* the brightness setting has been changed so that
+        // the brightness info reflects the latest value.
+        saveBrightnessInfo(getScreenBrightnessSetting());
 
         // Apply dimming by at least some minimum amount when user activity
         // timeout is about to expire.
@@ -1335,15 +1353,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
                     && ((mBrightnessReason.modifier & BrightnessReason.MODIFIER_DIMMED) == 0
                     || (mBrightnessReason.modifier & BrightnessReason.MODIFIER_LOW_POWER) == 0)) {
+                // We want to scale HDR brightness level with the SDR level
                 animateValue = mHbmController.getHdrBrightnessValue();
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();
             final float currentSdrBrightness = mPowerState.getSdrScreenBrightness();
             if (isValidBrightnessValue(animateValue)
-                    && (!BrightnessSynchronizer.floatEquals(animateValue, currentBrightness)
-                    || !BrightnessSynchronizer.floatEquals(
-                            sdrAnimateValue, currentSdrBrightness))) {
+                    && (animateValue != currentBrightness
+                    || sdrAnimateValue != currentSdrBrightness)) {
                 if (initialRampSkip || hasBrightnessBuckets
                         || wasOrWillBeInVr || !isDisplayContentVisible || brightnessIsTemporary) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
@@ -1506,19 +1524,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private HighBrightnessModeController createHbmController() {
-        final DisplayDeviceConfig ddConfig =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig();
+    private HighBrightnessModeController createHbmControllerLocked() {
+        final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
+        final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
         final IBinder displayToken =
                 mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayTokenLocked();
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
-        return new HighBrightnessModeController(mHandler, displayToken, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, hbmData,
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
                 () -> {
                     sendUpdatePowerStateLocked();
                     mHandler.post(mOnBrightnessChangeRunnable);
-                });
+                    // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
+                    mAutomaticBrightnessController.update();
+                }, mContext);
     }
 
     private void blockScreenOn() {
@@ -1670,11 +1691,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mHbmController.getCurrentBrightnessMin(), mHbmController.getCurrentBrightnessMax());
     }
 
-    // Checks whether the brightness is within the valid brightness range, not including the off or
-    // invalid states.
-    private boolean isValidBrightnessValue(float brightnessState) {
-        return brightnessState >= PowerManager.BRIGHTNESS_MIN
-                && brightnessState <= PowerManager.BRIGHTNESS_MAX;
+    // Checks whether the brightness is within the valid brightness range, not including off.
+    private boolean isValidBrightnessValue(float brightness) {
+        return brightness >= PowerManager.BRIGHTNESS_MIN
+                && brightness <= PowerManager.BRIGHTNESS_MAX;
     }
 
     private void animateScreenBrightness(float target, float sdrTarget, float rate) {
@@ -2004,6 +2024,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void putScreenBrightnessSetting(float brightnessValue, boolean updateCurrent) {
+        if (!isValidBrightnessValue(brightnessValue)) {
+            return;
+        }
         if (updateCurrent) {
             setCurrentScreenBrightness(brightnessValue);
         }
@@ -2040,15 +2063,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private boolean updateUserSetScreenBrightness() {
+        final boolean brightnessSplineChanged = mPendingUserRbcChange;
+        if (mPendingUserRbcChange && !Float.isNaN(mCurrentScreenBrightnessSetting)) {
+            mLastUserSetScreenBrightness = mCurrentScreenBrightnessSetting;
+        }
+        mPendingUserRbcChange = false;
+
         if ((Float.isNaN(mPendingScreenBrightnessSetting)
                 || mPendingScreenBrightnessSetting < 0.0f)) {
-            return false;
+            return brightnessSplineChanged;
         }
-        if (BrightnessSynchronizer.floatEquals(
-                mCurrentScreenBrightnessSetting, mPendingScreenBrightnessSetting)) {
+        if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
             mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            return false;
+            return brightnessSplineChanged;
         }
         setCurrentScreenBrightness(mPendingScreenBrightnessSetting);
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;

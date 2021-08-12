@@ -508,7 +508,6 @@ interface IActivityManager {
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
-    boolean isAppStartModeDisabled(int uid, in String packageName);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);

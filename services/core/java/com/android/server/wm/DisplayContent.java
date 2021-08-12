@@ -61,6 +61,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
@@ -728,11 +729,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // When switching the app task, we keep the IME window visibility for better
         // transitioning experiences.
-        // However, in case IME created a child window without dismissing during the task
-        // switching to keep the window focus because IME window has higher window hierarchy,
-        // we don't give it focus if the next IME layering target doesn't request IME visible.
+        // However, in case IME created a child window or the IME selection dialog without
+        // dismissing during the task switching to keep the window focus because IME window has
+        // higher window hierarchy, we don't give it focus if the next IME layering target
+        // doesn't request IME visible.
         if (w.mIsImWindow && w.isChildWindow() && (mImeLayeringTarget == null
                 || !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME))) {
+            return false;
+        }
+        if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
+                && !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME)
+                && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION)) {
             return false;
         }
 
@@ -912,6 +920,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
                         && preferredModeId != 0) {
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
+                }
+
+                final float preferredMinRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
+                        .getPreferredMinRefreshRate(w);
+                if (mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate == 0
+                        && preferredMinRefreshRate != 0) {
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate =
+                            preferredMinRefreshRate;
                 }
 
                 final float preferredMaxRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
@@ -1564,12 +1580,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // window was transferred ({@link #mSkipAppTransitionAnimation}).
                 return false;
             }
-            if ((mAppTransition.getTransitFlags()
-                    & WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) != 0) {
-                // The transition may be finished before keyguard hidden. In order to avoid the
-                // intermediate orientation change, it is more stable to freeze the display.
-                return false;
-            }
             if (r.isState(RESUMED) && !r.getRootTask().mInResumeTopActivity) {
                 // If the activity is executing or has done the lifecycle callback, use normal
                 // rotation animation so the display info can be updated immediately (see
@@ -1583,8 +1593,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // If the transition has not started yet, the activity must be the top.
             return false;
         }
-        if (mLastWallpaperVisible && r.windowsCanBeWallpaperTarget()) {
-            // Use normal rotation animation for orientation change of visible wallpaper.
+        if (mLastWallpaperVisible && r.windowsCanBeWallpaperTarget()
+                && mFixedRotationTransitionListener.mAnimatingRecents == null) {
+            // Use normal rotation animation for orientation change of visible wallpaper if recents
+            // animation is not running (it may be swiping to home).
             return false;
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
@@ -1882,7 +1894,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
             }, true /* traverseTopToBottom */);
-            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction);
+            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
         }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
@@ -3975,7 +3987,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update Ime parent when IME insets leash created or the new IME layering target might
         // updated from setImeLayeringTarget, which is the best time that default IME visibility
         // has been settled down after IME control target changed.
-        if (prevImeControlTarget != mImeControlTarget || forceUpdateImeParent) {
+        final boolean imeParentChanged =
+                prevImeControlTarget != mImeControlTarget || forceUpdateImeParent;
+        if (imeParentChanged) {
             updateImeParent();
         }
 
@@ -3983,7 +3997,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final IBinder token = win != null ? win.mClient.asBinder() : null;
         // Note: not allowed to call into IMMS with the WM lock held, hence the post.
         mWmService.mH.post(() ->
-                InputMethodManagerInternal.get().reportImeControl(token)
+                InputMethodManagerInternal.get().reportImeControl(token, imeParentChanged)
         );
     }
 
@@ -4327,6 +4341,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                     true /* inTraversal, must call performTraversalInTrans... below */);
@@ -4617,6 +4632,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public boolean preferMinimalPostProcessing;
         public float preferredRefreshRate;
         public int preferredModeId;
+        public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
 
         void reset() {
@@ -4626,6 +4642,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
+            preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
         }
     }
@@ -5492,6 +5509,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean updateDisplayOverrideConfigurationLocked() {
+        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
+        // case properly since the signals it receives all happen post-change
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
+        if (recentsAnimationController != null) {
+            recentsAnimationController.cancelAnimationForDisplayChange();
+        }
+
         Configuration values = new Configuration();
         computeScreenConfiguration(values);
 
@@ -5670,7 +5695,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Only update focus/visibility for the last one because there may be many root tasks are
         // reparented and the intermediate states are unnecessary.
         if (lastReparentedRootTask != null) {
-            lastReparentedRootTask.postReparent();
+            lastReparentedRootTask.resumeNextFocusAfterReparent();
         }
         releaseSelfIfNeeded();
         mDisplayPolicy.release();
@@ -5816,7 +5841,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         return false; /* continue */
                     }
                 }
-
+                if (nextWindow.isSecureLocked()) {
+                    return false; /* continue */
+                }
                 return true; /* stop, match found */
             }
         });

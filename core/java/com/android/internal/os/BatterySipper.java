@@ -23,7 +23,10 @@ import java.util.List;
 
 /**
  * Contains power usage of an application, system service, or hardware type.
+ *
+ * @deprecated Please use BatteryStatsManager.getBatteryUsageStats instead.
  */
+@Deprecated
 public class BatterySipper implements Comparable<BatterySipper> {
     @UnsupportedAppUsage
     public int userId;

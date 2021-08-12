@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS සේවාව"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"සංවේදක දැනුම් දීමේ සේවාව"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ඇඳිරි සේවාව"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"වේලා කලාප අනාවරකය (සම්බන්ධතාවක් නොමැත)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS වේලා යාවත්කාලීන සේවාව"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"සංගීත හැඳුනුම් කළමනාකරු සේවාව"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"සීරුමාරු කිරීම උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය. අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ඇඟිලි සලකුණ භාවිත කරන්න"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ඇඟිලි සලකුණ හෝ තිර අගුල භාවිත කරන්න"</string>
@@ -611,13 +610,16 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු ඇරීම"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"හඳුනා ගැනීම වැඩිදියුණු කිරීමට, ඔබේ මුහුණ යළි-ලියාපදිංචි කරන්න"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු ඇරීම පිහිටුවන්න"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු හැරීම"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"මුහුණෙන් අගුලු හැරීම සම්බන්ධව ගැටලුවකි"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ඔබගේ මුහුණත ආකෘතිය මැකීමට තට්ටු කරන්න, අනතුරුව ඔබගේ මුහුණ නැවත එක් කරන්න"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු හැරීම පිහිටුවන්න"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ඔබගේ දුරකථනය දෙස බැලීමෙන් එහි අගුලු හරින්න"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"අගුලු හැරීමට තවත් ක්‍රම සකසන්න"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ඇඟිලි සලකුණක් එක් කිරීමට තට්ටු කරන්න"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ඇඟිලි සලකුණු අගුළු හැරීම"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"නිරවද්‍ය මුහුණු දත්ත ගත නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ඉතා අඳුරුයි. තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න."</string>
@@ -641,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"මුහුණෙන් අගුළු ඇරීම නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"මුහුණෙන් අගුළු හැරීම නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"නව මුහුණු දත්ත ගබඩා කළ නොහැක. පළමුව පැරණි එකක් මකන්න."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු ඇරීම අවලංගු කරන ලදි"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු හැරීම අවලංගු කරන ලදි"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණෙන් අගුළු ඇරීම අබලයි."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණෙන් අගුළු හැරීම අබලයි."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඒ වෙනුවට තිර අගුල ඇතුළු කරන්න."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු ඇරීම පිහිටුවා නැත"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"මුහුණෙන් අගුළු ඇරීම මෙම උපාංගයේ සහාය නොදක්වයි."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු හැරීම පිහිටුවා නැත"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"මුහුණෙන් අගුළු හැරීම මෙම උපාංගයේ සහාය නොදක්වයි."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"මුහුණෙන් අගුළු ඇරීම භාවිත කර."</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"මුහුණෙන් අගුළු හැරීම භාවිත කර."</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"මුහුණෙන් අගුළු හැරීම හෝ තිර අගුල භාවිත කරන්න"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ඉදිරියට යාමට ඔබගේ මුහුණ භාවිත කරන්න"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ඉදිරියට යාමට ඔබගේ මුහුණු හෝ තිර අගුල භාවිත කරන්න"</string>
@@ -956,7 +958,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"අගුළු නොදැමූ ප්‍රදේශය පුළුල් කරන්න."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"සර්පණ අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"රටා අගුළු ඇරීම."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"මුහුණෙන් අගුළු ඇරීම."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"මුහුණෙන් අගුළු හැරීම."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim Pin අගුලු දැමීම."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk අගුලු දැමීම."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"අවසර ඉල්ලා සිටී"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> ගිණුම සඳහා\nඅවසර ඉල්ලන ලදි."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ගිණුම සඳහා <xliff:g id="APP">%1$s</xliff:g>\n විසින් ඉල්ලූ අවසරය"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"මෙම යෙදුම ඔබගේ කාර්යාල පැතිකඩින් පිට දී ඔබ භාවිතා කරයි"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"මෙම යෙදුම ඔබගේ පුද්ගලික කොටසේ ඔබ භාවිතා කරයි"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ආදාන ක්‍රමය"</string>

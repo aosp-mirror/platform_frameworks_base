@@ -98,6 +98,7 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     OverlayManagerTransaction.Builder mTransactionBuilder;
 
     private ThemeOverlayApplier mManager;
+    private boolean mGetOverlayInfoEnabled = true;
 
     @Before
     public void setup() throws Exception {
@@ -159,7 +160,12 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         OverlayInfo launcherTargetInfo = new OverlayInfo("packageName", LAUNCHER_PACKAGE,
                 null, null, "/", 0, 0, 0, false);
         when(mOverlayManager.getOverlayInfo(any(OverlayIdentifier.class), any()))
-                .thenReturn(launcherTargetInfo);
+                .thenAnswer(answer -> {
+                    if (mGetOverlayInfoEnabled) {
+                        return launcherTargetInfo;
+                    }
+                    return null;
+                });
         clearInvocations(mOverlayManager);
         verify(mDumpManager).registerDumpable(any(), any());
     }
@@ -204,6 +210,20 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
             // Not enabled for work profile because the target package is LAUNCHER_PACKAGE
             verify(mTransactionBuilder, never()).setEnabled(eq(overlayPackage), eq(true),
                     eq(TEST_USER_MANAGED_PROFILE.getIdentifier()));
+        }
+    }
+
+    @Test
+    public void enablesOverlays_onlyIfItExistsForUser() {
+        mGetOverlayInfoEnabled = false;
+
+        Set<UserHandle> userHandles = Sets.newHashSet(TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER.getIdentifier(),
+                userHandles);
+
+        for (OverlayIdentifier overlayPackage : ALL_CATEGORIES_MAP.values()) {
+            verify(mTransactionBuilder, never()).setEnabled(eq(overlayPackage), eq(true),
+                    eq(TEST_USER.getIdentifier()));
         }
     }
 

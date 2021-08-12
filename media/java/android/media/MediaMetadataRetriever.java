@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -52,6 +53,8 @@ import java.util.Map;
  * frame and meta data from an input media file.
  */
 public class MediaMetadataRetriever implements AutoCloseable {
+    private static final String TAG = "MediaMetadataRetriever";
+
     // borrowed from ExoPlayer
     private static final String[] STANDARD_GENRES = new String[] {
             // These are the official ID3v1 genres.
@@ -301,11 +304,15 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException  {
-        ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd);
-        if (modernFd == null) {
-            _setDataSource(fd, offset, length);
-        } else {
-            _setDataSource(modernFd.getFileDescriptor(), offset, length);
+
+        try (ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd)) {
+            if (modernFd == null) {
+                _setDataSource(fd, offset, length);
+            } else {
+                _setDataSource(modernFd.getFileDescriptor(), offset, length);
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Ignoring IO error while setting data source", e);
         }
     }
 

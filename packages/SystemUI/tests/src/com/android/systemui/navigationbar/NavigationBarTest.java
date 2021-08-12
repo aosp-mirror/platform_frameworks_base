@@ -76,8 +76,10 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -116,6 +118,10 @@ public class NavigationBarTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
 
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
@@ -126,6 +132,8 @@ public class NavigationBarTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
+                .thenReturn(mEdgeBackGestureHandler);
         mCommandQueue = new CommandQueue(mContext);
         setupSysuiDependency();
         mDependency.injectMockDependency(AssistManager.class);
@@ -133,7 +141,8 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
         mOverviewProxyService = mDependency.injectMockDependency(OverviewProxyService.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
+                mEdgeBackGestureHandlerFactory);
         TestableLooper.get(this).runWithLooper(() -> {
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
@@ -273,10 +282,12 @@ public class NavigationBarTest extends SysuiTestCase {
                 () -> mock(StatusBar.class),
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
+                mock(NotificationShadeDepthController.class),
                 mock(SystemActions.class),
                 mHandler,
                 mock(NavigationBarOverlayController.class),
-                mUiEventLogger));
+                mUiEventLogger,
+                mock(UserTracker.class)));
     }
 
     private void processAllMessages() {

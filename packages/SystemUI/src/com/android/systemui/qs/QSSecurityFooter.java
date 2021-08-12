@@ -185,15 +185,22 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         final boolean isProfileOwnerOfOrganizationOwnedDevice =
                 mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         final boolean isParentalControlsEnabled = mSecurityController.isParentalControlsEnabled();
+        final boolean isWorkProfileOn = mSecurityController.isWorkProfileOn();
+        final boolean hasDisclosableWorkProfilePolicy = hasCACertsInWorkProfile
+                || vpnNameWorkProfile != null || (hasWorkProfile && isNetworkLoggingEnabled);
         // Update visibility of footer
-        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile
-                || vpnName != null || vpnNameWorkProfile != null
-                || isProfileOwnerOfOrganizationOwnedDevice || isParentalControlsEnabled
-                || (hasWorkProfile && isNetworkLoggingEnabled);
+        mIsVisible = (isDeviceManaged && !isDemoDevice)
+                || hasCACerts
+                || vpnName != null
+                || isProfileOwnerOfOrganizationOwnedDevice
+                || isParentalControlsEnabled
+                || (hasDisclosableWorkProfilePolicy && isWorkProfileOn);
         // Update the view to be untappable if the device is an organization-owned device with a
-        // managed profile and there is no policy set which requires a privacy disclosure.
-        if (mIsVisible && isProfileOwnerOfOrganizationOwnedDevice && !isNetworkLoggingEnabled
-                && !hasCACertsInWorkProfile && vpnNameWorkProfile == null) {
+        // managed profile and there is either:
+        // a) no policy set which requires a privacy disclosure.
+        // b) a specific work policy set but the work profile is turned off.
+        if (mIsVisible && isProfileOwnerOfOrganizationOwnedDevice
+                && (!hasDisclosableWorkProfilePolicy || !isWorkProfileOn)) {
             mRootView.setClickable(false);
             mRootView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
         } else {
@@ -204,7 +211,8 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
                 vpnNameWorkProfile, organizationName, workProfileOrganizationName,
-                isProfileOwnerOfOrganizationOwnedDevice, isParentalControlsEnabled);
+                isProfileOwnerOfOrganizationOwnedDevice, isParentalControlsEnabled,
+                isWorkProfileOn);
         // Update the icon
         int footerIconId = R.drawable.ic_info_outline;
         if (vpnName != null || vpnNameWorkProfile != null) {
@@ -236,7 +244,8 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
             CharSequence workProfileOrganizationName,
-            boolean isProfileOwnerOfOrganizationOwnedDevice, boolean isParentalControlsEnabled) {
+            boolean isProfileOwnerOfOrganizationOwnedDevice, boolean isParentalControlsEnabled,
+            boolean isWorkProfileOn) {
         if (isParentalControlsEnabled) {
             return mContext.getString(R.string.quick_settings_disclosure_parental_controls);
         }
@@ -280,7 +289,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                         organizationName);
             }
         } // end if(isDeviceManaged)
-        if (hasCACertsInWorkProfile) {
+        if (hasCACertsInWorkProfile && isWorkProfileOn) {
             if (workProfileOrganizationName == null) {
                 return mContext.getString(
                         R.string.quick_settings_disclosure_managed_profile_monitoring);
@@ -295,7 +304,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         if (vpnName != null && vpnNameWorkProfile != null) {
             return mContext.getString(R.string.quick_settings_disclosure_vpns);
         }
-        if (vpnNameWorkProfile != null) {
+        if (vpnNameWorkProfile != null && isWorkProfileOn) {
             return mContext.getString(R.string.quick_settings_disclosure_managed_profile_named_vpn,
                     vpnNameWorkProfile);
         }
@@ -308,7 +317,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             return mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                     vpnName);
         }
-        if (hasWorkProfile && isNetworkLoggingEnabled) {
+        if (hasWorkProfile && isNetworkLoggingEnabled && isWorkProfileOn) {
             return mContext.getString(
                     R.string.quick_settings_disclosure_managed_profile_network_activity);
         }

@@ -28,7 +28,7 @@ import android.accounts.AccountManagerInternal;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -322,6 +322,8 @@ public class SyncManager {
     private final AccountManagerInternal mAccountManagerInternal;
 
     private final PackageManagerInternal mPackageManagerInternal;
+
+    private final ActivityManagerInternal mAmi;
 
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
@@ -643,6 +645,7 @@ public class SyncManager {
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
         mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mAmi = LocalServices.getService(ActivityManagerInternal.class);
 
         mAccountManagerInternal.addOnAppPermissionChangeListener((Account account, int uid) -> {
             // If the UID gained access to the account kick-off syncs lacking account access
@@ -1115,15 +1118,11 @@ public class SyncManager {
         }
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
-        try {
-            if (ActivityManager.getService().isAppStartModeDisabled(owningUid, owningPackage)) {
-                Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
-                        + syncAdapterInfo.componentName
-                        + " -- package not allowed to start");
-                return AuthorityInfo.NOT_SYNCABLE;
-            }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        if (mAmi.isAppStartModeDisabled(owningUid, owningPackage)) {
+            Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
+                    + syncAdapterInfo.componentName
+                    + " -- package not allowed to start");
+            return AuthorityInfo.NOT_SYNCABLE;
         }
         if (checkAccountAccess && !canAccessAccount(account, owningPackage, owningUid)) {
             Log.w(TAG, "Access to " + logSafe(account) + " denied for package "

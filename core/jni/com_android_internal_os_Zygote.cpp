@@ -27,9 +27,11 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <functional>
+#include <iterator>
 #include <list>
 #include <optional>
 #include <sstream>
@@ -120,6 +122,10 @@ static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
 
+static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
+static jclass gZygoteInitClass;
+static jmethodID gGetOrCreateSystemServerClassLoader;
+
 static bool gIsSecurityEnforced = true;
 
 /**
@@ -168,6 +174,7 @@ static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
 static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
 
 static constexpr const char* kCurProfileDirPath = "/data/misc/profiles/cur";
+static constexpr const char* kRefProfileDirPath = "/data/misc/profiles/ref";
 
 /**
  * The maximum value that the gUSAPPoolSizeMax variable may take.  This value
@@ -880,7 +887,7 @@ static void DetachDescriptors(JNIEnv* env,
 
     for (int fd : fds_to_close) {
       ALOGV("Switching descriptor %d to /dev/null", fd);
-      if (dup3(devnull_fd, fd, O_CLOEXEC) == -1) {
+      if (TEMP_FAILURE_RETRY(dup3(devnull_fd, fd, O_CLOEXEC)) == -1) {
         fail_fn(StringPrintf("Failed dup3() on descriptor %d: %s", fd, strerror(errno)));
       }
     }
@@ -1431,6 +1438,7 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   // Mount (namespace) tmpfs on profile directory, so apps no longer access
   // the original profile directory anymore.
   MountAppDataTmpFs(kCurProfileDirPath, fail_fn);
+  MountAppDataTmpFs(kRefProfileDirPath, fail_fn);
 
   // Create profile directory for this user.
   std::string actualCurUserProfile = StringPrintf("%s/%d", kCurProfileDirPath, user_id);
@@ -1444,14 +1452,24 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
         packageName.c_str());
     std::string mirrorCurPackageProfile = StringPrintf("/data_mirror/cur_profiles/%d/%s",
         user_id, packageName.c_str());
+    std::string actualRefPackageProfile = StringPrintf("%s/%s", kRefProfileDirPath,
+        packageName.c_str());
+    std::string mirrorRefPackageProfile = StringPrintf("/data_mirror/ref_profiles/%s",
+        packageName.c_str());
 
     if (access(mirrorCurPackageProfile.c_str(), F_OK) != 0) {
       ALOGW("Can't access app profile directory: %s", mirrorCurPackageProfile.c_str());
       continue;
     }
+    if (access(mirrorRefPackageProfile.c_str(), F_OK) != 0) {
+      ALOGW("Can't access app profile directory: %s", mirrorRefPackageProfile.c_str());
+      continue;
+    }
 
     PrepareDir(actualCurPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
     BindMount(mirrorCurPackageProfile, actualCurPackageProfile, fail_fn);
+    PrepareDir(actualRefPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
+    BindMount(mirrorRefPackageProfile, actualRefPackageProfile, fail_fn);
   }
 }
 
@@ -1609,6 +1627,17 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
         android::PreInitializeNativeBridge(app_data_dir.has_value() ? app_data_dir.value().c_str()
                                                                     : nullptr,
                                            instruction_set.value().c_str());
+    }
+
+    if (is_system_server) {
+        // Prefetch the classloader for the system server. This is done early to
+        // allow a tie-down of the proper system server selinux domain.
+        env->CallStaticObjectMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
+        if (env->ExceptionCheck()) {
+            // Be robust here. The Java code will attempt to create the classloader
+            // at a later point (but may not have rights to use AoT artifacts).
+            env->ExceptionClear();
+        }
     }
 
     if (setresgid(gid, gid, gid) == -1) {
@@ -2005,6 +2034,9 @@ void zygote::ZygoteFailure(JNIEnv* env,
   __builtin_unreachable();
 }
 
+static std::set<int>* gPreloadFds = nullptr;
+static bool gPreloadFdsExtracted = false;
+
 // Utility routine to fork a process from the zygote.
 pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
                          const std::vector<int>& fds_to_close,
@@ -2030,9 +2062,12 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
   __android_log_close();
   AStatsSocket_close();
 
-  // If this is the first fork for this zygote, create the open FD table.  If
-  // it isn't, we just need to check whether the list of open files has changed
-  // (and it shouldn't in the normal case).
+  // If this is the first fork for this zygote, create the open FD table,
+  // verifying that files are of supported type and allowlisted.  Otherwise (not
+  // the first fork), check that the open files have not changed.  Newly open
+  // files are not expected, and will be disallowed in the future.  Currently
+  // they are allowed if they pass the same checks as in the
+  // FileDescriptorTable::Create() above.
   if (gOpenFdTable == nullptr) {
     gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, fail_fn);
   } else {
@@ -2128,7 +2163,12 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         fds_to_ignore.push_back(gSystemServerSocketFd);
     }
 
-    pid_t pid = zygote::ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
+    if (gPreloadFds && gPreloadFdsExtracted) {
+        fds_to_ignore.insert(fds_to_ignore.end(), gPreloadFds->begin(), gPreloadFds->end());
+    }
+
+    pid_t pid = zygote::ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore,
+                                   true);
 
     if (pid == 0) {
         SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, capabilities, capabilities,
@@ -2265,6 +2305,10 @@ int zygote::forkApp(JNIEnv* env,
       }
       fds_to_ignore.push_back(gSystemServerSocketFd);
   }
+  if (gPreloadFds && gPreloadFdsExtracted) {
+      fds_to_ignore.insert(fds_to_ignore.end(), gPreloadFds->begin(), gPreloadFds->end());
+  }
+
   return zygote::ForkCommon(env, /* is_system_server= */ false, fds_to_close,
                             fds_to_ignore, is_priority_fork == JNI_TRUE, purge);
 }
@@ -2558,6 +2602,7 @@ static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env
     case PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_SYNC;
     case PR_MTE_TCF_ASYNC:
+    case PR_MTE_TCF_ASYNC | PR_MTE_TCF_SYNC:
       return MEMORY_TAG_LEVEL_ASYNC;
     default:
       ALOGE("Unknown memory tagging level: %i", level);
@@ -2566,6 +2611,35 @@ static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env
 #else // defined(__aarch64__)
   return 0;
 #endif // defined(__aarch64__)
+}
+
+static void com_android_internal_os_Zygote_nativeMarkOpenedFilesBeforePreload(JNIEnv* env, jclass) {
+    // Ignore invocations when too early or too late.
+    if (gPreloadFds) {
+        return;
+    }
+
+    // App Zygote Preload starts soon. Save FDs remaining open.  After the
+    // preload finishes newly open files will be determined.
+    auto fail_fn = std::bind(zygote::ZygoteFailure, env, "zygote", nullptr, _1);
+    gPreloadFds = GetOpenFds(fail_fn).release();
+}
+
+static void com_android_internal_os_Zygote_nativeAllowFilesOpenedByPreload(JNIEnv* env, jclass) {
+    // Ignore invocations when too early or too late.
+    if (!gPreloadFds || gPreloadFdsExtracted) {
+        return;
+    }
+
+    // Find the newly open FDs, if any.
+    auto fail_fn = std::bind(zygote::ZygoteFailure, env, "zygote", nullptr, _1);
+    std::unique_ptr<std::set<int>> current_fds = GetOpenFds(fail_fn);
+    auto difference = std::make_unique<std::set<int>>();
+    std::set_difference(current_fds->begin(), current_fds->end(), gPreloadFds->begin(),
+                        gPreloadFds->end(), std::inserter(*difference, difference->end()));
+    delete gPreloadFds;
+    gPreloadFds = difference.release();
+    gPreloadFdsExtracted = true;
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -2616,6 +2690,10 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativeSupportsTaggedPointers},
         {"nativeCurrentTaggingLevel", "()I",
          (void*)com_android_internal_os_Zygote_nativeCurrentTaggingLevel},
+        {"nativeMarkOpenedFilesBeforePreload", "()V",
+         (void*)com_android_internal_os_Zygote_nativeMarkOpenedFilesBeforePreload},
+        {"nativeAllowFilesOpenedByPreload", "()V",
+         (void*)com_android_internal_os_Zygote_nativeAllowFilesOpenedByPreload},
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
@@ -2626,6 +2704,13 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
+  gGetOrCreateSystemServerClassLoader =
+          GetStaticMethodIDOrDie(env, gZygoteInitClass, "getOrCreateSystemServerClassLoader",
+                                 "()Ljava/lang/ClassLoader;");
+
+  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+
+  return JNI_OK;
 }
 }  // namespace android

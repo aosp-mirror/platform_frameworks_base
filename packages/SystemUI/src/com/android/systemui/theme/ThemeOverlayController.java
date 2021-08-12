@@ -241,7 +241,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         @Override
         public void onReceive(Context context, Intent intent) {
             boolean newWorkProfile = Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction());
-            boolean userStarted = Intent.ACTION_USER_STARTED.equals(intent.getAction());
+            boolean userStarted = Intent.ACTION_USER_SWITCHED.equals(intent.getAction());
             boolean isManagedProfile = mUserManager.isManagedProfile(
                     intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
             if (userStarted || newWorkProfile) {
@@ -288,7 +288,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
@@ -450,19 +450,23 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         OverlayIdentifier systemPalette = categoryToPackage.get(OVERLAY_CATEGORY_SYSTEM_PALETTE);
         if (mIsMonetEnabled && systemPalette != null && systemPalette.getPackageName() != null) {
             try {
-                int color = Integer.parseInt(systemPalette.getPackageName().toLowerCase(), 16);
+                String colorString =  systemPalette.getPackageName().toLowerCase();
+                if (!colorString.startsWith("#")) {
+                    colorString = "#" + colorString;
+                }
+                int color = Color.parseColor(colorString);
                 mNeutralOverlay = getOverlay(color, NEUTRAL);
                 mNeedsOverlayCreation = true;
                 categoryToPackage.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
-            } catch (NumberFormatException e) {
-                Log.w(TAG, "Invalid color definition: " + systemPalette.getPackageName());
+            } catch (Exception e) {
+                // Color.parseColor doesn't catch any exceptions from the calls it makes
+                Log.w(TAG, "Invalid color definition: " + systemPalette.getPackageName(), e);
             }
         } else if (!mIsMonetEnabled && systemPalette != null) {
             try {
                 // It's possible that we flipped the flag off and still have a @ColorInt in the
                 // setting. We need to sanitize the input, otherwise the overlay transaction will
                 // fail.
-                Integer.parseInt(systemPalette.getPackageName().toLowerCase(), 16);
                 categoryToPackage.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
             } catch (NumberFormatException e) {
                 // This is a package name. All good, let's continue
@@ -473,12 +477,17 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         OverlayIdentifier accentPalette = categoryToPackage.get(OVERLAY_CATEGORY_ACCENT_COLOR);
         if (mIsMonetEnabled && accentPalette != null && accentPalette.getPackageName() != null) {
             try {
-                int color = Integer.parseInt(accentPalette.getPackageName().toLowerCase(), 16);
+                String colorString =  accentPalette.getPackageName().toLowerCase();
+                if (!colorString.startsWith("#")) {
+                    colorString = "#" + colorString;
+                }
+                int color = Color.parseColor(colorString);
                 mSecondaryOverlay = getOverlay(color, ACCENT);
                 mNeedsOverlayCreation = true;
                 categoryToPackage.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
-            } catch (NumberFormatException e) {
-                Log.w(TAG, "Invalid color definition: " + accentPalette.getPackageName());
+            } catch (Exception e) {
+                // Color.parseColor doesn't catch any exceptions from the calls it makes
+                Log.w(TAG, "Invalid color definition: " + accentPalette.getPackageName(), e);
             }
         } else if (!mIsMonetEnabled && accentPalette != null) {
             try {

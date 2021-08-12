@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Твар не распазнаны. Скарыстайце адбітак пальца."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Каб працягнуць, скарыстайце адбітак пальца"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Не ўдалося распазнаць адбітак пальца. Разблакіруйце экран іншым спосабам."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Ідзе пошук вашага твару…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Значок твару"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Кнопка сумяшчальнасці маштаба."</string>
@@ -437,8 +439,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру ці мікрафон."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Прылада"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Правядзіце ўверх, каб пераключыць праграмы"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Каб хутка пераключыцца паміж праграмамі, перацягніце ўправа"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Уключыць/выключыць агляд"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Зараджаны"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Зарадка"</string>
@@ -458,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
     <string name="tap_again" msgid="1315420114387908655">"Націсніце яшчэ раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Каб адкрыць, прагарніце ўверх"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Націсніце, каб адкрыць"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Разблакіруйце, каб выкарыстоўваць NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Гэта прылада належыць вашай арганізацыі"</string>
@@ -484,10 +485,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Дадаць карыстальніка"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Новы карыстальнік"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Выдаліць госця?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Скінуць гасцявы сеанс?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Выдаліць"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Скінуць"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З вяртаннем, госць!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Хочаце працягнуць сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Пачаць зноў"</string>
@@ -677,7 +676,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Наладзьце картку, каб рабіць больш хуткія і бяспечныя куплі з дапамогай тэлефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Паказаць усе"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Разблакіраваць для аплаты"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не наладжана"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Дадаць карту"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Ідзе абнаўленне"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблакіраваць для выкарыстання"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Узнікла праблема з загрузкай вашых карт. Паўтарыце спробу пазней"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Налады экрана блакіроўкі"</string>
@@ -1055,7 +1055,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Перамясціць на край і схаваць"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Перамясціць за край і паказаць"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"уключыць/выключыць"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Элементы кіравання домам"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Элементы кіравання прыладай"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Выберыце праграму для дадавання элементаў кіравання"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Дададзены <xliff:g id="NUMBER_1">%s</xliff:g> элемент кіравання.</item>
@@ -1129,7 +1129,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Віджэты размовы"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Націсніце на размову, каб дадаць яе на галоўны экран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Вярніцеся сюды, калі з\'явяцца паведамленні"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Тут будуць паказвацца вашы нядаўнія размовы"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Прыярытэтныя размовы"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Нядаўнія размовы"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1158,8 +1158,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Глядзець нядаўнія паведамленні, прапушчаныя выклікі і абнаўленні стану"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Размова"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> адправіў паведамленне"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Прыпынена функцыяй \"Не турбаваць\""</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> прыслаў паведамленне: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> адправіў відарыс"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> абнавіў стан: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Даступна"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Праблема з чытаннем індыкатара зараду акумулятара"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Націсніце, каб убачыць больш"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Няма будзільнікаў"</string>

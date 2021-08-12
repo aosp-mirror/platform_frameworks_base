@@ -331,6 +331,8 @@ public:
             mSkiaLayer.reset();
         }
 
+        mProperties.mutateLayerProperties().mutableStretchEffect().clear();
+        mStretchMask.clear();
         // Clear out the previous snapshot and the image filter the previous
         // snapshot was created with whenever the layer changes.
         mSnapshotResult.snapshot = nullptr;

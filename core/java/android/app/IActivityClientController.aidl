@@ -117,16 +117,6 @@ interface IActivityClientController {
     oneway void setDisablePreviewScreenshots(in IBinder token, boolean disable);
 
     /**
-     * Restarts the activity by killing its process if it is visible. If the activity is not
-     * visible, the activity will not be restarted immediately and just keep the activity record in
-     * the stack. It also resets the current override configuration so the activity will use the
-     * configuration according to the latest state.
-     *
-     * @param activityToken The token of the target activity to restart.
-     */
-    void restartActivityProcessIfVisible(in IBinder activityToken);
-
-    /**
      * It should only be called from home activity to remove its outdated snapshot. The home
      * snapshot is used to speed up entering home from screen off. If the content of home activity
      * is significantly different from before taking the snapshot, then the home activity can use

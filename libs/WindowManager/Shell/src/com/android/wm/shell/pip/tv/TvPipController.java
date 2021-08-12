@@ -279,7 +279,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private void checkIfPinnedTaskAppeared() {
         final TaskInfo pinnedTask = getPinnedTaskInfo();
         if (DEBUG) Log.d(TAG, "checkIfPinnedTaskAppeared(), task=" + pinnedTask);
-        if (pinnedTask == null) return;
+        if (pinnedTask == null || pinnedTask.topActivity == null) return;
         mPinnedTaskId = pinnedTask.taskId;
         setState(STATE_PIP);
 

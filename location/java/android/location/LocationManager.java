@@ -315,6 +315,33 @@ public class LocationManager {
     public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
 
     /**
+     * Broadcast intent action when the ADAS (Advanced Driving Assistance Systems) GNSS location
+     * enabled state changes. Includes a boolean intent extra, {@link #EXTRA_ADAS_GNSS_ENABLED},
+     * with the enabled state of ADAS GNSS location. This broadcast only has meaning on automotive
+     * devices.
+     *
+     * @see #EXTRA_ADAS_GNSS_ENABLED
+     * @see #isAdasGnssLocationEnabled()
+     *
+     * @hide
+     */
+    // TODO: @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ADAS_GNSS_ENABLED_CHANGED =
+            "android.location.action.ADAS_GNSS_ENABLED_CHANGED";
+
+    /**
+     * Intent extra included with {@link #ACTION_ADAS_GNSS_ENABLED_CHANGED} broadcasts, containing
+     * the boolean enabled state of ADAS GNSS location.
+     *
+     * @see #ACTION_ADAS_GNSS_ENABLED_CHANGED
+     *
+     * @hide
+     */
+    // TODO: @SystemApi
+    public static final String EXTRA_ADAS_GNSS_ENABLED = "android.location.extra.ADAS_GNSS_ENABLED";
+
+    /**
      * Broadcast intent action indicating that a high power location requests
      * has either started or stopped being active.  The current state of
      * active location requests should be read from AppOpsManager using
@@ -615,6 +642,42 @@ public class LocationManager {
     public void setLocationEnabledForUser(boolean enabled, @NonNull UserHandle userHandle) {
         try {
             mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current enabled/disabled state of ADAS (Advanced Driving Assistance Systems)
+     * GNSS location access for the given user. This controls safety critical automotive access to
+     * GNSS location. This only has meaning on automotive devices.
+     *
+     * @return true if ADAS location is enabled and false if ADAS location is disabled.
+     *
+     * @hide
+     */
+    //TODO: @SystemApi
+    public boolean isAdasGnssLocationEnabled() {
+        try {
+            return mService.isAdasGnssLocationEnabledForUser(mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables ADAS (Advanced Driving Assistance Systems) GNSS location access for the
+     * given user. This only has meaning on automotive devices.
+     *
+     * @param enabled true to enable ADAS location and false to disable ADAS location.
+     *
+     * @hide
+     */
+    // TODO: @SystemApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public void setAdasGnssLocationEnabled(boolean enabled) {
+        try {
+            mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

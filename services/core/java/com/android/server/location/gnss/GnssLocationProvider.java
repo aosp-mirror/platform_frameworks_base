@@ -771,10 +771,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         boolean enabled = mContext.getSystemService(LocationManager.class)
                 .isLocationEnabledForUser(UserHandle.CURRENT);
 
-        // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
+        // .. but enable anyway, if there's an active bypass request (e.g. ELS or ADAS)
         enabled |= (mProviderRequest != null
                 && mProviderRequest.isActive()
-                && mProviderRequest.isLocationSettingsIgnored());
+                && mProviderRequest.isBypass());
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;

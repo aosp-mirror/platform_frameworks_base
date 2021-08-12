@@ -73,6 +73,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final QuickAccessWalletController mController;
 
     private WalletCard mSelectedCard;
+    private boolean mIsWalletUpdating = true;
     @VisibleForTesting Drawable mCardViewDrawable;
 
     @Inject
@@ -110,7 +111,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         super.handleSetListening(listening);
         if (listening) {
             mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE);
-            if (!mController.getWalletClient().isWalletServiceAvailable()) {
+            if (!mController.getWalletClient().isWalletServiceAvailable()
+                    || !mController.getWalletClient().isWalletFeatureAvailable()) {
                 Log.i(TAG, "QAW service is unavailable, recreating the wallet client.");
                 mController.reCreateWalletClient();
             }
@@ -156,9 +158,14 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         CharSequence label = mController.getWalletClient().getServiceLabel();
         state.label = label == null ? mLabel : label;
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
+        Drawable tileIcon = mController.getWalletClient().getTileIcon();
+        state.icon =
+                tileIcon == null
+                        ? ResourceIcon.get(R.drawable.ic_wallet_lockscreen)
+                        : new DrawableIcon(tileIcon);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
-        if (mController.getWalletClient().isWalletServiceAvailable()) {
+        if (mController.getWalletClient().isWalletServiceAvailable()
+                && mController.getWalletClient().isWalletFeatureAvailable()) {
             if (mSelectedCard != null) {
                 if (isDeviceLocked) {
                     state.state = Tile.STATE_INACTIVE;
@@ -172,7 +179,11 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 }
             } else {
                 state.state = Tile.STATE_INACTIVE;
-                state.secondaryLabel = mContext.getString(R.string.wallet_secondary_label_no_card);
+                state.secondaryLabel =
+                        mContext.getString(
+                                mIsWalletUpdating
+                                        ? R.string.wallet_secondary_label_updating
+                                        : R.string.wallet_secondary_label_no_card);
                 state.sideViewCustomDrawable = null;
             }
             state.stateDescription = state.secondaryLabel;
@@ -218,6 +229,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         @Override
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             Log.i(TAG, "Successfully retrieved wallet cards.");
+            mIsWalletUpdating = false;
             List<WalletCard> cards = response.getWalletCards();
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
@@ -240,7 +252,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
         @Override
         public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
-            Log.w(TAG, "Error retrieve wallet cards");
+            mIsWalletUpdating = false;
             mCardViewDrawable = null;
             mSelectedCard = null;
             refreshState();

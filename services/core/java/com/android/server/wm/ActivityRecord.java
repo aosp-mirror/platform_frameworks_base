@@ -38,6 +38,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -252,10 +253,12 @@ import android.app.servertransaction.TopResumedActivityChangeItem;
 import android.app.servertransaction.TransferSplashScreenViewStateItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -277,6 +280,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
@@ -327,6 +331,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.uri.NeededUriGrants;
@@ -796,6 +801,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
+
+    // Entering PiP is usually done in two phases, we put the task into pinned mode first and
+    // SystemUi sets the pinned mode on activity after transition is done.
+    boolean mWaitForEnteringPinnedMode;
 
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
@@ -1786,17 +1795,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Evaluate the theme for a starting window.
+     * @param prev Previous activity which may have a starting window.
      * @param originalTheme The original theme which read from activity or application.
      * @param replaceTheme The replace theme which requested from starter.
      * @return Resolved theme.
      */
-    private int evaluateStartingWindowTheme(String pkg, int originalTheme, int replaceTheme) {
+    private int evaluateStartingWindowTheme(ActivityRecord prev, String pkg, int originalTheme,
+            int replaceTheme) {
         // Skip if the package doesn't want a starting window.
-        if (!validateStartingWindowTheme(pkg, originalTheme)) {
+        if (!validateStartingWindowTheme(prev, pkg, originalTheme)) {
             return 0;
         }
         int selectedTheme = originalTheme;
-        if (replaceTheme != 0 && validateStartingWindowTheme(pkg, replaceTheme)) {
+        if (replaceTheme != 0 && validateStartingWindowTheme(prev, pkg, replaceTheme)) {
             // allow to replace theme
             selectedTheme = replaceTheme;
         }
@@ -1833,7 +1844,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return LAUNCH_SOURCE_TYPE_APPLICATION;
     }
 
-    private boolean validateStartingWindowTheme(String pkg, int theme) {
+    private boolean validateStartingWindowTheme(ActivityRecord prev, String pkg, int theme) {
         // If this is a translucent window, then don't show a starting window -- the current
         // effect (a full-screen opaque starting window that fades away to the real contents
         // when it is ready) does not work for this.
@@ -1870,7 +1881,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (windowDisableStarting && !launchedFromSystemSurface()) {
-            return false;
+            // Check if previous activity can transfer the starting window to this activity.
+            return prev != null && prev.getActivityType() == ACTIVITY_TYPE_STANDARD
+                    && prev.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_IDLE
+                    && (prev.mStartingData != null
+                    || (prev.mStartingWindow != null && prev.mStartingSurface != null));
         }
         return true;
     }
@@ -1920,11 +1935,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* isLowResolution */);
-        final int typeParameter = mWmService.mStartingSurfaceController
-                .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, useEmpty);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, snapshot);
+
+        //TODO(191787740) Remove for T
+        final boolean useLegacy = type == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                && mWmService.mStartingSurfaceController.isExceptionApp(packageName, mTargetSdk,
+                    () -> {
+                        ActivityInfo activityInfo = intent.resolveActivityInfo(
+                                mAtmService.mContext.getPackageManager(),
+                                PackageManager.GET_META_DATA);
+                        return activityInfo != null ? activityInfo.applicationInfo : null;
+                    });
+
+        final int typeParameter = mWmService.mStartingSurfaceController
+                .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
+                        allowTaskSnapshot, activityCreated, useEmpty, useLegacy);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
             if (isActivityTypeHome()) {
@@ -2243,6 +2269,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final WindowManagerPolicy.StartingSurface surface;
+        final StartingData startingData = mStartingData;
         if (mStartingData != null) {
             surface = mStartingSurface;
             mStartingData = null;
@@ -2269,7 +2296,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Runnable removeSurface = () -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
-                surface.remove(prepareAnimation);
+                surface.remove(prepareAnimation && startingData.needRevealAnimation());
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
@@ -4699,7 +4726,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private void postApplyAnimation(boolean visible) {
         final boolean delayed = isAnimating(PARENTS | CHILDREN,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
+                        | ANIMATION_TYPE_RECENTS);
         if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
@@ -4719,7 +4747,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
+        if (visible || !isAnimating(PARENTS,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
             setClientVisible(visible);
         }
 
@@ -4871,6 +4900,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             true /* activityChange */, true /* updateOomAdj */,
                             true /* addPendingTopUid */);
                 }
+                final ContentCaptureManagerInternal contentCaptureService =
+                        LocalServices.getService(ContentCaptureManagerInternal.class);
+                if (contentCaptureService != null) {
+                    contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
+                            ActivityEvent.TYPE_ACTIVITY_STARTED);
+                }
                 break;
             case PAUSED:
                 mAtmService.updateBatteryStats(this, false);
@@ -4998,8 +5033,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void notifyAppStopped() {
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
+        // This is to fix the edge case that auto-enter-pip is finished in Launcher but app calls
+        // setAutoEnterEnabled(false) and transitions to STOPPED state, see b/191930787.
+        // Clear any surface transactions and content overlay in this case.
+        if (task != null && task.mLastRecentsAnimationTransaction != null) {
+            task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
+        }
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
+        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        if (isClientVisible()) {
+            // Though this is usually unlikely to happen, still make sure the client is invisible.
+            setClientVisible(false);
+        }
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -6197,7 +6243,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void showStartingWindow(boolean taskSwitch) {
         showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                0 /* splashScreenTheme */, null);
+                false /* startActivity */, null);
     }
 
     /**
@@ -6232,7 +6278,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return null;
     }
 
-    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord) {
+    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord, boolean startActivity) {
+        if (sourceRecord == null && !startActivity) {
+            // Use empty style if this activity is not top activity. This could happen when adding
+            // a splash screen window to the warm start activity which is re-create because top is
+            // finishing.
+            final ActivityRecord above = task.getActivityAbove(this);
+            if (above != null) {
+                return true;
+            }
+        }
         if (mPendingOptions != null) {
             final int optionsStyle = mPendingOptions.getSplashScreenStyle();
             if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
@@ -6259,8 +6314,41 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
+    private int getSplashscreenTheme() {
+        // Find the splash screen theme. User can override the persisted theme by
+        // ActivityOptions.
+        String splashScreenThemeResName = mPendingOptions != null
+                ? mPendingOptions.getSplashScreenThemeResName() : null;
+        if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
+            try {
+                splashScreenThemeResName = mAtmService.getPackageManager()
+                        .getSplashScreenTheme(packageName, mUserId);
+            } catch (RemoteException ignore) {
+                // Just use the default theme
+            }
+        }
+        int splashScreenThemeResId = 0;
+        if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
+            try {
+                final Context packageContext = mAtmService.mContext
+                        .createPackageContext(packageName, 0);
+                splashScreenThemeResId = packageContext.getResources()
+                        .getIdentifier(splashScreenThemeResName, null, null);
+            } catch (PackageManager.NameNotFoundException
+                    | Resources.NotFoundException ignore) {
+                // Just use the default theme
+            }
+        }
+        return splashScreenThemeResId;
+    }
+
+    /**
+     * @param prev Previous activity which contains a starting window.
+     * @param startActivity Whether this activity is just created from starter.
+     * @param sourceRecord The source activity which start this activity.
+     */
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
-            int splashScreenTheme, ActivityRecord sourceRecord) {
+            boolean startActivity, ActivityRecord sourceRecord) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -6274,17 +6362,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final CompatibilityInfo compatInfo =
                 mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo);
 
-        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord);
+        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord, startActivity);
 
-        final int resolvedTheme = evaluateStartingWindowTheme(packageName, theme,
+        final int splashScreenTheme = startActivity ? getSplashscreenTheme() : 0;
+        final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
+
+        final boolean activityCreated =
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
+        // If this activity is just created and all activities below are finish, treat this
+        // scenario as warm launch.
+        final boolean newSingleActivity = !newTask && !activityCreated
+                && task.getActivity((r) -> !r.finishing && r != this) == null;
 
         final boolean shown = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
-                allowTaskSnapshot(),
-                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
-                mSplashScreenStyleEmpty);
+                prev != null ? prev.appToken : null,
+                newTask || newSingleActivity, taskSwitch, isProcessRunning(),
+                allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
@@ -7666,6 +7761,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // mode (see RootWindowContainer#moveActivityToPinnedRootTask). So once the windowing mode
         // of activity is changed, it is the signal of the last step to update the PiP states.
         if (!wasInPictureInPicture && inPinnedWindowingMode() && task != null) {
+            mWaitForEnteringPinnedMode = false;
             mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, task.getBounds());
         }
 

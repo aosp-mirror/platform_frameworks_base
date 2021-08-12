@@ -81,6 +81,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private TouchAnimator mFirstPageAnimator;
     private TouchAnimator mFirstPageDelayedAnimator;
+    private TouchAnimator mTranslationXAnimator;
     private TouchAnimator mTranslationYAnimator;
     private TouchAnimator mNonfirstPageAnimator;
     private TouchAnimator mNonfirstPageDelayedAnimator;
@@ -139,9 +140,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateAnimators();
     }
 
-
-    public void onQsScrollingChanged() {
-        // Lazily update animators whenever the scrolling changes
+    /**
+     * Request an update to the animators. This will update them lazily next time the position
+     * is changed.
+     */
+    public void requestAnimatorUpdate() {
         mNeedsAnimatorUpdate = true;
     }
 
@@ -223,18 +226,25 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             View qqsView,
             View qsView,
             View commonParent,
+            int xOffset,
             int yOffset,
             int[] temp,
-            TouchAnimator.Builder animatorBuilder
+            TouchAnimator.Builder animatorBuilderX,
+            TouchAnimator.Builder animatorBuilderY
     ) {
         getRelativePosition(temp, qqsView, commonParent);
-        int qqsPos = temp[1];
+        int qqsPosX = temp[0];
+        int qqsPosY = temp[1];
         getRelativePosition(temp, qsView, commonParent);
-        int qsPos = temp[1];
+        int qsPosX = temp[0];
+        int qsPosY = temp[1];
 
-        int diff = qsPos - qqsPos - yOffset;
-        animatorBuilder.addFloat(qqsView, "translationY", 0, diff);
-        animatorBuilder.addFloat(qsView, "translationY", -diff, 0);
+        int xDiff = qsPosX - qqsPosX - xOffset;
+        animatorBuilderX.addFloat(qqsView, "translationX", 0, xDiff);
+        animatorBuilderX.addFloat(qsView, "translationX", -xDiff, 0);
+        int yDiff = qsPosY - qqsPosY - yOffset;
+        animatorBuilderY.addFloat(qqsView, "translationY", 0, yDiff);
+        animatorBuilderY.addFloat(qsView, "translationY", -yDiff, 0);
         mAllViews.add(qqsView);
         mAllViews.add(qsView);
     }
@@ -243,6 +253,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mNeedsAnimatorUpdate = false;
         TouchAnimator.Builder firstPageBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
+        TouchAnimator.Builder translationXBuilder = new Builder();
 
         Collection<QSTile> tiles = mHost.getTiles();
         int count = 0;
@@ -289,6 +300,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     getRelativePosition(loc1, quickTileView, view);
                     getRelativePosition(loc2, tileView, view);
                     int yOffset = loc2[1] - loc1[1];
+                    int xOffset = loc2[0] - loc1[0];
 
                     // Offset the translation animation on the views
                     // (that goes from 0 to getOffsetTranslation)
@@ -298,6 +310,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             offsetWithQSBHTranslation);
                     translationYBuilder.addFloat(tileView, "translationY",
                             -offsetWithQSBHTranslation, 0);
+
+                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xOffset);
+                    translationXBuilder.addFloat(tileView, "translationX", -xOffset, 0);
 
                     if (mQQSTileHeightAnimator == null) {
                         mQQSTileHeightAnimator = new HeightExpansionAnimator(this,
@@ -312,8 +327,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             quickTileView.getIcon(),
                             tileView.getIcon(),
                             view,
+                            xOffset,
                             yOffset,
                             loc1,
+                            translationXBuilder,
                             translationYBuilder
                     );
 
@@ -322,8 +339,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             quickTileView.getLabelContainer(),
                             tileView.getLabelContainer(),
                             view,
+                            xOffset,
                             yOffset,
                             loc1,
+                            translationXBuilder,
                             translationYBuilder
                     );
 
@@ -332,8 +351,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             quickTileView.getSecondaryIcon(),
                             tileView.getSecondaryIcon(),
                             view,
+                            xOffset,
                             yOffset,
                             loc1,
+                            translationXBuilder,
                             translationYBuilder
                     );
 
@@ -364,6 +385,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     mOtherTilesExpandAnimator.addView(tileView);
                     tileView.setClipChildren(true);
                     tileView.setClipToPadding(true);
+                    firstPageBuilder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 1);
                 }
 
                 mAllViews.add(tileView);
@@ -398,10 +420,19 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // Fade in the security footer and the divider as we reach the final position
             builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
             builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
+            if (mQsPanelController.shouldUseHorizontalLayout()
+                    && mQsPanelController.mMediaHost.hostView != null) {
+                builder.addFloat(mQsPanelController.mMediaHost.hostView, "alpha", 0, 1);
+            } else {
+                // In portrait, media view should always be visible
+                mQsPanelController.mMediaHost.hostView.setAlpha(1.0f);
+            }
             mAllPagesDelayedAnimator = builder.build();
             mAllViews.add(mSecurityFooter.getView());
             translationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
+            translationXBuilder.setInterpolator(mQSExpansionPathInterpolator.getXInterpolator());
             mTranslationYAnimator = translationYBuilder.build();
+            mTranslationXAnimator = translationXBuilder.build();
             if (mQQSTileHeightAnimator != null) {
                 mQQSTileHeightAnimator.setInterpolator(
                         mQSExpansionPathInterpolator.getYInterpolator());
@@ -474,6 +505,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
             mTranslationYAnimator.setPosition(position);
+            mTranslationXAnimator.setPosition(position);
             if (mQQSTileHeightAnimator != null) {
                 mQQSTileHeightAnimator.setPosition(position);
             }

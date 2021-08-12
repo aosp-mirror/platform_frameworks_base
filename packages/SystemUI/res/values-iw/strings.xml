@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"לא ניתן לזהות את הפנים. יש להשתמש בטביעת אצבע במקום."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"יש להשתמש בטביעת האצבע כדי להמשיך"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"לא ניתן לזהות את טביעת האצבע. יש להשתמש בנעילת המסך במקום."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"מתבצע חיפוש…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"סמל הפנים"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"לחצן מרחק מתצוגה של תאימות."</string>
@@ -437,8 +439,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"הפעולה הזו מבטלת את חסימת הגישה של כל האפליקציות והשירותים שמורשים להשתמש במצלמה."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"הפעולה הזו מבטלת את חסימת הגישה של כל האפליקציות והשירותים שמורשים להשתמש במצלמה או במיקרופון."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"מכשיר"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"יש להחליק מעלה כדי להחליף אפליקציות"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"יש לגרור ימינה כדי לעבור במהירות בין אפליקציות"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"החלפת מצב של מסכים אחרונים"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"הסוללה טעונה"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"בטעינה"</string>
@@ -458,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"יש להקיש שוב כדי לפתוח את ההתראה"</string>
     <string name="tap_again" msgid="1315420114387908655">"צריך להקיש פעם נוספת"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"יש להקיש כדי לפתוח"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏יש לבטל את הנעילה כדי להשתמש ב-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"המכשיר הזה שייך לארגון שלך"</string>
@@ -484,12 +485,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"הוספת משתמש"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"משתמש חדש"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"להסיר אורח?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסרה"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"האם ברצונך להמשיך בפעילות באתר?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"סשן חדש"</string>
@@ -679,7 +676,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"מגדירים אמצעי תשלום ונהנים מביצוע מהיר ומאובטח יותר של רכישות באמצעות הטלפון"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"הצגת הכול"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"לביטול הנעילה ולתשלום"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"לא מוגדר"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"הוספת כרטיס"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"מתבצע עדכון"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"יש לבטל את הנעילה כדי להשתמש"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"הייתה בעיה בקבלת הכרטיסים שלך. כדאי לנסות שוב מאוחר יותר"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"הגדרות מסך הנעילה"</string>
@@ -754,7 +752,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"מוצגת בחלק העליון של קטע ההתראות וכתמונת פרופיל במסך הנעילה"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מפריעה במצב \'נא לא להפריע\'"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה הצפה ומפריעה במצב \'נא לא להפריע\'"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
@@ -1057,7 +1055,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"העברה לשוליים והסתרה"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"העברה מהשוליים והצגה"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"החלפת מצב"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"פקדי הבית החכם"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"פקדי מכשירים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
@@ -1131,7 +1129,7 @@
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ווידג\'טים של שיחות"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"יש להקיש על שיחה כדי להוסיף אותה למסך הבית"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"אפשר לחזור לכאן ולהתעדכן לאחר קבלת מספר הודעות"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"השיחות האחרונות שלך יופיעו כאן"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"שיחות בעדיפות גבוהה"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"שיחות אחרונות"</string>
     <string name="okay" msgid="6490552955618608554">"בסדר"</string>
@@ -1160,8 +1158,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ההודעות האחרונות, שיחות שלא נענו ועדכוני סטטוס"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"שיחה"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה הודעה"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"ההתראה הושהתה על ידי \'נא לא להפריע\'"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"התקבלה הודעה מ<xliff:g id="NAME">%1$s</xliff:g>: ‏<xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה תמונה"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"הסטטוס של <xliff:g id="NAME">%1$s</xliff:g> עודכן: ‏<xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"אונליין"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה התראה"</string>

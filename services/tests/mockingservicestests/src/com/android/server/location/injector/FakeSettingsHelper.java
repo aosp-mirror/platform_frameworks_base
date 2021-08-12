@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Version of AppOpsHelper for testing. Settings are initialized to reasonable defaults (location is
- * enabled by default).
+ * Version of SettingsHelper for testing. Settings are initialized to reasonable defaults (location
+ * is enabled by default).
  */
 public class FakeSettingsHelper extends SettingsHelper {
 
