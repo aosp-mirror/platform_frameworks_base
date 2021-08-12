@@ -31,7 +31,10 @@ import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
+import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
+import org.junit.Assume.assumeFalse
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +53,12 @@ import org.junit.runners.Parameterized
 class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
     private val testApp = FixedAppHelper(instrumentation)
+
+    @Before
+    open fun setup() {
+        // Legacy split is having some issue with Shell transition, and will be deprecated soon.
+        assumeFalse(isShellTransitionsEnabled())
+    }
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
