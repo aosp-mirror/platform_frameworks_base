@@ -56,8 +56,7 @@ public:
 
 private:
     CopyResult copySurfaceIntoLegacy(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap);
-    CopyResult copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
-                             const Rect& srcRect, SkBitmap* bitmap);
+    CopyResult copyImageInto(const sk_sp<SkImage>& image, const Rect& srcRect, SkBitmap* bitmap);
 
     bool copyLayerInto(Layer* layer, const SkRect* srcRect, const SkRect* dstRect,
                        SkBitmap* bitmap);

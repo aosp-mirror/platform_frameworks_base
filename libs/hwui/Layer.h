@@ -74,9 +74,17 @@ public:
 
     void setColorFilter(sk_sp<SkColorFilter> filter) { mColorFilter = filter; };
 
-    inline SkMatrix& getTexTransform() { return texTransform; }
-
     inline SkMatrix& getTransform() { return transform; }
+
+    inline SkRect getCurrentCropRect() { return mCurrentCropRect; }
+
+    inline void setCurrentCropRect(const SkRect currentCropRect) {
+        mCurrentCropRect = currentCropRect;
+    }
+
+    inline void setWindowTransform(uint32_t windowTransform) { mWindowTransform = windowTransform; }
+
+    inline uint32_t getWindowTransform() { return mWindowTransform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -116,14 +124,19 @@ private:
     SkBlendMode mode;
 
     /**
-     * Optional texture coordinates transform.
-     */
-    SkMatrix texTransform;
-
-    /**
      * Optional transform.
      */
     SkMatrix transform;
+
+    /**
+     * Optional crop
+     */
+    SkRect mCurrentCropRect;
+
+    /**
+     * Optional transform
+     */
+    uint32_t mWindowTransform;
 
     /**
      * An image backing the layer.
