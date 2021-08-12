@@ -122,7 +122,8 @@ public final class DisplayManager {
             VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS,
             VIRTUAL_DISPLAY_FLAG_TRUSTED,
             VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
-            VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+            VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED,
+            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VirtualDisplayFlag {}
@@ -378,6 +379,15 @@ public final class DisplayManager {
      * @hide
      */
     public static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
+
+    /**
+     * Virtual display flags: Indicates that the display should not play sound effects or perform
+     * haptic feedback when the user touches the screen.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {

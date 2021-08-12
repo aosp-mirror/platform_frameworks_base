@@ -865,6 +865,9 @@ public final class DisplayInfo implements Parcelable {
         if ((flags & Display.FLAG_ALWAYS_UNLOCKED) != 0) {
             result.append(", FLAG_ALWAYS_UNLOCKED");
         }
+        if ((flags & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            result.append(", FLAG_TOUCH_FEEDBACK_DISABLED");
+        }
         return result.toString();
     }
 }

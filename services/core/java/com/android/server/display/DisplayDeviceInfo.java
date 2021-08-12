@@ -149,6 +149,13 @@ final class DisplayDeviceInfo {
      */
     public static final int FLAG_ALWAYS_UNLOCKED = 1 << 15;
 
+    /**
+     * Flag: Indicates that the display should not play sound effects or perform haptic feedback
+     * when the user touches the screen.
+     *
+     * @hide
+     */
+    public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 16;
 
     /**
      * Touch attachment: Display does not receive touch.

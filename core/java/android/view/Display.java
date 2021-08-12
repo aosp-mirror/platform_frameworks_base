@@ -309,6 +309,15 @@ public final class Display {
     public static final int FLAG_ALWAYS_UNLOCKED = 1 << 9;
 
     /**
+     * Flag: Indicates that the display should not play sound effects or perform haptic feedback
+     * when the user touches the screen.
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 10;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.

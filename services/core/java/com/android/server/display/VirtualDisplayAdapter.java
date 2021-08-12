@@ -27,10 +27,12 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTAT
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 
 import static com.android.server.display.DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
+import static com.android.server.display.DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
 import android.content.Context;
@@ -456,6 +458,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0
                         && (mInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
                     mInfo.flags |= FLAG_ALWAYS_UNLOCKED;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+                    mInfo.flags |= FLAG_TOUCH_FEEDBACK_DISABLED;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;
