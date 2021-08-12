@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,6 +37,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentCreationParams;
@@ -70,6 +72,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private IBinder mFragmentToken;
     private WindowContainerTransaction mTransaction;
     private WindowContainerToken mFragmentWindowToken;
+    private RemoteAnimationDefinition mDefinition;
 
     @Before
     public void setup() {
@@ -83,6 +86,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 new TaskFragment(mAtm, mFragmentToken, true /* createdByOrganizer */);
         mTransaction = new WindowContainerTransaction();
         mFragmentWindowToken = mTaskFragment.mRemoteToken.toWindowContainerToken();
+        mDefinition = new RemoteAnimationDefinition();
 
         spyOn(mController);
         spyOn(mOrganizer);
@@ -205,6 +209,18 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentError(eq(errorCallbackToken), eq(exception));
+    }
+
+    @Test
+    public void testRegisterRemoteAnimations() {
+        mController.registerOrganizer(mIOrganizer);
+        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
+
+        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
+
+        mController.unregisterRemoteAnimations(mIOrganizer);
+
+        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
     }
 
     @Test

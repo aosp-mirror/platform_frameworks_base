@@ -1249,6 +1249,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-702650156": {
+      "message": "Override with TaskFragment remote animation for transit=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "-701167286": {
       "message": "applyAnimation: transit=%s, enter=%b, wc=%s",
       "level": "VERBOSE",
@@ -1788,6 +1794,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-70719599": {
+      "message": "Unregister remote animations for organizer=%s uid=%d pid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "-55185509": {
       "message": "setFocusedTask: taskId=%d touchedActivity=%s",
@@ -2940,6 +2952,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1210037962": {
+      "message": "Register remote animations for organizer=%s uid=%d pid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "1219600119": {
       "message": "addWindow: win=%s Callers=%s",
