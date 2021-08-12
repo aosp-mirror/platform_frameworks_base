@@ -10221,6 +10221,13 @@ public final class Settings {
                 "device_state_rotation_lock";
 
         /**
+         * Control whether communal mode is allowed on this device.
+         *
+         * @hide
+         */
+        public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
