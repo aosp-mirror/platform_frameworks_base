@@ -42,6 +42,9 @@ private:
 extern std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj);
 
+extern jobject android_view_InputApplicationHandle_fromInputApplicationInfo(
+        JNIEnv* env, gui::InputApplicationInfo inputApplicationInfo);
+
 } // namespace android
 
 #endif // _ANDROID_VIEW_INPUT_APPLICATION_HANDLE_H
