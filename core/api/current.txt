@@ -6652,7 +6652,7 @@ package android.app {
     method public boolean onUnbind(android.content.Intent);
     method public final void startForeground(int, android.app.Notification);
     method public final void startForeground(int, @NonNull android.app.Notification, int);
-    method public final void stopForeground(boolean);
+    method @Deprecated public final void stopForeground(boolean);
     method public final void stopForeground(int);
     method public final void stopSelf();
     method public final void stopSelf(int);
@@ -25267,12 +25267,12 @@ package android.media.session {
   public final class MediaSessionManager {
     method public void addOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, @Nullable android.content.ComponentName);
     method public void addOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, @Nullable android.content.ComponentName, @Nullable android.os.Handler);
-    method public void addOnMediaKeyEventSessionChangedListener(@NonNull android.content.ComponentName, @NonNull java.util.concurrent.Executor, @NonNull android.media.session.MediaSessionManager.OnMediaKeyEventSessionChangedListener);
+    method public void addOnMediaKeyEventSessionChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.session.MediaSessionManager.OnMediaKeyEventSessionChangedListener);
     method public void addOnSession2TokensChangedListener(@NonNull android.media.session.MediaSessionManager.OnSession2TokensChangedListener);
     method public void addOnSession2TokensChangedListener(@NonNull android.media.session.MediaSessionManager.OnSession2TokensChangedListener, @NonNull android.os.Handler);
     method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessions(@Nullable android.content.ComponentName);
-    method @Nullable public android.media.session.MediaSession.Token getMediaKeyEventSession(@NonNull android.content.ComponentName);
-    method @NonNull public String getMediaKeyEventSessionPackageName(@NonNull android.content.ComponentName);
+    method @Nullable public android.media.session.MediaSession.Token getMediaKeyEventSession();
+    method @NonNull public String getMediaKeyEventSessionPackageName();
     method @NonNull public java.util.List<android.media.Session2Token> getSession2Tokens();
     method public boolean isTrustedForMediaControl(@NonNull android.media.session.MediaSessionManager.RemoteUserInfo);
     method @Deprecated public void notifySession2Created(@NonNull android.media.Session2Token);

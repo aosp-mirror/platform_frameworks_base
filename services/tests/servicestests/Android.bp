@@ -37,7 +37,6 @@ android_test {
         "services.net",
         "services.people",
         "services.usage",
-        "services.uwb",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",

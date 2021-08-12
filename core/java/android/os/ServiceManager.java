@@ -257,7 +257,12 @@ public final class ServiceManager {
      *
      * @return {@code null} only if there are permission problems or fatal errors.
      */
-    public static native IBinder waitForService(@NonNull String name);
+    public static IBinder waitForService(@NonNull String name) {
+        return Binder.allowBlocking(waitForServiceNative(name));
+    }
+
+    private static native IBinder waitForServiceNative(@NonNull String name);
+
 
     /**
      * Returns the specified service from the service manager, if declared.

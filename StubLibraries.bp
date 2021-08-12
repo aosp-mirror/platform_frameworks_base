@@ -250,6 +250,7 @@ modules_public_stubs = [
     "framework-sdkextensions.stubs",
     "framework-statsd.stubs",
     "framework-tethering.stubs",
+    "framework-uwb.stubs",
     "framework-wifi.stubs",
     "i18n.module.public.api.stubs",
 ]
@@ -269,6 +270,7 @@ modules_system_stubs = [
     "framework-sdkextensions.stubs.system",
     "framework-statsd.stubs.system",
     "framework-tethering.stubs.system",
+    "framework-uwb.stubs.system",
     "framework-wifi.stubs.system",
     "i18n.module.public.api.stubs", // Only has public stubs
 ]

@@ -64,7 +64,6 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
             transitions {
                 pipApp.clickEnterPipButton(wmHelper)
-                pipApp.expandPipWindow(wmHelper)
             }
         }
 

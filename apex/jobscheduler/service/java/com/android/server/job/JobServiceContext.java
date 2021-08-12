@@ -531,6 +531,42 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    @Override
+    public void onBindingDied(ComponentName name) {
+        synchronized (mLock) {
+            if (mRunningJob == null) {
+                Slog.e(TAG, "Binding died for " + name.getPackageName()
+                        + " but no running job on this context");
+            } else if (mRunningJob.getServiceComponent().equals(name)) {
+                Slog.e(TAG, "Binding died for "
+                        + mRunningJob.getSourceUserId() + ":" + name.getPackageName());
+            } else {
+                Slog.e(TAG, "Binding died for " + name.getPackageName()
+                        + " but context is running a different job");
+            }
+            closeAndCleanupJobLocked(true /* needsReschedule */, "binding died");
+        }
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+        synchronized (mLock) {
+            if (mRunningJob == null) {
+                Slog.wtf(TAG, "Got null binding for " + name.getPackageName()
+                        + " but no running job on this context");
+            } else if (mRunningJob.getServiceComponent().equals(name)) {
+                Slog.wtf(TAG, "Got null binding for "
+                        + mRunningJob.getSourceUserId() + ":" + name.getPackageName());
+            } else {
+                Slog.wtf(TAG, "Got null binding for " + name.getPackageName()
+                        + " but context is running a different job");
+            }
+            // Don't reschedule the job since returning a null binding is an explicit choice by the
+            // app which breaks things.
+            closeAndCleanupJobLocked(false /* needsReschedule */, "null binding");
+        }
+    }
+
     /**
      * This class is reused across different clients, and passes itself in as a callback. Check
      * whether the client exercising the callback is the client we expect.

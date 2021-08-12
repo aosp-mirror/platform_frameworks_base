@@ -42,6 +42,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.TestableContext;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
@@ -92,8 +93,8 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected boolean addWindow(int taskId, IBinder appToken,
-                View view, WindowManager wm, WindowManager.LayoutParams params, int suggestType) {
+        protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,
+                WindowManager.LayoutParams params, int suggestType) {
             // listen for addView
             mAddWindowForTask = taskId;
             mViewThemeResId = view.getContext().getThemeResId();
