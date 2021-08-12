@@ -940,7 +940,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 final int displayId = r.getDisplayId();
                 final Context c = root.getDisplayUiContext(displayId);
 
-                if (r.mVisibleRequested && !displayContexts.contains(c)) {
+                if (c != null && r.mVisibleRequested && !displayContexts.contains(c)) {
                     displayContexts.add(c);
                 }
             }
