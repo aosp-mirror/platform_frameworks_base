@@ -3029,6 +3029,19 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Sets the token used for background operations for the pending intents associated with this
+     * notification.
+     *
+     * This token is automatically set during deserialization for you, you usually won't need to
+     * call this unless you want to change the existing token, if any.
+     *
+     * @hide
+     */
+    public void setAllowlistToken(@Nullable IBinder token) {
+        mWhitelistToken = token;
+    }
+
+    /**
      * @hide
      */
     public static void addFieldsFromContext(Context context, Notification notification) {
