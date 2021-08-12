@@ -14971,7 +14971,7 @@ package android.graphics {
     method public void drawTextRun(@NonNull android.graphics.text.MeasuredText, int, int, int, int, float, float, boolean, @NonNull android.graphics.Paint);
     method public void drawVertices(@NonNull android.graphics.Canvas.VertexMode, int, @NonNull float[], int, @Nullable float[], int, @Nullable int[], int, @Nullable short[], int, int, @NonNull android.graphics.Paint);
     method public void enableZ();
-    method public boolean getClipBounds(@Nullable android.graphics.Rect);
+    method public boolean getClipBounds(@NonNull android.graphics.Rect);
     method @NonNull public final android.graphics.Rect getClipBounds();
     method public int getDensity();
     method @Nullable public android.graphics.DrawFilter getDrawFilter();
