@@ -278,15 +278,41 @@ public enum ScrimState {
     BUBBLE_EXPANDED {
         @Override
         public void prepare(ScrimState previousState) {
-            mFrontTint = Color.TRANSPARENT;
-            mBehindTint = Color.TRANSPARENT;
-            mBubbleTint = Color.BLACK;
+            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mNotifAlpha = 0;
+            mFrontAlpha = 0;
 
-            mFrontAlpha = 0f;
-            mBehindAlpha = mDefaultScrimAlpha;
+            mAnimationDuration = mKeyguardFadingAway
+                    ? mKeyguardFadingAwayDuration
+                    : StatusBar.FADE_KEYGUARD_DURATION;
+
+            mAnimateChange = !mLaunchingAffordanceWithPreview;
+
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = Color.BLACK;
+            mBubbleTint = Color.BLACK;
+            mBlankScreen = false;
+
+            if (previousState == ScrimState.AOD) {
+                // Set all scrims black, before they fade transparent.
+                updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
+                if (mScrimForBubble != null) {
+                    updateScrimColor(mScrimForBubble, 1f /* alpha */, Color.BLACK /* tint */);
+                }
+
+                // Scrims should still be black at the end of the transition.
+                mFrontTint = Color.BLACK;
+                mBehindTint = Color.BLACK;
+                mBubbleTint = Color.BLACK;
+                mBlankScreen = true;
+            }
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
-            mBlankScreen = false;
         }
     };
 
