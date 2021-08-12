@@ -1720,21 +1720,21 @@ public class CameraMetadataNative implements Parcelable {
                 new SetCommand() {
             @Override
             public <T> void setValue(CameraMetadataNative metadata, T value) {
-                metadata.setAWBRegions((MeteringRectangle[]) value);
+                metadata.setAWBRegions(value);
             }
         });
         sSetCommandMap.put(CaptureRequest.CONTROL_AF_REGIONS.getNativeKey(),
                 new SetCommand() {
             @Override
             public <T> void setValue(CameraMetadataNative metadata, T value) {
-                metadata.setAFRegions((MeteringRectangle[]) value);
+                metadata.setAFRegions(value);
             }
         });
         sSetCommandMap.put(CaptureRequest.CONTROL_AE_REGIONS.getNativeKey(),
                 new SetCommand() {
             @Override
             public <T> void setValue(CameraMetadataNative metadata, T value) {
-                metadata.setAERegions((MeteringRectangle[]) value);
+                metadata.setAERegions(value);
             }
         });
     }
@@ -1815,30 +1815,33 @@ public class CameraMetadataNative implements Parcelable {
         return true;
     }
 
-    private <T> boolean setAFRegions(MeteringRectangle[] afRegions) {
+    private <T> boolean setAFRegions(T afRegions) {
         if (afRegions == null) {
             return false;
         }
         setBase(CaptureRequest.CONTROL_AF_REGIONS_SET, true);
-        setBase(CaptureRequest.CONTROL_AF_REGIONS, afRegions);
+        // The cast to CaptureRequest.Key is needed since java does not support template
+        // specialization and we need to route this method to
+        // setBase(CaptureRequest.Key<T> key, T value)
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AF_REGIONS, afRegions);
         return true;
     }
 
-    private <T> boolean setAERegions(MeteringRectangle[] aeRegions) {
+    private <T> boolean setAERegions(T aeRegions) {
         if (aeRegions == null) {
             return false;
         }
         setBase(CaptureRequest.CONTROL_AE_REGIONS_SET, true);
-        setBase(CaptureRequest.CONTROL_AE_REGIONS, aeRegions);
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AE_REGIONS, aeRegions);
         return true;
     }
 
-    private <T> boolean setAWBRegions(MeteringRectangle[] awbRegions) {
+    private <T> boolean setAWBRegions(T awbRegions) {
         if (awbRegions == null) {
             return false;
         }
         setBase(CaptureRequest.CONTROL_AWB_REGIONS_SET, true);
-        setBase(CaptureRequest.CONTROL_AWB_REGIONS, awbRegions);
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AWB_REGIONS, awbRegions);
         return true;
     }
 

@@ -148,7 +148,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"व्हॉइस सहाय्य उघडा"</string>
     <string name="camera_label" msgid="8253821920931143699">"कॅमेरा उघडा"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द करा"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"खात्री करा"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"कंफर्म करा"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"पुन्हा प्रयत्न करा"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ऑथेंटिकेशन रद्द करण्यासाठी टॅप करा"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"कृपया पुन्हा प्रयत्न करा"</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरा ओळखू शकत नाही. त्याऐवजी फिंगरप्रिंट वापरा."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"पुढे सुरू ठेवण्‍यासाठी तुमची फिंगरप्रिंट वापरा"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"फिंगरप्रिंट ओळखता आली नाही. त्याऐवजी स्क्रीन लॉक वापरा."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"तुमच्यासाठी शोधत आहे…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"चेहरा आयकन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"सुसंगतता झूम बटण."</string>

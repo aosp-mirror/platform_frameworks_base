@@ -446,16 +446,12 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (mHandlerThread != null) {
-            mHandlerThread.quitSafely();
-        }
-        super.finalize();
-    }
+    public void release(boolean skipCloseNotification) {
+        boolean notifyClose = false;
 
-    public void release() {
         synchronized (mInterfaceLock) {
+            mHandlerThread.quitSafely();
+
             if (mSessionProcessor != null) {
                 try {
                     mSessionProcessor.deInitSession();
@@ -469,6 +465,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
                 if (mInitialized) {
+                    notifyClose = true;
                     CameraExtensionCharacteristics.releaseSession();
                 }
             }
@@ -482,6 +479,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             mClientRepeatingRequestSurface = null;
             mClientCaptureSurface = null;
         }
+
+        if (notifyClose && !skipCloseNotification) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallbacks.onClosed(
+                        CameraAdvancedExtensionSessionImpl.this));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     private void notifyConfigurationFailure() {
@@ -491,7 +498,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
         }
 
-        release();
+        release(true /*skipCloseNotification*/);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -507,15 +514,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             android.hardware.camera2.CameraCaptureSession.StateCallback {
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
-            release();
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallbacks.onClosed(
-                       CameraAdvancedExtensionSessionImpl.this));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            release(false /*skipCloseNotification*/);
         }
 
         @Override

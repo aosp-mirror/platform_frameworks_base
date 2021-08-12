@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityTaskManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -114,6 +115,8 @@ public class UserSwitcherController implements Dumpable {
     @VisibleForTesting
     final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final DevicePolicyManager mDevicePolicyManager;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -149,6 +152,8 @@ public class UserSwitcherController implements Dumpable {
             UserManager userManager,
             UserTracker userTracker,
             KeyguardStateController keyguardStateController,
+            DeviceProvisionedController deviceProvisionedController,
+            DevicePolicyManager devicePolicyManager,
             @Main Handler handler,
             ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher,
@@ -178,6 +183,8 @@ public class UserSwitcherController implements Dumpable {
         mGuestIsResetting = new AtomicBoolean();
         mGuestCreationScheduled = new AtomicBoolean();
         mKeyguardStateController = keyguardStateController;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mDevicePolicyManager = devicePolicyManager;
         mHandler = handler;
         mActivityStarter = activityStarter;
         mUserManager = userManager;
@@ -336,8 +343,7 @@ public class UserSwitcherController implements Dumpable {
                                 true /* isGuest */, false /* isCurrent */,
                                 false /* isAddUser */, false /* isRestricted */,
                                 isSwitchToGuestEnabled);
-                        // Don't call checkIfAddUserDisallowedByAdminOnly if
-                        // config_guestUserAutoCreated=true.
+                        checkIfAddUserDisallowedByAdminOnly(guestRecord);
                         records.add(guestRecord);
                     } else if (canCreateGuest) {
                         guestRecord = new UserRecord(null /* info */, null /* picture */,
@@ -733,10 +739,27 @@ public class UserSwitcherController implements Dumpable {
     }
 
     /**
+     * Guarantee guest is present only if the device is provisioned. Otherwise, create a content
+     * observer to wait until the device is provisioned, then schedule the guest creation.
+     */
+    public void schedulePostBootGuestCreation() {
+        if (isDeviceAllowedToAddGuest()) {
+            guaranteeGuestPresent();
+        } else {
+            mDeviceProvisionedController.addCallback(mGuaranteeGuestPresentAfterProvisioned);
+        }
+    }
+
+    private boolean isDeviceAllowedToAddGuest() {
+        return mDeviceProvisionedController.isDeviceProvisioned()
+                && !mDevicePolicyManager.isDeviceManaged();
+    }
+
+    /**
      * If there is no guest on the device, schedule creation of a new guest user in the background.
      */
-    public void guaranteeGuestPresent() {
-        if (mUserManager.findCurrentGuestUser() == null) {
+    private void guaranteeGuestPresent() {
+        if (isDeviceAllowedToAddGuest() && mUserManager.findCurrentGuestUser() == null) {
             scheduleGuestCreation();
         }
     }
@@ -1055,6 +1078,21 @@ public class UserSwitcherController implements Dumpable {
                     }
                 }
             };
+
+    private final DeviceProvisionedController.DeviceProvisionedListener
+            mGuaranteeGuestPresentAfterProvisioned =
+            new DeviceProvisionedController.DeviceProvisionedListener() {
+                @Override
+                public void onDeviceProvisionedChanged() {
+                    if (isDeviceAllowedToAddGuest()) {
+                        mBgExecutor.execute(
+                                () -> mDeviceProvisionedController.removeCallback(
+                                        mGuaranteeGuestPresentAfterProvisioned));
+                        guaranteeGuestPresent();
+                    }
+                }
+            };
+
 
     private final class ExitGuestDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
