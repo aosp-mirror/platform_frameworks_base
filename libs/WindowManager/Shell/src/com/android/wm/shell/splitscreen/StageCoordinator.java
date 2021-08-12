@@ -375,7 +375,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (options == null) {
                     options = new Bundle();
                 }
-                updateActivityOptions(options, position, wct);
+                updateActivityOptions(options, position);
                 break;
             }
             case STAGE_TYPE_MAIN: {
@@ -390,7 +390,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (options == null) {
                     options = new Bundle();
                 }
-                updateActivityOptions(options, position, wct);
+                updateActivityOptions(options, position);
                 break;
             }
             default:
@@ -491,22 +491,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
     }
 
-    void updateActivityOptions(Bundle opts, @SplitPosition int position,
-            @Nullable WindowContainerTransaction wct) {
+    void updateActivityOptions(Bundle opts, @SplitPosition int position) {
         addActivityOptions(opts, position == mSideStagePosition ? mSideStage : mMainStage);
-
-        if (!mMainStage.isActive()) {
-            // Activate the main stage in anticipation of an app launch.
-            boolean needsApply = wct == null;
-            if (needsApply) {
-                wct = new WindowContainerTransaction();
-            }
-            mMainStage.activate(getMainStageBounds(), wct);
-            mSideStage.setBounds(getSideStageBounds(), wct);
-            if (needsApply) {
-                mTaskOrganizer.applyTransaction(wct);
-            }
-        }
     }
 
     void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {
