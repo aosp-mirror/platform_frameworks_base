@@ -621,7 +621,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, false,
+                mScrimBehind, true,
                 mScrimForBubble, true
         ));
 
