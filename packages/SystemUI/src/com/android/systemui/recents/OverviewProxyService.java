@@ -78,6 +78,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -543,6 +544,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
+            ScreenLifecycle screenLifecycle,
             Optional<StartingSurface> startingSurface,
             SmartspaceTransitionController smartspaceTransitionController) {
         super(broadcastDispatcher);
@@ -607,6 +609,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         // Listen for user setup
         startTracking();
+
+        screenLifecycle.addObserver(new ScreenLifecycle.Observer() {
+            @Override
+            public void onScreenTurnedOn() {
+                notifyScreenTurnedOn();
+            }
+        });
 
         // Connect to the service
         updateEnabledState();
@@ -897,6 +906,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onSplitScreenSecondaryBoundsChanged()", e);
+        }
+    }
+
+    /**
+     * Notifies the Launcher that screen turned on and ready to use
+     */
+    public void notifyScreenTurnedOn() {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onScreenTurnedOn();
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for screen turned on event.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call notifyScreenTurnedOn()", e);
         }
     }
 

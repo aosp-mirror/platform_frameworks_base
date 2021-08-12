@@ -60,6 +60,8 @@ public class SensorPrivacyServiceMockingTest {
             String.format(PERSISTENCE_FILE_PATHS_TEMPLATE, 4);
     public static final String PERSISTENCE_FILE5 =
             String.format(PERSISTENCE_FILE_PATHS_TEMPLATE, 5);
+    public static final String PERSISTENCE_FILE6 =
+            String.format(PERSISTENCE_FILE_PATHS_TEMPLATE, 6);
 
     private Context mContext;
     @Mock
@@ -111,6 +113,7 @@ public class SensorPrivacyServiceMockingTest {
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE3);
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE4);
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE5);
+            initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE6);
 
             // Try all files with two known users
             doReturn(new int[]{0, 10}).when(mMockedUserManagerInternal).getUserIds();
@@ -124,6 +127,7 @@ public class SensorPrivacyServiceMockingTest {
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE3);
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE4);
             initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE5);
+            initServiceWithPersistenceFile(onDeviceFile, PERSISTENCE_FILE6);
 
         } finally {
             mockitoSession.finishMocking();

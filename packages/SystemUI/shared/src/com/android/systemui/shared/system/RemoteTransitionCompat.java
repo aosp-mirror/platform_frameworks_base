@@ -19,6 +19,7 @@ package com.android.systemui.shared.system;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -172,6 +173,8 @@ public class RemoteTransitionCompat implements Parcelable {
         if (mFilter == null) {
             mFilter = new TransitionFilter();
         }
+        // No need to handle the transition that also dismisses keyguard.
+        mFilter.mNotFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
         mFilter.mRequirements =
                 new TransitionFilter.Requirement[]{new TransitionFilter.Requirement(),
                         new TransitionFilter.Requirement()};
