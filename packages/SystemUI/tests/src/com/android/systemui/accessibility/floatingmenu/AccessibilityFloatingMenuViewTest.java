@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.View.OVER_SCROLL_ALWAYS;
 import static android.view.View.OVER_SCROLL_NEVER;
 import static android.view.WindowInsets.Type.ime;
@@ -134,7 +135,10 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         mMenuHalfHeight = menuHeight / 2;
         mScreenHalfWidth = screenWidth / 2;
         mScreenHalfHeight = mScreenHeight / 2;
-        mMaxWindowX = screenWidth - margin - menuWidth;
+        int marginStartEnd =
+                mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT
+                        ? margin : 0;
+        mMaxWindowX = screenWidth - marginStartEnd - menuWidth;
         mMenuWindowHeight = menuHeight + margin * 2;
         mMaxWindowY = mScreenHeight - mMenuWindowHeight;
     }

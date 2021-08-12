@@ -162,7 +162,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException ignored) { }
-                    Runtime.getRuntime().gc();
+                    System.gc();
+                    System.runFinalization();
+                    System.gc();
                 });
             } else {
                 SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,

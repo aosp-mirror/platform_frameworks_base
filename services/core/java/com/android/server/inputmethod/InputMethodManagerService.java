@@ -58,10 +58,10 @@ import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
-import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -182,6 +182,7 @@ import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -262,6 +263,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
+    private static final String HANDLER_THREAD_NAME = "android.imms";
 
     /**
      * Binding flags for establishing connection to the {@link InputMethodService}.
@@ -1592,7 +1594,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mIPackageManager = AppGlobals.getPackageManager();
         mContext = context;
         mRes = context.getResources();
-        mHandler = new Handler(this);
+        // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
+        // additional subtypes in switchUserOnHandlerLocked().
+        final ServiceThread thread = new ServiceThread(
+                HANDLER_THREAD_NAME, Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+        thread.start();
+        mHandler = Handler.createAsync(thread.getLooper(), this);
         // Note: SettingsObserver doesn't register observers in its constructor.
         mSettingsObserver = new SettingsObserver(mHandler);
         mIWindowManager = IWindowManager.Stub.asInterface(
@@ -1601,7 +1608,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImeDisplayValidator = displayId -> mWindowManagerInternal.getDisplayImePolicy(displayId);
-        mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
+        mCaller = new HandlerCaller(context, thread.getLooper(), new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
                 handleMessage(msg);
@@ -4159,7 +4166,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    void setEnabledSessionInMainThread(SessionState session) {
+    void setEnabledSessionInHandlerThread(SessionState session) {
         if (mEnabledSession != session) {
             if (mEnabledSession != null && mEnabledSession.session != null) {
                 try {
@@ -4179,7 +4186,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @MainThread
+    @UiThread
     @Override
     public boolean handleMessage(Message msg) {
         SomeArgs args;
@@ -4356,7 +4363,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final IInputContext inputContext = (IInputContext) args.arg3;
                 final EditorInfo editorInfo = (EditorInfo) args.arg4;
                 try {
-                    setEnabledSessionInMainThread(session);
+                    setEnabledSessionInHandlerThread(session);
                     session.method.startInput(startInputToken, inputContext, missingMethods,
                             editorInfo, restarting);
                 } catch (RemoteException e) {

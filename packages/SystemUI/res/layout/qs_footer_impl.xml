@@ -68,7 +68,8 @@
 
         </LinearLayout>
 
-        <include layout="@layout/qs_footer_actions"/>
+        <include layout="@layout/footer_actions"
+            android:id="@+id/qs_footer_actions"/>
 
     </LinearLayout>
 

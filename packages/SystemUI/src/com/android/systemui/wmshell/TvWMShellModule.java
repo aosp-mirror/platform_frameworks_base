@@ -25,6 +25,7 @@ import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -58,10 +59,10 @@ public class TvWMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor,
-            TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, mainExecutor,
-                transactionPool);
+            DisplayController displayController, DisplayInsetsController displayInsetsController,
+            @ShellMainThread ShellExecutor mainExecutor, TransactionPool transactionPool) {
+        return new DisplayImeController(wmService, displayController, displayInsetsController,
+                mainExecutor, transactionPool);
     }
 
     //
