@@ -29,7 +29,6 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLES
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
@@ -249,10 +248,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "start default transition animation, info = %s", info);
-
-        // Fallback for screen wake. This just immediately finishes since there is no
-        // animation for screen-wake.
-        if (info.getType() == WindowManager.TRANSIT_WAKE) {
+        // If keyguard goes away, we should loadKeyguardExitAnimation. Otherwise this just
+        // immediately finishes since there is no animation for screen-wake.
+        if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
             startTransaction.apply();
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
             return true;
@@ -354,7 +352,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
         final boolean canCustomContainer = isTask ? !sDisableCustomTaskAnimationProperty : true;
 
-        if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
+        if (info.isKeyguardGoingAway()) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
                     (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {

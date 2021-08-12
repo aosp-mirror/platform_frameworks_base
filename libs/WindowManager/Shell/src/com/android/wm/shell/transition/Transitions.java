@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -230,7 +231,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_OPEN
                 || type == TRANSIT_TO_FRONT
-                || type == WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+                || type == TRANSIT_KEYGUARD_GOING_AWAY;
     }
 
     /** @return true if the transition was triggered by closing something vs opening something */
