@@ -112,6 +112,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -334,5 +335,23 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
                     mInternalResourceService.getContext().getContentResolver(),
                     TARE_JOB_SCHEDULER_CONSTANTS));
         }
+    }
+
+    @Override
+    void dump(IndentingPrintWriter pw) {
+        pw.println("Actions:");
+        pw.increaseIndent();
+        for (int i = 0; i < mActions.size(); ++i) {
+            dumpAction(pw, mActions.valueAt(i));
+        }
+        pw.decreaseIndent();
+
+        pw.println();
+        pw.println("Rewards:");
+        pw.increaseIndent();
+        for (int i = 0; i < mRewards.size(); ++i) {
+            dumpReward(pw, mRewards.valueAt(i));
+        }
+        pw.decreaseIndent();
     }
 }
