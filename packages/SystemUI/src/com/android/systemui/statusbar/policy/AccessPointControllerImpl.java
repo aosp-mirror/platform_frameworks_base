@@ -40,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 import com.android.wifitrackerlib.WifiPickerTracker;
 
@@ -154,6 +155,15 @@ public class AccessPointControllerImpl
             entries.add(0, connectedEntry);
         }
         fireAcccessPointsCallback(entries);
+    }
+
+    @Override
+    public MergedCarrierEntry getMergedCarrierEntry() {
+        if (mWifiPickerTracker == null) {
+            fireAcccessPointsCallback(Collections.emptyList());
+            return null;
+        }
+        return mWifiPickerTracker.getMergedCarrierEntry();
     }
 
     @Override
