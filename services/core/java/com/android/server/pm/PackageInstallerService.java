@@ -261,6 +261,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 new Lifecycle(context, this));
     }
 
+    StagingManager getStagingManager() {
+        return mStagingManager;
+    }
+
     boolean okToSendBroadcasts()  {
         return mOkToSendBroadcasts;
     }

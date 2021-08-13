@@ -90,6 +90,10 @@ public:
             uint8_t* audioData;
             int audioLength;
             Animation* animation;
+            // Controls if dynamic coloring is enabled for this part.
+            bool useDynamicColoring = false;
+            // Defines if this part is played after the dynamic coloring part.
+            bool postDynamicColoring = false;
 
             bool hasFadingPhase() const {
                 return !playUntilComplete && framesToFadeCount > 0;
@@ -105,6 +109,10 @@ public:
         ZipFileRO* zip;
         Font clockFont;
         Font progressFont;
+         // Controls if dynamic coloring is enabled for the whole animation.
+        bool dynamicColoringEnabled = false;
+        float startColors[4][3]; // Start colors of dynamic color transition.
+        float endColors[4][3];   // End colors of dynamic color transition.
     };
 
     // All callbacks will be called from this class's internal thread.
@@ -226,6 +234,7 @@ private:
     GLuint mImageTextureLocation;
     GLuint mTextCropAreaLocation;
     GLuint mTextTextureLocation;
+    GLuint mImageColorProgressLocation;
 };
 
 // ---------------------------------------------------------------------------

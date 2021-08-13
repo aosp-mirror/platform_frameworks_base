@@ -163,6 +163,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
@@ -202,6 +203,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.SigningInfo;
+import android.content.pm.StagedApexInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
@@ -23074,6 +23076,29 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean hasSystemFeature(String featureName, int version) {
             return PackageManagerService.this.hasSystemFeature(featureName, version);
         }
+
+        @Override
+        public void registerStagedApexObserver(IStagedApexObserver observer) {
+            mInstallerService.getStagingManager().registerStagedApexObserver(observer);
+        }
+
+        @Override
+        public void unregisterStagedApexObserver(IStagedApexObserver observer) {
+            mInstallerService.getStagingManager().unregisterStagedApexObserver(observer);
+        }
+
+        @Override
+        public String[] getStagedApexModuleNames() {
+            return mInstallerService.getStagingManager()
+                    .getStagedApexModuleNames().toArray(new String[0]);
+        }
+
+        @Override
+        @Nullable
+        public StagedApexInfo getStagedApexInfo(String moduleName) {
+            return mInstallerService.getStagingManager().getStagedApexInfo(moduleName);
+        }
+
     }
 
     private AndroidPackage getPackage(String packageName) {
@@ -25049,5 +25074,3 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 }
-
-

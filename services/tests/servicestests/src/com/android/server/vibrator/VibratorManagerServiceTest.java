@@ -95,6 +95,8 @@ import org.mockito.junit.MockitoRule;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -696,10 +698,12 @@ public class VibratorManagerServiceTest {
                         VibratorManagerService.OnSyncedVibrationCompleteListener.class);
         verify(mNativeWrapperMock).init(listenerCaptor.capture());
 
-        // Mock trigger callback on registered listener.
+        CountDownLatch triggerCountDown = new CountDownLatch(1);
+        // Mock trigger callback on registered listener right after the synced vibration starts.
         when(mNativeWrapperMock.prepareSynced(eq(new int[]{1, 2}))).thenReturn(true);
         when(mNativeWrapperMock.triggerSynced(anyLong())).then(answer -> {
             listenerCaptor.getValue().onComplete(answer.getArgument(0));
+            triggerCountDown.countDown();
             return true;
         });
 
@@ -708,20 +712,19 @@ public class VibratorManagerServiceTest {
                 .compose();
         CombinedVibration effect = CombinedVibration.createParallel(composed);
 
-        // Wait for vibration to start, it should finish right away with trigger callback.
         vibrate(service, effect, ALARM_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait until callback is triggered.
-        assertTrue(waitUntil(s -> !listenerCaptor.getAllValues().isEmpty(), service,
-                TEST_TIMEOUT_MILLIS));
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        triggerCountDown.await(TEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
         verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
         verify(mNativeWrapperMock).triggerSynced(anyLong());
-
         PrimitiveSegment expected = new PrimitiveSegment(
                 VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100);
         assertEquals(Arrays.asList(expected), mVibratorProviders.get(1).getEffectSegments());
         assertEquals(Arrays.asList(expected), mVibratorProviders.get(2).getEffectSegments());
+
+        // VibrationThread needs some time to react to native callbacks and stop the vibrator.
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 
     @Test
