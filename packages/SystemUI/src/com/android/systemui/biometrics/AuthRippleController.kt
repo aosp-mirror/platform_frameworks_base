@@ -79,7 +79,7 @@ class AuthRippleController @Inject constructor(
         notificationShadeWindowController.setForcePluginOpen(false, this)
     }
 
-    private fun showRipple(biometricSourceType: BiometricSourceType?) {
+    fun showRipple(biometricSourceType: BiometricSourceType?) {
         if (!keyguardUpdateMonitor.isKeyguardVisible ||
             keyguardUpdateMonitor.userNeedsStrongAuth()) {
             return
