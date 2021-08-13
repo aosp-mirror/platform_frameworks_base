@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
@@ -51,6 +52,7 @@ import com.android.systemui.qs.AlphaControlledSignalTileView;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
@@ -75,6 +77,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
     private int mLastTileState = -1;
 
     protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
+    private final InternetDialogFactory mInternetDialogFactory;
+    final Handler mHandler;
 
     @Inject
     public InternetTile(
@@ -86,10 +90,13 @@ public class InternetTile extends QSTileImpl<SignalState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            NetworkController networkController
+            NetworkController networkController,
+            InternetDialogFactory internetDialogFactory
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+        mInternetDialogFactory = internetDialogFactory;
+        mHandler = mainHandler;
         mController = networkController;
         mDataController = mController.getMobileDataController();
         mController.observe(getLifecycle(), mSignalCallback);
@@ -114,7 +121,13 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        mActivityStarter.postStartActivityDismissingKeyguard(INTERNET_PANEL, 0);
+        if (!FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            mActivityStarter.postStartActivityDismissingKeyguard(INTERNET_PANEL, 0);
+        } else {
+            mHandler.post(() -> {
+                mInternetDialogFactory.create(true);
+            });
+        }
     }
 
     @Override
