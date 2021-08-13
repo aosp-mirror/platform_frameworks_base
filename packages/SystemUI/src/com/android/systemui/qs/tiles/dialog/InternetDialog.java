@@ -111,6 +111,7 @@ public class InternetDialog extends SystemUIDialog implements
     private LinearLayout mMobileNetworkLayout;
     private LinearLayout mMobileNetworkList;
     private LinearLayout mTurnWifiOnLayout;
+    private TextView mWifiToggleTitleText;
     private LinearLayout mSeeAllLayout;
     private RecyclerView mWifiRecyclerView;
     private ImageView mConnectedWifiIcon;
@@ -215,6 +216,7 @@ public class InternetDialog extends SystemUIDialog implements
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
         mMobileNetworkList = mDialogView.requireViewById(R.id.mobile_network_list);
         mTurnWifiOnLayout = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
+        mWifiToggleTitleText = mDialogView.requireViewById(R.id.wifi_toggle_title);
         mConnectedWifListLayout = mDialogView.requireViewById(R.id.wifi_connected_layout);
         mConnectedWifList = mDialogView.requireViewById(R.id.wifi_connected_list);
         mConnectedWifiIcon = mDialogView.requireViewById(R.id.wifi_connected_icon);
@@ -368,6 +370,12 @@ public class InternetDialog extends SystemUIDialog implements
 
     private void updateWifiToggle(boolean isWifiEnabled, boolean isDeviceLocked) {
         mWiFiToggle.setChecked(isWifiEnabled);
+        if (isDeviceLocked && mInternetDialogController.isNightMode()) {
+            int titleColor = mConnectedWifiEntry != null ? mContext.getColor(
+                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
+                    mContext, android.R.attr.textColorPrimary);
+            mWifiToggleTitleText.setTextColor(titleColor);
+        }
         mTurnWifiOnLayout.setBackground(
                 (isDeviceLocked && mConnectedWifiEntry != null) ? mBackgroundOn : null);
     }
