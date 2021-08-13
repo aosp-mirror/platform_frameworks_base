@@ -329,16 +329,25 @@ public final class ActiveServices {
     };
 
     /**
-     * Watch for apps being put into forced app standby, so we can step their fg
+     * Reference to the AppStateTracker service. No lock is needed as we'll assign with the same
+     * instance to it always.
+     */
+    AppStateTracker mAppStateTracker;
+
+    /**
+     * Watch for apps being put into background restricted, so we can step their fg
      * services down.
      */
-    class ForcedStandbyListener implements AppStateTracker.ServiceStateListener {
+    class BackgroundRestrictedListener implements AppStateTracker.BackgroundRestrictedAppListener {
         @Override
-        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
+        public void updateBackgroundRestrictedForUidPackage(int uid, String packageName,
+                boolean restricted) {
             synchronized (mAm) {
                 if (!isForegroundServiceAllowedInBackgroundRestricted(uid, packageName)) {
                     stopAllForegroundServicesLocked(uid, packageName);
                 }
+                mAm.mProcessList.updateBackgroundRestrictedForUidPackageLocked(
+                        uid, packageName, restricted);
             }
         }
     }
@@ -523,10 +532,16 @@ public final class ActiveServices {
     }
 
     void systemServicesReady() {
-        AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        ast.addServiceStateListener(new ForcedStandbyListener());
+        getAppStateTracker().addBackgroundRestrictedAppListener(new BackgroundRestrictedListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
+    }
+
+    private AppStateTracker getAppStateTracker() {
+        if (mAppStateTracker == null) {
+            mAppStateTracker = LocalServices.getService(AppStateTracker.class);
+        }
+        return mAppStateTracker;
     }
 
     private void setAllowListWhileInUsePermissionInFgs() {
@@ -607,9 +622,11 @@ public final class ActiveServices {
     }
 
     private boolean appRestrictedAnyInBackground(final int uid, final String packageName) {
-        final int mode = mAm.getAppOpsManager().checkOpNoThrow(
-                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
-        return (mode != AppOpsManager.MODE_ALLOWED);
+        final AppStateTracker appStateTracker = getAppStateTracker();
+        if (appStateTracker != null) {
+            return appStateTracker.isAppBackgroundRestricted(uid, packageName);
+        }
+        return false;
     }
 
     void updateAppRestrictedAnyInBackgroundLocked(final int uid, final String packageName) {

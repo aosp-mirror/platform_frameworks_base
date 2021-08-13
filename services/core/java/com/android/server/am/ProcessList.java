@@ -42,6 +42,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.DISPATCH_PROCESSES_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.DISPATCH_PROCESS_DIED_UI_MSG;
+import static com.android.server.am.ActivityManagerService.IDLE_UIDS_MSG;
 import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_DELAY_MS;
 import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_MSG;
 import static com.android.server.am.ActivityManagerService.PERSISTENT_MASK;
@@ -126,6 +127,7 @@ import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
+import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
@@ -543,6 +545,12 @@ public final class ProcessList {
     @GuardedBy("mService")
     final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
+
+    /**
+     * The list of apps in background restricted mode.
+     */
+    @GuardedBy("mService")
+    final ArraySet<ProcessRecord> mAppsInBackgroundRestricted = new ArraySet<>();
 
     private PlatformCompat mPlatformCompat = null;
 
@@ -2370,6 +2378,16 @@ public final class ProcessList {
                 allowlistedAppDataInfoMap = null;
             }
 
+            AppStateTracker ast = mService.mServices.mAppStateTracker;
+            if (ast != null) {
+                final boolean inBgRestricted = ast.isAppBackgroundRestricted(
+                        app.info.uid, app.info.packageName);
+                if (inBgRestricted) {
+                    mAppsInBackgroundRestricted.add(app);
+                }
+                app.mState.setBackgroundRestricted(inBgRestricted);
+            }
+
             final Process.ProcessStartResult startResult;
             boolean regularZygote = false;
             if (hostingRecord.usesWebviewZygote()) {
@@ -3104,6 +3122,7 @@ public final class ProcessList {
         if (record != null && record.appZygote) {
             removeProcessFromAppZygoteLocked(record);
         }
+        mAppsInBackgroundRestricted.remove(record);
 
         return old;
     }
@@ -5017,6 +5036,75 @@ public final class ProcessList {
             }
         }
         return true;
+    }
+
+    @GuardedBy("mService")
+    void updateBackgroundRestrictedForUidPackageLocked(int uid, String packageName,
+            boolean restricted) {
+        final UidRecord uidRec = getUidRecordLOSP(uid);
+        if (uidRec != null) {
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            uidRec.forEachProcess(app -> {
+                if (TextUtils.equals(app.info.packageName, packageName)) {
+                    app.mState.setBackgroundRestricted(restricted);
+                    if (restricted) {
+                        mAppsInBackgroundRestricted.add(app);
+                        final long future = killAppIfBgRestrictedAndCachedIdleLocked(
+                                app, nowElapsed);
+                        if (future > 0 && !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                            mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
+                                    future - nowElapsed);
+                        }
+                    } else {
+                        mAppsInBackgroundRestricted.remove(app);
+                    }
+                    if (!app.isKilledByAm()) {
+                        mService.enqueueOomAdjTargetLocked(app);
+                    }
+                }
+            });
+            /* Will be a no-op if nothing pending */
+            mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        }
+    }
+
+    /**
+     * Kill the given app if it's in cached idle and background restricted mode.
+     *
+     * @return A future timestamp when the app should be killed at, or a 0 if it shouldn't
+     * be killed or it has been killed.
+     */
+    @GuardedBy("mService")
+    long killAppIfBgRestrictedAndCachedIdleLocked(ProcessRecord app, long nowElapsed) {
+        final UidRecord uidRec = app.getUidRecord();
+        final long lastCanKillTime = app.mState.getLastCanKillOnBgRestrictedAndIdleTime();
+        if (!mService.mConstants.mKillBgRestrictedAndCachedIdle
+                || app.isKilled() || app.getThread() == null || uidRec == null || !uidRec.isIdle()
+                || !app.isCached() || app.mState.shouldNotKillOnBgRestrictedAndIdle()
+                || !app.mState.isBackgroundRestricted() || lastCanKillTime == 0) {
+            return 0;
+        }
+        final long future = lastCanKillTime
+                + mService.mConstants.mKillBgRestrictedAndCachedIdleSettleTimeMs;
+        if (future <= nowElapsed) {
+            app.killLocked("cached idle & background restricted",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY,
+                    true);
+            return 0;
+        }
+        return future;
+    }
+
+    /**
+     * Called by {@link ActivityManagerService#enqueueUidChangeLocked} only, it doesn't schedule
+     * the standy killing checks because it should have been scheduled before enqueueing UID idle
+     * changed.
+     */
+    @GuardedBy("mService")
+    void killAppIfBgRestrictedAndCachedIdleLocked(UidRecord uidRec) {
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        uidRec.forEachProcess(app -> killAppIfBgRestrictedAndCachedIdleLocked(app, nowElapsed));
     }
 
     /**
