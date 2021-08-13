@@ -285,7 +285,7 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT = 0;
     /** @hide */
-    public static final double DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING = 0.01;
+    public static final float DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING = 0.01f;
     /** @hide */
     public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX = 500;
     /** @hide */
@@ -372,7 +372,7 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT = 0;
     /** @hide */
-    public static final double DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING = 0.5;
+    public static final float DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING = 0.5f;
     /** @hide */
     public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX = 15000;
     /** @hide */

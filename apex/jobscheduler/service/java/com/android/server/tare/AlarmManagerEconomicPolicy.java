@@ -16,6 +16,79 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
+import static android.app.tare.EconomyManager.KEY_AM_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.KEY_AM_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_SEEN_MAX;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_OTHER_USER_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_TOP_ACTIVITY_INSTANT;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_TOP_ACTIVITY_MAX;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_TOP_ACTIVITY_ONGOING;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_WIDGET_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.provider.Settings.Global.TARE_ALARM_MANAGER_CONSTANTS;
+
 import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
@@ -24,6 +97,13 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
+import android.util.Slog;
 import android.util.SparseArray;
 
 /**
@@ -31,6 +111,8 @@ import android.util.SparseArray;
  * AlarmManager.
  */
 public class AlarmManagerEconomicPolicy extends EconomicPolicy {
+    private static final String TAG = "TARE- " + AlarmManagerEconomicPolicy.class.getSimpleName();
+
     public static final int ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE =
             TYPE_ACTION | POLICY_AM | 0;
     public static final int ACTION_ALARM_WAKEUP_EXACT =
@@ -57,30 +139,50 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
             COST_MODIFIER_PROCESS_STATE
     };
 
+    private long mMinSatiatedBalance;
+    private long mMaxSatiatedBalance;
+    private long mMaxSatiatedCirculation;
+
+    private final KeyValueListParser mParser = new KeyValueListParser(',');
+    private final SettingsObserver mSettingsObserver;
+    private final InternalResourceService mInternalResourceService;
+
     private final SparseArray<Action> mActions = new SparseArray<>();
     private final SparseArray<Reward> mRewards = new SparseArray<>();
 
     AlarmManagerEconomicPolicy(InternalResourceService irs) {
         super(irs);
-        loadActions();
-        loadRewards();
+        mInternalResourceService = irs;
+        mSettingsObserver = new SettingsObserver(TareHandlerThread.getHandler());
+        loadConstants("");
+    }
+
+    @Override
+    void setup() {
+        super.setup();
+        ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
+        resolver.registerContentObserver(
+                Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        loadConstants(Settings.Global.getString(
+                mInternalResourceService.getContext().getContentResolver(),
+                TARE_ALARM_MANAGER_CONSTANTS));
     }
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
         // TODO: take exemption into account
-        return arcToNarc(160);
+        return mMinSatiatedBalance;
     }
 
     @Override
     long getMaxSatiatedBalance() {
-        return arcToNarc(1440);
+        return mMaxSatiatedBalance;
     }
-
 
     @Override
     long getMaxSatiatedCirculation() {
-        return arcToNarc(52000);
+        return mMaxSatiatedCirculation;
     }
 
     @NonNull
@@ -101,43 +203,162 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         return mRewards.get(rewardId);
     }
 
-    private void loadActions() {
+    private void loadConstants(String policyValuesString) {
+        mActions.clear();
+        mRewards.clear();
+
+        try {
+            mParser.setString(policyValuesString);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Global setting key incorrect: ", e);
+        }
+
+        mMinSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
+                        DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
+        mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
+                DEFAULT_AM_MAX_SATIATED_BALANCE));
+        mMaxSatiatedCirculation = arcToNarc(mParser.getInt(KEY_AM_MAX_CIRCULATION,
+                DEFAULT_AM_MAX_CIRCULATION));
+
+        final long exactAllowWhileIdleWakeupBasePrice = arcToNarc(
+                mParser.getInt(KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
+                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE));
+
         mActions.put(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE, arcToNarc(3), arcToNarc(5)));
+                new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP)),
+                        exactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_EXACT,
-                new Action(ACTION_ALARM_WAKEUP_EXACT, arcToNarc(3), arcToNarc(4)));
+                new Action(ACTION_ALARM_WAKEUP_EXACT,
+                        arcToNarc(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP)),
+                        arcToNarc(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE))));
+
+        final long inexactAllowWhileIdleWakeupBasePrice =
+                arcToNarc(mParser.getInt(
+                        KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE,
+                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE));
+
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(3), arcToNarc(4)));
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP)),
+                        inexactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT,
-                new Action(ACTION_ALARM_WAKEUP_INEXACT, arcToNarc(3), arcToNarc(3)));
+                new Action(ACTION_ALARM_WAKEUP_INEXACT,
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE))));
+
+        final long exactAllowWhileIdleNonWakeupBasePrice =
+                arcToNarc(mParser.getInt(
+                        KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
+                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
+
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(1), arcToNarc(3)));
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP)),
+                        exactAllowWhileIdleNonWakeupBasePrice));
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT,
-                new Action(ACTION_ALARM_NONWAKEUP_EXACT, arcToNarc(1), arcToNarc(2)));
+                new Action(ACTION_ALARM_NONWAKEUP_EXACT,
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE))));
+
+        final long inexactAllowWhileIdleNonWakeupBasePrice =
+                arcToNarc(mParser.getInt(
+                        KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
+                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
+
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(1), arcToNarc(2)));
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP)),
+                        inexactAllowWhileIdleNonWakeupBasePrice));
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT,
-                new Action(ACTION_ALARM_NONWAKEUP_INEXACT, arcToNarc(1), arcToNarc(1)));
+                new Action(ACTION_ALARM_NONWAKEUP_INEXACT,
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE))));
         mActions.put(ACTION_ALARM_CLOCK,
-                new Action(ACTION_ALARM_CLOCK, arcToNarc(5), arcToNarc(10)));
-    }
+                new Action(ACTION_ALARM_CLOCK,
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP,
+                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE))));
 
-    private void loadRewards() {
-        mRewards.put(REWARD_TOP_ACTIVITY,
-                new Reward(REWARD_TOP_ACTIVITY,
-                        arcToNarc(0), /* .01 arcs */ arcToNarc(1) / 100, arcToNarc(500)));
-        mRewards.put(REWARD_NOTIFICATION_SEEN,
-                new Reward(REWARD_NOTIFICATION_SEEN, arcToNarc(3), arcToNarc(0), arcToNarc(60)));
+        mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT)),
+                (long) (arcToNarc(1) * mParser.getFloat(KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_MAX,
+                                DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX))));
+        mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT)),
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX))));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        arcToNarc(5), arcToNarc(0), arcToNarc(500)));
-        mRewards.put(REWARD_WIDGET_INTERACTION,
-                new Reward(REWARD_WIDGET_INTERACTION, arcToNarc(10), arcToNarc(0), arcToNarc(500)));
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT,
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING,
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX,
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX))));
+        mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT)),
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX))));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        arcToNarc(10), arcToNarc(0), arcToNarc(500)));
+                        arcToNarc(mParser.getInt(KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_REWARD_OTHER_USER_INTERACTION_ONGOING,
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING)),
+                        arcToNarc(mParser.getInt(
+                                KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX,
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX))));
+    }
+
+    private final class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            loadConstants(Settings.Global.getString(
+                    mInternalResourceService.getContext().getContentResolver(),
+                    TARE_ALARM_MANAGER_CONSTANTS));
+        }
     }
 }
