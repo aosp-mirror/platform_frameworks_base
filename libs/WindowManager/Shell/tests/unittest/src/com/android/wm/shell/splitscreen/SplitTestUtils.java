@@ -65,9 +65,10 @@ public class SplitTestUtils {
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
                 MainStage mainStage, SideStage sideStage, DisplayImeController imeController,
-                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool) {
+                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
+                SplitscreenEventLogger logger) {
             super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
-                    sideStage, imeController, splitLayout, transitions, transactionPool);
+                    sideStage, imeController, splitLayout, transitions, transactionPool, logger);
 
             // Prepare default TaskDisplayArea for testing.
             mDisplayAreaInfo = new DisplayAreaInfo(
