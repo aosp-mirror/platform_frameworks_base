@@ -107,12 +107,6 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
 
     @Override
     protected void onViewDetached() {
-        destroy();
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
         mConfigurationController.removeCallback(mConfigurationListener);
         unsubscribeFromTunerUpdates();
         mCurrentUserTracker.stopTracking();

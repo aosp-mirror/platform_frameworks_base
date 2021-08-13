@@ -110,16 +110,6 @@ public abstract class ViewController<T extends View> {
     }
 
     /**
-     * Destroys this controller so that it never receives view attach and detach events again.
-     * Does nothing if the view is null.
-     */
-    public void destroy() {
-        if (mView != null) {
-            mView.removeOnAttachStateChangeListener(mOnAttachStateListener);
-        }
-    }
-
-    /**
      * Called when the view is attached and a call to {@link #init()} has been made in either order.
      */
     protected abstract void onViewAttached();
