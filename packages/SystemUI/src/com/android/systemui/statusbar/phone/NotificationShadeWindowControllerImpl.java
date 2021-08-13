@@ -605,12 +605,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void setLightRevealScrimAmount(float amount) {
-        boolean lightRevealScrimOpaque = amount == 0;
-        if (mCurrentState.mLightRevealScrimOpaque == lightRevealScrimOpaque) {
+    public void setLightRevealScrimOpaque(boolean opaque) {
+        if (mCurrentState.mLightRevealScrimOpaque == opaque) {
             return;
         }
-        mCurrentState.mLightRevealScrimOpaque = lightRevealScrimOpaque;
+        mCurrentState.mLightRevealScrimOpaque = opaque;
         apply(mCurrentState);
     }
 
