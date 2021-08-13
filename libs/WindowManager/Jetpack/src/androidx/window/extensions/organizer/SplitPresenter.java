@@ -108,9 +108,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Set adjacent to each other so that the containers below will be invisible.
         wct.setAdjacentTaskFragments(
                 primaryContainer.getTaskFragmentToken(), secondaryContainer.getTaskFragmentToken());
-        applyTransaction(wct);
 
-        mController.registerSplit(primaryContainer, primaryActivity, secondaryContainer, rule);
+        mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
+
+        applyTransaction(wct);
 
         return secondaryContainer;
     }
@@ -142,9 +143,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Set adjacent to each other so that the containers below will be invisible.
         wct.setAdjacentTaskFragments(
                 primaryContainer.getTaskFragmentToken(), secondaryContainer.getTaskFragmentToken());
-        applyTransaction(wct);
 
-        mController.registerSplit(primaryContainer, primaryActivity, secondaryContainer, rule);
+        mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
+
+        applyTransaction(wct);
     }
 
     /**
@@ -202,20 +204,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
 
         TaskFragmentContainer secondaryContainer = mController.newContainer(null);
-        startActivityToSide(
-                primaryContainer.getTaskFragmentToken(),
-                primaryRectBounds,
-                launchingActivity,
-                secondaryContainer.getTaskFragmentToken(),
-                secondaryRectBounds,
-                activityIntent,
-                activityOptions);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
+                rule);
+        startActivityToSide(wct, primaryContainer.getTaskFragmentToken(), primaryRectBounds,
+                launchingActivity, secondaryContainer.getTaskFragmentToken(), secondaryRectBounds,
+                activityIntent, activityOptions);
+        applyTransaction(wct);
 
         primaryContainer.setLastRequestedBounds(primaryRectBounds);
         secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
-
-        mController.registerSplit(primaryContainer, launchingActivity, secondaryContainer,
-                rule);
     }
 
     /**
