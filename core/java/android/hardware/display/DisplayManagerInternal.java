@@ -35,6 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Display manager local system service interface.
@@ -127,6 +128,14 @@ public abstract class DisplayManagerInternal {
      * returned object must be treated as immutable.
      */
     public abstract DisplayInfo getDisplayInfo(int displayId);
+
+    /**
+     * Returns a set of DisplayInfo, for the states that may be assumed by either the given display,
+     * or any other display within that display's group.
+     *
+     * @param displayId The logical display id to fetch DisplayInfo for.
+     */
+    public abstract Set<DisplayInfo> getPossibleDisplayInfo(int displayId);
 
     /**
      * Returns the position of the display's projection.
