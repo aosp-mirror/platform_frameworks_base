@@ -296,12 +296,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Creates and registers a new split with the provided containers and configuration.
+     * Creates and registers a new split with the provided containers and configuration. Finishes
+     * existing secondary containers if found for the given primary container.
      */
-    void registerSplit(@NonNull TaskFragmentContainer primaryContainer,
-            @NonNull Activity primaryActivity,
+    void registerSplit(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer primaryContainer, @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull ExtensionSplitPairRule splitPairRule) {
+        removeExistingSecondaryContainers(wct, primaryContainer);
+
         SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
                 secondaryContainer, splitPairRule);
         mSplitContainers.add(splitContainer);
@@ -321,6 +324,25 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         mSplitContainers.removeAll(containersToRemove);
+    }
+
+    /**
+     * Removes a secondary container for the given primary container if an existing split is
+     * already registered.
+     */
+    void removeExistingSecondaryContainers(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer primaryContainer) {
+        // If the primary container was already in a split - remove the secondary container that
+        // is now covered by the new one that replaced it.
+        final SplitContainer existingSplitContainer = getActiveSplitForContainer(
+                primaryContainer);
+        if (existingSplitContainer == null
+                || primaryContainer == existingSplitContainer.getSecondaryContainer()) {
+            return;
+        }
+
+        existingSplitContainer.getSecondaryContainer().finish(
+                false /* shouldFinishDependent */, mPresenter, wct, this);
     }
 
     /**
