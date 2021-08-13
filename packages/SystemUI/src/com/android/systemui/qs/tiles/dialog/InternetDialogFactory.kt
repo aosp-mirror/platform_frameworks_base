@@ -50,6 +50,7 @@ class InternetDialogFactory @Inject constructor(
         } else {
             internetDialog = InternetDialog(context, this, internetDialogController, aboveStatusBar,
                     uiEventLogger, handler)
+            internetDialog?.show()
         }
     }
 
