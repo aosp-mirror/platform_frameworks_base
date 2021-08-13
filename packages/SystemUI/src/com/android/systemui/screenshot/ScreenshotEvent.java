@@ -71,7 +71,13 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     @UiEvent(doc = "User has shared a long screenshot")
     SCREENSHOT_LONG_SCREENSHOT_SHARE(689),
     @UiEvent(doc = "User has sent a long screenshot to the editor")
-    SCREENSHOT_LONG_SCREENSHOT_EDIT(690);
+    SCREENSHOT_LONG_SCREENSHOT_EDIT(690),
+    @UiEvent(doc = "A long screenshot capture has started")
+    SCREENSHOT_LONG_SCREENSHOT_STARTED(880),
+    @UiEvent(doc = "The long screenshot capture failed")
+    SCREENSHOT_LONG_SCREENSHOT_FAILURE(881),
+    @UiEvent(doc = "The long screenshot capture completed successfully")
+    SCREENSHOT_LONG_SCREENSHOT_COMPLETED(882);
 
     private final int mId;
 
