@@ -31,7 +31,6 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -67,14 +66,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
-
-
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;
     private NotificationInterruptStateProvider mNotificationInterruptStateProvider =
             mock(NotificationInterruptStateProvider.class);
@@ -88,7 +83,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     @Before
     public void setup() {
         mMetricsLogger = new FakeMetricsLogger();
-        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+        LockscreenGestureLogger lockscreenGestureLogger = new LockscreenGestureLogger(
+                mMetricsLogger);
         mCommandQueue = new CommandQueue(mContext);
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
@@ -123,6 +119,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
                 mock(KeyguardUpdateMonitor.class),
+                lockscreenGestureLogger,
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mock(NotificationRemoteInputManager.class),

@@ -227,6 +227,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    @Mock private LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
@@ -390,6 +391,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
+                mLockscreenGestureLogger,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,
                 mPowerManager, mScreenPinningRequest,

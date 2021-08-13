@@ -82,10 +82,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
         NotificationRowBinderImpl.BindRowCallback,
         CommandQueue.Callbacks {
-
-    private final LockscreenGestureLogger mLockscreenGestureLogger =
-            Dependency.get(LockscreenGestureLogger.class);
-
     private static final String TAG = "StatusBarNotificationPresenter";
 
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
@@ -97,6 +93,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final LockscreenGestureLogger mLockscreenGestureLogger;
 
     private final NotificationPanelViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -142,6 +139,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationMediaManager notificationMediaManager,
             NotificationGutsManager notificationGutsManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            LockscreenGestureLogger lockscreenGestureLogger,
             InitController initController,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationRemoteInputManager remoteInputManager,
@@ -163,6 +161,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mMediaManager = notificationMediaManager;
         mGutsManager = notificationGutsManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mLockscreenGestureLogger = lockscreenGestureLogger;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(

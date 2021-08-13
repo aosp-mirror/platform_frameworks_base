@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
@@ -174,6 +175,7 @@ public interface StatusBarPhoneModule {
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
+            LockscreenGestureLogger lockscreenGestureLogger,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
@@ -263,6 +265,7 @@ public interface StatusBarPhoneModule {
                 dozeParameters,
                 scrimController,
                 lockscreenWallpaperLazy,
+                lockscreenGestureLogger,
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,

@@ -455,6 +455,7 @@ public class StatusBar extends SystemUI implements
     private BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
     private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    private final LockscreenGestureLogger mLockscreenGestureLogger;
     @Nullable
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
@@ -837,6 +838,7 @@ public class StatusBar extends SystemUI implements
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
+            LockscreenGestureLogger lockscreenGestureLogger,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
@@ -929,6 +931,7 @@ public class StatusBar extends SystemUI implements
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
+        mLockscreenGestureLogger = lockscreenGestureLogger;
         mScreenPinningRequest = screenPinningRequest;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
@@ -1538,6 +1541,7 @@ public class StatusBar extends SystemUI implements
                 mMediaManager,
                 mGutsManager,
                 mKeyguardUpdateMonitor,
+                mLockscreenGestureLogger,
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mRemoteInputManager,
