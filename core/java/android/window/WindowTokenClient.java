@@ -94,6 +94,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
         onConfigurationChanged(newConfig, newDisplayId, true /* shouldReportConfigChange */);
     }
 
+    // TODO(b/192048581): rewrite this method based on WindowContext and WindowProviderService
+    //  are inherited from WindowProvider.
     /**
      * Called when {@link Configuration} updates from the server side receive.
      *
