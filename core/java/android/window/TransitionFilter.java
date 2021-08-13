@@ -59,6 +59,9 @@ public final class TransitionFilter implements Parcelable {
     /** All flags must be set on a transition. */
     public @WindowManager.TransitionFlags int mFlags = 0;
 
+    /** All flags must NOT be set on a transition. */
+    public @WindowManager.TransitionFlags int mNotFlags = 0;
+
     /**
      * A list of required changes. To pass, a transition must meet all requirements.
      */
@@ -70,6 +73,7 @@ public final class TransitionFilter implements Parcelable {
     private TransitionFilter(Parcel in) {
         mTypeSet = in.createIntArray();
         mFlags = in.readInt();
+        mNotFlags = in.readInt();
         mRequirements = in.createTypedArray(Requirement.CREATOR);
     }
 
@@ -89,6 +93,9 @@ public final class TransitionFilter implements Parcelable {
         if ((info.getFlags() & mFlags) != mFlags) {
             return false;
         }
+        if ((info.getFlags() & mNotFlags) != 0) {
+            return false;
+        }
         // Make sure info meets all of the requirements.
         if (mRequirements != null) {
             for (int i = 0; i < mRequirements.length; ++i) {
@@ -106,6 +113,7 @@ public final class TransitionFilter implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeIntArray(mTypeSet);
         dest.writeInt(mFlags);
+        dest.writeInt(mNotFlags);
         dest.writeTypedArray(mRequirements, flags);
     }
 
@@ -139,6 +147,7 @@ public final class TransitionFilter implements Parcelable {
             }
         }
         sb.append("] flags=0x" + Integer.toHexString(mFlags));
+        sb.append("] notFlags=0x" + Integer.toHexString(mNotFlags));
         sb.append(" checks=[");
         if (mRequirements != null) {
             for (int i = 0; i < mRequirements.length; ++i) {

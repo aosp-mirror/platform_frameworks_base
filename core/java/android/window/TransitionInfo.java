@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -247,6 +248,13 @@ public final class TransitionInfo implements Parcelable {
      */
     public void addChange(@NonNull Change change) {
         mChanges.add(change);
+    }
+
+    /**
+     * Whether this transition includes keyguard going away.
+     */
+    public boolean isKeyguardGoingAway() {
+        return (mFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0;
     }
 
     @Override

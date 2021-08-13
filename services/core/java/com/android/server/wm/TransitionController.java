@@ -18,11 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -230,6 +226,10 @@ class TransitionController {
         if (isCollecting()) {
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
+            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
+                // Add keyguard flag to dismiss keyguard
+                mCollectingTransition.addFlag(flags);
+            }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
                     trigger != null ? trigger.asTask() : null, remoteTransition);
@@ -354,11 +354,7 @@ class TransitionController {
     }
 
     void dispatchLegacyAppTransitionStarting(TransitionInfo info) {
-        final boolean keyguardGoingAway = info.getType() == TRANSIT_KEYGUARD_GOING_AWAY
-                || (info.getFlags() & (TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE
-                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION
-                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER
-                        | TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION)) != 0;
+        final boolean keyguardGoingAway = info.isKeyguardGoingAway();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             mLegacyListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
                     0 /* durationHint */, SystemClock.uptimeMillis(),
