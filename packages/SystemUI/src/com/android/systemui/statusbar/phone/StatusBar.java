@@ -1512,14 +1512,32 @@ public class StatusBar extends SystemUI implements
         );
 
         // TODO: inject this.
-        mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
-                mHeadsUpManager, mNotificationShadeWindowView, mStackScrollerController,
-                mDozeScrimController, mScrimController, mNotificationShadeWindowController,
-                mDynamicPrivacyController, mKeyguardStateController,
+        mPresenter = new StatusBarNotificationPresenter(
+                mContext,
+                mNotificationPanelViewController,
+                mHeadsUpManager,
+                mNotificationShadeWindowView,
+                mStackScrollerController,
+                mDozeScrimController,
+                mScrimController,
+                mNotificationShadeWindowController,
+                mDynamicPrivacyController,
+                mKeyguardStateController,
                 mKeyguardIndicationController,
-                this /* statusBar */, mShadeController,
-                mLockscreenShadeTransitionController, mCommandQueue, mInitController,
-                mNotificationInterruptStateProvider);
+                this /* statusBar */,
+                mShadeController,
+                mLockscreenShadeTransitionController,
+                mCommandQueue,
+                mViewHierarchyManager,
+                mLockscreenUserManager,
+                mStatusBarStateController,
+                mMediaManager,
+                mGutsManager,
+                mKeyguardUpdateMonitor,
+                mInitController,
+                mNotificationInterruptStateProvider,
+                mRemoteInputManager,
+                mConfigurationController);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
