@@ -38,7 +38,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
         view = PhoneStatusBarView(mContext, null)
         controller = PhoneStatusBarViewController(view, commandQueue)
     }
