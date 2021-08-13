@@ -6247,8 +6247,9 @@ public class Notification implements Parcelable
          *
          * @param color the color to check
          * @return true if the color has higher contrast with white than black
+         * @hide
          */
-        private static boolean isColorDark(int color) {
+        public static boolean isColorDark(int color) {
             // as per ContrastColorUtil.shouldUseDark, this uses the color contrast midpoint.
             return ContrastColorUtil.calculateLuminance(color) <= 0.17912878474;
         }
