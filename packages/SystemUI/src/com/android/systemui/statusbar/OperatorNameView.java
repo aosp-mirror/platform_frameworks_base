@@ -28,17 +28,13 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.List;
 
 /** Shows the operator name */
-public class OperatorNameView extends TextView implements DemoModeCommandReceiver,
-        SignalCallback, Tunable {
+public class OperatorNameView extends TextView implements DemoModeCommandReceiver, Tunable {
 
     private static final String KEY_SHOW_OPERATOR_NAME = "show_operator_name";
 
@@ -69,7 +65,6 @@ public class OperatorNameView extends TextView implements DemoModeCommandReceive
         super.onAttachedToWindow();
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.registerCallback(mCallback);
-        Dependency.get(NetworkController.class).addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, KEY_SHOW_OPERATOR_NAME);
     }
 
@@ -77,13 +72,7 @@ public class OperatorNameView extends TextView implements DemoModeCommandReceive
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mKeyguardUpdateMonitor.removeCallback(mCallback);
-        Dependency.get(NetworkController.class).removeCallback(this);
         Dependency.get(TunerService.class).removeTunable(this);
-    }
-
-    @Override
-    public void setIsAirplaneMode(IconState icon) {
-        update();
     }
 
     @Override
@@ -107,7 +96,7 @@ public class OperatorNameView extends TextView implements DemoModeCommandReceive
         update();
     }
 
-    private void update() {
+    void update() {
         boolean showOperatorName = Dependency.get(TunerService.class)
                 .getValue(KEY_SHOW_OPERATOR_NAME, 1) != 0;
         setVisibility(showOperatorName ? VISIBLE : GONE);

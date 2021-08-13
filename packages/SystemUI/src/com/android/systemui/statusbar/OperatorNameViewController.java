@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.view.View;
 
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -26,35 +27,42 @@ import javax.inject.Inject;
 /** Controller for {@link OperatorNameView}. */
 public class OperatorNameViewController extends ViewController<OperatorNameView> {
     private final DarkIconDispatcher mDarkIconDispatcher;
+    private final NetworkController mNetworkController;
 
     private OperatorNameViewController(OperatorNameView view,
-            DarkIconDispatcher darkIconDispatcher) {
+            DarkIconDispatcher darkIconDispatcher,
+            NetworkController networkController) {
         super(view);
         mDarkIconDispatcher = darkIconDispatcher;
+        mNetworkController = networkController;
     }
 
     @Override
     protected void onViewAttached() {
         mDarkIconDispatcher.addDarkReceiver(mDarkReceiver);
+        mNetworkController.addCallback(mSignalCallback);
     }
 
     @Override
     protected void onViewDetached() {
         mDarkIconDispatcher.removeDarkReceiver(mDarkReceiver);
+        mNetworkController.addCallback(mSignalCallback);
     }
 
     /** Factory for constructing an {@link OperatorNameViewController}. */
     public static class Factory {
         private final DarkIconDispatcher mDarkIconDispatcher;
+        private final NetworkController mNetworkController;
 
         @Inject
-        public Factory(DarkIconDispatcher darkIconDispatcher) {
+        public Factory(DarkIconDispatcher darkIconDispatcher, NetworkController networkController) {
             mDarkIconDispatcher = darkIconDispatcher;
+            mNetworkController = networkController;
         }
 
         /** Create an {@link OperatorNameViewController}. */
         public OperatorNameViewController create(OperatorNameView view) {
-            return new OperatorNameViewController(view, mDarkIconDispatcher);
+            return new OperatorNameViewController(view, mDarkIconDispatcher, mNetworkController);
         }
     }
 
@@ -70,4 +78,11 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
     private final DarkIconDispatcher.DarkReceiver mDarkReceiver =
             (area, darkIntensity, tint) ->
                     mView.setTextColor(DarkIconDispatcher.getTint(area, mView, tint));
+    private final NetworkController.SignalCallback mSignalCallback =
+            new NetworkController.SignalCallback() {
+        @Override
+        public void setIsAirplaneMode(NetworkController.IconState icon) {
+            mView.update();
+        }
+    };
 }
