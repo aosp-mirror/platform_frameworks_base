@@ -652,7 +652,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private KeyguardMediaController mKeyguardMediaController;
 
-    private boolean mStatusViewCentered = false;
+    private boolean mStatusViewCentered = true;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -1082,7 +1082,7 @@ public class NotificationPanelViewController extends PanelViewController {
         constraintSet.applyTo(mNotificationContainerParent);
         mNotificationContainerParent.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
-        updateKeyguardStatusViewAlignment(false /* animate */);
+        updateKeyguardStatusViewAlignment(/* animate= */false);
         mLockscreenSmartspaceController.onSplitShadeChanged(mShouldUseSplitNotificationShade);
         mKeyguardMediaController.refreshMediaPosition();
     }
@@ -1129,6 +1129,9 @@ public class NotificationPanelViewController extends PanelViewController {
         keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
                 R.layout.keyguard_status_view, mNotificationContainerParent, false);
         mNotificationContainerParent.addView(keyguardStatusView, statusIndex);
+        // When it's reinflated, this is centered by default. If it shouldn't be, this will update
+        // below when resources are updated.
+        mStatusViewCentered = true;
         attachSplitShadeMediaPlayerContainer(
                 keyguardStatusView.findViewById(R.id.status_view_media_container));
 
