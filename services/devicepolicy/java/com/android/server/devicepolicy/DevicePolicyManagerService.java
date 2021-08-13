@@ -3804,17 +3804,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
-    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
-        Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()),
-                String.format(NOT_SYSTEM_CALLER_MSG, "query separate challenge support"));
-
-        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
-        // Profile challenge is supported on N or newer release.
-        return profileOwner != null &&
-                getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
-    }
-
     private boolean canSetPasswordQualityOnParent(String packageName, final CallerIdentity caller) {
         return !mInjector.isChangeEnabled(
                 PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, caller.getUserId())
