@@ -527,16 +527,15 @@ status_t BootAnimation::readyToRun() {
 
         // In the case of multi-display, boot animation shows on the specified displays
         // in addition to the primary display
-        auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
-        constexpr uint32_t LAYER_STACK = 0;
-        for (auto id : physicalDisplayIds) {
+        const auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
+        for (const auto id : physicalDisplayIds) {
             if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(id);
-                if (token != nullptr)
-                    t.setDisplayLayerStack(token, LAYER_STACK);
+                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+                    t.setDisplayLayerStack(token, ui::DEFAULT_LAYER_STACK);
+                }
             }
         }
-        t.setLayerStack(control, LAYER_STACK);
+        t.setLayerStack(control, ui::DEFAULT_LAYER_STACK);
     }
 
     t.setLayer(control, 0x40000000)

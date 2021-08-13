@@ -168,7 +168,8 @@ void SpriteController::doUpdateSprites() {
 
         // If surface is a new one, we have to set right layer stack.
         if (update.surfaceChanged || update.state.dirty & DIRTY_DISPLAY_ID) {
-            t.setLayerStack(update.state.surfaceControl, update.state.displayId);
+            t.setLayerStack(update.state.surfaceControl,
+                            ui::LayerStack::fromValue(update.state.displayId));
             needApplyTransaction = true;
         }
     }
