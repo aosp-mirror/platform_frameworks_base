@@ -2798,9 +2798,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mInputManagerInternal.toggleCapsLock(event.getDeviceId());
                         mPendingCapsLockToggle = false;
                     } else if (mPendingMetaAction) {
-                        launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
-                                event.getDeviceId(),
-                                event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                        if (!canceled) {
+                            launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
+                                    event.getDeviceId(),
+                                    event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                        }
                         mPendingMetaAction = false;
                     }
                 }

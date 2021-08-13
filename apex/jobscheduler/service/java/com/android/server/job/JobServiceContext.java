@@ -54,6 +54,9 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.tare.EconomicPolicy;
+import com.android.server.tare.EconomyManagerInternal;
+import com.android.server.tare.JobSchedulerEconomicPolicy;
 
 /**
  * Handles client binding and lifecycle of a job. Jobs execute one at a time on an instance of this
@@ -107,6 +110,7 @@ public final class JobServiceContext implements ServiceConnection {
     private final Context mContext;
     private final Object mLock;
     private final IBatteryStats mBatteryStats;
+    private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
     private final PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
@@ -211,6 +215,7 @@ public final class JobServiceContext implements ServiceConnection {
         mLock = service.getLock();
         mService = service;
         mBatteryStats = batteryStats;
+        mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
         mJobConcurrencyManager = concurrencyManager;
@@ -288,6 +293,11 @@ public final class JobServiceContext implements ServiceConnection {
             mWakeLock.setReferenceCounted(false);
             mWakeLock.acquire();
 
+            // Note the start when we try to bind so that the app is charged for some processing
+            // even if binding fails.
+            mEconomyManagerInternal.noteInstantaneousEvent(
+                    job.getSourceUserId(), job.getSourcePackageName(),
+                    getStartActionId(job), String.valueOf(job.getJobId()));
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
@@ -350,6 +360,9 @@ public final class JobServiceContext implements ServiceConnection {
             } catch (RemoteException e) {
                 // Whatever.
             }
+            mEconomyManagerInternal.noteOngoingEventStarted(
+                    job.getSourceUserId(), job.getSourcePackageName(),
+                    getRunningActionId(job), String.valueOf(job.getJobId()));
             final String jobPackage = job.getSourcePackageName();
             final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
@@ -361,6 +374,22 @@ public final class JobServiceContext implements ServiceConnection {
             job.startedAsExpeditedJob = job.shouldTreatAsExpeditedJob();
             return true;
         }
+    }
+
+    @EconomicPolicy.AppAction
+    private static int getStartActionId(@NonNull JobStatus job) {
+        if (job.startedAsExpeditedJob || job.shouldTreatAsExpeditedJob()) {
+            return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START;
+        }
+        return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
+    }
+
+    @EconomicPolicy.AppAction
+    private static int getRunningActionId(@NonNull JobStatus job) {
+        if (job.startedAsExpeditedJob || job.shouldTreatAsExpeditedJob()) {
+            return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING;
+        }
+        return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING;
     }
 
     /**
@@ -981,6 +1010,15 @@ public final class JobServiceContext implements ServiceConnection {
                     internalStopReason);
         } catch (RemoteException e) {
             // Whatever.
+        }
+        mEconomyManagerInternal.noteOngoingEventStopped(
+                mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
+                getRunningActionId(mRunningJob), String.valueOf(mRunningJob.getJobId()));
+        if (mParams.getStopReason() == JobParameters.STOP_REASON_TIMEOUT) {
+            mEconomyManagerInternal.noteInstantaneousEvent(
+                    mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
+                    JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
+                    String.valueOf(mRunningJob.getJobId()));
         }
         if (mWakeLock != null) {
             mWakeLock.release();

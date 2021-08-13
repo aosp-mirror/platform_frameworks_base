@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
@@ -28,6 +29,8 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApexStagedEvent;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -36,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
+import android.content.pm.StagedApexInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -52,6 +56,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
@@ -80,7 +85,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -99,7 +106,8 @@ public class StagingManager {
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Context mContext;
-    private final PreRebootVerificationHandler mPreRebootVerificationHandler;
+    @VisibleForTesting
+    final PreRebootVerificationHandler mPreRebootVerificationHandler;
     private final Supplier<PackageParser2> mPackageParserSupplier;
 
     private final File mFailureReasonFile = new File("/metadata/staged-install/failure_reason.txt");
@@ -114,6 +122,9 @@ public class StagingManager {
 
     @GuardedBy("mSuccessfulStagedSessionIds")
     private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
+
+    @GuardedBy("mStagedApexObservers")
+    private final List<IStagedApexObserver> mStagedApexObservers = new ArrayList<>();
 
     private final CompletableFuture<Void> mBootCompleted = new CompletableFuture<>();
 
@@ -202,6 +213,35 @@ public class StagingManager {
 
     private void markBootCompleted() {
         mApexManager.markBootCompleted();
+    }
+
+    void registerStagedApexObserver(IStagedApexObserver observer) {
+        if (observer == null) {
+            return;
+        }
+        if  (observer.asBinder() != null) {
+            try {
+                observer.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        synchronized (mStagedApexObservers) {
+                            mStagedApexObservers.remove(observer);
+                        }
+                    }
+                }, 0);
+            } catch (RemoteException re) {
+                Slog.w(TAG, re.getMessage());
+            }
+        }
+        synchronized (mStagedApexObservers) {
+            mStagedApexObservers.add(observer);
+        }
+    }
+
+    void unregisterStagedApexObserver(IStagedApexObserver observer) {
+        synchronized (mStagedApexObservers) {
+            mStagedApexObservers.remove(observer);
+        }
     }
 
     /**
@@ -808,6 +848,9 @@ public class StagingManager {
                 // Also, cleaning up the stageDir prevents the apex from being activated.
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             }
+            if (session.containsApexSession()) {
+                notifyStagedApexObservers();
+            }
         }
 
         // Session was successfully aborted from apexd (if required) and pre-reboot verification
@@ -1093,7 +1136,107 @@ public class StagingManager {
         return session;
     }
 
-    private final class PreRebootVerificationHandler extends Handler {
+    /**
+     * Returns ApexInfo about APEX contained inside the session as a {@code Map<String, ApexInfo>},
+     * where the key of the map is the module name of the ApexInfo.
+     *
+     * Returns an empty map if there is any error.
+     */
+    @VisibleForTesting
+    @NonNull
+    Map<String, ApexInfo> getStagedApexInfos(@NonNull StagedSession session) {
+        Preconditions.checkArgument(session != null, "Session is null");
+        Preconditions.checkArgument(!session.hasParentSessionId(),
+                session.sessionId() + " session has parent session");
+        Preconditions.checkArgument(session.containsApexSession(),
+                session.sessionId() + " session does not contain apex");
+
+        // Even if caller calls this method on ready session, the session could be abandoned
+        // right after this method is called.
+        if (!session.isSessionReady() || session.isDestroyed()) {
+            return Collections.emptyMap();
+        }
+
+        ApexSessionParams params = new ApexSessionParams();
+        params.sessionId = session.sessionId();
+        final IntArray childSessionIds = new IntArray();
+        if (session.isMultiPackage()) {
+            for (StagedSession s : session.getChildSessions()) {
+                if (s.isApexSession()) {
+                    childSessionIds.add(s.sessionId());
+                }
+            }
+        }
+        params.childSessionIds = childSessionIds.toArray();
+
+        ApexInfo[] infos = mApexManager.getStagedApexInfos(params);
+        Map<String, ApexInfo> result = new ArrayMap<>();
+        for (ApexInfo info : infos) {
+            result.put(info.moduleName, info);
+        }
+        return result;
+    }
+
+    /**
+     * Returns apex module names of all packages that are staged ready
+     */
+    List<String> getStagedApexModuleNames() {
+        List<String> result = new ArrayList<>();
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final StagedSession session = mStagedSessions.valueAt(i);
+                if (!session.isSessionReady() || session.isDestroyed()
+                        || session.hasParentSessionId() || !session.containsApexSession()) {
+                    continue;
+                }
+                result.addAll(getStagedApexInfos(session).keySet());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns ApexInfo of the {@code moduleInfo} provided if it is staged, otherwise returns null.
+     */
+    @Nullable
+    StagedApexInfo getStagedApexInfo(String moduleName) {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final StagedSession session = mStagedSessions.valueAt(i);
+                if (!session.isSessionReady() || session.isDestroyed()
+                        || session.hasParentSessionId() || !session.containsApexSession()) {
+                    continue;
+                }
+                ApexInfo ai = getStagedApexInfos(session).get(moduleName);
+                if (ai != null) {
+                    StagedApexInfo info = new StagedApexInfo();
+                    info.moduleName = ai.moduleName;
+                    info.diskImagePath = ai.modulePath;
+                    info.versionCode = ai.versionCode;
+                    info.versionName = ai.versionName;
+                    return info;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void notifyStagedApexObservers() {
+        synchronized (mStagedApexObservers) {
+            for (IStagedApexObserver observer : mStagedApexObservers) {
+                ApexStagedEvent event = new ApexStagedEvent();
+                event.stagedApexModuleNames = getStagedApexModuleNames().toArray(new String[0]);
+                try {
+                    observer.onApexStaged(event);
+                } catch (RemoteException re) {
+                    Slog.w(TAG, "Failed to contact the observer " + re.getMessage());
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    final class PreRebootVerificationHandler extends Handler {
 
         PreRebootVerificationHandler(Looper looper) {
             super(looper);
@@ -1114,7 +1257,8 @@ public class StagingManager {
          */
         private static final int MSG_PRE_REBOOT_VERIFICATION_START = 1;
         private static final int MSG_PRE_REBOOT_VERIFICATION_APEX = 2;
-        private static final int MSG_PRE_REBOOT_VERIFICATION_END = 3;
+        @VisibleForTesting
+        static final int MSG_PRE_REBOOT_VERIFICATION_END = 3;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1314,6 +1458,7 @@ public class StagingManager {
                 if (hasApex) {
                     try {
                         mApexManager.markStagedSessionReady(session.sessionId());
+                        notifyStagedApexObservers();
                     } catch (PackageManagerException e) {
                         session.setSessionFailed(e.error, e.getMessage());
                         return;

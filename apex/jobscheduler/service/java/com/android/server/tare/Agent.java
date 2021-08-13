@@ -238,8 +238,9 @@ class Agent {
     }
 
     @GuardedBy("mLock")
-    void noteOngoingEventLocked(final int userId, @NonNull final String pkgName, final int eventId,
-            @Nullable String tag, final long startElapsed, final boolean updateBalanceCheck) {
+    private void noteOngoingEventLocked(final int userId, @NonNull final String pkgName,
+            final int eventId, @Nullable String tag, final long startElapsed,
+            final boolean updateBalanceCheck) {
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null) {
@@ -398,8 +399,8 @@ class Agent {
      *                                    registered bills and notify listeners about any changes.
      */
     @GuardedBy("mLock")
-    void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
-            @Nullable String tag, final long nowElapsed, final long now,
+    private void stopOngoingActionLocked(final int userId, @NonNull final String pkgName,
+            final int eventId, @Nullable String tag, final long nowElapsed, final long now,
             final boolean updateBalanceCheck, final boolean notifyOnAffordabilityChange) {
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
@@ -408,7 +409,7 @@ class Agent {
         if (ongoingEvents == null) {
             // This may occur if TARE goes from disabled to enabled while an event is already
             // occurring.
-            Slog.w(TAG, "No ongoing transactions for <" + userId + ">" + pkgName);
+            Slog.w(TAG, "No ongoing transactions for " + appToString(userId, pkgName));
             return;
         }
         final OngoingEvent ongoingEvent = ongoingEvents.get(eventId, tag);
@@ -417,7 +418,7 @@ class Agent {
             // occurring.
             Slog.w(TAG, "Nonexistent ongoing transaction "
                     + eventToString(eventId) + (tag == null ? "" : ":" + tag)
-                    + " for <" + userId + ">" + pkgName + " ended");
+                    + " for " + appToString(userId, pkgName) + " ended");
             return;
         }
         ongoingEvent.refCount--;
@@ -472,7 +473,8 @@ class Agent {
             Slog.i(TAG, "Would result in too many credits in circulation. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
-                    + " for <" + userId + ">" + pkgName + " by " + (transaction.delta - newDelta));
+                    + " for " + appToString(userId, pkgName)
+                    + " by " + (transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
                     transaction.eventId, transaction.tag, newDelta);
@@ -485,7 +487,8 @@ class Agent {
             Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
-                    + " for <" + userId + ">" + pkgName + " by " + (transaction.delta - newDelta));
+                    + " for " + appToString(userId, pkgName)
+                    + " by " + (transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
                     transaction.eventId, transaction.tag, newDelta);
@@ -548,7 +551,7 @@ class Agent {
                 }
                 if (toReclaim > 0) {
                     Slog.i(TAG, "Reclaiming unused wealth! Taking " + toReclaim
-                            + " from <" + userId + ">" + pkgName);
+                            + " from " + appToString(userId, pkgName));
 
                     recordTransactionLocked(userId, pkgName, ledger,
                             new Ledger.Transaction(
@@ -845,7 +848,7 @@ class Agent {
 
             @Override
             public String toString() {
-                return "<" + userId + ">" + packageName;
+                return appToString(userId, packageName);
             }
 
             @Override

@@ -10221,6 +10221,13 @@ public final class Settings {
                 "device_state_rotation_lock";
 
         /**
+         * Control whether communal mode is allowed on this device.
+         *
+         * @hide
+         */
+        public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
@@ -10365,6 +10372,14 @@ public final class Settings {
         @Readable
         public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
                 "enable_accessibility_global_gesture_enabled";
+
+        /**
+         * Whether select sound track with audio description by default.
+         * @hide
+         */
+        @Readable
+        public static final String ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT =
+                "enable_accessibility_audio_description_by_default";
 
         /**
          * Whether Airplane Mode is on.

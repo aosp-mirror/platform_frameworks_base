@@ -20,68 +20,68 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Toast message when Wi-Fi cannot scan for networks -->
     <string name="wifi_fail_to_scan">Can\'t scan for networks</string>
-    <!-- Concise terminology for wifi with WEP security -->
-    <string name="wifi_security_short_wep" translatable="false">WEP</string>
-    <!-- Concise terminology for wifi with WPA security -->
-    <string name="wifi_security_short_wpa" translatable="false">WPA</string>
-    <!-- Concise terminology for wifi with WPA2 security -->
-    <string name="wifi_security_short_wpa2" translatable="false">WPA2</string>
-    <!-- Concise terminology for wifi with both WPA/WPA2 security -->
-    <string name="wifi_security_short_wpa_wpa2" translatable="false">WPA/WPA2</string>
+    <!-- Concise terminology for wifi with WEP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wep">WEP</string>
+    <!-- Concise terminology for wifi with WPA security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa">WPA</string>
+    <!-- Concise terminology for wifi with WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa2">WPA2</string>
+    <!-- Concise terminology for wifi with both WPA/WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_wpa_wpa2">WPA/WPA2</string>
     <!-- Concise terminology for wifi with unknown PSK type -->
     <string name="wifi_security_short_psk_generic" translatable="false">@string/wifi_security_short_wpa_wpa2</string>
-    <!-- Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_short_eap" translatable="false">802.1x</string>
-    <!-- Concise terminology for wifi with WPA 802.1x EAP security -->
-    <string name="wifi_security_short_eap_wpa" translatable="false">WPA-EAP</string>
-    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
-    <string name="wifi_security_short_eap_wpa2_wpa3" translatable="false">RSN-EAP</string>
-    <!-- Concise terminology for wifi with WPA3 security -->
-    <string name="wifi_security_short_sae" translatable="false">WPA3</string>
-    <!-- Concise terminology for wifi with WPA2/WPA3 transition security -->
-    <string name="wifi_security_short_psk_sae" translatable="false">WPA2/WPA3</string>
-    <!-- Concise terminology for Wi-Fi with None/OWE transition mode security -->
-    <string name="wifi_security_short_none_owe" translatable="false">None/OWE</string>
-    <!-- Concise terminology for wifi with OWE security -->
-    <string name="wifi_security_short_owe" translatable="false">OWE</string>
-    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
-    <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B-192</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap">802.1x</string>
+    <!-- Concise terminology for wifi with WPA 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_wpa">WPA-EAP</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_wpa2_wpa3">RSN-EAP</string>
+    <!-- Concise terminology for wifi with WPA3 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_sae">WPA3</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 transition security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_psk_sae">WPA2/WPA3</string>
+    <!-- Concise terminology for Wi-Fi with None/OWE transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_none_owe">None/OWE</string>
+    <!-- Concise terminology for wifi with OWE security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_owe">OWE</string>
+    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_short_eap_suiteb">Suite-B-192</string>
 
     <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. [CHAR LIMIT=40] -->
     <string name="wifi_security_none">None</string>
 
-    <!-- Terminology for wifi with WEP security -->
-    <string name="wifi_security_wep" translatable="false">WEP</string>
-    <!-- Terminology for wifi with WPA security -->
-    <string name="wifi_security_wpa" translatable="false">WPA-Personal</string>
-    <!-- Terminology for wifi with WPA2 security -->
-    <string name="wifi_security_wpa2" translatable="false">WPA2-Personal</string>
-    <!-- Terminology for wifi with both WPA/WPA2 security, or unknown -->
-    <string name="wifi_security_wpa_wpa2" translatable="false">WPA/WPA2-Personal</string>
+    <!-- Terminology for wifi with WEP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wep">WEP</string>
+    <!-- Terminology for wifi with WPA security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa">WPA-Personal</string>
+    <!-- Terminology for wifi with WPA2 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa2">WPA2-Personal</string>
+    <!-- Terminology for wifi with both WPA/WPA2 security, or unknown [CHAR LIMIT=40] -->
+    <string name="wifi_security_wpa_wpa2">WPA/WPA2-Personal</string>
     <!-- Terminology for wifi with unknown PSK type -->
     <string name="wifi_security_psk_generic" translatable="false">@string/wifi_security_wpa_wpa2</string>
-    <!-- Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap" translatable="false">WPA/WPA2/WPA3-Enterprise</string>
-    <!-- Concise terminology for wifi with WPA 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa" translatable="false">WPA-Enterprise</string>
-    <!-- Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa_wpa2" translatable="false">WPA/WPA2-Enterprise</string>
-    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
-    <!-- Concise terminology for wifi with WPA3 802.1x EAP security -->
-    <string name="wifi_security_eap_wpa3" translatable="false">WPA3-Enterprise</string>
-    <!-- Concise terminology for Passpoint network -->
-    <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
-    <!-- Terminology for wifi with WPA3 security -->
-    <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
-    <!-- Terminology for wifi with WPA2/WPA3 Transition mode security -->
-    <string name="wifi_security_psk_sae" translatable="false">WPA2/WPA3-Personal</string>
-    <!-- Terminology for Wi-Fi with None/OWE transition mode security -->
-    <string name="wifi_security_none_owe" translatable="false">None/Enhanced Open</string>
-    <!-- Terminology for wifi with OWE security -->
-    <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
-    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
-    <string name="wifi_security_eap_suiteb" translatable="false">WPA3-Enterprise 192-bit</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap">WPA/WPA2/WPA3-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa">WPA-Enterprise</string>
+    <!-- Concise terminology for wifi with 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa_wpa2">WPA/WPA2-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA2/WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa2_wpa3">WPA2/WPA3-Enterprise</string>
+    <!-- Concise terminology for wifi with WPA3 802.1x EAP security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_wpa3">WPA3-Enterprise</string>
+    <!-- Concise terminology for Passpoint network [CHAR LIMIT=40] -->
+    <string name="wifi_security_passpoint">Passpoint</string>
+    <!-- Terminology for wifi with WPA3 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_sae">WPA3-Personal</string>
+    <!-- Terminology for wifi with WPA2/WPA3 Transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_psk_sae">WPA2/WPA3-Personal</string>
+    <!-- Terminology for Wi-Fi with None/OWE transition mode security [CHAR LIMIT=40] -->
+    <string name="wifi_security_none_owe">None/Enhanced Open</string>
+    <!-- Terminology for wifi with OWE security [CHAR LIMIT=40] -->
+    <string name="wifi_security_owe">Enhanced Open</string>
+    <!-- Concise terminology for wifi with 802.1x EAP Suite-B-192 security [CHAR LIMIT=40] -->
+    <string name="wifi_security_eap_suiteb">WPA3-Enterprise 192-bit</string>
 
     <!-- Summary for the remembered network. -->
     <string name="wifi_remembered">Saved</string>
