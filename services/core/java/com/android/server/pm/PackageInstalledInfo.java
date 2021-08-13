@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.TAG;
 
-import android.content.pm.PackageParser;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
@@ -57,12 +56,6 @@ final class PackageInstalledInfo {
         setReturnCode(code);
         setReturnMessage(msg);
         Slog.w(TAG, msg);
-    }
-
-    public void setError(String msg, PackageParser.PackageParserException e) {
-        setReturnCode(e.error);
-        setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-        Slog.w(TAG, msg, e);
     }
 
     public void setError(String msg, PackageManagerException e) {
