@@ -4363,8 +4363,7 @@ public class NotificationManagerService extends SystemService {
                             final int userId = r.getSbn().getUserId();
                             if (userId != info.userid && userId != UserHandle.USER_ALL &&
                                     !mUserProfiles.isCurrentProfile(userId)) {
-                                throw new SecurityException("Disallowed call from listener: "
-                                        + info.service);
+                                continue;
                             }
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
@@ -4431,8 +4430,7 @@ public class NotificationManagerService extends SystemService {
                         final int userId = r.getSbn().getUserId();
                         if (userId != info.userid && userId != UserHandle.USER_ALL
                                 && !mUserProfiles.isCurrentProfile(userId)) {
-                            throw new SecurityException("Disallowed call from listener: "
-                                    + info.service);
+                            continue;
                         }
                         seen.add(r);
                         if (!r.isSeen()) {
