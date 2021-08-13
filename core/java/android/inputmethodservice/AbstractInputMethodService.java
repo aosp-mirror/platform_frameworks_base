@@ -294,7 +294,7 @@ public abstract class AbstractInputMethodService extends WindowProviderService
     @Override
     @Nullable
     public final Bundle getWindowContextOptions() {
-        return null;
+        return super.getWindowContextOptions();
     }
 
     /** @hide */

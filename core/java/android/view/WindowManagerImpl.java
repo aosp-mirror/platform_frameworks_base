@@ -19,9 +19,12 @@ package android.view;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+import static android.window.WindowProvider.KEY_IS_WINDOW_PROVIDER_SERVICE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -36,7 +39,9 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.window.WindowContext;
+import android.window.WindowProvider;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
@@ -145,11 +150,41 @@ public final class WindowManagerImpl implements WindowManager {
             throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
         }
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+        assertWindowContextTypeMatches(wparams.type);
         // Only use the default token if we don't have a parent window and a token.
         if (mDefaultToken != null && mParentWindow == null && wparams.token == null) {
             wparams.token = mDefaultToken;
         }
         wparams.mWindowContextToken = mWindowContextToken;
+    }
+
+    private void assertWindowContextTypeMatches(@LayoutParams.WindowType int windowType) {
+        if (!(mContext instanceof WindowProvider)) {
+            return;
+        }
+        // Don't need to check sub-window type because sub window should be allowed to be attached
+        // to the parent window.
+        if (windowType >= FIRST_SUB_WINDOW && windowType <= LAST_SUB_WINDOW) {
+            return;
+        }
+        final WindowProvider windowProvider = (WindowProvider) mContext;
+        if (windowProvider.getWindowType() == windowType) {
+            return;
+        }
+        IllegalArgumentException exception = new IllegalArgumentException("Window type mismatch."
+                + " Window Context's window type is " + windowProvider.getWindowType()
+                + ", while LayoutParams' type is set to " + windowType + "."
+                + " Please create another Window Context via"
+                + " createWindowContext(getDisplay(), " + windowType + ", null)"
+                + " to add window with type:" + windowType);
+        if (!windowProvider.getWindowContextOptions().getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE,
+                false)) {
+            throw exception;
+        }
+        // Throw IncorrectCorrectViolation if the Window Context is allowed to provide multiple
+        // window types. Usually it's because the Window Context is a WindowProviderService.
+        StrictMode.onIncorrectContextUsed("WindowContext's window type must"
+                + " match type in WindowManager.LayoutParams", exception);
     }
 
     @Override
