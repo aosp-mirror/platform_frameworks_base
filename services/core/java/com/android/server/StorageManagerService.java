@@ -2847,8 +2847,12 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Slog.wtf(TAG, e);
+            // Make sure to re-throw this exception; we must not ignore failure
+            // to prepare the user storage as it could indicate that encryption
+            // wasn't successfully set up.
+            throw new RuntimeException(e);
         }
     }
 
