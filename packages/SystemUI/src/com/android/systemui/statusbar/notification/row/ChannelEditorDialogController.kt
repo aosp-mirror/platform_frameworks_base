@@ -280,7 +280,8 @@ class ChannelEditorDialogController @Inject constructor(
 
     @VisibleForTesting
     fun launchSettings(sender: View) {
-        onSettingsClickListener?.onClick(sender, null, appUid!!)
+        val channel = if (providedChannels.size == 1) providedChannels[0] else null
+        onSettingsClickListener?.onClick(sender, channel, appUid!!)
     }
 
     private fun initDialog() {
