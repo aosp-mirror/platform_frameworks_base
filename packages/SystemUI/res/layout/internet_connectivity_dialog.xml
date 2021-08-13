@@ -191,6 +191,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent">
                         <TextView
+                            android:id="@+id/wifi_toggle_title"
                             android:text="@string/turn_on_wifi"
                             android:textDirection="locale"
                             android:layout_width="wrap_content"
