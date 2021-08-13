@@ -30,19 +30,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginEnablerImpl;
-import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.shared.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +46,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -59,11 +55,13 @@ public class PluginManagerTest extends SysuiTestCase {
 
     private static final String WHITELISTED_PACKAGE = "com.android.systemui";
 
-    private PluginInstanceManagerFactory mMockFactory;
+    private PluginInstanceManager.Factory mMockFactory;
     private PluginInstanceManager mMockPluginInstance;
     private PluginManagerImpl mPluginManager;
-    private PluginListener mMockListener;
+    private PluginListener<?> mMockListener;
     private PackageManager mMockPackageManager;
+    private PluginEnabler mPluginEnabler;
+    private PluginPrefs mPluginPrefs;
 
     private UncaughtExceptionHandler mRealExceptionHandler;
     private UncaughtExceptionHandler mMockExceptionHandler;
@@ -71,30 +69,23 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        mDependency.injectTestDependency(Dependency.BG_LOOPER,
-                TestableLooper.get(this).getLooper());
         mRealExceptionHandler = Thread.getUncaughtExceptionPreHandler();
         mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
-        mMockFactory = mock(PluginInstanceManagerFactory.class);
+        mMockFactory = mock(PluginInstanceManager.Factory.class);
         mMockPluginInstance = mock(PluginInstanceManager.class);
-        when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
+        mPluginEnabler = mock(PluginEnabler.class);
+        mPluginPrefs = mock(PluginPrefs.class);
+        when(mMockFactory.create(Mockito.any(), Mockito.any(),
+                Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+                Mockito.any()))
                 .thenReturn(mMockPluginInstance);
 
         mMockPackageManager = mock(PackageManager.class);
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, true,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-                    @Override
-                    public String[] getWhitelistedPlugins(Context context) {
-                        return new String[0];
-                    }
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, new String[0]);
 
-                    @Override
-                    public PluginEnabler getPluginEnabler(Context context) {
-                        return new PluginEnablerImpl(context, mMockPackageManager);
-                    }
-        });
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
     }
@@ -127,13 +118,10 @@ public class PluginManagerTest extends SysuiTestCase {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     public void testNonDebuggable_noWhitelist() {
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-            @Override
-            public String[] getWhitelistedPlugins(Context context) {
-                return new String[0];
-            }
-        });
+        mPluginManager = new PluginManagerImpl(
+                getContext(), mMockFactory, false,
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, new String[0]);
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
@@ -148,13 +136,10 @@ public class PluginManagerTest extends SysuiTestCase {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     public void testNonDebuggable_whitelistedPkg() {
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                mMockExceptionHandler, new PluginInitializerImpl() {
-            @Override
-            public String[] getWhitelistedPlugins(Context context) {
-                return new String[] {WHITELISTED_PACKAGE};
-            }
-        });
+        mPluginManager = new PluginManagerImpl(
+                getContext(), mMockFactory, false,
+                Optional.of(mMockExceptionHandler), mPluginEnabler,
+                mPluginPrefs, new String[] {WHITELISTED_PACKAGE});
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
@@ -211,9 +196,7 @@ public class PluginManagerTest extends SysuiTestCase {
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
         verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));
-        verify(mMockPackageManager).setComponentEnabledSetting(eq(testComponent),
-                eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
-                eq(PackageManager.DONT_KILL_APP));
+        verify(mPluginEnabler).setDisabled(testComponent, PluginEnabler.DISABLED_INVALID_VERSION);
     }
 
     private void resetExceptionHandler() {

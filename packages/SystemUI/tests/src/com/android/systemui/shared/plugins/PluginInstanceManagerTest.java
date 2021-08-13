@@ -82,6 +82,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private PluginEnabler mMockEnabler;
     ComponentName mTestPluginComponentName =
             new ComponentName(WHITELISTED_PACKAGE, TestPlugin.class.getName());
+    private PluginInitializer mInitializer;
 
     @Before
     public void setup() throws Exception {
@@ -95,9 +96,10 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockEnabler = mock(PluginEnabler.class);
         when(mMockManager.getPluginEnabler()).thenReturn(mMockEnabler);
         mMockVersionInfo = mock(VersionInfo.class);
+        mInitializer = mock(PluginInitializer.class);
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, true, new String[0]);
+                mMockManager, true, new String[0], mInitializer);
         sMockPlugin = mock(Plugin.class);
         when(sMockPlugin.getVersion()).thenReturn(1);
     }
@@ -194,7 +196,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[0]);
+                mMockManager, false, new String[0], mInitializer);
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();
@@ -211,7 +213,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[] {WHITELISTED_PACKAGE});
+                mMockManager, false, new String[] {WHITELISTED_PACKAGE}, mInitializer);
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();
@@ -255,7 +257,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testDisableWhitelisted() throws Exception {
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[] {WHITELISTED_PACKAGE});
+                mMockManager, false, new String[] {WHITELISTED_PACKAGE}, mInitializer);
         createPlugin(); // Get into valid created state.
 
         mPluginInstanceManager.disableAll();
