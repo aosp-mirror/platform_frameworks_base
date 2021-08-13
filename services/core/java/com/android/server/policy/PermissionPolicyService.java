@@ -64,8 +64,8 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.PermissionThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -279,7 +279,7 @@ public final class PermissionPolicyService extends SystemService {
                 PermissionControllerManager manager = mPermControllerManagers.get(user);
                 if (manager == null) {
                     manager = new PermissionControllerManager(
-                            getUserContext(getContext(), user), PermissionThread.getHandler());
+                            getUserContext(getContext(), user), FgThread.getHandler());
                     mPermControllerManagers.put(user, manager);
                 }
                 manager.updateUserSensitiveForApp(uid);
@@ -287,9 +287,8 @@ public final class PermissionPolicyService extends SystemService {
         }, UserHandle.ALL, intentFilter, null, null);
 
         PermissionControllerManager manager = new PermissionControllerManager(
-                getUserContext(getContext(), Process.myUserHandle()),
-                PermissionThread.getHandler());
-        PermissionThread.getHandler().postDelayed(manager::updateUserSensitive,
+                getUserContext(getContext(), Process.myUserHandle()), FgThread.getHandler());
+        FgThread.getHandler().postDelayed(manager::updateUserSensitive,
                 USER_SENSITIVE_UPDATE_DELAY_MS);
     }
 
@@ -316,7 +315,7 @@ public final class PermissionPolicyService extends SystemService {
         if (isStarted(changedUserId)) {
             synchronized (mLock) {
                 if (mIsPackageSyncsScheduled.add(new Pair<>(packageName, changedUserId))) {
-                    PermissionThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService
                                     ::synchronizePackagePermissionsAndAppOpsForUser,
                             this, packageName, changedUserId));
@@ -422,9 +421,9 @@ public final class PermissionPolicyService extends SystemService {
             final PermissionControllerManager permissionControllerManager =
                     new PermissionControllerManager(
                             getUserContext(getContext(), UserHandle.of(userId)),
-                            PermissionThread.getHandler());
+                            FgThread.getHandler());
             permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
-                    PermissionThread.getExecutor(), successful -> {
+                    FgThread.getExecutor(), successful -> {
                         if (successful) {
                             future.complete(null);
                         } else {
@@ -528,7 +527,7 @@ public final class PermissionPolicyService extends SystemService {
             synchronized (mLock) {
                 if (!mIsUidSyncScheduled.get(uid)) {
                     mIsUidSyncScheduled.put(uid, true);
-                    PermissionThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService::resetAppOpPermissionsIfNotRequestedForUid,
                             this, uid));
                 }

@@ -145,7 +145,6 @@ import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.PermissionThread;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
@@ -2057,7 +2056,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private byte[] backupRuntimePermissions(@UserIdInt int userId) {
         CompletableFuture<byte[]> backup = new CompletableFuture<>();
         mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
-                PermissionThread.getExecutor(), backup::complete);
+                mContext.getMainExecutor(), backup::complete);
 
         try {
             return backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
@@ -2102,7 +2101,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName,
-                UserHandle.of(userId), PermissionThread.getExecutor(), (hasMoreBackup) -> {
+                UserHandle.of(userId), mContext.getMainExecutor(), (hasMoreBackup) -> {
                     if (hasMoreBackup) {
                         return;
                     }
@@ -4551,8 +4550,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        mPermissionControllerManager = new PermissionControllerManager(
-                mContext, PermissionThread.getHandler());
+        mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
     }
 
