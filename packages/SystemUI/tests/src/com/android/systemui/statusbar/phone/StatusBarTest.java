@@ -205,6 +205,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
+    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NavigationBarController mNavigationBarController;
@@ -359,6 +360,7 @@ public class StatusBarTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
+                mNotificationEntryManager,
                 mNotificationGutsManager,
                 notificationLogger,
                 mNotificationInterruptStateProvider,

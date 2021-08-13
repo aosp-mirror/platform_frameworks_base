@@ -197,6 +197,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -529,6 +530,7 @@ public class StatusBar extends SystemUI implements
 
     private final int[] mAbsPos = new int[2];
 
+    protected final NotificationEntryManager mEntryManager;
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
@@ -805,6 +807,7 @@ public class StatusBar extends SystemUI implements
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
+            NotificationEntryManager notificationEntryManager,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
@@ -894,6 +897,7 @@ public class StatusBar extends SystemUI implements
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
+        mEntryManager = notificationEntryManager;
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
@@ -1530,6 +1534,7 @@ public class StatusBar extends SystemUI implements
                 mViewHierarchyManager,
                 mLockscreenUserManager,
                 mStatusBarStateController,
+                mEntryManager,
                 mMediaManager,
                 mGutsManager,
                 mKeyguardUpdateMonitor,

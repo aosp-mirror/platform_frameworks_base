@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -143,6 +144,7 @@ public interface StatusBarPhoneModule {
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
+            NotificationEntryManager notificationEntryManager,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
@@ -231,6 +233,7 @@ public interface StatusBarPhoneModule {
                 falsingManager,
                 falsingCollector,
                 broadcastDispatcher,
+                notificationEntryManager,
                 notificationGutsManager,
                 notificationLogger,
                 notificationInterruptStateProvider,

@@ -96,9 +96,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationRemoteInputManager.Callback.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ForegroundServiceNotificationListener.class);
-        NotificationEntryManager entryManager =
-                mDependency.injectMockDependency(NotificationEntryManager.class);
-        when(entryManager.getActiveNotificationsForCurrentUser()).thenReturn(new ArrayList<>());
 
         NotificationShadeWindowView notificationShadeWindowView =
                 mock(NotificationShadeWindowView.class);
@@ -122,6 +119,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationViewHierarchyManager.class),
                 mock(NotificationLockscreenUserManager.class),
                 mock(SysuiStatusBarStateController.class),
+                mock(NotificationEntryManager.class),
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
                 mock(KeyguardUpdateMonitor.class),

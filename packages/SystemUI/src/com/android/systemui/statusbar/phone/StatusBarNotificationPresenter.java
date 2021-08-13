@@ -93,8 +93,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
+    private final NotificationEntryManager mEntryManager;
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -139,6 +138,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             NotificationLockscreenUserManager lockscreenUserManager,
             SysuiStatusBarStateController sysuiStatusBarStateController,
+            NotificationEntryManager notificationEntryManager,
             NotificationMediaManager notificationMediaManager,
             NotificationGutsManager notificationGutsManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -159,6 +159,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mViewHierarchyManager = notificationViewHierarchyManager;
         mLockscreenUserManager = lockscreenUserManager;
         mStatusBarStateController = sysuiStatusBarStateController;
+        mEntryManager = notificationEntryManager;
         mMediaManager = notificationMediaManager;
         mGutsManager = notificationGutsManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
