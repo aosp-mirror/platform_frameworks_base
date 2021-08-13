@@ -16,12 +16,9 @@
 
 package android.view;
 
-import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.window.WindowProviderService.isWindowProviderService;
@@ -46,7 +43,9 @@ import android.window.WindowProvider;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -304,31 +303,86 @@ public final class WindowManagerImpl implements WindowManager {
     private WindowInsets computeWindowInsets(Rect bounds) {
         // Initialize params which used for obtaining all system insets.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
         final Context context = (mParentWindow != null) ? mParentWindow.getContext() : mContext;
         params.token = Context.getToken(context);
-        params.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-        params.setFitInsetsTypes(0);
-        params.setFitInsetsSides(0);
-
-        return getWindowInsetsFromServer(params, bounds);
+        return getWindowInsetsFromServerForCurrentDisplay(params, bounds);
     }
 
-    private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
+    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
+            WindowManager.LayoutParams attrs, Rect bounds) {
+        final Configuration config = mContext.getResources().getConfiguration();
+        return getWindowInsetsFromServerForDisplay(mContext.getDisplayId(), attrs, bounds,
+                config.isScreenRound(), config.windowConfiguration.getWindowingMode());
+    }
+
+    /**
+     * Retrieves WindowInsets for the given context and display, given the window bounds.
+     *
+     * @param displayId the ID of the logical display to calculate insets for
+     * @param attrs the LayoutParams for the calling app
+     * @param bounds the window bounds to calculate insets for
+     * @param isScreenRound if the display identified by displayId is round
+     * @param windowingMode the windowing mode of the window to calculate insets for
+     * @return WindowInsets calculated for the given window bounds, on the given display
+     */
+    private static WindowInsets getWindowInsetsFromServerForDisplay(int displayId,
+            WindowManager.LayoutParams attrs, Rect bounds, boolean isScreenRound,
+            int windowingMode) {
         try {
             final InsetsState insetsState = new InsetsState();
             final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(attrs, mContext.getDisplayId(), insetsState);
-            final Configuration config = mContext.getResources().getConfiguration();
-            final boolean isScreenRound = config.isScreenRound();
-            final int windowingMode = config.windowConfiguration.getWindowingMode();
+                    .getWindowInsets(attrs, displayId, insetsState);
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
                     isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode, null /* typeSideMap */);
+                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode,
+                    null /* typeSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    @NonNull
+    public Set<WindowMetrics> getPossibleMaximumWindowMetrics(int displayId) {
+        List<DisplayInfo> possibleDisplayInfos;
+        try {
+            possibleDisplayInfos = WindowManagerGlobal.getWindowManagerService()
+                    .getPossibleDisplayInfo(displayId, mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        int size = possibleDisplayInfos.size();
+        DisplayInfo currentDisplayInfo;
+        WindowInsets windowInsets = null;
+        if (size > 0) {
+            currentDisplayInfo = possibleDisplayInfos.get(0);
+
+            final WindowManager.LayoutParams params =  new WindowManager.LayoutParams();
+            final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
+            // TODO(181127261) not computing insets correctly - need to have underlying
+            // frame reflect the faked orientation.
+            windowInsets = getWindowInsetsFromServerForDisplay(
+                    currentDisplayInfo.displayId, params,
+                    new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
+                            currentDisplayInfo.getNaturalHeight()), isScreenRound,
+                    WINDOWING_MODE_FULLSCREEN);
+        }
+
+        Set<WindowMetrics> maxMetrics = new HashSet<>();
+        for (int i = 0; i < size; i++) {
+            currentDisplayInfo = possibleDisplayInfos.get(i);
+
+            // Calculate max bounds for this rotation and state.
+            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
+                    currentDisplayInfo.getNaturalHeight());
+
+            // Calculate insets for the rotated max bounds.
+            // TODO(181127261) calculate insets for each display rotation and state.
+
+            maxMetrics.add(new WindowMetrics(maxBounds, windowInsets));
+        }
+        return maxMetrics;
     }
 
     @Override
