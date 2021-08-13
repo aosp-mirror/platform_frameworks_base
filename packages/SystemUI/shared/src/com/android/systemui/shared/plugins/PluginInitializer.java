@@ -14,18 +14,10 @@
 
 package com.android.systemui.shared.plugins;
 
-import android.content.Context;
-
 /**
  * Provides necessary components for initializing {@link PluginManagerImpl}.
  */
 public interface PluginInitializer {
-
-    /**
-     * Return a list of plugins that don't get disabled when an exception occurs.
-     */
-    String[] getPrivilegedPlugins(Context context);
-
 
     /**
      * Called from {@link PluginActionManager}.

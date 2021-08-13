@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import com.android.systemui.R;
 import com.android.systemui.dagger.PluginModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginActionManager;
@@ -126,7 +127,7 @@ public abstract class PluginsModule {
 
     @Provides
     @Named(PLUGIN_PRIVILEGED)
-    static List<String> providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
-        return Arrays.asList(initializer.getPrivilegedPlugins(context));
+    static List<String> providesPrivilegedPlugins(Context context) {
+        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginWhitelist));
     }
 }
