@@ -93,7 +93,7 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         val newScrimView = LightRevealScrim(context, null)
             .apply {
                 revealEffect = LinearLightRevealEffect(isVerticalFold)
-                revealAmountListener = Consumer {}
+                isScrimOpaqueChangedListener = Consumer {}
                 revealAmount = 0f
             }
 

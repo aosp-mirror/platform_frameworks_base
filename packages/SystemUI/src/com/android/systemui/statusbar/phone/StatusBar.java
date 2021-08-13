@@ -1338,8 +1338,19 @@ public class StatusBar extends SystemUI implements
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
-        mLightRevealScrim.setRevealAmountListener(
-                mNotificationShadeWindowController::setLightRevealScrimAmount);
+        mLightRevealScrim.setScrimOpaqueChangedListener((opaque) -> {
+            Runnable updateOpaqueness = () -> {
+                mNotificationShadeWindowController.setLightRevealScrimOpaque(
+                        mLightRevealScrim.isScrimOpaque());
+            };
+            if (opaque) {
+                // Delay making the view opaque for a frame, because it needs some time to render
+                // otherwise this can lead to a flicker where the scrim doesn't cover the screen
+                mLightRevealScrim.post(updateOpaqueness);
+            } else {
+                updateOpaqueness.run();
+            }
+        });
         mUnlockedScreenOffAnimationController.initialize(this, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
