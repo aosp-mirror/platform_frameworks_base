@@ -46,6 +46,8 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_270;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -153,6 +155,7 @@ import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -162,6 +165,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.TestUtilityService;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -323,11 +327,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -8451,6 +8457,65 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (packageName == null || !isRecentsComponent(packageName, callingUid)) {
+                    Slog.e(TAG, "Unable to verify uid for package " + packageName
+                            + " for getPossibleMaximumWindowMetrics");
+                    return new ArrayList<>();
+                }
+                // TODO(181127261) DisplayInfo should be pushed from DisplayManager.
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.e(TAG, "Invalid displayId " + displayId
+                            + " for getPossibleMaximumWindowMetrics");
+                    return new ArrayList<>();
+                }
+
+                // TODO(181127261) DisplayManager should provide a DisplayInfo for each rotation
+                DisplayInfo currentDisplayInfo = dc.getDisplayInfo();
+                Set<DisplayInfo> displayInfoSet = new HashSet<>();
+                for (int rotation = ROTATION_0; rotation <= ROTATION_270; rotation++) {
+                    currentDisplayInfo.rotation = rotation;
+                    // TODO(181127261) Retrieve the device state from display stack.
+                    displayInfoSet.add(new DisplayInfo(currentDisplayInfo));
+                }
+                return new ArrayList<DisplayInfo>(displayInfoSet);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Returns {@code true} when the calling package is the recents component.
+     */
+    boolean isRecentsComponent(@NonNull String callingPackageName, int callingUid) {
+        String recentsPackage;
+        try {
+            String recentsComponent = mContext.getResources().getString(
+                    R.string.config_recentsComponentName);
+            if (recentsComponent == null) {
+                return false;
+            }
+            recentsPackage = ComponentName.unflattenFromString(recentsComponent).getPackageName();
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Unable to verify if recents component", e);
+            return false;
+        }
+        try {
+            return callingUid == mContext.getPackageManager().getPackageUid(callingPackageName, 0)
+                    && callingPackageName.equals(recentsPackage);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Unable to verify if recents component", e);
+            return false;
         }
     }
 
