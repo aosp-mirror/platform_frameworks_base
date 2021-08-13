@@ -16910,6 +16910,14 @@ public final class Settings {
              * @hide
              */
             public static final String COMBINED_LOCATION_ENABLED = "combined_location_enable";
+
+            /**
+             * The wrist orientation mode of the device
+             * Valid values - LEFT_WRIST_ROTATION_0 = "0" (default), LEFT_WRIST_ROTATION_180 = "1",
+             *          RIGHT_WRIST_ROTATION_0 = "2", RIGHT_WRIST_ROTATION_180 = "3"
+             * @hide
+             */
+            public static final String WRIST_ORIENTATION_MODE = "wear_wrist_orientation_mode";
         }
     }
 
