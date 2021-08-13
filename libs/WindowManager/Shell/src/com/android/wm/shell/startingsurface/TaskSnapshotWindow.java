@@ -364,6 +364,7 @@ public class TaskSnapshotWindow {
 
         // In case window manager leaks us, make sure we don't retain the snapshot.
         mSnapshot = null;
+        mSurfaceControl.release();
     }
 
     private void drawSizeMatchSnapshot() {
@@ -431,6 +432,7 @@ public class TaskSnapshotWindow {
             mTransaction.setBuffer(mSurfaceControl, background);
         }
         mTransaction.apply();
+        childSurfaceControl.release();
     }
 
     /**
