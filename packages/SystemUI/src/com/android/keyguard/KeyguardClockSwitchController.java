@@ -98,6 +98,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private SmartspaceTransitionController mSmartspaceTransitionController;
 
+    private boolean mOnlyClock = false;
+
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
@@ -127,6 +129,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
+    }
+
+    /**
+     * Mostly used for alternate displays, limit the information shown
+     */
+    public void setOnlyClock(boolean onlyClock) {
+        mOnlyClock = onlyClock;
     }
 
     /**
@@ -169,6 +178,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
         mColorExtractor.addOnColorsChangedListener(mColorsListener);
         mView.updateColors(getGradientColors());
+
+        if (mOnlyClock) {
+            View ksa = mView.findViewById(R.id.keyguard_status_area);
+            ksa.setVisibility(View.GONE);
+
+            View nic = mView.findViewById(
+                    R.id.left_aligned_notification_icon_container);
+            nic.setVisibility(View.GONE);
+            return;
+        }
         updateAodIcons();
 
         if (mSmartspaceController.isSmartspaceEnabled()) {
