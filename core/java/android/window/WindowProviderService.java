@@ -42,21 +42,26 @@ import android.view.WindowManagerImpl;
  * {@link WindowContext}, but is represented as {@link Service}.
  *
  * @see android.inputmethodservice.InputMethodService
- * @see android.accessibilityservice.AccessibilityService
  *
  * @hide
  */
 @TestApi
 @UiContext
-public abstract class WindowProviderService extends Service {
+public abstract class WindowProviderService extends Service implements WindowProvider {
 
+    private final Bundle mOptions;
     private final WindowTokenClient mWindowToken = new WindowTokenClient();
     private final WindowContextController mController = new WindowContextController(mWindowToken);
     private WindowManager mWindowManager;
     private boolean mInitialized;
 
+    public WindowProviderService() {
+        mOptions = new Bundle();
+        mOptions.putBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, true);
+    }
+
     /**
-     * Returns the type of this {@link WindowProviderService}.
+     * Returns the window type of this {@link WindowProviderService}.
      * Each inheriting class must implement this method to provide the type of the window. It is
      * used similar to {@code type} of {@link Context#createWindowContext(int, Bundle)}
      *
@@ -68,15 +73,24 @@ public abstract class WindowProviderService extends Service {
     @SuppressLint("OnNameExpected")
     // Suppress the lint because it is not a callback and users should provide window type
     // so we cannot make it final.
-    public abstract @WindowType int getWindowType();
+    @WindowType
+    @Override
+    public abstract int getWindowType();
 
     /**
      * Returns the option of this {@link WindowProviderService}.
-     * Default is {@code null}. The inheriting class can implement this method to provide the
-     * customization {@code option} of the window. It is used similar to {@code options} of
-     * {@link Context#createWindowContext(int, Bundle)}
-     *
-     * @see Context#createWindowContext(int, Bundle)
+     * <p>
+     * The inheriting class can implement this method to provide the customization {@code option} of
+     * the window, but must be based on this method's returned value.
+     * It is used similar to {@code options} of {@link Context#createWindowContext(int, Bundle)}
+     * </p>
+     * <pre class="prettyprint">
+     * public Bundle getWindowContextOptions() {
+     *     final Bundle options = super.getWindowContextOptions();
+     *     options.put(KEY_ROOT_DISPLAY_AREA_ID, displayAreaInfo.rootDisplayAreaId);
+     *     return options;
+     * }
+     * </pre>
      *
      * @hide
      */
@@ -85,8 +99,10 @@ public abstract class WindowProviderService extends Service {
     // Suppress the lint because it is not a callback and users may override this API to provide
     // launch option. Also, the return value of this API is null by default.
     @Nullable
+    @CallSuper
+    @Override
     public Bundle getWindowContextOptions() {
-        return null;
+        return mOptions;
     }
 
     /**
