@@ -22,6 +22,7 @@ per-file android_view_PointerIcon.* = file:/services/core/java/com/android/serve
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file android_window_WindowInfosListener.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Resources
 per-file android_content_res_* = file:/core/java/android/content/res/OWNERS

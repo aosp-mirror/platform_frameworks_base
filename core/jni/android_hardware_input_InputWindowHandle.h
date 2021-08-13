@@ -40,6 +40,9 @@ private:
 extern sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
         JNIEnv* env, jobject inputWindowHandleObj);
 
+extern jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
+                                                             gui::WindowInfo windowInfo);
+
 } // namespace android
 
 #endif // _ANDROID_VIEW_INPUT_WINDOW_HANDLE_H
