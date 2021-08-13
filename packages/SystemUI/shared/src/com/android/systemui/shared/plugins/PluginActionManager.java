@@ -212,7 +212,6 @@ public class PluginActionManager<T extends Plugin> {
     private void onPluginConnected(PluginInstance<T> pluginInstance) {
         if (DEBUG) Log.d(TAG, "onPluginConnected");
         PluginPrefs.setHasPlugins(mContext);
-        mInitializer.handleWtfs();
         pluginInstance.onCreate(mContext, mListener);
     }
 
