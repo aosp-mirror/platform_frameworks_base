@@ -47,7 +47,6 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -65,7 +64,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -92,20 +90,14 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationViewHierarchyManager mViewHierarchyManager =
-            Dependency.get(NotificationViewHierarchyManager.class);
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final SysuiStatusBarStateController mStatusBarStateController =
-            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
+    private final NotificationViewHierarchyManager mViewHierarchyManager;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
-    private final NotificationMediaManager mMediaManager =
-            Dependency.get(NotificationMediaManager.class);
-    private final VisualStabilityManager mVisualStabilityManager =
-            Dependency.get(VisualStabilityManager.class);
-    private final NotificationGutsManager mGutsManager =
-            Dependency.get(NotificationGutsManager.class);
+    private final NotificationMediaManager mMediaManager;
+    private final NotificationGutsManager mGutsManager;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private final NotificationPanelViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -144,8 +136,16 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
+            NotificationViewHierarchyManager notificationViewHierarchyManager,
+            NotificationLockscreenUserManager lockscreenUserManager,
+            SysuiStatusBarStateController sysuiStatusBarStateController,
+            NotificationMediaManager notificationMediaManager,
+            NotificationGutsManager notificationGutsManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
             InitController initController,
-            NotificationInterruptStateProvider notificationInterruptStateProvider) {
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
+            NotificationRemoteInputManager remoteInputManager,
+            ConfigurationController configurationController) {
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -156,6 +156,12 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mShadeController = shadeController;
         mShadeTransitionController = shadeTransitionController;
         mCommandQueue = commandQueue;
+        mViewHierarchyManager = notificationViewHierarchyManager;
+        mLockscreenUserManager = lockscreenUserManager;
+        mStatusBarStateController = sysuiStatusBarStateController;
+        mMediaManager = notificationMediaManager;
+        mGutsManager = notificationGutsManager;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
@@ -176,8 +182,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 Slog.e(TAG, "Failed to register VR mode state listener: " + e);
             }
         }
-        NotificationRemoteInputManager remoteInputManager =
-                Dependency.get(NotificationRemoteInputManager.class);
         remoteInputManager.setUpWithCallback(
                 Dependency.get(NotificationRemoteInputManager.Callback.class),
                 mNotificationPanel.createRemoteInputDelegate());
@@ -220,14 +224,14 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configurationController.addCallback(this);
     }
 
     @Override
     public void onDensityOrFontScaleChanged() {
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
-        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
+        if (!mKeyguardUpdateMonitor.isSwitchingUser()) {
             updateNotificationsOnDensityOrFontScaleChanged();
         } else {
             mReinflateNotificationsOnUserSwitched = true;
@@ -236,7 +240,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void onUiModeChanged() {
-        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
+        if (!mKeyguardUpdateMonitor.isSwitchingUser()) {
             updateNotificationOnUiModeChanged();
         } else {
             mDispatchUiModeChangeOnUserSwitched = true;

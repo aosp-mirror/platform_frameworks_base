@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
@@ -51,7 +52,6 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -86,22 +87,13 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        NotificationRemoteInputManager notificationRemoteInputManager =
-                mock(NotificationRemoteInputManager.class);
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mCommandQueue = new CommandQueue(mContext);
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
-        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
-                notificationRemoteInputManager);
-        mDependency.injectMockDependency(NotificationViewHierarchyManager.class);
         mDependency.injectMockDependency(NotificationRemoteInputManager.Callback.class);
-        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
-        mDependency.injectMockDependency(NotificationMediaManager.class);
-        mDependency.injectMockDependency(VisualStabilityManager.class);
-        mDependency.injectMockDependency(NotificationGutsManager.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ForegroundServiceNotificationListener.class);
         NotificationEntryManager entryManager =
@@ -126,8 +118,17 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class), mStatusBar,
                 mock(ShadeControllerImpl.class), mock(LockscreenShadeTransitionController.class),
-                mCommandQueue, mInitController,
-                mNotificationInterruptStateProvider);
+                mCommandQueue,
+                mock(NotificationViewHierarchyManager.class),
+                mock(NotificationLockscreenUserManager.class),
+                mock(SysuiStatusBarStateController.class),
+                mock(NotificationMediaManager.class),
+                mock(NotificationGutsManager.class),
+                mock(KeyguardUpdateMonitor.class),
+                mInitController,
+                mNotificationInterruptStateProvider,
+                mock(NotificationRemoteInputManager.class),
+                mock(ConfigurationController.class));
         mInitController.executePostInitTasks();
         ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
                 ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);
