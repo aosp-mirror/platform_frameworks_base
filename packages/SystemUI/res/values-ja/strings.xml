@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"顔を認識できません。指紋認証を使用してください。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"続行するには指紋認証を使用してください"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"指紋を認識できません。代わりに画面ロックを使用してください。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"顔を認証しています…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"顔アイコン"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"互換ズームボタン。"</string>
