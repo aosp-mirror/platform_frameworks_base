@@ -30,7 +30,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -39,7 +38,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
@@ -56,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 /**
  * @see Plugin
  */
@@ -64,57 +64,45 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private static final String TAG = PluginManagerImpl.class.getSimpleName();
     static final String DISABLE_PLUGIN = "com.android.systemui.action.DISABLE_PLUGIN";
 
-    private final ArrayMap<PluginListener<?>, PluginInstanceManager> mPluginMap
+    private final ArrayMap<PluginListener<?>, PluginInstanceManager<?>> mPluginMap
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
     private final ArraySet<String> mOneShotPackages = new ArraySet<>();
-    private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
+    private final ArraySet<String> mPrivilegedPlugins = new ArraySet<>();
     private final Context mContext;
-    private final PluginInstanceManagerFactory mFactory;
+    private final PluginInstanceManager.Factory mInstanceManagerFactory;
     private final boolean mIsDebuggable;
     private final PluginPrefs mPluginPrefs;
     private final PluginEnabler mPluginEnabler;
-    private final PluginInitializer mPluginInitializer;
     private ClassLoaderFilter mParentClassLoader;
     private boolean mListening;
     private boolean mHasOneShot;
-    private Looper mLooper;
 
-    public PluginManagerImpl(Context context, PluginInitializer initializer) {
-        this(context, new PluginInstanceManagerFactory(), initializer.isDebuggable(),
-                Thread.getUncaughtExceptionPreHandler(), initializer);
-    }
-
-    @VisibleForTesting
-    PluginManagerImpl(Context context, PluginInstanceManagerFactory factory, boolean debuggable,
-            UncaughtExceptionHandler defaultHandler, final PluginInitializer initializer) {
+    public PluginManagerImpl(Context context,
+            PluginInstanceManager.Factory instanceManagerFactory,
+            boolean debuggable,
+            Optional<UncaughtExceptionHandler> defaultHandlerOptional,
+            PluginEnabler pluginEnabler,
+            PluginPrefs pluginPrefs,
+            String[] privilegedPlugins) {
         mContext = context;
-        mFactory = factory;
-        mLooper = initializer.getBgLooper();
+        mInstanceManagerFactory = instanceManagerFactory;
         mIsDebuggable = debuggable;
-        mWhitelistedPlugins.addAll(Arrays.asList(initializer.getWhitelistedPlugins(mContext)));
-        mPluginPrefs = new PluginPrefs(mContext);
-        mPluginEnabler = initializer.getPluginEnabler(mContext);
-        mPluginInitializer = initializer;
+        mPrivilegedPlugins.addAll(Arrays.asList(privilegedPlugins));
+        mPluginPrefs = pluginPrefs;
+        mPluginEnabler = pluginEnabler;
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
-                defaultHandler);
+                defaultHandlerOptional);
         Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
-
-        new Handler(mLooper).post(new Runnable() {
-            @Override
-            public void run() {
-                initializer.onPluginManagerInit();
-            }
-        });
     }
 
     public boolean isDebuggable() {
         return mIsDebuggable;
     }
 
-    public String[] getWhitelistedPlugins() {
-        return mWhitelistedPlugins.toArray(new String[0]);
+    public String[] getPrivilegedPlugins() {
+        return mPrivilegedPlugins.toArray(new String[0]);
     }
 
     public PluginEnabler getPluginEnabler() {
@@ -138,9 +126,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             throw new RuntimeException("Must be called from UI thread");
         }
         // Passing null causes compiler to complain about incompatible (generic) types.
-        PluginListener<Plugin> dummy = null;
-        PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, dummy,
-                false, mLooper, cls, this);
+        PluginListener<T> dummy = null;
+        PluginInstanceManager<T> p = mInstanceManagerFactory.create(
+                action, dummy, false, new VersionInfo().addClass(cls), this,
+                isDebuggable(), getPrivilegedPlugins());
         mPluginPrefs.addAction(action);
         PluginInfo<T> info = p.getPlugin();
         if (info != null) {
@@ -167,10 +156,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class cls, boolean allowMultiple) {
+            Class<?> cls, boolean allowMultiple) {
         mPluginPrefs.addAction(action);
-        PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
-                allowMultiple, mLooper, cls, this);
+        PluginInstanceManager<T> p = mInstanceManagerFactory.create(action, listener, allowMultiple,
+                new VersionInfo().addClass(cls), this, isDebuggable(),
+                getPrivilegedPlugins());
         p.loadAll();
         synchronized (this) {
             mPluginMap.put(listener, p);
@@ -218,7 +208,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
             synchronized (this) {
-                for (PluginInstanceManager manager : mPluginMap.values()) {
+                for (PluginInstanceManager<?> manager : mPluginMap.values()) {
                     manager.loadAll();
                 }
             }
@@ -226,8 +216,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Uri uri = intent.getData();
             ComponentName component = ComponentName.unflattenFromString(
                     uri.toString().substring(10));
-            if (isPluginWhitelisted(component)) {
-                // Don't disable whitelisted plugins as they are a part of the OS.
+            if (isPluginPrivileged(component)) {
+                // Don't disable privileged plugins as they are a part of the OS.
                 return;
             }
             getPluginEnabler().setDisabled(component, PluginEnabler.DISABLED_INVALID_VERSION);
@@ -287,11 +277,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             }
             synchronized (this) {
                 if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
                         manager.onPackageChange(pkg);
                     }
                 } else {
-                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
                         manager.onPackageRemoved(pkg);
                     }
                 }
@@ -301,8 +291,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     /** Returns class loader specific for the given plugin. */
     public ClassLoader getClassLoader(ApplicationInfo appInfo) {
-        if (!mIsDebuggable && !isPluginPackageWhitelisted(appInfo.packageName)) {
-            Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:"
+        if (!mIsDebuggable && !isPluginPackagePrivileged(appInfo.packageName)) {
+            Log.w(TAG, "Cannot get class loader for non-privileged plugin. Src:"
                     + appInfo.sourceDir + ", pkg: " + appInfo.packageName);
             return null;
         }
@@ -345,32 +335,18 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         return false;
     }
 
-    public void handleWtfs() {
-        mPluginInitializer.handleWtfs();
-    }
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (this) {
             pw.println(String.format("  plugin map (%d):", mPluginMap.size()));
-            for (PluginListener listener : mPluginMap.keySet()) {
+            for (PluginListener<?> listener : mPluginMap.keySet()) {
                 pw.println(String.format("    %s -> %s",
                         listener, mPluginMap.get(listener)));
             }
         }
     }
 
-    @VisibleForTesting
-    public static class PluginInstanceManagerFactory {
-        public <T extends Plugin> PluginInstanceManager createPluginInstanceManager(Context context,
-                String action, PluginListener<T> listener, boolean allowMultiple, Looper looper,
-                Class<?> cls, PluginManagerImpl manager) {
-            return new PluginInstanceManager(context, action, listener, allowMultiple, looper,
-                    new VersionInfo().addClass(cls), manager);
-        }
-    }
-
-    private boolean isPluginPackageWhitelisted(String packageName) {
-        for (String componentNameOrPackage : mWhitelistedPlugins) {
+    private boolean isPluginPackagePrivileged(String packageName) {
+        for (String componentNameOrPackage : mPrivilegedPlugins) {
             ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
             if (componentName != null) {
                 if (componentName.getPackageName().equals(packageName)) {
@@ -383,8 +359,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         return false;
     }
 
-    private boolean isPluginWhitelisted(ComponentName pluginName) {
-        for (String componentNameOrPackage : mWhitelistedPlugins) {
+    private boolean isPluginPrivileged(ComponentName pluginName) {
+        for (String componentNameOrPackage : mPrivilegedPlugins) {
             ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
             if (componentName != null) {
                 if (componentName.equals(pluginName)) {
@@ -417,16 +393,20 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     private class PluginExceptionHandler implements UncaughtExceptionHandler {
-        private final UncaughtExceptionHandler mHandler;
+        private final Optional<UncaughtExceptionHandler> mExceptionHandlerOptional;
 
-        private PluginExceptionHandler(UncaughtExceptionHandler handler) {
-            mHandler = handler;
+        private PluginExceptionHandler(
+                Optional<UncaughtExceptionHandler> exceptionHandlerOptional) {
+            mExceptionHandlerOptional = exceptionHandlerOptional;
         }
 
         @Override
         public void uncaughtException(Thread thread, Throwable throwable) {
             if (SystemProperties.getBoolean("plugin.debugging", false)) {
-                mHandler.uncaughtException(thread, throwable);
+                Throwable finalThrowable = throwable;
+                mExceptionHandlerOptional.ifPresent(
+                        handler -> handler.uncaughtException(thread, finalThrowable));
+
                 return;
             }
             // Search for and disable plugins that may have been involved in this crash.
@@ -436,7 +416,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // disable all the plugins, so we can be sure that SysUI is running as
                 // best as possible.
                 synchronized (this) {
-                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
                         disabledAny |= manager.disableAll();
                     }
                 }
@@ -446,7 +426,9 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             }
 
             // Run the normal exception handler so we can crash and cleanup our state.
-            mHandler.uncaughtException(thread, throwable);
+            Throwable finalThrowable = throwable;
+            mExceptionHandlerOptional.ifPresent(
+                    handler -> handler.uncaughtException(thread, finalThrowable));
         }
 
         private boolean checkStack(Throwable throwable) {
@@ -454,7 +436,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             boolean disabledAny = false;
             synchronized (this) {
                 for (StackTraceElement element : throwable.getStackTrace()) {
-                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
                         disabledAny |= manager.checkAndDisable(element.getClassName());
                     }
                 }
