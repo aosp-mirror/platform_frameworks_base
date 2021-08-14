@@ -17,10 +17,9 @@
 
 <resources>
 
-    <style name="SwitchBar.Switch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
-        <item name="android:trackTint">@color/settingslib_switchbar_switch_track_tint</item>
-        <item name="android:thumbTint">@color/settingslib_switchbar_switch_thumb_tint</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:minWidth">48dp</item>
+    <style name="MainSwitchText.Settingslib" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 </resources>

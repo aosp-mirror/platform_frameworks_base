@@ -7061,6 +7061,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             "requestScrollCapture: caught exception dispatching to window."
                                     + "token=%s", targetWindow.mClient.asBinder());
                     responseBuilder.setWindowTitle(targetWindow.getName());
+                    responseBuilder.setPackageName(targetWindow.getOwningPackage());
                     responseBuilder.setDescription(String.format("caught exception: %s", e));
                     listener.onScrollCaptureResponse(responseBuilder.build());
                 }
@@ -8606,8 +8607,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imeTargetWindowTask == null) {
                 return false;
             }
-            final TaskSnapshot snapshot = mAtmService.getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                    false /* isLowResolution */);
+            final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
+                    imeTargetWindowTask.mUserId, false /* isLowResolution */,
+                    false /* restoreFromDisk */);
             return snapshot != null && snapshot.hasImeSurface();
         }
     }

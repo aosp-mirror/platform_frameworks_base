@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2019 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
-
+-->
 <resources>
-    <dimen name="secondary_app_icon_size">32dp</dimen>
-    <dimen name="app_preference_padding_start">?android:attr/listPreferredItemPaddingStart</dimen>
-    <dimen name="app_icon_min_width">56dp</dimen>
-    <dimen name="two_target_min_width">72dp</dimen>
-    <dimen name="settingslib_dialogCornerRadius">8dp</dimen>
+    <style name="Theme.CollapsingToolbar.Settings" parent="@style/Theme.MaterialComponents.DayNight">
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="elevationOverlayColor">?attr/colorPrimary</item>
+        <item name="colorPrimary">@color/settingslib_primary_dark_device_default_settings</item>
+        <item name="colorAccent">@color/settingslib_accent_device_default_dark</item>
+    </style>
 </resources>

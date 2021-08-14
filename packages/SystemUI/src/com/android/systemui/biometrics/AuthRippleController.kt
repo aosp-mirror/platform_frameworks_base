@@ -24,6 +24,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
+import com.android.systemui.R
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -58,6 +59,11 @@ class AuthRippleController @Inject constructor(
     var fingerprintSensorLocation: PointF? = null
     private var faceSensorLocation: PointF? = null
     private var circleReveal: LightRevealEffect? = null
+
+    override fun onInit() {
+        mView.setAlphaInDuration(sysuiContext.resources.getInteger(
+                R.integer.auth_ripple_alpha_in_duration).toLong())
+    }
 
     @VisibleForTesting
     public override fun onViewAttached() {
