@@ -70,13 +70,16 @@ public class BubblePositioner {
 
     private Context mContext;
     private WindowManager mWindowManager;
-    private Rect mPositionRect;
     private Rect mScreenRect;
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
+    private boolean mImeVisible;
+    private int mImeHeight;
+    private boolean mIsLargeScreen;
+
+    private Rect mPositionRect;
     private int mDefaultMaxBubbles;
     private int mMaxBubbles;
-
     private int mBubbleSize;
     private int mSpacingBetweenBubbles;
 
@@ -98,7 +101,6 @@ public class BubblePositioner {
     private PointF mRestingStackPosition;
     private int[] mPaddings = new int[4];
 
-    private boolean mIsLargeScreen;
     private boolean mShowingInTaskbar;
     private @TaskbarPosition int mTaskbarPosition = TASKBAR_POSITION_NONE;
     private int mTaskbarIconSize;
@@ -302,6 +304,17 @@ public class BubblePositioner {
         return mMaxBubbles;
     }
 
+    /** The height for the IME if it's visible. **/
+    public int getImeHeight() {
+        return mImeVisible ? mImeHeight : 0;
+    }
+
+    /** Sets whether the IME is visible. **/
+    public void setImeVisible(boolean visible, int height) {
+        mImeVisible = visible;
+        mImeHeight = height;
+    }
+
     /**
      * Calculates the padding for the bubble expanded view.
      *
@@ -357,17 +370,13 @@ public class BubblePositioner {
     }
 
     /** Gets the y position of the expanded view if it was top-aligned. */
-    private float getExpandedViewYTopAligned() {
+    public float getExpandedViewYTopAligned() {
         final int top = getAvailableRect().top;
         if (showBubblesVertically()) {
             return top - mPointerWidth + mExpandedViewPadding;
         } else {
             return top + mBubbleSize + mPointerMargin;
         }
-    }
-
-    public float getExpandedBubblesY() {
-        return getAvailableRect().top + mExpandedViewPadding;
     }
 
     /**
@@ -464,6 +473,11 @@ public class BubblePositioner {
                 : bubblePosition + (normalizedSize / 2f) - mPointerWidth;
     }
 
+    private int getExpandedStackSize(int numberOfBubbles) {
+        return (numberOfBubbles * mBubbleSize)
+                + ((numberOfBubbles - 1) * mSpacingBetweenBubbles);
+    }
+
     /**
      * Returns the position of the bubble on-screen when the stack is expanded.
      *
@@ -474,8 +488,7 @@ public class BubblePositioner {
      */
     public PointF getExpandedBubbleXY(int index, int numberOfBubbles, boolean onLeftEdge) {
         final float positionInRow = index * (mBubbleSize + mSpacingBetweenBubbles);
-        final float expandedStackSize = (numberOfBubbles * mBubbleSize)
-                + ((numberOfBubbles - 1) * mSpacingBetweenBubbles);
+        final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
         final float centerPosition = showBubblesVertically()
                 ? mPositionRect.centerY()
                 : mPositionRect.centerX();
@@ -498,7 +511,66 @@ public class BubblePositioner {
             y = mPositionRect.top + mExpandedViewPadding;
             x = rowStart + positionInRow;
         }
+
+        if (showBubblesVertically() && mImeVisible) {
+            return new PointF(x, getExpandedBubbleYForIme(index, numberOfBubbles));
+        }
         return new PointF(x, y);
+    }
+
+
+    /**
+     * Returns the position of the bubble on-screen when the stack is expanded and the IME
+     * is showing.
+     *
+     * @param index the index of the bubble in the stack.
+     * @param numberOfBubbles the total number of bubbles in the stack.
+     * @return y position of the bubble on-screen when the stack is expanded.
+     */
+    private float getExpandedBubbleYForIme(int index, int numberOfBubbles) {
+        final float top = getAvailableRect().top + mExpandedViewPadding;
+        if (!showBubblesVertically()) {
+            // Showing horizontally: align to top
+            return top;
+        }
+        // Showing vertically: align to edges, check if there's overlap with the IME and adjust.
+        final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
+        final float centerPosition = showBubblesVertically()
+                ? mPositionRect.centerY()
+                : mPositionRect.centerX();
+        final float rowTop = centerPosition - (expandedStackSize / 2f);
+        float rowTopAdjusted = Math.max(rowTop - getTranslationForIme(0, numberOfBubbles), top);
+        return rowTopAdjusted + (index * (mBubbleSize + mSpacingBetweenBubbles));
+    }
+
+    private float getTranslationForIme(int selectedIndex, int numberOfBubbles) {
+        if (!showBubblesVertically()) {
+            // Showing at the top, no need to adjust for IME.
+            return 0;
+        }
+        // Showing vertically: if there are enough bubbles, need to translate
+        final float top = getAvailableRect().top + mExpandedViewPadding;
+        final float bottomInset = getImeHeight() + mInsets.bottom - mExpandedViewPadding;
+        final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
+        final float centerPosition = showBubblesVertically()
+                ? mPositionRect.centerY()
+                : mPositionRect.centerX();
+        final float rowBottom = centerPosition + (expandedStackSize / 2f);
+        final float rowTop = centerPosition - (expandedStackSize / 2f);
+
+        if (rowBottom > bottomInset) {
+            // We overlap with IME, must shift the bubbles
+            float translationY = rowBottom - bottomInset;
+            if (rowTop - translationY < top) {
+                // Even if we shift the bubbles, they will still overlap with the IME.
+
+                // TODO: in the case that the selected bubble is the one that overlaps with
+                // the IME, we should allow the bubbles to shift further "up" and potentially
+                // go offscreen so that the selected one is visible.
+            }
+            return translationY;
+        }
+        return 0;
     }
 
     /**

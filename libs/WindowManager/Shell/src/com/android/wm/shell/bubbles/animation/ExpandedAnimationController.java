@@ -21,7 +21,6 @@ import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RES
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -364,7 +363,7 @@ public class ExpandedAnimationController
             bubbleView.setTranslationY(y);
         }
 
-        final float expandedY = mPositioner.getExpandedBubblesY();
+        final float expandedY = mPositioner.getExpandedViewYTopAligned();
         final boolean draggedOutEnough =
                 y > expandedY + mBubbleSizePx || y < expandedY - mBubbleSizePx;
         if (draggedOutEnough != mBubbleDraggedOutEnough) {
@@ -427,16 +426,6 @@ public class ExpandedAnimationController
         mBubbleDraggedOutEnough = false;
         mMagnetizedBubbleDraggingOut = null;
         updateBubblePositions();
-    }
-
-    /**
-     * Animates the bubbles to the y position. Used in response to IME showing.
-     */
-    public void updateYPosition(Runnable after) {
-        if (mLayout == null) return;
-        animationsForChildrenFromIndex(
-                0, (i, anim) -> anim.translationY(mPositioner.getExpandedBubblesY()))
-                .startAll(after);
     }
 
     /** Description of current animation controller state. */
@@ -504,28 +493,27 @@ public class ExpandedAnimationController
             } else {
                 child.setTranslationX(p.x);
             }
-            if (!mPreparingToCollapse) {
-                // Only animate if we're not collapsing as that animation will handle placing the
+
+            if (mPreparingToCollapse) {
+                // Don't animate if we're collapsing, as that animation will handle placing the
                 // new bubble in the stacked position.
-                if (mPositioner.showBubblesVertically()) {
-                    Rect availableRect = mPositioner.getAvailableRect();
-                    float fromX = onLeft
-                            ? -mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
-                            : availableRect.right + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
-                    animationForChild(child)
-                            .translationX(fromX, p.y)
-                            .start();
-                } else {
-                    // Only animate if we're not collapsing as that animation will handle placing
-                    // the new bubble in the stacked position.
-                    float fromY = mPositioner.getExpandedBubblesY() - mBubbleSizePx
-                            * ANIMATE_TRANSLATION_FACTOR;
-                    animationForChild(child)
-                            .translationY(fromY, p.y)
-                            .start();
-                }
-                updateBubblePositions();
+                return;
             }
+
+            if (mPositioner.showBubblesVertically()) {
+                float fromX = onLeft
+                        ? p.x - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
+                        : p.x + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
+                animationForChild(child)
+                        .translationX(fromX, p.y)
+                        .start();
+            } else {
+                float fromY = p.y - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
+                animationForChild(child)
+                        .translationY(fromY, p.y)
+                        .start();
+            }
+            updateBubblePositions();
         }
     }
 

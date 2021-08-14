@@ -28,6 +28,8 @@ import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RES
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -246,7 +248,6 @@ public class BubbleStackView extends FrameLayout
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
     private int mCornerRadius;
-    private int mImeOffset;
     @Nullable private BubbleViewProvider mExpandedBubble;
     private boolean mIsExpanded;
 
@@ -757,7 +758,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
-        mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
@@ -1762,6 +1762,7 @@ public class BubbleStackView extends FrameLayout
      * not.
      */
     void hideCurrentInputMethod() {
+        mPositioner.setImeVisible(false, 0);
         mBubbleController.hideCurrentInputMethod();
     }
 
@@ -2187,9 +2188,20 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    /** Moves the bubbles out of the way if they're going to be over the keyboard. */
-    public void onImeVisibilityChanged(boolean visible, int height) {
-        mStackAnimationController.setImeHeight(visible ? height + mImeOffset : 0);
+    /**
+     * Updates the stack based for IME changes. When collapsed it'll move the stack if it
+     * overlaps where they IME would be. When expanded it'll shift the expanded bubbles
+     * if they might overlap with the IME (this only happens for large screens).
+     */
+    public void animateForIme(boolean visible) {
+        if ((mIsExpansionAnimating || mIsBubbleSwitchAnimating) && mIsExpanded) {
+            // This will update the animation so the bubbles move to position for the IME
+            mExpandedAnimationController.expandFromStack(() -> {
+                updatePointerPosition();
+                afterExpandedViewAnimation();
+            } /* after */);
+            return;
+        }
 
         if (!mIsExpanded && getBubbleCount() > 0) {
             final float stackDestinationY =
@@ -2208,9 +2220,21 @@ public class BubbleStackView extends FrameLayout
                                 FLYOUT_IME_ANIMATION_SPRING_CONFIG)
                         .start();
             }
-        } else if (mIsExpanded && mExpandedBubble != null
-                && mExpandedBubble.getExpandedView() != null) {
+        } else if (mPositioner.showBubblesVertically() && mIsExpanded
+                && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().setImeVisible(visible);
+            final int count = mBubbleContainer.getChildCount();
+            List<Animator> animList = new ArrayList();
+            for (int i = 0; i < count; i++) {
+                View child = mBubbleContainer.getChildAt(i);
+                float transY = mPositioner.getExpandedBubbleXY(
+                        i, count, mStackOnLeftOrWillBe).y;
+                ObjectAnimator anim = ObjectAnimator.ofFloat(child, TRANSLATION_Y, transY);
+                animList.add(anim);
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(animList);
+            set.start();
         }
     }
 
@@ -2514,7 +2538,7 @@ public class BubbleStackView extends FrameLayout
             // Account for the IME in the touchable region so that the touchable region of the
             // Bubble window doesn't obscure the IME. The touchable region affects which areas
             // of the screen can be excluded by lower windows (IME is just above the embedded task)
-            outRect.bottom -= (int) mStackAnimationController.getImeHeight();
+            outRect.bottom -= mPositioner.getImeHeight();
         }
 
         if (mFlyout.getVisibility() == View.VISIBLE) {
@@ -2858,12 +2882,13 @@ public class BubbleStackView extends FrameLayout
         if (index == -1) {
             return;
         }
-        PointF bubblePosition = mPositioner.getExpandedBubbleXY(index,
+        PointF position = mPositioner.getExpandedBubbleXY(index,
                 mBubbleContainer.getChildCount(),
                 mStackOnLeftOrWillBe);
-        mExpandedBubble.getExpandedView().setPointerPosition(mPositioner.showBubblesVertically()
-                ? bubblePosition.y
-                : bubblePosition.x,
+        float bubblePosition = mPositioner.showBubblesVertically()
+                ? position.y
+                : position.x;
+        mExpandedBubble.getExpandedView().setPointerPosition(bubblePosition,
                 mStackOnLeftOrWillBe);
     }
 
