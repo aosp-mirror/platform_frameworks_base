@@ -1470,7 +1470,7 @@ public final class FileUtils {
         try (ParcelFileDescriptor dupFd = ParcelFileDescriptor.dup(fd)) {
             return MediaStore.getOriginalMediaFormatFileDescriptor(context, dupFd);
         } catch (Exception e) {
-            Log.d(TAG, "Failed to convert to modern format file descriptor", e);
+            // Ignore error
             return null;
         }
     }
