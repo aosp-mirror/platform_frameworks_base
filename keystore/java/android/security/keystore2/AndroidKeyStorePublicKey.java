@@ -23,6 +23,7 @@ import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyMetadata;
 
 import java.security.PublicKey;
+import java.util.Objects;
 
 /**
  * {@link PublicKey} backed by Android Keystore.
@@ -75,9 +76,14 @@ public abstract class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implem
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
+
+        /*
+         * getClass().equals(ojb.getClass()) is implied by the call to super.equals() above. This
+         * means we can cast obj to AndroidKeyStorePublicKey here.
+         */
+        final AndroidKeyStorePublicKey other = (AndroidKeyStorePublicKey) obj;
+
+        return Objects.equals(mCertificate, other.mCertificate) && Objects.equals(mCertificateChain,
+                other.mCertificateChain);
     }
 }
