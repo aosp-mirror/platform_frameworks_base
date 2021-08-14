@@ -4469,4 +4469,7 @@
   <java-symbol type="fraction" name="global_actions_horizontal_padding_percentage" />
   <java-symbol type="drawable" name="global_actions_item_red_background" />
   <java-symbol type="color" name="wear_material_grey_900" />
+
+  <java-symbol type="string" name="config_wearSysUiPackage"/>
+  <java-symbol type="string" name="config_wearSysUiMainActivity"/>
 </resources>
