@@ -205,6 +205,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
+    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NavigationBarController mNavigationBarController;
@@ -226,6 +227,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    @Mock private LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
@@ -359,6 +361,7 @@ public class StatusBarTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
+                mNotificationEntryManager,
                 mNotificationGutsManager,
                 notificationLogger,
                 mNotificationInterruptStateProvider,
@@ -388,6 +391,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
+                mLockscreenGestureLogger,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,
                 mPowerManager, mScreenPinningRequest,

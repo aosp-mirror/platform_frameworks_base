@@ -197,6 +197,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -454,6 +455,7 @@ public class StatusBar extends SystemUI implements
     private BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
     private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    private final LockscreenGestureLogger mLockscreenGestureLogger;
     @Nullable
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
@@ -529,6 +531,7 @@ public class StatusBar extends SystemUI implements
 
     private final int[] mAbsPos = new int[2];
 
+    protected final NotificationEntryManager mEntryManager;
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
@@ -805,6 +808,7 @@ public class StatusBar extends SystemUI implements
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
+            NotificationEntryManager notificationEntryManager,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
@@ -834,6 +838,7 @@ public class StatusBar extends SystemUI implements
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
+            LockscreenGestureLogger lockscreenGestureLogger,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
@@ -894,6 +899,7 @@ public class StatusBar extends SystemUI implements
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
+        mEntryManager = notificationEntryManager;
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
@@ -925,6 +931,7 @@ public class StatusBar extends SystemUI implements
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
+        mLockscreenGestureLogger = lockscreenGestureLogger;
         mScreenPinningRequest = screenPinningRequest;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
@@ -1511,14 +1518,34 @@ public class StatusBar extends SystemUI implements
         );
 
         // TODO: inject this.
-        mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
-                mHeadsUpManager, mNotificationShadeWindowView, mStackScrollerController,
-                mDozeScrimController, mScrimController, mNotificationShadeWindowController,
-                mDynamicPrivacyController, mKeyguardStateController,
+        mPresenter = new StatusBarNotificationPresenter(
+                mContext,
+                mNotificationPanelViewController,
+                mHeadsUpManager,
+                mNotificationShadeWindowView,
+                mStackScrollerController,
+                mDozeScrimController,
+                mScrimController,
+                mNotificationShadeWindowController,
+                mDynamicPrivacyController,
+                mKeyguardStateController,
                 mKeyguardIndicationController,
-                this /* statusBar */, mShadeController,
-                mLockscreenShadeTransitionController, mCommandQueue, mInitController,
-                mNotificationInterruptStateProvider);
+                this /* statusBar */,
+                mShadeController,
+                mLockscreenShadeTransitionController,
+                mCommandQueue,
+                mViewHierarchyManager,
+                mLockscreenUserManager,
+                mStatusBarStateController,
+                mEntryManager,
+                mMediaManager,
+                mGutsManager,
+                mKeyguardUpdateMonitor,
+                mLockscreenGestureLogger,
+                mInitController,
+                mNotificationInterruptStateProvider,
+                mRemoteInputManager,
+                mConfigurationController);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);

@@ -4793,6 +4793,52 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetNotificationsShownFromListener_protectsCrossUserInformation()
+            throws RemoteException {
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag" + System.currentTimeMillis(),  UserHandle.PER_USER_RANGE, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE),
+                null, 0);
+        final NotificationRecord r =
+                new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        r.setTextChanged(true);
+        mService.addNotification(r);
+
+        // no security exception!
+        mBinderService.setNotificationsShownFromListener(null, new String[] {r.getKey()});
+
+        verify(mAppUsageStats, never()).reportInterruptiveNotification(
+                anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_protectsCrossUserInformation()
+            throws RemoteException {
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag" + System.currentTimeMillis(),  UserHandle.PER_USER_RANGE, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE),
+                null, 0);
+        final NotificationRecord r =
+                new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        r.setTextChanged(true);
+        mService.addNotification(r);
+
+        // no security exception!
+        mBinderService.cancelNotificationsFromListener(null, new String[] {r.getKey()});
+
+        waitForIdle();
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
     public void testMaybeRecordInterruptionLocked_doesNotRecordTwice()
             throws RemoteException {
         final NotificationRecord r = generateNotificationRecord(
