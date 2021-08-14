@@ -296,12 +296,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Creates and registers a new split with the provided containers and configuration.
+     * Creates and registers a new split with the provided containers and configuration. Finishes
+     * existing secondary containers if found for the given primary container.
      */
-    void registerSplit(@NonNull TaskFragmentContainer primaryContainer,
-            @NonNull Activity primaryActivity,
+    void registerSplit(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer primaryContainer, @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull ExtensionSplitPairRule splitPairRule) {
+        removeExistingSecondaryContainers(wct, primaryContainer);
+
         SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
                 secondaryContainer, splitPairRule);
         mSplitContainers.add(splitContainer);
@@ -321,6 +324,25 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         mSplitContainers.removeAll(containersToRemove);
+    }
+
+    /**
+     * Removes a secondary container for the given primary container if an existing split is
+     * already registered.
+     */
+    void removeExistingSecondaryContainers(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer primaryContainer) {
+        // If the primary container was already in a split - remove the secondary container that
+        // is now covered by the new one that replaced it.
+        final SplitContainer existingSplitContainer = getActiveSplitForContainer(
+                primaryContainer);
+        if (existingSplitContainer == null
+                || primaryContainer == existingSplitContainer.getSecondaryContainer()) {
+            return;
+        }
+
+        existingSplitContainer.getSecondaryContainer().finish(
+                false /* shouldFinishDependent */, mPresenter, wct, this);
     }
 
     /**
@@ -686,10 +708,24 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
             final Activity launchingActivity = (Activity) who;
 
+            if (!setLaunchingToSideContainer(launchingActivity, intent, options)) {
+                setLaunchingInSameContainer(launchingActivity, intent, options);
+            }
+
+            return super.onStartActivity(who, intent, options);
+        }
+
+        /**
+         * Returns {@code true} if the activity that is going to be started via the
+         * {@code intent} should be paired with the {@code launchingActivity} and is set to be
+         * launched in an empty side container.
+         */
+        private boolean setLaunchingToSideContainer(Activity launchingActivity, Intent intent,
+                Bundle options) {
             final ExtensionSplitPairRule splitPairRule = getSplitRule(
                     launchingActivity.getComponentName(), intent.getComponent(), getSplitRules());
             if (splitPairRule == null) {
-                return super.onStartActivity(who, intent, options);
+                return false;
             }
 
             // Create a new split with an empty side container
@@ -700,8 +736,52 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // dedicated container.
             options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
                     secondaryContainer.getTaskFragmentToken());
+            return true;
+        }
 
-            return super.onStartActivity(who, intent, options);
+        /**
+         * Checks if the activity that is going to be started via the {@code intent} should be
+         * paired with the existing top activity which is currently paired with the
+         * {@code launchingActivity}. If so, set the activity to be launched in the same
+         * container of the {@code launchingActivity}.
+         */
+        private void setLaunchingInSameContainer(Activity launchingActivity, Intent intent,
+                Bundle options) {
+            final TaskFragmentContainer launchingContainer = getContainerWithActivity(
+                    launchingActivity.getActivityToken());
+            if (launchingContainer == null) {
+                return;
+            }
+
+            final SplitContainer splitContainer = getActiveSplitForContainer(launchingContainer);
+            if (splitContainer == null) {
+                return;
+            }
+
+            if (splitContainer.getSecondaryContainer() != launchingContainer) {
+                return;
+            }
+
+            // The launching activity is on the secondary container. Retrieve the primary
+            // activity from the other container.
+            Activity primaryActivity =
+                    splitContainer.getPrimaryContainer().getTopNonFinishingActivity();
+            if (primaryActivity == null) {
+                return;
+            }
+
+            final ExtensionSplitPairRule splitPairRule = getSplitRule(
+                    primaryActivity.getComponentName(), intent.getComponent(), getSplitRules());
+            if (splitPairRule == null) {
+                return;
+            }
+
+            // Amend the request to let the WM know that the activity should be placed in the
+            // dedicated container. This is necessary for the case that the activity is started
+            // into a new Task, or new Task will be escaped from the current host Task and be
+            // displayed in fullscreen.
+            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                    launchingContainer.getTaskFragmentToken());
         }
     }
 }

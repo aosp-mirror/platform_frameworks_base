@@ -1067,16 +1067,16 @@ public class NotificationPanelViewController extends PanelViewController {
                     userSwitcherComponent.getKeyguardQsUserSwitchController();
             mKeyguardQsUserSwitchController.setNotificationPanelViewController(this);
             mKeyguardQsUserSwitchController.init();
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(true);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(true);
         } else if (keyguardUserSwitcherView != null) {
             KeyguardUserSwitcherComponent userSwitcherComponent =
                     mKeyguardUserSwitcherComponentFactory.build(keyguardUserSwitcherView);
             mKeyguardUserSwitcherController =
                     userSwitcherComponent.getKeyguardUserSwitcherController();
             mKeyguardUserSwitcherController.init();
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(true);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(true);
         } else {
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(false);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(false);
         }
     }
 
@@ -2508,7 +2508,6 @@ public class NotificationPanelViewController extends PanelViewController {
             boolean qsVisible) {
         // Fancy clipping for quick settings
         int radius = mScrimCornerRadius;
-        int statusBarClipTop = 0;
         boolean clipStatusView = false;
         if (!mShouldUseSplitNotificationShade) {
             // The padding on this area is large enough that we can use a cheaper clipping strategy
@@ -2517,7 +2516,6 @@ public class NotificationPanelViewController extends PanelViewController {
             float screenCornerRadius = mRecordingController.isRecording() ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
-            statusBarClipTop = top - mKeyguardStatusBar.getTop();
         }
         if (mQs != null) {
             float qsTranslation = 0;
@@ -2555,8 +2553,13 @@ public class NotificationPanelViewController extends PanelViewController {
             mScrimController.setNotificationsBounds(left, top, right, bottom);
         }
 
+        if (mShouldUseSplitNotificationShade) {
+            mKeyguardStatusBarViewController.setNoTopClipping();
+        } else {
+            mKeyguardStatusBarViewController.updateTopClipping(top);
+        }
+
         mScrimController.setScrimCornerRadius(radius);
-        mKeyguardStatusBar.setTopClipping(statusBarClipTop);
         int nsslLeft = left - mNotificationStackScrollLayoutController.getLeft();
         int nsslRight = right - mNotificationStackScrollLayoutController.getLeft();
         int nsslTop = top - mNotificationStackScrollLayoutController.getTop();

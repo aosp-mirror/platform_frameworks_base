@@ -535,6 +535,10 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, currentUser,
                     managedProfiles);
         }
+        onOverlaysApplied();
+    }
+
+    protected void onOverlaysApplied() {
     }
 
     @Override

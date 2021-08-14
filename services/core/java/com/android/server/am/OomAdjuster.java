@@ -1564,6 +1564,7 @@ public class OomAdjuster {
         state.resetAllowStartFgsState();
         if (!cycleReEval) {
             // Don't reset this flag when doing cycles re-evaluation.
+            state.setNoKillOnBgRestrictedAndIdle(false);
             app.mOptRecord.setShouldNotFreeze(false);
         }
 
@@ -2900,6 +2901,23 @@ public class OomAdjuster {
                             + " target=" + state.getAdjTarget() + " capability=" + item.capability);
         }
 
+        if (state.isCached() && !state.shouldNotKillOnBgRestrictedAndIdle()) {
+            // It's eligible to get killed when in UID idle and bg restricted mode,
+            // check if these states are just flipped.
+            if (!state.isSetCached() || state.isSetNoKillOnBgRestrictedAndIdle()) {
+                // Take the timestamp, we'd hold the killing for the background settle time
+                // (for states debouncing to avoid from thrashing).
+                state.setLastCanKillOnBgRestrictedAndIdleTime(nowElapsed);
+                // Kick off the delayed checkup message if needed.
+                if (!mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                    mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
+                            mConstants.mKillBgRestrictedAndCachedIdleSettleTimeMs);
+                }
+            }
+        }
+        state.setSetCached(state.isCached());
+        state.setSetNoKillOnBgRestrictedAndIdle(state.shouldNotKillOnBgRestrictedAndIdle());
+
         return success;
     }
 
@@ -3047,6 +3065,20 @@ public class OomAdjuster {
         }
         if (mLocalPowerManager != null) {
             mLocalPowerManager.finishUidChanges();
+        }
+        // Also check if there are any apps in cached and background restricted mode,
+        // if so, kill it if it's been there long enough, or kick off a msg to check
+        // it later.
+        if (mService.mConstants.mKillBgRestrictedAndCachedIdle) {
+            final ArraySet<ProcessRecord> apps = mProcessList.mAppsInBackgroundRestricted;
+            for (int i = 0, size = apps.size(); i < size; i++) {
+                // Check to see if needs to be killed.
+                final long bgTime = mProcessList.killAppIfBgRestrictedAndCachedIdleLocked(
+                        apps.valueAt(i), nowElapsed) - mConstants.BACKGROUND_SETTLE_TIME;
+                if (bgTime > 0 && (nextTime == 0 || nextTime > bgTime)) {
+                    nextTime = bgTime;
+                }
+            }
         }
         if (nextTime > 0) {
             mService.mHandler.removeMessages(IDLE_UIDS_MSG);

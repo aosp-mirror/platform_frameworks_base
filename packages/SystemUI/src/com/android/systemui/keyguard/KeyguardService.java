@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
@@ -33,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
@@ -170,8 +172,9 @@ public class KeyguardService extends Service {
     }
 
     private static @TransitionOldType int getTransitionOldType(@TransitionType int type,
-            RemoteAnimationTarget[] apps) {
-        if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
+            @TransitionFlags int flags, RemoteAnimationTarget[] apps) {
+        if (type == TRANSIT_KEYGUARD_GOING_AWAY
+                || (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
@@ -200,7 +203,7 @@ public class KeyguardService extends Service {
                     t.setAlpha(change.getLeash(), 1.0f);
                 }
                 t.apply();
-                runner.onAnimationStart(getTransitionOldType(info.getType(), apps),
+                runner.onAnimationStart(getTransitionOldType(info.getType(), info.getFlags(), apps),
                         apps, wallpapers, nonApps,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
@@ -232,7 +235,7 @@ public class KeyguardService extends Service {
             if (sEnableRemoteKeyguardGoingAwayAnimation) {
                 Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
                 TransitionFilter f = new TransitionFilter();
-                f.mTypeSet = new int[]{TRANSIT_KEYGUARD_GOING_AWAY};
+                f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
                 shellTransitions.registerRemote(f, wrap(mExitAnimationRunner));
             }
             if (sEnableRemoteKeyguardOccludeAnimation) {

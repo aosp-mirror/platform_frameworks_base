@@ -31,17 +31,17 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  */
 @SysUISingleton
 class InternetDialogFactory @Inject constructor(
-        @Main private val handler: Handler,
-        private val internetDialogController: InternetDialogController,
-        private val context: Context,
-        private val uiEventLogger: UiEventLogger
+    @Main private val handler: Handler,
+    private val internetDialogController: InternetDialogController,
+    private val context: Context,
+    private val uiEventLogger: UiEventLogger
 ) {
     companion object {
         var internetDialog: InternetDialog? = null
     }
 
     /** Creates a [InternetDialog]. */
-    fun create(aboveStatusBar: Boolean, canConfigMobileData: Boolean) {
+    fun create(aboveStatusBar: Boolean, canConfigMobileData: Boolean, canConfigWifi: Boolean) {
         if (internetDialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "InternetDialog is showing, do not create it twice.")
@@ -49,7 +49,7 @@ class InternetDialogFactory @Inject constructor(
             return
         } else {
             internetDialog = InternetDialog(context, this, internetDialogController,
-                    canConfigMobileData, aboveStatusBar, uiEventLogger, handler)
+                    canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler)
             internetDialog?.show()
         }
     }

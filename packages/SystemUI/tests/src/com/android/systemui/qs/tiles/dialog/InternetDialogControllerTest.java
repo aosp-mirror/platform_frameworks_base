@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,6 +101,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
         when(mConnectedEntry.hasInternetAccess()).thenReturn(true);
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
 
         mInternetDialogController = new MockInternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
@@ -109,7 +111,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(
-                mock(InternetDialogController.InternetDialogCallback.class));
+                mock(InternetDialogController.InternetDialogCallback.class), true);
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mConnectedEntry = mConnectedEntry;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
@@ -143,8 +145,14 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.setAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(false);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
-                getResourcesString("wifi_is_off")));
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("wifi_is_off"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isNotEqualTo(getResourcesString("wifi_is_off"));
     }
 
     @Test
@@ -155,8 +163,14 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         doReturn(0).when(wifiScanResults).size();
         when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(true),
-                getResourcesString("wifi_empty_list_wifi_on")));
+        assertThat(mInternetDialogController.getSubtitleText(true))
+                .isEqualTo(getResourcesString("wifi_empty_list_wifi_on"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(true))
+                .isNotEqualTo(getResourcesString("wifi_empty_list_wifi_on"));
     }
 
     @Test
@@ -167,8 +181,14 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         doReturn(1).when(wifiScanResults).size();
         when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
-                getResourcesString("tap_a_network_to_connect")));
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("tap_a_network_to_connect"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isNotEqualTo(getResourcesString("tap_a_network_to_connect"));
     }
 
     @Test
@@ -188,8 +208,6 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         List<ScanResult> wifiScanResults = new ArrayList<>();
         doReturn(wifiScanResults).when(mWifiManager).getScanResults();
         when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
-        when(mSubscriptionManager.getActiveSubscriptionIdList())
-                .thenReturn(new int[] {SUB_ID});
 
         doReturn(ServiceState.STATE_OUT_OF_SERVICE).when(mServiceState).getState();
         doReturn(mServiceState).when(mTelephonyManager).getServiceState();
@@ -206,16 +224,20 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         List<ScanResult> wifiScanResults = new ArrayList<>();
         doReturn(wifiScanResults).when(mWifiManager).getScanResults();
         when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
-        when(mSubscriptionManager.getActiveSubscriptionIdList())
-                .thenReturn(new int[] {SUB_ID});
 
         doReturn(ServiceState.STATE_IN_SERVICE).when(mServiceState).getState();
         doReturn(mServiceState).when(mTelephonyManager).getServiceState();
 
         when(mTelephonyManager.isDataEnabled()).thenReturn(false);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
-                getResourcesString("non_carrier_network_unavailable")));
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("non_carrier_network_unavailable"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isNotEqualTo(getResourcesString("non_carrier_network_unavailable"));
     }
 
     @Test
@@ -245,36 +267,6 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         //   - The connected Wi-Fi entry have both default network and internet access conditions.
 
         assertThat(mInternetDialogController.getInternetWifiEntry()).isEqualTo(mConnectedEntry);
-    }
-
-    @Test
-    public void getInternetWifiTitle_withNoConnectedWifiEntry_returnEmpty() {
-        mInternetDialogController.mConnectedEntry = null;
-
-        assertThat(mInternetDialogController.getInternetWifiTitle()).isEmpty();
-    }
-
-    @Test
-    public void getInternetWifiTitle_withInternetWifi_returnTitle() {
-        // The preconditions have been set in setUp().
-        //   - The connected Wi-Fi entry have both default network and internet access conditions.
-        when(mConnectedEntry.getTitle()).thenReturn(CONNECTED_TITLE);
-
-        assertThat(mInternetDialogController.getInternetWifiTitle()).isEqualTo(CONNECTED_TITLE);
-    }
-
-    @Test
-    public void getInternetWifiSummary_withNoConnectedWifiEntry_returnEmpty() {
-        mInternetDialogController.mConnectedEntry = null;
-
-        assertThat(mInternetDialogController.getInternetWifiSummary()).isEmpty();
-    }
-
-    @Test
-    public void getInternetWifiSummary_withInternetWifi_returnSummary() {
-        when(mConnectedEntry.getSummary(false)).thenReturn(CONNECTED_SUMMARY);
-
-        assertThat(mInternetDialogController.getInternetWifiSummary()).isEqualTo(CONNECTED_SUMMARY);
     }
 
     @Test
@@ -340,6 +332,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
 
         assertThat(mInternetDialogController.isDeviceLocked()).isTrue();
+    }
+
+    @Test
+    public void scanWifiAccessPoints_cannotConfigWifi_doNothing() {
+        reset(mAccessPointController);
+        mInternetDialogController.mCanConfigWifi = false;
+
+        mInternetDialogController.scanWifiAccessPoints();
+
+        verify(mAccessPointController, never()).scanForAccessPoints();
     }
 
     private String getResourcesString(String name) {

@@ -666,7 +666,10 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
                     Settings.Global.Wearable.UNGAZE_ENABLED,
                     Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
-                    Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED);
+                    Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                    Settings.Global.Wearable.WRIST_ORIENTATION_MODE,
+                    Settings.Global.Wearable.CLOCKWORK_SYSUI_PACKAGE,
+                    Settings.Global.Wearable.CLOCKWORK_SYSUI_MAIN_ACTIVITY);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

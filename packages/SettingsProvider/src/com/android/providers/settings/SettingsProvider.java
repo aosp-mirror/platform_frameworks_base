@@ -5193,210 +5193,216 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 203) {
-                        // Version 203: initialize entries migrated from wear settings provide.
-                        initGlobalSettingsDefaultValForWearLocked(Global.Wearable.HAS_PAY_TOKENS,
-                                false);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, 6);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.HOTWORD_DETECTION_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_hotwordDetectionEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SMART_REPLIES_ENABLED, false);
-                        Setting locationMode = getSecureSettingsLocked(userId)
-                                                        .getSettingLocked(Secure.LOCATION_MODE);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
-                                !locationMode.isNull()
-                                        && !Integer.toString(Secure.LOCATION_MODE_OFF)
-                                                .equals(locationMode.getValue()));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
-                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.BUG_REPORT,
-                                "user".equals(Build.TYPE) // is user build?
-                                        ? Global.Wearable.BUG_REPORT_DISABLED
-                                        : Global.Wearable.BUG_REPORT_ENABLED);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SMART_ILLUMINATE_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_smartIlluminateEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.CLOCKWORK_AUTO_TIME,
-                                Global.Wearable.SYNC_TIME_FROM_PHONE);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
-                                Global.Wearable.SYNC_TIME_ZONE_FROM_PHONE);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.CLOCKWORK_24HR_TIME, false);
-                        initGlobalSettingsDefaultValForWearLocked(Global.Wearable.AUTO_WIFI, true);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.WIFI_POWER_SAVE,
-                                getContext()
-                                        .getResources()
-                                        .getInteger(
-                                                R.integer
+                    // Version 203: initialize entries migrated from wear settings provide.
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.HAS_PAY_TOKENS, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, 6);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.HOTWORD_DETECTION_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_hotwordDetectionEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SMART_REPLIES_ENABLED, false);
+                    Setting locationMode =
+                            getSecureSettingsLocked(userId).getSettingLocked(Secure.LOCATION_MODE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
+                            !locationMode.isNull()
+                                    && !Integer.toString(Secure.LOCATION_MODE_OFF)
+                                            .equals(locationMode.getValue()));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                            Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.BUG_REPORT,
+                            "user".equals(Build.TYPE) // is user build?
+                                    ? Global.Wearable.BUG_REPORT_DISABLED
+                                    : Global.Wearable.BUG_REPORT_ENABLED);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SMART_ILLUMINATE_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_smartIlluminateEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_AUTO_TIME,
+                            Global.Wearable.SYNC_TIME_FROM_PHONE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+                            Global.Wearable.SYNC_TIME_ZONE_FROM_PHONE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_24HR_TIME, false);
+                    initGlobalSettingsDefaultValForWearLocked(Global.Wearable.AUTO_WIFI, true);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WIFI_POWER_SAVE,
+                            getContext()
+                                    .getResources()
+                                    .getInteger(
+                                            R.integer
                                                     .def_wearable_offChargerWifiUsageLimitMinutes));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS, 0L);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.UPDOWN_GESTURES_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_upDownGesturesEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SETUP_SKIPPED,
-                                Global.Wearable.SETUP_SKIPPED_UNKNOWN);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.LAST_CALL_FORWARD_ACTION,
-                                Global.Wearable.CALL_FORWARD_NO_LAST_ACTION);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_muteWhenOffBodyEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.WEAR_OS_VERSION_STRING, "");
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_alternateLauncherEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.CORNER_ROUNDNESS,
-                                getContext()
-                                        .getResources()
-                                        .getInteger(
-                                                R.integer
-                                                        .def_wearable_squareScreenCornerRoundness));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.BUTTON_SET, false);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SIDE_BUTTON,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_sideButtonPresent));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.ANDROID_WEAR_VERSION,
-                                Long.parseLong(
-                                        getContext()
-                                                .getResources()
-                                                .getString(
-                                                        R.string.def_wearable_androidWearVersion)));
-                        final int editionGlobal = 1;
-                        final int editionLocal = 2;
-                        boolean isLe =
-                                getContext().getPackageManager().hasSystemFeature("cn.google");
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SYSTEM_EDITION,
-                                isLe ? editionLocal : editionGlobal);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.SYSTEM_CAPABILITIES,
-                                getWearSystemCapabilities(isLe));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
-                                SystemProperties.getInt("ro.cw_build.platform_mr", 0));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.BOTTOM_OFFSET, 0);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.DISPLAY_SHAPE,
-                                Settings.Global.Wearable.DISPLAY_SHAPE_SQUARE);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
-                                getContext()
-                                        .getResources()
-                                        .getString(R.string.def_wearable_brightnessLevels));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(
-                                                R.bool.def_wearable_mobileSignalDetectorAllowed));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.AMBIENT_ENABLED,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_ambientEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.AMBIENT_TILT_TO_WAKE,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_tiltToWakeEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, false);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_touchToWakeEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_wearable_tiltToBrightEnabled));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.DECOMPOSABLE_WATCHFACE, false);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
-                                SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
-                                SystemProperties.getInt("ro.ambient.gesture_sensor_id", 0));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
-                                SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
-                                SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.COMPANION_ADDRESS, "");
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
-                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
-                                Settings.Global.Wearable.HFP_CLIENT_UNSET);
-                        Setting disabledProfileSetting =
-                                getGlobalSettingsLocked()
-                                        .getSettingLocked(
-                                                Settings.Global.BLUETOOTH_DISABLED_PROFILES);
-                        final long disabledProfileSettingValue =
-                                disabledProfileSetting.isNull()
-                                        ? 0
-                                        : Long.parseLong(disabledProfileSetting.getValue());
-                        final boolean isHfpClientProfileEnabled =
-                                (disabledProfileSettingValue
-                                                & (1 << BluetoothProfile.HEADSET_CLIENT))
-                                        == 0;
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
-                                isHfpClientProfileEnabled);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.COMPANION_OS_VERSION,
-                                Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
-                        final boolean defaultBurnInProtectionEnabled =
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(
-                                                com.android
-                                                        .internal
-                                                        .R
-                                                        .bool
-                                                        .config_enableBurnInProtection);
-                        final boolean forceBurnInProtection =
-                                SystemProperties.getBoolean("persist.debug.force_burn_in", false);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
-                                defaultBurnInProtectionEnabled || forceBurnInProtection);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS, 0L);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.UPDOWN_GESTURES_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_upDownGesturesEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SETUP_SKIPPED, Global.Wearable.SETUP_SKIPPED_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.LAST_CALL_FORWARD_ACTION,
+                            Global.Wearable.CALL_FORWARD_NO_LAST_ACTION);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_muteWhenOffBodyEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WEAR_OS_VERSION_STRING, "");
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_alternateLauncherEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CORNER_ROUNDNESS,
+                            getContext()
+                                    .getResources()
+                                    .getInteger(
+                                            R.integer.def_wearable_squareScreenCornerRoundness));
+                    initGlobalSettingsDefaultValForWearLocked(Global.Wearable.BUTTON_SET, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SIDE_BUTTON,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_sideButtonPresent));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.ANDROID_WEAR_VERSION,
+                            Long.parseLong(
+                                    getContext()
+                                            .getResources()
+                                            .getString(R.string.def_wearable_androidWearVersion)));
+                    final int editionGlobal = 1;
+                    final int editionLocal = 2;
+                    boolean isLe = getContext().getPackageManager().hasSystemFeature("cn.google");
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SYSTEM_EDITION, isLe ? editionLocal : editionGlobal);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SYSTEM_CAPABILITIES, getWearSystemCapabilities(isLe));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                            SystemProperties.getInt("ro.cw_build.platform_mr", 0));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.BOTTOM_OFFSET, 0);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.DISPLAY_SHAPE,
+                            Settings.Global.Wearable.DISPLAY_SHAPE_SQUARE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
+                            getContext()
+                                    .getResources()
+                                    .getString(R.string.def_wearable_brightnessLevels));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_mobileSignalDetectorAllowed));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_ambientEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_tiltToWakeEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_touchToWakeEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_tiltToBrightEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.DECOMPOSABLE_WATCHFACE, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                            SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
+                            SystemProperties.getInt("ro.ambient.gesture_sensor_id", 0));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                            SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                            SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.COMPANION_ADDRESS, "");
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                            Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                            Settings.Global.Wearable.HFP_CLIENT_UNSET);
+                    Setting disabledProfileSetting =
+                            getGlobalSettingsLocked()
+                                    .getSettingLocked(Settings.Global.BLUETOOTH_DISABLED_PROFILES);
+                    final long disabledProfileSettingValue =
+                            disabledProfileSetting.isNull()
+                                    ? 0
+                                    : Long.parseLong(disabledProfileSetting.getValue());
+                    final boolean isHfpClientProfileEnabled =
+                            (disabledProfileSettingValue & (1 << BluetoothProfile.HEADSET_CLIENT))
+                                    == 0;
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
+                            isHfpClientProfileEnabled);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.COMPANION_OS_VERSION,
+                            Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
+                    final boolean defaultBurnInProtectionEnabled =
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(
+                                            com.android
+                                                    .internal
+                                                    .R
+                                                    .bool
+                                                    .config_enableBurnInProtection);
+                    final boolean forceBurnInProtection =
+                            SystemProperties.getBoolean("persist.debug.force_burn_in", false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                            defaultBurnInProtectionEnabled || forceBurnInProtection);
 
-                        // TODO(b/164398026): add necessary initialization logic for all entries.
-                        currentVersion = 204;
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.CLOCKWORK_SYSUI_PACKAGE,
+                            getContext()
+                                    .getResources()
+                                    .getString(
+                                            com.android.internal.R.string.config_wearSysUiPackage));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.CLOCKWORK_SYSUI_MAIN_ACTIVITY,
+                            getContext()
+                                    .getResources()
+                                    .getString(
+                                            com.android
+                                                    .internal
+                                                    .R
+                                                    .string
+                                                    .config_wearSysUiMainActivity));
+
+                    currentVersion = 204;
                 }
 
                 if (currentVersion == 204) {

@@ -24,9 +24,9 @@ import android.hardware.camera2.extension.Request;
 interface IRequestProcessorImpl
 {
     void setImageProcessor(in OutputConfigId outputConfigId, in IImageProcessorImpl imageProcessor);
-    boolean submit(in Request request, in IRequestCallback callback);
-    boolean submitBurst(in List<Request> requests, in IRequestCallback callback);
-    boolean setRepeating(in Request request, in IRequestCallback callback);
+    int submit(in Request request, in IRequestCallback callback);
+    int submitBurst(in List<Request> requests, in IRequestCallback callback);
+    int setRepeating(in Request request, in IRequestCallback callback);
     void abortCaptures();
     void stopRepeating();
 }

@@ -423,28 +423,6 @@ private:
     jobject mObject;
 };
 
-class JWeakGlobalRefHolder {
-public:
-    JWeakGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm) {
-        mWeakRef = getenv(vm)->NewWeakGlobalRef(object);
-    }
-
-    virtual ~JWeakGlobalRefHolder() {
-        if (mWeakRef != nullptr) getenv(mVm)->DeleteWeakGlobalRef(mWeakRef);
-        mWeakRef = nullptr;
-    }
-
-    jobject ref() { return mWeakRef; }
-    JavaVM* vm() { return mVm; }
-
-private:
-    JWeakGlobalRefHolder(const JWeakGlobalRefHolder&) = delete;
-    void operator=(const JWeakGlobalRefHolder&) = delete;
-
-    JavaVM* mVm;
-    jobject mWeakRef;
-};
-
 using TextureMap = std::unordered_map<uint32_t, sk_sp<SkImage>>;
 
 struct PictureCaptureState {
@@ -578,20 +556,16 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
     } else {
         JavaVM* vm = nullptr;
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
-        auto globalCallbackRef =
-                std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(
+                vm, env->NewGlobalRef(aSurfaceTransactionCallback));
         proxy->setASurfaceTransactionCallback(
                 [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) -> bool {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
-                    jobject localref = env->NewLocalRef(globalCallbackRef->ref());
-                    if (CC_UNLIKELY(!localref)) {
-                        return false;
-                    }
                     jboolean ret = env->CallBooleanMethod(
-                            localref, gASurfaceTransactionCallback.onMergeTransaction,
+                            globalCallbackRef->object(),
+                            gASurfaceTransactionCallback.onMergeTransaction,
                             static_cast<jlong>(transObj), static_cast<jlong>(scObj),
                             static_cast<jlong>(frameNr));
-                    env->DeleteLocalRef(localref);
                     return ret;
                 });
     }
@@ -606,15 +580,11 @@ static void android_view_ThreadedRenderer_setPrepareSurfaceControlForWebviewCall
         JavaVM* vm = nullptr;
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
         auto globalCallbackRef =
-                std::make_shared<JWeakGlobalRefHolder>(vm, callback);
+                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
         proxy->setPrepareSurfaceControlForWebviewCallback([globalCallbackRef]() {
             JNIEnv* env = getenv(globalCallbackRef->vm());
-            jobject localref = env->NewLocalRef(globalCallbackRef->ref());
-            if (CC_UNLIKELY(!localref)) {
-                return;
-            }
-            env->CallVoidMethod(localref, gPrepareSurfaceControlForWebviewCallback.prepare);
-            env->DeleteLocalRef(localref);
+            env->CallVoidMethod(globalCallbackRef->object(),
+                                gPrepareSurfaceControlForWebviewCallback.prepare);
         });
     }
 }

@@ -242,19 +242,21 @@ public class ScreenshotView extends FrameLayout implements
     /**
      * Called to display the scroll action chip when support is detected.
      *
+     * @param packageName the owning package of the window to be captured
      * @param onClick the action to take when the chip is clicked.
      */
-    public void showScrollChip(Runnable onClick) {
+    public void showScrollChip(String packageName, Runnable onClick) {
         if (DEBUG_SCROLL) {
             Log.d(TAG, "Showing Scroll option");
         }
-        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION);
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION, 0, packageName);
         mScrollChip.setVisibility(VISIBLE);
         mScrollChip.setOnClickListener((v) -> {
             if (DEBUG_INPUT) {
                 Log.d(TAG, "scroll chip tapped");
             }
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED);
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED, 0,
+                    packageName);
             onClick.run();
         });
     }

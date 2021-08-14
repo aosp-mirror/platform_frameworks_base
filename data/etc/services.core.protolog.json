@@ -2599,6 +2599,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "743418423": {
+      "message": "Sending TaskFragment error exception=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "744171317": {
       "message": "      SKIP: %s",
       "level": "VERBOSE",

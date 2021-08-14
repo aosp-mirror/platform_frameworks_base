@@ -485,9 +485,6 @@ public final class ViewRootImpl implements ViewParent,
     protected final ViewFrameInfo mViewFrameInfo = new ViewFrameInfo();
     private final InputEventAssigner mInputEventAssigner = new InputEventAssigner();
 
-    // Set to true if mSurfaceControl is used for Webview Overlay
-    private boolean mIsForWebviewOverlay;
-
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
      * ViewRootImpl instance. Erase the data in the current ViewFrameInfo to prepare for the next
@@ -1386,42 +1383,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    /**
-     * Register a callback to be executed when Webview overlay needs to merge a transaction.
-     * This callback will be executed on RenderThread worker thread, and released inside native code
-     * when CanvasContext is destroyed.
-     */
-    private void addASurfaceTransactionCallback() {
-        HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
-                                                                 nativeSurfaceControlObj,
-                                                                 frameNr) -> {
-            if (mBlastBufferQueue == null) {
-                return false;
-            } else {
-                mBlastBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
-                return true;
-            }
-        };
-        mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
-    }
-
-    /**
-     * Register a callback to be executed when Webview overlay needs a surface control.
-     * This callback will be executed on RenderThread worker thread, and released inside native code
-     * when CanvasContext is destroyed.
-     */
-    private void addPrepareSurfaceControlForWebviewCallback() {
-        HardwareRenderer.PrepareSurfaceControlForWebviewCallback callback = () -> {
-            // make mSurfaceControl transparent, so child surface controls are visible
-            if (mIsForWebviewOverlay) return;
-            synchronized (ViewRootImpl.this) {
-                mIsForWebviewOverlay = true;
-            }
-            mTransaction.setOpaque(mSurfaceControl, false).apply();
-        };
-        mAttachInfo.mThreadedRenderer.setPrepareSurfaceControlForWebviewCallback(callback);
-    }
-
     @UnsupportedAppUsage
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
@@ -1466,11 +1427,8 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
-                    if (HardwareRenderer.isWebViewOverlaysEnabled()) {
-                        addPrepareSurfaceControlForWebviewCallback();
-                        addASurfaceTransactionCallback();
-                    }
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
+                    mAttachInfo.mThreadedRenderer.setBlastBufferQueue(mBlastBufferQueue);
                 }
             }
         }
@@ -2041,6 +1999,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.setSurfaceControl(null);
+            mAttachInfo.mThreadedRenderer.setBlastBufferQueue(null);
         }
     }
 
@@ -7823,11 +7782,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
-                if (HardwareRenderer.isWebViewOverlaysEnabled()) {
-                    addPrepareSurfaceControlForWebviewCallback();
-                    addASurfaceTransactionCallback();
-                }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
+                mAttachInfo.mThreadedRenderer.setBlastBufferQueue(mBlastBufferQueue);
             }
         } else {
             destroySurface();
@@ -7873,11 +7829,10 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        synchronized (this) {
-            if (mIsForWebviewOverlay) {
-                mIsSurfaceOpaque = false;
-                return;
-            }
+        final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
+        if (renderer != null && renderer.rendererOwnsSurfaceControlOpacity()) {
+            opaque = renderer.setSurfaceControlOpaque(opaque);
+        } else {
             mTransaction.setOpaque(mSurfaceControl, opaque).apply();
         }
 
@@ -9522,6 +9477,7 @@ public final class ViewRootImpl implements ViewParent,
 
         ScrollCaptureResponse.Builder response = new ScrollCaptureResponse.Builder();
         response.setWindowTitle(getTitle().toString());
+        response.setPackageName(mContext.getPackageName());
 
         StringWriter writer =  new StringWriter();
         IndentingPrintWriter pw = new IndentingPrintWriter(writer);
