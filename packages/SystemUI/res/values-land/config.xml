@@ -28,9 +28,6 @@
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">2</integer>
 
-    <!-- We have only space for one notification on phone landscape layouts. -->
-    <integer name="keyguard_max_notification_count">1</integer>
-
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">1</integer>
 
