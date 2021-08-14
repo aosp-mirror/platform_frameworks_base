@@ -24,10 +24,6 @@
          certain GPU's and thus can be turned off with only minimal visual impact. -->
     <bool name="config_notifications_round_rect_clipping">true</bool>
 
-    <!-- Control whether status bar should distinguish HSPA data icon form UMTS
-    data icon on devices -->
-    <bool name="config_hspa_data_distinguishable">false</bool>
-
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
      interface.  This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
@@ -55,9 +51,6 @@
 
     <!-- Show phone (voice) signal strength instead of data in mobile RSSI. -->
     <bool name="config_showPhoneRSSIForData">false</bool>
-
-    <!-- When true, show 1/2G networks as 3G. -->
-    <bool name="config_showMin3G">false</bool>
 
     <!-- Show rotation lock toggle in System UI-->
     <bool name="config_showRotationLock">true</bool>
@@ -93,20 +86,20 @@
     <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
     <!-- The maximum number of tiles in the QuickQSPanel -->
-    <integer name="quick_qs_panel_max_columns">6</integer>
+    <integer name="quick_qs_panel_max_columns">4</integer>
 
     <!-- The number of columns in the QuickSettings -->
-    <integer name="quick_settings_num_columns">3</integer>
+    <integer name="quick_settings_num_columns">2</integer>
 
     <!-- The number of rows in the QuickSettings -->
-    <integer name="quick_settings_max_rows">3</integer>
+    <integer name="quick_settings_max_rows">4</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast,screenrecord
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle
     </string>
 
     <!-- The minimum number of tiles to display in QuickSettings -->
@@ -114,7 +107,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,dark,work,cast,night,screenrecord,reverse
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -155,21 +148,14 @@
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
+    <!-- Whether to hide the notification header when the HUN is expanded. -->
+    <bool name="heads_up_notification_hides_header">false</bool>
+
     <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
 
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
     <integer name="ambient_notification_extension_time">10000</integer>
-
-    <!-- In multi-window, determines whether the stack where recents lives should grow from
-         the smallest position when being launched. -->
-    <bool name="recents_grow_in_multiwindow">true</bool>
-
-    <!-- Animation duration when using long press on recents to dock -->
-    <integer name="long_press_dock_anim_duration">250</integer>
-
-    <!-- Whether to enable KeyguardService or not -->
-    <bool name="config_enableKeyguardService">true</bool>
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
@@ -191,11 +177,31 @@
     <!-- Doze: check proximity sensor before pulsing? -->
     <bool name="doze_proximity_check_before_pulse">true</bool>
 
+    <!-- Doze: only register sensors that use prox when device is in certain Display states. This
+     delays registering sensors when device first shows dozing UI but the
+     Display & Power state hasn't changed to low-power mode yet. -->
+    <bool name="doze_selectively_register_prox">false</bool>
+
+    <!-- Doze: whether the single tap sensor uses the proximity sensor.
+     If both this parameter and doze_selectively_register_prox are true, registration for the
+     sensor will be delayed when the device first enters dozing but the device has not entered its
+     low powered state yet. -->
+    <bool name="doze_single_tap_uses_prox">true</bool>
+
+    <!-- Doze: whether the long press sensor uses the proximity sensor.
+     If both this parameter and doze_selectively_register_prox are true, registration for the
+     sensor will be delayed when the device first enters dozing but the device has not entered its
+     low powered state yet. -->
+    <bool name="doze_long_press_uses_prox">true</bool>
+
     <!-- Doze: should notifications be used as a pulse signal? -->
     <bool name="doze_pulse_on_notifications">true</bool>
 
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
+
+    <!-- Doze: quick pickup duration to stay in AOD until the next gesture is triggered -->
+    <integer name="doze_quick_pickup_aod_duration">5000</integer>
 
     <!-- Type of a sensor that provides a low-power estimate of the desired display
          brightness, suitable to listen to while the device is asleep (e.g. during
@@ -296,6 +302,11 @@
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
+    <!-- Whether the multi-user switch on the keyguard opens QS user panel. If false, clicking the
+         user switch on the keyguard will replace the notifications and status area with the user
+         switcher. The multi-user switch is only shown if config_keyguardUserSwitcher=false. -->
+    <bool name="config_keyguard_user_switch_opens_qs_details">false</bool>
+
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
@@ -305,13 +316,11 @@
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.stackdivider.Divider</item>
         <item>com.android.systemui.statusbar.phone.StatusBar</item>
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>
         <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.pip.PipUI</item>
         <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
         <item>@string/config_systemUIVendorServiceComponent</item>
         <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
@@ -320,12 +329,12 @@
         <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.biometrics.AuthController</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.theme.ThemeOverlayController</item>
         <item>com.android.systemui.accessibility.WindowMagnification</item>
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
+        <item>com.android.systemui.wmshell.WMShell</item>
     </string-array>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
@@ -343,7 +352,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
-    <string name="config_navBarLayoutHandle" translatable="false">back[40AC];home_handle;ime_switcher[40AC]</string>
+    <string name="config_navBarLayoutHandle" translatable="false">back[70AC];home_handle;ime_switcher[70AC]</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
@@ -369,7 +378,7 @@
     <bool name="config_showNotificationGear">true</bool>
 
     <!-- Whether or not a background should be drawn behind a notification. -->
-    <bool name="config_drawNotificationBackground">true</bool>
+    <bool name="config_drawNotificationBackground">false</bool>
 
     <!-- Whether or the notifications can be shown and dismissed with a drag. -->
     <bool name="config_enableNotificationShadeDrag">true</bool>
@@ -387,16 +396,9 @@
     <!-- Whether or not the notifications should always fade as they are dismissed. -->
     <bool name="config_fadeNotificationsOnDismiss">false</bool>
 
-    <!-- Whether or not the parent of the notification row itself is being translated when swiped or
-         its children views. If true, then the contents are translated and vice versa. -->
-    <bool name="config_translateNotificationContentsOnSwipe">true</bool>
-
     <!-- Whether or not the fade on the notification is based on the amount that it has been swiped
          off-screen. -->
     <bool name="config_fadeDependingOnAmountSwiped">false</bool>
-
-    <!-- Whether or not to show the expand button at the end of the notification header. -->
-    <bool name="config_showNotificationExpandButtonAtEnd">false</bool>
 
     <!-- Whether or the notifications should be clipped to be reduced in height if it has been
          scrolled to the top of the screen. -->
@@ -424,10 +426,13 @@
     <!-- Whether or not the dividing lines should be shown when the container is expanding and
          collapsing. If this value is true, then the lines will only show when the container has
          been completely expanded. -->
-    <bool name="config_hideDividersDuringExpand">false</bool>
+    <bool name="config_hideDividersDuringExpand">true</bool>
 
     <!-- Whether or not child notifications that are part of a group will have shadows. -->
     <bool name="config_enableShadowOnChildNotifications">true</bool>
+
+    <!-- If true, group numbers are shown in the expander instead of via "+N" overflow number -->
+    <bool name="config_showNotificationGroupCountInExpander">true</bool>
 
     <!-- Whether or not a view containing child notifications will have a custom background when
          it has been expanded to reveal its children. -->
@@ -436,6 +441,9 @@
     <!-- Should we vibrate on an icon animation of the shelf. This should only be active if the
      vibrator is capable of subtle vibrations -->
     <bool name="config_vibrateOnIconAnimation">false</bool>
+
+    <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
+    <bool name="config_skinnyNotifsInLandscape">true</bool>
 
     <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
          does not work well, particularly with noisy touchscreens. Note that disabling it may
@@ -493,18 +501,6 @@
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
-    <!-- Animation duration for resizing of PIP when entering/exiting. -->
-    <integer name="config_pipResizeAnimationDuration">425</integer>
-
-    <!-- Allow dragging the PIP to a location to close it -->
-    <bool name="config_pipEnableDismissDragToEdge">true</bool>
-
-    <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
-    <bool name="config_pipEnableResizeForMenu">true</bool>
-
-    <!-- Allow PIP to enable round corner, see also R.dimen.pip_corner_radius -->
-    <bool name="config_pipEnableRoundCorner">false</bool>
-
     <!-- SystemUI Plugins that can be loaded on user builds. -->
     <string-array name="config_pluginWhitelist" translatable="false">
         <item>com.android.systemui</item>
@@ -524,22 +520,29 @@
      -->
     <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
 
-    <!-- Preferred refresh rate at keyguard, if supported by the display -->
+    <!-- Preferred refresh rate at keyguard, if supported by the display. Overrides
+         keyguardMaxRefreshRate. -->
     <integer name="config_keyguardRefreshRate">-1</integer>
+
+    <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
+    <integer name="config_keyguardMaxRefreshRate">-1</integer>
 
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
 
-    <!-- Defines the blacklist for system icons.  That is to say, the icons in the status bar that
-         are part of the blacklist are never displayed. Each item in the blacklist must be a string
-         defined in core/res/res/config.xml to properly blacklist the icon.
-
-         TODO: See if we can rename this config variable.
+    <!-- Defines system icons to be excluded from the display. That is to say, the icons in the
+         status bar that are part of this list are never displayed. Each item in the list must be a
+         string defined in core/res/res/config.xml to properly exclude the icon.
      -->
-    <string-array name="config_statusBarIconBlackList" translatable="false">
+    <string-array name="config_statusBarIconsToExclude" translatable="false">
         <item>@*android:string/status_bar_rotate</item>
         <item>@*android:string/status_bar_headset</item>
     </string-array>
+
+
+    <!-- Whether to show estimate in QS header. Default to false in case there's not enough
+     space -->
+    <bool name="config_showBatteryEstimateQSBH">false</bool>
 
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
@@ -575,6 +578,10 @@
 
     <!-- Max number of columns for power menu -->
     <integer name="power_menu_max_columns">3</integer>
+    <!-- Max number of columns for power menu lite -->
+    <integer name="power_menu_lite_max_columns">2</integer>
+    <!-- Max number of rows for power menu lite -->
+    <integer name="power_menu_lite_max_rows">4</integer>
 
     <!-- If the dp width of the available space is <= this value, potentially adjust the number
          of columns-->
@@ -582,8 +589,85 @@
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
 
+    <!-- Show a separate icon for low and high volume on the volume dialog -->
+    <bool name="config_showLowMediaVolumeIcon">false</bool>
+
+    <!-- Change the volume row tint when it is inactive, i.e. when it is being dismissed -->
+    <bool name="config_changeVolumeRowTintWhenInactive">true</bool>
+
+    <!-- The duraction of the show animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogShowAnimationDurationMs">300</integer>
+
+    <!-- The duraction of the hide animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogHideAnimationDurationMs">250</integer>
+
     <!-- Whether or not to show a notification for an unknown battery state -->
     <bool name="config_showNotificationForUnknownBatteryState">false</bool>
     <!-- content URL in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false -->
     <string translatable="false" name="config_batteryStateUnknownUrl"></string>
+
+    <!-- Whether wallet view is shown in landscape / seascape orientations -->
+    <bool name="global_actions_show_landscape_wallet_view">false</bool>
+    <!-- Whether global actions should show an informational message about changes in S -->
+    <bool name="global_actions_show_change_info">false</bool>
+
+    <!-- Package name of the preferred system app to perform eSOS action -->
+    <string name="config_preferredEmergencySosPackage" translatable="false"></string>
+
+    <!-- Whether to use the split 2-column notification shade -->
+    <bool name="config_use_split_notification_shade">false</bool>
+
+    <!-- Determines whether the shell features all run on another thread. -->
+    <bool name="config_enableShellMainThread">false</bool>
+
+    <!-- Default udfps icon. Same path as ic_fingerprint.xml -->
+    <string name="config_udfpsIcon" translatable="false">
+        M25.5,16.3283C28.47,14.8433 31.9167,14 35.5834,14C39.2501,14 42.6968,14.8433 45.6668,16.3283
+        M20,28.6669C22.7683,24.3402 28.7084,21.3335 35.5834,21.3335C42.4585,21.3335 48.3985,
+        24.3402 51.1669,28.6669
+        M22.8607,47.0002C21.834,44.3235 21.834,41.5002 21.834,41.5002C21.834,
+        34.4051 27.7374,28.6667 35.5841,28.6667C43.4308,28.6667 49.3341,34.4051 49.3341,41.5002
+        M49.3344,41.5003V42.0319C49.3344,44.7636 47.1161,47.0003 44.3661,47.0003C41.9461,
+        47.0003 39.8744,45.2403 39.471,42.857L38.9577,
+        39.7769C38.591,37.5953 36.7027,36.0002 34.5027,
+        36.0002C26.5826,36.0002 29.846,49.1087 35.291,50.6487
+        M44.9713,54.6267C42.5513,56.7167 39.2879,58.0001 35.5846,58.0001C32.2296,
+        58.0001 29.2229,56.9551 26.8945,55.195
+    </string>
+
+    <!-- The radius of the enrollment progress bar, in dp -->
+    <integer name="config_udfpsEnrollProgressBar" translatable="false">
+        280
+    </integer>
+
+    <!-- package name of a built-in camera app to use to restrict implicit intent resolution
+         when the double-press power gesture is used. Ignored if empty. -->
+    <string translatable="false" name="config_cameraGesturePackage"></string>
+
+    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
+    <bool name="allow_force_nav_bar_handle_opaque">true</bool>
+
+    <!-- Whether a transition of ACTIVITY_TYPE_DREAM to the home app should play a home sound
+         effect -->
+    <bool name="config_playHomeSoundAfterDream">false</bool>
+
+    <!-- Whether a transition of ACTIVITY_TYPE_ASSISTANT to the home app should play a home sound
+         effect -->
+    <bool name="config_playHomeSoundAfterAssistant">false</bool>
+
+    <!-- Whether to use window background blur for the volume dialog. -->
+    <bool name="config_volumeDialogUseBackgroundBlur">false</bool>
+
+    <!-- The properties of the face auth camera in pixels -->
+    <integer-array name="config_face_auth_props">
+        <!-- sensorLocationX -->
+        <!-- sensorLocationY -->
+        <!--sensorRadius -->
+    </integer-array>
+
+    <!-- Overrides the behavior of the face unlock keyguard bypass setting:
+         0 - Don't override the setting (default)
+         1 - Override the setting to always bypass keyguard
+         2 - Override the setting to never bypass keyguard -->
+    <integer name="config_face_unlock_bypass_override">0</integer>
 </resources>

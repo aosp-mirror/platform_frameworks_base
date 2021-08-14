@@ -16,7 +16,6 @@
 
 package android.permission;
 
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
@@ -32,6 +31,7 @@ import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import android.Manifest;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager.PermissionGrantState;
@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -257,6 +258,8 @@ public abstract class PermissionControllerService extends Service {
     }
 
     /**
+     * @deprecated See {@link #onSetRuntimePermissionGrantStateByDeviceAdmin(String,
+     * AdminPermissionControlParams, Consumer)}.
      * Set the runtime permission state from a device admin.
      *
      * @param callerPackageName The package name of the admin requesting the change
@@ -265,11 +268,26 @@ public abstract class PermissionControllerService extends Service {
      * @param grantState State to set the permission into
      * @param callback Callback waiting for whether the state could be set or not
      */
+    @Deprecated
     @BinderThread
     public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(
             @NonNull String callerPackageName, @NonNull String packageName,
             @NonNull String permission, @PermissionGrantState int grantState,
             @NonNull Consumer<Boolean> callback);
+
+    /**
+     * Set the runtime permission state from a device admin.
+     *
+     * @param callerPackageName The package name of the admin requesting the change
+     * @param params Parameters of admin request.
+     * @param callback Callback waiting for whether the state could be set or not
+     */
+    @BinderThread
+    public void onSetRuntimePermissionGrantStateByDeviceAdmin(
+            @NonNull String callerPackageName, @NonNull AdminPermissionControlParams params,
+            @NonNull Consumer<Boolean> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
 
     /**
      * Called when a package is considered inactive based on the criteria given by
@@ -280,6 +298,45 @@ public abstract class PermissionControllerService extends Service {
      */
     @BinderThread
     public void onOneTimePermissionSessionTimeout(@NonNull String packageName) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get the platform permissions which belong to a particular permission group
+     *
+     * @param permissionGroupName The permission group whose permissions are desired
+     * @param callback A callback the permission names will be passed to
+     */
+    @BinderThread
+    public void onGetPlatformPermissionsForGroup(@NonNull String permissionGroupName,
+            @NonNull Consumer<List<String>> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get the platform group of a particular permission, if the permission is a platform permission
+     *
+     * @param permissionName The permission name whose group is desired
+     * @param callback A callback the group name will be passed to
+     */
+    @BinderThread
+    public void onGetGroupOfPlatformPermission(@NonNull String permissionName,
+            @NonNull Consumer<String> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+    /**
+     * Get a user-readable sentence, describing the set of privileges that are to be granted to a
+     * companion app managing a device of the given profile.
+     *
+     * @param deviceProfileName the
+     *      {@link android.companion.AssociationRequest.DeviceProfile device profile} name
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
+    @NonNull
+    public String getPrivilegesDescriptionStringForProfile(@NonNull String deviceProfileName) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -450,32 +507,26 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName,
-                    String packageName, String permission, int grantState,
+            public void setRuntimePermissionGrantStateByDeviceAdminFromParams(
+                    String callerPackageName, AdminPermissionControlParams params,
                     AndroidFuture callback) {
                 checkStringNotEmpty(callerPackageName);
-                checkStringNotEmpty(packageName);
-                checkStringNotEmpty(permission);
-                checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
-                        || grantState == PERMISSION_GRANT_STATE_DENIED
-                        || grantState == PERMISSION_GRANT_STATE_DEFAULT);
-                checkNotNull(callback);
-
-                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_GRANTED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.GRANT_RUNTIME_PERMISSIONS);
                 }
 
-                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_DENIED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
                 }
 
                 enforceSomePermissionsGrantedToCaller(
                         Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+                checkNotNull(callback);
 
                 onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
-                        packageName, permission, grantState, callback::complete);
+                        params, callback::complete);
             }
 
             @Override
@@ -491,6 +542,9 @@ public abstract class PermissionControllerService extends Service {
             @Override
             public void updateUserSensitiveForApp(int uid, @NonNull AndroidFuture callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
 
                 try {
                     onUpdateUserSensitivePermissionFlags(uid, () -> callback.complete(null));
@@ -516,6 +570,53 @@ public abstract class PermissionControllerService extends Service {
                 enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 PermissionControllerService.this.dump(fd, writer, args);
+            }
+
+            @Override
+            public void getPrivilegesDescriptionStringForProfile(
+                    @NonNull String deviceProfileName,
+                    @NonNull AndroidFuture<String> callback) {
+                try {
+                    checkStringNotEmpty(deviceProfileName);
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_COMPANION_DEVICES);
+
+                    callback.complete(PermissionControllerService
+                            .this
+                            .getPrivilegesDescriptionStringForProfile(deviceProfileName));
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getPlatformPermissionsForGroup(
+                    @NonNull String permissionName,
+                    @NonNull AndroidFuture<List<String>> callback) {
+                try {
+                    Objects.requireNonNull(permissionName);
+                    Objects.requireNonNull(callback);
+                    PermissionControllerService.this.onGetPlatformPermissionsForGroup(
+                            permissionName, callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getGroupOfPlatformPermission(
+                    @NonNull String permissionGroupName,
+                    @NonNull AndroidFuture<String> callback) {
+                try {
+                    Objects.requireNonNull(permissionGroupName);
+                    Objects.requireNonNull(callback);
+                    PermissionControllerService.this.onGetGroupOfPlatformPermission(
+                            permissionGroupName, callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
             }
         };
     }

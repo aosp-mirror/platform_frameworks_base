@@ -17,6 +17,8 @@
 package com.android.server.hdmi;
 
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -29,6 +31,14 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
     // State that waits for <System Audio Mode Status> once send
     // <Give System Audio Mode Status> to AV Receiver.
     private static final int STATE_WAITING_FOR_SYSTEM_AUDIO_MODE_STATUS = 1;
+
+    @VisibleForTesting
+    static final int RETRIES_ON_TIMEOUT = 1;
+
+    // On some audio devices the <System Audio Mode Status> message can be delayed as the device
+    // is just waking up. Retry the <Give System Audio Mode Status> message to ensure we properly
+    // initialize system audio.
+    private int mRetriesOnTimeOut = RETRIES_ON_TIMEOUT;
 
     SystemAudioAutoInitiationAction(HdmiCecLocalDevice source, int avrAddress) {
         super(source);
@@ -100,6 +110,13 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
 
         switch (mState) {
             case STATE_WAITING_FOR_SYSTEM_AUDIO_MODE_STATUS:
+                if (mRetriesOnTimeOut > 0) {
+                    mRetriesOnTimeOut--;
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
+                    sendGiveSystemAudioModeStatus();
+                    return;
+                }
+
                 handleSystemAudioModeStatusTimeout();
                 break;
         }

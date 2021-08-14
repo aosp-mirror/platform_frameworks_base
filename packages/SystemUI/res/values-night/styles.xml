@@ -29,4 +29,23 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
+    <!-- Screenshots -->
+    <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+        <item name="android:textColorSecondary">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
+    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:textColorPrimary">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
+    <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
 </resources>

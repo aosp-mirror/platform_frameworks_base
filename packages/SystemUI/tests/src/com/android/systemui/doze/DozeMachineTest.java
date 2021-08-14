@@ -88,8 +88,7 @@ public class DozeMachineTest extends SysuiTestCase {
 
         mMachine = new DozeMachine(mServiceFake, mConfigMock, mWakeLockFake,
                 mWakefulnessLifecycle, mock(BatteryController.class), mDozeLog, mDockManager,
-                mHost);
-        mMachine.setParts(new DozeMachine.Part[]{mPartMock});
+                mHost, new DozeMachine.Part[]{mPartMock});
     }
 
     @Test

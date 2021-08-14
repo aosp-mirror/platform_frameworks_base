@@ -13,6 +13,7 @@ shell_static_libs = ["androidx.legacy_legacy-support-v4"]
 
 android_app {
     name: "Shell",
+    defaults: ["platform_app_defaults"],
     srcs: shell_srcs,
     aidl: {
         include_dirs: ["frameworks/native/cmds/dumpstate/binder"],
@@ -30,6 +31,7 @@ android_app {
 // with product specific permissions.
 android_library {
     name: "Shell-package-library",
+    defaults: ["platform_app_defaults"],
     srcs: shell_srcs,
     aidl: {
         include_dirs: ["frameworks/native/cmds/dumpstate/binder"],

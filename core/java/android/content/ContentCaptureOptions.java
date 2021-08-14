@@ -134,7 +134,8 @@ public final class ContentCaptureOptions implements Parcelable {
 
         final String packageName = at.getApplication().getPackageName();
 
-        if (!"android.contentcaptureservice.cts".equals(packageName)) {
+        if (!"android.contentcaptureservice.cts".equals(packageName)
+                && !"android.translation.cts".equals(packageName)) {
             Log.e(TAG, "forWhitelistingItself(): called by " + packageName);
             throw new SecurityException("Thou shall not pass!");
         }

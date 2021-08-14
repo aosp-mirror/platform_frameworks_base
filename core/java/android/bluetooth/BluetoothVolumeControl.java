@@ -26,7 +26,10 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Attributable;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -72,12 +75,14 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      */
     @SystemApi
     @SuppressLint("ActionValue")
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.volume-control.profile.action.CONNECTION_STATE_CHANGED";
 
     private BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothVolumeControl> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.VOLUME_CONTROL, TAG,
                     IBluetoothVolumeControl.class.getName()) {
@@ -94,6 +99,7 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
     /*package*/ BluetoothVolumeControl(Context context, ServiceListener listener,
             BluetoothAdapter adapter) {
         mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
@@ -122,13 +128,18 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
         final IBluetoothVolumeControl service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return Attributable.setAttributionSource(
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -145,13 +156,16 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
         final IBluetoothVolumeControl service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return Attributable.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -168,13 +182,14 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) log("getConnectionState(" + device + ")");
         final IBluetoothVolumeControl service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -192,7 +207,11 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public void setVolume(@Nullable BluetoothDevice device,
             @IntRange(from = 0, to = 255) int volume) {
         if (DBG)
@@ -200,7 +219,7 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
         final IBluetoothVolumeControl service = getService();
         try {
             if (service != null && isEnabled()) {
-                service.setVolume(device, volume);
+                service.setVolume(device, volume, mAttributionSource);
                 return;
             }
             if (service == null)
@@ -223,7 +242,11 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -234,7 +257,7 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
                 return false;
             }
             try {
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
@@ -256,13 +279,17 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothVolumeControl service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;

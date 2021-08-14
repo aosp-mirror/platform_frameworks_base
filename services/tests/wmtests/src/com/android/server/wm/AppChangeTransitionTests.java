@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,6 +36,7 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -53,27 +54,27 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class AppChangeTransitionTests extends WindowTestsBase {
 
-    private ActivityStack mStack;
     private Task mTask;
     private ActivityRecord mActivity;
 
     public void setUpOnDisplay(DisplayContent dc) {
-        mActivity = createTestActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
+        mActivity = createActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
         mTask = mActivity.getTask();
-        mStack = mTask.getStack();
 
         // Set a remote animator with snapshot disabled. Snapshots don't work in wmtests.
         RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         RemoteAnimationAdapter adapter =
                 new RemoteAnimationAdapter(new TestRemoteAnimationRunner(), 10, 1, false);
-        definition.addRemoteAnimation(TRANSIT_TASK_CHANGE_WINDOWING_MODE, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE, adapter);
         dc.registerRemoteAnimations(definition);
     }
 
     class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
         @Override
-        public void onAnimationStart(RemoteAnimationTarget[] apps,
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                RemoteAnimationTarget[] apps,
                 RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback) {
             for (RemoteAnimationTarget target : apps) {
                 assertNotNull(target.startBounds);
@@ -143,7 +144,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         // Reparenting to a display with different windowing mode may trigger
         // a change transition internally, but it should be cleaned-up once
         // the display change is complete.
-        mStack.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true);
+        mTask.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
 

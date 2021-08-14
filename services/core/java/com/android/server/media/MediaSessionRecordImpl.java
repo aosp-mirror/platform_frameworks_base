@@ -20,7 +20,7 @@ import android.media.AudioManager;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
-import com.android.server.media.SessionPolicyProvider.SessionPolicy;
+import com.android.server.media.MediaSessionPolicyProvider.SessionPolicy;
 
 import java.io.PrintWriter;
 
@@ -51,8 +51,8 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
     int getUserId();
 
     /**
-     * Check if this session has system priorty and should receive media buttons
-     * before any other sessions.
+     * Check if this session has system priority and should receive media buttons before any other
+     * sessions.
      *
      * @return True if this is a system priority session, false otherwise
      */
@@ -74,7 +74,8 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      *          activity. {@code false} otherwise to tell session about the real caller.
      * @param direction The direction to adjust volume in.
      * @param flags Any of the flags from {@link AudioManager}.
-     * @param useSuggested True to use adjustSuggestedStreamVolume instead of
+     * @param useSuggested True to use adjustSuggestedStreamVolumeForUid instead of
+     *          adjustStreamVolumeForUid
      */
     void adjustVolume(String packageName, String opPackageName, int pid, int uid,
             boolean asSystemService, int direction, int flags, boolean useSuggested);
@@ -89,12 +90,12 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
     boolean isActive();
 
     /**
-     * Check if the session's playback active state matches with the expectation. This always return
-     * {@code false} if the playback state is unknown (e.g. {@code null}), where we cannot know the
-     * actual playback state associated with the session.
+     * Check if the session's playback active state matches with the expectation. This always
+     * returns {@code false} if the playback state is unknown (e.g. {@code null}), where we cannot
+     * know the actual playback state associated with the session.
      *
-     * @param expected True if playback is expected to be active. false otherwise.
-     * @return True if the session's playback matches with the expectation. false otherwise.
+     * @param expected True if playback is expected to be active. False otherwise.
+     * @return True if the session's playback matches with the expectation. False otherwise.
      */
     boolean checkPlaybackActiveState(boolean expected);
 
@@ -103,8 +104,8 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * <p>
      * <ul>
      *   <li>Local: volume changes the stream volume because playback happens on this device.</li>
-     *   <li>Remote: volume is sent to the apps callback because playback happens on the remote
-     *     device and we cannot know how to control the volume of it.</li>
+     *   <li>Remote: volume is sent to the app's callback because playback happens on a remote
+     *     device and we cannot know how to control its volume.</li>
      * </ul>
      *
      * @return {@code true} if the playback is local. {@code false} if the playback is remote.
@@ -150,7 +151,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
     void dump(PrintWriter pw, String prefix);
 
     /**
-     * Override {@link AutoCloseable#close} to tell not to throw exception.
+     * Override {@link AutoCloseable#close} to tell it not to throw exception.
      */
     @Override
     void close();

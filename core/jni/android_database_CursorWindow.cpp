@@ -84,23 +84,31 @@ static int getFdCount() {
 }
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint cursorWindowSize) {
+    status_t status;
     String8 name;
+    CursorWindow* window;
+
     const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
     name.setTo(nameStr);
     env->ReleaseStringUTFChars(nameObj, nameStr);
 
-    CursorWindow* window;
-    status_t status = CursorWindow::create(name, cursorWindowSize, &window);
+    if (cursorWindowSize < 0) {
+        status = INVALID_OPERATION;
+        goto fail;
+    }
+    status = CursorWindow::create(name, cursorWindowSize, &window);
     if (status || !window) {
-        jniThrowExceptionFmt(env,
-                "android/database/CursorWindowAllocationException",
-                "Could not allocate CursorWindow '%s' of size %d due to error %d.",
-                name.string(), cursorWindowSize, status);
-        return 0;
+        goto fail;
     }
 
     LOG_WINDOW("nativeInitializeEmpty: window = %p", window);
     return reinterpret_cast<jlong>(window);
+
+fail:
+    jniThrowExceptionFmt(env, "android/database/CursorWindowAllocationException",
+                         "Could not allocate CursorWindow '%s' of size %d due to error %d.",
+                         name.string(), cursorWindowSize, status);
+    return 0;
 }
 
 static jlong nativeCreateFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {

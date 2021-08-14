@@ -899,6 +899,17 @@ public final class TvInputManager {
          */
         public void onTvInputInfoUpdated(TvInputInfo inputInfo) {
         }
+
+        /**
+         * This is called when the information about current tuned information has been updated.
+         *
+         * @param tunedInfos a list of {@link TunedInfo} objects of new tuned information.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
+        public void onCurrentTunedInfosUpdated(@NonNull List<TunedInfo> tunedInfos) {
+        }
     }
 
     private static final class TvInputCallbackRecord {
@@ -955,6 +966,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mCallback.onTvInputInfoUpdated(inputInfo);
+                }
+            });
+        }
+
+        public void postCurrentTunedInfosUpdated(final List<TunedInfo> currentTunedInfos) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onCurrentTunedInfosUpdated(currentTunedInfos);
                 }
             });
         }
@@ -1259,6 +1279,15 @@ public final class TvInputManager {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postTvInputInfoUpdated(inputInfo);
+                    }
+                }
+            }
+
+            @Override
+            public void onCurrentTunedInfosUpdated(List<TunedInfo> currentTunedInfos) {
+                synchronized (mLock) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
+                        record.postCurrentTunedInfosUpdated(currentTunedInfos);
                     }
                 }
             }
@@ -1953,6 +1982,25 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns the list of session information for {@link TvInputService.Session} that are
+     * currently in use.
+     * <p> Permission com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS is required to get
+     * the channel URIs. If the permission is not granted,
+     * {@link TunedInfo#getChannelUri()} returns {@code null}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
+    @NonNull
+    public List<TunedInfo> getCurrentTunedInfos() {
+        try {
+            return mService.getCurrentTunedInfos(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
@@ -2478,7 +2526,10 @@ public final class TvInputManager {
         /**
          * Pauses TV program recording in the current recording session.
          *
-         * @param params A set of extra parameters which might be handled with this event.
+         * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         *        {@link TvRecordingClient#pauseRecording(Bundle)}.
          */
         void pauseRecording(@NonNull Bundle params) {
             if (mToken == null) {
@@ -2495,7 +2546,10 @@ public final class TvInputManager {
         /**
          * Resumes TV program recording in the current recording session.
          *
-         * @param params A set of extra parameters which might be handled with this event.
+         * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         *        {@link TvRecordingClient#resumeRecording(Bundle)}.
          */
         void resumeRecording(@NonNull Bundle params) {
             if (mToken == null) {

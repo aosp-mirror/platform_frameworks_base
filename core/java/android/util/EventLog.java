@@ -308,7 +308,7 @@ public class EventLog {
          * @hide
          */
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             // Not using ByteBuffer.equals since it takes buffer position into account and we
             // always use absolute positions here.
             if (this == o) return true;

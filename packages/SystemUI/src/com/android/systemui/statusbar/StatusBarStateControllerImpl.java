@@ -16,18 +16,28 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -38,12 +48,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Tracks and reports on {@link StatusBarState}.
  */
-@Singleton
+@SysUISingleton
 public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
         CallbackController<StateListener>, Dumpable {
     private static final String TAG = "SbStateController";
@@ -73,22 +82,20 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private final UiEventLogger mUiEventLogger;
     private int mState;
     private int mLastState;
+    private int mUpcomingState;
     private boolean mLeaveOpenOnKeyguardHide;
     private boolean mKeyguardRequested;
 
     // Record the HISTORY_SIZE most recent states
     private int mHistoryIndex = 0;
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
+    // This is used by InteractionJankMonitor to get callback from HWUI.
+    private View mView;
 
     /**
      * If any of the system bars is hidden.
      */
     private boolean mIsFullscreen = false;
-
-    /**
-     * If the navigation bar can stay hidden when the display gets tapped.
-     */
-    private boolean mIsImmersive = false;
 
     /**
      * If the device is currently pulsing (AOD2).
@@ -99,6 +106,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
      * If the device is currently dozing or not.
      */
     private boolean mIsDozing;
+
+    /**
+     * If the status bar is currently expanded or not.
+     */
+    private boolean mIsExpanded;
 
     /**
      * Current {@link #mDozeAmount} animator.
@@ -134,11 +146,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public boolean setState(int state) {
+    public boolean setState(int state, boolean force) {
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
-        if (state == mState) {
+        if (!force && state == mState) {
             return false;
         }
 
@@ -158,6 +170,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
             mLastState = mState;
             mState = state;
+            mUpcomingState = state;
             mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStateChanged(mState);
@@ -173,6 +186,16 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
+    public void setUpcomingState(int nextState) {
+        mUpcomingState = nextState;
+    }
+
+    @Override
+    public int getCurrentOrUpcomingState() {
+        return mUpcomingState;
+    }
+
+    @Override
     public boolean isDozing() {
         return mIsDozing;
     }
@@ -185,6 +208,26 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     @Override
     public float getDozeAmount() {
         return mDozeAmount;
+    }
+
+    @Override
+    public boolean isExpanded() {
+        return mIsExpanded;
+    }
+
+    @Override
+    public boolean setPanelExpanded(boolean expanded) {
+        if (mIsExpanded == expanded) {
+            return false;
+        }
+        mIsExpanded = expanded;
+        String tag = getClass().getSimpleName() + "#setIsExpanded";
+        DejankUtils.startDetectingBlockingIpcs(tag);
+        for (RankedListener rl : new ArrayList<>(mListeners)) {
+            rl.mListener.onExpandedChanged(mIsExpanded);
+        }
+        DejankUtils.stopDetectingBlockingIpcs(tag);
+        return true;
     }
 
     @Override
@@ -214,6 +257,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
     @Override
     public void setDozeAmount(float dozeAmount, boolean animated) {
+        setAndInstrumentDozeAmount(null, dozeAmount, animated);
+    }
+
+    @Override
+    public void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated) {
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {
                 return;
@@ -222,6 +270,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
         }
 
+        // We don't need a new attached view if we already have one.
+        if ((mView == null || !mView.isAttachedToWindow())
+                && (view != null && view.isAttachedToWindow())) {
+            mView = view;
+        }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
             startDozeAnimation();
@@ -239,6 +292,22 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
         mDarkAnimator.setInterpolator(Interpolators.LINEAR);
         mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        mDarkAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cancelInteractionJankMonitor();
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                endInteractionJankMonitor();
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                beginInteractionJankMonitor();
+            }
+        });
         mDarkAnimator.start();
     }
 
@@ -253,6 +322,24 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
+    }
+
+    private void beginInteractionJankMonitor() {
+        if (mView != null && mView.isAttachedToWindow()) {
+            InteractionJankMonitor.getInstance().begin(mView, getCujType());
+        }
+    }
+
+    private void endInteractionJankMonitor() {
+        InteractionJankMonitor.getInstance().end(getCujType());
+    }
+
+    private void cancelInteractionJankMonitor() {
+        InteractionJankMonitor.getInstance().cancel(getCujType());
+    }
+
+    private int getCujType() {
+        return mIsDozing ? CUJ_LOCKSCREEN_TRANSITION_TO_AOD : CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
     }
 
     @Override
@@ -276,7 +363,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void addCallback(StateListener listener) {
+    public void addCallback(@NonNull StateListener listener) {
         synchronized (mListeners) {
             addListenerInternalLocked(listener, Integer.MAX_VALUE);
         }
@@ -316,7 +403,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
 
     @Override
-    public void removeCallback(StateListener listener) {
+    public void removeCallback(@NonNull StateListener listener) {
         synchronized (mListeners) {
             mListeners.removeIf((it) -> it.mListener.equals(listener));
         }
@@ -333,13 +420,12 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void setFullscreenState(boolean isFullscreen, boolean isImmersive) {
-        if (mIsFullscreen != isFullscreen || mIsImmersive != isImmersive) {
+    public void setFullscreenState(boolean isFullscreen) {
+        if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
-            mIsImmersive = isImmersive;
             synchronized (mListeners) {
                 for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen, isImmersive);
+                    rl.mListener.onFullscreenStateChanged(isFullscreen, true /* isImmersive */);
                 }
             }
         }

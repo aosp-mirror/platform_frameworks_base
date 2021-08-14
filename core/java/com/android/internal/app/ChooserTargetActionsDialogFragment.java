@@ -32,7 +32,6 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -59,25 +58,51 @@ import java.util.Optional;
 public class ChooserTargetActionsDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
 
-    protected List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
+    protected ArrayList<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
     protected UserHandle mUserHandle;
 
-    public ChooserTargetActionsDialogFragment() {
+    public static final String USER_HANDLE_KEY = "user_handle";
+    public static final String TARGET_INFOS_KEY = "target_infos";
+
+    public ChooserTargetActionsDialogFragment() {}
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            setStateFromBundle(savedInstanceState);
+        } else {
+            setStateFromBundle(getArguments());
+        }
     }
 
-    public ChooserTargetActionsDialogFragment(List<DisplayResolveInfo> targets,
-            UserHandle userHandle) {
-        mUserHandle = userHandle;
-        mTargetInfos = targets;
+    void setStateFromBundle(Bundle b) {
+        mTargetInfos = (ArrayList<DisplayResolveInfo>) b.get(TARGET_INFOS_KEY);
+        mUserHandle = (UserHandle) b.get(USER_HANDLE_KEY);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
+                mUserHandle);
+        outState.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
+                mTargetInfos);
     }
 
     /**
      * Recreate the layout from scratch to match new Sharesheet redlines
      */
+    @Override
     public View onCreateView(LayoutInflater inflater,
             @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-
+        if (savedInstanceState != null) {
+            setStateFromBundle(savedInstanceState);
+        } else {
+            setStateFromBundle(getArguments());
+        }
         // Make the background transparent to show dialog rounding
         Optional.of(getDialog()).map(Dialog::getWindow)
                 .ifPresent(window -> {
@@ -202,14 +227,6 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
         // Use the matching application icon and label for the title, any TargetInfo will do
         return new ResolveInfoPresentationGetter(getContext(), iconDpi,
                 mTargetInfos.get(0).getResolveInfo());
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        // Dismiss on config changed (eg: rotation)
-        // TODO: Maintain state on config change
-        super.onConfigurationChanged(newConfig);
-        dismiss();
     }
 
 }

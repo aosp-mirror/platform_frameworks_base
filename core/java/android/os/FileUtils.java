@@ -22,6 +22,8 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.EINVAL;
+import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
@@ -40,9 +42,14 @@ import static android.system.OsConstants.W_OK;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.provider.DocumentsContract.Document;
+import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
@@ -108,6 +115,9 @@ public final class FileUtils {
     private FileUtils() {
     }
 
+    private static final String CAMERA_DIR_LOWER_CASE = "/storage/emulated/" + UserHandle.myUserId()
+            + "/dcim/camera";
+
     /** Regular expression for safe filenames: no spaces or metacharacters.
       *
       * Use a preload holder so that FileUtils can be compile-time initialized.
@@ -118,6 +128,7 @@ public final class FileUtils {
 
     // non-final so it can be toggled by Robolectric's ShadowFileUtils
     private static boolean sEnableCopyOptimizations = true;
+    private static volatile int sMediaProviderAppId = -1;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
 
@@ -432,7 +443,19 @@ public final class FileUtils {
                 final StructStat st_in = Os.fstat(in);
                 final StructStat st_out = Os.fstat(out);
                 if (S_ISREG(st_in.st_mode) && S_ISREG(st_out.st_mode)) {
-                    return copyInternalSendfile(in, out, count, signal, executor, listener);
+                    try {
+                        return copyInternalSendfile(in, out, count, signal, executor, listener);
+                    } catch (ErrnoException e) {
+                        if (e.errno == EINVAL || e.errno == ENOSYS) {
+                            // sendfile(2) will fail in at least any of the following conditions:
+                            // 1. |in| doesn't support mmap(2)
+                            // 2. |out| was opened with O_APPEND
+                            // We fallback to userspace copy if that fails
+                            return copyInternalUserspace(in, out, count, signal, executor,
+                                    listener);
+                        }
+                        throw e;
+                    }
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
                     return copyInternalSplice(in, out, count, signal, executor, listener);
                 }
@@ -1432,6 +1455,42 @@ public final class FileUtils {
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
+    }
+
+    /** {@hide} */
+    @VisibleForTesting
+    public static ParcelFileDescriptor convertToModernFd(FileDescriptor fd) {
+        Context context = AppGlobals.getInitialApplication();
+        if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
+            // Never convert modern fd for MediaProvider, because this requires
+            // MediaStore#scanFile and can cause infinite loops when MediaProvider scans
+            return null;
+        }
+
+        try (ParcelFileDescriptor dupFd = ParcelFileDescriptor.dup(fd)) {
+            return MediaStore.getOriginalMediaFormatFileDescriptor(context, dupFd);
+        } catch (Exception e) {
+            // Ignore error
+            return null;
+        }
+    }
+
+    private static int getMediaProviderAppId(Context context) {
+        if (sMediaProviderAppId != -1) {
+            return sMediaProviderAppId;
+        }
+
+        PackageManager pm = context.getPackageManager();
+        ProviderInfo provider = context.getPackageManager().resolveContentProvider(
+                MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_SYSTEM_ONLY);
+        if (provider == null) {
+            return -1;
+        }
+
+        sMediaProviderAppId = UserHandle.getAppId(provider.applicationInfo.uid);
+        return sMediaProviderAppId;
     }
 
     /** {@hide} */

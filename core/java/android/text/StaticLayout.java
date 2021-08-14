@@ -977,6 +977,9 @@ public class StaticLayout extends Layout {
                 calculateEllipsis(start, end, measured, widthStart,
                         ellipsisWidth, ellipsize, j,
                         textWidth, paint, forceEllipsis);
+            } else {
+                mLines[mColumns * j + ELLIPSIS_START] = 0;
+                mLines[mColumns * j + ELLIPSIS_COUNT] = 0;
             }
         }
 

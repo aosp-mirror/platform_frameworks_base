@@ -4,21 +4,13 @@
       "name": "GtsMediaTestCases",
       "options" : [
         {
-	  "include-annotation": "android.platform.test.annotations.Presubmit"
+          "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
           "include-filter": "com.google.android.media.gts.WidevineGenericOpsTests"
-        }
-      ]
-    },
-    {
-      "name": "GtsExoPlayerTestCases",
-      "options" : [
-        {
-	  "include-annotation": "android.platform.test.annotations.SocPresubmit"
         },
         {
-          "include-filter": "com.google.android.exoplayer.gts.DashTest#testWidevine23FpsH264Fixed"
+          "include-filter": "com.google.android.media.gts.WidevineH264PlaybackTests"
         }
       ]
     }

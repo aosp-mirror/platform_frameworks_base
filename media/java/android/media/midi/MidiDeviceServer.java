@@ -384,14 +384,14 @@ public final class MidiDeviceServer implements Closeable {
 
     private void updateDeviceStatus() {
         // clear calling identity, since we may be in a Binder call from one of our clients
-        long identityToken = Binder.clearCallingIdentity();
-
-        MidiDeviceStatus status = new MidiDeviceStatus(mDeviceInfo, mInputPortOpen,
-                mOutputPortOpenCount);
-        if (mCallback != null) {
-            mCallback.onDeviceStatusChanged(this, status);
-        }
+        final long identityToken = Binder.clearCallingIdentity();
         try {
+            MidiDeviceStatus status = new MidiDeviceStatus(mDeviceInfo, mInputPortOpen,
+                    mOutputPortOpenCount);
+            if (mCallback != null) {
+                mCallback.onDeviceStatusChanged(this, status);
+            }
+
             mMidiManager.setDeviceStatus(mServer, status);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in updateDeviceStatus");

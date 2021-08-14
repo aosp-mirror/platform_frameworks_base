@@ -26,6 +26,9 @@
 #include <android_runtime/AndroidRuntime.h>
 #include "media/AudioEffect.h"
 
+#include <android/content/AttributionSourceState.h>
+#include <android_os_Parcel.h>
+
 #include <nativehelper/ScopedUtfChars.h>
 
 #include "android_media_AudioEffect.h"
@@ -270,7 +273,7 @@ static jint
 android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jstring type, jstring uuid, jint priority, jint sessionId,
         jint deviceType, jstring deviceAddress,
-        jintArray jId, jobjectArray javadesc, jstring opPackageName, jboolean probe)
+        jintArray jId, jobjectArray javadesc, jobject jAttributionSource, jboolean probe)
 {
     ALOGV("android_media_AudioEffect_native_setup");
     AudioEffectJniStorage* lpJniStorage = NULL;
@@ -282,8 +285,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     effect_descriptor_t desc;
     jobject jdesc;
     AudioDeviceTypeAddr device;
-
-    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    AttributionSourceState attributionSource;
+    Parcel* parcel = NULL;
 
     setAudioEffect(env, thiz, 0);
 
@@ -337,7 +340,9 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     }
 
     // create the native AudioEffect object
-    lpAudioEffect = new AudioEffect(String16(opPackageNameStr.c_str()));
+    parcel = parcelForJavaObject(env, jAttributionSource);
+    attributionSource.readFromParcel(parcel);
+    lpAudioEffect = new AudioEffect(attributionSource);
     if (lpAudioEffect == 0) {
         ALOGE("Error creating AudioEffect");
         goto setup_failure;
@@ -773,7 +778,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
 // Dalvik VM type signatures
 static const JNINativeMethod gMethods[] = {
     {"native_init",          "()V",      (void *)android_media_AudioEffect_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;IIILjava/lang/String;[I[Ljava/lang/Object;Ljava/lang/String;Z)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;IIILjava/lang/String;[I[Ljava/lang/Object;Landroid/os/Parcel;Z)I",
                                          (void *)android_media_AudioEffect_native_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioEffect_native_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioEffect_native_release},

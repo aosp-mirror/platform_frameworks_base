@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"বন্ধ করুন"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"বড় করুন"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"সেটিংস"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"ছবির-মধ্যে-ছবি তে <xliff:g id="NAME">%s</xliff:g> আছেন"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> কে এই বৈশিষ্ট্যটি ব্যবহার করতে দিতে না চাইলে ট্যাপ করে সেটিংসে গিয়ে সেটি বন্ধ করে দিন।"</string>
+    <string name="pip_play" msgid="3496151081459417097">"চালান"</string>
+    <string name="pip_pause" msgid="690688849510295232">"বিরাম দিন"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"এগিয়ে যাওয়ার জন্য এড়িয়ে যান"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"পিছনে যাওয়ার জন্য এড়িয়ে যান"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"রিসাইজ করুন"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"অ্যাপটি স্প্লিট স্ক্রিনে কাজ নাও করতে পারে।"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রিন সমর্থন করে না৷"</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"সেকেন্ডারি ডিসপ্লেতে অ্যাপটি কাজ নাও করতে পারে।"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"সেকেন্ডারি ডিসপ্লেতে অ্যাপ লঞ্চ করা যাবে না।"</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"বিভক্ত-স্ক্রিন বিভাজক"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাঁ দিকের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"৭০% বাকি আছে"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"৫০% বাকি আছে"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"৩০% বাকি আছে"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"ডান দিকের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"উপর দিকের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ ৭০%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ ৫০%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ ৩০%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"নীচের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"\'এক হাতে ব্যবহার করার মোড\'-এর ব্যবহার"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বেরিয়ে আসার জন্য, স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন অথবা অ্যাপ আইকনের উপরে যেকোনও জায়গায় ট্যাপ করুন"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"\'এক হাতে ব্যবহার করার মোড\' শুরু করুন"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"\'এক হাতে ব্যবহার করার মোড\' থেকে বেরিয়ে আসুন"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ওভারফ্লো"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"স্ট্যাকে আবার যোগ করুন"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> অ্যাপ থেকে <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> অ্যাপ এবং আরও <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>টি থেকে <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"উপরে বাঁদিকে সরান"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"উপরে ডানদিকে সরান"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"নিচে বাঁদিকে সরান"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"নিচে ডান দিকে সরান"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> সেটিংস"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"বাবল খারিজ করুন"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"বাবল ব্যবহার করে চ্যাট করুন"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"এই অ্যাপ থেকে বাবল বন্ধ করতে \'ম্যানেজ করুন\' বিকল্প ট্যাপ করুন"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুঝেছি"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনও সাম্প্রতিক বাবল নেই"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন ও \'ফুল-স্ক্রিন\' মোড ব্যবহার করুন।"</string>
+    <string name="got_it" msgid="4428750913636945527">"বুঝেছি"</string>
+</resources>

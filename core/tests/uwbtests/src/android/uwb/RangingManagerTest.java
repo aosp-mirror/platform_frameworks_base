@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.AttributionSource;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 
@@ -45,14 +46,19 @@ public class RangingManagerTest {
     private static final Executor EXECUTOR = UwbTestUtils.getExecutor();
     private static final PersistableBundle PARAMS = new PersistableBundle();
     private static final @RangingChangeReason int REASON = RangingChangeReason.UNKNOWN;
+    private static final int UID = 343453;
+    private static final String PACKAGE_NAME = "com.uwb.test";
+    private static final AttributionSource ATTRIBUTION_SOURCE =
+            new AttributionSource.Builder(UID).setPackageName(PACKAGE_NAME).build();
 
     @Test
     public void testOpenSession_OpenRangingInvoked() throws RemoteException {
         IUwbAdapter adapter = mock(IUwbAdapter.class);
         RangingManager rangingManager = new RangingManager(adapter);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        verify(adapter, times(1)).openRanging(any(), eq(rangingManager), eq(PARAMS));
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), any(), any(), any());
     }
 
     @Test
@@ -74,12 +80,14 @@ public class RangingManagerTest {
                 ArgumentCaptor.forClass(SessionHandle.class);
 
         RangingManager rangingManager = new RangingManager(adapter);
-        rangingManager.openSession(PARAMS, EXECUTOR, callback1);
-        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
 
-        rangingManager.openSession(PARAMS, EXECUTOR, callback2);
-        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingOpened(sessionHandle1);
@@ -100,8 +108,9 @@ public class RangingManagerTest {
         ArgumentCaptor<SessionHandle> sessionHandleCaptor =
                 ArgumentCaptor.forClass(SessionHandle.class);
 
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle handle = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingOpened(handle);
@@ -145,12 +154,14 @@ public class RangingManagerTest {
         ArgumentCaptor<SessionHandle> sessionHandleCaptor =
                 ArgumentCaptor.forClass(SessionHandle.class);
 
-        rangingManager.openSession(PARAMS, EXECUTOR, callback1);
-        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
 
-        rangingManager.openSession(PARAMS, EXECUTOR, callback2);
-        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingClosed(sessionHandle1, REASON, PARAMS);
@@ -172,13 +183,15 @@ public class RangingManagerTest {
                 ArgumentCaptor.forClass(SessionHandle.class);
 
         RangingManager rangingManager = new RangingManager(adapter);
-        rangingManager.openSession(PARAMS, EXECUTOR, callback1);
-        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingStarted(sessionHandle1, PARAMS);
-        rangingManager.openSession(PARAMS, EXECUTOR, callback2);
-        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
         rangingManager.onRangingStarted(sessionHandle2, PARAMS);
 
@@ -224,16 +237,18 @@ public class RangingManagerTest {
         ArgumentCaptor<SessionHandle> sessionHandleCaptor =
                 ArgumentCaptor.forClass(SessionHandle.class);
 
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback);
+        verify(adapter, times(1)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         SessionHandle handle = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingOpenFailed(handle, reasonIn, PARAMS);
         verify(callback, times(1)).onOpenFailed(eq(reasonOut), eq(PARAMS));
 
         // Open a new session
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        rangingManager.openSession(ATTRIBUTION_SOURCE, PARAMS, EXECUTOR, callback);
+        verify(adapter, times(2)).openRanging(
+                eq(ATTRIBUTION_SOURCE), sessionHandleCaptor.capture(), any(), any());
         handle = sessionHandleCaptor.getValue();
         rangingManager.onRangingOpened(handle);
 

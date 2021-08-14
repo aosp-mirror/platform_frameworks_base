@@ -389,19 +389,36 @@ public class TarBackupReader {
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
             boolean allowApks, FileMetadata info, Signature[] signatures,
             PackageManagerInternal pmi, int userId) {
+        return chooseRestorePolicy(packageManager, allowApks, info, signatures, pmi, userId,
+                BackupEligibilityRules.forBackup(packageManager, pmi, userId));
+    }
+
+    /**
+     * Chooses restore policy.
+     *
+     * @param packageManager - PackageManager instance.
+     * @param allowApks - allow restore set to include apks.
+     * @param info - file metadata.
+     * @param signatures - array of signatures parsed from backup file.
+     * @param userId - ID of the user for which restore is performed.
+     * @param eligibilityRules - {@link BackupEligibilityRules} for this operation.
+     * @return a restore policy constant.
+     */
+    public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
+            boolean allowApks, FileMetadata info, Signature[] signatures,
+            PackageManagerInternal pmi, int userId, BackupEligibilityRules eligibilityRules) {
         if (signatures == null) {
             return RestorePolicy.IGNORE;
         }
 
         RestorePolicy policy = RestorePolicy.IGNORE;
-
         // Okay, got the manifest info we need...
         try {
             PackageInfo pkgInfo = packageManager.getPackageInfoAsUser(
                     info.packageName, PackageManager.GET_SIGNING_CERTIFICATES, userId);
             // Fall through to IGNORE if the app explicitly disallows backup
             final int flags = pkgInfo.applicationInfo.flags;
-            if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
+            if (eligibilityRules.isAppBackupAllowed(pkgInfo.applicationInfo)) {
                 // Restore system-uid-space packages only if they have
                 // defined a custom backup agent
                 if (!UserHandle.isCore(pkgInfo.applicationInfo.uid)
@@ -413,7 +430,7 @@ public class TarBackupReader {
                     // such packages are signed with the platform cert instead of
                     // the app developer's cert, so they're different on every
                     // device.
-                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo, pmi)) {
+                    if (eligibilityRules.signaturesMatch(signatures, pkgInfo)) {
                         if ((pkgInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                             Slog.i(TAG, "Package has restoreAnyVersion; taking data");

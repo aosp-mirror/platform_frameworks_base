@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -23,20 +28,25 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IDisplayWindowListener;
@@ -50,6 +60,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Tests for the {@link ActivityTaskManagerService} class.
@@ -60,40 +71,40 @@ import java.util.ArrayList;
 @Presubmit
 @MediumTest
 @RunWith(WindowTestRunner.class)
-public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
+public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
             ArgumentCaptor.forClass(ClientTransaction.class);
 
     @Before
     public void setUp() throws Exception {
-        setBooted(mService);
+        setBooted(mAtm);
     }
 
     /** Verify that activity is finished correctly upon request. */
     @Test
     public void testActivityFinish() {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
-                0 /* resultCode */, null /* resultData */,
+        assertTrue("Activity must be finished", mAtm.mActivityClientController.finishActivity(
+                activity.appToken, 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
         assertTrue(activity.finishing);
 
         assertTrue("Duplicate activity finish request must also return 'true'",
-                mService.finishActivity(activity.appToken, 0 /* resultCode */,
+                mAtm.mActivityClientController.finishActivity(activity.appToken, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
     }
 
     @Test
     public void testOnPictureInPictureRequested() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
-        doReturn(mockLifecycleManager).when(mService).getLifecycleManager();
+        doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
         final ClientTransaction transaction = mClientTransactionCaptor.getValue();
@@ -106,13 +117,13 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test(expected = IllegalStateException.class)
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         // Check enter no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -120,12 +131,12 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test(expected = IllegalStateException.class)
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
 
-        mService.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         // Check that no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -158,14 +169,14 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
             @Override
             public void onFixedRotationFinished(int displayId) {}
         };
-        mService.mWindowManager.registerDisplayWindowListener(listener);
+        mAtm.mWindowManager.registerDisplayWindowListener(listener);
         // Check that existing displays call added
-        assertEquals(1, added.size());
+        assertEquals(mRootWindowContainer.getChildCount(), added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());
         added.clear();
         // Check adding a display
-        DisplayContent newDisp1 = new TestDisplayContent.Builder(mService, 600, 800).build();
+        DisplayContent newDisp1 = new TestDisplayContent.Builder(mAtm, 600, 800).build();
         assertEquals(1, added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());
@@ -174,7 +185,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
         newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mService.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
+        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                 newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
                 false /* deferResume */);
         assertEquals(0, added.size());
@@ -214,13 +225,13 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         //mock other operations
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
-        doReturn(false).when(mService).isInPictureInPictureMode(any());
-        doReturn(false).when(mService).isKeyguardLocked();
+        doReturn(false).when(record).inPinnedWindowingMode();
+        doReturn(false).when(mAtm).isKeyguardLocked();
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mService.enterPictureInPictureMode(token, params);
+        mAtm.mActivityClientController.enterPictureInPictureMode(token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
 
         mockSession.finishMocking();
@@ -229,23 +240,238 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     @Test
     public void testResumeNextActivityOnCrashedAppDied() {
         mSupervisor.beginDeferResume();
-        final ActivityRecord homeActivity = new ActivityBuilder(mService)
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
                 .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
                 .build();
-        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.setState(Task.ActivityState.RESUMED, "test");
         mSupervisor.endDeferResume();
+
+        assertEquals(activity.app, mAtm.mInternal.getTopApp());
+
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
         activity.mVisibleRequested = false;
         activity.setVisible(false);
-        activity.getRootTask().mPausingActivity = activity;
-        homeActivity.setState(ActivityStack.ActivityState.PAUSED, "test");
+        activity.getTask().setPausingActivity(activity);
+        homeActivity.setState(Task.ActivityState.PAUSED, "test");
 
         // Even the visibility states are invisible, the next activity should be resumed because
         // the crashed activity was pausing.
-        mService.mInternal.handleAppDied(activity.app, false /* restarting */,
+        mAtm.mInternal.handleAppDied(activity.app, false /* restarting */,
                 null /* finishInstrumentationCallback */);
-        assertEquals(ActivityStack.ActivityState.RESUMED, homeActivity.getState());
+        assertEquals(Task.ActivityState.RESUMED, homeActivity.getState());
+        assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
+    }
+
+    @Test
+    public void testUpdateSleep() {
+        doCallRealMethod().when(mWm.mRoot).hasAwakeDisplay();
+        mSupervisor.mGoingToSleepWakeLock = mock(PowerManager.WakeLock.class);
+        final Task rootHomeTask = mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm).setTask(rootHomeTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        topActivity.setState(Task.ActivityState.RESUMED, "test");
+
+        final Consumer<ActivityRecord> assertTopNonSleeping = activity -> {
+            assertFalse(mAtm.mInternal.isSleeping());
+            assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
+            assertEquals(activity.app, mAtm.mInternal.getTopApp());
+        };
+        assertTopNonSleeping.accept(topActivity);
+
+        // Sleep all displays.
+        mWm.mRoot.forAllDisplays(display -> doReturn(true).when(display).shouldSleep());
+        mAtm.updateSleepIfNeededLocked();
+        // Simulate holding sleep wake lock if it is acquired.
+        verify(mSupervisor.mGoingToSleepWakeLock).acquire();
+        doReturn(true).when(mSupervisor.mGoingToSleepWakeLock).isHeld();
+
+        assertEquals(Task.ActivityState.PAUSING, topActivity.getState());
+        assertTrue(mAtm.mInternal.isSleeping());
+        assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
+                mAtm.mInternal.getTopProcessState());
+        // The top app should not change while sleeping.
+        assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
+
+        // If all activities are stopped, the sleep wake lock must be released.
+        final Task topRootTask = topActivity.getRootTask();
+        doReturn(true).when(rootHomeTask).goToSleepIfPossible(anyBoolean());
+        doReturn(true).when(topRootTask).goToSleepIfPossible(anyBoolean());
+        topActivity.setState(Task.ActivityState.STOPPING, "test");
+        topActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
+                null /* description */);
+        verify(mSupervisor.mGoingToSleepWakeLock).release();
+
+        // Move the current top to back, the top app should update to the next activity.
+        topRootTask.moveToBack("test", null /* self */);
+        assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
+
+        // Wake all displays.
+        mWm.mRoot.forAllDisplays(display -> doReturn(false).when(display).shouldSleep());
+        mAtm.updateSleepIfNeededLocked();
+
+        assertTopNonSleeping.accept(homeActivity);
+    }
+
+    @Test
+    public void testSupportsMultiWindow_resizable() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_nonResizable() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+
+        // Device config as not support.
+        mAtm.mSupportsNonResizableMultiWindow = -1;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        // Device config as always support.
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+
+        // The default config is relying on the screen size.
+        mAtm.mSupportsNonResizableMultiWindow = 0;
+
+        // Supports on large screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+
+        // Not supports on small screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_activityMinWidthHeight_largerThanSupport() {
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        // This is larger than the min dimensions device support in multi window,
+                        // the activity will not be supported in multi window if the device respects
+                        /* minWidth= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density),
+                        /* minHeight= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density));
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+
+        // Ignore the activity min width/height for determine multi window eligibility.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+
+        // Always check the activity min width/height.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = 1;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        // The default config is relying on the screen size.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = 0;
+
+        // Ignore on large screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+
+        // Check on small screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_landscape_checkActivityMinWidth() {
+        // This is smaller than the min dimensions device support in multi window,
+        // the activity will be supported in multi window
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final int supportedWidth = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
+                * mAtm.mMinPercentageMultiWindowSupportWidth * density);
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        /* minWidth= */ supportedWidth,
+                        /* minHeight= */ 0);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().screenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        tda.getConfiguration().screenWidthDp = (int) Math.ceil(
+                mAtm.mLargeScreenSmallestScreenWidthDp
+                        / mAtm.mMinPercentageMultiWindowSupportWidth);
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_portrait_checkActivityMinHeight() {
+        // This is smaller than the min dimensions device support in multi window,
+        // the activity will be supported in multi window
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final int supportedHeight = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
+                * mAtm.mMinPercentageMultiWindowSupportHeight * density);
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        /* minWidth= */ 0,
+                        /* minHeight= */ supportedHeight);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().screenHeightDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().orientation = ORIENTATION_PORTRAIT;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        tda.getConfiguration().screenHeightDp = (int) Math.ceil(
+                mAtm.mLargeScreenSmallestScreenWidthDp
+                        / mAtm.mMinPercentageMultiWindowSupportHeight);
+
+        assertTrue(activity.supportsMultiWindow());
+        assertTrue(task.supportsMultiWindow());
     }
 }
 

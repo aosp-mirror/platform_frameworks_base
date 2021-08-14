@@ -17,5 +17,5 @@
 <permissions>
     <privapp-permissions package="com.android.car.activityresolver">
         <permission name="android.permission.MANAGE_USERS"/>
-      </privapp-permissions>
+    </privapp-permissions>
 </permissions>

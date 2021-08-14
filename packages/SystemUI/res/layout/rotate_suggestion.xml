@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.policy.KeyButtonView
+<com.android.systemui.navigationbar.buttons.KeyButtonView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rotate_suggestion"
     android:layout_width="match_parent"

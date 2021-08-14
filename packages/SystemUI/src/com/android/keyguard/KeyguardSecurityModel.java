@@ -18,22 +18,22 @@ package com.android.keyguard;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.admin.DevicePolicyManager;
-import android.content.Context;
+import android.content.res.Resources;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+@SysUISingleton
 public class KeyguardSecurityModel {
 
     /**
      * The different types of security available.
-     * @see KeyguardSecurityContainer#showSecurityScreen
+     * @see KeyguardSecurityContainerController#showSecurityScreen
      */
     public enum SecurityMode {
         Invalid, // NULL state
@@ -45,33 +45,30 @@ public class KeyguardSecurityModel {
         SimPuk // Unlock by entering a sim puk
     }
 
-    private final Context mContext;
     private final boolean mIsPukScreenAvailable;
 
-    private LockPatternUtils mLockPatternUtils;
+    private final LockPatternUtils mLockPatternUtils;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Inject
-    KeyguardSecurityModel(Context context) {
-        mContext = context;
-        mLockPatternUtils = new LockPatternUtils(context);
-        mIsPukScreenAvailable = mContext.getResources().getBoolean(
+    KeyguardSecurityModel(@Main Resources resources, LockPatternUtils lockPatternUtils,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+        mIsPukScreenAvailable = resources.getBoolean(
                 com.android.internal.R.bool.config_enable_puk_unlock_screen);
-    }
-
-    void setLockPatternUtils(LockPatternUtils utils) {
-        mLockPatternUtils = utils;
+        mLockPatternUtils = lockPatternUtils;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }
 
     public SecurityMode getSecurityMode(int userId) {
-        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
+                mKeyguardUpdateMonitor.getNextSubIdForState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
             return SecurityMode.SimPuk;
         }
 
         if (SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
+                mKeyguardUpdateMonitor.getNextSubIdForState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
             return SecurityMode.SimPin;
         }
 
@@ -96,5 +93,14 @@ public class KeyguardSecurityModel {
             default:
                 throw new IllegalStateException("Unknown security quality:" + security);
         }
+    }
+
+    /**
+     * Returns whether the given security view should be used in a "one handed" way. This can be
+     * used to change how the security view is drawn (e.g. take up less of the screen, and align to
+     * one side).
+     */
+    public static boolean isSecurityViewOneHanded(SecurityMode securityMode) {
+        return securityMode == SecurityMode.Pattern || securityMode == SecurityMode.PIN;
     }
 }

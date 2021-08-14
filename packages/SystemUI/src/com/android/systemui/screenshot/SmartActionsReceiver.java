@@ -16,9 +16,10 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_TYPE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_TYPE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -26,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.util.Slog;
 
 import javax.inject.Inject;
 
@@ -48,7 +48,9 @@ public class SmartActionsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         PendingIntent pendingIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
         String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
-        Slog.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
+        }
         ActivityOptions opts = ActivityOptions.makeBasic();
 
         try {
@@ -58,6 +60,7 @@ public class SmartActionsReceiver extends BroadcastReceiver {
         }
 
         mScreenshotSmartActions.notifyScreenshotAction(
-                context, intent.getStringExtra(EXTRA_ID), actionType, true);
+                context, intent.getStringExtra(EXTRA_ID), actionType, true,
+                pendingIntent.getIntent());
     }
 }

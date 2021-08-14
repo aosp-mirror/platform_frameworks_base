@@ -33,6 +33,7 @@ license {
 
 android_app {
     name: "PrintRecommendationService",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     sdk_version: "system_current",
     static_libs: [

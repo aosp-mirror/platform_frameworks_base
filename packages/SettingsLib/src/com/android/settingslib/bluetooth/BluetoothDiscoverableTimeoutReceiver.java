@@ -38,7 +38,7 @@ public class BluetoothDiscoverableTimeoutReceiver extends BroadcastReceiver {
         Intent intent = new Intent(INTENT_DISCOVERABLE_TIMEOUT);
         intent.setClass(context, BluetoothDiscoverableTimeoutReceiver.class);
         PendingIntent pending = PendingIntent.getBroadcast(
-            context, 0, intent, 0);
+                context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager =
               (AlarmManager) context.getSystemService (Context.ALARM_SERVICE);
 
@@ -47,8 +47,7 @@ public class BluetoothDiscoverableTimeoutReceiver extends BroadcastReceiver {
             alarmManager.cancel(pending);
             Log.d(TAG, "setDiscoverableAlarm(): cancel prev alarm");
         }
-        pending = PendingIntent.getBroadcast(
-            context, 0, intent, 0);
+        pending = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, pending);
     }
@@ -59,7 +58,7 @@ public class BluetoothDiscoverableTimeoutReceiver extends BroadcastReceiver {
         Intent intent = new Intent(INTENT_DISCOVERABLE_TIMEOUT);
         intent.setClass(context, BluetoothDiscoverableTimeoutReceiver.class);
         PendingIntent pending = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+                context, 0, intent, PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
         if (pending != null) {
             // Cancel any previous alarms that do the same thing.
             AlarmManager alarmManager =

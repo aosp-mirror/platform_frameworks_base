@@ -18,6 +18,7 @@
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
+#include "Properties.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "private/hwui/WebViewFunctor.h"
@@ -27,9 +28,9 @@
 #include "DamageAccumulator.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #endif
+#include <gui/TraceUtils.h>
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <SkPathOps.h>
 #include <algorithm>
@@ -70,15 +71,17 @@ RenderNode::RenderNode()
 RenderNode::~RenderNode() {
     ImmediateRemoved observer(nullptr);
     deleteDisplayList(observer);
-    delete mStagingDisplayList;
     LOG_ALWAYS_FATAL_IF(hasLayer(), "layer missed detachment!");
 }
 
-void RenderNode::setStagingDisplayList(DisplayList* displayList) {
-    mValid = (displayList != nullptr);
+void RenderNode::setStagingDisplayList(DisplayList&& newData) {
+    mValid = newData.isValid();
     mNeedsDisplayListSync = true;
-    delete mStagingDisplayList;
-    mStagingDisplayList = displayList;
+    mStagingDisplayList = std::move(newData);
+}
+
+void RenderNode::discardStagingDisplayList() {
+    setStagingDisplayList(DisplayList());
 }
 
 /**
@@ -101,32 +104,22 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
 
     properties().debugOutputProperties(output, level + 1);
 
-    if (mDisplayList) {
-        mDisplayList->output(output, level);
-    }
+    mDisplayList.output(output, level);
     output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
     output << std::endl;
 }
 
 int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
-    if (mStagingDisplayList) {
-        size += mStagingDisplayList->getUsedSize();
-    }
-    if (mDisplayList && mDisplayList != mStagingDisplayList) {
-        size += mDisplayList->getUsedSize();
-    }
+    size += mStagingDisplayList.getUsedSize();
+    size += mDisplayList.getUsedSize();
     return size;
 }
 
 int RenderNode::getAllocatedSize() {
     int size = sizeof(RenderNode);
-    if (mStagingDisplayList) {
-        size += mStagingDisplayList->getAllocatedSize();
-    }
-    if (mDisplayList && mDisplayList != mStagingDisplayList) {
-        size += mDisplayList->getAllocatedSize();
-    }
+    size += mStagingDisplayList.getAllocatedSize();
+    size += mDisplayList.getAllocatedSize();
     return size;
 }
 
@@ -202,6 +195,9 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     SkRect dirty;
     info.damageAccumulator->peekAtDirty(&dirty);
     info.layerUpdateQueue->enqueueLayerWithDamage(this, dirty);
+    if (!dirty.isEmpty()) {
+      mStretchMask.markDirty();
+    }
 
     // There might be prefetched layers that need to be accounted for.
     // That might be us, so tell CanvasContext that this layer is in the
@@ -234,6 +230,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     if (!mProperties.getAllowForceDark()) {
         info.disableForceDark++;
     }
+    if (!mProperties.layerProperties().getStretchEffect().isEmpty()) {
+        info.stretchEffectCount++;
+    }
 
     uint32_t animatorDirtyMask = 0;
     if (CC_LIKELY(info.runAnimations)) {
@@ -242,9 +241,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
 
     bool willHaveFunctor = false;
     if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayList) {
-        willHaveFunctor = mStagingDisplayList->hasFunctor();
+        willHaveFunctor = mStagingDisplayList.hasFunctor();
     } else if (mDisplayList) {
-        willHaveFunctor = mDisplayList->hasFunctor();
+        willHaveFunctor = mDisplayList.hasFunctor();
     }
     bool childFunctorsNeedLayer =
             mProperties.prepareForFunctorPresence(willHaveFunctor, functorsNeedLayer);
@@ -259,21 +258,28 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     }
 
     if (mDisplayList) {
-        info.out.hasFunctors |= mDisplayList->hasFunctor();
-        bool isDirty = mDisplayList->prepareListAndChildren(
+        info.out.hasFunctors |= mDisplayList.hasFunctor();
+        mHasHolePunches = mDisplayList.hasHolePunches();
+        bool isDirty = mDisplayList.prepareListAndChildren(
                 observer, info, childFunctorsNeedLayer,
-                [](RenderNode* child, TreeObserver& observer, TreeInfo& info,
-                   bool functorsNeedLayer) {
+                [this](RenderNode* child, TreeObserver& observer, TreeInfo& info,
+                       bool functorsNeedLayer) {
                     child->prepareTreeImpl(observer, info, functorsNeedLayer);
+                    mHasHolePunches |= child->hasHolePunches();
                 });
         if (isDirty) {
             damageSelf(info);
         }
+    } else {
+        mHasHolePunches = false;
     }
     pushLayerUpdate(info);
 
     if (!mProperties.getAllowForceDark()) {
         info.disableForceDark--;
+    }
+    if (!mProperties.layerProperties().getStretchEffect().isEmpty()) {
+        info.stretchEffectCount--;
     }
     info.damageAccumulator->popTransform();
 }
@@ -300,6 +306,18 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
         damageSelf(info);
         info.damageAccumulator->popTransform();
         syncProperties();
+
+        auto& layerProperties = mProperties.layerProperties();
+        const StretchEffect& stagingStretch = layerProperties.getStretchEffect();
+        if (stagingStretch.isEmpty()) {
+            mStretchMask.clear();
+        }
+
+        if (layerProperties.getImageFilter() == nullptr) {
+            mSnapshotResult.snapshot = nullptr;
+            mTargetImageFilter = nullptr;
+        }
+
         // We could try to be clever and only re-damage if the matrix changed.
         // However, we don't need to worry about that. The cost of over-damaging
         // here is only going to be a single additional map rect of this node
@@ -310,20 +328,57 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     }
 }
 
+std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
+    GrRecordingContext* context,
+    const SkImageFilter* imageFilter,
+    const SkIRect& clipBounds
+) {
+    auto* layerSurface = getLayerSurface();
+    if (layerSurface == nullptr) {
+        return std::nullopt;
+    }
+
+    sk_sp<SkImage> snapshot = layerSurface->makeImageSnapshot();
+    const auto subset = SkIRect::MakeWH(properties().getWidth(),
+                                        properties().getHeight());
+    // If we don't have an ImageFilter just return the snapshot
+    if (imageFilter == nullptr) {
+        mSnapshotResult.snapshot = snapshot;
+        mSnapshotResult.outSubset = subset;
+        mSnapshotResult.outOffset = SkIPoint::Make(0.0f, 0.0f);
+        mImageFilterClipBounds = clipBounds;
+        mTargetImageFilter = nullptr;
+    } else if (mSnapshotResult.snapshot == nullptr ||
+        imageFilter != mTargetImageFilter.get() ||
+        mImageFilterClipBounds != clipBounds) {
+        // Otherwise create a new snapshot with the given filter and snapshot
+        mSnapshotResult.snapshot =
+                snapshot->makeWithFilter(context,
+                                         imageFilter,
+                                         subset,
+                                         clipBounds,
+                                         &mSnapshotResult.outSubset,
+                                         &mSnapshotResult.outOffset);
+        mTargetImageFilter = sk_ref_sp(imageFilter);
+        mImageFilterClipBounds = clipBounds;
+    }
+
+    return mSnapshotResult;
+}
+
 void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
-        mStagingDisplayList->updateChildren([](RenderNode* child) { child->incParentRefCount(); });
+        mStagingDisplayList.updateChildren([](RenderNode* child) { child->incParentRefCount(); });
     }
     deleteDisplayList(observer, info);
-    mDisplayList = mStagingDisplayList;
-    mStagingDisplayList = nullptr;
+    mDisplayList = std::move(mStagingDisplayList);
     if (mDisplayList) {
         WebViewSyncData syncData {
             .applyForceDark = info && !info->disableForceDark
         };
-        mDisplayList->syncContents(syncData);
+        mDisplayList.syncContents(syncData);
         handleForceDark(info);
     }
 }
@@ -333,15 +388,18 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         return;
     }
     auto usage = usageHint();
-    const auto& children = mDisplayList->mChildNodes;
-    if (mDisplayList->hasText()) {
+    FatVector<RenderNode*, 6> children;
+    mDisplayList.updateChildren([&children](RenderNode* node) {
+        children.push_back(node);
+    });
+    if (mDisplayList.hasText()) {
         usage = UsageHint::Foreground;
     }
     if (usage == UsageHint::Unknown) {
         if (children.size() > 1) {
             usage = UsageHint::Background;
         } else if (children.size() == 1 &&
-                children.front().getRenderNode()->usageHint() !=
+                children.front()->usageHint() !=
                         UsageHint::Background) {
             usage = UsageHint::Background;
         }
@@ -350,7 +408,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         // Crude overlap check
         SkRect drawn = SkRect::MakeEmpty();
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-            const auto& child = iter->getRenderNode();
+            const auto& child = *iter;
             // We use stagingProperties here because we haven't yet sync'd the children
             SkRect bounds = SkRect::MakeXYWH(child->stagingProperties().getX(), child->stagingProperties().getY(),
                     child->stagingProperties().getWidth(), child->stagingProperties().getHeight());
@@ -361,7 +419,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
             drawn.join(bounds);
         }
     }
-    mDisplayList->mDisplayList.applyColorTransform(
+    mDisplayList.applyColorTransform(
             usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
 }
 
@@ -378,20 +436,17 @@ void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo&
 
 void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
-        mDisplayList->updateChildren(
+        mDisplayList.updateChildren(
                 [&observer, info](RenderNode* child) { child->decParentRefCount(observer, info); });
-        if (!mDisplayList->reuseDisplayList(this, info ? &info->canvasContext : nullptr)) {
-            delete mDisplayList;
-        }
+        mDisplayList.clear(this);
     }
-    mDisplayList = nullptr;
 }
 
 void RenderNode::destroyHardwareResources(TreeInfo* info) {
     if (hasLayer()) {
         this->setLayerSurface(nullptr);
     }
-    setStagingDisplayList(nullptr);
+    discardStagingDisplayList();
 
     ImmediateRemoved observer(info);
     deleteDisplayList(observer, info);
@@ -401,8 +456,9 @@ void RenderNode::destroyLayers() {
     if (hasLayer()) {
         this->setLayerSurface(nullptr);
     }
+
     if (mDisplayList) {
-        mDisplayList->updateChildren([](RenderNode* child) { child->destroyLayers(); });
+        mDisplayList.updateChildren([](RenderNode* child) { child->destroyLayers(); });
     }
 }
 
@@ -418,6 +474,9 @@ void RenderNode::decParentRefCount(TreeObserver& observer, TreeInfo* info) {
 }
 
 void RenderNode::onRemovedFromTree(TreeInfo* info) {
+    if (Properties::enableWebViewOverlays && mDisplayList) {
+        mDisplayList.onRemovedFromTree();
+    }
     destroyHardwareResources(info);
 }
 
@@ -465,6 +524,14 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
 
                 matrix.multiply(true3dMat);
             }
+        }
+    }
+
+    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
+        const StretchEffect& stretch = properties().layerProperties().getStretchEffect();
+        if (!stretch.isEmpty()) {
+            matrix.multiply(
+                    stretch.makeLinearStretch(properties().getWidth(), properties().getHeight()));
         }
     }
 }

@@ -148,6 +148,9 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Skambinimas naudojant „Wi-Fi“"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Skambinimas naudojant mobiliojo ryšio tinklą"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Tik „Wi-Fi“"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> – atsarginis skambinimas"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neperadresuota"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
@@ -197,10 +200,15 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Šį įrenginį tvarko organizacija ir gali stebėti tinklo srautą. Palieskite, kad gautumėte daugiau informacijos."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Programos gali pasiekti jūsų vietovę"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Jei norite sužinoti daugiau, susisiekite su IT administratoriumi"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"Geografinių sričių stebėjimo paslauga"</string>
     <string name="country_detector" msgid="7023275114706088854">"Šalies detektorius"</string>
     <string name="location_service" msgid="2439187616018455546">"Vietovės paslauga"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS paslauga"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Jutiklių pranešimų paslauga"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Paslauga „Twilight“"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Laiko juostos aptikimo priemonė (nėra ryšio)"</string>
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS laiko atnaujinimo paslauga"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Muzikos atpažinimo tvarkyklės paslauga"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratoriaus programos negalima naudoti. Dabar įrenginio duomenys bus ištrinti.\n\nJei turite klausimų, susisiekite su organizacijos administratoriumi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Neleidžiama spausdinti (<xliff:g id="OWNER_APP">%s</xliff:g>)."</string>
@@ -291,6 +299,8 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB jungtis"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Programa paleista"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Programos, naudojančios akumuliatoriaus energiją"</string>
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Didinimas"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Pritaikomumo funkcijų naudojimas"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ naudoja akumuliatoriaus energiją"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Programų, naudojančių akumuliatoriaus energiją: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Palieskite ir sužinokite išsamios informacijos apie akumuliatoriaus bei duomenų naudojimą"</string>
@@ -315,6 +325,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"galimybė pasiekti fizinę veiklą"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparatas"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotografuoti ir filmuoti"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Įrenginiai netoliese"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"aptikti netoliese esančius įrenginius ir prisijungti prie jų"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Skambučių žurnalai"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"skaityti ir rašyti telefono skambučių žurnalą"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefonas"</string>
@@ -341,6 +353,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Leidžiama programai būti būsenos juosta."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"išskleisti / sutraukti būsenos juostą"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Leidžiama programai išskleisti arba sutraukti būsenos juostą."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"pateikti pranešimus kaip veiklą viso ekrano režimu užrakintame įrenginyje"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Leidžiama programai pateikti pranešimus kaip veiklą viso ekrano režimu užrakintame įrenginyje"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"įdiegti sparčiuosius klavišus"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Programai leidžiama pridėti sparčiuosius klavišus prie pagrindinio ekrano be naudotojo įsikišimo."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"pašalinti sparčiuosius klavišus"</string>
@@ -438,13 +452,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"keisti garso nustatymus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Leidžiama programai keisti visuotinius garso nustatymus, pvz., garsumą ir tai, kuris garsiakalbis naudojamas išvesčiai."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"įrašyti garsą"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Ši programa gali bet kada įrašyti garsą naudodama mikrofoną."</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Ši programa gali įrašyti garsą naudodama mikrofoną, kol programa naudojama."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"įrašyti garsą fone"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ši programa gali bet kada įrašyti garsą naudodama mikrofoną."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"siųsti komandas į SIM kortelę"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Programai leidžiama siųsti komandas į SIM kortelę. Tai labai pavojinga."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"atpažinti fizinę veiklą"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ši programa gali atpažinti jūsų fizinę veiklą."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotografuoti ir filmuoti"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Ši programa gali bet kada fotografuoti ir įrašyti vaizdo įrašų naudodama fotoaparatą."</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"Ši programa gali fotografuoti ir įrašyti vaizdo įrašų naudodama fotoaparatą, kol programa naudojama."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"fotografuoti ir įrašyti vaizdo įrašų fone"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Ši programa gali bet kada fotografuoti ir įrašyti vaizdo įrašų naudodama fotoaparatą."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Suteikti programai arba paslaugai prieigą prie sistemos fotoaparatų, kad būtų galima daryti nuotraukas ir įrašyti vaizdo įrašus"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ši privilegijuota arba sistemos programa gali daryti nuotraukas ir įrašyti vaizdo įrašus naudodama sistemos fotoaparatą bet kuriuo metu. Programai taip pat būtinas leidimas „android.permission.CAMERA“"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leisti programai ar paslaugai sulaukti atgalinio skambinimo, kai atidaromas ar uždaromas fotoaparatas."</string>
@@ -522,6 +540,14 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją planšetiniame kompiuteryje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Programai leidžiama peržiūrėti „Bluetooth“ konfigūraciją „Android TV“ įrenginyje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją telefone ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"„Bluetooth“ įr. netoliese aptikimas ir susiejimas"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Leidžiama programai aptikti ir susieti „Bluetooth“ įrenginius netoliese"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungimas prie susietų „Bluetooth“ įrenginių"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Leidžiama programai prisijungti prie susietų „Bluetooth“ įrenginių"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"reklamuoti netoliese es. „Bluetooth“ įrenginiuose"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Programai leidžiama reklamuoti netoliese esančiuose „Bluetooth“ įrenginiuose"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"nustatyti apyt. netoliese es. itin plataus dažnio juostos įreng. poziciją"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Leisti programai nustatyti apytikslę netoliese esančių itin plataus dažnio juostos įrenginių poziciją"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Pageidaujama ARL mokėjimo paslaugos informacija"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Programai leidžiama gauti pageidaujamą ARL mokamos paslaugos informaciją, pvz., užregistruotą pagalbą ir maršrutų tikslus."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"valdyti artimo lauko perdavimą (angl. „Near Field Communication“)"</string>
@@ -544,24 +570,34 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Programai leidžiama keisti nuotraukų kolekciją."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"skaityti vietoves iš medijos kolekcijos"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Programai leidžiama skaityti vietoves iš medijos kolekcijos."</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Naudoti biometrinius duomenis"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Naudoti biometrinius duomenis arba ekrano užraktą"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Patvirtinkite, kad tai jūs"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Norėdami tęsti, naudokite biometrinius duomenis"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Jei norite tęsti, naudokite biometrinius duomenis arba ekrano užraktą"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrinė aparatinė įranga nepasiekiama"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikavimas atšauktas"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Neatpažinta"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikavimas atšauktas"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenustatytas PIN kodas, atrakinimo piešinys arba slaptažodis"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Aptiktas dalinis piršto antspaudas. Bandykite dar kartą."</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Aptiktas dalinis kontrolinis kodas"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Piršto antspaudo jutiklis purvinas. Nuvalykite ir bandykite dar kartą."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Per greitai judinate pirštą. Bandykite dar kartą."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Nuvalykite jutiklį"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Per greitai patraukėte pirštą"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Per lėtai judinate pirštą. Bandykite dar kartą."</string>
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pabandykite kitą kontrolinį kodą"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Per šviesu"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Pabandykite koreguoti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Piršto antspaudas autentifikuotas"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Veidas autentifikuotas"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Piršto antspaudo aparatinė įranga nepasiekiama."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Negalima išsaugoti piršto antspaudo. Pašalinkite esamą piršto antspaudą."</string>
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nepavyko nustatyti kontrolinio kodo"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Baigėsi piršto antspaudo nustatymo skirtasis laikas. Bandykite dar kartą."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Piršto antspaudo operacija atšaukta."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Piršto antspaudo operaciją atšaukė naudotojas."</string>
@@ -572,6 +608,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Šiame įrenginyje nėra kontrolinio kodo jutiklio."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Jutiklis laikinai išjungtas."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> pirštas"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Naudoti kontrolinį kodą"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Naudoti kontrolinį kodą arba ekrano užraktą"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Naudokite kontrolinį kodą, kad galėtumėte tęsti"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Jei norite tęsti, naudokite kontrolinį kodą arba ekrano užraktą"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Piršto antspaudo piktograma"</string>
@@ -582,6 +622,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Atrakinimas pagal veidą"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Pakartotinis veido registravimas"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Kad patobulintumėte atpažinimą, iš naujo užregistruokite veidą"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Atrakinimo pagal veidą nustatymas"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Atrakinkite telefoną pažiūrėję į jį"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Daugiau atrakinimo metodų nustatymas"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Palieskite, kad pridėtumėte kontrolinį kodą"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Neužfiks. tikslūs veido duom. Bandykite dar kartą."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Per šviesu. Išbandykite mažesnį apšvietimą."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Per tamsu. Išbandykite šviesesnį apšvietimą."</string>
@@ -598,7 +642,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Nebegalima atpažinti veido. Bandykite dar kartą."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Per daug panašu, pakeiskite veido išraišką."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Nesukite tiek galvos."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Nesukite tiek galvos."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Pakreipkite galvą šiek tiek mažiau."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Nesukite tiek galvos."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Patraukite viską, kas užstoja jūsų veidą."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Išvalykite ekrano viršų, įskaitant juodą juostą"</string>
@@ -616,6 +660,10 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Atrakinimas pagal veidą šiame įrenginyje nepalaikomas."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Jutiklis laikinai išjungtas."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> veidas"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Naudoti atrakinimą pagal veidą"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Naudoti atrakinimą pagal veidą arba ekrano užraktą"</string>
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Jei norite tęsti, naudokite atpažinimą pagal veidą"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jei norite tęsti, naudokite veido atpažinimo funkciją arba ekrano užraktą"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Veido pkt."</string>
@@ -677,6 +725,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leidžiama programai skaityti ir rašyti „Do Not Disturb“ konfigūraciją."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pradėti peržiūrėti leidimo naudojimą"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leidžia savininkui pradėti naudoti programos leidimą. Įprastoms programoms to neturėtų prireikti."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pasiekti jutiklių duomenis dideliu skaitmeninimo dažniu"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Programai leidžiama skaitmeninti jutiklių duomenis didesniu nei 200 Hz dažniu"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Valdykite, kokio ilgio ekrano užrakto slaptažodžius ir PIN kodus galima naudoti."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Stebėti bandymus atrakinti ekraną"</string>
@@ -977,6 +1027,11 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Neturite leidimo atidaryti šį puslapį."</string>
     <string name="text_copied" msgid="2531420577879738860">"Tekstas nukopijuotas į iškarpinę."</string>
     <string name="copied" msgid="4675902854553014676">"Nukopijuota"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijuota iš „<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>“"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijuota iš iškarpinės"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijavo jūsų nukopijuotą tekstą"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijavo jūsų nukopijuotą vaizdą"</string>
+    <string name="pasted_content" msgid="646276353060777131">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijavo jūsų nukopijuotą turinį"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Daugiau"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Meniu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"„Meta“ +"</string>
@@ -1164,6 +1219,8 @@
     <string name="capital_off" msgid="7443704171014626777">"IŠJ."</string>
     <string name="checked" msgid="9179896827054513119">"pažymėta"</string>
     <string name="not_checked" msgid="7972320087569023342">"nepažymėta"</string>
+    <string name="selected" msgid="6614607926197755875">"pasirinkta"</string>
+    <string name="not_selected" msgid="410652016565864475">"nepasirinkta"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Užbaigti veiksmą naudojant"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Užbaigti veiksmą naudojant %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Užbaigti veiksmą"</string>
@@ -1507,9 +1564,6 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Užklausą pateikė <xliff:g id="NAME">%1$s</xliff:g> („<xliff:g id="SERVICE">%2$s</xliff:g>“)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Taip"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
-    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Pasiekta kritinės padėties vietovės inf."</string>
-    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Įrenginio gamintojas pasiekė jūsų vietovės duomenis per naujausią kritinės padėties seansą"</string>
-    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Operatorius pasiekė jūsų vietovės duomenis per naujausią kritinės padėties seansą"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Viršytas ištrynimo apribojimas"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Yra <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ištr. element., skirt. <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, „<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>“ pask. Ką norite daryti?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ištrinti elementus"</string>
@@ -1671,10 +1725,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kai spartusis klavišas įjungtas, paspaudus abu garsumo mygtukus ir palaikius 3 sekundes bus įjungta pritaikymo neįgaliesiems funkcija."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Įjungti pritaikymo neįgaliesiems funkcijas?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Įjungti pritaikymo neįgaliesiems funkcijų spartųjį klavišą?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiamos pritaikymo neįgaliesiems funkcijos. Tai gali pakeisti įrenginio veikimą.\n\nDabartinės funkcijos:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPasirinktas funkcijas galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Įjungti „<xliff:g id="SERVICE">%1$s</xliff:g>“?"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Įjungti „<xliff:g id="SERVICE">%1$s</xliff:g>“ spartųjį klavišą?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiama pritaikymo neįgaliesiems funkcija „<xliff:g id="SERVICE">%1$s</xliff:g>“. Tai gali pakeisti įrenginio veikimą.\n\nGalite pakeisti šį spartųjį klavišą į kitą funkciją skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Įjungti"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Neįjungti"</string>
@@ -1699,6 +1753,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų taisymas"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ įjungta."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ išjungta."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Jei norite naudoti „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“, paspauskite abu garsumo klavišus ir palaikykite tris sekundes"</string>
@@ -1855,8 +1910,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ištrynė administratorius"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Gerai"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Kad akumuliatorius veiktų ilgiau, Akumuliatoriaus tausojimo priemonė:\n\n• įjungia tamsiąją temą;\n• išjungia arba apriboja veiklą fone, kai kuriuos vaizdinius efektus ir kitas funkcijas, pvz., „Ok Google“.\n\n"<annotation id="url">"Sužinokite daugiau"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Kad akumuliatorius veiktų ilgiau, Akumuliatoriaus tausojimo priemonė:\n\n• įjungia tamsiąją temą;\n• išjungia arba apriboja veiklą fone, kai kuriuos vaizdinius efektus ir kitas funkcijas, pvz., „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Akumuliatoriaus tausojimo priemonė įjungia tamsiąją temą ir apriboja arba išjungia veiklą fone, kai kuriuos vaizdinius efektus bei tam tikras funkcijas.\n\n"<annotation id="url">"Sužinokite daugiau"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Akumuliatoriaus tausojimo priemonė įjungia tamsiąją temą ir apriboja arba išjungia veiklą fone, kai kuriuos vaizdinius efektus bei tam tikras funkcijas."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Įj. Duomenų taupymo priemonę?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Įjungti"</string>
@@ -1908,6 +1963,7 @@
       <item quantity="many">%d val.</item>
       <item quantity="other">%d val.</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kitas signalas)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kol išjungsite"</string>
@@ -1931,8 +1987,10 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS užklausa pakeista į vaizdo skambutį"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS užklausa pakeista į USSD užklausą"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Pakeista į naują SS užklausą"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Įspėjimas apie sukčiavimą"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Darbo profilis"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Įspėjimas išsiųstas"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Patvirtinta"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Išskleisti"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Sutraukti"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"perjungti išskleidimą"</string>
@@ -1944,6 +2002,13 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Padidinti"</string>
     <string name="close_button_text" msgid="10603510034455258">"Uždaryti"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Atsakyti"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vaizdo įrašas"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Atmesti"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Baigti pok."</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gaunamasis skambutis"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Vykstantis skambutis"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Gaunamojo skambučio tikrinimas"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
       <item quantity="few">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
@@ -2000,6 +2065,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Naujienos ir žurnalai"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Žemėlapiai ir navigacija"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produktyvumas"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Pritaikomumas"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Įrenginio saugykla"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB derinimas"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"valanda"</string>
@@ -2080,6 +2146,22 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparatas"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofonas"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"rodo virš kitų programų jūsų ekrane"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Pateikti atsiliepimą"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Šio pranešimo svarba padidinta iki numatytojo lygio. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šio pranešimo svarba sumažinta iki begarsio lygio. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šio pranešimo svarba padidinta. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šio pranešimo svarba sumažinta. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Sužinokite daugiau"</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Veiksmų sekos režimo informacijos pranešimas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumuliatoriaus energija gali išsekti prieš įprastą įkrovimą"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akumuliatoriaus tausojimo priemonė suaktyvinta, kad akumuliatorius veiktų ilgiau"</string>
@@ -2128,6 +2210,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Ekrano pritaikomumo šaukinys"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Ekrano pritaikomumo šaukinių parinkiklis"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Pritaikomumo šaukinys"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Atsisakyti pranešimų skydelio"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Programos „<xliff:g id="APP_NAME">%1$s</xliff:g>“ antraštės juosta."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"„<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>“ įkeltas į grupę APRIBOTA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2135,24 +2218,23 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pokalbis"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupės pokalbis"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninis"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninė"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darbo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Asmeninė peržiūra"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Darbo peržiūra"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Negalima bendrinti su darbo programomis"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT administratorius neleidžia bendrinti šio turinio naudojant programas jūsų darbo profilyje"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Negalima atidaryti naudojant darbo programas"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT administratorius neleidžia atidaryti šio turinio naudojant programas jūsų darbo profilyje"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Negalima bendrinti su asmeninėmis programomis"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT administratorius neleidžia bendrinti šio turinio naudojant programas jūsų asmeniniame profilyje"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Negalima atidaryti naudojant asmenines programas"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT administratorius neleidžia atidaryti šio turinio naudojant programas jūsų asmeniniame profilyje"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Užblokavo jūsų IT administratorius"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Šio turinio negalima bendrinti su darbo programomis"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Šio turinio negalima atidaryti naudojant darbo programas"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Šio turinio negalima bendrinti su asmeninėmis programomis"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Šio turinio negalima atidaryti naudojant asmenines programas"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Darbo profilis pristabdytas"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Įjungti"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Jokios darbo programos nepalaiko šio turinio"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Jokiose darbo programose negalima atidaryti šio turinio"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Jokios asmeninės programos nepalaiko šio turinio"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Jokiose asmeninėse programose negalima atidaryti šio turinio"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Paliesti, norint įjungti"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nėra darbo programų"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nėra asmeninių programų"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Atidaryti programoje „<xliff:g id="APP">%s</xliff:g>“ asmeniniame profilyje?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Atidaryti programoje „<xliff:g id="APP">%s</xliff:g>“ darbo profilyje?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Naudoti asmeninę naršyklę"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Naudoti darbo naršyklę"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM tinklo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM tinklo poaibio operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM bendrojo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
@@ -2265,4 +2347,17 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nauji didinimo nustatymai"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Dabar galite padidinti dalį ekrano"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Įjungti nustatymuose"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Atmesti"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Panaikinkite įrenginio mikrofono blokavimą"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Panaikinkite įrenginio fotoaparato blokavimą"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ir visoms programoms bei paslaugoms"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Panaikinti blokavimą"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Jutiklių privatumas"</string>
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Programos piktograma"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Programos prekės ženklo vaizdas"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Patikrinkite prieigos nustatymus"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"„<xliff:g id="SERVICE_NAME">%s</xliff:g>“ gali peržiūrėti ir valdyti jūsų ekraną. Palieskite ir peržiūrėkite."</string>
 </resources>

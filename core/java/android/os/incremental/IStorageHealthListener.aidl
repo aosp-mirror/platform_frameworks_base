@@ -26,8 +26,8 @@ oneway interface IStorageHealthListener {
     /** There are reads pending for params.blockedTimeoutMs, waiting till
     *   params.unhealthyTimeoutMs to confirm unhealthy state. */
     const int HEALTH_STATUS_BLOCKED = 2;
-    /** There are reads pending for params.unhealthyTimeoutMs>,
-    *   marking storage as unhealthy. */
+    /** There are reads pending for params.unhealthyTimeoutMs,
+    *   marking storage as unhealthy due to unknown issues. */
     const int HEALTH_STATUS_UNHEALTHY = 3;
 
     /** Health status callback. */

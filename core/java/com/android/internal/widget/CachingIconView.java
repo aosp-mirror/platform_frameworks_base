@@ -16,12 +16,15 @@
 
 package com.android.internal.widget;
 
+import static com.android.internal.widget.ColoredIconHelper.applyGrayTint;
+
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -49,6 +52,7 @@ public class CachingIconView extends ImageView {
     private Consumer<Integer> mOnVisibilityChangedListener;
     private Consumer<Boolean> mOnForceHiddenChangedListener;
     private int mIconColor;
+    private int mBackgroundColor;
     private boolean mWillBeForceHidden;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -231,9 +235,57 @@ public class CachingIconView extends ImageView {
         return mForceHidden;
     }
 
+    /**
+     * Provides the notification's background color to the icon.  This is only used when the icon
+     * is "inverted".  This should be called before calling {@link #setOriginalIconColor(int)}.
+     */
+    @RemotableViewMethod
+    public void setBackgroundColor(int color) {
+        mBackgroundColor = color;
+    }
+
+    /**
+     * Sets the icon color. If COLOR_INVALID is set, the icon's color filter will
+     * not be altered. If there is a background drawable, this method uses the value from
+     * {@link #setBackgroundColor(int)} which must have been already called.
+     */
     @RemotableViewMethod
     public void setOriginalIconColor(int color) {
         mIconColor = color;
+        Drawable background = getBackground();
+        Drawable icon = getDrawable();
+        boolean hasColor = color != ColoredIconHelper.COLOR_INVALID;
+        if (background == null) {
+            // This is the pre-S style -- colored icon with no background.
+            if (hasColor && icon != null) {
+                icon.mutate().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            }
+        } else {
+            // When there is a background drawable, color it with the foreground color and
+            // colorize the icon itself with the background color, creating an inverted effect.
+            if (hasColor) {
+                background.mutate().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                if (icon != null) {
+                    icon.mutate().setColorFilter(mBackgroundColor, PorterDuff.Mode.SRC_ATOP);
+                }
+            } else {
+                background.mutate().setColorFilter(mBackgroundColor, PorterDuff.Mode.SRC_ATOP);
+            }
+        }
+    }
+
+    /**
+     * Set the icon's color filter: to gray if true, otherwise colored.
+     * If this icon has no original color, this has no effect.
+     */
+    public void setGrayedOut(boolean grayedOut) {
+        // If there is a background drawable, then it has the foreground color and the image
+        // drawable has the background color, creating an inverted efffect.
+        Drawable drawable = getBackground();
+        if (drawable == null) {
+            drawable = getDrawable();
+        }
+        applyGrayTint(mContext, drawable, grayedOut, mIconColor);
     }
 
     public int getOriginalIconColor() {

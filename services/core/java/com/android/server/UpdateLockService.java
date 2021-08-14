@@ -74,7 +74,7 @@ public class UpdateLockService extends IUpdateLock.Stub {
 
     void sendLockChangedBroadcast(boolean state) {
         // Safe early during boot because this broadcast only goes to registered receivers.
-        long oldIdent = Binder.clearCallingIdentity();
+        final long oldIdent = Binder.clearCallingIdentity();
         try {
             Intent intent = new Intent(UpdateLock.UPDATE_LOCK_CHANGED)
                     .putExtra(UpdateLock.NOW_IS_CONVENIENT, state)

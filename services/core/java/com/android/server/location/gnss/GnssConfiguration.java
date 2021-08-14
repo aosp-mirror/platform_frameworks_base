@@ -31,7 +31,7 @@ import libcore.io.IoUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.Properties;
  * Instances of this class are not thread-safe and should either be used from a single thread
  * or with external synchronization when used by multiple threads.
  */
-class GnssConfiguration {
+public class GnssConfiguration {
     private static final String TAG = "GnssConfiguration";
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -93,13 +93,13 @@ class GnssConfiguration {
     /**
      * Properties loaded from PROPERTIES_FILE.
      */
-    private Properties mProperties;
+    private final Properties mProperties;
 
     private int mEsExtensionSec = 0;
 
     private final Context mContext;
 
-    GnssConfiguration(Context context) {
+    public GnssConfiguration(Context context) {
         mContext = context;
         mProperties = new Properties();
     }
@@ -115,7 +115,7 @@ class GnssConfiguration {
      * Returns the value of config parameter ES_EXTENSION_SEC. The value is range checked
      * and constrained to min/max limits.
      */
-    int getEsExtensionSec() {
+    public int getEsExtensionSec() {
         return mEsExtensionSec;
     }
 
@@ -163,8 +163,8 @@ class GnssConfiguration {
      * Returns the value of config parameter SUPL_ES or {@code defaultSuplEs} if no value is
      * provided or if there is an error parsing the configured value.
      */
-    int getSuplEs(int defaulSuplEs) {
-        return getIntConfig(CONFIG_SUPL_ES, defaulSuplEs);
+    public int getSuplEs(int defaultSuplEs) {
+        return getIntConfig(CONFIG_SUPL_ES, defaultSuplEs);
     }
 
     /**
@@ -176,34 +176,28 @@ class GnssConfiguration {
     }
 
     /**
-     * Returns the list of proxy apps from the value of config parameter NFW_PROXY_APPS or
-     * {@Collections.EMPTY_LIST} if no value is provided.
+     * Returns the list of proxy apps from the value of config parameter NFW_PROXY_APPS.
      */
     List<String> getProxyApps() {
         // Space separated list of Android proxy app package names.
         String proxyAppsStr = mProperties.getProperty(CONFIG_NFW_PROXY_APPS);
         if (TextUtils.isEmpty(proxyAppsStr)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         String[] proxyAppsArray = proxyAppsStr.trim().split("\\s+");
         if (proxyAppsArray.length == 0) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
-        ArrayList proxyApps = new ArrayList(proxyAppsArray.length);
-        for (String proxyApp : proxyAppsArray) {
-            proxyApps.add(proxyApp);
-        }
-
-        return proxyApps;
+        return Arrays.asList(proxyAppsArray);
     }
 
     /**
      * Updates the GNSS HAL satellite denylist.
      */
-    void setSatelliteBlacklist(int[] constellations, int[] svids) {
-        native_set_satellite_blacklist(constellations, svids);
+    void setSatelliteBlocklist(int[] constellations, int[] svids) {
+        native_set_satellite_blocklist(constellations, svids);
     }
 
     HalInterfaceVersion getHalInterfaceVersion() {
@@ -227,11 +221,11 @@ class GnssConfiguration {
             // override default value of this if lpp_prof is not empty
             mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
         }
+
         /*
          * Overlay carrier properties from a debug configuration file.
          */
         loadPropertiesFromGpsDebugConfig(mProperties);
-
         mEsExtensionSec = getRangeCheckedConfigEsExtensionSec();
 
         logConfigurations();
@@ -315,7 +309,7 @@ class GnssConfiguration {
 
         int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
         PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(ddSubId)
-                ? configManager.getConfigForSubId(ddSubId) : null;
+                ? configManager.getConfigForSubId(ddSubId) : configManager.getConfig();
         if (configs == null) {
             if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
             configs = CarrierConfigManager.getDefaultConfig();
@@ -414,7 +408,7 @@ class GnssConfiguration {
 
     private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
 
-    private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
+    private static native boolean native_set_satellite_blocklist(int[] constellations, int[] svIds);
 
     private static native boolean native_set_es_extension_sec(int emergencyExtensionSeconds);
 }

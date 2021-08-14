@@ -28,7 +28,7 @@ android_test {
     test_suites: ["device-tests"],
 }
 
-java_test {
+java_library {
     name: "flickertestapplib",
     sdk_version: "current",
     srcs: ["src/com/android/server/wm/flicker/testapp/ActivityOptions.java"],

@@ -42,6 +42,8 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
+import com.android.internal.util.XmlUtils;
+
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -1189,7 +1191,25 @@ class HtmlToSpannedConverter implements ContentHandler {
                 return i;
             }
         }
-        return Color.getHtmlColor(color);
+
+        // If |color| is the name of a color, pass it to Color to convert it. Otherwise,
+        // it may start with "#", "0", "0x", "+", or a digit. All of these cases are
+        // handled below by XmlUtils. (Note that parseColor accepts colors starting
+        // with "#", but it treats them differently from XmlUtils.)
+        if (Character.isLetter(color.charAt(0))) {
+            try {
+                return Color.parseColor(color);
+            } catch (IllegalArgumentException e) {
+                return -1;
+            }
+        }
+
+        try {
+            return XmlUtils.convertValueToInt(color, -1);
+        } catch (NumberFormatException nfe) {
+            return -1;
+        }
+
     }
 
     public void setDocumentLocator(Locator locator) {

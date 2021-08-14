@@ -30,7 +30,7 @@ import java.util.Map;
 interface IUsageStatsManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
-            String callingPackage);
+            String callingPackage, int userId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
@@ -65,6 +65,8 @@ interface IUsageStatsManager {
     void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,
             String callingPackage);
     void reportUsageStop(in IBinder activity, String token, String callingPackage);
+    void reportUserInteraction(String packageName, int userId);
     int getUsageSource();
     void forceUsageSourceSettingRead();
+    long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
 }

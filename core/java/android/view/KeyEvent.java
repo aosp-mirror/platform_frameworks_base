@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
@@ -519,8 +520,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Settings key.
      * Starts the system settings activity. */
     public static final int KEYCODE_SETTINGS        = 176;
-    /** Key code constant: TV power key.
-     * On TV remotes, toggles the power on a television screen. */
+    /**
+     * Key code constant: TV power key.
+     * On HDMI TV panel devices and Android TV devices that don't support HDMI, toggles the power
+     * state of the device.
+     * On HDMI source devices, toggles the power state of the HDMI-connected TV via HDMI-CEC and
+     * makes the source device follow this power state.
+     */
     public static final int KEYCODE_TV_POWER        = 177;
     /** Key code constant: TV input key.
      * On TV remotes, switches the input on a television screen. */
@@ -1217,6 +1223,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int FLAG_FALLBACK = 0x400;
 
     /**
+     * This flag indicates that this event was modified by or generated from an accessibility
+     * service. Value = 0x800
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_IS_ACCESSIBILITY_EVENT = INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
+
+    /**
      * Signifies that the key is being predispatched.
      * @hide
      */
@@ -1908,8 +1922,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /**
      * Returns whether this key will be sent to the
      * {@link android.media.session.MediaSession.Callback} if not handled.
-     *
-     * @hide
      */
     public static final boolean isMediaSessionKey(int keyCode) {
         switch (keyCode) {

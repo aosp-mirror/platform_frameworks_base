@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -53,22 +54,23 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** The class to show notification(s) of instant apps. This may show multiple notifications on
  * splitted screen.
  */
-@Singleton
+@SysUISingleton
 public class InstantAppNotifier extends SystemUI
         implements CommandQueue.Callbacks, KeyguardStateController.Callback {
     private static final String TAG = "InstantAppNotifier";
@@ -80,13 +82,13 @@ public class InstantAppNotifier extends SystemUI
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Divider mDivider;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor, Divider divider) {
+            @UiBackground Executor uiBgExecutor, Optional<LegacySplitScreen> splitScreenOptional) {
         super(context);
-        mDivider = divider;
+        mSplitScreenOptional = splitScreenOptional;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
     }
@@ -105,11 +107,11 @@ public class InstantAppNotifier extends SystemUI
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
 
-        mDivider.registerInSplitScreenListener(
-                exists -> {
+        mSplitScreenOptional.ifPresent(splitScreen ->
+                splitScreen.registerInSplitScreenListener(exists -> {
                     mDockedStackExists = exists;
                     updateForegroundInstantApps();
-                });
+                }));
 
         // Clear out all old notifications on startup (only present in the case where sysui dies)
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
@@ -160,16 +162,16 @@ public class InstantAppNotifier extends SystemUI
                 () -> {
                     ArraySet<Pair<String, Integer>> notifs = new ArraySet<>(mCurrentNotifs);
                     try {
-                        final ActivityManager.StackInfo focusedStack =
-                                ActivityTaskManager.getService().getFocusedStackInfo();
-                        if (focusedStack != null) {
+                        final RootTaskInfo focusedTask =
+                                ActivityTaskManager.getService().getFocusedRootTaskInfo();
+                        if (focusedTask != null) {
                             final int windowingMode =
-                                    focusedStack.configuration.windowConfiguration
+                                    focusedTask.configuration.windowConfiguration
                                             .getWindowingMode();
                             if (windowingMode == WINDOWING_MODE_FULLSCREEN
                                     || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                                     || windowingMode == WINDOWING_MODE_FREEFORM) {
-                                checkAndPostForStack(focusedStack, notifs, noMan, pm);
+                                checkAndPostForStack(focusedTask, notifs, noMan, pm);
                             }
                         }
                         if (mDockedStackExists) {
@@ -204,10 +206,8 @@ public class InstantAppNotifier extends SystemUI
             @NonNull NotificationManager noMan,
             @NonNull IPackageManager pm) {
         try {
-            final ActivityManager.StackInfo info =
-                    ActivityTaskManager.getService()
-                            .getStackInfo(
-                                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+            final RootTaskInfo info = ActivityTaskManager.getService().getRootTaskInfo(
+                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
             checkAndPostForStack(info, notifs, noMan, pm);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -220,7 +220,7 @@ public class InstantAppNotifier extends SystemUI
      * exists, this method removes it from {@code notifs} in the arguments.
      */
     private void checkAndPostForStack(
-            @Nullable ActivityManager.StackInfo info,
+            @Nullable RootTaskInfo info,
             @NonNull ArraySet<Pair<String, Integer>> notifs,
             @NonNull NotificationManager noMan,
             @NonNull IPackageManager pm) {
@@ -240,7 +240,7 @@ public class InstantAppNotifier extends SystemUI
                             info.userId,
                             appInfo,
                             noMan,
-                            info.taskIds[info.taskIds.length - 1]);
+                            info.childTaskIds[info.childTaskIds.length - 1]);
                 }
             }
         } catch (RemoteException e) {
@@ -364,18 +364,13 @@ public class InstantAppNotifier extends SystemUI
 
     @Nullable
     private Intent getTaskIntent(int taskId, int userId) {
-        try {
-            final List<ActivityManager.RecentTaskInfo> tasks =
-                    ActivityTaskManager.getService()
-                            .getRecentTasks(NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId)
-                            .getList();
-            for (int i = 0; i < tasks.size(); i++) {
-                if (tasks.get(i).id == taskId) {
-                    return tasks.get(i).baseIntent;
-                }
+        final List<ActivityManager.RecentTaskInfo> tasks =
+                ActivityTaskManager.getInstance().getRecentTasks(
+                        NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId);
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).id == taskId) {
+                return tasks.get(i).baseIntent;
             }
-        } catch (RemoteException e) {
-            // Fall through
         }
         return null;
     }

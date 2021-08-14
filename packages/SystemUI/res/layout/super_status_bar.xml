@@ -26,6 +26,11 @@
     android:fitsSystemWindows="true">
 
     <FrameLayout
+        android:id="@+id/status_bar_launch_animation_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
         android:id="@+id/status_bar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

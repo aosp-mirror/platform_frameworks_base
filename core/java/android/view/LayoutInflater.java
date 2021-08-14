@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -31,6 +32,7 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -93,7 +95,9 @@ public abstract class LayoutInflater {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    // TODO(b/182007470): Use @ConfigurationContext instead
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UiContext
     protected final Context mContext;
 
     // these are optional, set by the caller
@@ -253,6 +257,7 @@ public abstract class LayoutInflater {
      * values for their attributes are retrieved.
      */
     protected LayoutInflater(Context context) {
+        StrictMode.assertConfigurationContext(context, "LayoutInflater");
         mContext = context;
         initPrecompiledViews();
     }
@@ -266,6 +271,7 @@ public abstract class LayoutInflater {
      * @param newContext The new Context to use.
      */
     protected LayoutInflater(LayoutInflater original, Context newContext) {
+        StrictMode.assertConfigurationContext(newContext, "LayoutInflater");
         mContext = newContext;
         mFactory = original.mFactory;
         mFactory2 = original.mFactory2;
@@ -277,7 +283,7 @@ public abstract class LayoutInflater {
     /**
      * Obtains the LayoutInflater from the given context.
      */
-    public static LayoutInflater from(Context context) {
+    public static LayoutInflater from(@UiContext Context context) {
         LayoutInflater LayoutInflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (LayoutInflater == null) {

@@ -20,15 +20,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.util.Slog;
 
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
@@ -174,7 +174,7 @@ class TaskSnapshotLoader {
                 Slog.w(TAG, "Failed to create hardware bitmap: " + bitmapFile.getPath());
                 return null;
             }
-            final GraphicBuffer buffer = hwBitmap.createGraphicBufferHandle();
+            final HardwareBuffer buffer = hwBitmap.getHardwareBuffer();
             if (buffer == null) {
                 Slog.w(TAG, "Failed to retrieve gralloc buffer for bitmap: "
                         + bitmapFile.getPath());
@@ -197,7 +197,7 @@ class TaskSnapshotLoader {
                     hwBitmap.getColorSpace(), proto.orientation, proto.rotation, taskSize,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     loadLowResolutionBitmap, proto.isRealSnapshot, proto.windowingMode,
-                    proto.systemUiVisibility, proto.isTranslucent);
+                    proto.appearance, proto.isTranslucent, false /* hasImeSurface */);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);
             return null;

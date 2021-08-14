@@ -6,27 +6,32 @@ package {
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
+
 filegroup {
-    // NOTE: This is purposefully left empty, and exists only so that it can be
-    // referenced in frameworks/base/Android.bp.
     name: "framework-media-tv-tunerresourcemanager-sources-aidl",
-    srcs: [],
-}
-
-filegroup {
-    name: "framework-media-tv-tunerresourcemanager-sources",
     srcs: [
-        "*.java",
-        "*.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/*.aidl",
     ],
-    path: ".",
+    path: "aidl",
 }
 
-java_library {
-    name: "framework-media-tv-trm-sources",
-    srcs: [":framework-media-tv-tunerresourcemanager-sources"],
-    installable: true,
-    visibility: [
-        "//frameworks/base",
+aidl_interface {
+    name: "tv_tuner_resource_manager_aidl_interface",
+    unstable: true,
+    local_include_dir: "aidl",
+    backend: {
+        java: {
+            enabled: true,
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    srcs: [
+        ":framework-media-tv-tunerresourcemanager-sources-aidl",
     ],
+    imports: ["tv_tuner_frontend_info_aidl_interface"],
 }

@@ -28,17 +28,16 @@ import java.util.List;
  * backwards. uptimeMillis, elapsedRealtime, and currentThreadTimeMillis are all kept in sync.
  *
  * Unless otherwise specified, uptimeMillis and elapsedRealtime will advance the same amount with
- * every call to {@link #advanceTime(long)}. Thread time always lags by 50% of the uptime
+ * every call to {@link #advanceTime}. Thread time always lags by 50% of the uptime
  * advancement to simulate time loss due to scheduling.
  */
 public class FakeSystemClock implements SystemClock {
     private long mUptimeMillis = 10000;
     private long mElapsedRealtime = 10000;
     private long mCurrentThreadTimeMillis = 10000;
-
     private long mCurrentTimeMillis = 1555555500000L;
-
     private final List<ClockTickListener> mListeners = new ArrayList<>();
+
     @Override
     public long uptimeMillis() {
         return mUptimeMillis;
@@ -72,21 +71,42 @@ public class FakeSystemClock implements SystemClock {
         mCurrentTimeMillis = millis;
     }
 
-    public void advanceTime(long uptime) {
-        advanceTime(uptime, 0);
+    public void setElapsedRealtime(long millis) {
+        mElapsedRealtime = millis;
     }
 
-    public void advanceTime(long uptime, long sleepTime) {
-        if (uptime < 0 || sleepTime < 0) {
+    /**
+     * Advances the time tracked by the fake clock and notifies any listeners that the time has
+     * changed (for example, an attached {@link FakeExecutor} may fire its pending runnables).
+     *
+     * All tracked times increment by [millis], with the exception of currentThreadTimeMillis,
+     * which advances by [millis] * 0.5
+     */
+    public void advanceTime(long millis) {
+        advanceTime(millis, 0);
+    }
+
+    /**
+     * Advances the time tracked by the fake clock and notifies any listeners that the time has
+     * changed (for example, an attached {@link FakeExecutor} may fire its pending runnables).
+     *
+     * The tracked times change as follows:
+     * - uptimeMillis increments by [awakeMillis]
+     * - currentThreadTimeMillis increments by [awakeMillis] * 0.5
+     * - elapsedRealtime increments by [awakeMillis] + [sleepMillis]
+     * - currentTimeMillis increments by [awakeMillis] + [sleepMillis]
+     */
+    public void advanceTime(long awakeMillis, long sleepMillis) {
+        if (awakeMillis < 0 || sleepMillis < 0) {
             throw new IllegalArgumentException("Time cannot go backwards");
         }
 
-        if (uptime > 0 || sleepTime > 0) {
-            mUptimeMillis += uptime;
-            mElapsedRealtime += uptime + sleepTime;
-            mCurrentTimeMillis += uptime + sleepTime;
+        if (awakeMillis > 0 || sleepMillis > 0) {
+            mUptimeMillis += awakeMillis;
+            mElapsedRealtime += awakeMillis + sleepMillis;
+            mCurrentTimeMillis += awakeMillis + sleepMillis;
 
-            mCurrentThreadTimeMillis += Math.ceil(uptime * 0.5);
+            mCurrentThreadTimeMillis += Math.ceil(awakeMillis * 0.5);
 
             for (ClockTickListener listener : mListeners) {
                 listener.onClockTick();
@@ -105,6 +125,4 @@ public class FakeSystemClock implements SystemClock {
     public interface ClockTickListener {
         void onClockTick();
     }
-
-    private static final long START_TIME = 10000;
 }

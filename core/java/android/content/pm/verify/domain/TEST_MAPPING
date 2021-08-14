@@ -1,0 +1,21 @@
+{
+  "presubmit": [
+    {
+      "name": "PackageManagerServiceUnitTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.test.verify.domain"
+        }
+      ]
+    },
+    {
+      "name": "CtsDomainVerificationDeviceStandaloneTestCases"
+    },
+    {
+      "name": "CtsDomainVerificationDeviceMultiUserTestCases"
+    },
+    {
+      "name": "CtsDomainVerificationHostTestCases"
+    }
+  ]
+}

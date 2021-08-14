@@ -66,12 +66,6 @@ public abstract class DefaultServiceBinder {
     @ClassKey(SystemUIAuxiliaryDumpService.class)
     public abstract Service bindSystemUIAuxiliaryDumpService(SystemUIAuxiliaryDumpService service);
 
-    /** */
-    @Binds
-    @IntoMap
-    @ClassKey(TakeScreenshotService.class)
-    public abstract Service bindTakeScreenshotService(TakeScreenshotService service);
-
     /** Inject into RecordingService */
     @Binds
     @IntoMap

@@ -17,8 +17,10 @@
 package com.android.internal.telephony;
 
 import android.Manifest.permission;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -38,16 +40,19 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +89,8 @@ public final class SmsApplication {
     };
 
     private static SmsPackageMonitor sSmsPackageMonitor = null;
+
+    private static SmsRoleListener sSmsRoleListener = null;
 
     public static class SmsApplicationData {
         /**
@@ -524,7 +531,7 @@ public final class SmsApplication {
     }
 
     private static String getDefaultSmsPackage(Context context, int userId) {
-        return context.getSystemService(RoleManager.class).getDefaultSmsPackage(userId);
+        return context.getSystemService(RoleManager.class).getSmsRoleHolder(userId);
     }
 
     /**
@@ -685,7 +692,7 @@ public final class SmsApplication {
      * {@link Intent#ACTION_DEFAULT_SMS_PACKAGE_CHANGED}
      * {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
      */
-    public static void broadcastSmsAppChange(Context context,
+    private static void broadcastSmsAppChange(Context context,
             UserHandle userHandle, @Nullable String oldPackage, @Nullable String newPackage) {
         Collection<SmsApplicationData> apps = getApplicationCollection(context);
 
@@ -752,6 +759,7 @@ public final class SmsApplication {
     private static void assignExclusiveSmsPermissionsToSystemApp(Context context,
             PackageManager packageManager, AppOpsManager appOps, String packageName,
             boolean sigatureMatch) {
+        if (packageName == null) return;
         // First check package signature matches the caller's package signature.
         // Since this class is only used internally by the system, this check makes sure
         // the package signature matches system signature.
@@ -844,9 +852,51 @@ public final class SmsApplication {
         }
     }
 
+    /**
+     * Tracks SMS role changes and sends broadcasts for default SMS app change.
+     */
+    private static final class SmsRoleListener implements OnRoleHoldersChangedListener {
+        private final Context mContext;
+        private final RoleManager mRoleManager;
+        private final SparseArray<String> mSmsPackageNames = new SparseArray<>();
+
+        public SmsRoleListener(@NonNull Context context) {
+            mContext = context;
+            mRoleManager = context.getSystemService(RoleManager.class);
+            final List<UserHandle> users = context.getSystemService(UserManager.class)
+                    .getUserHandles(true);
+            final int usersSize = users.size();
+            for (int i = 0; i < usersSize; i++) {
+                final UserHandle user = users.get(i);
+                mSmsPackageNames.put(user.getIdentifier(), getSmsPackageName(user));
+            }
+            mRoleManager.addOnRoleHoldersChangedListenerAsUser(context.getMainExecutor(), this,
+                    UserHandle.ALL);
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            if (!Objects.equals(roleName, RoleManager.ROLE_SMS)) {
+                return;
+            }
+            final int userId = user.getIdentifier();
+            final String newSmsPackageName = getSmsPackageName(user);
+            broadcastSmsAppChange(mContext, user, mSmsPackageNames.get(userId), newSmsPackageName);
+            mSmsPackageNames.put(userId, newSmsPackageName);
+        }
+
+        @Nullable
+        private String getSmsPackageName(@NonNull UserHandle user) {
+            final List<String> roleHolders = mRoleManager.getRoleHoldersAsUser(
+                    RoleManager.ROLE_SMS, user);
+            return !roleHolders.isEmpty() ? roleHolders.get(0) : null;
+        }
+    }
+
     public static void initSmsPackageMonitor(Context context) {
         sSmsPackageMonitor = new SmsPackageMonitor(context);
         sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL);
+        sSmsRoleListener = new SmsRoleListener(context);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

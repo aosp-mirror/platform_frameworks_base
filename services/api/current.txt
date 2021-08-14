@@ -35,10 +35,41 @@ package com.android.server {
 
 }
 
+package com.android.server.am {
+
+  public interface ActivityManagerLocal {
+    method public boolean canStartForegroundService(int, int, @NonNull String);
+  }
+
+}
+
+package com.android.server.role {
+
+  public interface RoleServicePlatformHelper {
+    method @NonNull public String computePackageStateHash(int);
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getLegacyRoleState(int);
+  }
+
+}
+
 package com.android.server.stats {
 
   public final class StatsHelper {
     method public static void sendStatsdReadyBroadcast(@NonNull android.content.Context);
+  }
+
+}
+
+package com.android.server.usage {
+
+  public interface StorageStatsManagerLocal {
+    method public void registerStorageStatsAugmenter(@NonNull com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter, @NonNull String);
+  }
+
+  public static interface StorageStatsManagerLocal.StorageStatsAugmenter {
+    method public void augmentStatsForPackageForUser(@NonNull android.content.pm.PackageStats, @NonNull String, @NonNull android.os.UserHandle, boolean);
+    method public void augmentStatsForUid(@NonNull android.content.pm.PackageStats, int, boolean);
+    method public void augmentStatsForUser(@NonNull android.content.pm.PackageStats, @NonNull android.os.UserHandle);
   }
 
 }

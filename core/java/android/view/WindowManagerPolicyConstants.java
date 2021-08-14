@@ -16,7 +16,10 @@
 
 package android.view;
 
+import static android.os.IInputConstants.POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
+
 import android.annotation.IntDef;
+import android.os.PowerManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,10 +29,12 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public interface WindowManagerPolicyConstants {
-    // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h.
+    // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h and
+    // frameworks/native/libs/input/android/os/IInputConstants.aidl
     int FLAG_WAKE = 0x00000001;
     int FLAG_VIRTUAL = 0x00000002;
 
+    int FLAG_INJECTED_FROM_ACCESSIBILITY = POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
     int FLAG_INJECTED = 0x01000000;
     int FLAG_TRUSTED = 0x02000000;
     int FLAG_FILTERED = 0x04000000;
@@ -89,6 +94,15 @@ public interface WindowManagerPolicyConstants {
      */
     String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
 
+    /**
+     * Extra for the start reason of the HOME intent.
+     * Will be {@link PowerManager#WAKE_REASON_WAKE_KEY} or
+     * {@link PowerManager#WAKE_REASON_POWER_BUTTON} when intent was sent through
+     * {@link PhoneWindowManager#shouldWakeUpWithHomeIntent}.
+     * @hide
+     */
+    String EXTRA_START_REASON = "android.intent.extra.EXTRA_START_REASON";
+
     // TODO: move this to a more appropriate place.
     interface PointerEventListener {
         /**
@@ -97,6 +111,27 @@ public interface WindowManagerPolicyConstants {
          * copy() must be made and the copy must be recycled.
          **/
         void onPointerEvent(MotionEvent motionEvent);
+    }
+
+    @IntDef(prefix = { "OFF_BECAUSE_OF_" }, value = {
+            OFF_BECAUSE_OF_ADMIN,
+            OFF_BECAUSE_OF_USER,
+            OFF_BECAUSE_OF_TIMEOUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OffReason{}
+
+    static @OffReason int translateSleepReasonToOffReason(
+            @PowerManager.GoToSleepReason int reason) {
+        switch (reason) {
+            case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
+                return OFF_BECAUSE_OF_ADMIN;
+            case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+            case PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE:
+                return OFF_BECAUSE_OF_TIMEOUT;
+            default:
+                return OFF_BECAUSE_OF_USER;
+        }
     }
 
     /** Screen turned off because of a device admin */
@@ -125,6 +160,23 @@ public interface WindowManagerPolicyConstants {
                 return "ON_BECAUSE_OF_UNKNOWN";
             default:
                 return Integer.toString(why);
+        }
+    }
+
+    static @OnReason int translateWakeReasonToOnReason(@PowerManager.WakeReason int reason) {
+        switch (reason) {
+            case PowerManager.WAKE_REASON_POWER_BUTTON:
+            case PowerManager.WAKE_REASON_PLUGGED_IN:
+            case PowerManager.WAKE_REASON_GESTURE:
+            case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
+            case PowerManager.WAKE_REASON_WAKE_KEY:
+            case PowerManager.WAKE_REASON_WAKE_MOTION:
+            case PowerManager.WAKE_REASON_LID:
+                return ON_BECAUSE_OF_USER;
+            case PowerManager.WAKE_REASON_APPLICATION:
+                return ON_BECAUSE_OF_APPLICATION;
+            default:
+                return ON_BECAUSE_OF_UNKNOWN;
         }
     }
 

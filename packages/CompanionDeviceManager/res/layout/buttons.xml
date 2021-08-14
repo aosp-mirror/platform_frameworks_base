@@ -29,14 +29,15 @@
         android:id="@+id/button_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@android:string/cancel"
-        style="@android:style/Widget.Material.Light.Button.Borderless.Colored"
+        android:text="@string/consent_no"
+        android:textColor="?android:attr/textColorSecondary"
+        style="@android:style/Widget.Material.Button.Borderless.Colored"
     />
     <Button
         android:id="@+id/button_pair"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@android:string/ok"
-        style="@android:style/Widget.Material.Light.Button.Borderless.Colored"
+        android:text="@string/consent_yes"
+        style="@android:style/Widget.Material.Button.Borderless.Colored"
     />
 </LinearLayout>

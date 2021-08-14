@@ -24,7 +24,6 @@ import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
-import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
@@ -199,18 +198,8 @@ public class IntentForwarderActivity extends Activity  {
                     /* ignoreTargetSecurity= */ false,
                     userId);
         } catch (RuntimeException e) {
-            int launchedFromUid = -1;
-            String launchedFromPackage = "?";
-            try {
-                launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
-                        getActivityToken());
-                launchedFromPackage = ActivityTaskManager.getService()
-                        .getLaunchedFromPackage(getActivityToken());
-            } catch (RemoteException ignored) {
-            }
-
-            Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
-                    + launchedFromPackage + ", while running in "
+            Slog.wtf(TAG, "Unable to launch as UID " + getLaunchedFromUid() + " package "
+                    + getLaunchedFromPackage() + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
     }

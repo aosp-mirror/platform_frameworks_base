@@ -100,15 +100,9 @@
     <!-- For notification icons for which targetSdk < L, this caches whether the icon is grayscale -->
     <item type="id" name="icon_is_grayscale" />
     <item type="id" name="image_icon_tag" />
+    <item type="id" name="align_transform_end_tag" />
     <item type="id" name="contains_transformed_view" />
     <item type="id" name="is_clicked_heads_up_tag" />
-
-    <!-- Accessibility actions for the docked stack divider -->
-    <item type="id" name="action_move_tl_full" />
-    <item type="id" name="action_move_tl_70" />
-    <item type="id" name="action_move_tl_50" />
-    <item type="id" name="action_move_tl_30" />
-    <item type="id" name="action_move_rb_full" />
 
     <item type="id" name="bottom_roundess_animator_tag"/>
     <item type="id" name="bottom_roundess_animator_start_tag"/>
@@ -137,12 +131,6 @@
     <item type="id" name="action_snooze_assistant_suggestion_1"/>
     <item type="id" name="action_snooze"/>
 
-    <!-- Accessibility actions for bubbles. -->
-    <item type="id" name="action_move_top_left"/>
-    <item type="id" name="action_move_top_right"/>
-    <item type="id" name="action_move_bottom_left"/>
-    <item type="id" name="action_move_bottom_right"/>
-
     <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
@@ -152,16 +140,6 @@
 
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
-
-    <!-- For saving PhysicsAnimationLayout animations/animators as view tags. -->
-    <item type="id" name="translation_x_dynamicanimation_tag"/>
-    <item type="id" name="translation_y_dynamicanimation_tag"/>
-    <item type="id" name="translation_z_dynamicanimation_tag"/>
-    <item type="id" name="alpha_dynamicanimation_tag"/>
-    <item type="id" name="scale_x_dynamicanimation_tag"/>
-    <item type="id" name="scale_y_dynamicanimation_tag"/>
-    <item type="id" name="physics_animator_tag"/>
-    <item type="id" name="target_animator_tag" />
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />
@@ -180,7 +158,20 @@
     <item type="id" name="accessibility_action_qs_move_to_position" />
     <item type="id" name="accessibility_action_qs_add_to_position" />
 
-    <!-- Accessibility actions for PIP -->
-    <item type="id" name="action_pip_resize" />
+    <!-- Accessibility actions for window magnification. -->
+    <item type="id" name="accessibility_action_zoom_in"/>
+    <item type="id" name="accessibility_action_zoom_out"/>
+    <item type="id" name="accessibility_action_move_left"/>
+    <item type="id" name="accessibility_action_move_right"/>
+    <item type="id" name="accessibility_action_move_up"/>
+    <item type="id" name="accessibility_action_move_down"/>
+
+    <!-- Accessibility actions for Accessibility floating menu. -->
+    <item type="id" name="action_move_top_left"/>
+    <item type="id" name="action_move_top_right"/>
+    <item type="id" name="action_move_bottom_left"/>
+    <item type="id" name="action_move_bottom_right"/>
+    <item type="id" name="action_move_to_edge_and_hide"/>
+    <item type="id" name="action_move_out_edge_and_show"/>
 </resources>
 

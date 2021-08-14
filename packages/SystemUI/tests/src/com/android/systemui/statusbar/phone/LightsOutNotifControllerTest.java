@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -95,21 +96,25 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
 
     @Test
     public void testAreLightsOut_lightsOut() {
-        mCallbacks.onSystemBarAppearanceChanged(
+        mCallbacks.onSystemBarAttributesChanged(
                 mDisplayId /* display id */,
                 LIGHTS_OUT /* appearance */,
                 null /* appearanceRegions */,
-                false /* navbarColorManagedByIme */);
+                false /* navbarColorManagedByIme */,
+                BEHAVIOR_DEFAULT,
+                false /* isFullscreen */);
         assertTrue(mLightsOutNotifController.areLightsOut());
     }
 
     @Test
     public void testAreLightsOut_lightsOn() {
-        mCallbacks.onSystemBarAppearanceChanged(
+        mCallbacks.onSystemBarAttributesChanged(
                 mDisplayId /* display id */,
                 LIGHTS_ON /* appearance */,
                 null /* appearanceRegions */,
-                false /* navbarColorManagedByIme */);
+                false /* navbarColorManagedByIme */,
+                BEHAVIOR_DEFAULT,
+                false /* isFullscreen */);
         assertFalse(mLightsOutNotifController.areLightsOut());
     }
 
@@ -128,16 +133,18 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLightsOut_withNotifs_onSystemBarAppearanceChanged() {
+    public void testLightsOut_withNotifs_onSystemBarAttributesChanged() {
         // GIVEN active visible notifications
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(true);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
 
         // WHEN lights out
-        mCallbacks.onSystemBarAppearanceChanged(
+        mCallbacks.onSystemBarAttributesChanged(
                 mDisplayId /* display id */,
                 LIGHTS_OUT /* appearance */,
                 null /* appearanceRegions */,
-                false /* navbarColorManagedByIme */);
+                false /* navbarColorManagedByIme */,
+                BEHAVIOR_DEFAULT,
+                false /* isFullscreen */);
 
         // THEN we should show dot
         assertTrue(mLightsOutNotifController.shouldShowDot());
@@ -145,16 +152,18 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLightsOut_withoutNotifs_onSystemBarAppearanceChanged() {
+    public void testLightsOut_withoutNotifs_onSystemBarAttributesChanged() {
         // GIVEN no active visible notifications
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(false);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
 
         // WHEN lights out
-        mCallbacks.onSystemBarAppearanceChanged(
+        mCallbacks.onSystemBarAttributesChanged(
                 mDisplayId /* display id */,
                 LIGHTS_OUT /* appearance */,
                 null /* appearanceRegions */,
-                false /* navbarColorManagedByIme */);
+                false /* navbarColorManagedByIme */,
+                BEHAVIOR_DEFAULT,
+                false /* isFullscreen */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());
@@ -162,16 +171,18 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLightsOn_afterLightsOut_onSystemBarAppearanceChanged() {
+    public void testLightsOn_afterLightsOut_onSystemBarAttributesChanged() {
         // GIVEN active visible notifications
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(true);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
 
         // WHEN lights on
-        mCallbacks.onSystemBarAppearanceChanged(
+        mCallbacks.onSystemBarAttributesChanged(
                 mDisplayId /* display id */,
                 LIGHTS_ON /* appearance */,
                 null /* appearanceRegions */,
-                false /* navbarColorManagedByIme */);
+                false /* navbarColorManagedByIme */,
+                BEHAVIOR_DEFAULT,
+                false /* isFullscreen */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());
@@ -181,13 +192,13 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testEntryAdded() {
         // GIVEN no visible notifications and lights out
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(false);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
         mLightsOutNotifController.mAppearance = LIGHTS_OUT;
         mLightsOutNotifController.updateLightsOutView();
         assertIsShowingDot(false);
 
         // WHEN an active notification is added
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(true);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
         assertTrue(mLightsOutNotifController.shouldShowDot());
         mEntryListener.onNotificationAdded(mock(NotificationEntry.class));
 
@@ -198,13 +209,13 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testEntryRemoved() {
         // GIVEN a visible notification and lights out
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(true);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
         mLightsOutNotifController.mAppearance = LIGHTS_OUT;
         mLightsOutNotifController.updateLightsOutView();
         assertIsShowingDot(true);
 
         // WHEN all active notifications are removed
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(false);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
         assertFalse(mLightsOutNotifController.shouldShowDot());
         mEntryListener.onEntryRemoved(
                 mock(NotificationEntry.class), null, false, REASON_CANCEL_ALL);
@@ -216,13 +227,13 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testEntryUpdated() {
         // GIVEN no visible notifications and lights out
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(false);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
         mLightsOutNotifController.mAppearance = LIGHTS_OUT;
         mLightsOutNotifController.updateLightsOutView();
         assertIsShowingDot(false);
 
         // WHEN an active notification is added
-        when(mEntryManager.hasVisibleNotifications()).thenReturn(true);
+        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
         assertTrue(mLightsOutNotifController.shouldShowDot());
         mEntryListener.onPostEntryUpdated(mock(NotificationEntry.class));
 

@@ -16,20 +16,24 @@
 package android.hardware.face;
 
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticationFrame;
+import android.hardware.face.FaceEnrollFrame;
 
 /**
  * Communication channel from the FaceService back to FaceAuthenticationManager.
  * @hide
  */
 oneway interface IFaceServiceReceiver {
-    void onEnrollResult(long deviceId, int faceId, int remaining);
-    void onAcquired(long deviceId, int acquiredInfo, int vendorCode);
-    void onAuthenticationSucceeded(long deviceId, in Face face, int userId,
-            boolean isStrongBiometric);
-    void onAuthenticationFailed(long deviceId);
-    void onError(long deviceId, int error, int vendorCode);
-    void onRemoved(long deviceId, int faceId, int remaining);
-    void onEnumerated(long deviceId, int faceId, int remaining);
+    void onEnrollResult(in Face face, int remaining);
+    void onAcquired(int acquiredInfo, int vendorCode);
+    void onAuthenticationSucceeded(in Face face, int userId, boolean isStrongBiometric);
+    void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric);
+    void onAuthenticationFailed();
+    void onError(int error, int vendorCode);
+    void onRemoved(in Face face, int remaining);
     void onFeatureSet(boolean success, int feature);
-    void onFeatureGet(boolean success, int feature, boolean value);
+    void onFeatureGet(boolean success, in int[] features, in boolean[] featureState);
+    void onChallengeGenerated(int sensorId, int userId, long challenge);
+    void onAuthenticationFrame(in FaceAuthenticationFrame frame);
+    void onEnrollmentFrame(in FaceEnrollFrame frame);
 }

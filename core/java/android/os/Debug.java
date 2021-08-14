@@ -1948,7 +1948,13 @@ public final class Debug
      */
     public static final int MEMINFO_KRECLAIMABLE = 15;
     /** @hide */
-    public static final int MEMINFO_COUNT = 16;
+    public static final int MEMINFO_ACTIVE = 16;
+    /** @hide */
+    public static final int MEMINFO_INACTIVE = 17;
+    /** @hide */
+    public static final int MEMINFO_UNEVICTABLE = 18;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 19;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields
@@ -2470,7 +2476,7 @@ public final class Debug
     @UnsupportedAppUsage
     public static String getCallers(final int depth) {
         final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < depth; i++) {
             sb.append(getCaller(callStack, i)).append(" ");
         }
@@ -2485,7 +2491,7 @@ public final class Debug
      */
     public static String getCallers(final int start, int depth) {
         final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         depth += start;
         for (int i = start; i < depth; i++) {
             sb.append(getCaller(callStack, i)).append(" ");
@@ -2503,7 +2509,7 @@ public final class Debug
      */
     public static String getCallers(final int depth, String linePrefix) {
         final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < depth; i++) {
             sb.append(linePrefix).append(getCaller(callStack, i)).append("\n");
         }

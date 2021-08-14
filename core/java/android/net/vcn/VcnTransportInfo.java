@@ -16,11 +16,12 @@
 
 package android.net.vcn;
 
-import static android.net.NetworkCapabilities.REDACT_NONE;
+import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.NetworkCapabilities;
 import android.net.TransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.Parcel;
@@ -108,13 +109,24 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
     @Override
     @NonNull
     public TransportInfo makeCopy(long redactions) {
+        if ((redactions & NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS) != 0) {
+            return new VcnTransportInfo(null, INVALID_SUBSCRIPTION_ID);
+        }
+
         return new VcnTransportInfo(
                 (mWifiInfo == null) ? null : mWifiInfo.makeCopy(redactions), mSubId);
     }
 
     @Override
     public long getApplicableRedactions() {
-        return (mWifiInfo == null) ? REDACT_NONE : mWifiInfo.getApplicableRedactions();
+        long redactions = REDACT_FOR_NETWORK_SETTINGS;
+
+        // Add additional wifi redactions if necessary
+        if (mWifiInfo != null) {
+            redactions |= mWifiInfo.getApplicableRedactions();
+        }
+
+        return redactions;
     }
 
     /** {@inheritDoc} */
@@ -135,6 +147,14 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
                 public VcnTransportInfo createFromParcel(Parcel in) {
                     final int subId = in.readInt();
                     final WifiInfo wifiInfo = in.readParcelable(null);
+
+                    // If all fields are their null values, return null TransportInfo to avoid
+                    // leaking information about this being a VCN Network (instead of macro
+                    // cellular, etc)
+                    if (wifiInfo == null && subId == INVALID_SUBSCRIPTION_ID) {
+                        return null;
+                    }
+
                     return new VcnTransportInfo(wifiInfo, subId);
                 }
 

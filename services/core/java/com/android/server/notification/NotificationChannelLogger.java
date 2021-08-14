@@ -215,6 +215,13 @@ public interface NotificationChannelLogger {
     }
 
     /**
+     * @return Small hash of the conversation ID, if present, or 0 otherwise.
+     */
+    static int getConversationIdHash(@NonNull NotificationChannel channel) {
+        return SmallHash.hash(channel.getConversationId());
+    }
+
+    /**
      * @return Small hash of the channel ID, if present, or 0 otherwise.
      */
     static int getIdHash(@NonNull NotificationChannelGroup group) {

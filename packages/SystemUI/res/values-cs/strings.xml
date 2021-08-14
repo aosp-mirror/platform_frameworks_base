@@ -65,7 +65,7 @@
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Povolit v této síti bezdrátové ladění?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Název sítě (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"V této síti vždy povolit"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Vždy povolit v této síti"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Povolit"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezdrátové ladění není povoleno"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout bezdrátové ladění. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
@@ -83,17 +83,29 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Snímek obrazovky byl uložen"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Klepnutím snímek obrazovky zobrazíte"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Snímek obrazovky se nepodařilo uložit"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Aby bylo možné uložit screenshot, zařízení musí být odemknuto"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Zkuste snímek pořídit znovu"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Snímek obrazovky kvůli nedostatku místa v úložišti nelze uložit"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Snímek obrazovky se nepodařilo uložit"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikace nebo organizace zakazuje pořizování snímků obrazovky"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavřít snímek obrazovky"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Upravit"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Upravit snímek obrazovky"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Zachytit více"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavřít snímek obrazovky"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Náhled snímku obrazovky"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Spustit nahrávání?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrát zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
@@ -102,14 +114,15 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahrávání obrazovky"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahrávání obrazovky a zvuku"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na obrazovku"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Klepnutím nahrávání zastavíte"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Klepnutím zastavíte"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zastavit"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pozastavit"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Obnovit"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Zrušit"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Nahrávání obrazovky bylo zrušeno"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Záznam obrazovky byl uložen, zobrazíte jej klepnutím"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky byla uložena"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Nahrávku zobrazíte klepnutím"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Při mazání záznamu obrazovky došlo k chybě"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nepodařilo se načíst oprávnění"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Při spouštění nahrávání obrazovky došlo k chybě"</string>
@@ -170,6 +183,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Zavřít"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotkněte se snímače otisků prstů"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona otisku prstu"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obličej se nepodařilo rozpoznat. Použijte místo něj otisk prstu."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Pokračujte přiložením prstu"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Otisk prstu se nepodařilo rozpoznat. Použijte místo něj zámek obrazovky."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Hledáme vás…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona obličeje"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
@@ -182,16 +198,6 @@
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tři čárky baterie."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterie je nabitá."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procento baterie není známé."</string>
-    <string name="accessibility_no_phone" msgid="8828412144430247025">"Žádná telefonní síť."</string>
-    <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Jedna čárka signálu telefonní sítě."</string>
-    <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dvě čárky signálu telefonní sítě."</string>
-    <string name="accessibility_phone_three_bars" msgid="5670937367300884534">"Tři čárky signálu telefonní sítě."</string>
-    <string name="accessibility_phone_signal_full" msgid="1103449569988869971">"Plný signál telefonní sítě."</string>
-    <string name="accessibility_no_data" msgid="2124768255213392359">"Žádné datové připojení."</string>
-    <string name="accessibility_data_one_bar" msgid="3226985124149387055">"Jedna čárka signálu datové sítě."</string>
-    <string name="accessibility_data_two_bars" msgid="4576231688545173059">"Dvě čárky signálu datové sítě."</string>
-    <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Tři čárky signálu datové sítě."</string>
-    <string name="accessibility_data_signal_full" msgid="283507058258113551">"Plný signál datové sítě."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"Připojeno k zařízení <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Připojeno k zařízení <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Jste připojeni k zařízení <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -200,8 +206,6 @@
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"Dvě čárky signálu sítě WiMAX."</string>
     <string name="accessibility_wimax_three_bars" msgid="2773714362377629938">"Tři čárky signálu sítě WiMAX."</string>
     <string name="accessibility_wimax_signal_full" msgid="3101861561730624315">"Plný signál sítě WiMAX."</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"Síť ethernet je odpojena."</string>
-    <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"Síť ethernet je připojena."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"Není signál."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Nepřipojeno."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"Žádná čárka."</string>
@@ -213,30 +217,17 @@
     <string name="accessibility_desc_off" msgid="8055389500285421408">"Vypnuto."</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Připojeno."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Připojování."</string>
-    <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
-    <string name="data_connection_3g" msgid="1215807817895516914">"3G"</string>
-    <string name="data_connection_3_5g" msgid="4097346596394846450">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
-    <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
-    <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Žádná SIM karta."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobilní data"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobilní data jsou zapnuta"</string>
-    <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobilní data jsou vypnuta"</string>
-    <string name="not_default_data_content_description" msgid="6757881730711522517">"Nenastaveno k využití dat"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Vypnuto"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Sdílené připojení přes Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Režim Letadlo."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN je zapnuto."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Chybí SIM karta"</string>
-    <string name="carrier_network_change_mode" msgid="5174141476991149918">"Probíhá změna sítě operátora"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Otevřít podrobnosti o baterii"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Stav baterie: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Baterie je nabitá na <xliff:g id="PERCENTAGE">%1$s</xliff:g> procent, při vašem používání vydrží ještě <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -255,7 +246,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Oznámení je zavřeno."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Bublina byla zavřena."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Panel oznámení."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Rychlé nastavení."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Obrazovka uzamčení"</string>
@@ -367,6 +357,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Metoda zadávání dat"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Poloha vypnuta"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Přístup k fotoaparátu"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Přístup k mikrofonu"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Dostupné"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Blokováno"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Mediální zařízení"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Pouze tísňová volání"</string>
@@ -376,6 +370,9 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Uživatel"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Nový uživatel"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Dostupné sítě"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nedostupné sítě"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nepřipojeno"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Žádná síť"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi vypnuta"</string>
@@ -393,7 +390,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Převrátit barvy"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Režim korekce barev"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Další nastavení"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Uživatelské nastavení"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zavřít"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Připojeno"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Připojeno, baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Připojování..."</string>
@@ -435,6 +434,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Záznam obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Spustit"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončit"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokovat mikrofon zařízení?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Odblokovat fotoaparát zařízení?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Odblokovat fotoaparát a mikrofon zařízení?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš mikrofon."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tímto odblokujete přístup všem aplikacím a službám, které mají povoleno používat váš fotoaparát či mikrofon."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Zařízení"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Přejetím nahoru přepnete aplikace"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Přetažením doprava rychle přepnete aplikace"</string>
@@ -457,8 +462,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Oznámení otevřete opětovným klepnutím"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC vyžaduje odemknutou obrazovku"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zařízení patří vaší organizaci"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefon otevřete přejetím prstem od ikony"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Hlasovou asistenci otevřete přejetím prstem od ikony"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Fotoaparát otevřete přejetím prstem od ikony"</string>
@@ -516,7 +523,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichá oznámení"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiché"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Oznámení"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
@@ -526,8 +533,10 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil může být monitorován"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Síť může být sledována"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Síť může být monitorována"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Toto zařízení spravuje rodič"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Toto zařízení vlastní vaše organizace, která může sledovat síťový provoz"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, která může sledovat síťový provoz"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Toto zařízení patří vaší organizaci a je připojené k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojené k síti <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Toto zařízení patří vaší organizaci"</string>
@@ -536,11 +545,13 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojené k sítím VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizace může ve vašem pracovním profilu sledovat síťový provoz"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> může ve vašem pracovním profilu sledovat síťový provoz"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktivitu pracovního profilu na síti vidí administrátor IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Síť může být sledována"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Toto zařízení je připojené k sítím VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Váš pracovní profil je připojen k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Váš osobní profil je připojený k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Toto zařízení je připojené k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Správa zařízení"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Monitoring profilu"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Sledování sítě"</string>
@@ -550,12 +561,15 @@
     <string name="disable_vpn" msgid="482685974985502922">"Deaktivovat VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Odpojit VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Zobrazit zásady"</string>
+    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Zobrazit ovládací prvky"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří vaší organizaci.\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne administrátor IT."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> má přístup k datům spojeným s tímto zařízením, může měnit jeho nastavení a spravovat aplikace.\n\nPokud máte nějaké otázky, obraťte se na organizaci <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zařízení patří vaší organizaci\n\nVáš administrátor IT může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nDalší informace vám poskytne váš administrátor IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizace do tohoto zařízení nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizace do vašeho pracovního profilu nainstalovala certifikační autoritu. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz ve vašem pracovním profilu (ale ne v osobním)."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Jste připojeni k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Jste připojeni k aplikacím <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, které mohou sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Váš pracovní profil je připojen k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
@@ -573,6 +587,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení.\n\nDalší informace vám poskytne administrátor."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Udělili jste aplikaci oprávnění k nastavení připojení VPN.\n\nTato aplikace může sledovat vaši aktivitu v zařízení a v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může monitorovat vaši síťovou aktivitu, včetně e-mailů, aplikací a webů.\n\nDalší informace vám poskytne administrátor.\n\nJste také připojeni k síti VPN, která může sledovat vaši aktivitu v síti."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Toto zařízení spravuje rodič. Rodič může zobrazit údaje, jako jsou používané aplikace, tvá poloha a čas strávený na zařízení."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
@@ -597,17 +612,17 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktivovat"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivovat"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Přepnout zařízení pro výstup"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikace je připnutá"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikace je připnuta"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude vidět, dokud ji neodepnete. Odepnout ji můžete přejetím nahoru a podržením."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Může mít přístup k soukromým datům (například kontaktům a obsahu e-mailů)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Připnutá aplikace může otevírat další aplikace."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Aplikaci odepnete podržením tlačítek Zpět a Přehled"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aplikaci odepnete podržením tlačítek Zpět a Plocha"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Aplikaci odepnete přejetím prstem nahoru a podržením"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Může mít přístup k soukromým datům (například kontaktům a obsahu e-mailů)"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Připnutá aplikace může otevírat další aplikace"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Chcete-li tuto aplikaci odepnout, podržte tlačítka Zpět a Přehled"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Chcete-li tuto aplikaci odepnout, podržte tlačítka Zpět a Plocha"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Chcete-li tuto aplikaci odepnout, přejeďte prstem nahoru a podržte"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, děkuji"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikace byla připnuta"</string>
@@ -635,6 +650,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Klepnutím vypnete zvuk. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Klepnutím nastavíte vibrace."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Klepnutím vypnete zvuk."</string>
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Klepnutím změníte režim vyzvánění"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vypnout zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"zapnout zvuk"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrovat"</string>
@@ -658,6 +674,15 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Zobrazit ukázkový režim"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Budík"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Peněženka"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Připraveno"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Nastavit platbu"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovní profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim Letadlo"</string>
     <string name="add_tile" msgid="6239678623873086686">"Přidat dlaždici"</string>
@@ -713,20 +738,23 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Dál upozorňovat"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Vypnout oznámení"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Tiché"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Ticho"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Výchozí"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Bublina"</string>
+    <string name="notification_automatic_title" msgid="3745465364578762652">"Automaticky"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žádný zvuk ani vibrace a zobrazuje se níže v sekci konverzací"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Vyzvání nebo vibruje podle nastavení telefonu"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Vyzvání nebo vibruje podle nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> mají ve výchozím nastavení podobu bublin."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žádný zvuk ani vibrace a zobrazovat níže v sekci konverzací"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací jako plovoucí bublina a na obrazovce uzamčení zobrazuje profilovou fotku"</string>
+    <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Nechat systém rozhodnout, zda má toto oznámení vydat zvuk či zavibrovat"</string>
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stav:&lt;/b&gt; priorita zvýšena na Výchozí"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stav:&lt;/b&gt; priorita snížena na Tiché"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno výše"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; zařazeno níže"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Vždy se zobrazuje na začátku vašich oznámení (i když je zapnutý prioritní režim)"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"Prioritní konverzace"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žádné nedávné bubliny"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tuto skupinu oznámení tady nelze nakonfigurovat"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Zprostředkované oznámení"</string>
@@ -741,6 +769,13 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Tato aplikace se zobrazuje přes ostatní aplikace na obrazovce a využívá mikrofon a fotoaparát."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Nastavení"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
+    <string name="feedback_alerted" msgid="5192459808484271208">"U tohoto oznámení systém automaticky &lt;b&gt;zvýšil prioritu na Výchozí&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"U tohoto oznámení systém automaticky &lt;b&gt;snížil prioritu na Tiché&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Toto oznámení bylo na panelu automaticky &lt;b&gt;zařazeno výše&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Toto oznámení bylo na panelu automaticky &lt;b&gt;zařazeno níže&lt;/b&gt;."</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Sdělte vývojáři svůj názor. Udělal to správně?"</string>
+    <string name="feedback_response" msgid="4671729244976641339">"Děkujeme za zpětnou vazbu."</string>
+    <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly otevřeny"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly zavřeny"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Povolit oznámení z tohoto kanálu"</string>
@@ -882,17 +917,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Zobrazit ikony oznámení s nízkou prioritou"</string>
     <string name="other" msgid="429768510980739978">"Jiné"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Čára rozdělující obrazovku"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Levá část na celou obrazovku"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"70 % vlevo"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"50 % vlevo"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"30 % vlevo"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Pravá část na celou obrazovku"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Horní část na celou obrazovku"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"70 % nahoře"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"50 % nahoře"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"30 % nahoře"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Dolní část na celou obrazovku"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"odstranit dlaždici"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"přidat dlaždici na konec"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Přesunout dlaždici"</string>
@@ -900,37 +924,24 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Přesunout na pozici <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Přidat dlaždici na pozici <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozice <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Karta byla přidána"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Karta byla odstraněna"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor rychlého nastavení"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Oznámení aplikace <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikace v režimu rozdělené obrazovky nemusí fungovat."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Aplikace nepodporuje režim rozdělené obrazovky."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Aplikace na sekundárním displeji nemusí fungovat."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Aplikace nepodporuje spuštění na sekundárních displejích."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otevřít nastavení."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Otevřít rychlé nastavení."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Zavřít rychlé nastavení."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Budík je nastaven."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Jste přihlášeni jako <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"zvolit uživatele"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nejste připojeni k internetu"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Otevřít podrobnosti."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Nedostupné, protože <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otevřít nastavení aplikace <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Upravit pořadí nastavení."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Nabídka vypínače"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stránka <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Obrazovka uzamčení"</string>
-    <string name="pip_phone_expand" msgid="1424988917240616212">"Rozbalit"</string>
-    <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimalizovat"</string>
-    <string name="pip_phone_close" msgid="8801864042095341824">"Zavřít"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Nastavení"</string>
-    <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Nápovědu zavřete přetažením dolů"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"Nabídka"</string>
-    <string name="pip_notification_title" msgid="8661573026059630525">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Pokud nechcete, aby aplikace <xliff:g id="NAME">%s</xliff:g> tuto funkci používala, klepnutím otevřete nastavení a funkci vypněte."</string>
-    <string name="pip_play" msgid="333995977693142810">"Přehrát"</string>
-    <string name="pip_pause" msgid="1139598607050555845">"Pozastavit"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Přeskočit na další"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Přeskočit na předchozí"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Změnit velikost"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se vypnul z důvodu zahřátí"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Nyní telefon funguje jako obvykle.\nKlepnutím zobrazíte další informace"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon byl příliš zahřátý, proto se vypnul, aby vychladl. Nyní telefon funguje jako obvykle.\n\nTelefon se může příliš zahřát v těchto případech:\n	• používání náročných aplikací (např. her, videí nebo navigace),\n	• stahování nebo nahrávání velkých souborů,\n	• používání telefonu při vysokých teplotách."</string>
@@ -1004,48 +1015,51 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikace využívají tato oprávnění: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"Aplikace <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> používá aplikaci <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Aplikace <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> nedávno použila aplikaci <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(podniková verze)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonní hovor"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(prostřednictvím aplikace <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparát"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"poloha"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzory jsou vypnuty"</string>
     <string name="device_services" msgid="1549944177856658705">"Služby zařízení"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Klepnutím aplikaci restartujete a přejdete na režim celé obrazovky"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Nastavení bublin aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Rozbalovací nabídka"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Přidat zpět do sady"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Spravovat"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"Oznámení <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikace <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikace <xliff:g id="APP_NAME">%2$s</xliff:g> a dalších (<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>)"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Přesunout"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Přesunout vlevo nahoru"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Přesunout vpravo nahoru"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Přesunout vlevo dolů"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Přesunout vpravo dolů"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Zavřít bublinu"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nezobrazovat konverzaci v bublinách"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatujte pomocí bublin"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nové konverzace se zobrazují jako plovoucí ikony, neboli bubliny. Klepnutím bublinu otevřete. Přetažením ji posunete."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Nastavení bublin můžete kdykoli upravit"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bubliny pro tuto aplikaci můžete vypnout klepnutím na Spravovat"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Rozumím"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"Nastavení <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzace byla nastavena jako prioritní"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Chování prioritních konverzací:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzací"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zobrazovat profilovou fotku na zámku obrazovky"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazuje se jako plovoucí bublina nad aplikacemi"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Prioritní konverzace"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Tyto konverzace se zařazují na začátek seznamu, a když je zapnutý prioritní režim, mohou se vám vždy zobrazit"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Na obrazovce uzamčení se zobrazují profilové obrázky"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Tyto konverzace snadno najdete v bublinách na ploše"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Přerušit režim Nerušit"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Rozumím"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavení"</string>
-    <string name="magnification_overlay_title" msgid="6584179429612427958">"Překryvné zvětšovací okno"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Zvětšovací okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládací prvky zvětšovacího okna"</string>
+    <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Přiblížit"</string>
+    <string name="accessibility_control_zoom_out" msgid="69578832020304084">"Oddálit"</string>
+    <string name="accessibility_control_move_up" msgid="6622825494014720136">"Přesunout nahoru"</string>
+    <string name="accessibility_control_move_down" msgid="5390922476900974512">"Přesunout dolů"</string>
+    <string name="accessibility_control_move_left" msgid="8156206978511401995">"Přesunout doleva"</string>
+    <string name="accessibility_control_move_right" msgid="8926821093629582888">"Přesunout doprava"</string>
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Přepínač zvětšení"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zvětšit celou obrazovku"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zvětšit část obrazovky"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Přepnout"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tlačítko přístupnosti bylo nahrazeno gestem přístupnosti\n\n"<annotation id="link">"Zobrazit nastavení"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Přesunutím tlačítka k okraji ho dočasně skryjete"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Přesunout vlevo nahoru"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Přesunout vpravo nahoru"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Přesunout vlevo dolů"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Přesunout vpravo dolů"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Přesunout k okraji a skrýt"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Přesunout okraj ven a zobrazit"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Ovládání zařízení"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Přidejte si ovládací prvky pro připojená zařízení"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Přidejte ovládací prvky pro připojená zařízení"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavení ovládání zařízení"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Podržením vypínače zobrazíte ovládací prvky"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Vyberte aplikaci, pro kterou chcete přidat ovládací prvky"</string>
@@ -1075,6 +1089,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Přidat"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Návrh z aplikace <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládací prvky aktualizovány"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Zařízení uzamčeno"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kód PIN obsahuje písmena nebo symboly"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Ověření zařízení <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Chybný PIN"</string>
@@ -1110,6 +1125,41 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (odpojeno)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Spojení se nezdařilo. Zkuste to znovu."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovat nové zařízení"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo sestavení"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo sestavení bylo zkopírováno do schránky."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Otevřít konverzaci"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Widgety konverzací"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Klepnutím na konverzaci ji přidáte na plochu"</string>
+    <string name="no_conversations_text" msgid="7362374212649891057">"Vraťte se sem, až dostanete nějaké zprávy"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Prioritní konverzace"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Poslední konverzace"</string>
+    <string name="okay" msgid="6490552955618608554">"OK"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Před <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Před méně než <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Před více než <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Narozeniny"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"<xliff:g id="NAME">%1$s</xliff:g> má narozeniny"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Brzy má narozeniny"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> bude mít brzy narozeniny"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Výročí"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g> má výročí"</string>
+    <string name="location_status" msgid="1294990572202541812">"Sdílí polohu"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> sdílí polohu"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Nový příběh"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> sdílí nový příběh"</string>
+    <string name="video_status" msgid="4548544654316843225">"Sledování"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Poslouchám"</string>
+    <string name="game_status" msgid="1340694320630973259">"Hraje"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat."</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazit poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Konverzace"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> posílá obrázek"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problém s načtením měřiče baterie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím zobrazíte další informace"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Budík nenastaven"</string>
 </resources>

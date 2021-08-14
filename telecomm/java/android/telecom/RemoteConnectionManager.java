@@ -45,7 +45,10 @@ public class RemoteConnectionManager {
                         outgoingConnectionServiceRpc,
                         mOurConnectionServiceImpl);
                 mRemoteConnectionServices.put(componentName, remoteConnectionService);
-            } catch (RemoteException ignored) {
+            } catch (RemoteException e) {
+                Log.w(RemoteConnectionManager.this,
+                        "error when addConnectionService of %s: %s", componentName,
+                        e.toString());
             }
         }
     }

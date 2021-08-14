@@ -26,7 +26,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -34,6 +33,8 @@ import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.ValueAnimator;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.hardware.power.Boost;
+import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.view.Choreographer;
@@ -46,11 +47,12 @@ import android.view.animation.TranslateAnimation;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.AnimationThread;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -64,8 +66,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @SmallTest
 @Presubmit
-@RunWith(WindowTestRunner.class)
-public class SurfaceAnimationRunnerTest extends WindowTestsBase {
+public class SurfaceAnimationRunnerTest {
 
     @Mock SurfaceControl mMockSurface;
     @Mock Transaction mMockTransaction;
@@ -75,6 +76,9 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
     private SurfaceAnimationRunner mSurfaceAnimationRunner;
     private CountDownLatch mFinishCallbackLatch;
 
+    private final Handler mAnimationThreadHandler = AnimationThread.getHandler();
+    private final Handler mSurfaceAnimationHandler = SurfaceAnimationThread.getHandler();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -82,6 +86,12 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         mFinishCallbackLatch = new CountDownLatch(1);
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(null /* callbackProvider */, null,
                 mMockTransaction, mMockPowerManager);
+    }
+
+    @After
+    public void tearDown() {
+        SurfaceAnimationThread.dispose();
+        AnimationThread.dispose();
     }
 
     private void finishedCallback() {
@@ -101,8 +111,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         verify(mMockTransaction, atLeastOnce()).setMatrix(eq(mMockSurface), eq(m), any());
         verify(mMockTransaction, atLeastOnce()).setAlpha(eq(mMockSurface), eq(1.0f));
 
-        waitHandlerIdle(SurfaceAnimationThread.getHandler());
-        mFinishCallbackLatch.await(1, SECONDS);
+        waitHandlerIdle(mSurfaceAnimationHandler);
         assertFinishCallbackCalled();
 
         m.setTranslate(10, 0);
@@ -120,7 +129,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
                 .startAnimation(createTranslateAnimation(), mMockSurface, mMockTransaction,
                 this::finishedCallback);
         mSurfaceAnimationRunner.onAnimationCancelled(mMockSurface);
-        waitUntilHandlersIdle();
+        waitHandlerIdle(mAnimationThreadHandler);
         assertTrue(mSurfaceAnimationRunner.mPendingAnimations.isEmpty());
         assertFinishCallbackNotCalled();
     }
@@ -135,7 +144,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         mSurfaceAnimationRunner.onAnimationCancelled(mMockSurface);
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
-        waitUntilHandlersIdle();
+        waitHandlerIdle(mAnimationThreadHandler);
         assertFinishCallbackNotCalled();
     }
 
@@ -180,23 +189,20 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         mSurfaceAnimationRunner.continueStartingAnimations();
         waitUntilNextFrame();
-        waitHandlerIdle(SurfaceAnimationThread.getHandler());
+        waitHandlerIdle(mSurfaceAnimationHandler);
         assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
-        mFinishCallbackLatch.await(1, SECONDS);
         assertFinishCallbackCalled();
     }
 
     @Test
-    public void testPowerHint() throws Exception {
+    public void testPowerBoost() throws Exception {
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), null,
                 mMockTransaction, mMockPowerManager);
         mSurfaceAnimationRunner.startAnimation(createTranslateAnimation(), mMockSurface,
                 mMockTransaction, this::finishedCallback);
         waitUntilNextFrame();
 
-        // TODO: For some reason we don't have access to PowerHint definition from the tests. For
-        // now let's just verify that we got some kind of hint.
-        verify(mMockPowerManager).powerHint(anyInt(), anyInt());
+        verify(mMockPowerManager).setPowerBoost(eq(Boost.INTERACTION), eq(0));
     }
 
     private void waitUntilNextFrame() throws Exception {
@@ -206,7 +212,15 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         latch.await();
     }
 
+    private static void waitHandlerIdle(Handler handler) {
+        handler.runWithScissors(() -> { }, 0 /* timeout */);
+    }
+
     private void assertFinishCallbackCalled() {
+        try {
+            assertTrue(mFinishCallbackLatch.await(5, SECONDS));
+        } catch (InterruptedException ignored) {
+        }
         assertEquals(0, mFinishCallbackLatch.getCount());
     }
 

@@ -17,6 +17,7 @@ package android.util;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
@@ -241,7 +242,7 @@ public final class Rational extends Number implements Comparable<Rational> {
      * @return A boolean that determines whether or not the two Rational objects are equal.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         return obj instanceof Rational && equals((Rational) obj);
     }
 

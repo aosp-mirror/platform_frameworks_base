@@ -11,7 +11,8 @@
             android:directBootAware="true">
 
         <receiver android:name=".InputDeviceReceiver"
-                android:label="@string/keyboard_layouts_label">
+            android:label="@string/keyboard_layouts_label"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS" />
             </intent-filter>

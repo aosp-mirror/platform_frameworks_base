@@ -16,14 +16,19 @@
 
 package com.android.overlaytest;
 
+import static com.android.overlaytest.OverlayBaseTest.APP_OVERLAY_ONE_PKG;
+import static com.android.overlaytest.OverlayBaseTest.APP_OVERLAY_TWO_PKG;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
 import android.content.om.OverlayManagerTransaction;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.UserHandle;
 
@@ -40,8 +45,6 @@ import java.util.List;
 @RunWith(JUnit4.class)
 @MediumTest
 public class TransactionTest {
-    static final String APP_OVERLAY_ONE_PKG = "com.android.overlaytest.app_overlay_one";
-    static final String APP_OVERLAY_TWO_PKG = "com.android.overlaytest.app_overlay_two";
 
     private Context mContext;
     private Resources mResources;
@@ -58,8 +61,8 @@ public class TransactionTest {
         mUserHandle = UserHandle.of(mUserId);
 
         LocalOverlayManager.toggleOverlaysAndWait(
-                new String[]{},
-                new String[]{APP_OVERLAY_ONE_PKG, APP_OVERLAY_TWO_PKG});
+                new OverlayIdentifier[]{},
+                new OverlayIdentifier[]{APP_OVERLAY_ONE_PKG, APP_OVERLAY_TWO_PKG});
     }
 
     @Test
@@ -78,8 +81,8 @@ public class TransactionTest {
         List<OverlayInfo> ois =
                 mOverlayManager.getOverlayInfosForTarget("com.android.overlaytest", mUserHandle);
         assertEquals(ois.size(), 2);
-        assertEquals(ois.get(0).packageName, APP_OVERLAY_ONE_PKG);
-        assertEquals(ois.get(1).packageName, APP_OVERLAY_TWO_PKG);
+        assertEquals(ois.get(0).getOverlayIdentifier(), APP_OVERLAY_ONE_PKG);
+        assertEquals(ois.get(1).getOverlayIdentifier(), APP_OVERLAY_TWO_PKG);
 
         OverlayManagerTransaction t2 = new OverlayManagerTransaction.Builder()
                 .setEnabled(APP_OVERLAY_TWO_PKG, true)
@@ -92,8 +95,8 @@ public class TransactionTest {
         List<OverlayInfo> ois2 =
                 mOverlayManager.getOverlayInfosForTarget("com.android.overlaytest", mUserHandle);
         assertEquals(ois2.size(), 2);
-        assertEquals(ois2.get(0).packageName, APP_OVERLAY_TWO_PKG);
-        assertEquals(ois2.get(1).packageName, APP_OVERLAY_ONE_PKG);
+        assertEquals(ois2.get(0).getOverlayIdentifier(), APP_OVERLAY_TWO_PKG);
+        assertEquals(ois2.get(1).getOverlayIdentifier(), APP_OVERLAY_ONE_PKG);
 
         OverlayManagerTransaction t3 = new OverlayManagerTransaction.Builder()
                 .setEnabled(APP_OVERLAY_TWO_PKG, false)
@@ -105,8 +108,8 @@ public class TransactionTest {
         List<OverlayInfo> ois3 =
                 mOverlayManager.getOverlayInfosForTarget("com.android.overlaytest", mUserHandle);
         assertEquals(ois3.size(), 2);
-        assertEquals(ois3.get(0).packageName, APP_OVERLAY_TWO_PKG);
-        assertEquals(ois3.get(1).packageName, APP_OVERLAY_ONE_PKG);
+        assertEquals(ois3.get(0).getOverlayIdentifier(), APP_OVERLAY_TWO_PKG);
+        assertEquals(ois3.get(1).getOverlayIdentifier(), APP_OVERLAY_ONE_PKG);
     }
 
     @Test
@@ -116,7 +119,7 @@ public class TransactionTest {
 
         OverlayManagerTransaction t = new OverlayManagerTransaction.Builder()
                 .setEnabled(APP_OVERLAY_ONE_PKG, true)
-                .setEnabled("does-not-exist", true)
+                .setEnabled(new OverlayIdentifier("does-not-exist"), true)
                 .setEnabled(APP_OVERLAY_TWO_PKG, true)
                 .build();
         assertThrows(SecurityException.class, () -> mOverlayManager.commit(t));
@@ -125,9 +128,10 @@ public class TransactionTest {
         assertOverlayIsEnabled(APP_OVERLAY_TWO_PKG, false, mUserId);
     }
 
-    private void assertOverlayIsEnabled(final String packageName, boolean enabled, int userId) {
-        final OverlayInfo oi = mOverlayManager.getOverlayInfo(packageName, UserHandle.of(userId));
+    private void assertOverlayIsEnabled(final OverlayIdentifier overlay, boolean enabled,
+            int userId) {
+        final OverlayInfo oi = mOverlayManager.getOverlayInfo(overlay, UserHandle.of(userId));
         assertNotNull(oi);
-        assertEquals(oi.isEnabled(), enabled);
+        assertEquals(enabled, oi.isEnabled());
     }
 }

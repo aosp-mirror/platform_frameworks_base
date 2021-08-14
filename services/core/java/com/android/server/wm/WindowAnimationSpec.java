@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
 import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -47,19 +47,19 @@ public class WindowAnimationSpec implements AnimationSpec {
     private final ThreadLocal<TmpValues> mThreadLocalTmps = ThreadLocal.withInitial(TmpValues::new);
     private final boolean mCanSkipFirstFrame;
     private final boolean mIsAppAnimation;
-    private final Rect mStackBounds = new Rect();
-    private int mStackClipMode;
+    private final Rect mRootTaskBounds = new Rect();
+    private int mRootTaskClipMode;
     private final Rect mTmpRect = new Rect();
     private final float mWindowCornerRadius;
 
     public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame,
             float windowCornerRadius)  {
-        this(animation, position, null /* stackBounds */, canSkipFirstFrame, STACK_CLIP_NONE,
+        this(animation, position, null /* rootTaskBounds */, canSkipFirstFrame, ROOT_TASK_CLIP_NONE,
                 false /* isAppAnimation */, windowCornerRadius);
     }
 
-    public WindowAnimationSpec(Animation animation, Point position, Rect stackBounds,
-            boolean canSkipFirstFrame, int stackClipMode, boolean isAppAnimation,
+    public WindowAnimationSpec(Animation animation, Point position, Rect rootTaskBounds,
+            boolean canSkipFirstFrame, int rootTaskClipMode, boolean isAppAnimation,
             float windowCornerRadius) {
         mAnimation = animation;
         if (position != null) {
@@ -68,9 +68,9 @@ public class WindowAnimationSpec implements AnimationSpec {
         mWindowCornerRadius = windowCornerRadius;
         mCanSkipFirstFrame = canSkipFirstFrame;
         mIsAppAnimation = isAppAnimation;
-        mStackClipMode = stackClipMode;
-        if (stackBounds != null) {
-            mStackBounds.set(stackBounds);
+        mRootTaskClipMode = rootTaskClipMode;
+        if (rootTaskBounds != null) {
+            mRootTaskBounds.set(rootTaskBounds);
         }
     }
 
@@ -94,13 +94,13 @@ public class WindowAnimationSpec implements AnimationSpec {
         t.setAlpha(leash, tmp.transformation.getAlpha());
 
         boolean cropSet = false;
-        if (mStackClipMode == STACK_CLIP_NONE) {
+        if (mRootTaskClipMode == ROOT_TASK_CLIP_NONE) {
             if (tmp.transformation.hasClipRect()) {
                 t.setWindowCrop(leash, tmp.transformation.getClipRect());
                 cropSet = true;
             }
         } else {
-            mTmpRect.set(mStackBounds);
+            mTmpRect.set(mRootTaskBounds);
             if (tmp.transformation.hasClipRect()) {
                 mTmpRect.intersect(tmp.transformation.getClipRect());
             }

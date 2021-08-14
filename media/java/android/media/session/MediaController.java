@@ -16,8 +16,11 @@
 
 package android.media.session;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -27,8 +30,10 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.media.VolumeProvider.ControlType;
 import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,6 +46,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -430,7 +439,7 @@ public final class MediaController {
         }
 
         if (mSessionInfo == null) {
-            Log.w(TAG, "sessionInfo shouldn't be null.");
+            Log.d(TAG, "sessionInfo is not set.");
             mSessionInfo = Bundle.EMPTY;
         } else if (MediaSession.hasCustomParcelable(mSessionInfo)) {
             Log.w(TAG, "sessionInfo contains custom parcelable. Ignoring.");
@@ -456,20 +465,15 @@ public final class MediaController {
         return mTag;
     }
 
-    /*
-     * @hide
-     */
-    ISessionController getSessionBinder() {
-        return mSessionBinder;
-    }
-
     /**
      * @hide
+     * Returns whether this and {@code other} media controller controls the same session.
      */
-    @UnsupportedAppUsage
-    public boolean controlsSameSession(MediaController other) {
+    @UnsupportedAppUsage(publicAlternatives = "Check equality of {@link #getSessionToken() tokens} "
+            + "instead.", maxTargetSdk = Build.VERSION_CODES.R)
+    public boolean controlsSameSession(@Nullable MediaController other) {
         if (other == null) return false;
-        return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();
+        return mToken.equals(other.mToken);
     }
 
     private void addCallbackLocked(Callback cb, Handler handler) {
@@ -510,6 +514,17 @@ public final class MediaController {
             mCbRegistered = false;
         }
         return success;
+    }
+
+    /**
+     * Gets associated handler for the given callback.
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler getHandlerForCallback(Callback cb) {
+        synchronized (mLock) {
+            return getHandlerForCallbackLocked(cb);
+        }
     }
 
     private MessageHandler getHandlerForCallbackLocked(Callback cb) {
@@ -950,6 +965,14 @@ public final class MediaController {
      * this session.
      */
     public static final class PlaybackInfo implements Parcelable {
+
+        /**
+         * @hide
+         */
+        @IntDef({PLAYBACK_TYPE_LOCAL, PLAYBACK_TYPE_REMOTE})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PlaybackType {}
+
         /**
          * The session uses local playback.
          */
@@ -959,7 +982,7 @@ public final class MediaController {
          */
         public static final int PLAYBACK_TYPE_REMOTE = 2;
 
-        private final int mVolumeType;
+        private final int mPlaybackType;
         private final int mVolumeControl;
         private final int mMaxVolume;
         private final int mCurrentVolume;
@@ -967,27 +990,35 @@ public final class MediaController {
         private final String mVolumeControlId;
 
         /**
+         * Creates a new playback info.
+         *
+         * @param playbackType The playback type. Should be {@link #PLAYBACK_TYPE_LOCAL} or
+         *                     {@link #PLAYBACK_TYPE_REMOTE}
+         * @param volumeControl The volume control. Should be one of:
+         *                      {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE},
+         *                      {@link VolumeProvider#VOLUME_CONTROL_RELATIVE}, and
+         *                      {@link VolumeProvider#VOLUME_CONTROL_FIXED}.
+         * @param maxVolume The max volume. Should be equal or greater than zero.
+         * @param currentVolume The current volume. Should be in the interval [0, maxVolume].
+         * @param audioAttrs The audio attributes for this playback. Should not be null.
+         * @param volumeControlId The volume control ID. This is used for matching
+         *                        {@link RoutingSessionInfo} and {@link MediaSession}.
          * @hide
          */
-        public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs) {
-            this(type, control, max, current, attrs, null);
-        }
-
-        /**
-         * @hide
-         */
-        public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs,
-                String volumeControlId) {
-            mVolumeType = type;
-            mVolumeControl = control;
-            mMaxVolume = max;
-            mCurrentVolume = current;
-            mAudioAttrs = attrs;
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public PlaybackInfo(@PlaybackType int playbackType, @ControlType int volumeControl,
+                @IntRange(from = 0) int maxVolume, @IntRange(from = 0) int currentVolume,
+                @NonNull AudioAttributes audioAttrs, @Nullable String volumeControlId) {
+            mPlaybackType = playbackType;
+            mVolumeControl = volumeControl;
+            mMaxVolume = maxVolume;
+            mCurrentVolume = currentVolume;
+            mAudioAttrs = audioAttrs;
             mVolumeControlId = volumeControlId;
         }
 
         PlaybackInfo(Parcel in) {
-            mVolumeType = in.readInt();
+            mPlaybackType = in.readInt();
             mVolumeControl = in.readInt();
             mMaxVolume = in.readInt();
             mCurrentVolume = in.readInt();
@@ -1005,7 +1036,7 @@ public final class MediaController {
          * @return The type of playback this session is using.
          */
         public int getPlaybackType() {
-            return mVolumeType;
+            return mPlaybackType;
         }
 
         /**
@@ -1016,8 +1047,7 @@ public final class MediaController {
          * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
          * </ul>
          *
-         * @return The type of volume control that may be used with this
-         *         session.
+         * @return The type of volume control that may be used with this session.
          */
         public int getVolumeControl() {
             return mVolumeControl;
@@ -1075,7 +1105,7 @@ public final class MediaController {
 
         @Override
         public String toString() {
-            return "volumeType=" + mVolumeType + ", volumeControl=" + mVolumeControl
+            return "playbackType=" + mPlaybackType + ", volumeControlType=" + mVolumeControl
                     + ", maxVolume=" + mMaxVolume + ", currentVolume=" + mCurrentVolume
                     + ", audioAttrs=" + mAudioAttrs + ", volumeControlId=" + mVolumeControlId;
         }
@@ -1087,7 +1117,7 @@ public final class MediaController {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mVolumeType);
+            dest.writeInt(mPlaybackType);
             dest.writeInt(mVolumeControl);
             dest.writeInt(mMaxVolume);
             dest.writeInt(mCurrentVolume);

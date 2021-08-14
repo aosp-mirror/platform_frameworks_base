@@ -56,8 +56,8 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
     jobject jFrequencyResponses = NULL;
     jobject jChannelMappings = NULL;
 
-    jDeviceId = env->NewStringUTF(String8(microphoneInfo->getDeviceId()).string());
-    jAddress = env->NewStringUTF(String8(microphoneInfo->getAddress()).string());
+    jDeviceId = env->NewStringUTF(microphoneInfo->getDeviceId().c_str());
+    jAddress = env->NewStringUTF(microphoneInfo->getAddress().c_str());
     if (microphoneInfo->getGeometricLocation().size() != 3 ||
             microphoneInfo->getOrientation().size() != 3) {
         jStatus = nativeToJavaStatus(BAD_VALUE);

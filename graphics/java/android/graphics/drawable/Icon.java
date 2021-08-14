@@ -16,11 +16,14 @@
 
 package android.graphics.drawable;
 
+import static android.content.Context.CONTEXT_INCLUDE_CODE;
+import static android.content.Context.CONTEXT_RESTRICTED;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
-import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,6 +42,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -243,7 +248,7 @@ public final class Icon implements Parcelable {
      * Note: This resource may not be available if the application changes at all, and it is
      * up to the caller to ensure safety if this resource is re-used and/or persisted.
      */
-    @IdRes
+    @DrawableRes
     public int getResId() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResId() on " + this);
@@ -332,7 +337,7 @@ public final class Icon implements Parcelable {
      */
     public Drawable loadDrawable(Context context) {
         final Drawable result = loadDrawableInner(context);
-        if (result != null && (mTintList != null || mBlendMode != DEFAULT_BLEND_MODE)) {
+        if (result != null && hasTint()) {
             result.mutate();
             result.setTintList(mTintList);
             result.setTintBlendMode(mBlendMode);
@@ -364,7 +369,9 @@ public final class Icon implements Parcelable {
                         final PackageManager pm = context.getPackageManager();
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(
-                                    resPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                                    resPackage,
+                                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                    | PackageManager.GET_SHARED_LIBRARY_FILES);
                             if (ai != null) {
                                 mObj1 = pm.getResourcesForApplication(ai);
                             } else {
@@ -441,10 +448,22 @@ public final class Icon implements Parcelable {
                 resPackage = context.getPackageName();
             }
             if (getResources() == null && !(getResPackage().equals("android"))) {
-                final PackageManager pm = context.getPackageManager();
+                // TODO(b/173307037): Move CONTEXT_INCLUDE_CODE to ContextImpl.createContextAsUser
+                final Context userContext;
+                if (context.getUserId() == userId) {
+                    userContext = context;
+                } else {
+                    final boolean sameAppWithProcess =
+                            UserHandle.isSameApp(context.getApplicationInfo().uid, Process.myUid());
+                    final int flags = (sameAppWithProcess ? CONTEXT_INCLUDE_CODE : 0)
+                            | CONTEXT_RESTRICTED;
+                    userContext = context.createContextAsUser(UserHandle.of(userId), flags);
+                }
+
+                final PackageManager pm = userContext.getPackageManager();
                 try {
                     // assign getResources() as the correct user
-                    mObj1 = pm.getResourcesForApplicationAsUser(resPackage, userId);
+                    mObj1 = pm.getResourcesForApplication(resPackage);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG, String.format("Unable to find pkg=%s user=%d",
                                     getResPackage(),
@@ -467,7 +486,7 @@ public final class Icon implements Parcelable {
         if ((mType == TYPE_BITMAP || mType == TYPE_ADAPTIVE_BITMAP) &&
             getBitmap().isMutable() &&
             getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
-            setBitmap(getBitmap().createAshmemBitmap());
+            setBitmap(getBitmap().asShared());
         }
     }
 
@@ -746,6 +765,11 @@ public final class Icon implements Parcelable {
         return this;
     }
 
+    /** @hide */
+    public @Nullable ColorStateList getTintList() {
+        return mTintList;
+    }
+
     /**
      * Store a blending mode to use whenever this Icon is drawn.
      *
@@ -766,6 +790,11 @@ public final class Icon implements Parcelable {
     public @NonNull Icon setTintBlendMode(@NonNull BlendMode mode) {
         mBlendMode = mode;
         return this;
+    }
+
+    /** @hide */
+    public @NonNull BlendMode getTintBlendMode() {
+        return mBlendMode;
     }
 
     /** @hide */

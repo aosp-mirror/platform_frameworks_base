@@ -269,8 +269,11 @@ public final class MicrophoneInfo {
 
     /**
      * Returns A {@link Coordinate3F} object that represents the geometric location of microphone
-     * in meters, from bottom-left-back corner of appliance. X-axis, Y-axis and Z-axis show
-     * as the x, y, z values.
+     * in meters. X-axis, Y-axis and Z-axis show as the x, y, z values. For mobile devices, the axes
+     * originate from the bottom-left-back corner of the appliance. In devices with
+     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE}, axes are defined with respect
+     * to the vehicle body frame, originating from the center of the vehicle's rear axle.
+     * @see <a href="https://source.android.com/devices/sensors/sensor-types#auto_axes">auto axes</a>
      *
      * @return the geometric location of the microphone or {@link #POSITION_UNKNOWN} if the
      * geometric location is unknown

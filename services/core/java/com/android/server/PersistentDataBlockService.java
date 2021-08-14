@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -155,14 +156,15 @@ public class PersistentDataBlockService extends SystemService {
     private int getAllowedUid(int userHandle) {
         String allowedPackage = mContext.getResources()
                 .getString(R.string.config_persistentDataPackageName);
-        PackageManager pm = mContext.getPackageManager();
         int allowedUid = -1;
-        try {
-            allowedUid = pm.getPackageUidAsUser(allowedPackage,
-                    PackageManager.MATCH_SYSTEM_ONLY, userHandle);
-        } catch (PackageManager.NameNotFoundException e) {
-            // not expected
-            Slog.e(TAG, "not able to find package " + allowedPackage, e);
+        if (!TextUtils.isEmpty(allowedPackage)) {
+            try {
+                allowedUid = mContext.getPackageManager().getPackageUidAsUser(
+                        allowedPackage, PackageManager.MATCH_SYSTEM_ONLY, userHandle);
+            } catch (PackageManager.NameNotFoundException e) {
+                // not expected
+                Slog.e(TAG, "not able to find package " + allowedPackage, e);
+            }
         }
         return allowedUid;
     }
@@ -373,15 +375,38 @@ public class PersistentDataBlockService extends SystemService {
 
         try {
             FileChannel channel = getBlockOutputChannel();
+            // Format the data selectively.
+            //
+            // 1. write header, set length = 0
             int header_size = DIGEST_SIZE_BYTES + HEADER_SIZE;
             ByteBuffer buf = ByteBuffer.allocate(header_size);
             buf.put(new byte[DIGEST_SIZE_BYTES]);
             buf.putInt(PARTITION_TYPE_MARKER);
             buf.putInt(0);
+            buf.flip();
             channel.write(buf);
-            // corrupt the payload explicitly
+            channel.force(true);
+
+            // 2. corrupt the legacy FRP data explicitly
             int payload_size = (int) getBlockDeviceSize() - header_size;
-            buf = ByteBuffer.allocate(payload_size);
+            buf = ByteBuffer.allocate(payload_size
+                          - TEST_MODE_RESERVED_SIZE - FRP_CREDENTIAL_RESERVED_SIZE - 1);
+            channel.write(buf);
+            channel.force(true);
+
+            // 3. skip the test mode data and leave it unformat
+            //    This is for a feature that enables testing.
+            channel.position(channel.position() + TEST_MODE_RESERVED_SIZE);
+
+            // 4. wipe the FRP_CREDENTIAL explicitly
+            buf = ByteBuffer.allocate(FRP_CREDENTIAL_RESERVED_SIZE);
+            channel.write(buf);
+            channel.force(true);
+
+            // 5. set unlock = 0 because it's a formatPartitionLocked
+            buf = ByteBuffer.allocate(FRP_CREDENTIAL_RESERVED_SIZE);
+            buf.put((byte)0);
+            buf.flip();
             channel.write(buf);
             channel.force(true);
         } catch (IOException e) {

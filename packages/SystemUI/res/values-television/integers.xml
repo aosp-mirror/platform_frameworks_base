@@ -17,6 +17,9 @@
 <resources>
     <!-- The position of the volume dialog on the screen.
          See com.android.systemui.volume.VolumeDialogImpl.
-         Value 81 corresponds to BOTTOM|CENTER_HORIZONTAL. -->
-    <integer name="volume_dialog_gravity">81</integer>
+         Value 81 corresponds to BOTTOM|CENTER_HORIZONTAL.
+         Value 21 corresponds to RIGHT|CENTER_VERTICAL. -->
+    <integer name="volume_dialog_gravity">21</integer>
+
+    <integer name="privacy_chip_animation_millis">300</integer>
 </resources>

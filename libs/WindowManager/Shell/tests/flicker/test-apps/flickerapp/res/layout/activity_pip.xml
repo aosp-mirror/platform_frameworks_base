@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2020 The Android Open Source Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/holo_blue_bright">
+
+    <!-- All the buttons (and other clickable elements) should be arranged in a way so that it is
+         possible to "cycle" over all them by clicking on the D-Pad DOWN button. The way we do it
+         here is by arranging them this vertical LL and by relying on the nextFocusDown attribute
+         where things are arranged differently and to circle back up to the top once we reach the
+         bottom. -->
+
+    <Button
+        android:id="@+id/enter_pip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter PIP"
+        android:onClick="enterPip"/>
+
+    <CheckBox
+        android:id="@+id/with_custom_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="With custom actions"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:checkedButton="@id/ratio_default">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ratio"/>
+
+        <RadioButton
+            android:id="@+id/ratio_default"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Default"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_square"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Square [1:1]"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_wide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wide [2:1]"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_tall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tall [1:2]"
+            android:onClick="onRatioSelected"/>
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Media Session"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/media_session_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:nextFocusDown="@id/media_session_stop"
+            android:text="Start"/>
+
+        <Button
+            android:id="@+id/media_session_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:nextFocusDown="@id/enter_pip"
+            android:text="Stop"/>
+
+    </LinearLayout>
+
+</LinearLayout>

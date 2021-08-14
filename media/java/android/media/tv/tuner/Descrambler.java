@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.filter.Filter;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,12 +110,17 @@ public class Descrambler implements AutoCloseable {
     }
 
     /**
-     * Set a key token to link descrambler to a key slot
+     * Set a key token to link descrambler to a key slot. Use {@link isValidKeyToken(byte[])} to
+     * validate the key token format. Invalid key token would cause no-op and return
+     * {@link Tuner.RESULT_INVALID_ARGUMENT}.
      *
-     * A descrambler instance can have only one key slot to link, but a key slot can hold a few
-     * keys for different purposes.
+     * <p>A descrambler instance can have only one key slot to link, but a key slot can hold a few
+     * keys for different purposes. {@link Tuner.VOID_KEYTOKEN} is considered valid.
      *
-     * @param keyToken the token to be used to link the key slot.
+     * @param keyToken the token to be used to link the key slot. Use {@link Tuner#VOID_KEYTOKEN}
+     *        to remove the current key from descrambler. If the current keyToken comes from a
+     *        MediaCas session, use {@link Tuner#VOID_KEYTOKEN} to remove current key before
+     *        closing the MediaCas session.
      * @return result status of the operation.
      */
     @Result
@@ -122,8 +128,27 @@ public class Descrambler implements AutoCloseable {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             Objects.requireNonNull(keyToken, "key token must not be null");
+            if (!isValidKeyToken(keyToken)) {
+                return Tuner.RESULT_INVALID_ARGUMENT;
+            }
             return nativeSetKeyToken(keyToken);
         }
+    }
+
+    /**
+     * Validate the key token format as the parameter of {@link setKeyToken(byte[])}.
+     *
+     * <p>The key token is expected to be less than 128 bits.
+     *
+     * @param keyToken the token to be validated.
+     * @return true if the given key token is a valid one.
+     */
+    public static boolean isValidKeyToken(@NonNull byte[] keyToken) {
+        if (keyToken.length == 0 || keyToken.length > 16) {
+            Log.d(TAG, "Invalid key token size: " + (keyToken.length * 8) + " bit.");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -143,5 +168,4 @@ public class Descrambler implements AutoCloseable {
             }
         }
     }
-
 }

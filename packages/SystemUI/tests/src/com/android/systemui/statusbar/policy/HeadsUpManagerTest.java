@@ -18,19 +18,26 @@ package com.android.systemui.statusbar.policy;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
+import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -49,6 +56,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     private AccessibilityManagerWrapper mAccessibilityMgr;
     private HeadsUpManager mHeadsUpManager;
     private boolean mLivesPastNormalTime;
+    private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
         TestableHeadsUpManager(Context context) {
@@ -65,6 +73,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Before
     public void setUp() {
         mAccessibilityMgr = mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
+        mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
 
         mHeadsUpManager = new TestableHeadsUpManager(mContext);
         super.setUp();
@@ -108,5 +117,50 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0);
         assertThat(activeRemoteInput.compareTo(ongoingCall)).isGreaterThan(0);
     }
-}
 
+    @Test
+    public void testAlertEntryCompareTo_incomingCallLessThanActiveRemoteInput() {
+        HeadsUpManager.HeadsUpEntry incomingCall = mHeadsUpManager.new HeadsUpEntry();
+        Person person = new Person.Builder().setName("person").build();
+        PendingIntent intent = mock(PendingIntent.class);
+        incomingCall.setEntry(new NotificationEntryBuilder()
+                .setSbn(createNewSbn(0,
+                        new Notification.Builder(mContext, "")
+                                .setStyle(Notification.CallStyle
+                                        .forIncomingCall(person, intent, intent))))
+                .build());
+
+        HeadsUpManager.HeadsUpEntry activeRemoteInput = mHeadsUpManager.new HeadsUpEntry();
+        activeRemoteInput.setEntry(new NotificationEntryBuilder()
+                .setSbn(createNewNotification(1))
+                .build());
+        activeRemoteInput.remoteInputActive = true;
+
+        assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0);
+        assertThat(activeRemoteInput.compareTo(incomingCall)).isGreaterThan(0);
+    }
+
+    @Test
+    public void testPinEntry_logsPeek() {
+        // Needs full screen intent in order to be pinned
+        final PendingIntent fullScreenIntent = PendingIntent.getActivity(mContext, 0,
+                new Intent(), PendingIntent.FLAG_MUTABLE);
+
+        HeadsUpManager.HeadsUpEntry entryToPin = mHeadsUpManager.new HeadsUpEntry();
+        entryToPin.setEntry(new NotificationEntryBuilder()
+                .setSbn(createNewSbn(0,
+                        new Notification.Builder(mContext, "")
+                                .setFullScreenIntent(fullScreenIntent, true)))
+                .build());
+        // Note: the standard way to show a notification would be calling showNotification rather
+        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // the notification and then updates it; in order to not log twice, the entry needs
+        // to have a functional ExpandableNotificationRow that can keep track of whether it's
+        // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
+        mHeadsUpManager.onAlertEntryAdded(entryToPin);
+
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        assertEquals(HeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
+                mUiEventLoggerFake.eventId(0));
+    }
+}

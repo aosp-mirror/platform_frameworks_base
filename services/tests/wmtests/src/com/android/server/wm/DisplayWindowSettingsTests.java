@@ -17,14 +17,13 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -40,12 +39,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
 
+import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
-import android.util.Xml;
 import android.view.Display;
-import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -54,20 +52,12 @@ import androidx.test.filters.SmallTest;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.xmlpull.v1.XmlPullParser;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Tests for the {@link DisplayWindowSettings} class.
@@ -77,14 +67,11 @@ import java.nio.charset.StandardCharsets;
  */
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay
 @RunWith(WindowTestRunner.class)
 public class DisplayWindowSettingsTests extends WindowTestsBase {
-
-    private static final byte DISPLAY_PORT = (byte) 0xFF;
-    private static final long DISPLAY_MODEL = 0xEEEEEEEEL;
-
-    private static final File TEST_FOLDER = getInstrumentation().getTargetContext().getCacheDir();
-    private DisplayWindowSettings mTarget;
+    private TestSettingsProvider mSettingsProvider;
+    private DisplayWindowSettings mDisplayWindowSettings;
 
     private DisplayInfo mPrivateDisplayInfo;
 
@@ -92,18 +79,19 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     private DisplayContent mSecondaryDisplay;
     private DisplayContent mPrivateDisplay;
 
-    private TestStorage mStorage;
-
     @Before
     public void setUp() throws Exception {
-        deleteRecursively(TEST_FOLDER);
-
+        // TODO(b/121296525): We may want to restore other display settings (not only overscans in
+        // testPersistOverscan*test) on mPrimaryDisplay and mSecondaryDisplay back to default
+        // values after each test finishes, since we are going to reuse a singleton
+        // WindowManagerService instance among all tests that extend {@link WindowTestsBase} class
+        // (b/113239988).
         mWm.mAtmService.mSupportsFreeformWindowManagement = false;
         mWm.setIsPc(false);
         mWm.setForceDesktopModeOnExternalDisplays(false);
 
-        mStorage = new TestStorage();
-        mTarget = new DisplayWindowSettings(mWm, mStorage);
+        mSettingsProvider = new TestSettingsProvider();
+        mDisplayWindowSettings = new DisplayWindowSettings(mWm, mSettingsProvider);
 
         mPrimaryDisplay = mWm.getDefaultDisplayContentLocked();
         mSecondaryDisplay = mDisplayContent;
@@ -116,20 +104,9 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertNotEquals(mSecondaryDisplay.getDisplayId(), mPrivateDisplay.getDisplayId());
     }
 
-    @After
-    public void tearDown() {
-        deleteRecursively(TEST_FOLDER);
-
-        // TODO(b/121296525): We may want to restore other display settings (not only overscans in
-        // testPersistOverscan*test) on mPrimaryDisplay and mSecondaryDisplay back to default
-        // values after each test finishes, since we are going to reuse a singleton
-        // WindowManagerService instance among all tests that extend {@link WindowTestsBase} class
-        // (b/113239988).
-    }
-
     @Test
     public void testPrimaryDisplayDefaultToFullscreen_NoFreeformSupport() {
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                 mPrimaryDisplay.getWindowingMode());
@@ -139,7 +116,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                 mPrimaryDisplay.getWindowingMode());
@@ -150,7 +127,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                 mPrimaryDisplay.getWindowingMode());
@@ -161,20 +138,19 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        assertEquals(WINDOWING_MODE_FREEFORM,
-                mPrimaryDisplay.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FREEFORM, mPrimaryDisplay.getWindowingMode());
     }
 
     @Test
     public void testPrimaryDisplayUpdateToFreeform_HasFreeformSupport_IsPc() {
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
-        mTarget.updateSettingsForDisplay(mPrimaryDisplay);
+        mDisplayWindowSettings.updateSettingsForDisplay(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
                 mPrimaryDisplay.getWindowingMode());
@@ -182,7 +158,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFullscreen_NoFreeformSupport() {
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                 mSecondaryDisplay.getWindowingMode());
@@ -192,7 +168,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                 mSecondaryDisplay.getWindowingMode());
@@ -203,7 +179,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
                 mSecondaryDisplay.getWindowingMode());
@@ -214,7 +190,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
                 mSecondaryDisplay.getWindowingMode());
@@ -227,7 +203,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         final int originalDensity = mSecondaryDisplay.mBaseDisplayDensity;
         final boolean originalScalingDisabled = mSecondaryDisplay.mDisplayScalingDisabled;
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(originalWidth, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(originalHeight, mSecondaryDisplay.mBaseDisplayHeight);
@@ -244,8 +220,9 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
             return null;
         }).when(mWm.mDisplayManagerInternal).getNonOverrideDisplayInfo(anyInt(), any());
 
-        mTarget.setForcedSize(mSecondaryDisplay, 1000 /* width */, 2000 /* height */);
-        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+        mDisplayWindowSettings.setForcedSize(mSecondaryDisplay, 1000 /* width */,
+                2000 /* height */);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(1000 /* width */, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(2000 /* height */, mSecondaryDisplay.mBaseDisplayHeight);
@@ -257,8 +234,9 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetForcedDensity() {
-        mTarget.setForcedDensity(mSecondaryDisplay, 600 /* density */, 0 /* userId */);
-        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+        mDisplayWindowSettings.setForcedDensity(mSecondaryDisplay, 600 /* density */,
+                0 /* userId */);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(600 /* density */, mSecondaryDisplay.mBaseDisplayDensity);
 
@@ -269,8 +247,9 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetForcedScalingMode() {
-        mTarget.setForcedScalingMode(mSecondaryDisplay, DisplayContent.FORCE_SCALING_MODE_DISABLED);
-        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+        mDisplayWindowSettings.setForcedScalingMode(mSecondaryDisplay,
+                DisplayContent.FORCE_SCALING_MODE_DISABLED);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertTrue(mSecondaryDisplay.mDisplayScalingDisabled);
 
@@ -281,7 +260,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testDefaultToFreeUserRotation() {
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
         assertEquals(WindowManagerPolicy.USER_ROTATION_FREE, rotation.getUserRotationMode());
@@ -290,7 +269,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testDefaultTo0DegRotation() {
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(Surface.ROTATION_0, mSecondaryDisplay.getDisplayRotation().getUserRotation());
     }
@@ -298,70 +277,72 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     @Test
     public void testPrivateDisplayDefaultToDestroyContent() {
         assertEquals(REMOVE_CONTENT_MODE_DESTROY,
-                mTarget.getRemoveContentModeLocked(mPrivateDisplay));
+                mDisplayWindowSettings.getRemoveContentModeLocked(mPrivateDisplay));
     }
 
     @Test
     public void testPublicDisplayDefaultToMoveToPrimary() {
         assertEquals(REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
-                mTarget.getRemoveContentModeLocked(mSecondaryDisplay));
+                mDisplayWindowSettings.getRemoveContentModeLocked(mSecondaryDisplay));
     }
 
     @Test
     public void testDefaultToNotShowWithInsecureKeyguard() {
-        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
-        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mSecondaryDisplay));
+        assertFalse(mDisplayWindowSettings.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
+        assertFalse(mDisplayWindowSettings.shouldShowWithInsecureKeyguardLocked(mSecondaryDisplay));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testPublicDisplayNotAllowSetShouldShowWithInsecureKeyguard() {
-        mTarget.setShouldShowWithInsecureKeyguardLocked(mSecondaryDisplay, true);
-
-        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mSecondaryDisplay));
+        mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(mSecondaryDisplay, true);
     }
 
     @Test
     public void testPrivateDisplayAllowSetShouldShowWithInsecureKeyguard() {
-        mTarget.setShouldShowWithInsecureKeyguardLocked(mPrivateDisplay, true);
+        mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(mPrivateDisplay, true);
 
-        assertTrue(mTarget.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
+        assertTrue(mDisplayWindowSettings.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
     }
 
     @Test
     public void testPrimaryDisplayShouldShowSystemDecors() {
-        assertTrue(mTarget.shouldShowSystemDecorsLocked(mPrimaryDisplay));
+        assertTrue(mDisplayWindowSettings.shouldShowSystemDecorsLocked(mPrimaryDisplay));
 
-        mTarget.setShouldShowSystemDecorsLocked(mPrimaryDisplay, false);
+        mDisplayWindowSettings.setShouldShowSystemDecorsLocked(mPrimaryDisplay, false);
 
         // Default display should show system decors
-        assertTrue(mTarget.shouldShowSystemDecorsLocked(mPrimaryDisplay));
+        assertTrue(mDisplayWindowSettings.shouldShowSystemDecorsLocked(mPrimaryDisplay));
     }
 
     @Test
     public void testSecondaryDisplayDefaultToNotShowSystemDecors() {
-        assertFalse(mTarget.shouldShowSystemDecorsLocked(mSecondaryDisplay));
+        assertFalse(mDisplayWindowSettings.shouldShowSystemDecorsLocked(mSecondaryDisplay));
     }
 
     @Test
-    public void testPrimaryDisplayShouldShowIme() {
-        assertTrue(mTarget.shouldShowImeLocked(mPrimaryDisplay));
+    public void testPrimaryDisplayImePolicy() {
+        assertEquals(DISPLAY_IME_POLICY_LOCAL,
+                mDisplayWindowSettings.getImePolicyLocked(mPrimaryDisplay));
 
-        mTarget.setShouldShowImeLocked(mPrimaryDisplay, false);
+        mDisplayWindowSettings.setDisplayImePolicy(mPrimaryDisplay,
+                DISPLAY_IME_POLICY_FALLBACK_DISPLAY);
 
-        assertTrue(mTarget.shouldShowImeLocked(mPrimaryDisplay));
+        assertEquals(DISPLAY_IME_POLICY_LOCAL,
+                mDisplayWindowSettings.getImePolicyLocked(mPrimaryDisplay));
     }
 
     @Test
-    public void testSecondaryDisplayDefaultToNotShowIme() {
-        assertFalse(mTarget.shouldShowImeLocked(mSecondaryDisplay));
+    public void testSecondaryDisplayDefaultToShowImeOnFallbackDisplay() {
+        assertEquals(DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
+                mDisplayWindowSettings.getImePolicyLocked(mSecondaryDisplay));
     }
 
     @Test
-    public void testPersistUserRotationModeInSameInstance() {
-        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
-                Surface.ROTATION_90);
+    public void testSetUserRotationMode() {
+        mDisplayWindowSettings.setUserRotation(mSecondaryDisplay,
+                WindowManagerPolicy.USER_ROTATION_LOCKED, Surface.ROTATION_90);
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
         assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation.getUserRotationMode());
@@ -369,48 +350,25 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPersistUserRotationInSameInstance() {
-        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
-                Surface.ROTATION_90);
+    public void testSetUserRotation() {
+        mDisplayWindowSettings.setUserRotation(mSecondaryDisplay,
+                WindowManagerPolicy.USER_ROTATION_LOCKED, Surface.ROTATION_90);
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(Surface.ROTATION_90, mSecondaryDisplay.getDisplayRotation().getUserRotation());
     }
 
     @Test
-    public void testPersistUserRotationModeAcrossInstances() {
-        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
-                Surface.ROTATION_270);
-
-        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
-
-        final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
-        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation.getUserRotationMode());
-        assertTrue(rotation.isRotationFrozen());
-    }
-
-    @Test
-    public void testPersistUserRotationAcrossInstances() {
-        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
-                Surface.ROTATION_270);
-
-        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
-
-        assertEquals(Surface.ROTATION_270,
-                mSecondaryDisplay.getDisplayRotation().getUserRotation());
-    }
-
-    @Test
     public void testFixedToUserRotationDefault() {
-        mTarget.setUserRotation(mPrimaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
-                Surface.ROTATION_0);
+        mDisplayWindowSettings.setUserRotation(mPrimaryDisplay,
+                WindowManagerPolicy.USER_ROTATION_LOCKED, Surface.ROTATION_0);
 
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
 
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_DEFAULT));
@@ -418,13 +376,14 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetFixedToUserRotationDisabled() {
-        mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_DISABLED);
+        mDisplayWindowSettings.setFixedToUserRotation(mPrimaryDisplay,
+                FIXED_TO_USER_ROTATION_DISABLED);
 
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
 
-        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_DISABLED));
@@ -432,131 +391,32 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetFixedToUserRotationEnabled() {
-        mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_ENABLED);
+        mDisplayWindowSettings.setFixedToUserRotation(mPrimaryDisplay,
+                FIXED_TO_USER_ROTATION_ENABLED);
 
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
 
-        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_ENABLED));
     }
 
     @Test
-    public void testReadingDisplaySettingsFromStorage() {
-        final String displayIdentifier = mSecondaryDisplay.getDisplayInfo().uniqueId;
-        prepareDisplaySettings(displayIdentifier);
-
-        readAndAssertDisplaySettings(mPrimaryDisplay);
-    }
-
-    @Test
-    public void testReadingDisplaySettingsFromStorage_LegacyDisplayId() {
-        final String displayIdentifier = mPrimaryDisplay.getDisplayInfo().name;
-        prepareDisplaySettings(displayIdentifier);
-
-        readAndAssertDisplaySettings(mPrimaryDisplay);
-    }
-
-    @Test
-    public void testReadingDisplaySettingsFromStorage_LegacyDisplayId_UpdateAfterAccess()
-            throws Exception {
-        // Store display settings with legacy display identifier.
-        final String displayIdentifier = mPrimaryDisplay.getDisplayInfo().name;
-        prepareDisplaySettings(displayIdentifier);
-
-        // Update settings with new value, should trigger write to injector.
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
-        settings.setRemoveContentModeLocked(mPrimaryDisplay, REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY);
-        assertEquals("Settings value must be updated", REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
-                settings.getRemoveContentModeLocked(mPrimaryDisplay));
-        assertTrue(mStorage.wasWriteSuccessful());
-
-        // Verify that display identifier was updated.
-        final String newDisplayIdentifier = getStoredDisplayAttributeValue("name");
-        assertEquals("Display identifier must be updated to use uniqueId",
-                mPrimaryDisplay.getDisplayInfo().uniqueId, newDisplayIdentifier);
-    }
-
-    @Test
-    public void testReadingDisplaySettingsFromStorage_UsePortAsId() {
-        final DisplayAddress.Physical displayAddress =
-                DisplayAddress.fromPortAndModel(DISPLAY_PORT, DISPLAY_MODEL);
-        mPrimaryDisplay.getDisplayInfo().address = displayAddress;
-
-        final String displayIdentifier = "port:" + Byte.toUnsignedInt(DISPLAY_PORT);
-        prepareDisplaySettings(displayIdentifier, true /* usePortAsId */);
-
-        readAndAssertDisplaySettings(mPrimaryDisplay);
-    }
-
-    @Test
-    public void testReadingDisplaySettingsFromStorage_UsePortAsId_IncorrectAddress() {
-        final String displayIdentifier = mPrimaryDisplay.getDisplayInfo().uniqueId;
-        prepareDisplaySettings(displayIdentifier, true /* usePortAsId */);
-
-        mPrimaryDisplay.getDisplayInfo().address = DisplayAddress.fromPhysicalDisplayId(123456);
-
-        // Verify that the entry is not matched and default settings are returned instead.
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm);
-        assertNotEquals("Default setting must be returned for new entry",
-                WINDOWING_MODE_PINNED, settings.getWindowingModeLocked(mPrimaryDisplay));
-    }
-
-    @Test
-    public void testWritingDisplaySettingsToStorage() throws Exception {
-        // Write some settings to storage.
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
-        settings.setShouldShowSystemDecorsLocked(mSecondaryDisplay, true);
-        settings.setShouldShowImeLocked(mSecondaryDisplay, true);
-        assertTrue(mStorage.wasWriteSuccessful());
-
-        // Verify that settings were stored correctly.
-        assertEquals("Attribute value must be stored", mSecondaryDisplay.getDisplayInfo().uniqueId,
-                getStoredDisplayAttributeValue("name"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue("shouldShowSystemDecors"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue("shouldShowIme"));
-    }
-
-    @Test
-    public void testWritingDisplaySettingsToStorage_UsePortAsId() throws Exception {
-        // Store config to use port as identifier.
-        final DisplayAddress.Physical displayAddress =
-                DisplayAddress.fromPortAndModel(DISPLAY_PORT, DISPLAY_MODEL);
-        mSecondaryDisplay.getDisplayInfo().address = displayAddress;
-        prepareDisplaySettings(null /* displayIdentifier */, true /* usePortAsId */);
-
-        // Write some settings.
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
-        settings.setShouldShowSystemDecorsLocked(mSecondaryDisplay, true);
-        settings.setShouldShowImeLocked(mSecondaryDisplay, true);
-        assertTrue(mStorage.wasWriteSuccessful());
-
-        // Verify that settings were stored correctly.
-        assertEquals("Attribute value must be stored", "port:" + Byte.toUnsignedInt(DISPLAY_PORT),
-                getStoredDisplayAttributeValue("name"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue("shouldShowSystemDecors"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue("shouldShowIme"));
-    }
-
-    @Test
-    public void testShouldShowImeWithinForceDesktopMode() {
+    public void testShouldShowImeOnDisplayWithinForceDesktopMode() {
         try {
             // Presume display enabled force desktop mode from developer options.
             final DisplayContent dc = createMockSimulatedDisplay();
             mWm.setForceDesktopModeOnExternalDisplays(true);
             final WindowManagerInternal wmInternal = LocalServices.getService(
                     WindowManagerInternal.class);
-            // Make sure WindowManagerInter#shouldShowIme as true is due to
-            // mForceDesktopModeOnExternalDisplays as true.
-            assertFalse(mWm.mDisplayWindowSettings.shouldShowImeLocked(dc));
-            assertTrue(wmInternal.shouldShowIme(dc.getDisplayId()));
+            // Make sure WindowManagerInter#getDisplayImePolicy is SHOW_IME_ON_DISPLAY is due to
+            // mForceDesktopModeOnExternalDisplays being SHOW_IME_ON_DISPLAY.
+            assertEquals(DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
+                    mWm.mDisplayWindowSettings.getImePolicyLocked(dc));
+            assertEquals(DISPLAY_IME_POLICY_LOCAL, wmInternal.getDisplayImePolicy(dc.getDisplayId()));
         } finally {
             mWm.setForceDesktopModeOnExternalDisplays(false);
         }
@@ -566,14 +426,13 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testDisplayWindowSettingsAppliedOnDisplayReady() {
         // Set forced densities for two displays in DisplayWindowSettings
         final DisplayContent dc = createMockSimulatedDisplay();
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
-        settings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
-        settings.setForcedDensity(dc, 456, 0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(dc, 456, 0 /* userId */);
 
         // Apply settings to displays - the settings will be stored, but config will not be
         // recalculated immediately.
-        settings.applySettingsToDisplayLocked(mPrimaryDisplay);
-        settings.applySettingsToDisplayLocked(dc);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
+        mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
         assertFalse(mPrimaryDisplay.mWaitingForConfig);
         assertFalse(dc.mWaitingForConfig);
 
@@ -588,173 +447,34 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertEquals(456, config.densityDpi);
     }
 
-    /**
-     * Prepares display settings and stores in {@link #mStorage}. Uses provided display identifier
-     * and stores windowingMode=WINDOWING_MODE_PINNED.
-     */
-    private void prepareDisplaySettings(String displayIdentifier) {
-        prepareDisplaySettings(displayIdentifier, false /* usePortAsId */);
-    }
+    public final class TestSettingsProvider implements DisplayWindowSettings.SettingsProvider {
+        Map<DisplayInfo, SettingsEntry> mOverrideSettingsCache = new HashMap<>();
 
-    private void prepareDisplaySettings(String displayIdentifier, boolean usePortAsId) {
-        String contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                + "<display-settings>\n";
-        if (usePortAsId) {
-            contents += "  <config identifier=\"1\"/>\n";
-        }
-        if (displayIdentifier != null) {
-            contents += "  <display\n"
-                    + "    name=\"" + displayIdentifier + "\"\n"
-                    + "    windowingMode=\"" + WINDOWING_MODE_PINNED + "\"/>\n";
-        }
-        contents += "</display-settings>\n";
-
-        final InputStream is = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
-        mStorage.setReadStream(is);
-    }
-
-    private void readAndAssertDisplaySettings(DisplayContent displayContent) {
-        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
-        assertEquals("Stored setting must be read",
-                WINDOWING_MODE_PINNED, settings.getWindowingModeLocked(displayContent));
-        assertEquals("Not stored setting must be set to default value",
-                REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
-                settings.getRemoveContentModeLocked(displayContent));
-    }
-
-    private String getStoredDisplayAttributeValue(String attr) throws Exception {
-        try (InputStream stream = mStorage.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                // Do nothing.
-            }
-
-            if (type != XmlPullParser.START_TAG) {
-                throw new IllegalStateException("no start tag found");
-            }
-
-            int outerDepth = parser.getDepth();
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                String tagName = parser.getName();
-                if (tagName.equals("display")) {
-                    return parser.getAttributeValue(null, attr);
-                }
-            }
-        } finally {
-            mStorage.closeRead();
-        }
-        return null;
-    }
-
-    /**
-     * This method helps to ensure read and write persistent settings successfully because the
-     * constructor of {@link DisplayWindowSettings} should read the persistent file from the given
-     * path that also means the previous state must be written correctly.
-     */
-    private void applySettingsToDisplayByNewInstance(DisplayContent display) {
-        // Assert that prior write completed successfully.
-        assertTrue(mStorage.wasWriteSuccessful());
-
-        // Read and apply settings.
-        new DisplayWindowSettings(mWm, mStorage).applySettingsToDisplayLocked(display);
-    }
-
-    private static boolean deleteRecursively(File file) {
-        boolean fullyDeleted = true;
-        if (file.isFile()) {
-            return file.delete();
-        } else if (file.isDirectory()) {
-            final File[] files = file.listFiles();
-            for (File child : files) {
-                fullyDeleted &= deleteRecursively(child);
-            }
-            fullyDeleted &= file.delete();
-        }
-        return fullyDeleted;
-    }
-
-    /** In-memory storage implementation. */
-    public class TestStorage implements DisplayWindowSettings.SettingPersister {
-        private InputStream mReadStream;
-        private ByteArrayOutputStream mWriteStream;
-
-        private boolean mWasSuccessful;
-
-        /**
-         * Returns input stream for reading. By default tries forward the output stream if previous
-         * write was successful.
-         * @see #closeRead()
-         */
         @Override
-        public InputStream openRead() throws FileNotFoundException {
-            if (mReadStream == null && mWasSuccessful) {
-                mReadStream = new ByteArrayInputStream(mWriteStream.toByteArray());
-            }
-            if (mReadStream == null) {
-                throw new FileNotFoundException();
-            }
-            if (mReadStream.markSupported()) {
-                mReadStream.mark(Integer.MAX_VALUE);
-            }
-            return mReadStream;
-        }
-
-        /** Must be called after each {@link #openRead} to reset the position in the stream. */
-        void closeRead() throws IOException {
-            if (mReadStream == null) {
-                throw new FileNotFoundException();
-            }
-            if (mReadStream.markSupported()) {
-                mReadStream.reset();
-            }
-            mReadStream = null;
-        }
-
-        /**
-         * Creates new or resets existing output stream for write. Automatically closes previous
-         * read stream, since following reads should happen based on this new write.
-         */
-        @Override
-        public OutputStream startWrite() throws IOException {
-            if (mWriteStream == null) {
-                mWriteStream = new ByteArrayOutputStream();
-            } else {
-                mWriteStream.reset();
-            }
-            if (mReadStream != null) {
-                closeRead();
-            }
-            return mWriteStream;
+        public SettingsEntry getSettings(@NonNull DisplayInfo info) {
+            return getOverrideSettings(info);
         }
 
         @Override
-        public void finishWrite(OutputStream os, boolean success) {
-            mWasSuccessful = success;
-            try {
-                os.close();
-            } catch (IOException e) {
-                // This method can't throw IOException since the super implementation doesn't, so
-                // we just wrap it in a RuntimeException so we end up crashing the test all the
-                // same.
-                throw new RuntimeException(e);
+        public SettingsEntry getOverrideSettings(@NonNull DisplayInfo info) {
+            SettingsEntry result = new SettingsEntry();
+            SettingsEntry overrideSettings = mOverrideSettingsCache.get(info);
+            if (overrideSettings != null) {
+                result.setTo(overrideSettings);
             }
+            return result;
         }
 
-        /** Override the read stream of the injector. By default it uses current write stream. */
-        private void setReadStream(InputStream is) {
-            mReadStream = is;
-        }
+        @Override
+        public void updateOverrideSettings(@NonNull DisplayInfo info,
+                @NonNull SettingsEntry settings) {
+            SettingsEntry overrideSettings = mOverrideSettingsCache.get(info);
+            if (overrideSettings == null) {
+                overrideSettings = new SettingsEntry();
+                mOverrideSettingsCache.put(info, overrideSettings);
+            }
 
-        private boolean wasWriteSuccessful() {
-            return mWasSuccessful;
+            overrideSettings.setTo(settings);
         }
     }
 }

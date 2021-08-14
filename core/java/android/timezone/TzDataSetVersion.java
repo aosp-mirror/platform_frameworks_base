@@ -17,6 +17,7 @@
 package android.timezone;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.i18n.timezone.TimeZoneDataFiles;
 import com.android.internal.annotations.VisibleForTesting;
@@ -128,7 +129,7 @@ public final class TzDataSetVersion {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

@@ -91,8 +91,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserFailed()
         resumeBrowser.testConnection()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -111,8 +112,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserConnectionNoResults()
         resumeBrowser.testConnection()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -132,8 +134,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserFailed()
         resumeBrowser.findRecentMedia()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -143,8 +146,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         whenever(browser.getRoot()).thenReturn(null)
         resumeBrowser.findRecentMedia()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -163,8 +167,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserConnectionNoResults()
         resumeBrowser.findRecentMedia()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -173,8 +178,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserConnectionNotPlayable()
         resumeBrowser.findRecentMedia()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -193,8 +199,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         setupBrowserFailed()
         resumeBrowser.restart()
 
-        // Then it calls onError
+        // Then it calls onError and disconnects
         verify(callback).onError()
+        verify(browser).disconnect()
     }
 
     @Test
@@ -202,13 +209,11 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         // When restart is called and we connect successfully
         setupBrowserConnection()
         resumeBrowser.restart()
+        verify(callback).onConnected()
 
         // Then it creates a new controller and sends play command
         verify(transportControls).prepare()
         verify(transportControls).play()
-
-        // Then it calls onConnected
-        verify(callback).onConnected()
     }
 
     /**

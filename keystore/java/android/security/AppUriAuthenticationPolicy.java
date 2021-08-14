@@ -18,6 +18,7 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +28,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -89,6 +91,13 @@ public final class AppUriAuthenticationPolicy implements Parcelable {
          * <p>
          * If this method is called with a package name and URI that was previously added, the
          * previous alias will be overwritten.
+         * <p>
+         * When the system tries to determine which alias to return to a requesting app calling
+         * {@code KeyChain.choosePrivateKeyAlias}, it will choose the alias whose associated URI
+         * exactly matches the URI provided in {@link KeyChain#choosePrivateKeyAlias(
+         * Activity, KeyChainAliasCallback, String[], Principal[], Uri, String)} or the URI
+         * built from the host and port provided in {@link KeyChain#choosePrivateKeyAlias(
+         * Activity, KeyChainAliasCallback, String[], Principal[], String, int, String)}.
          *
          * @param appPackageName The app's package name to authenticate the user to.
          * @param uri            The URI to authenticate the user to.
@@ -236,6 +245,23 @@ public final class AppUriAuthenticationPolicy implements Parcelable {
             aliases.addAll(appsToUris.getUrisToAliases().values());
         }
         return aliases;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof AppUriAuthenticationPolicy)) {
+            return false;
+        }
+        AppUriAuthenticationPolicy other = (AppUriAuthenticationPolicy) obj;
+        return Objects.equals(mAppToUris, other.mAppToUris);
+    }
+
+    @Override
+    public int hashCode() {
+        return mAppToUris.hashCode();
     }
 
 }

@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.Signature;
+import android.text.TextUtils;
 
 import libcore.util.HexEncoding;
 
@@ -39,18 +40,27 @@ public final class PackageUtils {
     }
 
     /**
+     * @see #computeSignaturesSha256Digests(Signature[], String)
+     */
+    public static @NonNull String[] computeSignaturesSha256Digests(
+            @NonNull Signature[] signatures) {
+        return computeSignaturesSha256Digests(signatures, null);
+    }
+
+    /**
      * Computes the SHA256 digests of a list of signatures. Items in the
      * resulting array of hashes correspond to the signatures in the
      * input array.
      * @param signatures The signatures.
+     * @param separator Separator between each pair of characters, such as a colon, or null to omit.
      * @return The digest array.
      */
     public static @NonNull String[] computeSignaturesSha256Digests(
-            @NonNull Signature[] signatures) {
+            @NonNull Signature[] signatures, @Nullable String separator) {
         final int signatureCount = signatures.length;
         final String[] digests = new String[signatureCount];
         for (int i = 0; i < signatureCount; i++) {
-            digests[i] = computeSha256Digest(signatures[i].toByteArray());
+            digests[i] = computeSha256Digest(signatures[i].toByteArray(), separator);
         }
         return digests;
     }
@@ -66,11 +76,11 @@ public final class PackageUtils {
             @NonNull Signature[] signatures) {
         // Shortcut for optimization - most apps singed by a single cert
         if (signatures.length == 1) {
-            return computeSha256Digest(signatures[0].toByteArray());
+            return computeSha256Digest(signatures[0].toByteArray(), null);
         }
 
         // Make sure these are sorted to handle reversed certificates
-        final String[] sha256Digests = computeSignaturesSha256Digests(signatures);
+        final String[] sha256Digests = computeSignaturesSha256Digests(signatures, null);
         return computeSignaturesSha256Digest(sha256Digests);
     }
 
@@ -99,7 +109,7 @@ public final class PackageUtils {
                 /* ignore - can't happen */
             }
         }
-        return computeSha256Digest(bytes.toByteArray());
+        return computeSha256Digest(bytes.toByteArray(), null);
     }
 
     /**
@@ -122,15 +132,34 @@ public final class PackageUtils {
     }
 
     /**
-     * Computes the SHA256 digest of some data.
-     * @param data The data.
-     * @return The digest or null if an error occurs.
+     * @see #computeSha256Digest(byte[], String)
      */
     public static @Nullable String computeSha256Digest(@NonNull byte[] data) {
+        return computeSha256Digest(data, null);
+    }
+    /**
+     * Computes the SHA256 digest of some data.
+     * @param data The data.
+     * @param separator Separator between each pair of characters, such as a colon, or null to omit.
+     * @return The digest or null if an error occurs.
+     */
+    public static @Nullable String computeSha256Digest(@NonNull byte[] data,
+            @Nullable String separator) {
         byte[] sha256DigestBytes = computeSha256DigestBytes(data);
         if (sha256DigestBytes == null) {
             return null;
         }
-        return HexEncoding.encodeToString(sha256DigestBytes, true /* uppercase */);
+
+        if (separator == null) {
+            return HexEncoding.encodeToString(sha256DigestBytes, true /* uppercase */);
+        }
+
+        int length = sha256DigestBytes.length;
+        String[] pieces = new String[length];
+        for (int index = 0; index < length; index++) {
+            pieces[index] = HexEncoding.encodeToString(sha256DigestBytes[index], true);
+        }
+
+        return TextUtils.join(separator, pieces);
     }
 }

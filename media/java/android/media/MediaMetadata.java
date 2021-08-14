@@ -15,6 +15,7 @@
  */
 package android.media;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -23,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -416,14 +418,17 @@ public final class MediaMetadata implements Parcelable {
     }
 
     private final Bundle mBundle;
+    private final int mBitmapDimensionLimit;
     private MediaDescription mDescription;
 
-    private MediaMetadata(Bundle bundle) {
+    private MediaMetadata(Bundle bundle, int bitmapDimensionLimit) {
         mBundle = new Bundle(bundle);
+        mBitmapDimensionLimit = bitmapDimensionLimit;
     }
 
     private MediaMetadata(Parcel in) {
         mBundle = in.readBundle();
+        mBitmapDimensionLimit = Math.max(in.readInt(), 1);
     }
 
     /**
@@ -512,6 +517,23 @@ public final class MediaMetadata implements Parcelable {
         return bmp;
     }
 
+    /**
+     * Gets the width/height limit (in pixels) for the bitmaps when this metadata was created.
+     * This method always returns a positive value.
+     * <p>
+     * If it returns {@link Integer#MAX_VALUE}, then no scaling down was applied to the bitmaps
+     * when this metadata was created.
+     * <p>
+     * If it returns another positive value, then all the bitmaps in this metadata has width/height
+     * not greater than this limit. Bitmaps may have been scaled down according to the limit.
+     * <p>
+     *
+     * @see Builder#setBitmapDimensionLimit(int)
+     */
+    public @IntRange(from = 1) int getBitmapDimensionLimit() {
+        return mBitmapDimensionLimit;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -520,6 +542,7 @@ public final class MediaMetadata implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mBundle);
+        dest.writeInt(mBitmapDimensionLimit);
     }
 
     /**
@@ -717,6 +740,7 @@ public final class MediaMetadata implements Parcelable {
      */
     public static final class Builder {
         private final Bundle mBundle;
+        private int mBitmapDimensionLimit = Integer.MAX_VALUE;
 
         /**
          * Create an empty Builder. Any field that should be included in the
@@ -735,29 +759,7 @@ public final class MediaMetadata implements Parcelable {
          */
         public Builder(MediaMetadata source) {
             mBundle = new Bundle(source.mBundle);
-        }
-
-        /**
-         * Create a Builder using a {@link MediaMetadata} instance to set
-         * initial values, but replace bitmaps with a scaled down copy if they
-         * are larger than maxBitmapSize.
-         *
-         * @param source The original metadata to copy.
-         * @param maxBitmapSize The maximum height/width for bitmaps contained
-         *            in the metadata.
-         * @hide
-         */
-        public Builder(MediaMetadata source, int maxBitmapSize) {
-            this(source);
-            for (String key : mBundle.keySet()) {
-                Object value = mBundle.get(key);
-                if (value != null && value instanceof Bitmap) {
-                    Bitmap bmp = (Bitmap) value;
-                    if (bmp.getHeight() > maxBitmapSize || bmp.getWidth() > maxBitmapSize) {
-                        putBitmap(key, scaleBitmap(bmp, maxBitmapSize));
-                    }
-                }
-            }
+            mBitmapDimensionLimit = source.mBitmapDimensionLimit;
         }
 
         /**
@@ -900,9 +902,9 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_DISPLAY_ICON}</li>
          * </ul>
          * <p>
-         * Large bitmaps may be scaled down by the system when
-         * {@link android.media.session.MediaSession#setMetadata} is called.
-         * To pass full resolution images {@link Uri Uris} should be used with
+         * Large bitmaps may be scaled down by the system with
+         * {@link Builder#setBitmapDimensionLimit(int)} when {@link MediaSession#setMetadata}
+         * is called. To pass full resolution images {@link Uri Uris} should be used with
          * {@link #putString}.
          *
          * @param key The key for referencing this value
@@ -921,18 +923,53 @@ public final class MediaMetadata implements Parcelable {
         }
 
         /**
+         * Sets the maximum width/height (in pixels) for the bitmaps in the metadata.
+         * Bitmaps will be replaced with scaled down copies if their width (or height) is
+         * larger than {@code bitmapDimensionLimit}.
+         * <p>
+         * In order to unset the limit, pass {@link Integer#MAX_VALUE} as
+         * {@code bitmapDimensionLimit}.
+         *
+         * @param bitmapDimensionLimit The maximum width/height (in pixels) for bitmaps
+         *                             contained in the metadata. Non-positive values are ignored.
+         *                             Pass {@link Integer#MAX_VALUE} to unset the limit.
+         */
+        @NonNull
+        public Builder setBitmapDimensionLimit(@IntRange(from = 1) int bitmapDimensionLimit) {
+            if (bitmapDimensionLimit > 0) {
+                mBitmapDimensionLimit = bitmapDimensionLimit;
+            } else {
+                Log.w(TAG, "setBitmapDimensionLimit(): Ignoring non-positive bitmapDimensionLimit: "
+                        + bitmapDimensionLimit);
+            }
+            return this;
+        }
+
+        /**
          * Creates a {@link MediaMetadata} instance with the specified fields.
          *
          * @return The new MediaMetadata instance
          */
         public MediaMetadata build() {
-            return new MediaMetadata(mBundle);
+            if (mBitmapDimensionLimit != Integer.MAX_VALUE) {
+                for (String key : mBundle.keySet()) {
+                    Object value = mBundle.get(key);
+                    if (value instanceof Bitmap) {
+                        Bitmap bmp = (Bitmap) value;
+                        if (bmp.getHeight() > mBitmapDimensionLimit
+                                || bmp.getWidth() > mBitmapDimensionLimit) {
+                            putBitmap(key, scaleBitmap(bmp, mBitmapDimensionLimit));
+                        }
+                    }
+                }
+            }
+            return new MediaMetadata(mBundle, mBitmapDimensionLimit);
         }
 
-        private Bitmap scaleBitmap(Bitmap bmp, int maxSize) {
-            float maxSizeF = maxSize;
-            float widthScale = maxSizeF / bmp.getWidth();
-            float heightScale = maxSizeF / bmp.getHeight();
+        private Bitmap scaleBitmap(Bitmap bmp, int maxDimension) {
+            float maxDimensionF = maxDimension;
+            float widthScale = maxDimensionF / bmp.getWidth();
+            float heightScale = maxDimensionF / bmp.getHeight();
             float scale = Math.min(widthScale, heightScale);
             int height = (int) (bmp.getHeight() * scale);
             int width = (int) (bmp.getWidth() * scale);

@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -185,7 +187,7 @@ public final class CellIdentityLte extends CellIdentity {
 
         if (mCi == CellInfo.UNAVAILABLE) return;
 
-        mGlobalCellId = plmn + String.format("%07x", mCi);
+        mGlobalCellId = plmn + formatSimple("%07x", mCi);
     }
 
     /**

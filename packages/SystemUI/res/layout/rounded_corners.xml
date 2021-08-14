@@ -14,6 +14,8 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
+
+<!-- TODO: remove this in favor of requiring top and bottom layouts -->
 <com.android.systemui.RegionInterceptingFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rounded_corners_default"
@@ -26,6 +28,25 @@
         android:layout_gravity="left|top"
         android:tint="#ff000000"
         android:src="@drawable/rounded"/>
+
+    <FrameLayout
+        android:id="@+id/privacy_dot_left_container"
+        android:layout_height="@dimen/status_bar_height"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_padding_top"
+        android:layout_marginLeft="8dp"
+        android:layout_gravity="left|top"
+        android:visibility="invisible" >
+        <ImageView
+            android:id="@+id/privacy_dot_left"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/system_animation_ongoing_dot"
+            android:visibility="visible" />
+    </FrameLayout>
+
+
     <ImageView
         android:id="@+id/right"
         android:layout_width="12dp"
@@ -33,4 +54,22 @@
         android:tint="#ff000000"
         android:layout_gravity="right|bottom"
         android:src="@drawable/rounded"/>
+    <FrameLayout
+        android:id="@+id/privacy_dot_right_container"
+        android:layout_height="@dimen/status_bar_height"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_padding_top"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="right|top"
+        android:visibility="invisible" >
+        <ImageView
+            android:id="@+id/privacy_dot_right"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/system_animation_ongoing_dot"
+            android:visibility="visible" />
+
+    </FrameLayout>
+
 </com.android.systemui.RegionInterceptingFrameLayout>

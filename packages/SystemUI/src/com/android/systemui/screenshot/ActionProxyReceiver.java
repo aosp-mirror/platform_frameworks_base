@@ -16,12 +16,14 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_EDIT;
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_SHARE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED;
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_EDIT;
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_SHARE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_DISALLOW_ENTER_PIP;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import android.app.ActivityOptions;
@@ -30,14 +32,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.view.RemoteAnimationAdapter;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -48,7 +49,6 @@ import javax.inject.Inject;
 public class ActionProxyReceiver extends BroadcastReceiver {
     private static final String TAG = "ActionProxyReceiver";
 
-    private static final int CLOSE_WINDOWS_TIMEOUT_MILLIS = 3000;
     private final StatusBar mStatusBar;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final ScreenshotSmartActions mScreenshotSmartActions;
@@ -65,14 +65,7 @@ public class ActionProxyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, final Intent intent) {
         Runnable startActivityRunnable = () -> {
-            try {
-                mActivityManagerWrapper.closeSystemWindows(
-                        SYSTEM_DIALOG_REASON_SCREENSHOT).get(
-                        CLOSE_WINDOWS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                Log.e(TAG, "Unable to share screenshot", e);
-                return;
-            }
+            mActivityManagerWrapper.closeSystemWindows(SYSTEM_DIALOG_REASON_SCREENSHOT);
 
             PendingIntent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
             ActivityOptions opts = ActivityOptions.makeBasic();
@@ -80,6 +73,16 @@ public class ActionProxyReceiver extends BroadcastReceiver {
                     intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
             try {
                 actionIntent.send(context, 0, null, null, null, null, opts.toBundle());
+                if (intent.getBooleanExtra(ScreenshotController.EXTRA_OVERRIDE_TRANSITION, false)) {
+                    RemoteAnimationAdapter runner = new RemoteAnimationAdapter(
+                            ScreenshotController.SCREENSHOT_REMOTE_RUNNER, 0, 0);
+                    try {
+                        WindowManagerGlobal.getWindowManagerService()
+                                .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error overriding screenshot app transition", e);
+                    }
+                }
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, "Pending intent canceled", e);
             }
@@ -99,7 +102,7 @@ public class ActionProxyReceiver extends BroadcastReceiver {
                     ? ACTION_TYPE_EDIT
                     : ACTION_TYPE_SHARE;
             mScreenshotSmartActions.notifyScreenshotAction(
-                    context, intent.getStringExtra(EXTRA_ID), actionType, false);
+                    context, intent.getStringExtra(EXTRA_ID), actionType, false, null);
         }
     }
 }

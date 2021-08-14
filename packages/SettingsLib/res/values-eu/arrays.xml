@@ -141,13 +141,13 @@
     <item msgid="1241278021345116816">"Audioaren kalitatea areagotzeko optimizatua (990 Kb/s / 909 Kb/s)"</item>
     <item msgid="3523665555859696539">"Audioaren eta konexioaren kalitate orekatua (660 Kb/s / 606 Kb/s)"</item>
     <item msgid="886408010459747589">"Konexioaren kalitatea areagotzeko optimizatua (330 Kb/s / 303 Kb/s)"</item>
-    <item msgid="3808414041654351577">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
+    <item msgid="3808414041654351577">"Emaitzarik onenak (bit-abiadura doigarria)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"Audioaren kalitatea areagotzeko optimizatua"</item>
     <item msgid="7451422070435297462">"Orekatu audioaren eta konexioaren kalitateak"</item>
     <item msgid="6173114545795428901">"Konexioaren kalitatea areagotzeko optimizatua"</item>
-    <item msgid="4349908264188040530">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
+    <item msgid="4349908264188040530">"Emaitzarik onenak (bit-abiadura doigarria)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
@@ -218,17 +218,17 @@
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="4497393944195787240">"Bat ere ez"</item>
-    <item msgid="8461943978957133391">"480p"</item>
-    <item msgid="6923083594932909205">"480p (segurua)"</item>
-    <item msgid="1226941831391497335">"720p"</item>
-    <item msgid="7051983425968643928">"720p (segurua)"</item>
-    <item msgid="7765795608738980305">"1080p"</item>
-    <item msgid="8084293856795803592">"1080p (segurua)"</item>
+    <item msgid="8461943978957133391">"480 p"</item>
+    <item msgid="6923083594932909205">"480 p (segurua)"</item>
+    <item msgid="1226941831391497335">"720 p"</item>
+    <item msgid="7051983425968643928">"720 p (segurua)"</item>
+    <item msgid="7765795608738980305">"1080 p"</item>
+    <item msgid="8084293856795803592">"1080 p (segurua)"</item>
     <item msgid="938784192903353277">"4K"</item>
     <item msgid="8612549335720461635">"4K (segurua)"</item>
     <item msgid="7322156123728520872">"4K (hobetua)"</item>
     <item msgid="7735692090314849188">"4K (hobetua, segurua)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (bi pantaila)"</item>
+    <item msgid="7346816300608639624">"720 p, 1080 p (bi pantaila)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Bat ere ez"</item>

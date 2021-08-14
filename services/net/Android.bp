@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.net",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [
         ":net-module-utils-srcs",
         ":services.net-sources",
@@ -36,7 +36,6 @@ java_library {
     name: "services.net-module-wifi",
     srcs: [
         ":framework-services-net-module-wifi-shared-srcs",
-        ":net-module-utils-srcs",
         ":net-utils-services-common-srcs",
     ],
     sdk_version: "module_current",

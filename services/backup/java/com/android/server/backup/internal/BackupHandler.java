@@ -20,6 +20,8 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.app.backup.BackupManager;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -222,7 +224,9 @@ public class BackupHandler extends Handler {
                                 listener,
                                 Collections.emptyList(),
                                 /* userInitiated */ false,
-                                /* nonIncremental */ false);
+                                /* nonIncremental */ false,
+                                backupManagerService.getEligibilityRulesForOperation(
+                                        OperationType.BACKUP));
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
@@ -279,7 +283,8 @@ public class BackupHandler extends Handler {
                         params.observer, params.includeApks, params.includeObbs,
                         params.includeShared, params.doWidgets, params.curPassword,
                         params.encryptPassword, params.allApps, params.includeSystem,
-                        params.doCompress, params.includeKeyValue, params.packages, params.latch);
+                        params.doCompress, params.includeKeyValue, params.packages, params.latch,
+                        params.backupEligibilityRules);
                 (new Thread(task, "adb-backup")).start();
                 break;
             }
@@ -299,7 +304,8 @@ public class BackupHandler extends Handler {
                                 params.pmToken,
                                 params.isSystemRestore,
                                 params.filterSet,
-                                params.listener);
+                                params.listener,
+                                params.backupEligibilityRules);
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {
@@ -384,7 +390,7 @@ public class BackupHandler extends Handler {
                     // Done: reset the session timeout clock
                     removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
                     sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
-                            mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
+                            mAgentTimeoutParameters.getRestoreSessionTimeoutMillis());
 
                     params.listener.onFinished(callerLogString);
                 }
@@ -462,7 +468,8 @@ public class BackupHandler extends Handler {
                         params.listener,
                         params.fullPackages,
                         /* userInitiated */ true,
-                        params.nonIncrementalBackup);
+                        params.nonIncrementalBackup,
+                        params.mBackupEligibilityRules);
                 break;
             }
 

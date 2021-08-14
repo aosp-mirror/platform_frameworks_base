@@ -178,6 +178,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action that long clicks on the node.
+     *
+     * <p>It does not support coordinate information for anchoring.</p>
      */
     public static final int ACTION_LONG_CLICK = 0x00000020;
 
@@ -627,12 +629,17 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Integer argument specifying the end index of the requested text location data. Must be
-     * positive.
+     * positive and no larger than {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}.
      *
      * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
+
+    /**
+     * The maximum allowed length of the requested text location data.
+     */
+    public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH = 20000;
 
     /**
      * Key used to request extra data for the rendering information.
@@ -1038,6 +1045,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * recycled).
      */
     public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
+        // limits the text location length to make sure the rectangle array allocation avoids
+        // the binder transaction failure and OOM crash.
+        if (args.getInt(EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH, -1)
+                > EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH) {
+            args.putInt(EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH,
+                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH);
+        }
+
         args.putString(EXTRA_DATA_REQUESTED_KEY, extraDataKey);
         return refresh(args, true);
     }
@@ -1781,8 +1796,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param viewId The fully qualified resource name of the view id to find.
      * @return A list of node info.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String viewId) {
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String viewId) {
         enforceSealed();
+        if (viewId == null) {
+            Log.e(TAG, "returns empty list due to null viewId.");
+            return Collections.emptyList();
+        }
         if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return Collections.emptyList();
         }
@@ -4369,7 +4388,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (this == object) {
             return true;
         }
@@ -5039,7 +5058,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             if (other == null) {
                 return false;
             }
@@ -5105,7 +5124,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final int RANGE_TYPE_INT = 0;
         /** Range type: float. */
         public static final int RANGE_TYPE_FLOAT = 1;
-        /** Range type: percent with values from zero to one.*/
+        /** Range type: percent with values from zero to one hundred. */
         public static final int RANGE_TYPE_PERCENT = 2;
 
         private static final SynchronizedPool<RangeInfo> sPool =

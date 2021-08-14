@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The AudioDevicePort is a specialized type of AudioPort
@@ -51,6 +52,19 @@ public class AudioDevicePort extends AudioPort {
              (AudioManager.isInputDevice(type) == true)  ?
                         AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
              deviceName, samplingRates, channelMasks, channelIndexMasks, formats, gains);
+        mType = type;
+        mAddress = address;
+        mEncapsulationModes = encapsulationModes;
+        mEncapsulationMetadataTypes = encapsulationMetadataTypes;
+    }
+
+    AudioDevicePort(AudioHandle handle, String deviceName, List<AudioProfile> profiles,
+            AudioGain[] gains, int type, String address, int[] encapsulationModes,
+            @AudioTrack.EncapsulationMetadataType int[] encapsulationMetadataTypes,
+            List<AudioDescriptor> descriptors) {
+        super(handle,
+                AudioManager.isInputDevice(type) ? AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
+                deviceName, profiles, gains, descriptors);
         mType = type;
         mAddress = address;
         mEncapsulationModes = encapsulationModes;

@@ -16,6 +16,8 @@
 
 package com.android.server.appwidget;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,6 +46,7 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.RemoteViews;
 
+import com.android.frameworks.servicestests.R;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.server.LocalServices;
 
@@ -92,6 +95,32 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         mMockHost = mock(IAppWidgetHost.class);
         LocalServices.addService(ShortcutServiceInternal.class, mMockShortcutService);
         mService.onStart();
+    }
+
+    public void testLoadDescription() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+        assertEquals(info.loadDescription(mTestContext), "widget description string");
+    }
+
+    public void testParseSizeConfiguration() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+
+        assertThat(info.minWidth).isEqualTo(getDimensionResource(R.dimen.widget_min_width));
+        assertThat(info.minHeight).isEqualTo(getDimensionResource(R.dimen.widget_min_height));
+        assertThat(info.minResizeWidth)
+                .isEqualTo(getDimensionResource(R.dimen.widget_min_resize_width));
+        assertThat(info.minResizeHeight)
+                .isEqualTo(getDimensionResource(R.dimen.widget_min_resize_height));
+        assertThat(info.maxResizeWidth)
+                .isEqualTo(getDimensionResource(R.dimen.widget_max_resize_width));
+        assertThat(info.maxResizeHeight)
+                .isEqualTo(getDimensionResource(R.dimen.widget_max_resize_height));
+        assertThat(info.targetCellWidth)
+                .isEqualTo(getIntegerResource(R.integer.widget_target_cell_width));
+        assertThat(info.targetCellHeight)
+                .isEqualTo(getIntegerResource(R.integer.widget_target_cell_height));
     }
 
     public void testRequestPinAppWidget_otherProvider() {
@@ -287,6 +316,13 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         }
     }
 
+    public void testGetPreviewLayout() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+
+        assertThat(info.previewLayout).isEqualTo(R.layout.widget_preview);
+    }
+
     private int setupHostAndWidget() {
         List<PendingHostUpdate> updates = mService.startListening(
                 mMockHost, mPkgName, HOST_ID, new int[0]).getList();
@@ -307,6 +343,14 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         CountDownLatch latch = new CountDownLatch(1);
         new Handler(mTestContext.getMainLooper()).post(latch::countDown);
         latch.await();
+    }
+
+    private int getDimensionResource(int resId) {
+        return mTestContext.getResources().getDimensionPixelSize(resId);
+    }
+
+    private int getIntegerResource(int resId) {
+        return mTestContext.getResources().getInteger(resId);
     }
 
     private class TestContext extends ContextWrapper {

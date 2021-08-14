@@ -28,6 +28,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager.GoToSleepReason;
 import android.os.PowerManager.WakeReason;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
@@ -86,18 +87,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int getMaxWallpaperLayer() {
-        return 0;
-    }
-
-    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return attrs.type == TYPE_NOTIFICATION_SHADE;
-    }
-
-    @Override
-    public boolean canBeHiddenByKeyguardLw(WindowState win) {
-        return false;
     }
 
     /**
@@ -122,16 +113,16 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, activity,
                     "Starting window", 0 /* ownerId */, 0 /* userId*/, false /* internalWindows */,
                     wm, mock(Session.class), iWindow, mPowerManagerWrapper);
-            activity.startingWindow = window;
+            activity.mStartingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
             mRunnableWhenAddingSplashScreen.run();
             mRunnableWhenAddingSplashScreen = null;
         }
-        return () -> {
+        return (a) -> {
             synchronized (wm.mGlobalLock) {
                 activity.removeChild(window);
-                activity.startingWindow = null;
+                activity.mStartingWindow = null;
             }
         };
     }
@@ -178,43 +169,39 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
-    }
-
-    @Override
     public void setAllowLockscreenWhenOn(int displayId, boolean allow) {
     }
 
     @Override
-    public void startedWakingUp(@WakeReason int reason) {
+    public void startedWakingUp(@WakeReason int wakeReason) {
     }
 
     @Override
-    public void finishedWakingUp(@WakeReason int reason) {
+    public void finishedWakingUp(@WakeReason int wakeReason) {
     }
 
     @Override
-    public void startedGoingToSleep(int why) {
+    public void startedGoingToSleep(@GoToSleepReason int sleepReason) {
     }
 
     @Override
-    public void finishedGoingToSleep(int why) {
+    public void finishedGoingToSleep(@GoToSleepReason int sleepReason) {
     }
 
     @Override
-    public void screenTurningOn(ScreenOnListener screenOnListener) {
+    public void screenTurningOn(int displayId, ScreenOnListener screenOnListener) {
     }
 
     @Override
-    public void screenTurnedOn() {
+    public void screenTurnedOn(int displayId) {
     }
 
     @Override
-    public void screenTurningOff(ScreenOffListener screenOffListener) {
+    public void screenTurningOff(int displayId, ScreenOffListener screenOffListener) {
     }
 
     @Override
-    public void screenTurnedOff() {
+    public void screenTurnedOff(int displayId) {
     }
 
     @Override
@@ -223,7 +210,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean okToAnimate() {
+    public boolean okToAnimate(boolean ignoreScreenOn) {
         return mOkToAnimate;
     }
 
@@ -377,12 +364,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isTopLevelWindow(int windowType) {
-        return false;
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public int applyKeyguardOcclusionChange() {
+        return 0;
     }
 
     @Override
@@ -404,10 +391,5 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean canDismissBootAnimation() {
         return true;
-    }
-
-    @Override
-    public boolean setAodShowing(boolean aodShowing) {
-        return false;
     }
 }

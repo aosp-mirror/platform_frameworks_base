@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.GROUP_ALERT_ALL;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
@@ -38,6 +39,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -46,13 +48,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -60,6 +65,7 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -88,6 +94,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
+
+import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -103,10 +112,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     NotificationUsageStats mUsageStats;
     @Mock
     IAccessibilityManager mAccessibilityService;
+    @Mock
+    KeyguardManager mKeyguardManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
-    private InjectableSystemClock mSystemClock = new FakeSystemClock();
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -133,41 +143,42 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private static final int CUSTOM_LIGHT_COLOR = Color.BLACK;
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
-    private static final long[] FALLBACK_VIBRATION_PATTERN = new long[] {100, 100, 100};
-    private static final VibrationEffect FALLBACK_VIBRATION =
-            VibrationEffect.createWaveform(FALLBACK_VIBRATION_PATTERN, -1);
     private static final int MAX_VIBRATION_DELAY = 1000;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        getContext().addMockSystemService(Vibrator.class, mVibrator);
 
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
+        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(false);
 
         long serviceReturnValue = IntPair.of(
                 AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED,
                 AccessibilityEvent.TYPES_ALL_MASK);
         when(mAccessibilityService.addClient(any(), anyInt())).thenReturn(serviceReturnValue);
         AccessibilityManager accessibilityManager =
-                new AccessibilityManager(Handler.getMain(), mAccessibilityService, 0);
+                new AccessibilityManager(getContext(), Handler.getMain(), mAccessibilityService,
+                        0, true);
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(accessibilityManager.isEnabled());
 
         mService = spy(new NotificationManagerService(getContext(), mNotificationRecordLogger,
-                mSystemClock, mNotificationInstanceIdSequence));
+                mNotificationInstanceIdSequence));
+        mService.setVibratorHelper(new VibratorHelper(getContext()));
         mService.setAudioManager(mAudioManager);
-        mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
         mService.setHandler(mHandler);
         mService.setLights(mLight);
         mService.setScreenOn(false);
-        mService.setFallbackVibrationPattern(FALLBACK_VIBRATION_PATTERN);
         mService.setUsageStats(mUsageStats);
         mService.setAccessibilityManager(accessibilityManager);
+        mService.setKeyguardManager(mKeyguardManager);
         mService.mScreenOn = false;
         mService.mInCallStateOffHook = false;
         mService.mNotificationPulseEnabled = true;
@@ -406,44 +417,50 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     private void verifyNeverVibrate() {
-        verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(), any());
+        verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(),
+                any(AudioAttributes.class));
     }
 
     private void verifyVibrate() {
+        verifyVibrate(/* times= */ 1);
+    }
+
+    private void verifyVibrate(int times) {
+        verifyVibrate(mVibrateOnceMatcher, times(times));
+    }
+
+    private void verifyVibrateLooped() {
+        verifyVibrate(mVibrateLoopMatcher, times(1));
+    }
+
+    private void verifyDelayedVibrateLooped() {
+        verifyVibrate(mVibrateLoopMatcher, timeout(MAX_VIBRATION_DELAY).times(1));
+    }
+
+    private void verifyDelayedVibrate(VibrationEffect effect) {
+        verifyVibrate(argument -> Objects.equals(effect, argument),
+                timeout(MAX_VIBRATION_DELAY).times(1));
+    }
+
+    private void verifyVibrate(ArgumentMatcher<VibrationEffect> effectMatcher,
+            VerificationMode verification) {
         ArgumentCaptor<AudioAttributes> captor = ArgumentCaptor.forClass(AudioAttributes.class);
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
+        verify(mVibrator, verification).vibrate(eq(Process.SYSTEM_UID),
+                eq(PackageManagerService.PLATFORM_PACKAGE_NAME), argThat(effectMatcher),
                 anyString(), captor.capture());
         assertEquals(0, (captor.getValue().getAllFlags()
                 & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
-    private void verifyVibrate(int times) {
-        verify(mVibrator, times(times)).vibrate(eq(Process.SYSTEM_UID),
-                eq(PackageManagerService.PLATFORM_PACKAGE_NAME), any(), anyString(),
-                any(AudioAttributes.class));
-    }
-
-    private void verifyVibrateLooped() {
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateLoopMatcher),
-                anyString(), any());
-    }
-
-    private void verifyDelayedVibrateLooped() {
-        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateLoopMatcher), anyString(), any());
-    }
-
-    private void verifyDelayedVibrate() {
-        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateOnceMatcher), anyString(), any());
-    }
-
     private void verifyStopVibrate() {
-        verify(mVibrator, times(1)).cancel();
+        int alarmClassUsageFilter =
+                VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK;
+        verify(mVibrator, times(1)).cancel(eq(alarmClassUsageFilter));
     }
 
-    private void verifyNeverStopVibrate() throws RemoteException {
+    private void verifyNeverStopVibrate() {
         verify(mVibrator, never()).cancel();
+        verify(mVibrator, never()).cancel(anyInt());
     }
 
     private void verifyNeverLights() {
@@ -481,6 +498,94 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testLockedPrivateA11yRedaction() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        r.setPackageVisibilityOverride(NotificationManager.VISIBILITY_NO_OVERRIDE);
+        r.getNotification().visibility = Notification.VISIBILITY_PRIVATE;
+        when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(true);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        mService.setAccessibilityManager(accessibilityManager);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        ArgumentCaptor<AccessibilityEvent> eventCaptor =
+                ArgumentCaptor.forClass(AccessibilityEvent.class);
+
+        verify(accessibilityManager, times(1))
+                .sendAccessibilityEvent(eventCaptor.capture());
+
+        AccessibilityEvent event = eventCaptor.getValue();
+        assertEquals(r.getNotification().publicVersion, event.getParcelableData());
+    }
+
+    @Test
+    public void testLockedOverridePrivateA11yRedaction() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        r.setPackageVisibilityOverride(Notification.VISIBILITY_PRIVATE);
+        r.getNotification().visibility = Notification.VISIBILITY_PUBLIC;
+        when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(true);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        mService.setAccessibilityManager(accessibilityManager);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        ArgumentCaptor<AccessibilityEvent> eventCaptor =
+                ArgumentCaptor.forClass(AccessibilityEvent.class);
+
+        verify(accessibilityManager, times(1))
+                .sendAccessibilityEvent(eventCaptor.capture());
+
+        AccessibilityEvent event = eventCaptor.getValue();
+        assertEquals(r.getNotification().publicVersion, event.getParcelableData());
+    }
+
+    @Test
+    public void testLockedPublicA11yNoRedaction() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        r.setPackageVisibilityOverride(NotificationManager.VISIBILITY_NO_OVERRIDE);
+        r.getNotification().visibility = Notification.VISIBILITY_PUBLIC;
+        when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(true);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        mService.setAccessibilityManager(accessibilityManager);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        ArgumentCaptor<AccessibilityEvent> eventCaptor =
+                ArgumentCaptor.forClass(AccessibilityEvent.class);
+
+        verify(accessibilityManager, times(1))
+                .sendAccessibilityEvent(eventCaptor.capture());
+
+        AccessibilityEvent event = eventCaptor.getValue();
+        assertEquals(r.getNotification(), event.getParcelableData());
+    }
+
+    @Test
+    public void testUnlockedPrivateA11yNoRedaction() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        r.setPackageVisibilityOverride(NotificationManager.VISIBILITY_NO_OVERRIDE);
+        r.getNotification().visibility = Notification.VISIBILITY_PRIVATE;
+        when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(false);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        mService.setAccessibilityManager(accessibilityManager);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        ArgumentCaptor<AccessibilityEvent> eventCaptor =
+                ArgumentCaptor.forClass(AccessibilityEvent.class);
+
+        verify(accessibilityManager, times(1))
+                .sendAccessibilityEvent(eventCaptor.capture());
+
+        AccessibilityEvent event = eventCaptor.getValue();
+        assertEquals(r.getNotification(), event.getParcelableData());
     }
 
     @Test
@@ -752,11 +857,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        VibrationEffect effect = VibrationEffect.createWaveform(r.getVibration(), -1);
-
-        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                eq(effect), anyString(),
-                (AudioAttributes) anyObject());
+        verifyDelayedVibrate(r.getVibration());
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
@@ -791,8 +892,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                eq(FALLBACK_VIBRATION), anyString(), (AudioAttributes) anyObject());
+        verifyDelayedVibrate(
+                mService.getVibratorHelper().createFallbackVibration(/* insistent= */ false));
         verify(mRingtonePlayer, never()).playAsync
                 (anyObject(), anyObject(), anyBoolean(), anyObject());
         assertTrue(r.isInterruptive());
@@ -1603,6 +1704,77 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         assertTrue(interrupter.isInterruptive());
     }
 
+    @Test
+    public void testBubbleSuppressedNotificationDoesntMakeSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                        mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = true;
+        record.setInterruptive(false);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyNeverVibrate();
+    }
+
+    @Test
+    public void testOverflowBubbleSuppressedNotificationDoesntMakeSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setFlagBubbleRemoved(true);
+        record.setAllowBubble(true);
+        record.isUpdate = true;
+        record.setInterruptive(false);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyNeverVibrate();
+    }
+
+    @Test
+    public void testBubbleUpdateMakesSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = true;
+        record.setInterruptive(true);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyVibrate(1);
+    }
+
+    @Test
+    public void testNewBubbleSuppressedNotifMakesSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = false;
+        record.setInterruptive(true);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyVibrate(1);
+    }
+
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {
         private final int mRepeatIndex;
 
@@ -1612,8 +1784,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         @Override
         public boolean matches(VibrationEffect actual) {
-            if (actual instanceof VibrationEffect.Waveform &&
-                    ((VibrationEffect.Waveform) actual).getRepeatIndex() == mRepeatIndex) {
+            if (actual instanceof VibrationEffect.Composed
+                    && ((VibrationEffect.Composed) actual).getRepeatIndex() == mRepeatIndex) {
                 return true;
             }
             // All non-waveform effects are essentially one shots.

@@ -17,8 +17,6 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,17 +26,22 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -48,8 +51,6 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     private NotificationListener mListener;
     @Mock
-    StatusBar mStatusBar;
-    @Mock
     StatusBarStateController mStatusBarStateController;
     @Mock
     NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -58,26 +59,38 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     NotificationMediaManager mNotificationMediaManager;
     @Mock
-    NotificationIconContainer mNotificationIconContainer;
-    @Mock
     DozeParameters mDozeParameters;
     @Mock
-    NotificationShadeWindowView mNotificationShadeWindowView;
+    CommonNotifCollection mNotifCollection;
+    @Mock
+    DarkIconDispatcher mDarkIconDispatcher;
+    @Mock
+    StatusBarWindowController mStatusBarWindowController;
+    @Mock
+    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private NotificationIconAreaController mController;
     @Mock
-    private BubbleController mBubbleController;
+    private Bubbles mBubbles;
+    @Mock private DemoModeController mDemoModeController;
+    @Mock
+    private NotificationIconContainer mAodIcons;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        when(mStatusBar.getNotificationShadeWindowView()).thenReturn(mNotificationShadeWindowView);
-        when(mNotificationShadeWindowView.findViewById(anyInt())).thenReturn(
-                mNotificationIconContainer);
-
-        mController = new NotificationIconAreaController(mContext, mStatusBar,
-                mStatusBarStateController, mWakeUpCoordinator, mKeyguardBypassController,
-                mNotificationMediaManager, mListener, mDozeParameters, mBubbleController);
+        mController = new NotificationIconAreaController(
+                mContext,
+                mStatusBarStateController,
+                mWakeUpCoordinator,
+                mKeyguardBypassController,
+                mNotificationMediaManager,
+                mListener,
+                mDozeParameters,
+                Optional.of(mBubbles),
+                mDemoModeController,
+                mDarkIconDispatcher,
+                mStatusBarWindowController,
+                mUnlockedScreenOffAnimationController);
     }
 
     @Test
@@ -96,9 +109,10 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
 
     @Test
     public void testAppearResetsTranslation() {
+        mController.setupAodIcons(mAodIcons);
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         mController.appearAodIcons();
-        verify(mNotificationIconContainer).setTranslationY(0);
-        verify(mNotificationIconContainer).setAlpha(1.0f);
+        verify(mAodIcons).setTranslationY(0);
+        verify(mAodIcons).setAlpha(1.0f);
     }
 }

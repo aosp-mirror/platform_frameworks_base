@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
 
@@ -141,8 +142,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** Usage: The buffer contains a complete mipmap hierarchy */
     public static final long USAGE_GPU_MIPMAP_COMPLETE    = 1 << 26;
 
-    // The approximate size of a native AHardwareBuffer object.
-    private static final long NATIVE_HARDWARE_BUFFER_SIZE = 232;
     /**
      * Creates a new <code>HardwareBuffer</code> instance.
      *
@@ -239,10 +238,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
-
+        long bufferSize = nEstimateSize(nativeObject);
         ClassLoader loader = HardwareBuffer.class.getClassLoader();
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
-                loader, nGetNativeFinalizer(), NATIVE_HARDWARE_BUFFER_SIZE);
+                loader, nGetNativeFinalizer(), bufferSize);
         mCleaner = registry.registerNativeAllocation(this, mNativeObject);
         mCloseGuard.open("close");
     }
@@ -429,4 +428,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private static native long nGetUsage(long nativeObject);
     private static native boolean nIsSupported(int width, int height, int format, int layers,
             long usage);
+    @CriticalNative
+    private static native long nEstimateSize(long nativeObject);
 }

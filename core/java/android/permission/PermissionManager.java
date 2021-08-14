@@ -16,30 +16,52 @@
 
 package android.permission;
 
+import static android.os.Build.VERSION_CODES.S;
+
 import android.Manifest;
-import android.annotation.CallbackExecutor;
+import android.annotation.CheckResult;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.PermissionGroupInfo;
+import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.media.AudioManager;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.DebugUtils;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.Immutable;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -47,8 +69,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * System level service for accessing the permission capabilities of the platform.
@@ -58,7 +78,10 @@ import java.util.function.Consumer;
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
-    private static final String TAG = PermissionManager.class.getName();
+    private static final String LOG_TAG = PermissionManager.class.getName();
+
+    /** @hide */
+    public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";
 
     /** @hide */
     public static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
@@ -67,41 +90,708 @@ public final class PermissionManager {
     public static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
 
+    private static final String SYSTEM_PKG = "android";
+
+    /**
+     * Refuse to install package if groups of permissions are bad
+     * - Permission groups should only be shared between apps sharing a certificate
+     * - If a permission belongs to a group that group should be defined
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = S)
+    public static final long CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS = 146211400;
+
+    /**
+     * The time to wait in between refreshing the exempted indicator role packages
+     */
+    private static final long EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS = 15000;
+
+    private static long sLastIndicatorUpdateTime = -1;
+
+    private static final int[] EXEMPTED_ROLES = {R.string.config_systemAmbientAudioIntelligence,
+        R.string.config_systemUiIntelligence, R.string.config_systemAudioIntelligence,
+        R.string.config_systemNotificationIntelligence, R.string.config_systemTextIntelligence,
+        R.string.config_systemVisualIntelligence};
+
+    private static final String[] INDICATOR_EXEMPTED_PACKAGES = new String[EXEMPTED_ROLES.length];
+
+    /**
+     * Note: Changing this won't do anything on its own - you should also change the filtering in
+     * {@link #shouldTraceGrant}.
+     *
+     * See log output for tag {@link #LOG_TAG_TRACE_GRANTS}
+     *
+     * @hide
+     */
+    public static final boolean DEBUG_TRACE_GRANTS = false;
+    /**
+     * @hide
+     */
+    public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
 
     private final IPermissionManager mPermissionManager;
 
+    private final LegacyPermissionManager mLegacyPermissionManager;
+
+    private final ArrayMap<PackageManager.OnPermissionsChangedListener,
+            IOnPermissionsChangeListener> mPermissionListeners = new ArrayMap<>();
+    private PermissionUsageHelper mUsageHelper;
+
     private List<SplitPermissionInfo> mSplitPermissionInfos;
 
     /**
      * Creates a new instance.
      *
-     * @param context The current context in which to operate.
+     * @param context The current context in which to operate
+     *
      * @hide
      */
-    public PermissionManager(@NonNull Context context, IPackageManager packageManager)
+    public PermissionManager(@NonNull Context context)
             throws ServiceManager.ServiceNotFoundException {
-        this(context, packageManager, IPermissionManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow("permissionmgr")));
+        mContext = context;
+        mPackageManager = AppGlobals.getPackageManager();
+        mPermissionManager = IPermissionManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
+                "permissionmgr"));
+        mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
+        //TODO ntmyren: there should be a way to only enable the watcher when requested
+        mUsageHelper = new PermissionUsageHelper(context);
     }
 
     /**
-     * Creates a new instance with the provided instantiation of the IPermissionManager.
+     * Retrieve all of the information we know about a particular permission.
      *
-     * @param context           the current context in which to operate
-     * @param packageManager    package manager service to be used for package related permission
-     *                          requests
-     * @param permissionManager injectable permission manager service
+     * @param permissionName the fully qualified name (e.g. com.android.permission.LOGIN) of the
+     *                       permission you are interested in
+     * @param flags additional option flags to modify the data returned
+     * @return a {@link PermissionInfo} containing information about the permission, or {@code null}
+     *         if not found
+     *
+     * @hide Pending API
+     */
+    @Nullable
+    public PermissionInfo getPermissionInfo(@NonNull String permissionName,
+            @PackageManager.PermissionInfoFlags int flags) {
+        try {
+            final String packageName = mContext.getOpPackageName();
+            return mPermissionManager.getPermissionInfo(permissionName, packageName, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Query for all of the permissions associated with a particular group.
+     *
+     * @param groupName the fully qualified name (e.g. com.android.permission.LOGIN) of the
+     *                  permission group you are interested in. Use {@code null} to find all of the
+     *                  permissions not associated with a group
+     * @param flags additional option flags to modify the data returned
+     * @return a list of {@link PermissionInfo} containing information about all of the permissions
+     *         in the given group, or {@code null} if the group is not found
+     *
+     * @hide Pending API
+     */
+    @Nullable
+    public List<PermissionInfo> queryPermissionsByGroup(@Nullable String groupName,
+            @PackageManager.PermissionInfoFlags int flags) {
+        try {
+            final ParceledListSlice<PermissionInfo> parceledList =
+                    mPermissionManager.queryPermissionsByGroup(groupName, flags);
+            if (parceledList == null) {
+                return null;
+            }
+            return parceledList.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a new dynamic permission to the system. For this to work, your package must have defined
+     * a permission tree through the
+     * {@link android.R.styleable#AndroidManifestPermissionTree &lt;permission-tree&gt;} tag in its
+     * manifest. A package can only add permissions to trees that were defined by either its own
+     * package or another with the same user id; a permission is in a tree if it matches the name of
+     * the permission tree + ".": for example, "com.foo.bar" is a member of the permission tree
+     * "com.foo".
+     * <p>
+     * It is good to make your permission tree name descriptive, because you are taking possession
+     * of that entire set of permission names. Thus, it must be under a domain you control, with a
+     * suffix that will not match any normal permissions that may be declared in any applications
+     * that are part of that domain.
+     * <p>
+     * New permissions must be added before any .apks are installed that use those permissions.
+     * Permissions you add through this method are remembered across reboots of the device. If the
+     * given permission already exists, the info you supply here will be used to update it.
+     *
+     * @param permissionInfo description of the permission to be added
+     * @param async whether the persistence of the permission should be asynchronous, allowing it to
+     *              return quicker and batch a series of adds, at the expense of no guarantee the
+     *              added permission will be retained if the device is rebooted before it is
+     *              written.
+     * @return {@code true} if a new permission was created, {@code false} if an existing one was
+     *         updated
+     * @throws SecurityException if you are not allowed to add the given permission name
+     *
+     * @see #removePermission(String)
+     *
+     * @hide Pending API
+     */
+    public boolean addPermission(@NonNull PermissionInfo permissionInfo, boolean async) {
+        try {
+            return mPermissionManager.addPermission(permissionInfo, async);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a permission that was previously added with
+     * {@link #addPermission(PermissionInfo, boolean)}. The same ownership rules apply -- you are
+     * only allowed to remove permissions that you are allowed to add.
+     *
+     * @param permissionName the name of the permission to remove
+     * @throws SecurityException if you are not allowed to remove the given permission name
+     *
+     * @see #addPermission(PermissionInfo, boolean)
+     *
+     * @hide Pending API
+     */
+    public void removePermission(@NonNull String permissionName) {
+        try {
+            mPermissionManager.removePermission(permissionName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve all of the information we know about a particular group of permissions.
+     *
+     * @param groupName the fully qualified name (e.g. com.android.permission_group.APPS) of the
+     *                  permission you are interested in
+     * @param flags additional option flags to modify the data returned
+     * @return a {@link PermissionGroupInfo} containing information about the permission, or
+     *         {@code null} if not found
+     *
+     * @hide Pending API
+     */
+    @Nullable
+    public PermissionGroupInfo getPermissionGroupInfo(@NonNull String groupName,
+            @PackageManager.PermissionGroupInfoFlags int flags) {
+        try {
+            return mPermissionManager.getPermissionGroupInfo(groupName, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve all of the known permission groups in the system.
+     *
+     * @param flags additional option flags to modify the data returned
+     * @return a list of {@link PermissionGroupInfo} containing information about all of the known
+     *         permission groups
+     *
+     * @hide Pending API
+     */
+    @NonNull
+    public List<PermissionGroupInfo> getAllPermissionGroups(
+            @PackageManager.PermissionGroupInfoFlags int flags) {
+        try {
+            final ParceledListSlice<PermissionGroupInfo> parceledList =
+                    mPermissionManager.getAllPermissionGroups(flags);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether a particular permissions has been revoked for a package by policy. Typically
+     * the device owner or the profile owner may apply such a policy. The user cannot grant policy
+     * revoked permissions, hence the only way for an app to get such a permission is by a policy
+     * change.
+     *
+     * @param packageName the name of the package you are checking against
+     * @param permissionName the name of the permission you are checking for
+     *
+     * @return whether the permission is restricted by policy
+     *
+     * @hide Pending API
+     */
+    @CheckResult
+    public boolean isPermissionRevokedByPolicy(@NonNull String packageName,
+            @NonNull String permissionName) {
+        try {
+            return mPermissionManager.isPermissionRevokedByPolicy(packageName, permissionName,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public static boolean shouldTraceGrant(
+            @NonNull String packageName, @NonNull String permissionName, int userId) {
+        // To be modified when debugging
+        // template: if ("".equals(packageName) && "".equals(permissionName)) return true;
+        return false;
+    }
+
+    /**
+     * Grant a runtime permission to an application which the application does not already have. The
+     * permission must have been requested by the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * {@code android.permission.GRANT_RUNTIME_PERMISSIONS} and if the user ID is not the current
+     * user {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @param packageName the package to which to grant the permission
+     * @param permissionName the permission name to grant
+     * @param user the user for which to grant the permission
+     *
+     * @see #revokeRuntimePermission(String, String, android.os.UserHandle, String)
+     *
      * @hide
      */
-    @VisibleForTesting
-    public PermissionManager(@NonNull Context context, IPackageManager packageManager,
-            IPermissionManager permissionManager) {
-        mContext = context;
-        mPackageManager = packageManager;
-        mPermissionManager = permissionManager;
+    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+    //@SystemApi
+    public void grantRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull UserHandle user) {
+        if (DEBUG_TRACE_GRANTS
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+            Log.i(LOG_TAG_TRACE_GRANTS, "App " + mContext.getPackageName() + " is granting "
+                    + packageName + " "
+                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+        }
+        try {
+            mPermissionManager.grantRuntimePermission(packageName, permissionName,
+                    user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Revoke a runtime permission that was previously granted by
+     * {@link #grantRuntimePermission(String, String, android.os.UserHandle)}. The permission must
+     * have been requested by and granted to the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * {@code android.permission.REVOKE_RUNTIME_PERMISSIONS} and if the user ID is not the current
+     * user {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @param packageName the package from which to revoke the permission
+     * @param permName the permission name to revoke
+     * @param user the user for which to revoke the permission
+     * @param reason the reason for the revoke, or {@code null} for unspecified
+     *
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    //@SystemApi
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permName, @NonNull UserHandle user, @Nullable String reason) {
+        if (DEBUG_TRACE_PERMISSION_UPDATES
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
+            Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
+                    + permName + " for user " + user.getIdentifier() + " with reason "
+                    + reason, new RuntimeException());
+        }
+        try {
+            mPermissionManager
+                    .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the state flags associated with a permission.
+     *
+     * @param packageName the package name for which to get the flags
+     * @param permissionName the permission for which to get the flags
+     * @param user the user for which to get permission flags
+     * @return the permission flags
+     *
+     * @hide
+     */
+    @PackageManager.PermissionFlags
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
+    //@SystemApi
+    public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull UserHandle user) {
+        try {
+            return mPermissionManager.getPermissionFlags(packageName, permissionName,
+                    user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates the flags associated with a permission by replacing the flags in the specified mask
+     * with the provided flag values.
+     *
+     * @param packageName The package name for which to update the flags
+     * @param permissionName The permission for which to update the flags
+     * @param flagMask The flags which to replace
+     * @param flagValues The flags with which to replace
+     * @param user The user for which to update the permission flags
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+    })
+    //@SystemApi
+    public void updatePermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @PackageManager.PermissionFlags int flagMask,
+            @PackageManager.PermissionFlags int flagValues, @NonNull UserHandle user) {
+        if (DEBUG_TRACE_PERMISSION_UPDATES && shouldTraceGrant(packageName, permissionName,
+                user.getIdentifier())) {
+            Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is updating flags for "
+                    + packageName + " " + permissionName + " for user "
+                    + user.getIdentifier() + ": " + DebugUtils.flagsToString(
+                    PackageManager.class, "FLAG_PERMISSION_", flagMask) + " := "
+                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_",
+                    flagValues), new RuntimeException());
+        }
+        try {
+            final boolean checkAdjustPolicyFlagPermission =
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
+            mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
+                    flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the restricted permissions that have been allowlisted and the app is allowed to have
+     * them granted in their full form.
+     * <p>
+     * Permissions can be hard restricted which means that the app cannot hold them or soft
+     * restricted where the app can hold the permission but in a weaker form. Whether a permission
+     * is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard restricted} or
+     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted} depends on the permission
+     * declaration. Allowlisting a hard restricted permission allows for the to hold that permission
+     * and allowlisting a soft restricted permission allows the app to hold the permission in its
+     * full, unrestricted form.
+     * <p>
+     * There are four allowlists:
+     * <ol>
+     * <li>
+     * One for cases where the system permission policy allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM} flag. Can only be
+     * accessed by pre-installed holders of a dedicated permission.
+     * <li>
+     * One for cases where the system allowlists the permission when upgrading from an OS version in
+     * which the permission was not restricted to an OS version in which the permission is
+     * restricted. This list corresponds to the
+     * {@link PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be accessed by
+     * pre-installed holders of a dedicated permission or the installer on record.
+     * <li>
+     * One for cases where the installer of the package allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
+     * accessed by pre-installed holders of a dedicated permission or the installer on record.
+     * </ol>
+     *
+     * @param packageName the app for which to get allowlisted permissions
+     * @param allowlistFlag the flag to determine which allowlist to query. Only one flag can be
+     *                      passed.
+     * @return the allowlisted permissions that are on any of the allowlists you query for
+     * @throws SecurityException if you try to access a allowlist that you have no access to
+     *
+     * @see #addAllowlistedRestrictedPermission(String, String, int)
+     * @see #removeAllowlistedRestrictedPermission(String, String, int)
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @hide Pending API
+     */
+    @NonNull
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+            conditional = true)
+    public Set<String> getAllowlistedRestrictedPermissions(@NonNull String packageName,
+            @PackageManager.PermissionWhitelistFlags int allowlistFlag) {
+        try {
+            final List<String> allowlist = mPermissionManager.getAllowlistedRestrictedPermissions(
+                    packageName, allowlistFlag, mContext.getUserId());
+            if (allowlist == null) {
+                return Collections.emptySet();
+            }
+            return new ArraySet<>(allowlist);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds a allowlisted restricted permission for an app.
+     * <p>
+     * Permissions can be hard restricted which means that the app cannot hold them or soft
+     * restricted where the app can hold the permission but in a weaker form. Whether a permission
+     * is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard restricted} or
+     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted} depends on the permission
+     * declaration. Allowlisting a hard restricted permission allows for the to hold that permission
+     * and allowlisting a soft restricted permission allows the app to hold the permission in its
+     * full, unrestricted form.
+     * <p>There are four allowlists:
+     * <ol>
+     * <li>
+     * One for cases where the system permission policy allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM} flag. Can only be
+     * accessed by pre-installed holders of a dedicated permission.
+     * <li>
+     * One for cases where the system allowlists the permission when upgrading from an OS version in
+     * which the permission was not restricted to an OS version in which the permission is
+     * restricted. This list corresponds to the
+     * {@link PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be accessed by
+     * pre-installed holders of a dedicated permission or the installer on record.
+     * <li>
+     * One for cases where the installer of the package allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
+     * accessed by pre-installed holders of a dedicated permission or the installer on record.
+     * </ol>
+     * <p>
+     * You need to specify the allowlists for which to set the allowlisted permissions which will
+     * clear the previous allowlisted permissions and replace them with the provided ones.
+     *
+     * @param packageName the app for which to get allowlisted permissions
+     * @param permissionName the allowlisted permission to add
+     * @param allowlistFlags the allowlists to which to add. Passing multiple flags updates all
+     *                       specified allowlists.
+     * @return whether the permission was added to the allowlist
+     * @throws SecurityException if you try to modify a allowlist that you have no access to.
+     *
+     * @see #getAllowlistedRestrictedPermissions(String, int)
+     * @see #removeAllowlistedRestrictedPermission(String, String, int)
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @hide Pending API
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+            conditional = true)
+    public boolean addAllowlistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permissionName,
+            @PackageManager.PermissionWhitelistFlags int allowlistFlags) {
+        try {
+            return mPermissionManager.addAllowlistedRestrictedPermission(packageName,
+                    permissionName, allowlistFlags, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a allowlisted restricted permission for an app.
+     * <p>
+     * Permissions can be hard restricted which means that the app cannot hold them or soft
+     * restricted where the app can hold the permission but in a weaker form. Whether a permission
+     * is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard restricted} or
+     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted} depends on the permission
+     * declaration. Allowlisting a hard restricted permission allows for the to hold that permission
+     * and allowlisting a soft restricted permission allows the app to hold the permission in its
+     * full, unrestricted form.
+     * <p>There are four allowlists:
+     * <ol>
+     * <li>
+     * One for cases where the system permission policy allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM} flag. Can only be
+     * accessed by pre-installed holders of a dedicated permission.
+     * <li>
+     * One for cases where the system allowlists the permission when upgrading from an OS version in
+     * which the permission was not restricted to an OS version in which the permission is
+     * restricted. This list corresponds to the
+     * {@link PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be accessed by
+     * pre-installed holders of a dedicated permission or the installer on record.
+     * <li>
+     * One for cases where the installer of the package allowlists a permission. This list
+     * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
+     * accessed by pre-installed holders of a dedicated permission or the installer on record.
+     * </ol>
+     * <p>
+     * You need to specify the allowlists for which to set the allowlisted permissions which will
+     * clear the previous allowlisted permissions and replace them with the provided ones.
+     *
+     * @param packageName the app for which to get allowlisted permissions
+     * @param permissionName the allowlisted permission to remove
+     * @param allowlistFlags the allowlists from which to remove. Passing multiple flags updates all
+     *                       specified allowlists.
+     * @return whether the permission was removed from the allowlist
+     * @throws SecurityException if you try to modify a allowlist that you have no access to.
+     *
+     * @see #getAllowlistedRestrictedPermissions(String, int)
+     * @see #addAllowlistedRestrictedPermission(String, String, int)
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @hide Pending API
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+            conditional = true)
+    public boolean removeAllowlistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permissionName,
+            @PackageManager.PermissionWhitelistFlags int allowlistFlags) {
+        try {
+            return mPermissionManager.removeAllowlistedRestrictedPermission(packageName,
+                    permissionName, allowlistFlags, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether an application is exempted from having its permissions be automatically
+     * revoked when the app is unused for an extended period of time.
+     * <p>
+     * Only the installer on record that installed the given package, or a holder of
+     * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     *
+     * @param packageName the app for which to set exemption
+     * @return whether the app is exempted
+     * @throws SecurityException if you you have no access to this
+     *
+     * @see #setAutoRevokeExempted
+     *
+     * @hide Pending API
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS,
+            conditional = true)
+    public boolean isAutoRevokeExempted(@NonNull String packageName) {
+        try {
+            return mPermissionManager.isAutoRevokeExempted(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Marks an application exempted from having its permissions be automatically revoked when the
+     * app is unused for an extended period of time.
+     * <p>
+     * Only the installer on record that installed the given package is allowed to call this.
+     * <p>
+     * Packages start in exempted state, and it is the installer's responsibility to un-exempt the
+     * packages it installs, unless auto-revoking permissions from that package would cause
+     * breakages beyond having to re-request the permission(s).
+     *
+     * @param packageName the app for which to set exemption
+     * @param exempted whether the app should be exempted
+     * @return whether any change took effect
+     * @throws SecurityException if you you have no access to modify this
+     *
+     * @see #isAutoRevokeExempted
+     *
+     * @hide Pending API
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS,
+            conditional = true)
+    public boolean setAutoRevokeExempted(@NonNull String packageName, boolean exempted) {
+        try {
+            return mPermissionManager.setAutoRevokeExempted(packageName, exempted,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get whether you should show UI with rationale for requesting a permission. You should do this
+     * only if you do not have the permission and the context in which the permission is requested
+     * does not clearly communicate to the user what would be the benefit from grating this
+     * permission.
+     *
+     * @param permissionName a permission your app wants to request
+     * @return whether you can show permission rationale UI
+     *
+     * @hide
+     */
+    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permissionName) {
+        try {
+            final String packageName = mContext.getPackageName();
+            return mPermissionManager.shouldShowRequestPermissionRationale(packageName,
+                    permissionName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a listener for permission changes for installed packages.
+     *
+     * @param listener the listener to add
+     *
+     * @hide
+     */
+    //@SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
+    public void addOnPermissionsChangeListener(
+            @NonNull PackageManager.OnPermissionsChangedListener listener) {
+        synchronized (mPermissionListeners) {
+            if (mPermissionListeners.get(listener) != null) {
+                return;
+            }
+            final OnPermissionsChangeListenerDelegate delegate =
+                    new OnPermissionsChangeListenerDelegate(listener, Looper.getMainLooper());
+            try {
+                mPermissionManager.addOnPermissionsChangeListener(delegate);
+                mPermissionListeners.put(listener, delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Remove a listener for permission changes for installed packages.
+     *
+     * @param listener the listener to remove
+     *
+     * @hide
+     */
+    //@SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
+    public void removeOnPermissionsChangeListener(
+            @NonNull PackageManager.OnPermissionsChangedListener listener) {
+        synchronized (mPermissionListeners) {
+            final IOnPermissionsChangeListener delegate = mPermissionListeners.get(listener);
+            if (delegate != null) {
+                try {
+                    mPermissionManager.removeOnPermissionsChangeListener(delegate);
+                    mPermissionListeners.remove(listener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
     }
 
     /**
@@ -172,7 +862,7 @@ public final class PermissionManager {
         try {
             parcelableList = ActivityThread.getPermissionManager().getSplitPermissions();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Error getting split permissions", e);
+            Slog.e(LOG_TAG, "Error getting split permissions", e);
             return Collections.emptyList();
         }
 
@@ -182,131 +872,78 @@ public final class PermissionManager {
     }
 
     /**
-     * Grant default permissions to currently active LUI app
-     * @param packageName The package name for the LUI app
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToLuiApp(
-            @NonNull String packageName, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToActiveLuiApp(
-                    packageName, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
+    @TestApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+        return mUsageHelper.getOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
     /**
-     * Revoke default permissions to currently active LUI app
-     * @param packageNames The package names for the LUI apps
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
+     * @param micMuted whether to consider the microphone muted when retrieving audio ops
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void revokeDefaultPermissionsFromLuiApps(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.revokeDefaultPermissionsFromLuiApps(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+    @TestApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
         }
+        return mUsageHelper.getOpUsageData(micMuted);
     }
 
     /**
-     * Grant default permissions to currently active Ims services
-     * @param packageNames The package names for the Ims services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
+     * Determine if a package should be shown in indicators. Only a select few roles, and the
+     * system app itself, are hidden. These values are updated at most every 15 seconds.
      * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledImsServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledImsServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
+    public static boolean shouldShowPackageForIndicatorCached(@NonNull Context context,
+            @NonNull String packageName) {
+        return !getIndicatorExemptedPackages(context).contains(packageName);
     }
 
     /**
-     * Grant default permissions to currently enabled telephony data services
-     * @param packageNames The package name for the services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
+     * Get the list of packages that are not shown by the indicators. Only a select few roles, and
+     * the system app itself, are hidden. These values are updated at most every 15 seconds.
      * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledTelephonyDataServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+    public static Set<String> getIndicatorExemptedPackages(@NonNull Context context) {
+        updateIndicatorExemptedPackages(context);
+        ArraySet<String> pkgNames = new ArraySet<>();
+        pkgNames.add(SYSTEM_PKG);
+        for (int i = 0; i < INDICATOR_EXEMPTED_PACKAGES.length; i++) {
+            String exemptedPackage = INDICATOR_EXEMPTED_PACKAGES[i];
+            if (exemptedPackage != null) {
+                pkgNames.add(exemptedPackage);
+            }
         }
+        return pkgNames;
     }
 
     /**
-     * Revoke default permissions to currently active telephony data services
-     * @param packageNames The package name for the services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when revoke completes
+     * Update the cached indicator exempted packages
      * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+    public static void updateIndicatorExemptedPackages(@NonNull Context context) {
+        long now = SystemClock.elapsedRealtime();
+        if (sLastIndicatorUpdateTime == -1
+                || (now - sLastIndicatorUpdateTime) > EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS) {
+            sLastIndicatorUpdateTime = now;
+            for (int i = 0; i < EXEMPTED_ROLES.length; i++) {
+                INDICATOR_EXEMPTED_PACKAGES[i] = context.getString(EXEMPTED_ROLES[i]);
+            }
         }
     }
-
-    /**
-     * Grant default permissions to currently enabled carrier apps
-     * @param packageNames Package names of the apps to be granted permissions
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[] packageNames,
-            @NonNull UserHandle user, @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledCarrierApps(packageNames,
-                    user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Gets the list of packages that have permissions that specified
      * {@code requestDontAutoRevokePermissions=true} in their
@@ -514,12 +1151,56 @@ public final class PermissionManager {
     @SystemApi
     public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
             @Nullable String callingFeatureId, int pid, int uid) {
+        return mLegacyPermissionManager.checkDeviceIdentifierAccess(packageName, message,
+                callingFeatureId, pid, uid);
+    }
+
+    /**
+     * Registers an attribution source with the OS. An app can only register an attribution
+     * source for itself. Once an attribution source has been registered another app can
+     * check whether this registration exists and thus trust the payload in the source
+     * object. This is important for permission checking and specifically for app op blaming
+     * since a malicious app should not be able to force the OS to blame another app
+     * that doesn't participate in an attribution chain.
+     *
+     * @param source The attribution source to register.
+     * @return The registered new attribution source.
+     *
+     * @see #isRegisteredAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+        // We use a shared static token for sources that are not registered since the token's
+        // only used for process death detection. If we are about to use the source for security
+        // enforcement we need to replace the binder with a unique one.
+        final AttributionSource registeredSource = source.withToken(new Binder());
         try {
-            return mPermissionManager.checkDeviceIdentifierAccess(packageName, message,
-                    callingFeatureId, pid, uid);
+            mPermissionManager.registerAttributionSource(registeredSource.asState());
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
+        return registeredSource;
+    }
+
+    /**
+     * Checks whether an attribution source is registered.
+     *
+     * @param source The attribution source to check.
+     * @return Whether this is a registered source.
+     *
+     * @see #registerAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
+        try {
+            return mPermissionManager.isRegisteredAttributionSource(source.asState());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /* @hide */
@@ -531,10 +1212,11 @@ public final class PermissionManager {
             // permission this is.
             final int appId = UserHandle.getAppId(uid);
             if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
-                Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " holds " + permission);
+                Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
+                        + permission);
                 return PackageManager.PERMISSION_GRANTED;
             }
-            Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
+            Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
                     + permission);
             return PackageManager.PERMISSION_DENIED;
         }
@@ -582,7 +1264,7 @@ public final class PermissionManager {
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             // N.B. pid doesn't count toward equality!
             if (rval == null) {
                 return false;
@@ -604,7 +1286,7 @@ public final class PermissionManager {
     /** @hide */
     private static final PropertyInvalidatedCache<PermissionQuery, Integer> sPermissionCache =
             new PropertyInvalidatedCache<PermissionQuery, Integer>(
-                    16, CACHE_KEY_PACKAGE_INFO) {
+                    2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
                 @Override
                 protected Integer recompute(PermissionQuery query) {
                     return checkPermissionUncached(query.permission, query.pid, query.uid);
@@ -633,28 +1315,29 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
-        final int uid;
+        final int userId;
 
-        PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName, int uid) {
+        PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName,
+                @UserIdInt int userId) {
             this.permName = permName;
             this.pkgName = pkgName;
-            this.uid = uid;
+            this.userId = userId;
         }
 
         @Override
         public String toString() {
             return String.format(
-                    "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s, uid=%s\")",
-                    pkgName, permName, uid);
+                    "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s, userId=%s\")",
+                    pkgName, permName, userId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(permName, pkgName, uid);
+            return Objects.hash(permName, pkgName, userId);
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             if (rval == null) {
                 return false;
             }
@@ -666,16 +1349,16 @@ public final class PermissionManager {
             }
             return Objects.equals(permName, other.permName)
                     && Objects.equals(pkgName, other.pkgName)
-                    && uid == other.uid;
+                    && userId == other.userId;
         }
     }
 
     /* @hide */
     private static int checkPackageNamePermissionUncached(
-            String permName, String pkgName, int uid) {
+            String permName, String pkgName, @UserIdInt int userId) {
         try {
-            return ActivityThread.getPermissionManager().checkPermission(
-                    permName, pkgName, uid);
+            return ActivityThread.getPackageManager().checkPermission(
+                    permName, pkgName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -685,11 +1368,11 @@ public final class PermissionManager {
     private static PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>
             sPackageNamePermissionCache =
             new PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>(
-                    16, CACHE_KEY_PACKAGE_INFO) {
+                    16, CACHE_KEY_PACKAGE_INFO, "checkPackageNamePermission") {
                 @Override
                 protected Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
-                            query.permName, query.pkgName, query.uid);
+                            query.permName, query.pkgName, query.userId);
                 }
             };
 
@@ -698,9 +1381,10 @@ public final class PermissionManager {
      *
      * @hide
      */
-    public static int checkPackageNamePermission(String permName, String pkgName, int uid) {
+    public static int checkPackageNamePermission(String permName, String pkgName,
+            @UserIdInt int userId) {
         return sPackageNamePermissionCache.query(
-                new PackageNamePermissionQuery(permName, pkgName, uid));
+                new PackageNamePermissionQuery(permName, pkgName, userId));
     }
 
     /**
@@ -712,4 +1396,35 @@ public final class PermissionManager {
         sPackageNamePermissionCache.disableLocal();
     }
 
+    private final class OnPermissionsChangeListenerDelegate
+            extends IOnPermissionsChangeListener.Stub implements Handler.Callback{
+        private static final int MSG_PERMISSIONS_CHANGED = 1;
+
+        private final PackageManager.OnPermissionsChangedListener mListener;
+        private final Handler mHandler;
+
+        public OnPermissionsChangeListenerDelegate(
+                PackageManager.OnPermissionsChangedListener listener, Looper looper) {
+            mListener = listener;
+            mHandler = new Handler(looper, this);
+        }
+
+        @Override
+        public void onPermissionsChanged(int uid) {
+            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_PERMISSIONS_CHANGED: {
+                    final int uid = msg.arg1;
+                    mListener.onPermissionsChanged(uid);
+                    return true;
+                }
+                default:
+                    return false;
+            }
+        }
+    }
 }

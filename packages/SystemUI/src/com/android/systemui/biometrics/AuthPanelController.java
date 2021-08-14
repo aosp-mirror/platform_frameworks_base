@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.Outline;
 import android.util.Log;
@@ -27,10 +28,20 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.android.systemui.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Controls the back panel and its animations for the BiometricPrompt UI.
  */
 public class AuthPanelController extends ViewOutlineProvider {
+    public static final int POSITION_BOTTOM = 1;
+    public static final int POSITION_LEFT = 2;
+    public static final int POSITION_RIGHT = 3;
+
+    @IntDef({POSITION_BOTTOM, POSITION_LEFT, POSITION_RIGHT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Position {}
 
     private static final String TAG = "BiometricPrompt/AuthPanelController";
     private static final boolean DEBUG = false;
@@ -38,6 +49,7 @@ public class AuthPanelController extends ViewOutlineProvider {
     private final Context mContext;
     private final View mPanelView;
 
+    @Position private int mPosition = POSITION_BOTTOM;
     private boolean mUseFullScreen;
 
     private int mContainerWidth;
@@ -51,19 +63,42 @@ public class AuthPanelController extends ViewOutlineProvider {
 
     @Override
     public void getOutline(View view, Outline outline) {
-        final int left = (mContainerWidth - mContentWidth) / 2;
-        final int right = mContainerWidth - left;
+        final int left = getLeftBound(mPosition);
+        final int right = left + mContentWidth;
 
-        // If the content fits within the container, shrink the height to wrap the content.
-        // Otherwise, set the outline to be the display size minus the margin - the content within
-        // is scrollable.
-        final int top = mContentHeight < mContainerHeight
-                ? mContainerHeight - mContentHeight - mMargin
-                : mMargin;
+        // If the content fits in the container, shrink the height to wrap it. Otherwise, expand to
+        // fill the display (minus the margin), since the content is scrollable.
+        final int top = getTopBound(mPosition);
+        final int bottom = Math.min(top + mContentHeight, mContainerHeight - mMargin);
 
-        // TODO(b/139954942) Likely don't need to "+1" after we resolve the navbar styling.
-        final int bottom = mContainerHeight - mMargin + 1;
         outline.setRoundRect(left, top, right, bottom, mCornerRadius);
+    }
+
+    private int getLeftBound(@Position int position) {
+        switch (position) {
+            case POSITION_BOTTOM:
+                return (mContainerWidth - mContentWidth) / 2;
+            case POSITION_LEFT:
+                return mMargin;
+            case POSITION_RIGHT:
+                return mContainerWidth - mContentWidth - mMargin;
+            default:
+                Log.e(TAG, "Unrecognized position: " + position);
+                return getLeftBound(POSITION_BOTTOM);
+        }
+    }
+
+    private int getTopBound(@Position int position) {
+        switch (position) {
+            case POSITION_BOTTOM:
+                return Math.max(mContainerHeight - mContentHeight - mMargin, mMargin);
+            case POSITION_LEFT:
+            case POSITION_RIGHT:
+                return Math.max((mContainerHeight - mContentHeight) / 2, mMargin);
+            default:
+                Log.e(TAG, "Unrecognized position: " + position);
+                return getTopBound(POSITION_BOTTOM);
+        }
     }
 
     public void setContainerDimensions(int containerWidth, int containerHeight) {
@@ -72,6 +107,10 @@ public class AuthPanelController extends ViewOutlineProvider {
         }
         mContainerWidth = containerWidth;
         mContainerHeight = containerHeight;
+    }
+
+    public void setPosition(@Position int position) {
+        mPosition = position;
     }
 
     public void setUseFullScreen(boolean fullScreen) {

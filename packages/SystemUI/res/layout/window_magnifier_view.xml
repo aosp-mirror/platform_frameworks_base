@@ -16,56 +16,71 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
-    <SurfaceView
-        android:layout_marginStart="@dimen/magnification_border_size"
-        android:layout_marginTop="@dimen/magnification_border_size"
-        android:id="@+id/surface_view"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:screenReaderFocusable="true">
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:importantForAccessibility="no"
+        android:background="@android:color/black"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/magnification_inner_border_margin"
+        android:importantForAccessibility="no"
+        android:background="@color/magnification_border_color"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:importantForAccessibility="noHideDescendants">
 
         <View
             android:id="@+id/left_handle"
-            android:layout_width="@dimen/magnification_border_size"
+            android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/drag_handle"
-            android:background="@color/magnification_border_color" />
+            android:layout_above="@+id/bottom_handle"/>
 
         <View
             android:id="@+id/top_handle"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/magnification_border_size"
-            android:background="@color/magnification_border_color" />
+            android:layout_height="@dimen/magnification_border_drag_size"
+            android:layout_alignParentTop="true"/>
 
         <View
             android:id="@+id/right_handle"
-            android:layout_width="@dimen/magnification_border_size"
+            android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/drag_handle"
-            android:layout_alignParentEnd="true"
-            android:background="@color/magnification_border_color" />
+            android:layout_above="@+id/bottom_handle"
+            android:layout_alignParentEnd="true"/>
 
         <View
             android:id="@+id/bottom_handle"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/magnification_border_size"
-            android:layout_above="@+id/drag_handle"
-            android:background="@color/magnification_border_color" />
+            android:layout_height="@dimen/magnification_border_drag_size"
+            android:layout_alignParentBottom="true"/>
 
-        <View
-            android:id="@+id/drag_handle"
-            android:layout_width="@dimen/magnification_drag_view_width"
-            android:layout_height="@dimen/magnification_drag_view_height"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:background="@color/magnification_border_color" />
+        <SurfaceView
+            android:id="@+id/surface_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/magnification_mirror_surface_margin"/>
 
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_width="@dimen/magnification_drag_view_size"
+        android:layout_height="@dimen/magnification_drag_view_size"
+        android:layout_margin="@dimen/magnification_inner_border_margin"
+        android:layout_gravity="right|bottom"
+        android:paddingEnd="@dimen/magnifier_drag_handle_padding"
+        android:paddingBottom="@dimen/magnifier_drag_handle_padding"
+        android:scaleType="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_move_magnification"/>
+
 </FrameLayout>

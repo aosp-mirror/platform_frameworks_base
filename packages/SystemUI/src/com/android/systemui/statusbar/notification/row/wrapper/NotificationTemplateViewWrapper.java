@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static android.view.View.VISIBLE;
+
 import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.DEFAULT_HEADER_VISIBLE_AMOUNT;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.view.View;
@@ -31,6 +33,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.NotificationActionListLayout;
@@ -51,12 +55,14 @@ import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
     private final int mFullHeaderTranslation;
-    protected ImageView mPicture;
+    private final boolean mAllowHideHeader;
+    protected ImageView mRightIcon;
+    protected ImageView mLeftIcon;
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
+    protected View mSmartReplyContainer;
     protected View mActionsContainer;
-    private ImageView mReplyAction;
 
     private int mContentHeight;
     private int mMinHeightHint;
@@ -64,11 +70,13 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
     private UiOffloadThread mUiOffloadThread;
     private View mRemoteInputHistory;
+    private boolean mCanHideHeader;
     private float mHeaderTranslation;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
         super(ctx, view, row);
+        mAllowHideHeader = ctx.getResources().getBoolean(R.bool.heads_up_notification_hides_header);
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
@@ -139,14 +147,18 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                 com.android.internal.R.dimen.notification_content_margin_top);
     }
 
-    private void resolveTemplateViews(StatusBarNotification notification) {
-        mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
-        if (mPicture != null) {
-            mPicture.setTag(ImageTransformState.ICON_TAG,
-                    notification.getNotification().getLargeIcon());
+    private void resolveTemplateViews(StatusBarNotification sbn) {
+        mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
+        if (mRightIcon != null) {
+            mRightIcon.setTag(ImageTransformState.ICON_TAG, getRightIcon(sbn.getNotification()));
+            mRightIcon.setTag(TransformState.ALIGN_END_TAG, true);
         }
-        mTitle = (TextView) mView.findViewById(com.android.internal.R.id.title);
-        mText = (TextView) mView.findViewById(com.android.internal.R.id.text);
+        mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
+        if (mLeftIcon != null) {
+            mLeftIcon.setTag(ImageTransformState.ICON_TAG, getLargeIcon(sbn.getNotification()));
+        }
+        mTitle = mView.findViewById(com.android.internal.R.id.title);
+        mText = mView.findViewById(com.android.internal.R.id.text);
         final View progress = mView.findViewById(com.android.internal.R.id.progress);
         if (progress instanceof ProgressBar) {
             mProgressBar = (ProgressBar) progress;
@@ -154,12 +166,33 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             // It's still a viewstub
             mProgressBar = null;
         }
+        mSmartReplyContainer = mView.findViewById(com.android.internal.R.id.smart_reply_container);
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
         mActions = mView.findViewById(com.android.internal.R.id.actions);
-        mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
         mRemoteInputHistory = mView.findViewById(
                 com.android.internal.R.id.notification_material_reply_container);
         updatePendingIntentCancellations();
+    }
+
+    @Nullable
+    protected final Icon getLargeIcon(Notification n) {
+        Icon modernLargeIcon = n.getLargeIcon();
+        if (modernLargeIcon == null && n.largeIcon != null) {
+            return Icon.createWithBitmap(n.largeIcon);
+        }
+        return modernLargeIcon;
+    }
+
+    @Nullable
+    protected final Icon getRightIcon(Notification n) {
+        if (n.extras.getBoolean(Notification.EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED)
+                && n.isStyle(Notification.BigPictureStyle.class)) {
+            Icon pictureIcon = Notification.BigPictureStyle.getPictureIcon(n.extras);
+            if (pictureIcon != null) {
+                return pictureIcon;
+            }
+        }
+        return getLargeIcon(n);
     }
 
     private void updatePendingIntentCancellations() {
@@ -189,31 +222,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                     }
                 });
             }
-        }
-        if (mReplyAction != null) {
-            // Let's reset the view on update, assuming the new pending intent isn't cancelled
-            // anymore. The color filter automatically resets when it's updated.
-            mReplyAction.setEnabled(true);
-            performOnPendingIntentCancellation(mReplyAction, () -> {
-                if (mReplyAction != null && mReplyAction.isEnabled()) {
-                    mReplyAction.setEnabled(false);
-                    // The visual appearance doesn't look disabled enough yet, let's add the
-                    // alpha as well. Since Alpha doesn't play nicely right now with the
-                    // transformation, we rather blend it manually with the background color.
-                    Drawable drawable = mReplyAction.getDrawable().mutate();
-                    PorterDuffColorFilter colorFilter =
-                            (PorterDuffColorFilter) drawable.getColorFilter();
-                    float disabledAlpha = mView.getResources().getFloat(
-                            com.android.internal.R.dimen.notification_action_disabled_alpha);
-                    if (colorFilter != null) {
-                        int color = colorFilter.getColor();
-                        color = blendColorWithBackground(color, disabledAlpha);
-                        drawable.mutate().setColorFilter(color, colorFilter.getMode());
-                    } else {
-                        mReplyAction.setAlpha(disabledAlpha);
-                    }
-                }
-            });
         }
     }
 
@@ -260,21 +268,15 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     @Override
-    public boolean disallowSingleClick(float x, float y) {
-        if (mReplyAction != null && mReplyAction.getVisibility() == View.VISIBLE) {
-            if (isOnView(mReplyAction, x, y) || isOnView(mPicture, x, y)) {
-                return true;
-            }
-        }
-        return super.disallowSingleClick(x, y);
-    }
-
-    @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
         resolveTemplateViews(row.getEntry().getSbn());
         super.onContentUpdated(row);
+        // With the modern templates, a large icon visually overlaps the header, so we can't
+        // hide the header, we must show it.
+        mCanHideHeader = mAllowHideHeader && mNotificationHeader != null
+                && (mRightIcon == null || mRightIcon.getVisibility() != VISIBLE);
         if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
             setHeaderVisibleAmount(row.getHeaderVisibleAmount());
         }
@@ -292,14 +294,16 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
                     mText);
         }
-        if (mPicture != null) {
+        if (mRightIcon != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_IMAGE,
-                    mPicture);
+                    mRightIcon);
         }
         if (mProgressBar != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS,
                     mProgressBar);
         }
+        addViewsTransformingToSimilar(mLeftIcon);
+        addTransformedViews(mSmartReplyContainer);
     }
 
     @Override
@@ -333,14 +337,14 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     @Override
     public int getHeaderTranslation(boolean forceNoHeader) {
-        return forceNoHeader ? mFullHeaderTranslation : (int) mHeaderTranslation;
+        return forceNoHeader && mCanHideHeader ? mFullHeaderTranslation : (int) mHeaderTranslation;
     }
 
     @Override
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         super.setHeaderVisibleAmount(headerVisibleAmount);
         float headerTranslation = 0f;
-        if (mNotificationHeader != null) {
+        if (mCanHideHeader && mNotificationHeader != null) {
             mNotificationHeader.setAlpha(headerVisibleAmount);
             headerTranslation = (1.0f - headerVisibleAmount) * mFullHeaderTranslation;
         }

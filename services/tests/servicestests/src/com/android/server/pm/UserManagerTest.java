@@ -41,6 +41,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Slog;
 
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -57,6 +58,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import javax.annotation.concurrent.GuardedBy;
 
 /** Test {@link UserManager} functionality. */
 @RunWith(AndroidJUnit4.class)
@@ -134,7 +138,7 @@ public final class UserManagerTest {
     @SmallTest
     @Test
     public void testHasSystemUser() throws Exception {
-        assertThat(findUser(UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
     }
 
     @MediumTest
@@ -155,6 +159,40 @@ public final class UserManagerTest {
         fail("Didn't find a guest: " + list);
     }
 
+    @Test
+    public void testCloneUser() throws Exception {
+        // Test that only one clone user can be created
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        UserInfo userInfo = createProfileForUser("Clone user1",
+                UserManager.USER_TYPE_PROFILE_CLONE,
+                primaryUserId);
+        assertThat(userInfo).isNotNull();
+        UserInfo userInfo2 = createProfileForUser("Clone user2",
+                UserManager.USER_TYPE_PROFILE_CLONE,
+                primaryUserId);
+        assertThat(userInfo2).isNull();
+
+        final Context userContext = mContext.createPackageContextAsUser("system", 0,
+                UserHandle.of(userInfo.id));
+        assertThat(userContext.getSystemService(
+                UserManager.class).isMediaSharedWithParent()).isTrue();
+
+        List<UserInfo> list = mUserManager.getUsers();
+        List<UserInfo> cloneUsers = list.stream().filter(
+                user -> (user.id == userInfo.id && user.name.equals("Clone user1")
+                        && user.isCloneProfile()))
+                .collect(Collectors.toList());
+        assertThat(cloneUsers.size()).isEqualTo(1);
+
+        // Verify clone user parent
+        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        assertThat(parentProfileInfo).isNotNull();
+        assertThat(primaryUserId).isEqualTo(parentProfileInfo.id);
+        removeUser(userInfo.id);
+        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+    }
+
     @MediumTest
     @Test
     public void testAdd2Users() throws Exception {
@@ -164,9 +202,9 @@ public final class UserManagerTest {
         assertThat(user1).isNotNull();
         assertThat(user2).isNotNull();
 
-        assertThat(findUser(UserHandle.USER_SYSTEM)).isTrue();
-        assertThat(findUser(user1.id)).isTrue();
-        assertThat(findUser(user2.id)).isTrue();
+        assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(hasUser(user1.id)).isTrue();
+        assertThat(hasUser(user2.id)).isTrue();
     }
 
     @MediumTest
@@ -175,7 +213,7 @@ public final class UserManagerTest {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         removeUser(userInfo.id);
 
-        assertThat(findUser(userInfo.id)).isFalse();
+        assertThat(hasUser(userInfo.id)).isFalse();
     }
 
     @MediumTest
@@ -199,13 +237,109 @@ public final class UserManagerTest {
             }
         }
 
-        assertThat(findUser(userInfo.id)).isFalse();
+        assertThat(hasUser(userInfo.id)).isFalse();
     }
 
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_restrictedReturnsError() throws Exception {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", /* flags= */ 0);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
+                asHandle(currentUser));
+        try {
+            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
+                    asHandle(currentUser));
+        }
+
+        assertThat(hasUser(user1.id)).isTrue();
+        assertThat(getUser(user1.id).isEphemeral()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_evenWhenRestricted() throws Exception {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", /* flags= */ 0);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
+                asHandle(currentUser));
+        try {
+            synchronized (mUserRemoveLock) {
+                assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                        /* evenWhenDisallowed= */ true))
+                                .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+                waitForUserRemovalLocked(user1.id);
+            }
+
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
+                    asHandle(currentUser));
+        }
+
+        assertThat(hasUser(user1.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_systemUserReturnsError() throws Exception {
+        assertThat(mUserManager.removeUserOrSetEphemeral(UserHandle.USER_SYSTEM,
+                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+
+        assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_invalidUserReturnsError() throws Exception {
+        assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
+        assertThat(mUserManager.removeUserOrSetEphemeral(Integer.MAX_VALUE,
+                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_currentUserSetEphemeral() throws Exception {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", /* flags= */ 0);
+        // Switch to the user just created.
+        switchUser(user1.id, null, /* ignoreHandle= */ true);
+
+        assertThat(mUserManager.removeUserOrSetEphemeral(user1.id, /* evenWhenDisallowed= */ false))
+                .isEqualTo(UserManager.REMOVE_RESULT_SET_EPHEMERAL);
+
+        assertThat(hasUser(user1.id)).isTrue();
+        assertThat(getUser(user1.id).isEphemeral()).isTrue();
+
+        // Switch back to the starting user.
+        switchUser(startUser, null, /* ignoreHandle= */ true);
+
+        // User is removed once switch is complete
+        synchronized (mUserRemoveLock) {
+            waitForUserRemovalLocked(user1.id);
+        }
+        assertThat(hasUser(user1.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserOrSetEphemeral_nonCurrentUserRemoved() throws Exception {
+        final UserInfo user1 = createUser("User 1", /* flags= */ 0);
+        synchronized (mUserRemoveLock) {
+            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+            waitForUserRemovalLocked(user1.id);
+        }
+
+        assertThat(hasUser(user1.id)).isFalse();
     }
 
     /** Tests creating a FULL user via specifying userType. */
@@ -608,15 +742,20 @@ public final class UserManagerTest {
                 () -> mUserManager.getUserCreationTime(asHandle(user.id)));
     }
 
-    private boolean findUser(int id) {
+    @Nullable
+    private UserInfo getUser(int id) {
         List<UserInfo> list = mUserManager.getUsers();
 
         for (UserInfo user : list) {
             if (user.id == id) {
-                return true;
+                return user;
             }
         }
-        return false;
+        return null;
+    }
+
+    private boolean hasUser(int id) {
+        return getUser(id) != null;
     }
 
     @MediumTest
@@ -918,17 +1057,22 @@ public final class UserManagerTest {
     private void removeUser(int userId) {
         synchronized (mUserRemoveLock) {
             mUserManager.removeUser(userId);
-            long time = System.currentTimeMillis();
-            while (mUserManager.getUserInfo(userId) != null) {
-                try {
-                    mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
-                    fail("Timeout waiting for removeUser. userId = " + userId);
-                }
+            waitForUserRemovalLocked(userId);
+        }
+    }
+
+    @GuardedBy("mUserRemoveLock")
+    private void waitForUserRemovalLocked(int userId) {
+        long time = System.currentTimeMillis();
+        while (mUserManager.getUserInfo(userId) != null) {
+            try {
+                mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
+                fail("Timeout waiting for removeUser. userId = " + userId);
             }
         }
     }

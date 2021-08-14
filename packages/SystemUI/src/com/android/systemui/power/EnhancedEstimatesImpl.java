@@ -2,11 +2,11 @@ package com.android.systemui.power;
 
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.fuelgauge.EstimateKt;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+@SysUISingleton
 public class EnhancedEstimatesImpl implements EnhancedEstimates {
 
     @Inject

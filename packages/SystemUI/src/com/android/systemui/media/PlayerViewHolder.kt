@@ -35,7 +35,6 @@ class PlayerViewHolder private constructor(itemView: View) {
 
     // Player information
     val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
-    val appName = itemView.requireViewById<TextView>(R.id.app_name)
     val albumView = itemView.requireViewById<ImageView>(R.id.album_art)
     val titleText = itemView.requireViewById<TextView>(R.id.header_title)
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
@@ -60,11 +59,12 @@ class PlayerViewHolder private constructor(itemView: View) {
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
 
     // Settings screen
-    val settingsText = itemView.requireViewById<TextView>(R.id.remove_text)
+    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
     val cancel = itemView.requireViewById<View>(R.id.cancel)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
     val dismissLabel = dismiss.getChildAt(0)
     val settings = itemView.requireViewById<View>(R.id.settings)
+    val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
 
     init {
         (player.background as IlluminationDrawable).let {
@@ -91,6 +91,10 @@ class PlayerViewHolder private constructor(itemView: View) {
                 throw IllegalArgumentException()
             }
         }
+    }
+
+    fun marquee(start: Boolean, delay: Long) {
+        longPressText.getHandler().postDelayed({ longPressText.setSelected(start) }, delay)
     }
 
     companion object {
@@ -120,6 +124,7 @@ class PlayerViewHolder private constructor(itemView: View) {
                 R.id.header_title,
                 R.id.header_artist,
                 R.id.media_seamless,
+                R.id.media_seamless_fallback,
                 R.id.notification_media_progress_time,
                 R.id.media_progress_bar,
                 R.id.action0,
@@ -130,7 +135,6 @@ class PlayerViewHolder private constructor(itemView: View) {
                 R.id.icon
         )
         val gutsIds = setOf(
-                R.id.media_text,
                 R.id.remove_text,
                 R.id.cancel,
                 R.id.dismiss,

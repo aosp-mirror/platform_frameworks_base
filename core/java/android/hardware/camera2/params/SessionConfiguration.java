@@ -22,6 +22,7 @@ import static com.android.internal.util.Preconditions.*;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -129,11 +130,13 @@ public final class SessionConfiguration implements Parcelable {
         int inputWidth = source.readInt();
         int inputHeight = source.readInt();
         int inputFormat = source.readInt();
+        boolean isInputMultiResolution = source.readBoolean();
         ArrayList<OutputConfiguration> outConfigs = new ArrayList<OutputConfiguration>();
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
-            mInputConfig = new InputConfiguration(inputWidth, inputHeight, inputFormat);
+            mInputConfig = new InputConfiguration(inputWidth, inputHeight,
+                    inputFormat, isInputMultiResolution);
         }
         mSessionType = sessionType;
         mOutputConfigurations = outConfigs;
@@ -143,13 +146,7 @@ public final class SessionConfiguration implements Parcelable {
             new Parcelable.Creator<SessionConfiguration> () {
         @Override
         public SessionConfiguration createFromParcel(Parcel source) {
-            try {
-                SessionConfiguration sessionConfiguration = new SessionConfiguration(source);
-                return sessionConfiguration;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception creating SessionConfiguration from parcel", e);
-                return null;
-            }
+            return new SessionConfiguration(source);
         }
 
         @Override
@@ -168,10 +165,12 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeInt(mInputConfig.getWidth());
             dest.writeInt(mInputConfig.getHeight());
             dest.writeInt(mInputConfig.getFormat());
+            dest.writeBoolean(mInputConfig.isMultiResolution());
         } else {
             dest.writeInt(/*inputWidth*/ 0);
             dest.writeInt(/*inputHeight*/ 0);
             dest.writeInt(/*inputFormat*/ -1);
+            dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
     }
@@ -190,7 +189,7 @@ public final class SessionConfiguration implements Parcelable {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {

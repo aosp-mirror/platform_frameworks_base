@@ -1,4 +1,10 @@
 {
+  "presubmit": [
+    {
+      "name": "CtsSuspendAppsTestCases",
+      "file_patterns": ["(/|^)SuspendedAppActivity\\.java"]
+    }
+  ],
   "postsubmit": [
     {
       "name": "FrameworksCoreTests",

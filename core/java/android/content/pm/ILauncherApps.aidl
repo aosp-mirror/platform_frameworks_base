@@ -17,13 +17,14 @@
 package android.content.pm;
 
 import android.app.IApplicationThread;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.LocusId;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.LauncherActivityInfoInternal;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.IPackageInstallerCallback;
@@ -47,7 +48,7 @@ interface ILauncherApps {
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
     ParceledListSlice getLauncherActivities(
             String callingPackage, String packageName, in UserHandle user);
-    ActivityInfo resolveActivity(
+    LauncherActivityInfoInternal resolveLauncherActivityInternal(
             String callingPackage, in ComponentName component, in UserHandle user);
     void startSessionDetailsActivityAsUser(in IApplicationThread caller, String callingPackage,
                 String callingFeatureId, in PackageInstaller.SessionInfo sessionInfo,
@@ -55,6 +56,8 @@ interface ILauncherApps {
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
+    PendingIntent getActivityLaunchIntent(in ComponentName component, in Bundle opts,
+            in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
@@ -87,6 +90,8 @@ interface ILauncherApps {
             String callingPackage, String packageName, in UserHandle user);
     IntentSender getShortcutConfigActivityIntent(String callingPackage, in ComponentName component,
             in UserHandle user);
+    PendingIntent getShortcutIntent(String callingPackage, String packageName, String shortcutId,
+            in Bundle opts, in UserHandle user);
 
     // Unregister is performed using package installer
     void registerPackageInstallerCallback(String callingPackage,

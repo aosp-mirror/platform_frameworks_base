@@ -93,8 +93,6 @@ private:
     enum {
         HAS_BYTE_ARRAY = 8
     };
-
-    Status add(const Entry& entry);
 };
 
 }} // namespace android::os

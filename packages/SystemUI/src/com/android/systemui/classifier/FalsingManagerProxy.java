@@ -16,169 +16,107 @@
 
 package com.android.systemui.classifier;
 
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_MANAGER_ENABLED;
-
 import android.content.Context;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.provider.DeviceConfig;
-import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
-import com.android.systemui.classifier.brightline.FalsingDataProvider;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.Provider;
 
 /**
  * Simple passthrough implementation of {@link FalsingManager} allowing plugins to swap in.
  *
- * {@link FalsingManagerImpl} is used when a Plugin is not loaded.
+ * {@link BrightLineFalsingManager} is used when a Plugin is not loaded.
  */
-@Singleton
+@SysUISingleton
 public class FalsingManagerProxy implements FalsingManager, Dumpable {
 
-    private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
+    private static final String DUMPABLE_TAG = "FalsingManager";
+    public static final String FALSING_REMAIN_LOCKED = "falsing_failure_after_attempts";
+    public static final String FALSING_SUCCESS = "falsing_success_after_attempts";
 
-    private final ProximitySensor mProximitySensor;
-    private final FalsingDataProvider mFalsingDataProvider;
-    private FalsingManager mInternalFalsingManager;
-    private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener;
+    private final PluginManager mPluginManager;
     private final DeviceConfigProxy mDeviceConfig;
-    private boolean mBrightlineEnabled;
-    private final DockManager mDockManager;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private Executor mUiBgExecutor;
-    private final StatusBarStateController mStatusBarStateController;
+    private final Provider<BrightLineFalsingManager> mBrightLineFalsingManagerProvider;
+    private final DumpManager mDumpManager;
+    final PluginListener<FalsingPlugin> mPluginListener;
+
+    private FalsingManager mInternalFalsingManager;
+
+    private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener =
+            properties -> onDeviceConfigPropertiesChanged(properties.getNamespace());
 
     @Inject
-    FalsingManagerProxy(Context context, PluginManager pluginManager, @Main Executor executor,
-            ProximitySensor proximitySensor,
-            DeviceConfigProxy deviceConfig, DockManager dockManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpManager dumpManager,
-            @UiBackground Executor uiBgExecutor,
-            StatusBarStateController statusBarStateController,
-            FalsingDataProvider falsingDataProvider) {
-        mProximitySensor = proximitySensor;
-        mDockManager = dockManager;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mUiBgExecutor = uiBgExecutor;
-        mStatusBarStateController = statusBarStateController;
-        mFalsingDataProvider = falsingDataProvider;
-        mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
-        mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);
+    FalsingManagerProxy(PluginManager pluginManager, @Main Executor executor,
+            DeviceConfigProxy deviceConfig, DumpManager dumpManager,
+            Provider<BrightLineFalsingManager> brightLineFalsingManagerProvider) {
+        mPluginManager = pluginManager;
+        mDumpManager = dumpManager;
         mDeviceConfig = deviceConfig;
-        mDeviceConfigListener =
-                properties -> onDeviceConfigPropertiesChanged(context, properties.getNamespace());
-        setupFalsingManager(context);
+        mBrightLineFalsingManagerProvider = brightLineFalsingManagerProvider;
+        setupFalsingManager();
         mDeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                executor,
-                mDeviceConfigListener
+                DeviceConfig.NAMESPACE_SYSTEMUI, executor, mDeviceConfigListener
         );
 
-        final PluginListener<FalsingPlugin> mPluginListener = new PluginListener<FalsingPlugin>() {
+        mPluginListener = new PluginListener<FalsingPlugin>() {
             public void onPluginConnected(FalsingPlugin plugin, Context context) {
                 FalsingManager pluginFalsingManager = plugin.getFalsingManager(context);
                 if (pluginFalsingManager != null) {
-                    mInternalFalsingManager.cleanup();
+                    mInternalFalsingManager.cleanupInternal();
                     mInternalFalsingManager = pluginFalsingManager;
                 }
             }
 
             public void onPluginDisconnected(FalsingPlugin plugin) {
-                mInternalFalsingManager = new FalsingManagerImpl(context, mUiBgExecutor);
+                setupFalsingManager();
             }
         };
 
-        pluginManager.addPluginListener(mPluginListener, FalsingPlugin.class);
+        mPluginManager.addPluginListener(mPluginListener, FalsingPlugin.class);
 
-        dumpManager.registerDumpable("FalsingManager", this);
+        mDumpManager.registerDumpable(DUMPABLE_TAG, this);
     }
 
-    private void onDeviceConfigPropertiesChanged(Context context, String namespace) {
+    private void onDeviceConfigPropertiesChanged(String namespace) {
         if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
             return;
         }
 
-        setupFalsingManager(context);
+        setupFalsingManager();
     }
 
     /**
-     * Chooses the FalsingManager implementation.
+     * Setup the FalsingManager implementation.
+     *
+     * If multiple implementations are available, this is where the choice is made.
      */
-    private void setupFalsingManager(Context context) {
-        boolean brightlineEnabled = mDeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, true);
-        if (brightlineEnabled == mBrightlineEnabled && mInternalFalsingManager != null) {
-            return;
-        }
-        mBrightlineEnabled = brightlineEnabled;
-
+    private void setupFalsingManager() {
         if (mInternalFalsingManager != null) {
-            mInternalFalsingManager.cleanup();
+            mInternalFalsingManager.cleanupInternal();
         }
-        if (!brightlineEnabled) {
-            mInternalFalsingManager = new FalsingManagerImpl(context, mUiBgExecutor);
-        } else {
-            mInternalFalsingManager = new BrightLineFalsingManager(
-                    mFalsingDataProvider,
-                    mKeyguardUpdateMonitor,
-                    mProximitySensor,
-                    mDeviceConfig,
-                    mDockManager,
-                    mStatusBarStateController
-            );
-        }
-    }
-
-    /**
-     * Returns the FalsingManager implementation in use.
-     */
-    @VisibleForTesting
-    FalsingManager getInternalFalsingManager() {
-        return mInternalFalsingManager;
+        mInternalFalsingManager = mBrightLineFalsingManagerProvider.get();
     }
 
     @Override
     public void onSuccessfulUnlock() {
         mInternalFalsingManager.onSuccessfulUnlock();
-    }
-
-    @Override
-    public void onNotificationActive() {
-        mInternalFalsingManager.onNotificationActive();
-    }
-
-    @Override
-    public void setShowingAod(boolean showingAod) {
-        mInternalFalsingManager.setShowingAod(showingAod);
-    }
-
-    @Override
-    public void onNotificatonStartDraggingDown() {
-        mInternalFalsingManager.onNotificatonStartDraggingDown();
     }
 
     @Override
@@ -192,13 +130,18 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onNotificatonStopDraggingDown() {
-        mInternalFalsingManager.onNotificatonStartDraggingDown();
+    public boolean isSimpleTap() {
+        return mInternalFalsingManager.isSimpleTap();
     }
 
     @Override
-    public void setNotificationExpanded() {
-        mInternalFalsingManager.setNotificationExpanded();
+    public boolean isFalseTap(@Penalty int penalty) {
+        return mInternalFalsingManager.isFalseTap(penalty);
+    }
+
+    @Override
+    public boolean isFalseDoubleTap() {
+        return mInternalFalsingManager.isFalseDoubleTap();
     }
 
     @Override
@@ -207,58 +150,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onQsDown() {
-        mInternalFalsingManager.onQsDown();
-    }
-
-    @Override
-    public void setQsExpanded(boolean expanded) {
-        mInternalFalsingManager.setQsExpanded(expanded);
-    }
-
-    @Override
     public boolean shouldEnforceBouncer() {
         return mInternalFalsingManager.shouldEnforceBouncer();
-    }
-
-    @Override
-    public void onTrackingStarted(boolean secure) {
-        mInternalFalsingManager.onTrackingStarted(secure);
-    }
-
-    @Override
-    public void onTrackingStopped() {
-        mInternalFalsingManager.onTrackingStopped();
-    }
-
-    @Override
-    public void onLeftAffordanceOn() {
-        mInternalFalsingManager.onLeftAffordanceOn();
-    }
-
-    @Override
-    public void onCameraOn() {
-        mInternalFalsingManager.onCameraOn();
-    }
-
-    @Override
-    public void onAffordanceSwipingStarted(boolean rightCorner) {
-        mInternalFalsingManager.onAffordanceSwipingStarted(rightCorner);
-    }
-
-    @Override
-    public void onAffordanceSwipingAborted() {
-        mInternalFalsingManager.onAffordanceSwipingAborted();
-    }
-
-    @Override
-    public void onStartExpandingFromPulse() {
-        mInternalFalsingManager.onStartExpandingFromPulse();
-    }
-
-    @Override
-    public void onExpansionFromPulseStopped() {
-        mInternalFalsingManager.onExpansionFromPulseStopped();
     }
 
     @Override
@@ -267,88 +160,45 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onScreenOnFromTouch() {
-        mInternalFalsingManager.onScreenOnFromTouch();
-    }
-
-    @Override
     public boolean isReportingEnabled() {
         return mInternalFalsingManager.isReportingEnabled();
     }
 
     @Override
-    public void onUnlockHintStarted() {
-        mInternalFalsingManager.onUnlockHintStarted();
+    public void addFalsingBeliefListener(FalsingBeliefListener listener) {
+        mInternalFalsingManager.addFalsingBeliefListener(listener);
     }
 
     @Override
-    public void onCameraHintStarted() {
-        mInternalFalsingManager.onCameraHintStarted();
+    public void removeFalsingBeliefListener(FalsingBeliefListener listener) {
+        mInternalFalsingManager.removeFalsingBeliefListener(listener);
     }
 
     @Override
-    public void onLeftAffordanceHintStarted() {
-        mInternalFalsingManager.onLeftAffordanceHintStarted();
+    public void addTapListener(FalsingTapListener listener) {
+        mInternalFalsingManager.addTapListener(listener);
     }
 
     @Override
-    public void onScreenTurningOn() {
-        mInternalFalsingManager.onScreenTurningOn();
+    public void removeTapListener(FalsingTapListener listener) {
+        mInternalFalsingManager.removeTapListener(listener);
     }
 
     @Override
-    public void onScreenOff() {
-        mInternalFalsingManager.onScreenOff();
-    }
-
-    @Override
-    public void onNotificationStopDismissing() {
-        mInternalFalsingManager.onNotificationStopDismissing();
-    }
-
-    @Override
-    public void onNotificationDismissed() {
-        mInternalFalsingManager.onNotificationDismissed();
-    }
-
-    @Override
-    public void onNotificationStartDismissing() {
-        mInternalFalsingManager.onNotificationStartDismissing();
-    }
-
-    @Override
-    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
-        mInternalFalsingManager.onNotificationDoubleTap(accepted, dx, dy);
-    }
-
-    @Override
-    public void onBouncerShown() {
-        mInternalFalsingManager.onBouncerShown();
-    }
-
-    @Override
-    public void onBouncerHidden() {
-        mInternalFalsingManager.onBouncerHidden();
-    }
-
-    @Override
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
-        mInternalFalsingManager.onTouchEvent(ev, width, height);
+    public void onProximityEvent(ProximityEvent proximityEvent) {
+        mInternalFalsingManager.onProximityEvent(proximityEvent);
     }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        mInternalFalsingManager.dump(pw);
+        mInternalFalsingManager.dump(fd, pw, args);
     }
 
     @Override
-    public void dump(PrintWriter pw) {
-        mInternalFalsingManager.dump(pw);
-    }
-
-    @Override
-    public void cleanup() {
+    public void cleanupInternal() {
         mDeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListener);
-        mInternalFalsingManager.cleanup();
+        mPluginManager.removePluginListener(mPluginListener);
+        mDumpManager.unregisterDumpable(DUMPABLE_TAG);
+        mInternalFalsingManager.cleanupInternal();
     }
 }

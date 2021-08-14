@@ -13,40 +13,49 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.frameworks.coretests.enabled_app"
-        android:sharedUserId="com.android.uid.test">
+     package="com.android.frameworks.coretests.enabled_app"
+     android:sharedUserId="com.android.uid.test">
 
     <application>
 
         <!-- Used to test package component enabling and disabling -->
-        <activity android:name=".DisabledActivity" android:enabled="false" >
+        <activity android:name=".DisabledActivity"
+             android:enabled="false"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.android.frameworks.coretests.enabled_app.TEST_CATEGORY" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.frameworks.coretests.enabled_app.TEST_CATEGORY"/>
             </intent-filter>
         </activity>
-        <service android:name=".DisabledService" android:enabled="false" >
+        <service android:name=".DisabledService"
+             android:enabled="false">
         </service>
-        <receiver android:name=".DisabledReceiver" android:enabled="false" >
+        <receiver android:name=".DisabledReceiver"
+             android:enabled="false"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.ENABLED_APP_DISABLED_RECEIVER" />
+                <action android:name="android.intent.action.ENABLED_APP_DISABLED_RECEIVER"/>
             </intent-filter>
         </receiver>
-        <provider android:name=".DisabledProvider" android:enabled="false"
-                  android:authorities="com.android.frameworks.coretests.enabled_app.DisabledProvider"
-                  android:process=":disabled.provider.process" />
-        <activity android:name=".EnabledActivity" >
+        <provider android:name=".DisabledProvider"
+             android:enabled="false"
+             android:authorities="com.android.frameworks.coretests.enabled_app.DisabledProvider"
+             android:process=":disabled.provider.process"/>
+        <activity android:name=".EnabledActivity">
         </activity>
-        <service android:name=".EnabledService" android:enabled="true" >
+        <service android:name=".EnabledService"
+             android:enabled="true">
         </service>
-        <receiver android:name=".EnabledReceiver" >
+        <receiver android:name=".EnabledReceiver"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.ENABLED_APP_ENABLED_RECEIVER" />
+                <action android:name="android.intent.action.ENABLED_APP_ENABLED_RECEIVER"/>
             </intent-filter>
         </receiver>
         <provider android:name=".EnabledProvider"
-                  android:authorities="com.android.frameworks.coretests.enabled_app.EnabledProvider"
-                  android:process=":enabled.provider.process" />
+             android:authorities="com.android.frameworks.coretests.enabled_app.EnabledProvider"
+             android:process=":enabled.provider.process"/>
     </application>
 </manifest>

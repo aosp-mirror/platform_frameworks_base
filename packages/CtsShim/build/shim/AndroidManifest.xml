@@ -32,7 +32,8 @@
         <!-- These activities don't actually exist; define them just to test the filters !-->
 
         <!-- install test; high priority filter DENIED -->
-        <activity android:name=".InstallPriority">
+        <activity android:name=".InstallPriority"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.INFO" />

@@ -1,6 +1,6 @@
 # Camera
 per-file *Camera*,*camera* = cychen@google.com, epeev@google.com, etalvala@google.com
-per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhijunhe@google.com
+per-file *Camera*,*camera* = shuzhenwang@google.com, zhijunhe@google.com
 
 # Connectivity
 per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
@@ -41,9 +41,6 @@ per-file android_os_HwBlob* = file:platform/system/libhwbinder:/OWNERS
 per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
 per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
 per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
-
-# Sensor
-per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
 
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file fd_utils.* = file:/ZYGOTE_OWNERS

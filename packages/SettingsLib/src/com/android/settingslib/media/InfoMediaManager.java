@@ -31,6 +31,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -38,8 +39,11 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -53,6 +57,7 @@ import java.util.concurrent.Executors;
 /**
  * InfoMediaManager provide interface to get InfoMediaDevice list.
  */
+@RequiresApi(Build.VERSION_CODES.R)
 public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
@@ -84,12 +89,14 @@ public class InfoMediaManager extends MediaManager {
     public void startScan() {
         mMediaDevices.clear();
         mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+        mRouterManager.startScan();
         refreshDevices();
     }
 
     @Override
     public void stopScan() {
         mRouterManager.unregisterCallback(mMediaRouterCallback);
+        mRouterManager.stopScan();
     }
 
     /**
@@ -140,9 +147,16 @@ public class InfoMediaManager extends MediaManager {
     }
 
     private RoutingSessionInfo getRoutingSessionInfo() {
-        final List<RoutingSessionInfo> sessionInfos =
-                mRouterManager.getRoutingSessions(mPackageName);
+        return getRoutingSessionInfo(mPackageName);
+    }
 
+    private RoutingSessionInfo getRoutingSessionInfo(String packageName) {
+        final List<RoutingSessionInfo> sessionInfos =
+                mRouterManager.getRoutingSessions(packageName);
+
+        if (sessionInfos == null || sessionInfos.isEmpty()) {
+            return null;
+        }
         return sessionInfos.get(sessionInfos.size() - 1);
     }
 
@@ -361,6 +375,21 @@ public class InfoMediaManager extends MediaManager {
         return null;
     }
 
+    boolean shouldDisableMediaOutput(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            Log.w(TAG, "shouldDisableMediaOutput() package name is null or empty!");
+            return true;
+        }
+
+        // Disable when there is no transferable route
+        return mRouterManager.getTransferableRoutes(packageName).isEmpty();
+    }
+
+    @TargetApi(Build.VERSION_CODES.R)
+    boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
+        return false;
+    }
+
     private void refreshDevices() {
         mMediaDevices.clear();
         mCurrentConnectedDevice = null;
@@ -389,13 +418,36 @@ public class InfoMediaManager extends MediaManager {
     }
 
     private void buildAvailableRoutes() {
-        for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
+        for (MediaRoute2Info route : getAvailableRoutes(mPackageName)) {
             if (DEBUG) {
                 Log.d(TAG, "buildAvailableRoutes() route : " + route.getName() + ", volume : "
                         + route.getVolume() + ", type : " + route.getType());
             }
             addMediaDevice(route);
         }
+    }
+
+    private List<MediaRoute2Info> getAvailableRoutes(String packageName) {
+        final List<MediaRoute2Info> infos = new ArrayList<>();
+        RoutingSessionInfo routingSessionInfo = getRoutingSessionInfo(packageName);
+        if (routingSessionInfo != null) {
+            infos.addAll(mRouterManager.getSelectedRoutes(routingSessionInfo));
+        }
+        final List<MediaRoute2Info> transferableRoutes =
+                mRouterManager.getTransferableRoutes(packageName);
+        for (MediaRoute2Info transferableRoute : transferableRoutes) {
+            boolean alreadyAdded = false;
+            for (MediaRoute2Info mediaRoute2Info : infos) {
+                if (TextUtils.equals(transferableRoute.getId(), mediaRoute2Info.getId())) {
+                    alreadyAdded = true;
+                    break;
+                }
+            }
+            if (!alreadyAdded) {
+                infos.add(transferableRoute);
+            }
+        }
+        return infos;
     }
 
     @VisibleForTesting
@@ -449,7 +501,7 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
-    class RouterManagerCallback extends MediaRouter2Manager.Callback {
+    class RouterManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
         public void onRoutesAdded(List<MediaRoute2Info> routes) {

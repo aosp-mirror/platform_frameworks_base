@@ -25,21 +25,21 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEventListener;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.MemoryFile;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.util.concurrency.ThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Wrapper around sensor manager that hides potential sources of latency.
@@ -48,7 +48,7 @@ import javax.inject.Singleton;
  * without blocking. Note that this means registering listeners now always appears successful even
  * if it is not.
  */
-@Singleton
+@SysUISingleton
 public class AsyncSensorManager extends SensorManager
         implements PluginListener<SensorManagerPlugin> {
 
@@ -56,25 +56,14 @@ public class AsyncSensorManager extends SensorManager
 
     private final SensorManager mInner;
     private final List<Sensor> mSensorCache;
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final List<SensorManagerPlugin> mPlugins;
 
     @Inject
-    public AsyncSensorManager(SensorManager sensorManager, PluginManager pluginManager) {
-        this(sensorManager, pluginManager, null);
-    }
-
-    @VisibleForTesting
-    public AsyncSensorManager(
-            SensorManager sensorManager, PluginManager pluginManager, Handler handler) {
+    public AsyncSensorManager(SensorManager sensorManager, ThreadFactory threadFactory,
+            PluginManager pluginManager) {
         mInner = sensorManager;
-        if (handler == null) {
-            HandlerThread handlerThread = new HandlerThread("async_sensor");
-            handlerThread.start();
-            mHandler = new Handler(handlerThread.getLooper());
-        } else {
-            mHandler = handler;
-        }
+        mExecutor = threadFactory.buildExecutorOnNewThread("async_sensor");
         mSensorCache = mInner.getSensorList(Sensor.TYPE_ALL);
         mPlugins = new ArrayList<>();
         if (pluginManager != null) {
@@ -97,7 +86,7 @@ public class AsyncSensorManager extends SensorManager
     protected boolean registerListenerImpl(SensorEventListener listener,
             Sensor sensor, int delayUs, Handler handler, int maxReportLatencyUs,
             int reservedFlags) {
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             if (!mInner.registerListener(listener, sensor, delayUs, maxReportLatencyUs, handler)) {
                 Log.e(TAG, "Registering " + listener + " for " + sensor + " failed.");
             }
@@ -129,12 +118,12 @@ public class AsyncSensorManager extends SensorManager
     @Override
     protected void registerDynamicSensorCallbackImpl(DynamicSensorCallback callback,
             Handler handler) {
-        mHandler.post(() -> mInner.registerDynamicSensorCallback(callback, handler));
+        mExecutor.execute(() -> mInner.registerDynamicSensorCallback(callback, handler));
     }
 
     @Override
     protected void unregisterDynamicSensorCallbackImpl(DynamicSensorCallback callback) {
-        mHandler.post(() -> mInner.unregisterDynamicSensorCallback(callback));
+        mExecutor.execute(() -> mInner.unregisterDynamicSensorCallback(callback));
     }
 
     @Override
@@ -145,7 +134,7 @@ public class AsyncSensorManager extends SensorManager
         if (sensor == null) {
             throw new IllegalArgumentException("sensor cannot be null");
         }
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             if (!mInner.requestTriggerSensor(listener, sensor)) {
                 Log.e(TAG, "Requesting " + listener + " for " + sensor + " failed.");
             }
@@ -158,7 +147,7 @@ public class AsyncSensorManager extends SensorManager
             boolean disable) {
         Preconditions.checkArgument(disable);
 
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             if (!mInner.cancelTriggerSensor(listener, sensor)) {
                 Log.e(TAG, "Canceling " + listener + " for " + sensor + " failed.");
             }
@@ -178,7 +167,7 @@ public class AsyncSensorManager extends SensorManager
             Log.w(TAG, "No plugins registered");
             return false;
         }
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             for (int i = 0; i < mPlugins.size(); i++) {
                 mPlugins.get(i).registerListener(sensor, listener);
             }
@@ -194,7 +183,7 @@ public class AsyncSensorManager extends SensorManager
      */
     public void unregisterPluginListener(SensorManagerPlugin.Sensor sensor,
             SensorManagerPlugin.SensorEventListener listener) {
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             for (int i = 0; i < mPlugins.size(); i++) {
                 mPlugins.get(i).unregisterListener(sensor, listener);
             }
@@ -214,14 +203,14 @@ public class AsyncSensorManager extends SensorManager
 
     @Override
     protected boolean setOperationParameterImpl(SensorAdditionalInfo parameter) {
-        mHandler.post(() -> mInner.setOperationParameter(parameter));
+        mExecutor.execute(() -> mInner.setOperationParameter(parameter));
         return true;
     }
 
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener,
             Sensor sensor) {
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             if (sensor == null) {
                 mInner.unregisterListener(listener);
             } else {

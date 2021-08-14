@@ -150,6 +150,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_POST_DIAL_CONT = "CS.oPDC";
     private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
     private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
+    private static final String SESSION_CALL_FILTERING_COMPLETED = "CS.oCFC";
     private static final String SESSION_HANDOVER_COMPLETE = "CS.hC";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
     private static final String SESSION_START_RTT = "CS.+RTT";
@@ -752,6 +753,22 @@ public abstract class ConnectionService extends Service {
                 args.arg3 = extras;
                 args.arg4 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onCallFilteringCompleted(String callId,
+                Connection.CallFilteringCompletionInfo completionInfo,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CALL_FILTERING_COMPLETED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = completionInfo;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_CALL_FILTERING_COMPLETED, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1412,6 +1429,21 @@ public abstract class ConnectionService extends Service {
                         String event = (String) args.arg2;
                         Bundle extras = (Bundle) args.arg3;
                         sendCallEvent(callId, event, extras);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_CALL_FILTERING_COMPLETED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_CALL_FILTERING_COMPLETED);
+                        String callId = (String) args.arg1;
+                        Connection.CallFilteringCompletionInfo completionInfo =
+                                (Connection.CallFilteringCompletionInfo) args.arg2;
+                        onCallFilteringCompleted(callId, completionInfo);
                     } finally {
                         args.recycle();
                         Log.endSession();
@@ -2435,6 +2467,15 @@ public abstract class ConnectionService extends Service {
         }
     }
 
+    private void onCallFilteringCompleted(String callId, Connection.CallFilteringCompletionInfo
+            callFilteringCompletionInfo) {
+        Log.i(this, "onCallFilteringCompleted(%s, %s)", callId, callFilteringCompletionInfo);
+        Connection connection = findConnectionForAction(callId, "onCallFilteringCompleted");
+        if (connection != null) {
+            connection.onCallFilteringCompleted(callFilteringCompletionInfo);
+        }
+    }
+
     /**
      * Notifies a {@link Connection} that a handover has completed.
      *
@@ -3406,5 +3447,14 @@ public abstract class ConnectionService extends Service {
     @VisibleForTesting
     public Handler getHandler() {
         return mHandler;
+    }
+
+    /**
+     * Sets this {@link ConnectionService} ready for testing purposes.
+     * @hide
+     */
+    @VisibleForTesting
+    public void setReadyForTest() {
+        mAreAccountsInitialized = true;
     }
 }

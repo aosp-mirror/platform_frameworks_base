@@ -48,7 +48,7 @@ import android.util.Log;
  * // build the PendingIntent for the remote control client
  * Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
  * mediaButtonIntent.setComponent(myEventReceiver);
- * PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0);
+ * PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
  * // create and register the remote control client
  * RemoteControlClient myRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
  * myAudioManager.registerRemoteControlClient(myRemoteControlClient);</pre>

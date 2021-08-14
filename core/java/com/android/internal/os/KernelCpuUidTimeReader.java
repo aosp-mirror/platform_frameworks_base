@@ -91,15 +91,24 @@ public abstract class KernelCpuUidTimeReader<T> {
      * Reads the proc file, calling into the callback with a delta of time for each UID.
      *
      * @param cb The callback to invoke for each line of the proc file. If null,the data is
-     *           consumed and subsequent calls to readDelta will provide a fresh delta.
      */
     public void readDelta(@Nullable Callback<T> cb) {
+        readDelta(false, cb);
+    }
+
+    /**
+     * Reads the proc file, calling into the callback with a delta of time for each UID.
+     *
+     * @param force Ignore the throttling and force read the delta.
+     * @param cb The callback to invoke for each line of the proc file. If null,the data is
+     */
+    public void readDelta(boolean force, @Nullable Callback<T> cb) {
         if (!mThrottle) {
             readDeltaImpl(cb);
             return;
         }
         final long currTimeMs = SystemClock.elapsedRealtime();
-        if (currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
+        if (!force && currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
             if (DEBUG) {
                 Slog.d(mTag, "Throttle readDelta");
             }
@@ -468,17 +477,17 @@ public abstract class KernelCpuUidTimeReader<T> {
             }
             copyToCurTimes();
             boolean notify = false;
-            boolean valid = true;
             for (int i = 0; i < mFreqCount; i++) {
                 // Unit is 10ms.
                 mDeltaTimes[i] = mCurTimes[i] - lastTimes[i];
                 if (mDeltaTimes[i] < 0) {
-                    Slog.e(mTag, "Negative delta from freq time proc: " + mDeltaTimes[i]);
-                    valid = false;
+                    Slog.e(mTag, "Negative delta from freq time for uid: " + uid
+                            + ", delta: " + mDeltaTimes[i]);
+                    return;
                 }
                 notify |= mDeltaTimes[i] > 0;
             }
-            if (notify && valid) {
+            if (notify) {
                 System.arraycopy(mCurTimes, 0, lastTimes, 0, mFreqCount);
                 if (cb != null) {
                     cb.onUidCpuTime(uid, mDeltaTimes);
@@ -639,7 +648,8 @@ public abstract class KernelCpuUidTimeReader<T> {
                         cb.onUidCpuTime(uid, delta);
                     }
                 } else if (delta < 0) {
-                    Slog.e(mTag, "Negative delta from active time proc: " + delta);
+                    Slog.e(mTag, "Negative delta from active time for uid: " + uid
+                            + ", delta: " + delta);
                 }
             }
         }
@@ -813,12 +823,13 @@ public abstract class KernelCpuUidTimeReader<T> {
             for (int i = 0; i < mNumClusters; i++) {
                 mDeltaTime[i] = mCurTime[i] - lastTimes[i];
                 if (mDeltaTime[i] < 0) {
-                    Slog.e(mTag, "Negative delta from cluster time proc: " + mDeltaTime[i]);
-                    valid = false;
+                    Slog.e(mTag, "Negative delta from cluster time for uid: " + uid
+                            + ", delta: " + mDeltaTime[i]);
+                    return;
                 }
                 notify |= mDeltaTime[i] > 0;
             }
-            if (notify && valid) {
+            if (notify) {
                 System.arraycopy(mCurTime, 0, lastTimes, 0, mNumClusters);
                 if (cb != null) {
                     cb.onUidCpuTime(uid, mDeltaTime);

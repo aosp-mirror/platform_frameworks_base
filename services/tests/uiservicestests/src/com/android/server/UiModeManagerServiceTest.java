@@ -16,48 +16,21 @@
 
 package com.android.server;
 
-import android.Manifest;
-import android.app.AlarmManager;
-import android.app.IUiModeManager;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.os.Handler;
-import android.os.PowerManager;
-import android.os.PowerManagerInternal;
-import android.os.PowerSaveState;
-import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-
-import com.android.server.twilight.TwilightListener;
-import com.android.server.twilight.TwilightManager;
-import com.android.server.twilight.TwilightState;
-import com.android.server.wm.WindowManagerInternal;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.function.Consumer;
-
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_NO;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
+import static android.app.UiModeManager.PROJECTION_TYPE_ALL;
+import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
+import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
+
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -69,15 +42,60 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertThrows;
+
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.IOnProjectionStateChangedListener;
+import android.app.IUiModeManager;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
+import android.os.RemoteException;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+
+import com.android.server.twilight.TwilightListener;
+import com.android.server.twilight.TwilightManager;
+import com.android.server.twilight.TwilightState;
+import com.android.server.wm.WindowManagerInternal;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class UiModeManagerServiceTest extends UiServiceTestCase {
+    private static final String PACKAGE_NAME = "Diane Coffee";
     private UiModeManagerService mUiManagerService;
     private IUiModeManager mService;
     @Mock
@@ -100,6 +118,10 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private TwilightState mTwilightState;
     @Mock
     PowerManagerInternal mLocalPowerManager;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private IBinder mBinder;
 
     private BroadcastReceiver mScreenOffCallback;
     private BroadcastReceiver mTimeChangedCallback;
@@ -124,6 +146,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new PowerSaveState.Builder().setBatterySaverEnabled(false).build());
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         when(mTwilightManager.getLastTwilightState()).thenReturn(mTwilightState);
@@ -156,8 +179,8 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
         
-        mUiManagerService = new UiModeManagerService(mContext, true,
-                mTwilightManager);
+        mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
+                mTwilightManager, new TestInjector());
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}
@@ -234,7 +257,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void setNightModeActivated_permissiontoChangeOtherUsers() throws RemoteException {
-        mUiManagerService.onSwitchUser(9);
+        SystemService.TargetUser user = mock(SystemService.TargetUser.class);
+        doReturn(9).when(user).getUserIdentifier();
+        mUiManagerService.onUserSwitching(user, user);
         when(mContext.checkCallingOrSelfPermission(
                 eq(Manifest.permission.INTERACT_ACROSS_USERS)))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
@@ -446,5 +471,357 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private boolean isNightModeActivated() {
         return (mUiManagerService.getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_YES) != 0;
+    }
+
+    @Test
+    public void requestProjection_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0))
+                .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class, () -> mService.requestProjection(mBinder,
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection_failsIfNameNotFound() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0))
+                .thenThrow(new PackageManager.NameNotFoundException());
+
+        assertThrows(SecurityException.class, () -> mService.requestProjection(mBinder,
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection_failsIfNoProjectionTypes() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.requestProjection(mBinder, PROJECTION_TYPE_NONE, PACKAGE_NAME));
+        verify(mContext, never()).enforceCallingPermission(
+                eq(Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION), any());
+        verifyZeroInteractions(mBinder);
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection_failsIfMultipleProjectionTypes() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+
+        // Don't use PROJECTION_TYPE_ALL because that's actually == -1 and will fail the > 0 check.
+        int multipleProjectionTypes = PROJECTION_TYPE_AUTOMOTIVE | 0x0002 | 0x0004;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.requestProjection(mBinder, multipleProjectionTypes, PACKAGE_NAME));
+        verify(mContext, never()).enforceCallingPermission(
+                eq(Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION), any());
+        verifyZeroInteractions(mBinder);
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection_enforcesToggleAutomotiveProjectionPermission() throws Exception {
+        doThrow(new SecurityException()).when(mPackageManager).getPackageUid(PACKAGE_NAME, 0);
+
+        assertThrows(SecurityException.class, () -> mService.requestProjection(mBinder,
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection_automotive_failsIfAlreadySetByOtherPackage() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+
+        String otherPackage = "Raconteurs";
+        when(mPackageManager.getPackageUid(otherPackage, 0)).thenReturn(TestInjector.CALLING_UID);
+        assertFalse(mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, otherPackage));
+        assertThat(mService.getProjectingPackages(PROJECTION_TYPE_AUTOMOTIVE),
+                contains(PACKAGE_NAME));
+    }
+
+    @Test
+    public void requestProjection_failsIfCannotLinkToDeath() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        doThrow(new RemoteException()).when(mBinder).linkToDeath(any(), anyInt());
+
+        assertFalse(mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void requestProjection() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        // Should work for all powers of two.
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            int projectionType = 1 << i;
+            assertTrue(mService.requestProjection(mBinder, projectionType, PACKAGE_NAME));
+            assertTrue((mService.getActiveProjectionTypes() & projectionType) != 0);
+            assertThat(mService.getProjectingPackages(projectionType), contains(PACKAGE_NAME));
+            // Subsequent calls should still succeed.
+            assertTrue(mService.requestProjection(mBinder, projectionType, PACKAGE_NAME));
+        }
+        assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void releaseProjection_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0))
+                .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class, () -> mService.releaseProjection(
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void releaseProjection_failsIfNameNotFound() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0))
+                .thenThrow(new PackageManager.NameNotFoundException());
+
+        assertThrows(SecurityException.class, () -> mService.releaseProjection(
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void releaseProjection_enforcesToggleAutomotiveProjectionPermission() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+        doThrow(new SecurityException()).when(mContext).enforceCallingPermission(
+                eq(Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION), any());
+
+        // Should not be enforced for other types of projection.
+        int nonAutomotiveProjectionType = PROJECTION_TYPE_AUTOMOTIVE * 2;
+        mService.releaseProjection(nonAutomotiveProjectionType, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+
+        assertThrows(SecurityException.class, () -> mService.requestProjection(mBinder,
+                PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void releaseProjection() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        requestAllPossibleProjectionTypes();
+        assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
+
+        assertTrue(mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
+        int everythingButAutomotive = PROJECTION_TYPE_ALL & ~PROJECTION_TYPE_AUTOMOTIVE;
+        assertEquals(everythingButAutomotive, mService.getActiveProjectionTypes());
+
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            int projectionType = 1 << i;
+            assertEquals(projectionType != PROJECTION_TYPE_AUTOMOTIVE,
+                    (boolean) mService.releaseProjection(projectionType, PACKAGE_NAME));
+        }
+
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void binderDeath_releasesProjection() throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        requestAllPossibleProjectionTypes();
+        assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
+        ArgumentCaptor<IBinder.DeathRecipient> deathRecipientCaptor = ArgumentCaptor.forClass(
+                IBinder.DeathRecipient.class);
+        verify(mBinder, atLeastOnce()).linkToDeath(deathRecipientCaptor.capture(), anyInt());
+
+        // Wipe them out. All of them.
+        deathRecipientCaptor.getAllValues().forEach(IBinder.DeathRecipient::binderDied);
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void getActiveProjectionTypes() throws Exception {
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+        mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
+    }
+
+    @Test
+    public void getProjectingPackages() throws Exception {
+        assertTrue(mService.getProjectingPackages(PROJECTION_TYPE_ALL).isEmpty());
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(1, mService.getProjectingPackages(PROJECTION_TYPE_AUTOMOTIVE).size());
+        assertEquals(1, mService.getProjectingPackages(PROJECTION_TYPE_ALL).size());
+        assertThat(mService.getProjectingPackages(PROJECTION_TYPE_AUTOMOTIVE),
+                contains(PACKAGE_NAME));
+        assertThat(mService.getProjectingPackages(PROJECTION_TYPE_ALL), contains(PACKAGE_NAME));
+        mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertThat(mService.getProjectingPackages(PROJECTION_TYPE_ALL), empty());
+    }
+
+    @Test
+    public void addOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
+        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+
+        assertThrows(SecurityException.class, () -> mService.addOnProjectionStateChangedListener(
+                listener, PROJECTION_TYPE_ALL));
+    }
+
+    @Test
+    public void addOnProjectionStateChangedListener_callsListenerIfProjectionActive()
+            throws Exception {
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
+
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+        when(listener.asBinder()).thenReturn(mBinder);  // Any binder will do
+        mService.addOnProjectionStateChangedListener(listener, PROJECTION_TYPE_ALL);
+        verify(listener).onProjectionStateChanged(eq(PROJECTION_TYPE_AUTOMOTIVE),
+                eq(List.of(PACKAGE_NAME)));
+    }
+
+    @Test
+    public void removeOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
+        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+
+        assertThrows(SecurityException.class, () -> mService.removeOnProjectionStateChangedListener(
+                listener));
+    }
+
+    @Test
+    public void removeOnProjectionStateChangedListener() throws Exception {
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+        when(listener.asBinder()).thenReturn(mBinder); // Any binder will do.
+        mService.addOnProjectionStateChangedListener(listener, PROJECTION_TYPE_ALL);
+
+        mService.removeOnProjectionStateChangedListener(listener);
+        // Now set automotive projection, should not call back.
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verify(listener, never()).onProjectionStateChanged(anyInt(), any());
+    }
+
+    @Test
+    public void projectionStateChangedListener_calledWhenStateChanges() throws Exception {
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+        when(listener.asBinder()).thenReturn(mBinder); // Any binder will do.
+        mService.addOnProjectionStateChangedListener(listener, PROJECTION_TYPE_ALL);
+        verify(listener, atLeastOnce()).asBinder(); // Called twice during register.
+
+        // No calls initially, no projection state set.
+        verifyNoMoreInteractions(listener);
+
+        // Now set automotive projection, should call back.
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verify(listener).onProjectionStateChanged(eq(PROJECTION_TYPE_AUTOMOTIVE),
+                eq(List.of(PACKAGE_NAME)));
+
+        // Subsequent calls that are noops do nothing.
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        int unsetProjectionType = 0x0002;
+        mService.releaseProjection(unsetProjectionType, PACKAGE_NAME);
+        verifyNoMoreInteractions(listener);
+
+        // Release should call back though.
+        mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verify(listener).onProjectionStateChanged(eq(PROJECTION_TYPE_NONE),
+                eq(List.of()));
+
+        // But only the first time.
+        mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verifyNoMoreInteractions(listener);
+    }
+
+    @Test
+    public void projectionStateChangedListener_calledForAnyRelevantStateChange() throws Exception {
+        int fakeProjectionType = 0x0002;
+        int otherFakeProjectionType = 0x0004;
+        String otherPackageName = "Internet Arms";
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        when(mPackageManager.getPackageUid(otherPackageName, 0))
+                .thenReturn(TestInjector.CALLING_UID);
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+        when(listener.asBinder()).thenReturn(mBinder); // Any binder will do.
+        IOnProjectionStateChangedListener listener2 = mock(IOnProjectionStateChangedListener.class);
+        when(listener2.asBinder()).thenReturn(mBinder); // Any binder will do.
+        mService.addOnProjectionStateChangedListener(listener, fakeProjectionType);
+        mService.addOnProjectionStateChangedListener(listener2,
+                fakeProjectionType | otherFakeProjectionType);
+        verify(listener, atLeastOnce()).asBinder(); // Called twice during register.
+        verify(listener2, atLeastOnce()).asBinder(); // Called twice during register.
+
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verifyNoMoreInteractions(listener, listener2);
+
+        // fakeProjectionType should trigger both.
+        mService.requestProjection(mBinder, fakeProjectionType, PACKAGE_NAME);
+        verify(listener).onProjectionStateChanged(eq(fakeProjectionType),
+                eq(List.of(PACKAGE_NAME)));
+        verify(listener2).onProjectionStateChanged(eq(fakeProjectionType),
+                eq(List.of(PACKAGE_NAME)));
+
+        // otherFakeProjectionType should only trigger the second listener.
+        mService.requestProjection(mBinder, otherFakeProjectionType, otherPackageName);
+        verifyNoMoreInteractions(listener);
+        verify(listener2).onProjectionStateChanged(
+                eq(fakeProjectionType | otherFakeProjectionType),
+                eq(List.of(PACKAGE_NAME, otherPackageName)));
+
+        // Turning off fakeProjectionType should trigger both again.
+        mService.releaseProjection(fakeProjectionType, PACKAGE_NAME);
+        verify(listener).onProjectionStateChanged(eq(PROJECTION_TYPE_NONE), eq(List.of()));
+        verify(listener2).onProjectionStateChanged(eq(otherFakeProjectionType),
+                eq(List.of(otherPackageName)));
+
+        // Turning off otherFakeProjectionType should only trigger the second listener.
+        mService.releaseProjection(otherFakeProjectionType, otherPackageName);
+        verifyNoMoreInteractions(listener);
+        verify(listener2).onProjectionStateChanged(eq(PROJECTION_TYPE_NONE), eq(List.of()));
+    }
+
+    @Test
+    public void projectionStateChangedListener_unregisteredOnDeath() throws Exception {
+        IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
+        IBinder listenerBinder = mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mService.addOnProjectionStateChangedListener(listener, PROJECTION_TYPE_ALL);
+        ArgumentCaptor<IBinder.DeathRecipient> listenerDeathRecipient = ArgumentCaptor.forClass(
+                IBinder.DeathRecipient.class);
+        verify(listenerBinder).linkToDeath(listenerDeathRecipient.capture(), anyInt());
+
+        // Now kill the binder for the listener. This should remove it from the list of listeners.
+        listenerDeathRecipient.getValue().binderDied();
+        when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
+        mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
+        verify(listener, never()).onProjectionStateChanged(anyInt(), any());
+    }
+
+    private void requestAllPossibleProjectionTypes() throws RemoteException {
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            mService.requestProjection(mBinder, 1 << i, PACKAGE_NAME);
+        }
+    }
+
+    private static class TestInjector extends UiModeManagerService.Injector {
+        private static final int CALLING_UID = 8675309;
+
+        public int getCallingUid() {
+            return CALLING_UID;
+        }
     }
 }

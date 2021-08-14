@@ -4,11 +4,11 @@ import android.app.Notification
 import android.os.RemoteException
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.statusbar.NotificationVisibility
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.Assert
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Class to shim calls to IStatusBarManager#onNotificationClick/#onNotificationActionClick that
@@ -18,7 +18,7 @@ import javax.inject.Singleton
  * NOTE: this class eats exceptions from system server, as no current client of these APIs cares
  * about errors
  */
-@Singleton
+@SysUISingleton
 public class NotificationClickNotifier @Inject constructor(
     val barService: IStatusBarService,
     @Main val mainExecutor: Executor

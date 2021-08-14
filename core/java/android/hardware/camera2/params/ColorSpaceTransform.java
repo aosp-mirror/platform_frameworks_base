@@ -78,7 +78,7 @@ public final class ColorSpaceTransform {
         mElements = new int[COUNT_INT];
 
         for (int i = 0; i < elements.length; ++i) {
-            checkNotNull(elements, "element[" + i + "] must not be null");
+            checkNotNull(elements, "element[%d] must not be null", i);
             mElements[i * RATIONAL_SIZE + OFFSET_NUMERATOR] = elements[i].getNumerator();
             mElements[i * RATIONAL_SIZE + OFFSET_DENOMINATOR] = elements[i].getDenominator();
         }
@@ -116,7 +116,7 @@ public final class ColorSpaceTransform {
         }
 
         for (int i = 0; i < elements.length; ++i) {
-            checkNotNull(elements, "element " + i + " must not be null");
+            checkNotNull(elements, "element %d must not be null", i);
         }
 
         mElements = Arrays.copyOf(elements, elements.length);

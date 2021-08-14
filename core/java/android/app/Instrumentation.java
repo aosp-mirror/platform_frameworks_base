@@ -97,7 +97,8 @@ public class Instrumentation {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES})
+    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES,
+            UiAutomation.FLAG_DONT_USE_ACCESSIBILITY})
     public @interface UiAutomationFlags {};
 
 
@@ -135,6 +136,20 @@ public class Instrumentation {
             throw new RuntimeException(method +
                     " cannot be called outside of instrumented processes");
         }
+    }
+
+    /**
+     * Returns if it is being called in an instrumentation environment.
+     *
+     * @hide
+     */
+    public boolean isInstrumenting() {
+        // Check if we have an instrumentation context, as init should only get called by
+        // the system in startup processes that are being instrumented.
+        if (mInstrContext == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1118,7 +1133,8 @@ public class Instrumentation {
         }
         try {
             WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
-                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH,
+                    true /* waitForAnimations */);
         } catch (RemoteException e) {
         }
     }
@@ -1231,7 +1247,8 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */, null /*assistToken*/);
+                null /* window */, null /* activityConfigCallback */, null /*assistToken*/,
+                null /*shareableActivityToken*/);
         return activity;
     }
 
@@ -1724,7 +1741,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token,
                     target != null ? target.mEmbeddedID : null, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
@@ -1796,7 +1813,7 @@ public class Instrumentation {
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityTaskManager.getService().startActivities(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intents, resolvedTypes,
+                    who.getOpPackageName(), who.getAttributionTag(), intents, resolvedTypes,
                     token, options, userId);
             checkStartActivityResult(result, intents[0]);
             return result;
@@ -1863,7 +1880,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, target,
                     requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
@@ -1930,7 +1947,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivityAsUser(whoThread,
-                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, resultWho,
                     requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
@@ -1976,11 +1993,11 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService()
-                .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options, permissionToken,
-                        ignoreTargetSecurity, userId);
+                    .startActivityAsCaller(whoThread, who.getOpPackageName(), intent,
+                            intent.resolveTypeIfNeeded(who.getContentResolver()),
+                            token, target != null ? target.mEmbeddedID : null,
+                            requestCode, 0, null, options, permissionToken,
+                            ignoreTargetSecurity, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2022,7 +2039,7 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
-            int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
+            int result = appTask.startActivity(whoThread.asBinder(), who.getOpPackageName(),
                     who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
@@ -2170,7 +2187,8 @@ public class Instrumentation {
      * </p>
      *
      * @param flags The flags to be passed to the UiAutomation, for example
-     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES}.
+     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES},
+     *        {@link UiAutomation#FLAG_DONT_USE_ACCESSIBILITY}.
      *
      * @return The UI automation instance.
      *

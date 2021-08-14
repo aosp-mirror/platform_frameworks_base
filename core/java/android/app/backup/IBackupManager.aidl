@@ -678,7 +678,7 @@ interface IBackupManager {
      * {@link android.app.backup.IBackupManager.requestBackupForUser} for the calling user id.
      */
     int requestBackup(in String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor,
-        int flags);
+            int flags);
 
     /**
      * Cancel all running backups. After this call returns, no currently running backups will

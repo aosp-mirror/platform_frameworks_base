@@ -48,10 +48,30 @@ package android.app.prediction {
 
 }
 
+package android.app.search {
+
+  public final class Query implements android.os.Parcelable {
+    method @Deprecated @NonNull public long getTimestamp();
+  }
+
+  public final class SearchSession implements java.lang.AutoCloseable {
+    method @Deprecated public void destroy();
+  }
+
+  public final class SearchTarget implements android.os.Parcelable {
+    method @Deprecated public boolean shouldHide();
+  }
+
+  public static final class SearchTarget.Builder {
+    method @Deprecated @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
 }
@@ -115,6 +135,7 @@ package android.location {
   public class LocationManager {
     method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String);
     method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
@@ -163,6 +184,28 @@ package android.service.notification {
 
 }
 
+package android.service.search {
+
+  public abstract class SearchUiService extends android.app.Service {
+    method @Deprecated public void onCreateSearchSession(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
+  }
+
+}
+
+package android.service.translation {
+
+  public abstract class TranslationService extends android.app.Service {
+    method @Deprecated public void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
+    method @Deprecated public void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+  }
+
+  @Deprecated public static interface TranslationService.OnTranslationResultCallback {
+    method @Deprecated public void onError();
+    method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
+  }
+
+}
+
 package android.telecom {
 
   public class TelecomManager {
@@ -185,6 +228,91 @@ package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
     ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+
+package android.telephony.ims {
+
+  public interface DelegateStateCallback {
+    method @Deprecated public void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+  }
+
+  @Deprecated public final class SipDelegateImsConfiguration implements android.os.Parcelable {
+    method public boolean containsKey(@NonNull String);
+    method @NonNull public android.os.PersistableBundle copyBundle();
+    method public int describeContents();
+    method public boolean getBoolean(@NonNull String, boolean);
+    method public int getInt(@NonNull String, int);
+    method @Nullable public String getString(@NonNull String);
+    method public long getVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDelegateImsConfiguration> CREATOR;
+    field public static final String IPTYPE_IPV4 = "IPV4";
+    field public static final String IPTYPE_IPV6 = "IPV6";
+    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
+    field public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
+    field public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
+    field public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
+    field public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
+    field public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
+    field public static final String KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL = "sip_config_is_compact_form_enabled_bool";
+    field public static final String KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL = "sip_config_is_gruu_enabled_bool";
+    field public static final String KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL = "sip_config_is_ipsec_enabled_bool";
+    field public static final String KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL = "sip_config_is_keepalive_enabled_bool";
+    field public static final String KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL = "sip_config_is_nat_enabled_bool";
+    field public static final String KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT = "sip_config_udp_max_payload_size_int";
+    field public static final String KEY_SIP_CONFIG_PATH_HEADER_STRING = "sip_config_path_header_string";
+    field public static final String KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_access_network_info_header_string";
+    field public static final String KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING = "sip_config_p_associated_uri_header_string";
+    field public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING = "sip_config_p_last_access_network_info_header_string";
+    field public static final String KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING = "sip_config_security_verify_header_string";
+    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING = "sip_config_server_default_ipaddress_string";
+    field public static final String KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT = "sip_config_server_default_port_int";
+    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT = "sip_config_server_ipsec_client_port_int";
+    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_server_ipsec_old_client_port_int";
+    field public static final String KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT = "sip_config_server_ipsec_server_port_int";
+    field public static final String KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING = "sip_config_service_route_header_string";
+    field public static final String KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING = "sip_config_protocol_type_string";
+    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING = "sip_config_ue_default_ipaddress_string";
+    field public static final String KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT = "sip_config_ue_default_port_int";
+    field public static final String KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT = "sip_config_ue_ipsec_client_port_int";
+    field public static final String KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT = "sip_config_ue_ipsec_old_client_port_int";
+    field public static final String KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT = "sip_config_ue_ipsec_server_port_int";
+    field public static final String KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING = "sip_config_ue_private_user_id_string";
+    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING = "sip_config_ue_public_gruu_string";
+    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING = "sip_config_ue_public_ipaddress_with_nat_string";
+    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
+    field public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
+    field public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
+    field public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
+    field public static final String SIP_TRANSPORT_TCP = "TCP";
+    field public static final String SIP_TRANSPORT_UDP = "UDP";
+  }
+
+  public static final class SipDelegateImsConfiguration.Builder {
+    ctor public SipDelegateImsConfiguration.Builder(int);
+    ctor public SipDelegateImsConfiguration.Builder(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addBoolean(@NonNull String, boolean);
+    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addInt(@NonNull String, int);
+    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration.Builder addString(@NonNull String, @NonNull String);
+    method @NonNull public android.telephony.ims.SipDelegateImsConfiguration build();
+  }
+
+}
+
+package android.telephony.ims.stub {
+
+  public interface DelegateConnectionStateCallback {
+    method @Deprecated public default void onImsConfigurationChanged(@NonNull android.telephony.ims.SipDelegateImsConfiguration);
+  }
+
+}
+
+package android.view.translation {
+
+  public final class UiTranslationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
   }
 
 }

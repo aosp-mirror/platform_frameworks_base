@@ -19,6 +19,7 @@ license {
 
 android_app {
     name: "FakeOemFeatures",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",

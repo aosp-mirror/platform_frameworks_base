@@ -16,9 +16,13 @@
 
 package android.hardware.biometrics;
 
-import android.os.Bundle;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IInvalidationCallback;
+import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorPropertiesInternal;
 
 /**
  * Communication channel from BiometricPrompt and BiometricManager to AuthService. The
@@ -28,10 +32,19 @@ import android.hardware.biometrics.IBiometricServiceReceiver;
  * @hide
  */
 interface IAuthService {
+    // Creates a test session with the specified sensorId
+    ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
+
+    // Retrieve static sensor properties for all biometric sensors
+    List<SensorPropertiesInternal> getSensorProperties(String opPackageName);
+
+    // Retrieve the package where BIometricOrompt's UI is implemented
+    String getUiPackage();
+
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long sessionId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle);
+            IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
@@ -46,11 +59,10 @@ interface IAuthService {
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
 
-    // Explicitly set the active user.
-    void setActiveUser(int userId);
-
-    // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(in byte [] token);
+    // Requests all BIOMETRIC_STRONG sensors to have their authenticatorId invalidated for the
+    // specified user. This happens when enrollments have been added on devices with multiple
+    // biometric sensors.
+    void invalidateAuthenticatorIds(int userId, int fromSensorId, IInvalidationCallback callback);
 
     // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
@@ -58,4 +70,20 @@ interface IAuthService {
     // If userId is not equal to the calling user ID, the caller must have the
     // USE_BIOMETRIC_INTERNAL permission.
     long[] getAuthenticatorIds(in int userId);
+
+    // See documentation in BiometricManager.
+    void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId, int userId,
+            in byte[] hardwareAuthToken);
+
+    // Provides a localized string that may be used as the label for a button that invokes
+    // BiometricPrompt.
+    CharSequence getButtonLabel(int userId, String opPackageName, int authenticators);
+
+    // Provides a localized string that may be shown while the user is authenticating with
+    // BiometricPrompt.
+    CharSequence getPromptMessage(int userId, String opPackageName, int authenticators);
+
+    // Provides a localized string that may be shown as the title for an app setting that enables
+    // biometric authentication.
+    CharSequence getSettingName(int userId, String opPackageName, int authenticators);
 }

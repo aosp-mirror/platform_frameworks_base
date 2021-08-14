@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -101,7 +102,9 @@ public abstract class FileObserver {
     private static final String LOG_TAG = "FileObserver";
 
     private static class ObserverThread extends Thread {
+        /** Temporarily retained; appears to be missing UnsupportedAppUsage annotation */
         private HashMap<Integer, WeakReference> m_observers = new HashMap<Integer, WeakReference>();
+        private SparseArray<WeakReference> mRealObservers = new SparseArray<>();
         private int m_fd;
 
         public ObserverThread() {
@@ -127,10 +130,10 @@ public abstract class FileObserver {
 
             final WeakReference<FileObserver> fileObserverWeakReference =
                     new WeakReference<>(observer);
-            synchronized (m_observers) {
+            synchronized (mRealObservers) {
                 for (int wfd : wfds) {
                     if (wfd >= 0) {
-                        m_observers.put(wfd, fileObserverWeakReference);
+                        mRealObservers.put(wfd, fileObserverWeakReference);
                     }
                 }
             }
@@ -147,12 +150,12 @@ public abstract class FileObserver {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;
 
-            synchronized (m_observers) {
-                WeakReference weak = m_observers.get(wfd);
+            synchronized (mRealObservers) {
+                WeakReference weak = mRealObservers.get(wfd);
                 if (weak != null) {  // can happen with lots of events from a dead wfd
                     observer = (FileObserver) weak.get();
                     if (observer == null) {
-                        m_observers.remove(wfd);
+                        mRealObservers.remove(wfd);
                     }
                 }
             }

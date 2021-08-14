@@ -17,96 +17,169 @@
 package com.android.server.pm;
 
 import android.app.admin.SecurityLog;
-import android.content.Intent;
+import android.content.Context;
+import android.content.pm.ApkChecksum;
+import android.content.pm.Checksum;
+import android.content.pm.IOnChecksumsReadyListener;
+import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.os.HandlerExecutor;
+import android.os.RemoteException;
+import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import android.util.Slog;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 public final class ProcessLoggingHandler extends Handler {
-
     private static final String TAG = "ProcessLoggingHandler";
-    static final int LOG_APP_PROCESS_START_MSG = 1;
-    static final int INVALIDATE_BASE_APK_HASH_MSG = 2;
 
-    private final HashMap<String, String> mProcessLoggingBaseApkHashes = new HashMap();
+    private static final int CHECKSUM_TYPE = Checksum.TYPE_WHOLE_SHA256;
+
+    static class LoggingInfo {
+        public String apkHash = null;
+        public List<Bundle> pendingLogEntries = new ArrayList<>();
+    }
+
+    // Executor to handle checksum calculations.
+    private final Executor mExecutor = new HandlerExecutor(this);
+
+    // Apk path to logging info map.
+    private final ArrayMap<String, LoggingInfo> mLoggingInfo = new ArrayMap<>();
 
     ProcessLoggingHandler() {
         super(BackgroundThread.getHandler().getLooper());
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        switch (msg.what) {
-            case LOG_APP_PROCESS_START_MSG: {
-                Bundle bundle = msg.getData();
-                String processName = bundle.getString("processName");
-                int uid = bundle.getInt("uid");
-                String seinfo = bundle.getString("seinfo");
-                String apkFile = bundle.getString("apkFile");
-                int pid = bundle.getInt("pid");
-                long startTimestamp = bundle.getLong("startTimestamp");
-                String apkHash = computeStringHashOfApk(apkFile);
-                SecurityLog.writeEvent(SecurityLog.TAG_APP_PROCESS_START, processName,
-                        startTimestamp, uid, pid, seinfo, apkHash);
-                break;
-            }
-            case INVALIDATE_BASE_APK_HASH_MSG: {
-                Bundle bundle = msg.getData();
-                mProcessLoggingBaseApkHashes.remove(bundle.getString("apkFile"));
-                break;
-            }
-        }
-    }
-
-    void invalidateProcessLoggingBaseApkHash(String apkPath) {
+    void logAppProcessStart(Context context, PackageManagerInternal pmi, String apkFile,
+            String packageName, String processName, int uid, String seinfo, int pid) {
         Bundle data = new Bundle();
-        data.putString("apkFile", apkPath);
-        Message msg = obtainMessage(INVALIDATE_BASE_APK_HASH_MSG);
-        msg.setData(data);
-        sendMessage(msg);
+        data.putLong("startTimestamp", System.currentTimeMillis());
+        data.putString("processName", processName);
+        data.putInt("uid", uid);
+        data.putString("seinfo", seinfo);
+        data.putInt("pid", pid);
+
+        if (apkFile == null) {
+            enqueueSecurityLogEvent(data, "No APK");
+            return;
+        }
+
+        // Check cached apk hash.
+        boolean requestChecksums;
+        final LoggingInfo loggingInfo;
+        synchronized (mLoggingInfo) {
+            LoggingInfo cached = mLoggingInfo.get(apkFile);
+            requestChecksums = cached == null;
+            if (requestChecksums) {
+                // Create a new pending cache entry.
+                cached = new LoggingInfo();
+                mLoggingInfo.put(apkFile, cached);
+            }
+            loggingInfo = cached;
+        }
+
+        synchronized (loggingInfo) {
+            // Still pending?
+            if (!TextUtils.isEmpty(loggingInfo.apkHash)) {
+                enqueueSecurityLogEvent(data, loggingInfo.apkHash);
+                return;
+            }
+
+            loggingInfo.pendingLogEntries.add(data);
+        }
+
+        if (!requestChecksums) {
+            return;
+        }
+
+        // Request base checksums when first added entry.
+        // Capturing local loggingInfo to still log even if hash was invalidated.
+        try {
+            pmi.requestChecksums(packageName, false, 0, CHECKSUM_TYPE, null,
+                    new IOnChecksumsReadyListener.Stub() {
+                        @Override
+                        public void onChecksumsReady(List<ApkChecksum> checksums)
+                                throws RemoteException {
+                            processChecksums(loggingInfo, checksums);
+                        }
+                    }, context.getUserId(),
+                    mExecutor, this);
+        } catch (Throwable t) {
+            Slog.e(TAG, "requestChecksums() failed", t);
+            enqueueProcessChecksum(loggingInfo, null);
+        }
     }
 
-    private String computeStringHashOfApk(String apkFile) {
-        if (apkFile == null) {
-            return "No APK";
-        }
-        String apkHash = mProcessLoggingBaseApkHashes.get(apkFile);
-        if (apkHash == null) {
-            try {
-                byte[] hash = computeHashOfApkFile(apkFile);
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hash.length; i++) {
-                    sb.append(String.format("%02x", hash[i]));
-                }
-                apkHash = sb.toString();
-                mProcessLoggingBaseApkHashes.put(apkFile, apkHash);
-            } catch (IOException | NoSuchAlgorithmException e) {
-                Slog.w(TAG, "computeStringHashOfApk() failed", e);
+    void processChecksums(final LoggingInfo loggingInfo, List<ApkChecksum> checksums) {
+        for (int i = 0, size = checksums.size(); i < size; ++i) {
+            ApkChecksum checksum = checksums.get(i);
+            if (checksum.getType() == CHECKSUM_TYPE) {
+                processChecksum(loggingInfo, checksum.getValue());
+                return;
             }
         }
-        return apkHash != null ? apkHash : "Failed to count APK hash";
+
+        Slog.e(TAG, "requestChecksums() failed to return SHA256, see logs for details.");
+        processChecksum(loggingInfo, null);
     }
 
-    private byte[] computeHashOfApkFile(String packageArchiveLocation)
-            throws IOException, NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        FileInputStream input = new FileInputStream(new File(packageArchiveLocation));
-        byte[] buffer = new byte[65536];
-        int size;
-        while ((size = input.read(buffer)) > 0) {
-            md.update(buffer, 0, size);
+    void enqueueProcessChecksum(final LoggingInfo loggingInfo, final byte[] hash) {
+        this.post(() -> processChecksum(loggingInfo, null));
+    }
+
+    void processChecksum(final LoggingInfo loggingInfo, final byte[] hash) {
+        final String apkHash;
+        if (hash != null) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.length; i++) {
+                sb.append(String.format("%02x", hash[i]));
+            }
+            apkHash = sb.toString();
+        } else {
+            apkHash = "Failed to count APK hash";
         }
-        input.close();
-        return md.digest();
+
+        List<Bundle> pendingLogEntries;
+        synchronized (loggingInfo) {
+            if (!TextUtils.isEmpty(loggingInfo.apkHash)) {
+                return;
+            }
+            loggingInfo.apkHash = apkHash;
+
+            pendingLogEntries = loggingInfo.pendingLogEntries;
+            loggingInfo.pendingLogEntries = null;
+        }
+
+        if (pendingLogEntries != null) {
+            for (Bundle data : pendingLogEntries) {
+                logSecurityLogEvent(data, apkHash);
+            }
+        }
+    }
+
+    void invalidateBaseApkHash(String apkFile) {
+        synchronized (mLoggingInfo) {
+            mLoggingInfo.remove(apkFile);
+        }
+    }
+
+    void enqueueSecurityLogEvent(Bundle data, String apkHash) {
+        this.post(() -> logSecurityLogEvent(data, apkHash));
+    }
+
+    void logSecurityLogEvent(Bundle bundle, String apkHash) {
+        long startTimestamp = bundle.getLong("startTimestamp");
+        String processName = bundle.getString("processName");
+        int uid = bundle.getInt("uid");
+        String seinfo = bundle.getString("seinfo");
+        int pid = bundle.getInt("pid");
+        SecurityLog.writeEvent(SecurityLog.TAG_APP_PROCESS_START, processName,
+                startTimestamp, uid, pid, seinfo, apkHash);
     }
 }

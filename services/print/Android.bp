@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.print",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.print-sources"],
     libs: ["services.core"],
 }

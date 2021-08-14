@@ -105,13 +105,17 @@ filegroup {
         ":android.security.authorization-java-source",
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
+        ":android.security.metrics-java-source",
         ":android.system.keystore2-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
+        ":idmap2_aidl",
+        ":idmap2_core_aidl",
         ":incidentcompanion_aidl",
+        ":inputconstants_aidl",
         ":installd_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
@@ -123,6 +127,7 @@ filegroup {
         ":resourcemanager_aidl",
         ":storaged_aidl",
         ":vold_aidl",
+        ":deviceproductinfoconstants_aidl",
 
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
@@ -138,9 +143,14 @@ java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
         "android.net.ipsec.ike.stubs.module_lib",
+        "framework-appsearch.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
+        "framework-graphics.stubs.module_lib",
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
         "framework-permission.stubs.module_lib",
+        "framework-permission-s.stubs.module_lib",
+        "framework-scheduling.stubs.module_lib",
         "framework-sdkextensions.stubs.module_lib",
         "framework-statsd.stubs.module_lib",
         "framework-tethering.stubs.module_lib",
@@ -156,8 +166,13 @@ java_library {
     static_libs: [
         "android.net.ipsec.ike.impl",
         "framework-minus-apex",
+        "framework-appsearch.impl",
+        "framework-connectivity.impl",
+        "framework-graphics.impl",
         "framework-mediaprovider.impl",
         "framework-permission.impl",
+        "framework-permission-s.impl",
+        "framework-scheduling.impl",
         "framework-sdkextensions.impl",
         "framework-statsd.impl",
         "framework-tethering.impl",
@@ -218,6 +233,7 @@ java_library {
         "android.hardware.cas-V1.2-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
+        "android.hardware.contexthub-V1.2-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
@@ -234,14 +250,18 @@ java_library {
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb-V1.2-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.usb.gadget-V1.1-java",
+        "android.hardware.usb.gadget-V1.2-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
+        "android.hardware.vibrator-V2-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 
@@ -262,27 +282,34 @@ filegroup {
     visibility: ["//visibility:public"],
 }
 
-java_library {
-    name: "framework-minus-apex",
+java_defaults {
+    name: "framework-minus-apex-defaults",
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-connectivity-sources",
         "core/java/**/*.logtags",
     ],
     aidl: {
         generate_get_transaction_name: true,
+        local_include_dirs: [
+            "media/aidl",
+        ],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
     },
     dxflags: [
         "--core-library",
         "--multi-dex",
     ],
-    installable: true,
     jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
+        "error_prone_android_framework",
     ],
     required: [
         "framework-platform-compat-config",
@@ -293,6 +320,7 @@ java_library {
         "services-platform-compat-config",
         "TeleService-platform-compat-config",
         "documents-ui-compat-config",
+        "calendar-provider-compat-config",
     ],
     libs: [
         "app-compat-annotations",
@@ -307,21 +335,44 @@ java_library {
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
+        "av-types-aidl-java",
+        "tv_tuner_resource_manager_aidl_interface-java",
+        "soundtrigger_middleware-aidl-java",
+        "modules-utils-preconditions",
         "modules-utils-os",
+        "framework-permission-aidl-java",
     ],
+}
+
+java_library {
+    name: "framework-minus-apex",
+    defaults: ["framework-minus-apex-defaults"],
+    installable: true,
     // For backwards compatibility.
     stem: "framework",
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base",
-        // TODO: remove when framework-connectivity can build against API
-        "//frameworks/base/packages/Connectivity/framework",
         // TODO(b/147128803) remove the below lines
+        "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
         "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+}
+
+java_library {
+    name: "framework-minus-apex-intdefs",
+    defaults: ["framework-minus-apex-defaults"],
+    plugins: ["intdef-annotation-processor"],
 }
 
 // This "framework" module is NOT installed to the device. It's
@@ -340,6 +391,7 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
+        "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
@@ -371,13 +423,14 @@ filegroup {
     srcs: [
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         ":framework-annotations",
+        ":modules-utils-preconditions-srcs",
         "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/RingBufferIndices.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
@@ -405,14 +458,13 @@ java_library {
 java_library {
     name: "framework-wifi-util-lib",
     sdk_version: "module_current",
+    min_sdk_version: "30",
     srcs: [
-        "core/java/android/content/pm/BaseParceledListSlice.java",
-        "core/java/android/content/pm/ParceledListSlice.java",
+        ":modules-utils-preconditions-srcs",
         "core/java/android/os/HandlerExecutor.java",
         "core/java/com/android/internal/util/AsyncChannel.java",
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "telephony/java/android/telephony/Annotation.java",
         ":net-utils-framework-wifi-common-srcs",
     ],
@@ -483,9 +535,12 @@ stubs_defaults {
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
+            "media/aidl",
             "telephony/java",
         ],
         include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
             "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
@@ -502,6 +557,7 @@ stubs_defaults {
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb.gadget-V1.0-java",

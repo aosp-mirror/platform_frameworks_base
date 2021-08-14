@@ -100,7 +100,7 @@ public class ActivityTestMain extends Activity {
                     Intent intent = new Intent(ActivityTestMain.this, AlarmSpamReceiver.class);
                     intent.setAction("com.example.SPAM_ALARM=" + when);
                     PendingIntent pi = PendingIntent.getBroadcast(ActivityTestMain.this,
-                            0, intent, 0);
+                            0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
                     mAlarm.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME, when+(30*1000), pi);
                     scheduleSpamAlarm(30*1000);
                 } break;
@@ -134,7 +134,7 @@ public class ActivityTestMain extends Activity {
 
                     // Also send a broadcast alarm to evaluate the alarm fast-forward policy
                     intent.putExtra(SLOW_RECEIVER_EXTRA, 4);
-                    PendingIntent pi = PendingIntent.getBroadcast(ActivityTestMain.this, 1, intent, 0);
+                    PendingIntent pi = PendingIntent.getBroadcast(ActivityTestMain.this, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
                     AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                     long now = SystemClock.elapsedRealtime();
                     Log.i(TAG, "Setting alarm for now + 5 seconds");
@@ -493,7 +493,7 @@ public class ActivityTestMain extends Activity {
                 Intent receiveIntent = new Intent(ActivityTestMain.this, TrackTimeReceiver.class);
                 receiveIntent.putExtra("something", "yeah, this is us!");
                 options.requestUsageTimeReport(PendingIntent.getBroadcast(ActivityTestMain.this,
-                        0, receiveIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                        0, receiveIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED));
                 startActivity(Intent.createChooser(intent, "Who do you love?"), options.toBundle());
                 return true;
             }

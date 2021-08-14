@@ -16,8 +16,6 @@
 
 package com.android.server.locksettings;
 
-import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
@@ -172,7 +170,7 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PIN>");
             pw.println("    Sets the lock screen as PIN, using the given PIN to unlock.");
             pw.println("");
-            pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
+            pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
             pw.println("    Sets the lock screen as password, using the given PASSOWRD to unlock.");
             pw.println("");
             pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID]");
@@ -303,15 +301,17 @@ class LockSettingsShellCommand extends ShellCommand {
     private boolean isNewCredentialSufficient(LockscreenCredential credential) {
         final PasswordMetrics requiredMetrics =
                 mLockPatternUtils.getRequestedPasswordMetrics(mCurrentUserId);
+        final int requiredComplexity =
+                mLockPatternUtils.getRequestedPasswordComplexity(mCurrentUserId);
         final List<PasswordValidationError> errors;
         if (credential.isPassword() || credential.isPin()) {
-            errors = PasswordMetrics.validatePassword(requiredMetrics, PASSWORD_COMPLEXITY_NONE,
+            errors = PasswordMetrics.validatePassword(requiredMetrics, requiredComplexity,
                     credential.isPin(), credential.getCredential());
         } else {
             PasswordMetrics metrics = new PasswordMetrics(
                     credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
             errors = PasswordMetrics.validatePasswordMetrics(
-                    requiredMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */, metrics);
+                    requiredMetrics, requiredComplexity, metrics);
         }
         if (!errors.isEmpty()) {
             getOutPrintWriter().println(

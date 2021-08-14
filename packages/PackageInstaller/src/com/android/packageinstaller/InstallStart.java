@@ -22,24 +22,21 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AppGlobals;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.permission.IPermissionManager;
 import android.util.Log;
 
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Select which activity is the first visible activity of the installation and forward the intent to
@@ -49,19 +46,18 @@ public class InstallStart extends Activity {
     private static final String LOG_TAG = InstallStart.class.getSimpleName();
 
     private static final String DOWNLOADS_AUTHORITY = "downloads";
-    private IPackageManager mIPackageManager;
-    private IPermissionManager mIPermissionManager;
+    private PackageManager mPackageManager;
     private UserManager mUserManager;
     private boolean mAbortInstall = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mIPackageManager = AppGlobals.getPackageManager();
-        mIPermissionManager = AppGlobals.getPermissionManager();
+        mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
+        String callingAttributionTag = null;
 
         final boolean isSessionInstall =
                 PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
@@ -75,6 +71,8 @@ public class InstallStart extends Activity {
             PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
             PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
             callingPackage = (sessionInfo != null) ? sessionInfo.getInstallerPackageName() : null;
+            callingAttributionTag =
+                    (sessionInfo != null) ? sessionInfo.getInstallerAttributionTag() : null;
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
@@ -91,7 +89,7 @@ public class InstallStart extends Activity {
                 Log.w(LOG_TAG, "Cannot get target sdk version for uid " + originatingUid);
                 // Invalid originating uid supplied. Abort install.
                 mAbortInstall = true;
-            } else if (targetSdkVersion >= Build.VERSION_CODES.O && !declaresAppOpPermission(
+            } else if (targetSdkVersion >= Build.VERSION_CODES.O && !isUidRequestingPermission(
                     originatingUid, Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
                 Log.e(LOG_TAG, "Requesting uid " + originatingUid + " needs to declare permission "
                         + Manifest.permission.REQUEST_INSTALL_PACKAGES);
@@ -111,6 +109,8 @@ public class InstallStart extends Activity {
         // The the installation source as the nextActivity thinks this activity is the source, hence
         // set the originating UID and sourceInfo explicitly
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_CALLING_PACKAGE, callingPackage);
+        nextActivity.putExtra(PackageInstallerActivity.EXTRA_CALLING_ATTRIBUTION_TAG,
+                callingAttributionTag);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINAL_SOURCE_INFO, sourceInfo);
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
 
@@ -145,26 +145,24 @@ public class InstallStart extends Activity {
         finish();
     }
 
-    private boolean declaresAppOpPermission(int uid, String permission) {
-        try {
-            final String[] packages = mIPermissionManager.getAppOpPermissionPackages(permission);
-            if (packages == null) {
-                return false;
+    private boolean isUidRequestingPermission(int uid, String permission) {
+        final String[] packageNames = mPackageManager.getPackagesForUid(uid);
+        if (packageNames == null) {
+            return false;
+        }
+        for (final String packageName : packageNames) {
+            final PackageInfo packageInfo;
+            try {
+                packageInfo = mPackageManager.getPackageInfo(packageName,
+                        PackageManager.GET_PERMISSIONS);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Ignore and try the next package
+                continue;
             }
-            final List<UserInfo> users = mUserManager.getUsers();
-            for (String packageName : packages) {
-                for (UserInfo user : users) {
-                    try {
-                        if (uid == getPackageManager().getPackageUidAsUser(packageName, user.id)) {
-                            return true;
-                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                        // Ignore and try the next package
-                    }
-                }
+            if (packageInfo.requestedPermissions != null
+                    && Arrays.asList(packageInfo.requestedPermissions).contains(permission)) {
+                return true;
             }
-        } catch (RemoteException rexc) {
-            // If remote package manager cannot be reached, install will likely fail anyway.
         }
         return false;
     }
@@ -210,13 +208,9 @@ public class InstallStart extends Activity {
                 return PackageInstaller.SessionParams.UID_UNKNOWN;
             }
         }
-        try {
-            if (mIPackageManager.checkUidPermission(Manifest.permission.MANAGE_DOCUMENTS,
-                    callingUid) == PackageManager.PERMISSION_GRANTED) {
-                return uidFromIntent;
-            }
-        } catch (RemoteException rexc) {
-            // Ignore. Should not happen.
+        if (checkPermission(Manifest.permission.MANAGE_DOCUMENTS, -1, callingUid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return uidFromIntent;
         }
         if (isSystemDownloadsProvider(callingUid)) {
             return uidFromIntent;

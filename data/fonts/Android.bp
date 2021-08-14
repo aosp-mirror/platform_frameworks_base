@@ -34,9 +34,8 @@ prebuilt_font {
     src: "DroidSansMono.ttf",
     required: [
         // Roboto-Regular.ttf provides DroidSans.ttf as a symlink to itself
+        // Roboto-Regular.ttf provides DroidSans-Bold.ttf as a symlink to itself
         "Roboto-Regular.ttf",
-        // Roboto-Bold.ttf provides DroidSans-Bold.ttf as a symlink to itself
-        "Roboto-Bold.ttf",
     ],
 }
 

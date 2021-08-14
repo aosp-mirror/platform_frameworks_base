@@ -74,6 +74,7 @@ public abstract class JobService extends Service {
     /**
      * Call this to inform the JobScheduler that the job has finished its work.  When the
      * system receives this message, it releases the wakelock being held for the job.
+     * This does not need to be called if {@link #onStopJob(JobParameters)} has been called.
      * <p>
      * You can request that the job be scheduled again by passing {@code true} as
      * the <code>wantsReschedule</code> parameter. This will apply back-off policy
@@ -135,20 +136,30 @@ public abstract class JobService extends Service {
     /**
      * This method is called if the system has determined that you must stop execution of your job
      * even before you've had a chance to call {@link #jobFinished(JobParameters, boolean)}.
+     * Once this method is called, you no longer need to call
+     * {@link #jobFinished(JobParameters, boolean)}.
      *
-     * <p>This will happen if the requirements specified at schedule time are no longer met. For
+     * <p>This may happen if the requirements specified at schedule time are no longer met. For
      * example you may have requested WiFi with
      * {@link android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}, yet while your
      * job was executing the user toggled WiFi. Another example is if you had specified
-     * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
-     * idle maintenance window. You are solely responsible for the behavior of your application
-     * upon receipt of this message; your app will likely start to misbehave if you ignore it.
+     * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left
+     * its idle maintenance window. There are many other reasons a job can be stopped early besides
+     * constraints no longer being satisfied. {@link JobParameters#getStopReason()} will return the
+     * reason this method was called. You are solely responsible for the behavior of your
+     * application upon receipt of this message; your app will likely start to misbehave if you
+     * ignore it.
      * <p>
-     * Once this method returns, the system releases the wakelock that it is holding on
-     * behalf of the job.</p>
+     * Once this method returns (or times out), the system releases the wakelock that it is holding
+     * on behalf of the job.</p>
      *
-     * @param params The parameters identifying this job, as supplied to
-     *               the job in the {@link #onStartJob(JobParameters)} callback.
+     * <p class="caution"><strong>Note:</strong> When a job is stopped and rescheduled via this
+     * method call, the deadline constraint is excluded from the rescheduled job's constraint set.
+     * The rescheduled job will run again once all remaining constraints are satisfied.
+     *
+     * @param params The parameters identifying this job, similar to what was supplied to the job in
+     *               the {@link #onStartJob(JobParameters)} callback, but with the stop reason
+     *               included.
      * @return {@code true} to indicate to the JobManager whether you'd like to reschedule
      * this job based on the retry criteria provided at job creation-time; or {@code false}
      * to end the job entirely.  Regardless of the value returned, your job must stop executing.

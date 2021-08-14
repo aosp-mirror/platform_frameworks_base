@@ -21,11 +21,13 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.Trace;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import dalvik.system.CloseGuard;
 
+import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
@@ -52,8 +54,11 @@ public abstract class InputEventReceiver {
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(long receiverPtr);
     private static native void nativeFinishInputEvent(long receiverPtr, int seq, boolean handled);
+    private static native void nativeReportTimeline(long receiverPtr, int inputEventId,
+            long gpuCompletedTime, long presentTime);
     private static native boolean nativeConsumeBatchedInputEvents(long receiverPtr,
             long frameTimeNanos);
+    private static native String nativeDump(long receiverPtr, String prefix);
 
     /**
      * Creates an input event receiver bound to the specified input channel.
@@ -142,6 +147,30 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Called when a Pointer Capture event is received.
+     *
+     * @param pointerCaptureEnabled if true, the window associated with this input channel has just
+     *                              received Pointer Capture
+     *                              if false, the window associated with this input channel has just
+     *                              lost Pointer Capture
+     * @see View#requestPointerCapture()
+     * @see View#releasePointerCapture()
+     */
+    // Called from native code.
+    public void onPointerCaptureEvent(boolean pointerCaptureEnabled) {
+    }
+
+    /**
+     * Called when a drag event is received, from native code.
+     *
+     * @param isExiting if false, the window associated with this input channel has just received
+     *                 drag
+     *                 if true, the window associated with this input channel has just lost drag
+     */
+    public void onDragEvent(boolean isExiting, float x, float y) {
+    }
+
+    /**
      * Called when a batched input event is pending.
      *
      * The batched input event will continue to accumulate additional movement
@@ -182,6 +211,15 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Report the timing / latency information for a specific input event.
+     */
+    public final void reportTimeline(int inputEventId, long gpuCompletedTime, long presentTime) {
+        Trace.traceBegin(Trace.TRACE_TAG_INPUT, "reportTimeline");
+        nativeReportTimeline(mReceiverPtr, inputEventId, gpuCompletedTime, presentTime);
+        Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+    }
+
+    /**
      * Consumes all pending batched input events.
      * Must be called on the same Looper thread to which the receiver is attached.
      *
@@ -219,6 +257,18 @@ public abstract class InputEventReceiver {
     private void dispatchInputEvent(int seq, InputEvent event) {
         mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event);
+    }
+
+    /**
+     * Dump the state of this InputEventReceiver to the writer.
+     * @param prefix the prefix (typically whitespace padding) to append in front of each line
+     * @param writer the writer where the dump should be written
+     */
+    public void dump(String prefix, PrintWriter writer) {
+        writer.println(prefix + getClass().getName());
+        writer.println(prefix + " mInputChannel: " + mInputChannel);
+        writer.println(prefix + " mSeqMap: " + mSeqMap);
+        writer.println(prefix + " mReceiverPtr:\n" + nativeDump(mReceiverPtr, prefix + "  "));
     }
 
     /**

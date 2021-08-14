@@ -189,12 +189,6 @@ public class ZygoteInit {
         System.loadLibrary("android");
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
-
-        try {
-            System.loadLibrary("sfplugin_ccodec");
-        } catch (Error | RuntimeException e) {
-            // tolerate missing sfplugin_ccodec which is only present on Codec 2 devices
-        }
     }
 
     native private static void nativePreloadAppProcessHALs();
@@ -385,16 +379,19 @@ public class ZygoteInit {
         SharedLibraryInfo hidlBase = new SharedLibraryInfo(
                 "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
         SharedLibraryInfo hidlManager = new SharedLibraryInfo(
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
 
         SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
 
         ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
                 new SharedLibraryInfo[]{
@@ -992,7 +989,7 @@ public class ZygoteInit {
             // loops forever in the zygote.
             caller = zygoteServer.runSelectLoop(abiList);
         } catch (Throwable ex) {
-            Log.e(TAG, "System zygote died with exception", ex);
+            Log.e(TAG, "System zygote died with fatal exception", ex);
             throw ex;
         } finally {
             if (zygoteServer != null) {

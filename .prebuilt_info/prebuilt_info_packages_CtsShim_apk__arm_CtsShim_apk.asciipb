@@ -1,6 +1,6 @@
 drops {
   android_build_drop {
-    build_id: "7396576"
+    build_id: "7552332"
     target: "CtsShim"
     source_file: "aosp_arm64/CtsShim.apk"
   }
@@ -10,4 +10,6 @@ drops {
   git_project: "platform/frameworks/base"
   git_branch: "sc-dev"
   transform: TRANSFORM_NONE
+  transform_options {
+  }
 }

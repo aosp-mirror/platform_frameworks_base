@@ -239,7 +239,6 @@ public class ColorDrawable extends Drawable {
         return mColorState.mTint != null && mColorState.mTint.isStateful();
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mColorState.mTint != null && mColorState.mTint.hasFocusStateSpecified();

@@ -33,8 +33,6 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-class SkBitmap;
-
 namespace android {
 
 class Surface;
@@ -160,6 +158,8 @@ private:
 
     // Display event handling
     class DisplayEventCallback;
+    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
+    sp<Looper> mLooper;
     int displayEventCallback(int fd, int events, void* data);
     void processDisplayEvents();
 
@@ -218,8 +218,6 @@ private:
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
     sp<Callbacks> mCallbacks;
     Animation* mAnimation = nullptr;
-    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
-    sp<Looper> mLooper;
 };
 
 // ---------------------------------------------------------------------------

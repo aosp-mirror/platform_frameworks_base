@@ -273,8 +273,8 @@ public final class AudioFormat implements Parcelable {
 
     /** Audio data format: compressed audio wrapped in PCM for HDMI
      * or S/PDIF passthrough.
-     * IEC61937 uses a stereo stream of 16-bit samples as the wrapper.
-     * So the channel mask for the track must be {@link #CHANNEL_OUT_STEREO}.
+     * For devices whose SDK version is less than {@link android.os.Build.VERSION_CODES#S}, the
+     * channel mask of IEC61937 track must be {@link #CHANNEL_OUT_STEREO}.
      * Data should be written to the stream in a short[] array.
      * If the data is written in a byte[] array then there may be endian problems
      * on some platforms when converting to short internally.
@@ -310,6 +310,10 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_LEGACY_SHORT_ARRAY_THRESHOLD = ENCODING_OPUS;
 
     /** Audio data format: PCM 24 bit per sample packed as 3 bytes.
+     *
+     * The bytes are in little-endian order, so the least significant byte
+     * comes first in the byte array.
+     *
      * Not guaranteed to be supported by devices, may be emulated if not supported. */
     public static final int ENCODING_PCM_24BIT_PACKED = 21;
     /** Audio data format: PCM 32 bit per sample.
@@ -1090,7 +1094,7 @@ public final class AudioFormat implements Parcelable {
          * with named endpoint channels. The samples in the frame correspond to the
          * named set bits in the channel position mask, in ascending bit order.
          * See {@link #setChannelIndexMask(int)} to specify channels
-         * based on endpoint numbered channels. This <a href="#channelPositionMask>description of
+         * based on endpoint numbered channels. This <a href="#channelPositionMask">description of
          * channel position masks</a> covers the concept in more details.
          * @param channelMask describes the configuration of the audio channels.
          *    <p> For output, the channelMask can be an OR-ed combination of

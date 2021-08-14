@@ -36,11 +36,13 @@ public class PowerSaveState implements Parcelable {
      */
     public final boolean globalBatterySaverEnabled;
     public final int locationMode;
+    public final int soundTriggerMode;
     public final float brightnessFactor;
 
     public PowerSaveState(Builder builder) {
         batterySaverEnabled = builder.mBatterySaverEnabled;
         locationMode = builder.mLocationMode;
+        soundTriggerMode = builder.mSoundTriggerMode;
         brightnessFactor = builder.mBrightnessFactor;
         globalBatterySaverEnabled = builder.mGlobalBatterySaverEnabled;
     }
@@ -49,6 +51,7 @@ public class PowerSaveState implements Parcelable {
         batterySaverEnabled = in.readByte() != 0;
         globalBatterySaverEnabled = in.readByte() != 0;
         locationMode = in.readInt();
+        soundTriggerMode = in.readInt();
         brightnessFactor = in.readFloat();
     }
 
@@ -62,6 +65,7 @@ public class PowerSaveState implements Parcelable {
         dest.writeByte((byte) (batterySaverEnabled ? 1 : 0));
         dest.writeByte((byte) (globalBatterySaverEnabled ? 1 : 0));
         dest.writeInt(locationMode);
+        dest.writeInt(soundTriggerMode);
         dest.writeFloat(brightnessFactor);
     }
 
@@ -69,6 +73,7 @@ public class PowerSaveState implements Parcelable {
         private boolean mBatterySaverEnabled = false;
         private boolean mGlobalBatterySaverEnabled = false;
         private int mLocationMode = 0;
+        private int mSoundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
         private float mBrightnessFactor = 0.5f;
 
         public Builder() {}
@@ -80,6 +85,11 @@ public class PowerSaveState implements Parcelable {
 
         public Builder setGlobalBatterySaverEnabled(boolean enabled) {
             mGlobalBatterySaverEnabled = enabled;
+            return this;
+        }
+
+        public Builder setSoundTriggerMode(int mode) {
+            mSoundTriggerMode = mode;
             return this;
         }
 

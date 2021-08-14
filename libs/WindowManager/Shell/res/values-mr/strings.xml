@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"बंद करा"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तृत करा"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग्ज"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"मेनू"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>ने हे वैशिष्ट्य वापरू नये असे तुम्हाला वाटत असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
+    <string name="pip_play" msgid="3496151081459417097">"प्ले करा"</string>
+    <string name="pip_pause" msgid="690688849510295232">"थांबवा"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"डावलून पुढे जा"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"डावलून मागे जा"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदला"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"अ‍ॅप कदाचित स्प्लिट स्क्रीनसह काम करू शकत नाही."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"अ‍ॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"दुसऱ्या डिस्प्लेवर अ‍ॅप कदाचित चालणार नाही."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"दुसऱ्या डिस्प्लेवर अ‍ॅप लाँच होणार नाही."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"विभाजित-स्क्रीन विभाजक"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"डावी फुल स्क्रीन"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"डावी 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"डावी 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"डावी 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"उजवी फुल स्क्रीन"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"शीर्ष फुल स्क्रीन"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"शीर्ष 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"शीर्ष 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"शीर्ष 10"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"तळाशी फुल स्क्रीन"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"एकहाती मोड वापरणे"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"बाहेर पडण्यासाठी स्क्रीनच्या खालून वरच्या दिशेने स्वाइप करा किंवा ॲपवर कोठेही टॅप करा"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"एकहाती मोड सुरू करा"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"एकहाती मोडमधून बाहेर पडा"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबलसाठी सेटिंग्ज"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ओव्हरफ्लो"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"स्टॅकमध्ये परत जोडा"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> कडून <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> आणि आणखी <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> कडून <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"वर डावीकडे हलवा"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"वर उजवीकडे हलवा"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"तळाशी डावीकडे हलवा"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"तळाशी उजवीकडे हलवा"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> सेटिंग्ज"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल डिसमिस करा"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"संभाषणाला बबल करू नका"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"बबल वापरून चॅट करा"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"नवीन संभाषणे फ्लोटिंग आयकन किंवा बबल म्हणून दिसतात. बबल उघडण्यासाठी टॅप करा. हे हलवण्यासाठी ड्रॅग करा."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"बबल कधीही नियंत्रित करा"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"या अ‍ॅपमधून बबल बंद करण्यासाठी व्यवस्थापित करा वर टॅप करा"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"समजले"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"अलीकडील कोणतेही बबल नाहीत"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
+    <string name="got_it" msgid="4428750913636945527">"समजले"</string>
+</resources>

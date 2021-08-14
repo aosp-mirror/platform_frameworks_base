@@ -245,8 +245,19 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * @param slotName name of the icon slot to remove from the ignored list
      */
     public void removeIgnoredSlot(String slotName) {
-        if (mIgnoredSlots.contains(slotName)) {
-            mIgnoredSlots.remove(slotName);
+        mIgnoredSlots.remove(slotName);
+
+        requestLayout();
+    }
+
+    /**
+     * Remove a list of slots from the list of ignored icon slots.
+     * It will then be shown when set to visible by the {@link StatusBarIconController}.
+     * @param slots name of the icon slots to remove from the ignored list
+     */
+    public void removeIgnoredSlots(List<String> slots) {
+        for (String slot : slots) {
+            mIgnoredSlots.remove(slot);
         }
 
         requestLayout();
@@ -259,6 +270,25 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     public void setIgnoredSlots(List<String> slots) {
         mIgnoredSlots.clear();
         addIgnoredSlots(slots);
+    }
+
+    /**
+     * Returns the view corresponding to a particular slot.
+     *
+     * Use it solely to manipulate how it is presented.
+     * @param slot name of the slot to find. Names are defined in
+     *            {@link com.android.internal.R.config_statusBarIcons}
+     * @return a view for the slot if this container has it, else {@code null}
+     */
+    public View getViewForSlot(String slot) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof StatusIconDisplayable
+                    && ((StatusIconDisplayable) child).getSlot().equals(slot)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     /**

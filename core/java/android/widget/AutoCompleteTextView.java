@@ -1409,6 +1409,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return mFilter;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return AutoCompleteTextView.class.getName();
+    }
+
     private class DropDownItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView parent, View v, int position, long id) {
             performCompletion(v, position, id);

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
@@ -39,7 +39,7 @@ import java.io.IOException;
 /** @hide */
 class ParsedMainComponentUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -48,7 +48,8 @@ class ParsedMainComponentUtils {
             TypedArray array, int flags, boolean useRoundIcon, ParseInput input,
             int bannerAttr, int descriptionAttr, @Nullable Integer directBootAwareAttr,
             @Nullable Integer enabledAttr, int iconAttr, int labelAttr, int logoAttr, int nameAttr,
-            @Nullable Integer processAttr, int roundIconAttr, @Nullable Integer splitNameAttr) {
+            @Nullable Integer processAttr, int roundIconAttr, @Nullable Integer splitNameAttr,
+            @Nullable Integer attributionTagsAttr) {
         ParseResult<Component> result = ParsedComponentUtils.parseComponent(component, tag, pkg,
                 array, useRoundIcon, input, bannerAttr, descriptionAttr, iconAttr, labelAttr,
                 logoAttr, nameAttr, roundIconAttr);
@@ -94,6 +95,13 @@ class ParsedMainComponentUtils {
             component.splitName = array.getNonConfigurationString(splitNameAttr, 0);
         }
 
+        if (attributionTagsAttr != null) {
+            final String attributionTags = array.getNonConfigurationString(attributionTagsAttr, 0);
+            if (attributionTags != null) {
+                component.attributionTags = attributionTags.split("\\|");
+            }
+        }
+
         return input.success(component);
     }
 
@@ -113,7 +121,7 @@ class ParsedMainComponentUtils {
         ParsedIntentInfo intent = intentResult.getResult();
         int actionCount = intent.countActions();
         if (actionCount == 0 && failOnNoActions) {
-            Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseCodePath() + " "
+            Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                     + parser.getPositionDescription());
             // Backward-compat, do not actually fail
             return input.success(null);

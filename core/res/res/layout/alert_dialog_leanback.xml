@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 The Android Open Source Project
+     Copyright (C) 2021 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,108 +15,70 @@
      limitations under the License.
 -->
 
-<LinearLayout
+<com.android.internal.widget.AlertDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/dialog_background_material"
-    android:translationZ="@dimen/floating_window_z"
-    android:layout_marginLeft="@dimen/leanback_alert_dialog_horizontal_margin"
-    android:layout_marginTop="@dimen/leanback_alert_dialog_vertical_margin"
-    android:layout_marginRight="@dimen/leanback_alert_dialog_horizontal_margin"
-    android:layout_marginBottom="@dimen/leanback_alert_dialog_vertical_margin">
+    android:gravity="start|top"
+    android:orientation="vertical">
 
-    <LinearLayout android:id="@+id/topPanel"
+    <include layout="@layout/alert_dialog_title_material" />
+
+    <FrameLayout
+        android:id="@+id/contentPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout android:id="@+id/title_template"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical|start"
-            android:paddingStart="16dip"
-            android:paddingEnd="16dip"
-            android:paddingTop="16dip">
-            <ImageView android:id="@+id/icon"
-                android:layout_width="32dip"
-                android:layout_height="32dip"
-                android:layout_marginEnd="8dip"
-                android:scaleType="fitCenter"
-                android:src="@null" />
-            <TextView android:id="@+id/alertTitle"
-                style="?attr/windowTitleStyle"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="viewStart" />
-        </LinearLayout>
-        <!-- If the client uses a customTitle, it will be added here. -->
-    </LinearLayout>
+        android:minHeight="48dp">
 
-    <LinearLayout android:id="@+id/contentPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:minHeight="64dp">
-        <ScrollView android:id="@+id/scrollView"
+        <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToPadding="false">
-            <TextView android:id="@+id/message"
-                style="?attr/textAppearanceMedium"
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="16dip"
-                android:paddingEnd="16dip"
-                android:paddingTop="16dip" />
-        </ScrollView>
-    </LinearLayout>
+                android:orientation="vertical">
 
-    <FrameLayout android:id="@+id/customPanel"
+                <Space
+                    android:id="@+id/textSpacerNoTitle"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dialog_padding_top_material" />
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="?attr/dialogPreferredPadding"
+                    android:paddingStart="?attr/dialogPreferredPadding"
+                    style="@style/TextAppearance.Material.Subhead" />
+
+                <Space
+                    android:id="@+id/textSpacerNoButtons"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dialog_padding_top_material" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/customPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:minHeight="64dp">
-        <FrameLayout android:id="@+android:id/custom"
+        android:minHeight="48dp">
+
+        <FrameLayout
+            android:id="@+id/custom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <LinearLayout android:id="@+id/buttonPanel"
+    <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/alert_dialog_button_bar_height"
-        android:orientation="vertical"
-        android:gravity="end"
-        android:padding="16dip">
-        <LinearLayout
-            style="?attr/buttonBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layoutDirection="locale">
-            <Button android:id="@+id/button3"
-                style="?attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="2"
-                android:minHeight="@dimen/alert_dialog_button_bar_height" />
-            <Button android:id="@+id/button2"
-                style="?attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="2"
-                android:minHeight="@dimen/alert_dialog_button_bar_height" />
-            <Button android:id="@+id/button1"
-                style="?attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="2"
-                android:minHeight="@dimen/alert_dialog_button_bar_height" />
-        </LinearLayout>
-     </LinearLayout>
-</LinearLayout>
+        layout="@layout/alert_dialog_button_bar_leanback" />
+</com.android.internal.widget.AlertDialogLayout>

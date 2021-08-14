@@ -27,7 +27,13 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
     private val listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     private val entries: MutableMap<String, Pair<MediaData?, MediaDeviceData?>> = mutableMapOf()
 
-    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    override fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData,
+        immediately: Boolean,
+        isSsReactivated: Boolean
+    ) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
             entries[key] = data to entries.remove(oldKey)?.second
             update(key, oldKey)
@@ -37,8 +43,20 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         }
     }
 
+    override fun onSmartspaceMediaDataLoaded(
+        key: String,
+        data: SmartspaceMediaData,
+        shouldPrioritize: Boolean
+    ) {
+        listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
+    }
+
     override fun onMediaDataRemoved(key: String) {
         remove(key)
+    }
+
+    override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
+        listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
     override fun onMediaDeviceChanged(

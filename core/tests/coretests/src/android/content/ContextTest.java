@@ -189,14 +189,14 @@ public class ContextTest {
 
         assertFalse(wrapper.isUiContext());
 
-        wrapper = new ContextWrapper(getUiContext());
+        wrapper = new ContextWrapper(createUiContext());
 
         assertTrue(wrapper.isUiContext());
     }
 
     @Test
     public void testIsUiContext_UiContextDerivedContext() {
-        final Context uiContext = getUiContext();
+        final Context uiContext = createUiContext();
         Context context = uiContext.createAttributionContext(null /* attributionTag */);
 
         assertTrue(context.isUiContext());
@@ -208,7 +208,7 @@ public class ContextTest {
 
     @Test
     public void testIsUiContext_UiContextDerivedDisplayContext() {
-        final Context uiContext = getUiContext();
+        final Context uiContext = createUiContext();
         final Display secondaryDisplay =
                 getSecondaryDisplay(uiContext.getSystemService(DisplayManager.class));
         final Context context = uiContext.createDisplayContext(secondaryDisplay);
@@ -216,7 +216,7 @@ public class ContextTest {
         assertFalse(context.isUiContext());
     }
 
-    private Context getUiContext() {
+    private Context createUiContext() {
         final Context appContext = ApplicationProvider.getApplicationContext();
         final DisplayManager displayManager = appContext.getSystemService(DisplayManager.class);
         final Display display = displayManager.getDisplay(DEFAULT_DISPLAY);

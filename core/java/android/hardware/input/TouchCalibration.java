@@ -16,6 +16,7 @@
 
 package android.hardware.input;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -97,7 +98,7 @@ public class TouchCalibration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) {
             return true;
         } else if (obj instanceof TouchCalibration) {

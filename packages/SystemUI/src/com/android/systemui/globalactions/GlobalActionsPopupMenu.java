@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.util.LayoutDirection;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
@@ -49,11 +48,9 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
         mContext = context;
         Resources res = mContext.getResources();
         setBackgroundDrawable(
-                res.getDrawable(R.drawable.rounded_bg_full, context.getTheme()));
+                res.getDrawable(R.drawable.global_actions_popup_bg, context.getTheme()));
         mIsDropDownMode = isDropDownMode;
 
-        // required to show above the global actions dialog
-        setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
         setModal(true);
 

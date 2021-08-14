@@ -86,7 +86,7 @@ public class ContentResolverTest {
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
                 new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
-        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any(), any())).thenReturn(
+        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(
                 afd);
     }
 
@@ -260,5 +260,13 @@ public class ContentResolverTest {
         } catch (IllegalArgumentException e) {
             // Expected
         }
+    }
+
+    @Test
+    public void testUncanonicalize() {
+        Uri uncanonical = mResolver.uncanonicalize(
+                Uri.parse("content://android.content.FakeProviderRemote/something"));
+        assertThat(uncanonical).isEqualTo(
+                Uri.parse("content://android.content.FakeProviderRemote/uncanonical"));
     }
 }

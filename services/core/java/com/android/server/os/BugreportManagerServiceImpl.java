@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -31,6 +32,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
@@ -81,7 +83,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 == BugreportParams.BUGREPORT_MODE_TELEPHONY /* checkCarrierPrivileges */);
         final long identity = Binder.clearCallingIdentity();
         try {
-            ensureIsPrimaryUser();
+            ensureUserCanTakeBugReport(bugreportMode);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -145,10 +147,15 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
         // For carrier privileges, this can include user-installed apps. This is essentially a
         // function of the current active SIM(s) in the device to let carrier apps through.
-        if (checkCarrierPrivileges
-                && mTelephonyManager.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
-                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-            return;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (checkCarrierPrivileges
+                    && mTelephonyManager.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         String message =
@@ -161,11 +168,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     /**
-     * Validates that the current user is the primary user.
+     * Validates that the current user is the primary user or when bugreport is requested remotely
+     * and current user is affiliated user.
      *
      * @throws IllegalArgumentException if the current user is not the primary user
      */
-    private void ensureIsPrimaryUser() {
+    private void ensureUserCanTakeBugReport(int bugreportMode) {
         UserInfo currentUser = null;
         try {
             currentUser = ActivityManager.getService().getCurrentUser();
@@ -181,9 +189,38 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             logAndThrow("No primary user. Only primary user is allowed to take bugreports.");
         }
         if (primaryUser.id != currentUser.id) {
+            if (bugreportMode == BugreportParams.BUGREPORT_MODE_REMOTE
+                    && isCurrentUserAffiliated(currentUser.id)) {
+                return;
+            }
             logAndThrow("Current user not primary user. Only primary user"
                     + " is allowed to take bugreports.");
         }
+    }
+
+    /**
+     * Returns {@code true} if the device has device owner and the current user is affiliated
+     * with the device owner.
+     */
+    private boolean isCurrentUserAffiliated(int currentUserId) {
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        int deviceOwnerUid = dpm.getDeviceOwnerUserId();
+        if (deviceOwnerUid == UserHandle.USER_NULL) {
+            return false;
+        }
+
+        int callingUserId = UserHandle.getUserId(Binder.getCallingUid());
+
+        Slog.i(TAG, "callingUid: " + callingUserId + " deviceOwnerUid: " + deviceOwnerUid
+                + " currentUserId: " + currentUserId);
+
+        if (callingUserId != deviceOwnerUid) {
+            logAndThrow("Caller is not device owner on provisioned device.");
+        }
+        if (!dpm.isAffiliatedUser(currentUserId)) {
+            logAndThrow("Current user is not affiliated to the device owner.");
+        }
+        return true;
     }
 
     @GuardedBy("mLock")

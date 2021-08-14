@@ -118,7 +118,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
             mContext,
             0 /* requestCode */,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED, UserHandle.SYSTEM);
         mEuiccManager
                 .switchToSubscription(SubscriptionManager.INVALID_SUBSCRIPTION_ID, callbackIntent);
     }

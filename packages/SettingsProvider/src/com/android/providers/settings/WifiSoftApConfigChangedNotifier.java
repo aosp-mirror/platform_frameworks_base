@@ -15,16 +15,23 @@
  */
 package com.android.providers.settings;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
+
+import java.util.List;
 
 /**
  * Helper class for sending notifications when the user's Soft AP config was changed upon restore.
@@ -81,7 +88,25 @@ public class WifiSoftApConfigChangedNotifier {
 
     private static PendingIntent getPendingActivity(Context context) {
         Intent intent = new Intent("com.android.settings.WIFI_TETHER_SETTINGS")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setPackage(getSettingsPackageName(context));
+        return PendingIntent.getActivity(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    /**
+     * @return Get settings package name.
+     */
+    private static String getSettingsPackageName(Context context) {
+        if (context == null) return null;
+
+        Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+        List<ResolveInfo> resolveInfos = context.getPackageManager().queryIntentActivitiesAsUser(
+                intent, PackageManager.MATCH_SYSTEM_ONLY | PackageManager.MATCH_DEFAULT_ONLY,
+                UserHandle.of(ActivityManager.getCurrentUser()));
+        if (resolveInfos == null || resolveInfos.isEmpty()) {
+            return "com.android.settings";
+        }
+        return resolveInfos.get(0).activityInfo.packageName;
     }
 }

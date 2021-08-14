@@ -8,6 +8,12 @@
     },
     {
       "name": "CtsLocationNoneTestCases"
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [{
+        "include-filter": "com.android.server.location"
+      }]
     }
   ]
 }

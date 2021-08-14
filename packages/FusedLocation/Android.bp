@@ -33,6 +33,7 @@ license {
 
 android_app {
     name: "FusedLocation",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     libs: ["com.android.location.provider"],
     platform_apis: true,
@@ -61,5 +62,7 @@ android_test {
         "mockito-target-minus-junit4",
         "truth-prebuilt",
     ],
+    platform_apis: true,
+    certificate: "platform",
     test_suites: ["device-tests"]
 }

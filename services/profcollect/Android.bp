@@ -39,6 +39,7 @@ filegroup {
 
 java_library_static {
   name: "services.profcollect",
+  defaults: ["platform_service_defaults"],
   srcs: [":services.profcollect-sources"],
   libs: ["services.core"],
 }

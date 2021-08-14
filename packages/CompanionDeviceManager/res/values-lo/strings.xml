@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ຕົວຈັດການອຸປະກອນປະກອບ"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"ເຊື່ອມຕໍ່ກັບ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"ເຊື່ອມຕໍ່ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ກັບ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"ເລືອກ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ເພື່ອໃຫ້ຖືກຈັດການໂດຍ &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ອຸປະກອນ"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"ໂມງ"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"ອະນຸຍາດໃຫ້ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ຈັດການ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ຂອງທ່ານໄດ້"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"ຕ້ອງໃຊ້ແອັບນີ້ເພື່ອຈັດການ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ຂອງທ່ານ. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"ອະນຸຍາດ"</string>
+    <string name="consent_no" msgid="2640796915611404382">"ບໍ່ອະນຸຍາດ"</string>
 </resources>

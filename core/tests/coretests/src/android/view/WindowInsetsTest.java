@@ -61,7 +61,7 @@ public class WindowInsetsTest {
         WindowInsets.assignCompatInsets(maxInsets, new Rect(0, 10, 0, 0));
         WindowInsets.assignCompatInsets(insets, new Rect(0, 0, 0, 0));
         WindowInsets windowInsets = new WindowInsets(insets, maxInsets, visible, false, false, null,
-                systemBars(), true /* compatIgnoreVisibility */);
+                null, null, systemBars(), true /* compatIgnoreVisibility */);
         assertEquals(Insets.of(0, 10, 0, 0), windowInsets.getSystemWindowInsets());
     }
 }

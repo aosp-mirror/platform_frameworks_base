@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.net.Uri;
@@ -1033,7 +1034,7 @@ public final class NdefRecord implements Parcelable {
      * identical tnf, type, id and payload fields.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

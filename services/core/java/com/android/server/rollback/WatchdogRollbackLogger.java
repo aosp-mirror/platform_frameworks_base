@@ -36,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -216,6 +217,34 @@ public final class WatchdogRollbackLogger {
                     failingPackageName,
                     new byte[]{});
         }
+
+        logTestProperties(logPackage, type, rollbackReason, failingPackageName);
+    }
+
+    /**
+     * Writes properties which will be used by rollback tests to check if particular rollback
+     * events have occurred.
+     *
+     * persist.sys.rollbacktest.enabled: true if rollback tests are running
+     * persist.sys.rollbacktest.EVENT_TYPE: true if a particular rollback event has occurred
+     *   ex: persist.sys.rollbacktest.ROLLBACK_INITIATE is true if ROLLBACK_INITIATE has happened
+     * persist.sys.rollbacktest.EVENT_TYPE.logPackage: the package to associate the rollback with
+     * persist.sys.rollbacktest.EVENT_TYPE.rollbackReason: the reason Watchdog triggered a rollback
+     * persist.sys.rollbacktest.EVENT_TYPE.failedPackageName: the failing package or process which
+     *   triggered the rollback
+     */
+    private static void logTestProperties(@Nullable VersionedPackage logPackage, int type,
+            int rollbackReason, @NonNull String failingPackageName) {
+        // This property should be on only during the tests
+        final String prefix = "persist.sys.rollbacktest.";
+        if (!SystemProperties.getBoolean(prefix + "enabled", false)) {
+            return;
+        }
+        String key = prefix + rollbackTypeToString(type);
+        SystemProperties.set(key, String.valueOf(true));
+        SystemProperties.set(key + ".logPackage", logPackage != null ? logPackage.toString() : "");
+        SystemProperties.set(key + ".rollbackReason", rollbackReasonToString(rollbackReason));
+        SystemProperties.set(key + ".failedPackageName", failingPackageName);
     }
 
     @VisibleForTesting

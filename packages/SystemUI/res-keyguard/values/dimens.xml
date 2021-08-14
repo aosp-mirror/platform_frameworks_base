@@ -33,35 +33,40 @@
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_max_height">450dp</dimen>
 
+    <!-- pin/password field max height -->
+    <dimen name="keyguard_password_height">80dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_top_margin">8dp</dimen>
-    <dimen name="keyguard_security_view_lateral_margin">36dp</dimen>
+    <dimen name="keyguard_security_view_lateral_margin">20dp</dimen>
+
+    <dimen name="keyguard_eca_top_margin">18dp</dimen>
+    <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Slice header -->
-    <dimen name="widget_title_font_size">24dp</dimen>
-    <dimen name="header_subtitle_padding">12dp</dimen>
+    <dimen name="widget_title_font_size">20dp</dimen>
+    <dimen name="widget_title_line_height">24dp</dimen>
     <dimen name="header_icon_size">16dp</dimen>
     <!-- Slice subtitle -->
-    <dimen name="widget_label_font_size">18dp</dimen>
+    <dimen name="widget_label_font_size">16dp</dimen>
+    <dimen name="widget_label_line_height">20dp</dimen>
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">54dp</dimen>
     <dimen name="bottom_text_spacing_digital">0dp</dimen>
     <dimen name="title_clock_padding">4dp</dimen>
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">@dimen/widget_title_font_size</dimen>
-    <dimen name="widget_vertical_padding">17dp</dimen>
+    <dimen name="widget_vertical_padding">5dp</dimen>
     <dimen name="widget_vertical_padding_with_header">25dp</dimen>
     <dimen name="widget_vertical_padding_clock">12dp</dimen>
     <!-- Subtitle paddings -->
     <dimen name="widget_horizontal_padding">8dp</dimen>
-    <dimen name="widget_icon_size">20dp</dimen>
+    <dimen name="widget_icon_size">18dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
-    <dimen name="subtitle_clock_padding">0dp</dimen>
-    <dimen name="header_row_font_size">14dp</dimen>
     <!-- Notification shelf padding when dark -->
     <dimen name="widget_bottom_separator_padding">-6dp</dimen>
 
@@ -81,4 +86,16 @@
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
+
+    <!-- Spacing around each button used for PIN view -->
+    <dimen name="num_pad_key_width">72dp</dimen>
+    <dimen name="num_pad_entry_row_margin_bottom">16dp</dimen>
+    <dimen name="num_pad_row_margin_bottom">6dp</dimen>
+    <dimen name="num_pad_key_margin_end">12dp</dimen>
+
+    <!-- additional offset for clock switch area items -->
+    <dimen name="clock_padding_start">28dp</dimen>
+    <dimen name="below_clock_padding_start">32dp</dimen>
+    <dimen name="below_clock_padding_end">16dp</dimen>
+    <dimen name="below_clock_padding_start_icons">28dp</dimen>
 </resources>

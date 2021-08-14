@@ -97,6 +97,7 @@ public final class CachedAppOptimizerTest {
 
     @Before
     public void setUp() {
+        System.loadLibrary("activitymanagermockingservicestestjni");
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -134,11 +135,12 @@ public final class CachedAppOptimizerTest {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
-        app.pid = app.mPidForCompact = pid;
+        app.setPid(pid);
         app.info.uid = packageUid;
         // Exact value does not mater, it can be any state for which compaction is allowed.
-        app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-        app.setAdj = app.mSetAdjForCompact = 905;
+        app.mState.setSetProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+        app.mState.setSetAdj(899);
+        app.mState.setCurAdj(940);
         return app;
     }
 
@@ -163,8 +165,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
         assertThat(mCachedAppOptimizerUnderTest.mFreezerStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
-        assertThat(mCachedAppOptimizerUnderTest.mFullAnonRssThrottleKb).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
@@ -173,8 +173,11 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
         assertThat(mCachedAppOptimizerUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMaxOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ);
+
 
         Set<Integer> expected = new HashSet<>();
         for (String s : TextUtils.split(
@@ -183,6 +186,10 @@ public final class CachedAppOptimizerTest {
         }
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle)
                 .containsExactlyElementsIn(expected);
+
+        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
+                CachedAppOptimizer.DEFAULT_USE_FREEZER);
     }
 
     @Test
@@ -230,10 +237,17 @@ public final class CachedAppOptimizerTest {
                 Long.toString(
                         CachedAppOptimizer.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_PROC_STATE_THROTTLE, "1,2,3", false);
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+                CachedAppOptimizer.KEY_COMPACT_THROTTLE_MIN_OOM_ADJ,
+                Long.toString(
+                        CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ + 10), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CachedAppOptimizer.KEY_COMPACT_THROTTLE_MAX_OOM_ADJ,
+                Long.toString(
+                    CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ - 10), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CachedAppOptimizer.KEY_COMPACT_PROC_STATE_THROTTLE, "1,2,3", false);
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, CachedAppOptimizer.DEFAULT_USE_FREEZER
                         ? "false" : "true", false);
 
@@ -260,6 +274,12 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
+        assertThat(mCachedAppOptimizerUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ + 10);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMaxOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ - 10);
         assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
         assertThat(mCachedAppOptimizerUnderTest.mFreezerStatsdSampleRate).isEqualTo(
@@ -272,7 +292,8 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
 
-        if (mCachedAppOptimizerUnderTest.isFreezerSupported()) {
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        if (CachedAppOptimizer.isFreezerSupported()) {
             if (CachedAppOptimizer.DEFAULT_USE_FREEZER) {
                 assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
             } else {
@@ -306,15 +327,15 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_doesNotListenToDeviceConfigChanges() throws InterruptedException {
-        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
 
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
         // The freezer DeviceConfig property is read at boot only
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "true", false);
         mCachedAppOptimizerUnderTest.init();
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
         mCountDown = new CountDownLatch(1);
 
         // No notifications should get to the cached app optimizer.
@@ -327,14 +348,13 @@ public final class CachedAppOptimizerTest {
 
         // Set the flag the other way without rebooting. It shall not change.
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "false", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
 
-
         // Now, set the flag to false and restart the cached app optimizer
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "false", false);
         mCachedAppOptimizerUnderTest.init();
 
@@ -361,18 +381,17 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_listensToDeviceConfigChangesBadValues() throws InterruptedException {
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
         // When we push an invalid flag value...
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 CachedAppOptimizer.KEY_USE_FREEZER, "foobar", false);
 
         mCachedAppOptimizerUnderTest.init();
 
-        // Then we set the default.
-        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_FREEZER);
+        // DeviceConfig treats invalid value as false
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
     }
 
     @Test
@@ -436,7 +455,7 @@ public final class CachedAppOptimizerTest {
         mCachedAppOptimizerUnderTest.init();
 
         // When we override new reasonable throttle values after init...
-        mCountDown = new CountDownLatch(6);
+        mCountDown = new CountDownLatch(8);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_THROTTLE_1,
                 Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
@@ -455,7 +474,13 @@ public final class CachedAppOptimizerTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_THROTTLE_6,
                 Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1), false);
-        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CachedAppOptimizer.KEY_COMPACT_THROTTLE_MIN_OOM_ADJ,
+                Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CachedAppOptimizer.KEY_COMPACT_THROTTLE_MAX_OOM_ADJ,
+                Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ - 1), false);
+        assertThat(mCountDown.await(7, TimeUnit.SECONDS)).isTrue();
 
         // Then those flags values are reflected in the compactor.
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeSome).isEqualTo(
@@ -470,6 +495,10 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ + 1);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMaxOomAdj).isEqualTo(
+                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ - 1);
     }
 
     @Test
@@ -875,7 +904,8 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore2);
         mProcessDependencies.setRssAfterCompaction(rssAfter2);
         // This is to avoid throttle of compacting too soon.
-        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        processRecord.mOptRecord.setLastCompactTime(
+                processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction.
         mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
         waitForHandler();
@@ -890,7 +920,8 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore3);
         mProcessDependencies.setRssAfterCompaction(rssAfter3);
         // This is to avoid throttle of compacting too soon.
-        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        processRecord.mOptRecord.setLastCompactTime(
+                processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction
         mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
         waitForHandler();
@@ -899,7 +930,6 @@ public final class CachedAppOptimizerTest {
         valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
                 pid).getRssAfterCompaction();
         assertThat(valuesAfter).isEqualTo(rssAfter3);
-
     }
 
     @Test
@@ -949,6 +979,54 @@ public final class CachedAppOptimizerTest {
         long[] valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
                 pid).getRssAfterCompaction();
         assertThat(valuesAfter).isEqualTo(rssAboveThresholdAfter);
+    }
+
+    @Test
+    public void processWithOomAdjTooSmall_notFullCompacted() throws Exception {
+        // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set Min and
+        // Max OOM_Adj throttles.
+        mCachedAppOptimizerUnderTest.init();
+        setFlag(CachedAppOptimizer.KEY_USE_COMPACTION, "true", true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_THROTTLE_MIN_OOM_ADJ, Long.toString(920), true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_THROTTLE_MAX_OOM_ADJ, Long.toString(950), true);
+        initActivityManagerService();
+
+        // Simulate RSS memory for which compaction should occur.
+        long[] rssBefore =
+            new long[]{/*Total RSS*/ 15000, /*File RSS*/ 15000, /*Anon RSS*/ 15000,
+                /*Swap*/ 10000};
+        long[] rssAfter =
+            new long[]{/*Total RSS*/ 8000, /*File RSS*/ 9000, /*Anon RSS*/ 6000, /*Swap*/5000};
+        // Process that passes properties.
+        int pid = 1;
+        ProcessRecord processRecord =
+                makeProcessRecord(pid, 2, 3, "p1", "app1");
+        mProcessDependencies.setRss(rssBefore);
+        mProcessDependencies.setRssAfterCompaction(rssAfter);
+
+        // Compaction should occur if (setAdj < min for process || setAdj > max for process) &&
+        // (MIN < curAdj <  MAX)
+        // GIVEN OomAdj score below threshold.
+        processRecord.mState.setSetAdj(899);
+        processRecord.mState.setCurAdj(970);
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS NOT compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
+
+        // GIVEN (setAdj < MIN || setAdj > MAX) && (MIN < curAdj <  MAX)
+        processRecord.mState.setSetAdj(910);
+        processRecord.mState.setCurAdj(930);
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+        long[] valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats
+            .get(pid)
+            .getRssAfterCompaction();
+        assertThat(valuesAfter).isEqualTo(rssAfter);
     }
 
 

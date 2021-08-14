@@ -21,18 +21,112 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// Begin ProtoLog
+java_library {
+    name: "wm_shell_protolog-groups",
+    srcs: [
+        "src/com/android/wm/shell/protolog/ShellProtoLogGroup.java",
+        ":protolog-common-src",
+    ],
+}
+
+filegroup {
+    name: "wm_shell-sources",
+    srcs: [
+        "src/**/*.java",
+    ],
+    path: "src",
+}
+
+filegroup {
+    name: "wm_shell-aidls",
+    srcs: [
+        "src/**/*.aidl",
+    ],
+    path: "src",
+}
+
+// TODO(b/168581922) protologtool do not support kotlin(*.kt)
+filegroup {
+    name: "wm_shell-sources-kt",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    path: "src",
+}
+
+genrule {
+    name: "wm_shell_protolog_src",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) transform-protolog-calls " +
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
+      "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--output-srcjar $(out) " +
+      "$(locations :wm_shell-sources)",
+    out: ["wm_shell_protolog.srcjar"],
+}
+
+genrule {
+    name: "generate-wm_shell_protolog.json",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--viewer-conf $(out) " +
+      "$(locations :wm_shell-sources)",
+    out: ["wm_shell_protolog.json"],
+}
+// End ProtoLog
+
+java_library {
+    name: "WindowManager-Shell-proto",
+
+    srcs: ["proto/*.proto"],
+
+    proto: {
+        type: "nano",
+    },
+}
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [
-        "src/**/*.java",
-        "src/**/I*.aidl",
+        ":wm_shell_protolog_src",
+        // TODO(b/168581922) protologtool do not support kotlin(*.kt)
+        ":wm_shell-sources-kt",
+        ":wm_shell-aidls",
     ],
     resource_dirs: [
         "res",
     ],
+    java_resources: [
+        ":generate-wm_shell_protolog.json"
+    ],
+    static_libs: [
+        "androidx.appcompat_appcompat",
+        "androidx.arch.core_core-runtime",
+        "androidx.dynamicanimation_dynamicanimation",
+        "androidx.recyclerview_recyclerview",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
+        "iconloader_base",
+        "jsr330",
+        "protolog-lib",
+        "WindowManager-Shell-proto",
+        "jsr330",
+    ],
+    kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
-
-    platform_apis: true,
-    sdk_version: "current",
-    min_sdk_version: "system_current",
 }

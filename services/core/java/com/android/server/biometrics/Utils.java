@@ -23,29 +23,52 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.server.biometrics.PreAuthInfo.AUTHENTICATOR_OK;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_DISABLED_BY_DEVICE_POLICY;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_HARDWARE_NOT_DETECTED;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_LOCKOUT_PERMANENT;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_LOCKOUT_TIMED;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENABLED_FOR_APPS;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
+import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
+import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.List;
 
 public class Utils {
+
     private static final String TAG = "BiometricUtils";
 
     public static boolean isDebugEnabled(Context context, int targetUserId) {
@@ -66,19 +89,18 @@ public class Utils {
     }
 
     /**
-     * Combines {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
-     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible enough.
+     * Combines {@link PromptInfo#setDeviceCredentialAllowed(boolean)} with
+     * {@link PromptInfo#setAuthenticators(int)}, as the former is not flexible enough.
      */
-    public static void combineAuthenticatorBundles(Bundle bundle) {
+    static void combineAuthenticatorBundles(PromptInfo promptInfo) {
         // Cache and remove explicit ALLOW_DEVICE_CREDENTIAL boolean flag from the bundle.
-        final boolean deviceCredentialAllowed =
-                bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
-        bundle.remove(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+        final boolean deviceCredentialAllowed = promptInfo.isDeviceCredentialAllowed();
+        promptInfo.setDeviceCredentialAllowed(false);
 
         final @Authenticators.Types int authenticators;
-        if (bundle.containsKey(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED)) {
+        if (promptInfo.getAuthenticators() != 0) {
             // Ignore ALLOW_DEVICE_CREDENTIAL flag if AUTH_TYPES_ALLOWED is defined.
-            authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+            authenticators = promptInfo.getAuthenticators();
         } else {
             // Otherwise, use ALLOW_DEVICE_CREDENTIAL flag along with Weak+ biometrics by default.
             authenticators = deviceCredentialAllowed
@@ -86,23 +108,24 @@ public class Utils {
                     : Authenticators.BIOMETRIC_WEAK;
         }
 
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        promptInfo.setAuthenticators(authenticators);
     }
 
     /**
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return true if device credential is allowed.
      */
-    public static boolean isCredentialRequested(@Authenticators.Types int authenticators) {
+    static boolean isCredentialRequested(@Authenticators.Types int authenticators) {
         return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
     /**
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if device credential is allowed.
      */
-    public static boolean isCredentialRequested(Bundle bundle) {
-        return isCredentialRequested(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    static boolean isCredentialRequested(PromptInfo promptInfo) {
+        return isCredentialRequested(promptInfo.getAuthenticators());
     }
 
     /**
@@ -111,7 +134,7 @@ public class Utils {
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getPublicBiometricStrength(@Authenticators.Types int authenticators) {
+    static int getPublicBiometricStrength(@Authenticators.Types int authenticators) {
         // Only biometrics WEAK and above are allowed to integrate with the public APIs.
         return authenticators & Authenticators.BIOMETRIC_WEAK;
     }
@@ -119,22 +142,33 @@ public class Utils {
     /**
      * Checks if any of the publicly defined strengths are set.
      *
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getPublicBiometricStrength(Bundle bundle) {
-        return getPublicBiometricStrength(
-                bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    static int getPublicBiometricStrength(PromptInfo promptInfo) {
+        return getPublicBiometricStrength(promptInfo.getAuthenticators());
     }
 
     /**
      * Checks if any of the publicly defined strengths are set.
      *
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param authenticators composed of one or more values from {@link Authenticators}
      * @return true if biometric authentication is allowed.
      */
-    public static boolean isBiometricRequested(Bundle bundle) {
-        return getPublicBiometricStrength(bundle) != 0;
+    static boolean isBiometricRequested(@Authenticators.Types int authenticators) {
+        return getPublicBiometricStrength(authenticators) != 0;
+    }
+
+    /**
+     * Checks if any of the publicly defined strengths are set.
+     *
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
+     * @return true if biometric authentication is allowed.
+     */
+    static boolean isBiometricRequested(PromptInfo promptInfo) {
+        return getPublicBiometricStrength(promptInfo) != 0;
     }
 
     /**
@@ -142,7 +176,8 @@ public class Utils {
      * @param requestedStrength the strength that it must meet
      * @return true only if the sensor is at least as strong as the requested strength
      */
-    public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
+    public static boolean isAtLeastStrength(@Authenticators.Types int sensorStrength,
+            @Authenticators.Types int requestedStrength) {
         // Clear out any bits that are not reserved for biometric
         sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
 
@@ -165,11 +200,11 @@ public class Utils {
 
     /**
      * Checks if the authenticator configuration is a valid combination of the public APIs
-     * @param bundle
+     * @param promptInfo
      * @return
      */
-    public static boolean isValidAuthenticatorConfig(Bundle bundle) {
-        final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+    static boolean isValidAuthenticatorConfig(PromptInfo promptInfo) {
+        final int authenticators = promptInfo.getAuthenticators();
         return isValidAuthenticatorConfig(authenticators);
     }
 
@@ -178,7 +213,7 @@ public class Utils {
      * @param authenticators
      * @return
      */
-    public static boolean isValidAuthenticatorConfig(int authenticators) {
+    static boolean isValidAuthenticatorConfig(int authenticators) {
         // The caller is not required to set the authenticators. But if they do, check the below.
         if (authenticators == 0) {
             return true;
@@ -221,7 +256,7 @@ public class Utils {
      * @param biometricConstantsCode see {@link BiometricConstants}
      * @return see {@link BiometricManager}
      */
-    public static int biometricConstantsToBiometricManager(int biometricConstantsCode) {
+    static int biometricConstantsToBiometricManager(int biometricConstantsCode) {
         final int biometricManagerCode;
 
         switch (biometricConstantsCode) {
@@ -240,6 +275,10 @@ public class Utils {
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
+            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
+                biometricManagerCode = BiometricManager.BIOMETRIC_SUCCESS;
                 break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
@@ -261,7 +300,7 @@ public class Utils {
      *         BiometricPrompt.AuthenticationResult}.
      * @throws IllegalArgumentException if given an invalid dismissal reason.
      */
-    public static @AuthenticationResultType int getAuthenticationTypeForResult(int reason) {
+    static @AuthenticationResultType int getAuthenticationTypeForResult(int reason) {
         switch (reason) {
             case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
                 return BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
@@ -273,6 +312,180 @@ public class Utils {
             default:
                 throw new IllegalArgumentException("Unsupported dismissal reason: " + reason);
         }
+    }
+
+
+    static int authenticatorStatusToBiometricConstant(
+            @PreAuthInfo.AuthenticatorStatus int status) {
+        switch (status) {
+            case BIOMETRIC_NO_HARDWARE:
+            case BIOMETRIC_INSUFFICIENT_STRENGTH:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+
+            case AUTHENTICATOR_OK:
+                return BiometricConstants.BIOMETRIC_SUCCESS;
+
+            case BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE:
+                return BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+
+            case BIOMETRIC_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
+
+            case CREDENTIAL_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL;
+
+            case BIOMETRIC_LOCKOUT_TIMED:
+                return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
+
+            case BIOMETRIC_LOCKOUT_PERMANENT:
+                return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+
+            case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
+            case BIOMETRIC_HARDWARE_NOT_DETECTED:
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+            default:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+        }
+    }
+
+    static boolean isConfirmationSupported(@BiometricAuthenticator.Modality int modality) {
+        switch (modality) {
+            case BiometricAuthenticator.TYPE_FACE:
+            case BiometricAuthenticator.TYPE_IRIS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static int removeBiometricBits(@Authenticators.Types int authenticators) {
+        return authenticators & ~Authenticators.BIOMETRIC_MIN_STRENGTH;
+    }
+
+    public static boolean listContains(int[] haystack, int needle) {
+        for (int i = 0; i < haystack.length; i++) {
+            if (haystack[i] == needle) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void checkPermission(Context context, String permission) {
+        context.enforceCallingOrSelfPermission(permission,
+                "Must have " + permission + " permission.");
+    }
+
+    public static boolean isCurrentUserOrProfile(Context context, int userId) {
+        UserManager um = UserManager.get(context);
+        if (um == null) {
+            Slog.e(TAG, "Unable to get UserManager");
+            return false;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Allow current user or profiles of the current user...
+            for (int profileId : um.getEnabledProfileIds(ActivityManager.getCurrentUser())) {
+                if (profileId == userId) {
+                    return true;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return false;
+    }
+
+    public static boolean isStrongBiometric(int sensorId) {
+        IBiometricService service = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        try {
+            return Utils.isAtLeastStrength(service.getCurrentStrength(sensorId),
+                    Authenticators.BIOMETRIC_STRONG);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+            return false;
+        }
+    }
+
+    /**
+     * Returns the sensor's current strength, taking any updated strengths into effect.
+     *
+     * @param sensorId The sensor Id
+     * @return see {@link BiometricManager.Authenticators}
+     */
+    public static @Authenticators.Types int getCurrentStrength(int sensorId) {
+        IBiometricService service = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        try {
+            return service.getCurrentStrength(sensorId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+            return Authenticators.EMPTY_SET;
+        }
+    }
+
+    /**
+     * Checks if a client package matches Keyguard and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Keyguard.
+     * @return Whether the given package matches Keyguard.
+     */
+    public static boolean isKeyguard(@NonNull Context context, @Nullable String clientPackage) {
+        final boolean hasPermission = hasInternalPermission(context);
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_keyguardComponent));
+        final String keyguardPackage = keyguardComponent != null
+                ? keyguardComponent.getPackageName() : null;
+        return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches the Android system and can perform internal biometric
+     * operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against the Android system.
+     * @return Whether the given package matches the Android system.
+     */
+    public static boolean isSystem(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "android".equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches Settings and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Settings.
+     * @return Whether the given package matches Settings.
+     */
+    public static boolean isSettings(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "com.android.settings".equals(clientPackage);
+    }
+
+    private static boolean hasInternalPermission(@NonNull Context context) {
+        return context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static String getClientName(@Nullable BaseClientMonitor client) {
+        return client != null ? client.getClass().getSimpleName() : "null";
+    }
+
+    private static boolean containsFlag(int haystack, int needle) {
+        return (haystack & needle) != 0;
+    }
+
+    public static boolean isUserEncryptedOrLockdown(@NonNull LockPatternUtils lpu, int user) {
+        final int strongAuth = lpu.getStrongAuthForUser(user);
+        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        final boolean isLockDown = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        Slog.d(TAG, "isEncrypted: " + isEncrypted + " isLockdown: " + isLockDown);
+        return isEncrypted || isLockDown;
     }
 
     public static boolean isForeground(int callingUid, int callingPid) {
@@ -297,27 +510,45 @@ public class Utils {
         return false;
     }
 
-    public static boolean isKeyguard(Context context, String clientPackage) {
-        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
-                == PackageManager.PERMISSION_GRANTED;
-
-        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
-                context.getResources().getString(R.string.config_keyguardComponent));
-        final String keyguardPackage = keyguardComponent != null
-                ? keyguardComponent.getPackageName() : null;
-        return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    /**
+     * Converts from {@link BiometricManager.Authenticators} biometric strength to the internal
+     * {@link SensorPropertiesInternal} strength.
+     */
+    public static @SensorProperties.Strength int authenticatorStrengthToPropertyStrength(
+            @Authenticators.Types int strength) {
+        switch (strength) {
+            case BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE:
+                return SensorProperties.STRENGTH_CONVENIENCE;
+            case BiometricManager.Authenticators.BIOMETRIC_WEAK:
+                return SensorProperties.STRENGTH_WEAK;
+            case BiometricManager.Authenticators.BIOMETRIC_STRONG:
+                return SensorProperties.STRENGTH_STRONG;
+            default:
+                throw new IllegalArgumentException("Unknown strength: " + strength);
+        }
     }
 
-    private static boolean containsFlag(int haystack, int needle) {
-        return (haystack & needle) != 0;
+    public static @Authenticators.Types int propertyStrengthToAuthenticatorStrength(
+            @SensorProperties.Strength int strength) {
+        switch (strength) {
+            case SensorProperties.STRENGTH_CONVENIENCE:
+                return Authenticators.BIOMETRIC_CONVENIENCE;
+            case SensorProperties.STRENGTH_WEAK:
+                return Authenticators.BIOMETRIC_WEAK;
+            case SensorProperties.STRENGTH_STRONG:
+                return Authenticators.BIOMETRIC_STRONG;
+            default:
+                throw new IllegalArgumentException("Unknown strength: " + strength);
+        }
     }
 
-    public static boolean isUserEncryptedOrLockdown(@NonNull LockPatternUtils lpu, int user) {
-        final int strongAuth = lpu.getStrongAuthForUser(user);
-        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
-        final boolean isLockDown = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
-                || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
-        Slog.d(TAG, "isEncrypted: " + isEncrypted + " isLockdown: " + isLockDown);
-        return isEncrypted || isLockDown;
+    public static int getUdfpsAuthReason(@NonNull AuthenticationClient<?> client) {
+        if (client.isKeyguard()) {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
+        } else if (client.isBiometricPrompt()) {
+            return IUdfpsOverlayController.REASON_AUTH_BP;
+        } else {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_OTHER;
+        }
     }
 }

@@ -24,6 +24,7 @@ import static com.android.internal.accessibility.util.ShortcutUtils.optInValueTo
 import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -33,6 +34,7 @@ import android.view.accessibility.AccessibilityManager.ShortcutType;
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Abstract base class for creating various target related to accessibility service,
@@ -51,7 +53,8 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     private Drawable mIcon;
     private String mKey;
 
-    AccessibilityTarget(Context context, @ShortcutType int shortcutType,
+    @VisibleForTesting
+    public AccessibilityTarget(Context context, @ShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType, boolean isShortcutSwitched, String id,
             CharSequence label, Drawable icon, String key) {
         mContext = context;
@@ -101,6 +104,16 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         } else {
             optOutValueFromSettings(getContext(), convertToUserType(getShortcutType()), getId());
         }
+    }
+
+    /**
+     * Gets the state description of this feature target.
+     *
+     * @return the state description
+     */
+    @Nullable
+    public CharSequence getStateDescription() {
+        return null;
     }
 
     public void setShortcutEnabled(boolean enabled) {

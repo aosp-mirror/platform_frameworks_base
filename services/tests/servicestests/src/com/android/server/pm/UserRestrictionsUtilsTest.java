@@ -48,23 +48,6 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
         assertSame(in, UserRestrictionsUtils.nonNull(in));
     }
 
-    public void testIsEmpty() {
-        assertTrue(UserRestrictionsUtils.isEmpty(null));
-        assertTrue(UserRestrictionsUtils.isEmpty(new Bundle()));
-        assertFalse(UserRestrictionsUtils.isEmpty(newRestrictions("a")));
-    }
-
-    public void testClone() {
-        Bundle in = new Bundle();
-        Bundle out = UserRestrictionsUtils.clone(in);
-        assertNotSame(in, out);
-        assertRestrictions(out, new Bundle());
-
-        out = UserRestrictionsUtils.clone(null);
-        assertNotNull(out);
-        out.putBoolean("a", true); // Should not be Bundle.EMPTY.
-    }
-
     public void testMerge() {
         Bundle a = newRestrictions("a", "d");
         Bundle b = newRestrictions("b", "d", "e");

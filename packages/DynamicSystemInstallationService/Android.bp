@@ -19,6 +19,7 @@ license {
 
 android_app {
     name: "DynamicSystemInstallationService",
+    defaults: ["platform_app_defaults"],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],

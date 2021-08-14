@@ -16,6 +16,9 @@
 
 package com.android.server.content;
 
+import static android.os.PowerWhitelistManager.REASON_SYNC_MANAGER;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
+
 import static com.android.server.content.SyncLogger.logSafe;
 
 import android.accounts.Account;
@@ -25,7 +28,7 @@ import android.accounts.AccountManagerInternal;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -86,6 +89,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -151,6 +155,8 @@ import java.util.function.Predicate;
  * run at a later time. Similarly, when a sync succeeds, backoff is cleared and all associated syncs
  * are rescheduled. A rescheduled sync will get a new jobId.
  *
+ * See also {@code SyncManager.md} in the same directory for how app-standby affects sync adapters.
+ *
  * @hide
  */
 public class SyncManager {
@@ -188,12 +194,6 @@ public class SyncManager {
     private static final int SYNC_MONITOR_PROGRESS_THRESHOLD_BYTES = 10; // 10 bytes
 
     /**
-     * If a previously scheduled sync becomes ready and we are low on storage, it gets
-     * pushed back for this amount of time.
-     */
-    private static final long SYNC_DELAY_ON_LOW_STORAGE = 60*60*1000;   // 1 hour
-
-    /**
      * If a sync becomes ready and it conflicts with an already running sync, it gets
      * pushed back for this amount of time.
      */
@@ -210,7 +210,7 @@ public class SyncManager {
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
 
-    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = false;
+    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = true;
 
     private static final int SYNC_OP_STATE_VALID = 0;
     // "1" used to include errors 3, 4 and 5 but now it's split up.
@@ -231,14 +231,12 @@ public class SyncManager {
 
     private static final AccountAndUser[] INITIAL_ACCOUNTS_ARRAY = new AccountAndUser[0];
 
-    // TODO: add better locking around mRunningAccounts
+    private final Object mAccountsLock = new Object();
     private volatile AccountAndUser[] mRunningAccounts = INITIAL_ACCOUNTS_ARRAY;
 
     volatile private PowerManager.WakeLock mSyncManagerWakeLock;
     volatile private boolean mDataConnectionIsConnected = false;
-    volatile private boolean mStorageIsLow = false;
-    volatile private boolean mDeviceIsIdle = false;
-    volatile private boolean mReportedSyncActive = false;
+    private volatile int mNextJobIdOffset = 0;
 
     private final NotificationManager mNotificationMgr;
     private final IBatteryStats mBatteryStats;
@@ -258,17 +256,17 @@ public class SyncManager {
 
     protected final SyncAdaptersCache mSyncAdapters;
 
-    private final Random mRand;
-
     private final SyncLogger mLogger;
 
     private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
-        for (JobInfo job: pendingJobs) {
+        for (int i = 0, size = pendingJobs.size(); i < size; i++) {
+            JobInfo job = pendingJobs.get(i);
             if (job.getId() == jobId) {
                 return true;
             }
         }
-        for (ActiveSyncContext asc: mActiveSyncContexts) {
+        for (int i = 0, size = mActiveSyncContexts.size(); i < size; i++) {
+            ActiveSyncContext asc = mActiveSyncContexts.get(i);
             if (asc.mSyncOperation.jobId == jobId) {
                 return true;
             }
@@ -277,19 +275,28 @@ public class SyncManager {
     }
 
     private int getUnusedJobIdH() {
-        int newJobId;
-        do {
-            newJobId = MIN_SYNC_JOB_ID + mRand.nextInt(MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID);
-        } while (isJobIdInUseLockedH(newJobId,
-                mJobSchedulerInternal.getSystemScheduledPendingJobs()));
-        return newJobId;
+        final int maxNumSyncJobIds = MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID;
+        final List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
+        for (int i = 0; i < maxNumSyncJobIds; ++i) {
+            int newJobId = MIN_SYNC_JOB_ID + ((mNextJobIdOffset + i) % maxNumSyncJobIds);
+            if (!isJobIdInUseLockedH(newJobId, pendingJobs)) {
+                mNextJobIdOffset = (mNextJobIdOffset + i + 1) % maxNumSyncJobIds;
+                return newJobId;
+            }
+        }
+        // We've used all 10,000 intended job IDs.... We're probably in a world of pain right now :/
+        Slog.wtf(TAG, "All " + maxNumSyncJobIds + " possible sync job IDs are taken :/");
+        mNextJobIdOffset = (mNextJobIdOffset + 1) % maxNumSyncJobIds;
+        return MIN_SYNC_JOB_ID + mNextJobIdOffset;
     }
 
     private List<SyncOperation> getAllPendingSyncs() {
         verifyJobScheduler();
         List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
-        List<SyncOperation> pendingSyncs = new ArrayList<SyncOperation>(pendingJobs.size());
-        for (JobInfo job: pendingJobs) {
+        final int numJobs = pendingJobs.size();
+        final List<SyncOperation> pendingSyncs = new ArrayList<>(numJobs);
+        for (int i = 0; i < numJobs; ++i) {
+            final JobInfo job = pendingJobs.get(i);
             SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
             if (op != null) {
                 pendingSyncs.add(op);
@@ -297,31 +304,6 @@ public class SyncManager {
         }
         return pendingSyncs;
     }
-
-    private final BroadcastReceiver mStorageIntentReceiver =
-            new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Slog.v(TAG, "Internal storage is low.");
-                        }
-                        mStorageIsLow = true;
-                        cancelActiveSync(
-                                SyncStorageEngine.EndPoint.USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL,
-                                null /* any sync */,
-                                "storage low");
-                    } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Slog.v(TAG, "Internal storage is ok.");
-                        }
-                        mStorageIsLow = false;
-                        rescheduleSyncs(EndPoint.USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL,
-                                "storage ok");
-                    }
-                }
-            };
 
     private final BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
         @Override
@@ -340,6 +322,8 @@ public class SyncManager {
     private final AccountManagerInternal mAccountManagerInternal;
 
     private final PackageManagerInternal mPackageManagerInternal;
+
+    private final ActivityManagerInternal mAmi;
 
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
@@ -367,7 +351,7 @@ public class SyncManager {
     }
 
     private void removeStaleAccounts() {
-        for (UserInfo user : mUserManager.getUsers(true)) {
+        for (UserInfo user : mUserManager.getAliveUsers()) {
             // Skip any partially created/removed users
             if (user.partial) continue;
             Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(
@@ -631,15 +615,10 @@ public class SyncManager {
             }
         }, mSyncHandler);
 
-        mRand = new Random(System.currentTimeMillis());
         mConstants = new SyncManagerConstants(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
-
-        intentFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-        intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
-        context.registerReceiver(mStorageIntentReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         intentFilter.setPriority(100);
@@ -666,6 +645,7 @@ public class SyncManager {
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
         mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mAmi = LocalServices.getService(ActivityManagerInternal.class);
 
         mAccountManagerInternal.addOnAppPermissionChangeListener((Account account, int uid) -> {
             // If the UID gained access to the account kick-off syncs lacking account access
@@ -777,7 +757,7 @@ public class SyncManager {
         if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
             return;
         }
-        List<UserInfo> users = mUserManager.getUsers(true);
+        List<UserInfo> users = mUserManager.getAliveUsers();
         final int userCount = users.size();
         for (int i = 0; i < userCount; i++) {
             UserHandle userHandle = users.get(i).getUserHandle();
@@ -933,23 +913,24 @@ public class SyncManager {
         }
 
         AccountAndUser[] accounts = null;
-        if (requestedAccount != null) {
-            if (userId != UserHandle.USER_ALL) {
-                accounts = new AccountAndUser[]{new AccountAndUser(requestedAccount, userId)};
-            } else {
-                for (AccountAndUser runningAccount : mRunningAccounts) {
-                    if (requestedAccount.equals(runningAccount.account)) {
-                        accounts = ArrayUtils.appendElement(AccountAndUser.class,
-                                accounts, runningAccount);
+        synchronized (mAccountsLock) {
+            if (requestedAccount != null) {
+                if (userId != UserHandle.USER_ALL) {
+                    accounts = new AccountAndUser[]{new AccountAndUser(requestedAccount, userId)};
+                } else {
+                    for (AccountAndUser runningAccount : mRunningAccounts) {
+                        if (requestedAccount.equals(runningAccount.account)) {
+                            accounts = ArrayUtils.appendElement(AccountAndUser.class,
+                                    accounts, runningAccount);
+                        }
                     }
                 }
+            } else {
+                accounts = mRunningAccounts;
             }
-        } else {
-            accounts = mRunningAccounts;
         }
 
         if (ArrayUtils.isEmpty(accounts)) {
-            mLogger.log("scheduleSync: no accounts configured, dropping");
             return;
         }
 
@@ -1137,15 +1118,11 @@ public class SyncManager {
         }
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
-        try {
-            if (ActivityManager.getService().isAppStartModeDisabled(owningUid, owningPackage)) {
-                Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
-                        + syncAdapterInfo.componentName
-                        + " -- package not allowed to start");
-                return AuthorityInfo.NOT_SYNCABLE;
-            }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        if (mAmi.isAppStartModeDisabled(owningUid, owningPackage)) {
+            Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
+                    + syncAdapterInfo.componentName
+                    + " -- package not allowed to start");
+            return AuthorityInfo.NOT_SYNCABLE;
         }
         if (checkAccountAccess && !canAccessAccount(account, owningPackage, owningUid)) {
             Log.w(TAG, "Access to " + logSafe(account) + " denied for package "
@@ -1238,20 +1215,34 @@ public class SyncManager {
                 syncExemptionFlag, callingUid, callingPid, callingPackage);
     }
 
-    public SyncAdapterType[] getSyncAdapterTypes(int userId) {
+    public SyncAdapterType[] getSyncAdapterTypes(int callingUid, int userId) {
         final Collection<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> serviceInfos;
         serviceInfos = mSyncAdapters.getAllServices(userId);
-        SyncAdapterType[] types = new SyncAdapterType[serviceInfos.size()];
-        int i = 0;
+        final List<SyncAdapterType> types = new ArrayList<>(serviceInfos.size());
         for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> serviceInfo : serviceInfos) {
-            types[i] = serviceInfo.type;
-            ++i;
+            final String packageName = serviceInfo.type.getPackageName();
+            if (!TextUtils.isEmpty(packageName) && mPackageManagerInternal.filterAppAccess(
+                    packageName, callingUid, userId)) {
+                continue;
+            }
+            types.add(serviceInfo.type);
         }
-        return types;
+        return types.toArray(new SyncAdapterType[] {});
     }
 
-    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {
-        return mSyncAdapters.getSyncAdapterPackagesForAuthority(authority, userId);
+    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int callingUid,
+            int userId) {
+        final String[] syncAdapterPackages = mSyncAdapters.getSyncAdapterPackagesForAuthority(
+                authority, userId);
+        final List<String> filteredResult = new ArrayList<>(syncAdapterPackages.length);
+        for (String packageName : syncAdapterPackages) {
+            if (TextUtils.isEmpty(packageName) || mPackageManagerInternal.filterAppAccess(
+                    packageName, callingUid, userId)) {
+                continue;
+            }
+            filteredResult.add(packageName);
+        }
+        return filteredResult.toArray(new String[] {});
     }
 
     private void sendSyncFinishedOrCanceledMessage(ActiveSyncContext syncContext,
@@ -1486,6 +1477,11 @@ public class SyncManager {
                         + logSafe(syncOperation.target));
                 backoff = new Pair<Long, Long>(SyncStorageEngine.NOT_IN_BACKOFF_MODE,
                         SyncStorageEngine.NOT_IN_BACKOFF_MODE);
+            } else if (backoff.first != SyncStorageEngine.NOT_IN_BACKOFF_MODE) {
+                // if an EJ is being backed-off but doesn't have SYNC_EXTRAS_IGNORE_BACKOFF set,
+                // reschedule it as a regular job. Immediately downgrade here in case minDelay is
+                // set to 0.
+                syncOperation.scheduleEjAsRegularJob = true;
             }
             long now = SystemClock.elapsedRealtime();
             long backoffDelay = backoff.first == SyncStorageEngine.NOT_IN_BACKOFF_MODE ? 0
@@ -1501,6 +1497,10 @@ public class SyncManager {
 
         if (minDelay < 0) {
             minDelay = 0;
+        } else if (minDelay > 0) {
+            // We can't apply a delay to an EJ. If we want to delay it, we must demote it to a
+            // regular job.
+            syncOperation.scheduleEjAsRegularJob = true;
         }
 
         // Check if duplicate syncs are pending. If found, keep one with least expected run time.
@@ -1619,6 +1619,7 @@ public class SyncManager {
                 new ComponentName(mContext, SyncJobService.class))
                 .setExtras(syncOperation.toJobInfoExtras())
                 .setRequiredNetworkType(networkType)
+                .setRequiresStorageNotLow(true)
                 .setPersisted(true)
                 .setPriority(priority)
                 .setFlags(jobFlags);
@@ -1636,6 +1637,10 @@ public class SyncManager {
             b.setRequiresCharging(true);
         }
 
+        if (syncOperation.isScheduledAsExpeditedJob() && !syncOperation.scheduleEjAsRegularJob) {
+            b.setExpedited(true);
+        }
+
         if (syncOperation.syncExemptionFlag
                 == ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP) {
             DeviceIdleInternal dic =
@@ -1644,21 +1649,40 @@ public class SyncManager {
                 dic.addPowerSaveTempWhitelistApp(Process.SYSTEM_UID,
                         syncOperation.owningPackage,
                         mConstants.getKeyExemptionTempWhitelistDurationInSeconds() * 1000,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
                         UserHandle.getUserId(syncOperation.owningUid),
-                        /* sync=*/ false, "sync by top app");
+                        /* sync=*/ false, REASON_SYNC_MANAGER, "sync by top app");
             }
         }
 
         final UsageStatsManagerInternal usmi =
                 LocalServices.getService(UsageStatsManagerInternal.class);
         if (usmi != null) {
+            // This method name is unfortunate. It elevates apps to a higher bucket, so it ideally
+            // should be called before we attempt to schedule the job (especially as EJ).
             usmi.reportSyncScheduled(syncOperation.owningPackage,
                     UserHandle.getUserId(syncOperation.owningUid),
                     syncOperation.isAppStandbyExempted());
         }
 
-        getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
+        final JobInfo ji = b.build();
+        int result = getJobScheduler().scheduleAsPackage(ji, syncOperation.owningPackage,
                 syncOperation.target.userId, syncOperation.wakeLockName());
+        if (result == JobScheduler.RESULT_FAILURE && ji.isExpedited()) {
+            if (isLoggable) {
+                Slog.i(TAG, "Failed to schedule EJ for " + syncOperation.owningPackage
+                        + ". Downgrading to regular");
+            }
+            syncOperation.scheduleEjAsRegularJob = true;
+            b.setExpedited(false).setExtras(syncOperation.toJobInfoExtras());
+            result = getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
+                    syncOperation.target.userId, syncOperation.wakeLockName());
+        }
+        if (result == JobScheduler.RESULT_FAILURE) {
+            Slog.e(TAG, "Failed to schedule job for " + syncOperation.owningPackage);
+            // TODO: notify AppStandbyController that the sync isn't actually scheduled so the
+            // bucket doesn't stay elevated
+        }
     }
 
     /**
@@ -1706,6 +1730,8 @@ public class SyncManager {
         }
 
         operation.enableBackoff();
+        // Never run a rescheduled requested-EJ-sync as an EJ.
+        operation.scheduleEjAsRegularJob = true;
 
         if (operation.hasDoNotRetry() && !syncResult.syncAlreadyInProgress) {
             // syncAlreadyInProgress flag is set by AbstractThreadedSyncAdapter. The sync adapter
@@ -2161,9 +2187,9 @@ public class SyncManager {
             }
             pw.println();
         }
-        pw.print("Memory low: "); pw.println(mStorageIsLow);
-        pw.print("Device idle: "); pw.println(mDeviceIsIdle);
-        pw.print("Reported active: "); pw.println(mReportedSyncActive);
+        Intent storageLowIntent =
+                mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
+        pw.print("Storage low: "); pw.println(storageLowIntent != null);
         pw.print("Clock valid: "); pw.println(mSyncStorageEngine.isClockValid());
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
@@ -2773,7 +2799,7 @@ public class SyncManager {
         }
 
         private void onReady() {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mOnReadyCallback.onReady();
             } finally {
@@ -3115,7 +3141,7 @@ public class SyncManager {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
                 // mSyncJobService.callJobFinished is async, so cancel the job to ensure we don't
-                // find the this job in the pending jobs list while looking for duplicates
+                // find this job in the pending jobs list while looking for duplicates
                 // before scheduling it at a later time.
                 cancelJob(op, "deferSyncH()");
                 scheduleSyncOperationH(op, delay);
@@ -3149,11 +3175,6 @@ public class SyncManager {
             mSyncStorageEngine.setClockValid();
 
             SyncJobService.markSyncStarted(op.jobId);
-
-            if (mStorageIsLow) {
-                deferSyncH(op, SYNC_DELAY_ON_LOW_STORAGE, "storage low");
-                return;
-            }
 
             if (op.isPeriodic) {
                 // Don't allow this periodic to run if a previous instance failed and is currently
@@ -3228,40 +3249,45 @@ public class SyncManager {
         }
 
         private void updateRunningAccountsH(EndPoint syncTargets) {
-            AccountAndUser[] oldAccounts = mRunningAccounts;
-            mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Slog.v(TAG, "Accounts list: ");
-                for (AccountAndUser acc : mRunningAccounts) {
-                    Slog.v(TAG, acc.toString());
+            synchronized (mAccountsLock) {
+                AccountAndUser[] oldAccounts = mRunningAccounts;
+                mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Slog.v(TAG, "Accounts list: ");
+                    for (AccountAndUser acc : mRunningAccounts) {
+                        Slog.v(TAG, acc.toString());
+                    }
                 }
-            }
-            if (mLogger.enabled()) {
-                mLogger.log("updateRunningAccountsH: ", Arrays.toString(mRunningAccounts));
-            }
-            removeStaleAccounts();
-
-            AccountAndUser[] accounts = mRunningAccounts;
-            for (ActiveSyncContext currentSyncContext : mActiveSyncContexts) {
-                if (!containsAccountAndUser(accounts,
-                        currentSyncContext.mSyncOperation.target.account,
-                        currentSyncContext.mSyncOperation.target.userId)) {
-                    Log.d(TAG, "canceling sync since the account is no longer running");
-                    sendSyncFinishedOrCanceledMessage(currentSyncContext,
-                            null /* no result since this is a cancel */);
+                if (mLogger.enabled()) {
+                    mLogger.log("updateRunningAccountsH: ", Arrays.toString(mRunningAccounts));
                 }
-            }
+                removeStaleAccounts();
 
-            if (syncTargets != null) {
-                // On account add, check if there are any settings to be restored.
-                for (AccountAndUser aau : mRunningAccounts) {
-                    if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "Account " + aau.account
-                                    + " added, checking sync restore data");
+                AccountAndUser[] accounts = mRunningAccounts;
+                for (int i = 0, size = mActiveSyncContexts.size(); i < size; i++) {
+                    ActiveSyncContext currentSyncContext = mActiveSyncContexts.get(i);
+                    if (!containsAccountAndUser(accounts,
+                            currentSyncContext.mSyncOperation.target.account,
+                            currentSyncContext.mSyncOperation.target.userId)) {
+                        Log.d(TAG, "canceling sync since the account is no longer running");
+                        sendSyncFinishedOrCanceledMessage(currentSyncContext,
+                                null /* no result since this is a cancel */);
+                    }
+                }
+
+                if (syncTargets != null) {
+                    // On account add, check if there are any settings to be restored.
+                    for (int i = 0, length = mRunningAccounts.length; i < length; i++) {
+                        AccountAndUser aau = mRunningAccounts[i];
+                        if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "Account " + aau.account
+                                        + " added, checking sync restore data");
+                            }
+                            AccountSyncSettingsBackupHelper.accountAdded(mContext,
+                                    syncTargets.userId);
+                            break;
                         }
-                        AccountSyncSettingsBackupHelper.accountAdded(mContext, syncTargets.userId);
-                        break;
                     }
                 }
             }
@@ -3269,7 +3295,8 @@ public class SyncManager {
             // Cancel all jobs from non-existent accounts.
             AccountAndUser[] allAccounts = AccountManagerService.getSingleton().getAllAccounts();
             List<SyncOperation> ops = getAllPendingSyncs();
-            for (SyncOperation op: ops) {
+            for (int i = 0, opsSize = ops.size(); i < opsSize; i++) {
+                SyncOperation op = ops.get(i);
                 if (!containsAccountAndUser(allAccounts, op.target.account, op.target.userId)) {
                     mLogger.log("canceling: ", op);
                     cancelJob(op, "updateRunningAccountsH()");
@@ -3442,13 +3469,15 @@ public class SyncManager {
             final EndPoint target = op.target;
 
             // Drop the sync if the account of this operation no longer exists.
-            AccountAndUser[] accounts = mRunningAccounts;
-            if (!containsAccountAndUser(accounts, target.account, target.userId)) {
-                if (isLoggable) {
-                    Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
+            synchronized (mAccountsLock) {
+                AccountAndUser[] accounts = mRunningAccounts;
+                if (!containsAccountAndUser(accounts, target.account, target.userId)) {
+                    if (isLoggable) {
+                        Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
+                    }
+                    logAccountError("SYNC_OP_STATE_INVALID: account doesn't exist.");
+                    return SYNC_OP_STATE_INVALID_NO_ACCOUNT;
                 }
-                logAccountError("SYNC_OP_STATE_INVALID: account doesn't exist.");
-                return SYNC_OP_STATE_INVALID_NO_ACCOUNT;
             }
             // Drop this sync request if it isn't syncable.
             state = computeSyncable(target.account, target.userId, target.provider, true);
@@ -3831,7 +3860,8 @@ public class SyncManager {
             UserHandle user = new UserHandle(userId);
             final PendingIntent pendingIntent = PendingIntent
                     .getActivityAsUser(mContext, 0, clickIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT, null, user);
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                            null, user);
 
             CharSequence tooManyDeletesDescFormat = mContext.getResources().getText(
                     R.string.contentServiceTooManyDeletesNotificationDesc);
@@ -3938,7 +3968,13 @@ public class SyncManager {
      * @return true if the provided key is used by the SyncManager in scheduling the sync.
      */
     private static boolean isSyncSetting(String key) {
+        if (key == null) {
+            return false;
+        }
         if (key.equals(ContentResolver.SYNC_EXTRAS_EXPEDITED)) {
+            return true;
+        }
+        if (key.equals(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB)) {
             return true;
         }
         if (key.equals(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS)) {

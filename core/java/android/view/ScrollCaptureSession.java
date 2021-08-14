@@ -16,18 +16,15 @@
 
 package android.view;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 
 /**
  * A session represents the scope of interaction between a {@link ScrollCaptureCallback} and the
- * system during an active scroll capture operation. During the scope of a session, a callback
- * will receive a series of requests for image data. Resources provided here are valid for use
- * until {@link ScrollCaptureCallback#onScrollCaptureEnd(Runnable)}.
- *
- * @hide
+ * system during an active scroll capture operation.
  */
 public class ScrollCaptureSession {
 
@@ -35,22 +32,27 @@ public class ScrollCaptureSession {
     private final Rect mScrollBounds;
     private final Point mPositionInWindow;
 
-    @Nullable
-    private ScrollCaptureClient mClient;
-
-    /** @hide */
-    public ScrollCaptureSession(Surface surface, Rect scrollBounds, Point positionInWindow,
-            ScrollCaptureClient client) {
-        mSurface = surface;
-        mScrollBounds = scrollBounds;
-        mPositionInWindow = positionInWindow;
-        mClient = client;
+    /**
+     * Constructs a new session instance.
+     *
+     * @param surface the surface to consume generated images
+     * @param scrollBounds the bounds of the capture area within the containing view
+     * @param positionInWindow the offset of scrollBounds within the window
+     */
+    public ScrollCaptureSession(@NonNull Surface surface, @NonNull Rect scrollBounds,
+            @NonNull Point positionInWindow) {
+        mSurface = requireNonNull(surface);
+        mScrollBounds = requireNonNull(scrollBounds);
+        mPositionInWindow = requireNonNull(positionInWindow);
     }
 
     /**
      * Returns a
      * <a href="https://source.android.com/devices/graphics/arch-bq-gralloc">BufferQueue</a> in the
      * form of a {@link Surface} for transfer of image buffers.
+     * <p>
+     * The surface is guaranteed to remain {@link Surface#isValid() valid} until the session
+     * {@link ScrollCaptureCallback#onScrollCaptureEnd(Runnable) ends}.
      *
      * @return the surface for transferring image buffers
      * @throws IllegalStateException if the session has been closed
@@ -79,27 +81,5 @@ public class ScrollCaptureSession {
     @NonNull
     public Point getPositionInWindow() {
         return mPositionInWindow;
-    }
-
-    /**
-     * Notify the system that an a buffer has been posted via the getSurface() channel.
-     *
-     * @param frameNumber  the frame number of the queued buffer
-     * @param capturedArea the area captured, relative to scroll bounds
-     */
-    public void notifyBufferSent(long frameNumber, @NonNull Rect capturedArea) {
-        if (mClient != null) {
-            mClient.onRequestImageCompleted(frameNumber, capturedArea);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void disconnect() {
-        mClient = null;
-        if (mSurface.isValid()) {
-            mSurface.release();
-        }
     }
 }

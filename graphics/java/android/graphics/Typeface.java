@@ -25,6 +25,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
+import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.Font;
@@ -32,12 +34,20 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.os.SharedMemory;
+import android.os.SystemProperties;
+import android.os.Trace;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 import android.text.FontConfig;
+import android.util.ArrayMap;
 import android.util.Base64;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -50,18 +60,21 @@ import dalvik.annotation.optimization.CriticalNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
@@ -73,24 +86,27 @@ public class Typeface {
 
     private static String TAG = "Typeface";
 
+    /** @hide */
+    public static final boolean ENABLE_LAZY_TYPEFACE_INITIALIZATION = true;
+
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
             Typeface.class.getClassLoader(), nativeGetReleaseFunc());
 
     /** The default NORMAL typeface object */
-    public static final Typeface DEFAULT;
+    public static final Typeface DEFAULT = null;
     /**
      * The default BOLD typeface object. Note: this may be not actually be
      * bold, depending on what fonts are installed. Call getStyle() to know
      * for sure.
      */
-    public static final Typeface DEFAULT_BOLD;
+    public static final Typeface DEFAULT_BOLD = null;
     /** The NORMAL style of the default sans serif typeface. */
-    public static final Typeface SANS_SERIF;
+    public static final Typeface SANS_SERIF = null;
     /** The NORMAL style of the default serif typeface. */
-    public static final Typeface SERIF;
+    public static final Typeface SERIF = null;
     /** The NORMAL style of the default monospace typeface. */
-    public static final Typeface MONOSPACE;
+    public static final Typeface MONOSPACE = null;
 
     /**
      * The default {@link Typeface}s for different text styles.
@@ -98,6 +114,7 @@ public class Typeface {
      * It shouldn't be changed for app wide typeface settings. Please use theme and font XML for
      * the same purpose.
      */
+    @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     @UnsupportedAppUsage(trackingBug = 123769446)
     static Typeface[] sDefaults;
 
@@ -124,16 +141,28 @@ public class Typeface {
     private static final LruCache<String, Typeface> sDynamicTypefaceCache = new LruCache<>(16);
     private static final Object sDynamicCacheLock = new Object();
 
+
+    @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     static Typeface sDefaultTypeface;
 
-    // Following two fields are not used but left for hiddenapi private list
     /**
      * sSystemFontMap is read only and unmodifiable.
      * Use public API {@link #create(String, int)} to get the typeface for given familyName.
      */
+    @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     @UnsupportedAppUsage(trackingBug = 123769347)
-    static final Map<String, Typeface> sSystemFontMap;
+    static final Map<String, Typeface> sSystemFontMap = new ArrayMap<>();
 
+    // DirectByteBuffer object to hold sSystemFontMap's backing memory mapping.
+    static ByteBuffer sSystemFontMapBuffer = null;
+    static SharedMemory sSystemFontMapSharedMemory = null;
+
+    // Lock to guard sSystemFontMap and derived default or public typefaces.
+    // sStyledCacheLock may be held while this lock is held. Holding them in the reverse order may
+    // introduce deadlock.
+    private static final Object SYSTEM_FONT_MAP_LOCK = new Object();
+
+    // This field is used but left for hiddenapi private list
     // We cannot support sSystemFallbackMap since we will migrate to public FontFamily API.
     /**
      * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
@@ -144,10 +173,27 @@ public class Typeface {
             Collections.emptyMap();
 
     /**
+     * Returns the shared memory that used for creating Typefaces.
+     *
+     * @return A SharedMemory used for creating Typeface. Maybe null if the lazy initialization is
+     *         disabled or inside SystemServer or Zygote.
+     * @hide
+     */
+    @TestApi
+    public static @Nullable SharedMemory getSystemFontMapSharedMemory() {
+        if (ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            Objects.requireNonNull(sSystemFontMapSharedMemory);
+        }
+        return sSystemFontMapSharedMemory;
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
-    public long native_instance;
+    public final long native_instance;
+
+    private final Runnable mCleaner;
 
     /** @hide */
     @IntDef(value = {NORMAL, BOLD, ITALIC, BOLD_ITALIC})
@@ -162,20 +208,25 @@ public class Typeface {
     /** @hide */ public static final int STYLE_MASK = 0x03;
 
     @UnsupportedAppUsage
-    private @Style int mStyle = 0;
+    private @Style final int mStyle;
 
-    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) int mWeight = 0;
+    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) final int mWeight;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
     /** @hide */
     public static final int RESOLVE_BY_FONT_TABLE = -1;
-    private static final String DEFAULT_FAMILY = "sans-serif";
+    /**
+     * The key of the default font family.
+     * @hide
+     */
+    public static final String DEFAULT_FAMILY = "sans-serif";
 
     // Style value for building typeface.
     private static final int STYLE_NORMAL = 0;
     private static final int STYLE_ITALIC = 1;
 
+    @GuardedBy("this")
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
@@ -186,8 +237,16 @@ public class Typeface {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static void setDefault(Typeface t) {
-        sDefaultTypeface = t;
-        nativeSetDefault(t.native_instance);
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            sDefaultTypeface = t;
+            nativeSetDefault(t.native_instance);
+        }
+    }
+
+    private static Typeface getDefault() {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sDefaultTypeface;
+        }
     }
 
     /** Returns the typeface's weight value */
@@ -211,6 +270,21 @@ public class Typeface {
     }
 
     /**
+     * Returns true if the system has the font family with the name [familyName]. For example
+     * querying with "sans-serif" would check if the "sans-serif" family is defined in the system
+     * and return true if does.
+     *
+     * @param familyName The name of the font family, cannot be null. If null, exception will be
+     *                   thrown.
+     */
+    private static boolean hasFontFamily(@NonNull String familyName) {
+        Objects.requireNonNull(familyName, "familyName cannot be null");
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sSystemFontMap.containsKey(familyName);
+        }
+    }
+
+    /**
      * @hide
      * Used by Resources to load a font resource of type xml.
      */
@@ -219,6 +293,11 @@ public class Typeface {
             FamilyResourceEntry entry, AssetManager mgr, String path) {
         if (entry instanceof ProviderResourceEntry) {
             final ProviderResourceEntry providerEntry = (ProviderResourceEntry) entry;
+
+            String systemFontFamilyName = providerEntry.getSystemFontFamilyName();
+            if (systemFontFamilyName != null && hasFontFamily(systemFontFamilyName)) {
+                return Typeface.create(systemFontFamilyName, NORMAL);
+            }
             // Downloadable font
             List<List<String>> givenCerts = providerEntry.getCerts();
             List<List<byte[]>> certs = new ArrayList<>();
@@ -768,7 +847,7 @@ public class Typeface {
         public @NonNull CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
             Preconditions.checkNotNull(family);
             Preconditions.checkArgument(mFamilies.size() < getMaxCustomFallbackCount(),
-                    "Custom fallback limit exceeded(" + getMaxCustomFallbackCount() + ")");
+                    "Custom fallback limit exceeded(%d)", getMaxCustomFallbackCount());
             mFamilies.add(family);
             return this;
         }
@@ -780,18 +859,16 @@ public class Typeface {
          */
         public @NonNull Typeface build() {
             final int userFallbackSize = mFamilies.size();
-            final FontFamily[] fallback = SystemFonts.getSystemFallback(mFallbackName);
-            final long[] ptrArray = new long[fallback.length + userFallbackSize];
+            final Typeface fallbackTypeface = getSystemDefaultTypeface(mFallbackName);
+            final long[] ptrArray = new long[userFallbackSize];
             for (int i = 0; i < userFallbackSize; ++i) {
                 ptrArray[i] = mFamilies.get(i).getNativePtr();
-            }
-            for (int i = 0; i < fallback.length; ++i) {
-                ptrArray[i + userFallbackSize] = fallback[i].getNativePtr();
             }
             final int weight = mStyle == null ? 400 : mStyle.getWeight();
             final int italic =
                     (mStyle == null || mStyle.getSlant() == FontStyle.FONT_SLANT_UPRIGHT) ?  0 : 1;
-            return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
+            return new Typeface(nativeCreateFromArray(
+                    ptrArray, fallbackTypeface.native_instance, weight, italic));
         }
     }
 
@@ -832,7 +909,7 @@ public class Typeface {
             style = NORMAL;
         }
         if (family == null) {
-            family = sDefaultTypeface;
+            family = getDefault();
         }
 
         // Return early if we're asked for the same face/style
@@ -901,7 +978,7 @@ public class Typeface {
             @IntRange(from = 1, to = 1000) int weight, boolean italic) {
         Preconditions.checkArgumentInRange(weight, 0, 1000, "weight");
         if (family == null) {
-            family = sDefaultTypeface;
+            family = getDefault();
         }
         return createWeightStyle(family, weight, italic);
     }
@@ -943,7 +1020,9 @@ public class Typeface {
      * @return the default typeface that corresponds to the style
      */
     public static Typeface defaultFromStyle(@Style int style) {
-        return sDefaults[style];
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sDefaults[style];
+        }
     }
 
     /**
@@ -1026,7 +1105,8 @@ public class Typeface {
             ptrArray[i] = families[i].mNativePtr;
         }
         return new Typeface(nativeCreateFromArray(
-                ptrArray, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+                ptrArray, 0, RESOLVE_BY_FONT_TABLE,
+                RESOLVE_BY_FONT_TABLE));
     }
 
     /**
@@ -1039,7 +1119,7 @@ public class Typeface {
         for (int i = 0; i < families.length; ++i) {
             ptrArray[i] = families[i].getNativePtr();
         }
-        return new Typeface(nativeCreateFromArray(ptrArray,
+        return new Typeface(nativeCreateFromArray(ptrArray, 0,
                   RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
     }
 
@@ -1074,15 +1154,13 @@ public class Typeface {
     @Deprecated
     private static Typeface createFromFamiliesWithDefault(android.graphics.FontFamily[] families,
                 String fallbackName, int weight, int italic) {
-        android.graphics.fonts.FontFamily[] fallback = SystemFonts.getSystemFallback(fallbackName);
-        long[] ptrArray = new long[families.length + fallback.length];
+        final Typeface fallbackTypeface = getSystemDefaultTypeface(fallbackName);
+        long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
         }
-        for (int i = 0; i < fallback.length; i++) {
-            ptrArray[i + families.length] = fallback[i].getNativePtr();
-        }
-        return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
+        return new Typeface(nativeCreateFromArray(
+                ptrArray, fallbackTypeface.native_instance, weight, italic));
     }
 
     // don't allow clients to call this directly
@@ -1093,7 +1171,7 @@ public class Typeface {
         }
 
         native_instance = ni;
-        sRegistry.registerNativeAllocation(this, native_instance);
+        mCleaner = sRegistry.registerNativeAllocation(this, native_instance);
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
     }
@@ -1105,18 +1183,19 @@ public class Typeface {
 
     /** @hide */
     @VisibleForTesting
-    public static void initSystemDefaultTypefaces(Map<String, Typeface> systemFontMap,
-            Map<String, FontFamily[]> fallbacks,
-            FontConfig.Alias[] aliases) {
+    public static void initSystemDefaultTypefaces(Map<String, FontFamily[]> fallbacks,
+            List<FontConfig.Alias> aliases,
+            Map<String, Typeface> outSystemFontMap) {
         for (Map.Entry<String, FontFamily[]> entry : fallbacks.entrySet()) {
-            systemFontMap.put(entry.getKey(), createFromFamilies(entry.getValue()));
+            outSystemFontMap.put(entry.getKey(), createFromFamilies(entry.getValue()));
         }
 
-        for (FontConfig.Alias alias : aliases) {
-            if (systemFontMap.containsKey(alias.getName())) {
+        for (int i = 0; i < aliases.size(); ++i) {
+            final FontConfig.Alias alias = aliases.get(i);
+            if (outSystemFontMap.containsKey(alias.getName())) {
                 continue; // If alias and named family are conflict, use named family.
             }
-            final Typeface base = systemFontMap.get(alias.getToName());
+            final Typeface base = outSystemFontMap.get(alias.getOriginal());
             if (base == null) {
                 // The missing target is a valid thing, some configuration don't have font files,
                 // e.g. wear devices. Just skip this alias.
@@ -1125,7 +1204,7 @@ public class Typeface {
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
                     new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
-            systemFontMap.put(alias.getName(), newFace);
+            outSystemFontMap.put(alias.getName(), newFace);
         }
     }
 
@@ -1136,39 +1215,239 @@ public class Typeface {
         }
     }
 
-    static {
-        final HashMap<String, Typeface> systemFontMap = new HashMap<>();
-        initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
-                SystemFonts.getAliases());
-        sSystemFontMap = Collections.unmodifiableMap(systemFontMap);
-
-        // We can't assume DEFAULT_FAMILY available on Roboletric.
-        if (sSystemFontMap.containsKey(DEFAULT_FAMILY)) {
-            setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+    /**
+     * Create a serialized system font mappings.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @NonNull SharedMemory serializeFontMap(@NonNull Map<String, Typeface> fontMap)
+            throws IOException, ErrnoException {
+        long[] nativePtrs = new long[fontMap.size()];
+        // The name table will not be large, so let's create a byte array in memory.
+        ByteArrayOutputStream namesBytes = new ByteArrayOutputStream();
+        int i = 0;
+        for (Map.Entry<String, Typeface> entry : fontMap.entrySet()) {
+            nativePtrs[i++] = entry.getValue().native_instance;
+            writeString(namesBytes, entry.getKey());
         }
+        int typefacesBytesCount = nativeWriteTypefaces(null, nativePtrs);
+        // int (typefacesBytesCount), typefaces, namesBytes
+        SharedMemory sharedMemory = SharedMemory.create(
+                "fontMap", Integer.BYTES + typefacesBytesCount + namesBytes.size());
+        ByteBuffer writableBuffer = sharedMemory.mapReadWrite().order(ByteOrder.BIG_ENDIAN);
+        try {
+            writableBuffer.putInt(typefacesBytesCount);
+            int writtenBytesCount = nativeWriteTypefaces(writableBuffer.slice(), nativePtrs);
+            if (writtenBytesCount != typefacesBytesCount) {
+                throw new IOException(String.format("Unexpected bytes written: %d, expected: %d",
+                        writtenBytesCount, typefacesBytesCount));
+            }
+            writableBuffer.position(writableBuffer.position() + writtenBytesCount);
+            writableBuffer.put(namesBytes.toByteArray());
+        } finally {
+            SharedMemory.unmap(writableBuffer);
+        }
+        sharedMemory.setProtect(OsConstants.PROT_READ);
+        return sharedMemory;
+    }
 
-        // Set up defaults and typefaces exposed in public API
-        DEFAULT         = create((String) null, 0);
-        DEFAULT_BOLD    = create((String) null, Typeface.BOLD);
-        SANS_SERIF      = create("sans-serif", 0);
-        SERIF           = create("serif", 0);
-        MONOSPACE       = create("monospace", 0);
+    // buffer's byte order should be BIG_ENDIAN.
+    /**
+     * Deserialize the font mapping from the serialized byte buffer.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @NonNull long[] deserializeFontMap(
+            @NonNull ByteBuffer buffer, @NonNull Map<String, Typeface> out)
+            throws IOException {
+        int typefacesBytesCount = buffer.getInt();
+        long[] nativePtrs = nativeReadTypefaces(buffer.slice());
+        if (nativePtrs == null) {
+            throw new IOException("Could not read typefaces");
+        }
+        out.clear();
+        buffer.position(buffer.position() + typefacesBytesCount);
+        for (long nativePtr : nativePtrs) {
+            String name = readString(buffer);
+            out.put(name, new Typeface(nativePtr));
+        }
+        return nativePtrs;
+    }
 
-        sDefaults = new Typeface[] {
-            DEFAULT,
-            DEFAULT_BOLD,
-            create((String) null, Typeface.ITALIC),
-            create((String) null, Typeface.BOLD_ITALIC),
-        };
+    private static String readString(ByteBuffer buffer) {
+        int length = buffer.getInt();
+        byte[] bytes = new byte[length];
+        buffer.get(bytes);
+        return new String(bytes);
+    }
 
-        // A list of generic families to be registered in native.
-        // https://www.w3.org/TR/css-fonts-4/#generic-font-families
-        String[] genericFamilies = {
-            "serif", "sans-serif", "cursive", "fantasy", "monospace", "system-ui"
-        };
+    private static void writeString(ByteArrayOutputStream bos, String value) throws IOException {
+        byte[] bytes = value.getBytes();
+        writeInt(bos, bytes.length);
+        bos.write(bytes);
+    }
 
-        for (String genericFamily : genericFamilies) {
-            registerGenericFamilyNative(genericFamily, systemFontMap.get(genericFamily));
+    private static void writeInt(ByteArrayOutputStream bos, int value) {
+        // Write in the big endian order.
+        bos.write((value >> 24) & 0xFF);
+        bos.write((value >> 16) & 0xFF);
+        bos.write((value >> 8) & 0xFF);
+        bos.write(value & 0xFF);
+    }
+
+    /** @hide */
+    public static Map<String, Typeface> getSystemFontMap() {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sSystemFontMap;
+        }
+    }
+
+    /**
+     * Deserialize font map and set it as system font map. This method should be called at most once
+     * per process.
+     */
+    /** @hide */
+    @UiThread
+    public static void setSystemFontMap(@Nullable SharedMemory sharedMemory)
+            throws IOException, ErrnoException {
+        if (sSystemFontMapBuffer != null) {
+            // Apps can re-send BIND_APPLICATION message from their code. This is a work around to
+            // detect it and avoid crashing.
+            if (sharedMemory == null || sharedMemory == sSystemFontMapSharedMemory) {
+                return;
+            }
+            throw new UnsupportedOperationException(
+                    "Once set, buffer-based system font map cannot be updated");
+        }
+        sSystemFontMapSharedMemory = sharedMemory;
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setSystemFontMap");
+        try {
+            if (sharedMemory == null) {
+                // FontManagerService is not started. This may happen in FACTORY_TEST_LOW_LEVEL
+                // mode for example.
+                loadPreinstalledSystemFontMap();
+                return;
+            }
+            sSystemFontMapBuffer = sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN);
+            Map<String, Typeface> systemFontMap = new ArrayMap<>();
+            long[] nativePtrs = deserializeFontMap(sSystemFontMapBuffer, systemFontMap);
+
+            // Initialize native font APIs. The native font API will read fonts.xml by itself if
+            // Typeface is initialized with loadPreinstalledSystemFontMap.
+            for (long ptr : nativePtrs) {
+                nativeAddFontCollections(ptr);
+            }
+            setSystemFontMap(systemFontMap);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+        }
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static void setSystemFontMap(Map<String, Typeface> systemFontMap) {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            sSystemFontMap.clear();
+            sSystemFontMap.putAll(systemFontMap);
+
+            // We can't assume DEFAULT_FAMILY available on Roboletric.
+            if (sSystemFontMap.containsKey(DEFAULT_FAMILY)) {
+                setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+            }
+
+            // Set up defaults and typefaces exposed in public API
+            // Use sDefaultTypeface here, because create(String, int) uses DEFAULT as fallback.
+            nativeForceSetStaticFinalField("DEFAULT", create(sDefaultTypeface, 0));
+            nativeForceSetStaticFinalField("DEFAULT_BOLD", create(sDefaultTypeface, Typeface.BOLD));
+            nativeForceSetStaticFinalField("SANS_SERIF", create("sans-serif", 0));
+            nativeForceSetStaticFinalField("SERIF", create("serif", 0));
+            nativeForceSetStaticFinalField("MONOSPACE", create("monospace", 0));
+
+            sDefaults = new Typeface[]{
+                DEFAULT,
+                DEFAULT_BOLD,
+                create((String) null, Typeface.ITALIC),
+                create((String) null, Typeface.BOLD_ITALIC),
+            };
+
+            // A list of generic families to be registered in native.
+            // https://www.w3.org/TR/css-fonts-4/#generic-font-families
+            String[] genericFamilies = {
+                "serif", "sans-serif", "cursive", "fantasy", "monospace", "system-ui"
+            };
+
+            for (String genericFamily : genericFamilies) {
+                registerGenericFamilyNative(genericFamily, systemFontMap.get(genericFamily));
+            }
+        }
+    }
+
+    static {
+        // Preload Roboto-Regular.ttf in Zygote for improving app launch performance.
+        preloadFontFile("/system/fonts/Roboto-Regular.ttf");
+        preloadFontFile("/system/fonts/RobotoStatic-Regular.ttf");
+
+        String locale = SystemProperties.get("persist.sys.locale", "en-US");
+        String script = ULocale.addLikelySubtags(ULocale.forLanguageTag(locale)).getScript();
+
+        FontConfig config = SystemFonts.getSystemPreinstalledFontConfig();
+        for (int i = 0; i < config.getFontFamilies().size(); ++i) {
+            FontConfig.FontFamily family = config.getFontFamilies().get(i);
+            boolean loadFamily = false;
+            for (int j = 0; j < family.getLocaleList().size(); ++j) {
+                String fontScript = ULocale.addLikelySubtags(
+                        ULocale.forLocale(family.getLocaleList().get(j))).getScript();
+                loadFamily = fontScript.equals(script);
+                if (loadFamily) {
+                    break;
+                }
+            }
+            if (loadFamily) {
+                for (int j = 0; j < family.getFontList().size(); ++j) {
+                    preloadFontFile(family.getFontList().get(j).getFile().getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    private static void preloadFontFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            Log.i(TAG, "Preloading " + file.getAbsolutePath());
+            nativeWarmUpCache(filePath);
+        }
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static void destroySystemFontMap() {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            for (Typeface typeface : sSystemFontMap.values()) {
+                typeface.mCleaner.run();
+            }
+            sSystemFontMap.clear();
+            if (sSystemFontMapBuffer != null) {
+                SharedMemory.unmap(sSystemFontMapBuffer);
+            }
+            sSystemFontMapBuffer = null;
+            sSystemFontMapSharedMemory = null;
+        }
+    }
+
+    /** @hide */
+    public static void loadPreinstalledSystemFontMap() {
+        final FontConfig fontConfig = SystemFonts.getSystemPreinstalledFontConfig();
+        final Map<String, FontFamily[]> fallback = SystemFonts.buildSystemFallback(fontConfig);
+        final Map<String, Typeface> typefaceMap =
+                SystemFonts.buildSystemTypefaces(fontConfig, fallback);
+        setSystemFontMap(typefaceMap);
+    }
+
+    static {
+        if (!ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            loadPreinstalledSystemFontMap();
         }
     }
 
@@ -1207,6 +1486,16 @@ public class Typeface {
         return Arrays.binarySearch(mSupportedAxes, axis) >= 0;
     }
 
+    /** @hide */
+    public List<FontFamily> getFallback() {
+        ArrayList<FontFamily> families = new ArrayList<>();
+        int familySize = nativeGetFamilySize(native_instance);
+        for (int i = 0; i < familySize; ++i) {
+            families.add(new FontFamily(nativeGetFamily(native_instance, i)));
+        }
+        return families;
+    }
+
     private static native long nativeCreateFromTypeface(long native_instance, int style);
     private static native long nativeCreateFromTypefaceWithExactStyle(
             long native_instance, int weight, boolean italic);
@@ -1216,7 +1505,8 @@ public class Typeface {
     @UnsupportedAppUsage
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
+    private static native long nativeCreateFromArray(
+            long[] familyArray, long fallbackTypeface, int weight, int italic);
     private static native int[] nativeGetSupportedAxes(long native_instance);
 
     @CriticalNative
@@ -1231,5 +1521,24 @@ public class Typeface {
     @CriticalNative
     private static native long nativeGetReleaseFunc();
 
+    @CriticalNative
+    private static native int nativeGetFamilySize(long naitvePtr);
+
+    @CriticalNative
+    private static native long nativeGetFamily(long nativePtr, int index);
+
+
     private static native void nativeRegisterGenericFamily(String str, long nativePtr);
+
+    private static native int nativeWriteTypefaces(
+            @Nullable ByteBuffer buffer, @NonNull long[] nativePtrs);
+
+    private static native @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer);
+
+    private static native void nativeForceSetStaticFinalField(String fieldName, Typeface typeface);
+
+    @CriticalNative
+    private static native void nativeAddFontCollections(long nativePtr);
+
+    private static native void nativeWarmUpCache(String fileName);
 }

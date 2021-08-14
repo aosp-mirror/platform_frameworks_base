@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -33,7 +32,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.IntArray;
 import android.util.proto.ProtoOutputStream;
+import android.window.TaskSnapshot;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
@@ -162,22 +163,15 @@ public abstract class ActivityTaskManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Returns the top activity from each of the currently visible stacks. The first entry will be
-     * the focused activity.
+     * Returns the top activity from each of the currently visible root tasks, and the related task
+     * id. The first entry will be the focused activity.
      */
-    public abstract List<IBinder> getTopVisibleActivities();
+    public abstract List<ActivityAssistInfo> getTopVisibleActivities();
 
     /**
      * Returns whether {@code uid} has any resumed activity.
      */
     public abstract boolean hasResumedActivity(int uid);
-
-    /**
-     * Notify listeners that contents are drawn for the first time on a single task display.
-     *
-     * @param displayId An ID of the display on which contents are drawn.
-     */
-    public abstract void notifySingleTaskDisplayDrawn(int displayId);
 
     /**
      * Start activity {@code intents} as if {@code packageName/featureId} on user {@code userId} did
@@ -219,6 +213,19 @@ public abstract class ActivityTaskManagerInternal {
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart);
+
+    /**
+     * Callback to be called on certain activity start scenarios.
+     *
+     * @see BackgroundActivityStartCallback
+     */
+    public abstract void setBackgroundActivityStartCallback(
+            @Nullable BackgroundActivityStartCallback callback);
+
+    /**
+     * Sets the list of UIDs that contain an active accessibility service.
+     */
+    public abstract void setAccessibilityServiceUids(IntArray uids);
 
     /**
      * Start activity {@code intent} without calling user-id check.
@@ -273,15 +280,17 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isRecentsComponentHomeActivity(int userId);
 
     /**
-     * Cancels any currently running recents animation.
+     * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
+     * SecurityException} or returns false with a logcat message depending on whether the app
+     * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
      */
-    public abstract void cancelRecentsAnimation(boolean restoreHomeStackPosition);
+    public abstract boolean checkCanCloseSystemDialogs(int pid, int uid,
+            @Nullable String packageName);
 
     /**
-     * This enforces {@code func} can only be called if either the caller is Recents activity or
-     * has {@code permission}.
+     * Returns whether the app can close system dialogs or not.
      */
-    public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
+    public abstract boolean canCloseSystemDialogs(int pid, int uid);
 
     /**
      * Called after the voice interaction service has changed.
@@ -316,7 +325,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessRemoved(String name, int uid);
     public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
     public abstract int getTopProcessState();
-    public abstract boolean isHeavyWeightProcess(WindowProcessController proc);
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
@@ -341,13 +349,16 @@ public abstract class ActivityTaskManagerInternal {
     public final class ActivityTokens {
         private final @NonNull IBinder mActivityToken;
         private final @NonNull IBinder mAssistToken;
+        private final @NonNull IBinder mShareableActivityToken;
         private final @NonNull IApplicationThread mAppThread;
 
         public ActivityTokens(@NonNull IBinder activityToken,
-                @NonNull IBinder assistToken, @NonNull IApplicationThread appThread) {
+                @NonNull IBinder assistToken, @NonNull IApplicationThread appThread,
+                @NonNull IBinder shareableActivityToken) {
             mActivityToken = activityToken;
             mAssistToken = assistToken;
             mAppThread = appThread;
+            mShareableActivityToken = shareableActivityToken;
         }
 
         /**
@@ -365,6 +376,13 @@ public abstract class ActivityTaskManagerInternal {
         }
 
         /**
+         * @return The sharable activity token..
+         */
+        public @NonNull IBinder getShareableActivityToken() {
+            return mShareableActivityToken;
+        }
+
+        /**
          * @return The assist token.
          */
         public @NonNull IApplicationThread getApplicationThread() {
@@ -372,19 +390,14 @@ public abstract class ActivityTaskManagerInternal {
         }
     }
 
-    /**
-     * Set the corresponding display information for the process global configuration. To be called
-     * when we need to show IME on a different display.
-     *
-     * @param pid The process id associated with the IME window.
-     * @param displayId The ID of the display showing the IME.
-     */
-    public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
-
     public abstract void sendActivityResult(int callingUid, IBinder activityToken,
             String resultWho, int requestCode, int resultCode, Intent data);
     public abstract void clearPendingResultForActivity(
             IBinder activityToken, WeakReference<PendingIntentRecord> pir);
+
+    /** Returns the component name of the activity token. */
+    @Nullable
+    public abstract ComponentName getActivityName(IBinder activityToken);
 
     /**
      * @return the activity token and IApplicationThread for the top activity in the task or null
@@ -479,8 +492,8 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
-            String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
-            boolean dumpFocusedStackOnly);
+            String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
+            boolean dumpFocusedRootTaskOnly);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);
@@ -490,9 +503,6 @@ public abstract class ActivityTaskManagerInternal {
 
     /** @return the process for the top-most resumed activity in the system. */
     public abstract WindowProcessController getTopApp();
-
-    /** Generate oom-score-adjustment rank for all tasks in the system based on z-order. */
-    public abstract void rankTaskLayersIfNeeded();
 
     /** Destroy all activities. */
     public abstract void scheduleDestroyAllActivities(String reason);
@@ -517,7 +527,6 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void onUidActive(int uid, int procState);
     public abstract void onUidInactive(int uid);
-    public abstract void onActiveUidsCleared();
     public abstract void onUidProcStateChanged(int uid, int procState);
 
     public abstract void onUidAddedToPendingTempAllowlist(int uid, String tag);
@@ -536,9 +545,6 @@ public abstract class ActivityTaskManagerInternal {
     /** Flush recent tasks to disk. */
     public abstract void flushRecentTasks();
 
-    public abstract WindowProcessController getHomeProcess();
-    public abstract WindowProcessController getPreviousProcess();
-
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
     public abstract boolean canShowErrorDialogs();
@@ -550,12 +556,20 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry();
 
     /**
+     * Returns the URI permission owner associated with the given activity (see
+     * {@link ActivityRecord#getUriPermissionsLocked()}). If the passed-in activity token is
+     * invalid, returns null.
+     */
+    @Nullable
+    public abstract IBinder getUriPermissionOwnerForActivity(@NonNull IBinder activityToken);
+
+    /**
      * Gets bitmap snapshot of the provided task id.
      *
      * <p>Warning! this may restore the snapshot from disk so can block, don't call in a latency
      * sensitive environment.
      */
-    public abstract ActivityManager.TaskSnapshot getTaskSnapshotBlocking(int taskId,
+    public abstract TaskSnapshot getTaskSnapshotBlocking(int taskId,
             boolean isLowResolution);
 
     /** Returns true if uid is considered foreground for activity start purposes. */
@@ -566,12 +580,45 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setDeviceOwnerUid(int uid);
 
-    /** Set all associated companion app that belongs to an userId. */
-    public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids ActivityTaskManager will take ownership of this Set, the caller
+     *                         shouldn't touch the Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
 
     /**
      * @param packageName The package to check
      * @return Whether the package is the base of any locked task
      */
     public abstract boolean isBaseOfLockedTask(String packageName);
+
+    /**
+     * Create an interface to update configuration for an application.
+     */
+    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
+
+    /**
+     * An interface to update configuration for an application, and will persist override
+     * configuration for this package.
+     */
+    public interface PackageConfigurationUpdater {
+        /**
+         * Sets the dark mode for the current application. This setting is persisted and will
+         * override the system configuration for this application.
+         */
+        PackageConfigurationUpdater setNightMode(int nightMode);
+
+        /**
+         * Commit changes.
+         */
+        void commit();
+    }
+
+    /**
+     * A utility method to check AppOps and PackageManager for SYSTEM_ALERT_WINDOW permission.
+     */
+    public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+            String callingPackage);
 }

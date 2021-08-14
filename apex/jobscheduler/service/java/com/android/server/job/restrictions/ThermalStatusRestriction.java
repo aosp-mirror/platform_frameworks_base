@@ -19,9 +19,9 @@ package com.android.server.job.restrictions;
 import android.app.job.JobParameters;
 import android.os.PowerManager;
 import android.os.PowerManager.OnThermalStatusChangedListener;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerServiceDumpProto;
 import com.android.server.job.controllers.JobStatus;
@@ -34,7 +34,8 @@ public class ThermalStatusRestriction extends JobRestriction {
     private PowerManager mPowerManager;
 
     public ThermalStatusRestriction(JobSchedulerService service) {
-        super(service, JobParameters.REASON_DEVICE_THERMAL);
+        super(service, JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class ThermalStatusRestriction extends JobRestriction {
     @Override
     public void dumpConstants(IndentingPrintWriter pw) {
         pw.print("In thermal throttling?: ");
-        pw.print(mIsThermalRestricted);
+        pw.println(mIsThermalRestricted);
     }
 
     @Override

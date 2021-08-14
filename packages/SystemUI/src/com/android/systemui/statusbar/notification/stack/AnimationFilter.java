@@ -117,16 +117,6 @@ public class AnimationFilter {
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_GO_TO_FULL_SHADE) {
                 hasGoToFullShadeEvent = true;
             }
-            if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
-                    .ANIMATION_TYPE_HEADS_UP_DISAPPEAR) {
-                customDelay = StackStateAnimator.ANIMATION_DELAY_HEADS_UP;
-            } else if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
-                    .ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
-                // We need both timeouts when clicking, one to delay it and one for the animation
-                // to look nice
-                customDelay = StackStateAnimator.ANIMATION_DELAY_HEADS_UP_CLICKED
-                        + StackStateAnimator.ANIMATION_DELAY_HEADS_UP;
-            }
         }
     }
 

@@ -32,6 +32,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include "core_jni_helpers.h"
 #include <jni.h>
 #include <media/stagefright/NuMediaExtractor.h>
 #include <nativehelper/JNIHelp.h>
@@ -48,6 +49,7 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 
+// MtpDatabase methods
 static jmethodID method_beginSendObject;
 static jmethodID method_endSendObject;
 static jmethodID method_rescanFile;
@@ -63,6 +65,7 @@ static jmethodID method_setDeviceProperty;
 static jmethodID method_getObjectPropertyList;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
+static jmethodID method_openFilePath;
 static jmethodID method_getThumbnailInfo;
 static jmethodID method_getThumbnailData;
 static jmethodID method_beginDeleteObject;
@@ -74,6 +77,7 @@ static jmethodID method_endCopyObject;
 static jmethodID method_getObjectReferences;
 static jmethodID method_setObjectReferences;
 
+// MtpDatabase fields.
 static jfieldID field_context;
 
 // MtpPropertyList methods
@@ -84,6 +88,59 @@ static jmethodID method_getPropertyCodes;
 static jmethodID method_getDataTypes;
 static jmethodID method_getLongValues;
 static jmethodID method_getStringValues;
+
+// Initializer for the jfieldIDs and jmethodIDs above. This method must be invoked
+// before using these static fields and methods for JNI accesses.
+static void initializeJavaIDs(JNIEnv* env) {
+    static std::once_flag sJniInitialized;
+
+#define GET_METHOD_ID(name, jclass, signature)                              \
+    method_##name = GetMethodIDOrDie(env, jclass, #name, signature);
+
+    std::call_once(sJniInitialized, [](JNIEnv* env) {
+        const jclass mdb_class = FindClassOrDie(env, "android/mtp/MtpDatabase");
+        GET_METHOD_ID(beginSendObject, mdb_class, "(Ljava/lang/String;III)I");
+        GET_METHOD_ID(endSendObject, mdb_class, "(IZ)V");
+        GET_METHOD_ID(rescanFile, mdb_class, "(Ljava/lang/String;II)V");
+        GET_METHOD_ID(getObjectList, mdb_class, "(III)[I");
+        GET_METHOD_ID(getNumObjects, mdb_class, "(III)I");
+        GET_METHOD_ID(getSupportedPlaybackFormats, mdb_class, "()[I");
+        GET_METHOD_ID(getSupportedCaptureFormats, mdb_class, "()[I");
+        GET_METHOD_ID(getSupportedObjectProperties, mdb_class, "(I)[I");
+        GET_METHOD_ID(getSupportedDeviceProperties, mdb_class, "()[I");
+        GET_METHOD_ID(setObjectProperty, mdb_class, "(IIJLjava/lang/String;)I");
+        GET_METHOD_ID(getDeviceProperty, mdb_class, "(I[J[C)I");
+        GET_METHOD_ID(setDeviceProperty, mdb_class, "(IJLjava/lang/String;)I");
+        GET_METHOD_ID(getObjectPropertyList, mdb_class, "(IIIII)Landroid/mtp/MtpPropertyList;");
+        GET_METHOD_ID(getObjectInfo, mdb_class, "(I[I[C[J)Z");
+        GET_METHOD_ID(getObjectFilePath, mdb_class, "(I[C[J)I");
+        GET_METHOD_ID(openFilePath, mdb_class, "(Ljava/lang/String;Z)I");
+        GET_METHOD_ID(getThumbnailInfo, mdb_class, "(I[J)Z");
+        GET_METHOD_ID(getThumbnailData, mdb_class, "(I)[B");
+        GET_METHOD_ID(beginDeleteObject, mdb_class, "(I)I");
+        GET_METHOD_ID(endDeleteObject, mdb_class, "(IZ)V");
+        GET_METHOD_ID(beginMoveObject, mdb_class, "(III)I");
+        GET_METHOD_ID(endMoveObject, mdb_class, "(IIIIIZ)V");
+        GET_METHOD_ID(beginCopyObject, mdb_class, "(III)I");
+        GET_METHOD_ID(endCopyObject, mdb_class, "(IZ)V");
+        GET_METHOD_ID(getObjectReferences, mdb_class, "(I)[I");
+        GET_METHOD_ID(setObjectReferences, mdb_class, "(I[I)I");
+        field_context = GetFieldIDOrDie(env, mdb_class, "mNativeContext", "J");
+
+        const jclass mpl_class = FindClassOrDie(env, "android/mtp/MtpPropertyList");
+        GET_METHOD_ID(getCode, mpl_class, "()I");
+        GET_METHOD_ID(getCount, mpl_class, "()I");
+        GET_METHOD_ID(getObjectHandles, mpl_class, "()[I");
+        GET_METHOD_ID(getPropertyCodes, mpl_class, "()[I");
+        GET_METHOD_ID(getDataTypes, mpl_class, "()[I");
+        GET_METHOD_ID(getLongValues, mpl_class, "()[J");
+        GET_METHOD_ID(getStringValues, mpl_class, "()[Ljava/lang/String;");
+
+        return 0;
+    }, env);
+
+#undef GET_METHOD_ID
+}
 
 
 IMtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
@@ -160,6 +217,7 @@ public:
                                             MtpStringBuffer& outFilePath,
                                             int64_t& outFileLength,
                                             MtpObjectFormat& outFormat);
+    virtual int                     openFilePath(const char* path, bool transcode);
     virtual MtpResponseCode         beginDeleteObject(MtpObjectHandle handle);
     virtual void                    endDeleteObject(MtpObjectHandle handle, bool succeeded);
 
@@ -969,6 +1027,17 @@ MtpResponseCode MtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     return result;
 }
 
+int MtpDatabase::openFilePath(const char* path, bool transcode) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring pathStr = env->NewStringUTF(path);
+    jint result = env->CallIntMethod(mDatabase, method_openFilePath, pathStr, transcode);
+
+    if (result < 0) {
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    }
+    return result;
+}
+
 MtpResponseCode MtpDatabase::beginDeleteObject(MtpObjectHandle handle) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     MtpResponseCode result = env->CallIntMethod(mDatabase, method_beginDeleteObject, (jint)handle);
@@ -1062,6 +1131,7 @@ static const PropertyTableEntry   kDevicePropertyTable[] = {
     {   MTP_DEVICE_PROPERTY_IMAGE_SIZE,                 MTP_TYPE_STR },
     {   MTP_DEVICE_PROPERTY_BATTERY_LEVEL,              MTP_TYPE_UINT8 },
     {   MTP_DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE,      MTP_TYPE_UINT32 },
+    {   MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO,     MTP_TYPE_STR },
 };
 
 bool MtpDatabase::getObjectPropertyInfo(MtpObjectProperty property, int& type) {
@@ -1220,6 +1290,7 @@ MtpProperty* MtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
         switch (property) {
             case MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
+            case MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO:
                 writable = true;
                 // fall through
                 FALLTHROUGH_INTENDED;
@@ -1267,6 +1338,7 @@ MtpProperty* MtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
 static void
 android_mtp_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
+    initializeJavaIDs(env);
     MtpDatabase* database = new MtpDatabase(env, thiz);
     env->SetLongField(thiz, field_context, (jlong)database);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -1301,68 +1373,9 @@ static const JNINativeMethod gMtpPropertyGroupMethods[] = {
     {"format_date_time",        "(J)Ljava/lang/String;",
                                         (void *)android_mtp_MtpPropertyGroup_format_date_time},
 };
-
-#define GET_METHOD_ID(name, jclass, signature)                              \
-    method_##name = env->GetMethodID(jclass, #name, signature);             \
-    if (method_##name == NULL) {                                            \
-        ALOGE("Can't find " #name);                                         \
-        return -1;                                                          \
-    }                                                                       \
-
+                                                                   \
 int register_android_mtp_MtpDatabase(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/mtp/MtpDatabase");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpDatabase");
-        return -1;
-    }
-    GET_METHOD_ID(beginSendObject, clazz, "(Ljava/lang/String;III)I");
-    GET_METHOD_ID(endSendObject, clazz, "(IZ)V");
-    GET_METHOD_ID(rescanFile, clazz, "(Ljava/lang/String;II)V");
-    GET_METHOD_ID(getObjectList, clazz, "(III)[I");
-    GET_METHOD_ID(getNumObjects, clazz, "(III)I");
-    GET_METHOD_ID(getSupportedPlaybackFormats, clazz, "()[I");
-    GET_METHOD_ID(getSupportedCaptureFormats, clazz, "()[I");
-    GET_METHOD_ID(getSupportedObjectProperties, clazz, "(I)[I");
-    GET_METHOD_ID(getSupportedDeviceProperties, clazz, "()[I");
-    GET_METHOD_ID(setObjectProperty, clazz, "(IIJLjava/lang/String;)I");
-    GET_METHOD_ID(getDeviceProperty, clazz, "(I[J[C)I");
-    GET_METHOD_ID(setDeviceProperty, clazz, "(IJLjava/lang/String;)I");
-    GET_METHOD_ID(getObjectPropertyList, clazz, "(IIIII)Landroid/mtp/MtpPropertyList;");
-    GET_METHOD_ID(getObjectInfo, clazz, "(I[I[C[J)Z");
-    GET_METHOD_ID(getObjectFilePath, clazz, "(I[C[J)I");
-    GET_METHOD_ID(getThumbnailInfo, clazz, "(I[J)Z");
-    GET_METHOD_ID(getThumbnailData, clazz, "(I)[B");
-    GET_METHOD_ID(beginDeleteObject, clazz, "(I)I");
-    GET_METHOD_ID(endDeleteObject, clazz, "(IZ)V");
-    GET_METHOD_ID(beginMoveObject, clazz, "(III)I");
-    GET_METHOD_ID(endMoveObject, clazz, "(IIIIIZ)V");
-    GET_METHOD_ID(beginCopyObject, clazz, "(III)I");
-    GET_METHOD_ID(endCopyObject, clazz, "(IZ)V");
-    GET_METHOD_ID(getObjectReferences, clazz, "(I)[I");
-    GET_METHOD_ID(setObjectReferences, clazz, "(I[I)I");
-
-    field_context = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (field_context == NULL) {
-        ALOGE("Can't find MtpDatabase.mNativeContext");
-        return -1;
-    }
-
-    clazz = env->FindClass("android/mtp/MtpPropertyList");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpPropertyList");
-        return -1;
-    }
-    GET_METHOD_ID(getCode, clazz, "()I");
-    GET_METHOD_ID(getCount, clazz, "()I");
-    GET_METHOD_ID(getObjectHandles, clazz, "()[I");
-    GET_METHOD_ID(getPropertyCodes, clazz, "()[I");
-    GET_METHOD_ID(getDataTypes, clazz, "()[I");
-    GET_METHOD_ID(getLongValues, clazz, "()[J");
-    GET_METHOD_ID(getStringValues, clazz, "()[Ljava/lang/String;");
-
     if (AndroidRuntime::registerNativeMethods(env,
                 "android/mtp/MtpDatabase", gMtpDatabaseMethods, NELEM(gMtpDatabaseMethods)))
         return -1;

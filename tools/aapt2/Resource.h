@@ -57,6 +57,7 @@ enum class ResourceType {
   kInteger,
   kInterpolator,
   kLayout,
+  kMacro,
   kMenu,
   kMipmap,
   kNavigation,
@@ -138,7 +139,7 @@ struct ResourceId {
   uint32_t id;
 
   ResourceId();
-  ResourceId(const ResourceId& rhs);
+  ResourceId(const ResourceId& rhs) = default;
   ResourceId(uint32_t res_id);  // NOLINT(google-explicit-constructor)
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
@@ -222,8 +223,6 @@ bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
 
 inline ResourceId::ResourceId() : id(0) {}
 
-inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {}
-
 inline ResourceId::ResourceId(uint32_t res_id) : id(res_id) {}
 
 inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e)
@@ -272,6 +271,19 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& res_id)
 // For generic code to call 'using std::to_string; to_string(T);'.
 inline std::string to_string(const ResourceId& id) {
   return id.to_string();
+}
+
+// Helper to compare resource IDs, moving dynamic IDs after framework IDs.
+inline bool cmp_ids_dynamic_after_framework(const ResourceId& a, const ResourceId& b) {
+  // If one of a and b is from the framework package (package ID 0x01), and the
+  // other is a dynamic ID (package ID 0x00), then put the dynamic ID after the
+  // framework ID. This ensures that when AssetManager resolves the dynamic IDs,
+  // they will be in sorted order as expected by AssetManager.
+  if ((a.package_id() == kFrameworkPackageId && b.package_id() == 0x00) ||
+      (a.package_id() == 0x00 && b.package_id() == kFrameworkPackageId)) {
+    return b < a;
+  }
+  return a < b;
 }
 
 //

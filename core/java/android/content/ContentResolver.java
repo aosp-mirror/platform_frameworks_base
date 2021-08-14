@@ -63,7 +63,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.system.Int64Ref;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -110,7 +109,7 @@ public abstract class ContentResolver implements ContentInterface {
      *
      * @hide
      */
-    public static final boolean DEPRECATE_DATA_COLUMNS = StorageManager.hasIsolatedStorage();
+    public static final boolean DEPRECATE_DATA_COLUMNS = true;
 
     /**
      * Special filesystem path prefix which indicates that a path should be
@@ -133,8 +132,11 @@ public abstract class ContentResolver implements ContentInterface {
     public static final String SYNC_EXTRAS_ACCOUNT = "account";
 
     /**
-     * If this extra is set to true, the sync request will be scheduled
-     * at the front of the sync request queue and without any delay
+     * If this extra is set to true, the sync request will be scheduled at the front of the
+     * sync request queue, but it is still subject to JobScheduler quota and throttling due to
+     * App Standby buckets.
+     *
+     * <p>This is different from {@link #SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB}.
      */
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
 
@@ -144,6 +146,29 @@ public abstract class ContentResolver implements ContentInterface {
      * setRequiresCharging(true) on {@link SyncRequest}.
      */
     public static final String SYNC_EXTRAS_REQUIRE_CHARGING = "require_charging";
+
+    /**
+     * Run this sync operation as an "expedited job"
+     * (see {@link android.app.job.JobInfo.Builder#setExpedited(boolean)}).
+     * Normally (if this flag isn't specified), sync operations are executed as regular
+     * {@link android.app.job.JobService} jobs.
+     *
+     * <p> Because Expedited Jobs have various restrictions compared to regular jobs, this flag
+     * cannot be combined with certain other flags, otherwise an
+     * <code>IllegalArgumentException</code> will be thrown. Notably, because Expedited Jobs do not
+     * support various constraints, the following restriction apply:
+     * <ul>
+     *  <li>Can't be used with {@link #SYNC_EXTRAS_REQUIRE_CHARGING}
+     *  <li>Can't be used with {@link #SYNC_EXTRAS_EXPEDITED}
+     *  <li>Can't be used on periodic syncs.
+     *  <li>When an expedited-job-sync fails and a retry is scheduled, the retried sync will be
+     *  scheduled as a regular job unless {@link #SYNC_EXTRAS_IGNORE_BACKOFF} is set.
+     * </ul>
+     *
+     * <p>This is different from {@link #SYNC_EXTRAS_EXPEDITED}.
+     */
+    @SuppressLint("IntentName")
+    public static final String SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB = "schedule_as_expedited_job";
 
     /**
      * @deprecated instead use
@@ -779,6 +804,10 @@ public abstract class ContentResolver implements ContentInterface {
     private static final int REMOTE_CONTENT_PROVIDER_TIMEOUT_MILLIS =
             CONTENT_PROVIDER_READY_TIMEOUT_MILLIS + CONTENT_PROVIDER_TIMEOUT_MILLIS;
 
+    /**
+     * Note: passing a {@code null} context here could lead to unexpected behavior in certain
+     * ContentResolver APIs so it is highly recommended to pass a non-null context here.
+     */
     public ContentResolver(@Nullable Context context) {
         this(context, null);
     }
@@ -787,7 +816,6 @@ public abstract class ContentResolver implements ContentInterface {
     public ContentResolver(@Nullable Context context, @Nullable ContentInterface wrapped) {
         mContext = context != null ? context : ActivityThread.currentApplication();
         mPackageName = mContext.getOpPackageName();
-        mAttributionTag = mContext.getAttributionTag();
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mWrapped = wrapped;
     }
@@ -1188,7 +1216,7 @@ public abstract class ContentResolver implements ContentInterface {
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
             try {
-                qCursor = unstableProvider.query(mPackageName, mAttributionTag, uri, projection,
+                qCursor = unstableProvider.query(mContext.getAttributionSource(), uri, projection,
                         queryArgs, remoteCancellationSignal);
             } catch (DeadObjectException e) {
                 // The remote process has died...  but we only hold an unstable
@@ -1199,7 +1227,7 @@ public abstract class ContentResolver implements ContentInterface {
                 if (stableProvider == null) {
                     return null;
                 }
-                qCursor = stableProvider.query(mPackageName, mAttributionTag, uri, projection,
+                qCursor = stableProvider.query(mContext.getAttributionSource(), uri, projection,
                         queryArgs, remoteCancellationSignal);
             }
             if (qCursor == null) {
@@ -1291,7 +1319,7 @@ public abstract class ContentResolver implements ContentInterface {
 
         try {
             final UriResultListener resultListener = new UriResultListener();
-            provider.canonicalizeAsync(mPackageName, mAttributionTag, url,
+            provider.canonicalizeAsync(mContext.getAttributionSource(), url,
                     new RemoteCallback(resultListener));
             resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
             if (resultListener.exception != null) {
@@ -1341,7 +1369,14 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.uncanonicalize(mPackageName, mAttributionTag, url);
+            final UriResultListener resultListener = new UriResultListener();
+            provider.uncanonicalizeAsync(mContext.getAttributionSource(), url,
+                    new RemoteCallback(resultListener));
+            resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            if (resultListener.exception != null) {
+                throw resultListener.exception;
+            }
+            return resultListener.result;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -1393,7 +1428,7 @@ public abstract class ContentResolver implements ContentInterface {
                 remoteCancellationSignal = provider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return provider.refresh(mPackageName, mAttributionTag, url, extras,
+            return provider.refresh(mContext.getAttributionSource(), url, extras,
                     remoteCancellationSignal);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
@@ -1516,7 +1551,8 @@ public abstract class ContentResolver implements ContentInterface {
      * on these schemes.
      *
      * @param uri The desired URI.
-     * @param mode May be "w", "wa", "rw", or "rwt".
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return an OutputStream or {@code null} if the provider recently crashed.
      * @throws FileNotFoundException if the provided URI could not be opened.
      * @see #openAssetFileDescriptor(Uri, String)
@@ -1572,8 +1608,8 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1615,8 +1651,8 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *         or null if none. If the operation is canceled, then
      *         {@link OperationCanceledException} will be thrown.
@@ -1709,8 +1745,8 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1763,8 +1799,8 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress, or null if
      *            none. If the operation is canceled, then
      *            {@link OperationCanceledException} will be thrown.
@@ -1822,7 +1858,7 @@ public abstract class ContentResolver implements ContentInterface {
 
                     try {
                         fd = unstableProvider.openAssetFile(
-                                mPackageName, mAttributionTag, uri, mode,
+                                mContext.getAttributionSource(), uri, mode,
                                 remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
@@ -1837,8 +1873,8 @@ public abstract class ContentResolver implements ContentInterface {
                         if (stableProvider == null) {
                             throw new FileNotFoundException("No content provider: " + uri);
                         }
-                        fd = stableProvider.openAssetFile(
-                                mPackageName, mAttributionTag, uri, mode, remoteCancellationSignal);
+                        fd = stableProvider.openAssetFile(mContext.getAttributionSource(),
+                                uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -1989,7 +2025,7 @@ public abstract class ContentResolver implements ContentInterface {
 
             try {
                 fd = unstableProvider.openTypedAssetFile(
-                        mPackageName, mAttributionTag, uri, mimeType, opts,
+                        mContext.getAttributionSource(), uri, mimeType, opts,
                         remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
@@ -2005,7 +2041,7 @@ public abstract class ContentResolver implements ContentInterface {
                     throw new FileNotFoundException("No content provider: " + uri);
                 }
                 fd = stableProvider.openTypedAssetFile(
-                        mPackageName, mAttributionTag, uri, mimeType, opts,
+                        mContext.getAttributionSource(), uri, mimeType, opts,
                         remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
@@ -2154,7 +2190,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            Uri createdRow = provider.insert(mPackageName, mAttributionTag, url, values, extras);
+            Uri createdRow = provider.insert(mContext.getAttributionSource(), url, values, extras);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
             return createdRow;
@@ -2235,7 +2271,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsCreated = provider.bulkInsert(mPackageName, mAttributionTag, url, values);
+            int rowsCreated = provider.bulkInsert(mContext.getAttributionSource(), url, values);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
             return rowsCreated;
@@ -2294,7 +2330,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsDeleted = provider.delete(mPackageName, mAttributionTag, url, extras);
+            int rowsDeleted = provider.delete(mContext.getAttributionSource(), url, extras);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "delete", null);
             return rowsDeleted;
@@ -2361,7 +2397,8 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsUpdated = provider.update(mPackageName, mAttributionTag, uri, values, extras);
+            int rowsUpdated = provider.update(mContext.getAttributionSource(),
+                    uri, values, extras);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, uri, "update", null);
             return rowsUpdated;
@@ -2410,8 +2447,8 @@ public abstract class ContentResolver implements ContentInterface {
             throw new IllegalArgumentException("Unknown authority " + authority);
         }
         try {
-            final Bundle res = provider.call(mPackageName, mAttributionTag, authority, method, arg,
-                    extras);
+            final Bundle res = provider.call(mContext.getAttributionSource(),
+                    authority, method, arg, extras);
             Bundle.setDefusable(res, true);
             return res;
         } catch (RemoteException e) {
@@ -3212,6 +3249,18 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
+     * {@hide}
+     * Helper function to throw an <code>IllegalArgumentException</code> if any illegal
+     * extras were set for a sync scheduled as an expedited job.
+     *
+     * @param extras bundle to validate.
+     */
+    public static boolean hasInvalidScheduleAsEjExtras(Bundle extras) {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED);
+    }
+
+    /**
      * Specifies that a sync should be requested with the specified the account, authority,
      * and extras at the given frequency. If there is already another periodic sync scheduled
      * with the account, authority and extras then a new periodic sync won't be added, instead
@@ -3225,7 +3274,8 @@ public abstract class ContentResolver implements ContentInterface {
      * Periodic syncs are not allowed to have any of {@link #SYNC_EXTRAS_DO_NOT_RETRY},
      * {@link #SYNC_EXTRAS_IGNORE_BACKOFF}, {@link #SYNC_EXTRAS_IGNORE_SETTINGS},
      * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
-     * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
+     * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL},
+     * {@link #SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB} set to true.
      * If any are supplied then an {@link IllegalArgumentException} will be thrown.
      *
      * <p>This method requires the caller to hold the permission
@@ -3265,16 +3315,14 @@ public abstract class ContentResolver implements ContentInterface {
      * @param extras bundle to validate.
      */
     public static boolean invalidPeriodicExtras(Bundle extras) {
-        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
                 || extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
                 || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
                 || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
                 || extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
                 || extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
-                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
-            return true;
-        }
-        return false;
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, false);
     }
 
     /**
@@ -3819,12 +3867,17 @@ public abstract class ContentResolver implements ContentInterface {
     /** @hide */
     @UnsupportedAppUsage
     public String getPackageName() {
-        return mPackageName;
+        return mContext.getOpPackageName();
     }
 
     /** @hide */
     public @Nullable String getAttributionTag() {
-        return mAttributionTag;
+        return mContext.getAttributionTag();
+    }
+
+    /** @hide */
+    public @NonNull AttributionSource getAttributionSource() {
+        return mContext.getAttributionSource();
     }
 
     @UnsupportedAppUsage
@@ -3832,9 +3885,9 @@ public abstract class ContentResolver implements ContentInterface {
     @UnsupportedAppUsage
     private final Context mContext;
 
+    @Deprecated
     @UnsupportedAppUsage
     final String mPackageName;
-    final @Nullable String mAttributionTag;
     final int mTargetSdkVersion;
     final ContentInterface mWrapped;
 
@@ -4041,7 +4094,7 @@ public abstract class ContentResolver implements ContentInterface {
 
         // Convert to Point, since that's what the API is defined as
         final Bundle opts = new Bundle();
-        opts.putParcelable(EXTRA_SIZE, Point.convert(size));
+        opts.putParcelable(EXTRA_SIZE, new Point(size.getWidth(), size.getHeight()));
         final Int64Ref orientation = new Int64Ref(0);
 
         Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {

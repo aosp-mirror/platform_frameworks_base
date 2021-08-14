@@ -1,9 +1,8 @@
 # Connectivity / Networking
 per-file ConnectivityService.java,ConnectivityServiceInitializer.java,NetworkManagementService.java,NsdService.java,VpnManagerService.java = file:/services/core/java/com/android/server/net/OWNERS
 
-# Vibrator / Threads
-per-file VibratorService.java, DisplayThread.java = michaelwr@google.com
-per-file VibratorService.java, DisplayThread.java = ogunwale@google.com
+# Threads
+per-file DisplayThread.java = michaelwr@google.com, ogunwale@google.com
 
 # Zram writeback
 per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com

@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"កម្មវិធី​គ្រប់​គ្រង​ឧបករណ៍ដៃគូ"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"ភ្ជាប់​ជាមួយ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"ភ្ជាប់​ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ជាមួយ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីឱ្យស្ថិតក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"នាឡិកា"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; គ្រប់គ្រង &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; របស់អ្នក"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="PROFILE_NAME">%1$s</xliff:g> របស់អ្នក។ <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
+    <string name="consent_no" msgid="2640796915611404382">"កុំអនុញ្ញាត"</string>
 </resources>

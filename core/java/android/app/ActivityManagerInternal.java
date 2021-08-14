@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessCapability;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -30,11 +31,16 @@ import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.TransactionTooLargeException;
+import android.os.WorkSource;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Activity manager local system service interface.
@@ -43,6 +49,23 @@ import java.util.Map;
  */
 public abstract class ActivityManagerInternal {
 
+    public enum ServiceNotificationPolicy {
+        /**
+         * The Notification is not associated with any foreground service.
+         */
+        NOT_FOREGROUND_SERVICE,
+        /**
+         * The Notification is associated with a foreground service, but the
+         * notification system should handle it just like non-FGS notifications.
+         */
+        SHOW_IMMEDIATELY,
+        /**
+         * The Notification is associated with a foreground service, and the
+         * notification system should ignore it unless it has already been shown (in
+         * which case it should be used to update the currently displayed UI).
+         */
+        UPDATE_ONLY
+    }
 
     // Access modes for handleIncomingUser.
     public static final int ALLOW_NON_FULL = 0;
@@ -95,35 +118,57 @@ public abstract class ActivityManagerInternal {
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
 
     /**
-     *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
-     *  such as Power Save mode.
+     * Sets how long a {@link PendingIntent} can be temporarily allowlisted to bypass restrictions
+     * such as Power Save mode.
+     * @param target
+     * @param allowlistToken
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
      */
-    public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
-            IBinder whitelistToken, long duration);
+    public abstract void setPendingIntentAllowlistDuration(IIntentSender target,
+            IBinder allowlistToken, long duration, @TempAllowListType int type,
+            @ReasonCode int reasonCode, @Nullable String reason);
 
     /**
-     * Allows for a {@link PendingIntent} to be whitelisted to start activities from background.
+     * Returns the flags set for a {@link PendingIntent}.
+     */
+    public abstract int getPendingIntentFlags(IIntentSender target);
+
+    /**
+     * Allows a {@link PendingIntent} to start activities from background.
      */
     public abstract void setPendingIntentAllowBgActivityStarts(
-            IIntentSender target, IBinder whitelistToken, int flags);
+            IIntentSender target, IBinder allowlistToken, int flags);
 
     /**
-     * Voids {@link PendingIntent}'s privilege to be whitelisted to start activities from
-     * background.
+     * Voids {@link PendingIntent}'s privilege to start activities from background.
      */
     public abstract void clearPendingIntentAllowBgActivityStarts(IIntentSender target,
-            IBinder whitelistToken);
+            IBinder allowlistToken);
 
     /**
-     * Allow DeviceIdleController to tell us about what apps are whitelisted.
+     * Allow DeviceIdleController to tell us about what apps are allowlisted.
      */
-    public abstract void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids);
+    public abstract void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids);
 
     /**
-     * Update information about which app IDs are on the temp whitelist.
+     * Update information about which app IDs are on the temp allowlist.
+     * @param appids the updated list of appIds in temp allowlist.
+     * @param changingUid uid to add or remove to temp allowlist.
+     * @param adding true to add to temp allowlist, false to remove from temp allowlist.
+     * @param durationMs when adding is true, the duration to be in temp allowlist.
+     * @param type temp allowlist type defined at {@link TempAllowListType}.
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
+     * @param callingUid the callingUid that setup this temp allowlist, only valid when param adding
+     *                   is true.
      */
-    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId,
-            boolean adding);
+    public abstract void updateDeviceIdleTempAllowlist(int[] appids, int changingUid,
+            boolean adding, long durationMs, @TempAllowListType int type,
+            @ReasonCode int reasonCode,
+            @Nullable String reason, int callingUid);
 
     /**
      * Get the procstate for the UID.  The return value will be between
@@ -210,6 +255,9 @@ public abstract class ActivityManagerInternal {
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
 
+    /** Returns the currently started user ids. */
+    public abstract int[] getStartedUserIds();
+
     /** Returns true if the user is running. */
     public abstract boolean isUserRunning(@UserIdInt int userId, int flags);
 
@@ -262,6 +310,33 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean shouldConfirmCredentials(@UserIdInt int userId);
 
+    /**
+     * Used in conjunction with {@link #noteAlarmStart(PendingIntent, WorkSource, int, String)} to
+     * note an alarm duration for battery attribution
+     */
+    public abstract void noteAlarmFinish(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag);
+
+    /**
+     * Used in conjunction with {@link #noteAlarmFinish(PendingIntent, WorkSource, int, String)} to
+     * note an alarm duration for battery attribution
+     */
+    public abstract void noteAlarmStart(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag);
+
+    /**
+     * Used to note a wakeup alarm for battery attribution.
+     */
+    public abstract void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String sourcePkg, String tag);
+
+    /**
+     * Returns whether this app is disallowed to run in the background.
+     *
+     * @see ActivityManager#APP_START_MODE_DISABLED
+     */
+    public abstract boolean isAppStartModeDisabled(int uid, String packageName);
+
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(@UserIdInt int userId);
@@ -284,19 +359,31 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isBooted();
     public abstract void finishBooting();
 
-    public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-            long duration, String tag);
+    /**
+     * Temp allowlist a UID for PendingIntent.
+     * @param callerPid the PID that sent the PendingIntent.
+     * @param callerUid the UID that sent the PendingIntent.
+     * @param targetUid the UID that is been temp allowlisted.
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason
+     */
+    public abstract void tempAllowlistForPendingIntent(int callerPid, int callerUid, int targetUid,
+            long duration, int type, @ReasonCode int reasonCode, String reason);
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
             String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            @UserIdInt int userId, boolean allowBackgroundActivityStarts);
+            @UserIdInt int userId, boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken);
 
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage,
             @Nullable String callingFeatureId, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
+            boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,
@@ -312,11 +399,17 @@ public abstract class ActivityManagerInternal {
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
 
-    /** Input dispatch timeout to a window, start the ANR process. */
+    /** Input dispatch timeout to a window, start the ANR process. Return the timeout extension,
+     * in milliseconds, or 0 to abort dispatch. */
     public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
             boolean aboveSystem, String reason);
+    /**
+     * App started responding to input events. This signal can be used to abort the ANR process and
+     * hide the ANR dialog.
+     */
+    public abstract void inputDispatchingResumed(int pid);
 
     /**
      * Sends {@link android.content.Intent#ACTION_CONFIGURATION_CHANGED} with all the appropriate
@@ -359,8 +452,8 @@ public abstract class ActivityManagerInternal {
     /** Returns true if the given uid is the app in the foreground. */
     public abstract boolean isAppForeground(int uid);
 
-    /** Returns true if the given uid is currently marked 'bad' */
-    public abstract boolean isAppBad(ApplicationInfo info);
+    /** Returns true if the given process name and uid is currently marked 'bad' */
+    public abstract boolean isAppBad(String processName, int uid);
 
     /** Remove pending backup for the given userId. */
     public abstract void clearPendingBackup(@UserIdInt int userId);
@@ -384,6 +477,24 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean hasForegroundServiceNotification(String pkg, @UserIdInt int userId,
             String channelId);
+
+    /**
+     * Tell the service lifecycle logic that the given Notification content is now
+     * canonical for any foreground-service visibility policy purposes.
+     *
+     * Returns a description of any FGs-related policy around the given Notification:
+     * not associated with an FGS; ensure display; or only update if already displayed.
+     */
+    public abstract ServiceNotificationPolicy applyForegroundServiceNotification(
+            Notification notification, String tag, int id, String pkg, @UserIdInt int userId);
+
+    /**
+     * Callback from the notification subsystem that the given FGS notification has
+     * been evaluated, and either shown or explicitly overlooked.  This can happen
+     * after either Service.startForeground() or NotificationManager.notify().
+     */
+    public abstract void onForegroundServiceNotificationUpdate(boolean shown,
+            Notification notification, int id, String pkg, @UserIdInt int userId);
 
     /**
      * If the given app has any FGSs whose notifications are in the given channel,
@@ -421,11 +532,37 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void setDeviceOwnerUid(int uid);
 
+    /** Is this a profile owner app? */
+    public abstract boolean isProfileOwner(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uid of the profile owner.
+     * @param profileOwnerUids The profile owner UIDs. The ownership of the array is
+     *                         passed to callee.
+     */
+    public abstract void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids);
+
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids  ActivityManager will take ownership of this Set, the caller
+     *                          shouldn't touch this Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
+
+    /**
+     * is the uid an associated companion app of a userId?
+     * @param userId
+     * @param uid
+     * @return
+     */
+    public abstract boolean isAssociatedCompanionApp(int userId, int uid);
+
     /**
      * Sends a broadcast, assuming the caller to be the system and allowing the inclusion of an
-     * approved whitelist of app Ids >= {@link android.os.Process#FIRST_APPLICATION_UID} that the
+     * approved allowlist of app Ids >= {@link android.os.Process#FIRST_APPLICATION_UID} that the
      * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
-     * automatically whitelisted.
+     * automatically allowlisted.
      *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
@@ -434,7 +571,7 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
-            int userId, int[] appIdWhitelist);
+            int userId, int[] appIdAllowList, @Nullable Bundle bOptions);
 
     /**
      * Add uid to the ActivityManagerService PendingStartActivityUids list.
@@ -456,10 +593,57 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean isPendingTopUid(int uid);
 
-    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long duration);
+    /**
+     * @return the intent for the given intent sender.
+     */
+    @Nullable
+    public abstract Intent getIntentForIntentSender(IIntentSender sender);
 
+    /**
+     * Effectively PendingIntent.getActivityForUser(), but the PendingIntent is
+     * owned by the given uid rather than by the caller (i.e. the system).
+     */
+    public abstract PendingIntent getPendingIntentActivityAsApp(
+            int requestCode, @NonNull Intent intent, int flags, Bundle options,
+            String ownerPkgName, int ownerUid);
+
+    /**
+     * Effectively PendingIntent.getActivityForUser(), but the PendingIntent is
+     * owned by the given uid rather than by the caller (i.e. the system).
+     */
+    public abstract PendingIntent getPendingIntentActivityAsApp(
+            int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
+            String ownerPkgName, int ownerUid);
+
+    /**
+     * @return mBootTimeTempAllowlistDuration of ActivityManagerConstants.
+     */
+    public abstract long getBootTimeTempAllowListDuration();
+
+    /** Register an {@link AnrController} to control the ANR dialog behavior */
+    public abstract void registerAnrController(AnrController controller);
+
+    /** Unregister an {@link AnrController} */
+    public abstract void unregisterAnrController(AnrController controller);
+
+    /**
+     * Is the FGS started from an uid temporarily allowed to have while-in-use permission?
+     */
     public abstract boolean isTempAllowlistedForFgsWhileInUse(int uid);
 
-    public abstract boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
-            @NonNull String packageName);
+    /**
+     * Return the temp allowlist type when server push messaging is over the quota.
+     */
+    public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Returns the capability of the given uid
+     */
+    public abstract @ProcessCapability int getUidCapability(int uid);
+
+    /**
+     * @return The PID list of the isolated process with packages matching the given uid.
+     */
+    @Nullable
+    public abstract List<Integer> getIsolatedProcesses(int uid);
 }

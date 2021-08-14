@@ -47,6 +47,26 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
+    /**
+     * Whether the Notification Assistant can change ranking.
+     */
+    public static final String ENABLE_NAS_RANKING = "enable_nas_ranking";
+
+    /**
+     * Whether the Notification Assistant can prioritize notification.
+     */
+    public static final String ENABLE_NAS_PRIORITIZER = "enable_nas_prioritizer";
+
+    /**
+     * Whether to enable feedback UI for Notification Assistant
+     */
+    public static final String ENABLE_NAS_FEEDBACK = "enable_nas_feedback";
+
+    /**
+     * Whether the Notification Assistant can label a notification not a conversation
+     */
+    public static final String ENABLE_NAS_NOT_CONVERSATION = "enable_nas_not_conversation";
+
     // Flags related to screenshot intelligence
 
     /**
@@ -60,6 +80,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS =
             "screenshot_notification_smart_actions_timeout_ms";
+
+    /**
+     * (int) Timeout value in ms to get Quick Share actions for screenshot notification.
+     */
+    public static final String SCREENSHOT_NOTIFICATION_QUICK_SHARE_ACTIONS_TIMEOUT_MS =
+            "screenshot_notification_quick_share_actions_timeout_ms";
 
     // Flags related to Smart Suggestions - these are read in SmartReplyConstants.
 
@@ -110,12 +136,6 @@ public final class SystemUiDeviceConfigFlags {
     // Flags related to media notifications
 
     /**
-     * (boolean) If {@code true}, enables the seekbar in compact media notifications.
-     */
-    public static final String COMPACT_MEDIA_SEEKBAR_ENABLED =
-            "compact_media_notification_seekbar_enabled";
-
-    /**
      * (int) Maximum number of days to retain the salt for hashing direct share targets in logging
      */
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
@@ -131,6 +151,11 @@ public final class SystemUiDeviceConfigFlags {
      * Whether to show app ops chip for just microphone + camera.
      */
     public static final String PROPERTY_MIC_CAMERA_ENABLED = "camera_mic_icons_enabled";
+
+    /**
+     * Whether to show app ops chip for location.
+     */
+    public static final String PROPERTY_LOCATION_INDICATORS_ENABLED = "location_indicators_enabled";
 
     // Flags related to Assistant
 
@@ -355,11 +380,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_CORNER_FLOW = "enable_screenshot_corner_flow";
 
-    /**
-     * (boolean) Whether scrolling screenshots are enabled.
-     */
-    public static final String SCREENSHOT_SCROLLING_ENABLED = "enable_screenshot_scrolling";
-
     // Flags related to Nav Bar
 
     /**
@@ -390,23 +410,26 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
 
     /**
-     * (float) Weight bonus applied on top sharing shortcuts as per native ranking provided by apps.
-     * Its range need to be 0 ~ 1.
+     * (boolean) Whether dark launch of remote prediction service is enabled.
      */
-    public static final String TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
-            "top_native_ranked_sharing_shortcut_booster";
+    public static final String DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED =
+            "dark_launch_remote_prediction_service_enabled";
 
     /**
-     * (float) Weight bonus applied on 2nd top sharing shortcuts as per native ranking provided by
-     * apps. Its range need to be 0 ~ 1.
+     * (boolean) Whether to enable pinch resizing for PIP.
      */
-    public static final String NON_TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
-            "non_top_native_ranked_sharing_shortcut_booster";
+    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
 
     /**
-     * (boolean) Whether to enable user-drag resizing for PIP.
+     * (boolean) Whether to enable stashing for PIP.
      */
-    public static final String PIP_USER_RESIZE = "pip_user_resize";
+    public static final String PIP_STASHING = "pip_stashing";
+
+    /**
+     * (float) The threshold velocity to cause PiP to be stashed when flinging from one edge to the
+     * other.
+     */
+    public static final String PIP_STASH_MINIMUM_VELOCITY_THRESHOLD = "pip_velocity_threshold";
 
     /**
      * (float) Bottom height in DP for Back Gesture.
@@ -443,6 +466,34 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String BACK_GESTURE_ML_MODEL_THRESHOLD = "back_gesture_ml_model_threshold";
 
+    /**
+     * (boolean) Sharesheet - Whether to use the deprecated
+     * {@link android.service.chooser.ChooserTargetService} API for
+     *  direct share targets. If true, both CTS and Shortcuts will be used to find Direct
+     *  Share targets. If false, only Shortcuts will be used.
+     */
+    public static final String SHARE_USE_SERVICE_TARGETS = "share_use_service_targets";
+
+    /**
+     * (boolean) If true, SysUI provides guardrails for app usage of Direct Share by enforcing
+     * limits on number of targets per app & adjusting scores for apps providing many targets. If
+     * false, this step is skipped. This should be true unless the ranking provider configured by
+     * [some other flag] is expected to manage these incentives.
+     */
+    public static final String APPLY_SHARING_APP_LIMITS_IN_SYSUI =
+            "apply_sharing_app_limits_in_sysui";
+
+    /*
+     * (long) The duration that the home button must be pressed before triggering Assist
+     */
+    public static final String HOME_BUTTON_LONG_PRESS_DURATION_MS =
+            "home_button_long_press_duration_ms";
+
+    /**
+     * (boolean) Whether shortcut integration over app search service is enabled.
+     */
+    public static final String SHORTCUT_APPSEARCH_INTEGRATION =
+            "shortcut_appsearch_integration";
 
     private SystemUiDeviceConfigFlags() {
     }

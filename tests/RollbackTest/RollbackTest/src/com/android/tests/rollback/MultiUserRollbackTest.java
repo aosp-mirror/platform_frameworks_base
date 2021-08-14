@@ -70,6 +70,11 @@ public class MultiUserRollbackTest {
         new RollbackTest().testBasic();
     }
 
+    @Test
+    public void testBadUpdateRollback() throws Exception {
+        new RollbackTest().testBadUpdateRollback();
+    }
+
     /**
      * Install version 1 of the test app. This method is run for both users.
      */

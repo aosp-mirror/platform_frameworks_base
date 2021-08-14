@@ -77,9 +77,13 @@ stubs_defaults {
         // Module sources
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
+        ":framework-appsearch-sources",
         ":framework-connectivity-sources",
+        ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
+        ":framework-permission-s-sources",
+        ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
@@ -106,6 +110,14 @@ stubs_defaults {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
+    },
 }
 
 droidstubs {
@@ -188,6 +200,14 @@ doc_defaults {
         ":current-support-api",
         ":current-androidx-api",
     ],
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
+    },
 }
 
 doc_defaults {

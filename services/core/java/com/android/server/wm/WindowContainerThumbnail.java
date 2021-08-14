@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainerThumbnailProto.HEIGHT;
 import static com.android.server.wm.WindowContainerThumbnailProto.SURFACE_ANIMATOR;
@@ -28,22 +28,21 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.hardware.HardwareBuffer;
 import android.os.Process;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
-
-import java.util.function.Supplier;
 
 /**
  * Represents a surface that is displayed over a subclass of {@link WindowContainer}
@@ -57,30 +56,20 @@ class WindowContainerThumbnail implements Animatable {
     private final SurfaceAnimator mSurfaceAnimator;
     private final int mWidth;
     private final int mHeight;
-    private final boolean mRelative;
-
-    WindowContainerThumbnail(Supplier<Surface> surfaceFactory, Transaction t,
-            WindowContainer container, GraphicBuffer thumbnailHeader) {
-        this(surfaceFactory, t, container, thumbnailHeader, false /* relative */);
-    }
 
     /**
      * @param t Transaction to create the thumbnail in.
      * @param container The sub-class of {@link WindowContainer} to associate this thumbnail with.
      * @param thumbnailHeader A thumbnail or placeholder for thumbnail to initialize with.
-     * @param relative Whether this thumbnail will be a child of the container (and thus positioned
-     *                 relative to it) or not.
      */
-    WindowContainerThumbnail(Supplier<Surface> surfaceFactory, Transaction t,
-            WindowContainer container, GraphicBuffer thumbnailHeader, boolean relative) {
-        this(t, container, thumbnailHeader, relative, surfaceFactory.get(), null);
+    WindowContainerThumbnail(Transaction t, WindowContainer container,
+            HardwareBuffer thumbnailHeader) {
+        this(t, container, thumbnailHeader, null /* animator */);
     }
 
     WindowContainerThumbnail(Transaction t, WindowContainer container,
-            GraphicBuffer thumbnailHeader, boolean relative, Surface drawSurface,
-            SurfaceAnimator animator) {
+            HardwareBuffer thumbnailHeader, SurfaceAnimator animator) {
         mWindowContainer = container;
-        mRelative = relative;
         if (animator != null) {
             mSurfaceAnimator = animator;
         } else {
@@ -99,7 +88,7 @@ class WindowContainerThumbnail implements Animatable {
         // this to the task.
         mSurfaceControl = mWindowContainer.makeChildSurface(mWindowContainer.getTopChild())
                 .setName("thumbnail anim: " + mWindowContainer.toString())
-                .setBufferSize(mWidth, mHeight)
+                .setBLASTLayer()
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(METADATA_WINDOW_TYPE, mWindowContainer.getWindowingMode())
                 .setMetadata(METADATA_OWNER_UID, Process.myUid())
@@ -108,18 +97,14 @@ class WindowContainerThumbnail implements Animatable {
 
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "  THUMBNAIL %s: CREATE", mSurfaceControl);
 
-        // Transfer the thumbnail to the surface
-        drawSurface.copyFrom(mSurfaceControl);
-        drawSurface.attachAndQueueBuffer(thumbnailHeader);
-        drawSurface.release();
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(thumbnailHeader);
+        t.setBuffer(mSurfaceControl, graphicBuffer);
+        t.setColorSpace(mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
         t.show(mSurfaceControl);
 
         // We parent the thumbnail to the container, and just place it on top of anything else in
         // the container.
         t.setLayer(mSurfaceControl, Integer.MAX_VALUE);
-        if (relative) {
-            t.reparent(mSurfaceControl, mWindowContainer.getSurfaceControl());
-        }
     }
 
     void startAnimation(Transaction t, Animation anim) {
@@ -194,9 +179,6 @@ class WindowContainerThumbnail implements Animatable {
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         t.setLayer(leash, Integer.MAX_VALUE);
-        if (mRelative) {
-            t.reparent(leash, mWindowContainer.getSurfaceControl());
-        }
     }
 
     @Override

@@ -21,11 +21,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
+
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
@@ -37,6 +40,8 @@ import java.io.PrintWriter;
  * An active voice interaction session, initiated by a {@link VoiceInteractionService}.
  */
 public abstract class VoiceInteractionSessionService extends Service {
+
+    private static final String TAG = "VoiceInteractionSession";
 
     static final int MSG_NEW_SESSION = 1;
 
@@ -120,10 +125,22 @@ public abstract class VoiceInteractionSessionService extends Service {
             mSession = null;
         }
         mSession = onNewSession(args);
-        try {
-            mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
+        if (deliverSession(token)) {
             mSession.doCreate(mSystemService, token);
-        } catch (RemoteException e) {
+        } else {
+            // TODO(b/178777121): Add an onError() method to let the application know what happened.
+            mSession.doDestroy();
+            mSession = null;
         }
+    }
+
+    private boolean deliverSession(IBinder token) {
+        try {
+            return mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
+        } catch (DeadObjectException ignored) {
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to deliver session: " + e);
+        }
+        return false;
     }
 }

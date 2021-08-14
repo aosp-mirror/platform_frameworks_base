@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"자동으로 연결되지 않습니다."</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"인터넷에 연결되어 있지 않음"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"데이터 전송량 제한이 있는 네트워크에 연결됨"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s을(를) 통해 자동으로 연결됨"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"네트워크 평가 제공업체를 통해 자동으로 연결됨"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s을(를) 통해 연결됨"</string>
@@ -399,6 +400,11 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"비활성화 상태입니다. 전환하려면 탭하세요."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"활성화되었습니다. 전환하려면 탭하세요."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"앱 대기 상태:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"미디어 트랜스코딩 설정"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"트랜스코딩 기본값 재정의"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"트랜스코딩 사용"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>
@@ -418,10 +424,10 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색상 보정"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"색상 보정을 사용하면 기기에 표시되는 색상을 조절할 수 있습니다."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"기기에 색상이 표시되는 방식을 조정합니다. 다음과 같은 상황에서 유용합니다.&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 더욱 정확하게 보고 싶을 때&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중을 위해 색상을 제거하고 싶을 때&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"내 사용량을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"내 사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
@@ -444,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"충전 완료까지 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 완료까지 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 상태 최적화 중"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
@@ -453,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"전원이 연결되었지만 현재 충전할 수 없음"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"충전 완료"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"허용됨"</string>
@@ -495,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"알람 또는 리마인더를 설정하도록 허용"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"이 앱에서 알람 또는 다른 시간 기반 일정을 예약하도록 허용합니다. 이렇게 하면 기기를 사용하고 있지 않더라도 앱이 절전 모드에서 해제된 후 실행됩니다. 이 권한을 취소하면 앱이 오작동할 수 있으며 특히 이 앱에서 예약한 모든 알람은 더 이상 작동하지 않습니다."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"일정 예약, 알람, 리마인더, 이벤트"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
@@ -509,6 +523,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"사용 중지할 때까지"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"휴대전화 스피커"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>
@@ -546,12 +561,48 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"제한된 프로필을 만들기 전에 화면 잠금을 설정하여 앱과 개인 데이터를 보호해야 합니다."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"잠금 설정"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>(으)로 전환"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"새로운 사용자를 만드는 중…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
+    <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"기기 기본값"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"유선 헤드폰"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"사용"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"사용 안 함"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"이동통신사 네트워크 변경"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G 이상"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"모바일 데이터 꺼짐"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"데이터를 사용하도록 설정되지 않음"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"휴대전화의 신호가 없습니다."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"휴대전화 신호 막대가 하나입니다."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"휴대전화 신호 막대가 두 개입니다."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"휴대전화 신호 막대가 세 개입니다."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"휴대전화의 신호가 강합니다."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"데이터가 없습니다."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"데이터 신호 막대가 하나입니다."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"데이터 신호 막대가 두 개입니다."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"데이터 신호 막대가 세 개입니다."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"데이터 신호가 강합니다."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"이더넷에 연결되었습니다."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"통화 모드가 없습니다."</string>
 </resources>

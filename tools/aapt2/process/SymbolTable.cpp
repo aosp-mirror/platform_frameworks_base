@@ -197,9 +197,10 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
   std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>();
   symbol->is_public = (sr.entry->visibility.level == Visibility::Level::kPublic);
 
-  if (sr.package->id && sr.type->id && sr.entry->id) {
-    symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());
-    symbol->is_dynamic = (sr.package->id.value() == 0);
+  if (sr.entry->id) {
+    symbol->id = sr.entry->id.value();
+    symbol->is_dynamic =
+        (sr.entry->id.value().package_id() == 0) || sr.entry->visibility.staged_api;
   }
 
   if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
@@ -227,8 +228,7 @@ bool AssetManagerSymbolSource::AddAssetPath(const StringPiece& path) {
       apk_assets.push_back(apk_asset.get());
     }
 
-    asset_manager_.SetApkAssets(apk_assets, true /* invalidate_caches */,
-                                false /* filter_incompatible_configs */);
+    asset_manager_.SetApkAssets(apk_assets);
     return true;
   }
   return false;
@@ -351,9 +351,9 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
       return true;
     }
 
-    auto value = asset_manager_.GetResource(res_id.id, true /* may_be_bag */);
-    if (value.has_value()) {
-      type_spec_flags = value->flags;
+    auto flags = asset_manager_.GetResourceTypeSpecFlags(res_id.id);
+    if (flags.has_value()) {
+      type_spec_flags = *flags;
       found = true;
       return false;
     }
@@ -371,11 +371,12 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = res_id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package);
   }
 
   if (s) {
     s->is_public = (type_spec_flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package) ||
+                    (type_spec_flags & android::ResTable_typeSpec::SPEC_STAGED_API) != 0;
     return s;
   }
   return {};
@@ -406,8 +407,8 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     return {};
   }
 
-  auto value = asset_manager_.GetResource(id.id, true /* may_be_bag */);
-  if (!value.has_value()) {
+  auto flags = asset_manager_.GetResourceTypeSpecFlags(id.id);
+  if (!flags.has_value()) {
     return {};
   }
 
@@ -418,11 +419,12 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package);
   }
 
   if (s) {
-    s->is_public = (value->flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_public = (*flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package) ||
+                    (*flags & android::ResTable_typeSpec::SPEC_STAGED_API) != 0;
     return s;
   }
   return {};

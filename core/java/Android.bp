@@ -112,9 +112,12 @@ filegroup {
     srcs: [
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
         "android/os/IThermalEventListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
+        "android/os/IPowerManager.aidl",
     ],
 }
 
@@ -151,6 +154,7 @@ filegroup {
 filegroup {
     name: "framework-connectivity-shared-srcs",
     srcs: [
+        "android/util/IndentingPrintWriter.java",
         "android/util/LocalLog.java",
         // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
         "com/android/internal/util/IndentingPrintWriter.java",
@@ -159,6 +163,49 @@ filegroup {
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
         "com/android/internal/util/WakeupMessage.java",
+    ],
+}
+
+// keep these files in sync with the apex/jobscheduler/service jarjar-rules.txt for
+// the jobscheduler module.
+filegroup {
+    name: "framework-jobscheduler-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "com/android/internal/util/ArrayUtils.java",
+        "com/android/internal/util/BitUtils.java",
+        "com/android/internal/util/CollectionUtils.java",
+        "com/android/internal/util/ConcurrentUtils.java",
+        "com/android/internal/util/DumpUtils.java",
+        "com/android/internal/util/FastPrintWriter.java",
+        "com/android/internal/util/FastXmlSerializer.java",
+        "com/android/internal/util/FunctionalUtils.java",
+        "com/android/internal/util/ParseUtils.java",
+        "com/android/internal/util/RingBufferIndices.java",
+        "com/android/internal/util/StatLogger.java",
+        "com/android/internal/util/XmlUtils.java",
+    ],
+}
+
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "framework-permission-s-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "com/android/internal/infra/AndroidFuture.java",
+        "com/android/internal/infra/ServiceConnector.java",
+        "com/android/internal/infra/AndroidFuture.aidl",
+        "com/android/internal/infra/IAndroidFuture.aidl",
+        "android/os/HandlerExecutor.java",
+    ],
+}
+
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "service-permission-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
+        "com/android/internal/util/dump/DualDumpOutputStream.java",
     ],
 }
 
@@ -189,8 +236,10 @@ filegroup {
     name: "incremental_manager_aidl",
     srcs: [
         "android/os/incremental/IIncrementalService.aidl",
+        "android/os/incremental/IStorageLoadingProgressListener.aidl",
         "android/os/incremental/IncrementalNewFileParams.aidl",
         "android/os/incremental/IStorageHealthListener.aidl",
+        "android/os/incremental/PerUidReadTimeouts.aidl",
         "android/os/incremental/StorageHealthCheckParams.aidl",
     ],
 }
@@ -198,72 +247,61 @@ filegroup {
 filegroup {
     name: "activity_manager_procstate_aidl",
     srcs: [
-        // internal only
+        "android/app/ProcessStateEnum.aidl",
     ],
 }
 
-aidl_interface {
-    name: "libincremental_aidl",
-    unstable: true,
+cc_defaults {
+    name: "incremental_default",
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Wextra-semi",
+        "-Werror",
+        "-Wzero-as-null-pointer-constant",
+        "-DANDROID_BASE_UNIQUE_FD_DISABLE_IMPLICIT_CONVERSION",
+    ],
+    shared_libs: [
+        "libbinder",
+        "libutils",
+    ],
+    aidl: {
+        include_dirs: [
+            "frameworks/native/aidl/binder",
+        ],
+        export_aidl_headers: true,
+    },
+}
+
+cc_library {
+    name: "libincremental_aidl-cpp",
     srcs: [
         ":incremental_aidl",
     ],
-    backend: {
-        java: {
-            sdk_version: "28",
-        },
-        cpp: {
-            enabled: true,
-        },
-        ndk: {
-            enabled: true,
-        },
-    },
+    defaults: ["incremental_default"],
 }
 
-aidl_interface {
-    name: "libdataloader_aidl",
-    unstable: true,
+cc_library {
+    name: "libdataloader_aidl-cpp",
     srcs: [
         ":dataloader_aidl",
     ],
-    imports: [
-        "libincremental_aidl",
+    defaults: ["incremental_default"],
+    shared_libs: [
+        "libincremental_aidl-cpp",
     ],
-    backend: {
-        java: {
-            sdk_version: "28",
-        },
-        cpp: {
-            enabled: true,
-        },
-        ndk: {
-            enabled: false,
-        },
-    },
 }
 
-aidl_interface {
-    name: "libincremental_manager_aidl",
-    unstable: true,
+cc_library {
+    name: "libincremental_manager_aidl-cpp",
     srcs: [
         ":incremental_manager_aidl",
     ],
-    imports: [
-        "libincremental_aidl",
-        "libdataloader_aidl",
+    defaults: ["incremental_default"],
+    shared_libs: [
+        "libincremental_aidl-cpp",
+        "libdataloader_aidl-cpp",
     ],
-    backend: {
-        java: {
-            sdk_version: "28",
-        },
-        cpp: {
-            enabled: true,
-        },
-        ndk: {
-            enabled: false,
-        },
-    },
 }
 
 // Build Rust bindings for PermissionController. Needed by keystore2.
@@ -308,8 +346,10 @@ aidl_interface {
 filegroup {
     name: "framework-telephony-common-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
+        "android/util/IndentingPrintWriter.java",
         "android/util/LocalLog.java",
         "android/util/TimeUtils.java",
         "com/android/internal/os/SomeArgs.java",
@@ -320,7 +360,6 @@ filegroup {
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IState.java",
         "com/android/internal/util/IndentingPrintWriter.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
         "com/android/internal/util/UserIcons.java",
@@ -332,10 +371,10 @@ filegroup {
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/HandlerExecutor.java",
         "android/util/LocalLog.java",
         "com/android/internal/util/IState.java",
-        "com/android/internal/util/Preconditions.java",
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
     ],
@@ -344,16 +383,11 @@ filegroup {
 filegroup {
     name: "framework-ims-common-shared-srcs",
     srcs: [
+        ":modules-utils-preconditions-srcs",
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "com/android/internal/os/SomeArgs.java",
-        "com/android/internal/util/Preconditions.java",
     ],
-}
-
-filegroup {
-    name: "framework-wifi-util-lib-aidls",
-    srcs: ["android/content/pm/ParceledListSlice.aidl"],
 }
 
 // utility classes statically linked into wifi-service
@@ -376,3 +410,31 @@ filegroup {
         "//packages/modules/Wifi/service",
     ],
 }
+
+// protolog start
+filegroup {
+    name: "protolog-common-src",
+    srcs: [
+        "com/android/internal/protolog/common/**/*.java",
+    ],
+}
+
+java_library {
+    name: "protolog-lib",
+    platform_apis: true,
+    srcs: [
+        "com/android/internal/protolog/ProtoLogImpl.java",
+        "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
+        ":protolog-common-src",
+    ],
+}
+
+java_library {
+    name: "protolog-groups",
+    srcs: [
+        "com/android/internal/protolog/ProtoLogGroup.java",
+        ":protolog-common-src",
+    ],
+}
+
+// protolog end

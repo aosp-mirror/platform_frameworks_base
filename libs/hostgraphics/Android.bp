@@ -14,6 +14,12 @@ cc_library_host_static {
         "-Wno-unused-parameter",
     ],
 
+    static_libs: [
+        "libbase",
+        "libmath",
+        "libutils",
+    ],
+
     srcs: [
         ":libui_host_common",
         "Fence.cpp",
@@ -29,6 +35,7 @@ cc_library_host_static {
         "frameworks/native/libs/nativebase/include",
         "frameworks/native/libs/nativewindow/include",
         "frameworks/native/libs/arect/include",
+        "frameworks/native/libs/ui/include_private",
     ],
     export_include_dirs: ["."],
 

@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.storage.IStorageManager;
@@ -52,6 +53,7 @@ import android.os.strictmode.ResourceMismatchViolation;
 import android.os.strictmode.ServiceConnectionLeakedViolation;
 import android.os.strictmode.SqliteObjectLeakedViolation;
 import android.os.strictmode.UnbufferedIoViolation;
+import android.os.strictmode.UnsafeIntentLaunchViolation;
 import android.os.strictmode.UntaggedSocketViolation;
 import android.os.strictmode.Violation;
 import android.os.strictmode.WebViewMethodCalledOnWrongThreadViolation;
@@ -60,6 +62,7 @@ import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
 import android.util.Slog;
+import android.util.SparseLongArray;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -84,8 +87,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -257,6 +258,7 @@ public final class StrictMode {
             DETECT_VM_NON_SDK_API_USAGE,
             DETECT_VM_IMPLICIT_DIRECT_BOOT,
             DETECT_VM_INCORRECT_CONTEXT_USE,
+            DETECT_VM_UNSAFE_INTENT_LAUNCH,
             PENALTY_GATHER,
             PENALTY_LOG,
             PENALTY_DIALOG,
@@ -298,6 +300,8 @@ public final class StrictMode {
     private static final int DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED = 1 << 11;
     /** @hide */
     private static final int DETECT_VM_INCORRECT_CONTEXT_USE = 1 << 12;
+    /** @hide */
+    private static final int DETECT_VM_UNSAFE_INTENT_LAUNCH = 1 << 13;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -855,6 +859,7 @@ public final class StrictMode {
              * <p>In the Honeycomb release this includes leaks of SQLite cursors, Activities, and
              * other closable objects but will likely expand in future releases.
              */
+            @SuppressWarnings("AndroidFrameworkCompatChange")
             public @NonNull Builder detectAll() {
                 detectLeakedSqlLiteObjects();
 
@@ -885,6 +890,9 @@ public final class StrictMode {
                 }
                 if (targetSdk >= Build.VERSION_CODES.R) {
                     detectIncorrectContextUse();
+                }
+                if (targetSdk >= Build.VERSION_CODES.S) {
+                    detectUnsafeIntentLaunch();
                 }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
@@ -1044,27 +1052,80 @@ public final class StrictMode {
             /**
              * Detect attempts to invoke a method on a {@link Context} that is not suited for such
              * operation.
-             * <p>An example of this is trying to obtain an instance of visual service (e.g.
+             * <p>An example of this is trying to obtain an instance of UI service (e.g.
              * {@link android.view.WindowManager}) from a non-visual {@link Context}. This is not
              * allowed, since a non-visual {@link Context} is not adjusted to any visual area, and
              * therefore can report incorrect metrics or resources.
              * @see Context#getDisplay()
              * @see Context#getSystemService(String)
-             * @hide
              */
-            @TestApi
             public @NonNull Builder detectIncorrectContextUse() {
                 return enable(DETECT_VM_INCORRECT_CONTEXT_USE);
             }
 
             /**
              * Disable detection of incorrect context use.
-             * TODO(b/149790106): Fix usages and remove.
+             *
+             * @see #detectIncorrectContextUse()
+             *
              * @hide
              */
             @TestApi
             public @NonNull Builder permitIncorrectContextUse() {
                 return disable(DETECT_VM_INCORRECT_CONTEXT_USE);
+            }
+
+            /**
+             * Detect when your app launches an {@link Intent} which originated
+             * from outside your app.
+             * <p>
+             * Violations may indicate security vulnerabilities in the design of
+             * your app, where a malicious app could trick you into granting
+             * {@link Uri} permissions or launching unexported components. Here
+             * are some typical design patterns that can be used to safely
+             * resolve these violations:
+             * <ul>
+             * <li>The ideal approach is to migrate to using a
+             * {@link android.app.PendingIntent}, which ensures that your launch is
+             * performed using the identity of the original creator, completely
+             * avoiding the security issues described above.
+             * <li>If using a {@link android.app.PendingIntent} isn't feasible, an
+             * alternative approach is to create a brand new {@link Intent} and
+             * carefully copy only specific values from the original
+             * {@link Intent} after careful validation.
+             * </ul>
+             * <p>
+             * Note that this <em>may</em> detect false-positives if your app
+             * sends itself an {@link Intent} which is first routed through the
+             * OS, such as using {@link Intent#createChooser}. In these cases,
+             * careful inspection is required to determine if the return point
+             * into your app is appropriately protected with a signature
+             * permission or marked as unexported. If the return point is not
+             * protected, your app is likely vulnerable to malicious apps.
+             *
+             * @see Context#startActivity(Intent)
+             * @see Context#startService(Intent)
+             * @see Context#bindService(Intent, ServiceConnection, int)
+             * @see Context#sendBroadcast(Intent)
+             * @see android.app.Activity#setResult(int, Intent)
+             */
+            public @NonNull Builder detectUnsafeIntentLaunch() {
+                return enable(DETECT_VM_UNSAFE_INTENT_LAUNCH);
+            }
+
+            /**
+             * Permit your app to launch any {@link Intent} which originated
+             * from outside your app.
+             * <p>
+             * Disabling this check is <em>strongly discouraged</em>, as
+             * violations may indicate security vulnerabilities in the design of
+             * your app, where a malicious app could trick you into granting
+             * {@link Uri} permissions or launching unexported components.
+             *
+             * @see #detectUnsafeIntentLaunch()
+             */
+            public @NonNull Builder permitUnsafeIntentLaunch() {
+                return disable(DETECT_VM_UNSAFE_INTENT_LAUNCH);
             }
 
             /**
@@ -1525,7 +1586,9 @@ public final class StrictMode {
         // Map from violation stacktrace hashcode -> uptimeMillis of
         // last violation.  No locking needed, as this is only
         // accessed by the same thread.
+        /** Temporarily retained; appears to be missing UnsupportedAppUsage annotation */
         private ArrayMap<Integer, Long> mLastViolationTime;
+        private SparseLongArray mRealLastViolationTime;
 
         public AndroidBlockGuardPolicy(@ThreadPolicyMask int threadPolicyMask) {
             mThreadPolicyMask = threadPolicyMask;
@@ -1759,17 +1822,17 @@ public final class StrictMode {
             long lastViolationTime = 0;
             long now = SystemClock.uptimeMillis();
             if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
-                if (mLastViolationTime != null) {
-                    Long vtime = mLastViolationTime.get(crashFingerprint);
+                if (mRealLastViolationTime != null) {
+                    Long vtime = mRealLastViolationTime.get(crashFingerprint);
                     if (vtime != null) {
                         lastViolationTime = vtime;
                     }
-                    clampViolationTimeMap(mLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
+                    clampViolationTimeMap(mRealLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
                                 Math.max(MIN_DIALOG_INTERVAL_MS, MIN_DROPBOX_INTERVAL_MS)));
                 } else {
-                    mLastViolationTime = new ArrayMap<>(1);
+                    mRealLastViolationTime = new SparseLongArray(1);
                 }
-                mLastViolationTime.put(crashFingerprint, now);
+                mRealLastViolationTime.put(crashFingerprint, now);
             }
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
@@ -2114,6 +2177,11 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static boolean vmUnsafeIntentLaunchEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_UNSAFE_INTENT_LAUNCH) != 0;
+    }
+
+    /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
@@ -2165,16 +2233,17 @@ public final class StrictMode {
         }
 
         final int uid = android.os.Process.myUid();
-        String msg = "Detected cleartext network traffic from UID " + uid;
+        final StringBuilder msg = new StringBuilder("Detected cleartext network traffic from UID ")
+                .append(uid);
         if (rawAddr != null) {
             try {
-                msg += " to " + InetAddress.getByAddress(rawAddr);
+                msg.append(" to ").append(InetAddress.getByAddress(rawAddr));
             } catch (UnknownHostException ignored) {
             }
         }
-        msg += HexDump.dumpHexString(firstPacket).trim() + " ";
+        msg.append(HexDump.dumpHexString(firstPacket).trim()).append(' ');
         final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
-        onVmPolicyViolation(new CleartextNetworkViolation(msg), forceDeath);
+        onVmPolicyViolation(new CleartextNetworkViolation(msg.toString()), forceDeath);
     }
 
     /** @hide */
@@ -2190,6 +2259,75 @@ public final class StrictMode {
     /** @hide */
     public static void onIncorrectContextUsed(String message, Throwable originStack) {
         onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
+    }
+
+    /**
+     * A helper method to verify if the {@code context} has a proper {@link Configuration} to obtain
+     * {@link android.view.LayoutInflater}, {@link android.view.ViewConfiguration} or
+     * {@link android.view.GestureDetector}. Throw {@link IncorrectContextUseViolation} if the
+     * {@code context} doesn't have a proper configuration.
+     * <p>
+     * Note that the context created via {@link Context#createConfigurationContext(Configuration)}
+     * is also regarded as a context with a proper configuration because the {@link Configuration}
+     * is handled by developers.
+     * </p>
+     * @param context The context to verify if it is a display associative context
+     * @param methodName The asserted method name
+     *
+     * @see Context#isConfigurationContext()
+     * @see Context#createConfigurationContext(Configuration)
+     * @see Context#getSystemService(String)
+     * @see Context#LAYOUT_INFLATER_SERVICE
+     * @see android.view.ViewConfiguration#get(Context)
+     * @see android.view.LayoutInflater#from(Context)
+     * @see IncorrectContextUseViolation
+     *
+     * @hide
+     */
+    public static void assertConfigurationContext(@NonNull Context context,
+            @NonNull String methodName) {
+        if (vmIncorrectContextUseEnabled() && !context.isConfigurationContext()) {
+            final String errorMessage = "Tried to access the API:" + methodName + " which needs to"
+                    + " have proper configuration from a non-UI Context:" + context;
+            final String message = "The API:" + methodName + " needs a proper configuration."
+                    + " Use UI contexts such as an activity or a context created"
+                    + " via createWindowContext(Display, int, Bundle) or "
+                    + " createConfigurationContext(Configuration) with a proper configuration.";
+            final Exception exception = new IllegalAccessException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + " " + message, exception);
+        }
+    }
+
+    /**
+     * A helper method to verify if the {@code context} is a UI context and throw
+     * {@link IncorrectContextUseViolation} if the {@code context} is not a UI context.
+     *
+     * @param context The context to verify if it is a UI context
+     * @param methodName The asserted method name
+     *
+     * @see Context#isUiContext()
+     * @see IncorrectContextUseViolation
+     *
+     * @hide
+     */
+    public static void assertUiContext(@NonNull Context context, @NonNull String methodName) {
+        if (vmIncorrectContextUseEnabled() && !context.isUiContext()) {
+            final String errorMessage = "Tried to access UI related API:" + methodName
+                    + " from a non-UI Context:" + context;
+            final String message = methodName + " should be accessed from Activity or other UI "
+                    + "Contexts. Use an Activity or a Context created with "
+                    + "Context#createWindowContext(int, Bundle), which are adjusted to "
+                    + "the configuration and visual bounds of an area on screen.";
+            final Exception exception = new IllegalAccessException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + " " + message, exception);
+        }
+    }
+
+    /** @hide */
+    public static void onUnsafeIntentLaunch(Intent intent) {
+        onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent));
     }
 
     /** Assume locked until we hear otherwise */
@@ -2231,18 +2369,19 @@ public final class StrictMode {
     // Map from VM violation fingerprint to uptime millis.
     @UnsupportedAppUsage
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
+    private static final SparseLongArray sRealLastVmViolationTime = new SparseLongArray();
 
     /**
      * Clamp the given map by removing elements with timestamp older than the given retainSince.
      */
-    private static void clampViolationTimeMap(final @NonNull Map<Integer, Long> violationTime,
+    private static void clampViolationTimeMap(final @NonNull SparseLongArray violationTime,
             final long retainSince) {
-        final Iterator<Map.Entry<Integer, Long>> iterator = violationTime.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Integer, Long> e = iterator.next();
-            if (e.getValue() < retainSince) {
+        for (int i = 0; i < violationTime.size(); ) {
+            if (violationTime.valueAt(i) < retainSince) {
                 // Remove stale entries
-                iterator.remove();
+                violationTime.removeAt(i);
+            } else {
+                i++;
             }
         }
         // Ideally we'd cap the total size of the map, though it'll involve quickselect of topK,
@@ -2273,15 +2412,15 @@ public final class StrictMode {
         long lastViolationTime;
         long timeSinceLastViolationMillis = Long.MAX_VALUE;
         if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
-            synchronized (sLastVmViolationTime) {
-                if (sLastVmViolationTime.containsKey(fingerprint)) {
-                    lastViolationTime = sLastVmViolationTime.get(fingerprint);
+            synchronized (sRealLastVmViolationTime) {
+                if (sRealLastVmViolationTime.indexOfKey(fingerprint) >= 0) {
+                    lastViolationTime = sRealLastVmViolationTime.get(fingerprint);
                     timeSinceLastViolationMillis = now - lastViolationTime;
                 }
                 if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
-                    sLastVmViolationTime.put(fingerprint, now);
+                    sRealLastVmViolationTime.put(fingerprint, now);
                 }
-                clampViolationTimeMap(sLastVmViolationTime,
+                clampViolationTimeMap(sRealLastVmViolationTime,
                         now - Math.max(MIN_VM_INTERVAL_MS, MIN_LOG_INTERVAL_MS));
             }
         }

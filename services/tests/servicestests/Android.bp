@@ -37,12 +37,15 @@ android_test {
         "services.net",
         "services.people",
         "services.usage",
+        "services.uwb",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",
         "androidx.test.ext.truth",
         "androidx.test.runner",
         "androidx.test.rules",
+        "cts-wm-util",
+        "platform-compat-test-rules",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
@@ -53,11 +56,14 @@ android_test {
         "platformprotosnano",
         "hamcrest-library",
         "servicestests-utils",
+        "service-appsearch",
         "service-jobscheduler",
         "service-permission.impl",
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
+        "junit",
+        "platform-compat-test-rules",
     ],
 
     aidl: {
@@ -65,8 +71,10 @@ android_test {
     },
 
     libs: [
-        "android.hidl.manager-V1.0-java",
+        "android.hardware.power-V1-java",
         "android.hardware.tv.cec-V1.0-java",
+        "android.hardware.vibrator-V2-java",
+        "android.hidl.manager-V1.0-java",
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
@@ -84,6 +92,7 @@ android_test {
         "libbinder",
         "libc++",
         "libcutils",
+        "libicing",
         "liblog",
         "liblzma",
         "libnativehelper",
@@ -108,9 +117,25 @@ android_test {
         ":PackageParserTestApp1",
         ":PackageParserTestApp2",
         ":PackageParserTestApp3",
+        ":PackageParserTestApp4",
         ":apex.test",
+        ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
+        ":com.android.apex.cts.shim.v1_prebuilt",
+        ":com.android.apex.cts.shim.v2_different_certificate_prebuilt",
+        ":com.android.apex.cts.shim.v2_unsigned_apk_container_prebuilt",
     ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
+}
+
+java_library {
+    name: "servicestests-core-utils",
+    srcs: [
+        "src/com/android/server/pm/PackageSettingBuilder.java",
+    ],
+    static_libs: [
+        "services.core",
+    ],
 }
 
 java_library {
@@ -164,9 +189,12 @@ java_genrule {
         ":FrameworksServicesTests_install_split_feature_a",
         ":FrameworksServicesTests_install_uses_sdk_0",
         ":FrameworksServicesTests_install_uses_sdk_q0",
-        ":FrameworksServicesTests_install_uses_sdk_r",
+        ":FrameworksServicesTests_install_uses_sdk_q0_r0",
+        ":FrameworksServicesTests_install_uses_sdk_r_none",
         ":FrameworksServicesTests_install_uses_sdk_r0",
         ":FrameworksServicesTests_install_uses_sdk_r5",
+        ":FrameworksServicesTests_install_uses_sdk_r0_s0",
+        ":FrameworksServicesTests_install_uses_sdk_r0_s5",
     ],
     out: ["FrameworkServicesTests_apks_as_resources.res.zip"],
     tools: ["soong_zip"],

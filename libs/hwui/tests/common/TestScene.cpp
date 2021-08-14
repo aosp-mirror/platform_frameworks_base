@@ -22,8 +22,9 @@ namespace test {
 
 // Not a static global because we need to force the map to be constructed
 // before we try to add things to it.
-std::unordered_map<std::string, TestScene::Info>& TestScene::testMap() {
-    static std::unordered_map<std::string, TestScene::Info> testMap;
+// std::map because tests sorted by name is a prettier output
+std::map<std::string, TestScene::Info>& TestScene::testMap() {
+    static std::map<std::string, TestScene::Info> testMap;
     return testMap;
 }
 

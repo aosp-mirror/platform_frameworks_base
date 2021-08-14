@@ -197,6 +197,7 @@ message UsbPortManagerProto {
 
     optional bool is_simulation_active = 1;
     repeated UsbPortInfoProto usb_ports = 2;
+    optional bool enable_usb_data_signaling = 3;
 }
 
 message UsbPortInfoProto {

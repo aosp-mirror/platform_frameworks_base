@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.appprediction",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.appprediction-sources"],
     libs: ["services.core"],
 }

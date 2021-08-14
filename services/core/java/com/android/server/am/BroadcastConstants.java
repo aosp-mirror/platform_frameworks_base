@@ -64,7 +64,8 @@ public class BroadcastConstants {
     public float DEFERRAL_DECAY_FACTOR = DEFAULT_DEFERRAL_DECAY_FACTOR;
     // Minimum that the deferral time can decay to until the backlog fully clears
     public long DEFERRAL_FLOOR = DEFAULT_DEFERRAL_FLOOR;
-    // For how long after a whitelisted receiver's start its process can start a background activity
+    // For a receiver that has been allowed to start background activities, how long after it
+    // started its process can start a background activity.
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     // Settings override tracking for this instance

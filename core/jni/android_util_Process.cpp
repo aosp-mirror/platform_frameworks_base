@@ -248,10 +248,8 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         return;
     }
 
-    bool isDefault = false;
     if (grp < 0) {
         grp = SP_FOREGROUND;
-        isDefault = true;
     }
 
     if (kDebugPolicy) {
@@ -286,7 +284,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     while ((de = readdir(d))) {
         int t_pid;
         int t_pri;
-        int err;
+        std::string taskprofile;
 
         if (de->d_name[0] == '.')
             continue;
@@ -308,25 +306,49 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             }
         }
 
-        if (isDefault) {
-            if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
-                // This task wants to stay at background
-                // update its cpuset so it doesn't only run on bg core(s)
-                err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
-                if (err != NO_ERROR) {
-                    signalExceptionForGroupError(env, -err, t_pid);
+        errno = 0;
+        // grp == SP_BACKGROUND. Set background cpuset policy profile for all threads.
+        if (grp == SP_BACKGROUND) {
+            if (!SetTaskProfiles(t_pid, {"CPUSET_SP_BACKGROUND"}, true)) {
+                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
+                break;
+            }
+            continue;
+        }
+
+        // grp != SP_BACKGROUND. Only change the cpuset cgroup for low priority thread, so it could
+        // preserve it sched policy profile setting.
+        if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
+            switch (grp) {
+                case SP_SYSTEM:
+                    taskprofile = "ServiceCapacityLow";
                     break;
-                }
-                continue;
+                case SP_RESTRICTED:
+                    taskprofile = "ServiceCapacityRestricted";
+                    break;
+                case SP_FOREGROUND:
+                case SP_AUDIO_APP:
+                case SP_AUDIO_SYS:
+                    taskprofile = "ProcessCapacityHigh";
+                    break;
+                case SP_TOP_APP:
+                    taskprofile = "ProcessCapacityMax";
+                    break;
+                default:
+                    taskprofile = "ProcessCapacityNormal";
+                    break;
+            }
+            if (!SetTaskProfiles(t_pid, {taskprofile}, true)) {
+                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
+                break;
+            }
+        // Change the cpuset policy profile for non-low priority thread according to the grp
+        } else {
+            if (!SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true)) {
+                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
+                break;
             }
         }
-
-        err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
-        if (err != NO_ERROR) {
-            signalExceptionForGroupError(env, -err, t_pid);
-            break;
-        }
-
     }
     closedir(d);
 }
@@ -354,6 +376,10 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
         signalExceptionForGroupError(env, errno, pid);
     }
     return (int) sp;
+}
+
+jint android_os_Process_createProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid) {
+    return createProcessGroup(uid, pid);
 }
 
 /** Sample CPUset list format:
@@ -1313,6 +1339,7 @@ static const JNINativeMethod methods[] = {
         {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
         {"setProcessGroup", "(II)V", (void*)android_os_Process_setProcessGroup},
         {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
+        {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
         {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
         {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},

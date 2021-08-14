@@ -19,14 +19,12 @@ package android.wm;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
-import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
 import android.perftests.utils.PerfManualStatusReporter;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
@@ -48,23 +46,21 @@ import org.junit.Test;
 public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
         implements ManualBenchmarkState.CustomizedIterationListener {
 
-    private static final int PROFILED_ITERATIONS = 2;
-
     @Rule
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
 
     @BeforeClass
     public static void setUpClass() {
         // Get the permission to use most window types.
-        sUiAutomation.adoptShellPermissionIdentity();
+        getUiAutomation().adoptShellPermissionIdentity();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        sUiAutomation.dropShellPermissionIdentity();
+        getUiAutomation().dropShellPermissionIdentity();
     }
 
-    /** The last {@link #PROFILED_ITERATIONS} will provide the information of method profiling. */
+    /** The last customized iterations will provide the information of method profiling. */
     @Override
     public void onStart(int iteration) {
         startProfiling(WindowAddRemovePerfTest.class.getSimpleName()
@@ -80,17 +76,13 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
     @ManualBenchmarkTest(warmupDurationNs = TIME_1_S_IN_NS, targetTestDurationNs = TIME_5_S_IN_NS)
     public void testAddRemoveWindow() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        state.setCustomizedIterations(PROFILED_ITERATIONS, this);
+        state.setCustomizedIterations(getProfilingIterations(), this);
         new TestWindow().runBenchmark(state);
     }
 
     private static class TestWindow extends BaseIWindow {
         final WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
-        final Rect mOutFrame = new Rect();
-        final Rect mOutContentInsets = new Rect();
-        final Rect mOutStableInsets = new Rect();
-        final DisplayCutout.ParcelableWrapper mOutDisplayCutout =
-                new DisplayCutout.ParcelableWrapper();
+        final InsetsState mRequestedVisibility = new InsetsState();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
 
@@ -109,9 +101,9 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
                 final InputChannel inputChannel = new InputChannel();
 
                 long startTime = SystemClock.elapsedRealtimeNanos();
-                session.addToDisplay(this, mSeq, mLayoutParams, View.VISIBLE,
-                        Display.DEFAULT_DISPLAY, mOutFrame, mOutContentInsets, mOutStableInsets,
-                        mOutDisplayCutout, inputChannel, mOutInsetsState, mOutControls);
+                session.addToDisplay(this, mLayoutParams, View.VISIBLE,
+                        Display.DEFAULT_DISPLAY, mRequestedVisibility, inputChannel,
+                        mOutInsetsState, mOutControls);
                 final long elapsedTimeNsOfAdd = SystemClock.elapsedRealtimeNanos() - startTime;
                 state.addExtraResult("add", elapsedTimeNsOfAdd);
 

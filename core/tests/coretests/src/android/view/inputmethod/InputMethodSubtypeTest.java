@@ -125,7 +125,7 @@ public class InputMethodSubtypeTest {
         assertEquals("he", clonedSubtypeHe.getLocale());
     }
 
-    private static final InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {
+    private static InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {
         Parcel parcel = null;
         try {
             parcel = Parcel.obtain();

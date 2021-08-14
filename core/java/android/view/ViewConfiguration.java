@@ -16,10 +16,9 @@
 
 package android.view;
 
-import static android.os.StrictMode.vmIncorrectContextUseEnabled;
-
 import android.annotation.FloatRange;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.Activity;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -33,7 +32,6 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
@@ -309,6 +307,18 @@ public class ViewConfiguration {
      */
     private static final float AMBIGUOUS_GESTURE_MULTIPLIER = 2f;
 
+    /**
+     * The timeout value in milliseconds to adjust the selection span and actions for the selected
+     * text when TextClassifier has been initialized.
+     */
+    private static final int SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND = 200;
+
+    /**
+     * The timeout value in milliseconds to adjust the selection span and actions for the selected
+     * text when TextClassifier has not been initialized.
+     */
+    private static final int SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND = 500;
+
     private final boolean mConstructedWithContext;
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
@@ -334,6 +344,8 @@ public class ViewConfiguration {
     private final float mHorizontalScrollFactor;
     private final boolean mShowMenuShortcutsWhenKeyboardPresent;
     private final long mScreenshotChordKeyTimeout;
+    private final int mSmartSelectionInitializedTimeout;
+    private final int mSmartSelectionInitializingTimeout;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -377,6 +389,8 @@ public class ViewConfiguration {
         // Getter throws if mConstructedWithContext is false so doesn't matter what
         // this value is.
         mMinScalingSpan = 0;
+        mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
+        mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
     }
 
     /**
@@ -391,7 +405,7 @@ public class ViewConfiguration {
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
-    private ViewConfiguration(Context context) {
+    private ViewConfiguration(@UiContext Context context) {
         mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
@@ -487,6 +501,11 @@ public class ViewConfiguration {
 
         mScreenshotChordKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_screenshotChordKeyTimeout);
+
+        mSmartSelectionInitializedTimeout = res.getInteger(
+                com.android.internal.R.integer.config_smartSelectionInitializedTimeoutMillis);
+        mSmartSelectionInitializingTimeout = res.getInteger(
+                com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
     }
 
     /**
@@ -498,19 +517,9 @@ public class ViewConfiguration {
      *                be {@link Activity} or other {@link Context} created with
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
-    public static ViewConfiguration get(Context context) {
-        if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
-            final String errorMessage = "Tried to access UI constants from a non-visual Context:"
-                    + context;
-            final String message = "UI constants, such as display metrics or window metrics, "
-                    + "must be accessed from Activity or other visual Context. "
-                    + "Use an Activity or a Context created with "
-                    + "Context#createWindowContext(int, Bundle), which are adjusted to the "
-                    + "configuration and visual bounds of an area on screen";
-            final Exception exception = new IllegalArgumentException(errorMessage);
-            StrictMode.onIncorrectContextUsed(message, exception);
-            Log.e(TAG, errorMessage + message, exception);
-        }
+    // TODO(b/182007470): Use @ConfigurationContext instead
+    public static ViewConfiguration get(@UiContext Context context) {
+        StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         final int density = (int) (100.0f * metrics.density);
@@ -602,7 +611,6 @@ public class ViewConfiguration {
     /**
      * @return the duration in milliseconds between the first tap's up event and the second tap's
      * down event for an interaction to be considered part of the same multi-press.
-     * @hide
      */
     public static int getMultiPressTimeout() {
         return AppGlobals.getIntCoreSetting(Settings.Secure.MULTI_PRESS_TIMEOUT,
@@ -1065,6 +1073,24 @@ public class ViewConfiguration {
     @UnsupportedAppUsage
     public boolean isFadingMarqueeEnabled() {
         return mFadingMarqueeEnabled;
+    }
+
+    /**
+     * @return the timeout value in milliseconds to adjust the selection span and actions for the
+     *         selected text when TextClassifier has been initialized.
+     * @hide
+     */
+    public int getSmartSelectionInitializedTimeout() {
+        return mSmartSelectionInitializedTimeout;
+    }
+
+    /**
+     * @return the timeout value in milliseconds to adjust the selection span and actions for the
+     *         selected text when TextClassifier has not been initialized.
+     * @hide
+     */
+    public int getSmartSelectionInitializingTimeout() {
+        return mSmartSelectionInitializingTimeout;
     }
 
     /**

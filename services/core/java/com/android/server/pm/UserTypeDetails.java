@@ -28,8 +28,12 @@ import android.os.Bundle;
 import android.os.UserManager;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.BundleUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Contains the details about a multiuser "user type", such as a
@@ -82,6 +86,24 @@ public final class UserTypeDetails {
      */
     private final @Nullable Bundle mDefaultRestrictions;
 
+    /**
+     * List of {@link android.provider.Settings.System} to apply by default to newly created users
+     * of this type.
+     */
+    private final @Nullable Bundle mDefaultSystemSettings;
+
+    /**
+     * List of {@link android.provider.Settings.Secure} to apply by default to newly created users
+     * of this type.
+     */
+    private final @Nullable Bundle mDefaultSecureSettings;
+
+    /**
+     * List of {@link DefaultCrossProfileIntentFilter} to allow by default for newly created
+     * profiles.
+     */
+    private final @Nullable List<DefaultCrossProfileIntentFilter> mDefaultCrossProfileIntentFilters;
+
 
     // Fields for profiles only, controlling the nature of their badges.
     // All badge information should be set if {@link #hasBadge()} is true.
@@ -127,13 +149,24 @@ public final class UserTypeDetails {
      */
     private final @Nullable int[] mDarkThemeBadgeColors;
 
+    /**
+     * Denotes if the user shares media with its parent user.
+     *
+     * <p> Default value is false
+     */
+    private final boolean mIsMediaSharedWithParent;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
             @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
             @Nullable int[] darkThemeBadgeColors,
-            @Nullable Bundle defaultRestrictions) {
+            @Nullable Bundle defaultRestrictions,
+            @Nullable Bundle defaultSystemSettings,
+            @Nullable Bundle defaultSecureSettings,
+            @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
+            boolean isMediaSharedWithParent) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
@@ -141,6 +174,9 @@ public final class UserTypeDetails {
         this.mBaseType = baseType;
         this.mDefaultUserInfoPropertyFlags = defaultUserInfoPropertyFlags;
         this.mDefaultRestrictions = defaultRestrictions;
+        this.mDefaultSystemSettings = defaultSystemSettings;
+        this.mDefaultSecureSettings = defaultSecureSettings;
+        this.mDefaultCrossProfileIntentFilters = defaultCrossProfileIntentFilters;
 
         this.mIconBadge = iconBadge;
         this.mBadgePlain = badgePlain;
@@ -149,6 +185,7 @@ public final class UserTypeDetails {
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
+        this.mIsMediaSharedWithParent = isMediaSharedWithParent;
     }
 
     /**
@@ -174,6 +211,9 @@ public final class UserTypeDetails {
     /**
      * Returns the maximum number of this user type allowed per parent (for user types, like
      * profiles, that have parents).
+     * Under certain circumstances (such as after a change-user-type) the max value can actually
+     * be exceeded: this is allowed in order to keep the device in a usable state.
+     * An error is logged in {@link UserManagerService#upgradeProfileToTypeLU}
      * <p>Returns {@link #UNLIMITED_NUMBER_OF_USERS} to indicate that there is no hard limit.
      */
     public int getMaxAllowedPerParent() {
@@ -260,9 +300,16 @@ public final class UserTypeDetails {
         return (mBaseType & UserInfo.FLAG_SYSTEM) != 0;
     }
 
-    /** Returns a Bundle representing the default user restrictions. */
+    /**
+     * Returns true if the user has shared media with parent user or false otherwise.
+     */
+    public boolean isMediaSharedWithParent() {
+        return mIsMediaSharedWithParent;
+    }
+
+    /** Returns a {@link Bundle} representing the default user restrictions. */
     @NonNull Bundle getDefaultRestrictions() {
-        return UserRestrictionsUtils.clone(mDefaultRestrictions);
+        return BundleUtils.clone(mDefaultRestrictions);
     }
 
     /** Adds the default user restrictions to the given bundle of restrictions. */
@@ -270,9 +317,25 @@ public final class UserTypeDetails {
         UserRestrictionsUtils.merge(currentRestrictions, mDefaultRestrictions);
     }
 
+    /** Returns a {@link Bundle} representing the default system settings. */
+    @NonNull Bundle getDefaultSystemSettings() {
+        return BundleUtils.clone(mDefaultSystemSettings);
+    }
+
+    /** Returns a {@link Bundle} representing the default secure settings. */
+    @NonNull Bundle getDefaultSecureSettings() {
+        return BundleUtils.clone(mDefaultSecureSettings);
+    }
+
+    /** Returns a list of default cross profile intent filters. */
+    @NonNull List<DefaultCrossProfileIntentFilter> getDefaultCrossProfileIntentFilters() {
+        return mDefaultCrossProfileIntentFilters != null
+                ? new ArrayList<>(mDefaultCrossProfileIntentFilters)
+                : Collections.emptyList();
+    }
+
     /** Dumps details of the UserTypeDetails. Do not parse this. */
-    public void dump(PrintWriter pw) {
-        final String prefix = "        ";
+    public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mName: "); pw.println(mName);
         pw.print(prefix); pw.print("mBaseType: "); pw.println(UserInfo.flagsToString(mBaseType));
         pw.print(prefix); pw.print("mEnabled: "); pw.println(mEnabled);
@@ -282,6 +345,7 @@ public final class UserTypeDetails {
         pw.println(UserInfo.flagsToString(mDefaultUserInfoPropertyFlags));
         pw.print(prefix); pw.print("mLabel: "); pw.println(mLabel);
 
+        final String restrictionsPrefix = prefix + "    ";
         if (isSystem()) {
             pw.print(prefix); pw.println("config_defaultFirstUserRestrictions: ");
             try {
@@ -293,13 +357,13 @@ public final class UserTypeDetails {
                         restrictions.putBoolean(userRestriction, true);
                     }
                 }
-                UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", restrictions);
+                UserRestrictionsUtils.dumpRestrictions(pw, restrictionsPrefix, restrictions);
             } catch (Resources.NotFoundException e) {
-                pw.print(prefix); pw.println("    none - resource not found");
+                pw.print(restrictionsPrefix); pw.println("none - resource not found");
             }
         } else {
             pw.print(prefix); pw.println("mDefaultRestrictions: ");
-            UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", mDefaultRestrictions);
+            UserRestrictionsUtils.dumpRestrictions(pw, restrictionsPrefix, mDefaultRestrictions);
         }
 
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
@@ -322,6 +386,10 @@ public final class UserTypeDetails {
         private int mMaxAllowedPerParent = UNLIMITED_NUMBER_OF_USERS;
         private int mDefaultUserInfoPropertyFlags = 0;
         private @Nullable Bundle mDefaultRestrictions = null;
+        private @Nullable Bundle mDefaultSystemSettings = null;
+        private @Nullable Bundle mDefaultSecureSettings = null;
+        private @Nullable List<DefaultCrossProfileIntentFilter> mDefaultCrossProfileIntentFilters =
+                null;
         private boolean mEnabled = true;
         private int mLabel = Resources.ID_NULL;
         private @Nullable int[] mBadgeLabels = null;
@@ -330,6 +398,7 @@ public final class UserTypeDetails {
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
+        private boolean mIsMediaSharedWithParent = false;
 
         public Builder setName(String name) {
             mName = name;
@@ -404,6 +473,31 @@ public final class UserTypeDetails {
             return this;
         }
 
+        public Builder setDefaultSystemSettings(@Nullable Bundle settings) {
+            mDefaultSystemSettings = settings;
+            return this;
+        }
+
+        public Builder setDefaultSecureSettings(@Nullable Bundle settings) {
+            mDefaultSecureSettings = settings;
+            return this;
+        }
+
+        public Builder setDefaultCrossProfileIntentFilters(
+                @Nullable List<DefaultCrossProfileIntentFilter> intentFilters) {
+            mDefaultCrossProfileIntentFilters = intentFilters;
+            return this;
+        }
+
+        /**
+         * Sets shared media property for the user.
+         * @param isMediaSharedWithParent the value to be set, true or false
+         */
+        public Builder setIsMediaSharedWithParent(boolean isMediaSharedWithParent) {
+            mIsMediaSharedWithParent = isMediaSharedWithParent;
+            return this;
+        }
+
         @UserInfoFlag int getBaseType() {
             return mBaseType;
         }
@@ -422,15 +516,26 @@ public final class UserTypeDetails {
                 Preconditions.checkArgument(mBadgeColors != null && mBadgeColors.length != 0,
                         "UserTypeDetails " + mName + " has badge but no badgeColors.");
             }
+            if (!isProfile()) {
+                Preconditions.checkArgument(mDefaultCrossProfileIntentFilters == null
+                                || mDefaultCrossProfileIntentFilters.isEmpty(),
+                        "UserTypeDetails %s has a non empty "
+                                + "defaultCrossProfileIntentFilters", mName);
+            }
             return new UserTypeDetails(mName, mEnabled, mMaxAllowed, mBaseType,
                     mDefaultUserInfoPropertyFlags, mLabel, mMaxAllowedPerParent,
                     mIconBadge, mBadgePlain, mBadgeNoBackground, mBadgeLabels, mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
-                    mDefaultRestrictions);
+                    mDefaultRestrictions, mDefaultSystemSettings, mDefaultSecureSettings,
+                    mDefaultCrossProfileIntentFilters, mIsMediaSharedWithParent);
         }
 
         private boolean hasBadge() {
             return mIconBadge != Resources.ID_NULL;
+        }
+
+        private boolean isProfile() {
+            return (mBaseType & UserInfo.FLAG_PROFILE) != 0;
         }
 
         // TODO(b/143784345): Refactor this when we clean up UserInfo.

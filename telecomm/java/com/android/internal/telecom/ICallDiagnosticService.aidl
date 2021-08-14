@@ -18,7 +18,9 @@ package com.android.internal.telecom;
 
 import android.telecom.BluetoothCallQualityReport;
 import android.telecom.CallAudioState;
+import android.telecom.DisconnectCause;
 import android.telecom.ParcelableCall;
+import android.telephony.CallQuality;
 import com.android.internal.telecom.ICallDiagnosticServiceAdapter;
 
 /**
@@ -33,5 +35,7 @@ oneway interface ICallDiagnosticService {
     void updateCallAudioState(in CallAudioState callAudioState);
     void removeDiagnosticCall(in String callId);
     void receiveDeviceToDeviceMessage(in String callId, int message, int value);
+    void callQualityChanged(in String callId, in CallQuality callQuality);
     void receiveBluetoothCallQualityReport(in BluetoothCallQualityReport qualityReport);
+    void notifyCallDisconnected(in String callId, in DisconnectCause disconnectCause);
 }

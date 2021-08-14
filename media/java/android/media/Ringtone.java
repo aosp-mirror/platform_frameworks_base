@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
+import android.media.audiofx.HapticGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -77,6 +78,7 @@ public class Ringtone {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private MediaPlayer mLocalPlayer;
     private final MyOnCompletionListener mCompletionListener = new MyOnCompletionListener();
+    private HapticGenerator mHapticGenerator;
 
     @UnsupportedAppUsage
     private Uri mUri;
@@ -89,6 +91,7 @@ public class Ringtone {
     // playback properties, use synchronized with mPlaybackSettingsLock
     private boolean mIsLooping = false;
     private float mVolume = 1.0f;
+    private boolean mHapticGeneratorEnabled = false;
     private final Object mPlaybackSettingsLock = new Object();
 
     /** {@hide} */
@@ -197,15 +200,50 @@ public class Ringtone {
     }
 
     /**
+     * Enable or disable the {@link android.media.audiofx.HapticGenerator} effect. The effect can
+     * only be enabled on devices that support the effect.
+     *
+     * @return true if the HapticGenerator effect is successfully enabled. Otherwise, return false.
+     * @see android.media.audiofx.HapticGenerator#isAvailable()
+     */
+    public boolean setHapticGeneratorEnabled(boolean enabled) {
+        if (!HapticGenerator.isAvailable()) {
+            return false;
+        }
+        synchronized (mPlaybackSettingsLock) {
+            mHapticGeneratorEnabled = enabled;
+            applyPlaybackProperties_sync();
+        }
+        return true;
+    }
+
+    /**
+     * Return whether the {@link android.media.audiofx.HapticGenerator} effect is enabled or not.
+     * @return true if the HapticGenerator is enabled.
+     */
+    public boolean isHapticGeneratorEnabled() {
+        synchronized (mPlaybackSettingsLock) {
+            return mHapticGeneratorEnabled;
+        }
+    }
+
+    /**
      * Must be called synchronized on mPlaybackSettingsLock
      */
     private void applyPlaybackProperties_sync() {
         if (mLocalPlayer != null) {
             mLocalPlayer.setVolume(mVolume);
             mLocalPlayer.setLooping(mIsLooping);
+            if (mHapticGenerator == null && mHapticGeneratorEnabled) {
+                mHapticGenerator = HapticGenerator.create(mLocalPlayer.getAudioSessionId());
+            }
+            if (mHapticGenerator != null) {
+                mHapticGenerator.setEnabled(mHapticGeneratorEnabled);
+            }
         } else if (mAllowRemote && (mRemotePlayer != null)) {
             try {
-                mRemotePlayer.setPlaybackProperties(mRemoteToken, mVolume, mIsLooping);
+                mRemotePlayer.setPlaybackProperties(
+                        mRemoteToken, mVolume, mIsLooping, mHapticGeneratorEnabled);
             } catch (RemoteException e) {
                 Log.w(TAG, "Problem setting playback properties: ", e);
             }
@@ -367,9 +405,11 @@ public class Ringtone {
      */
     public void play() {
         if (mLocalPlayer != null) {
-            // do not play ringtones if stream volume is 0
-            // (typically because ringer mode is silent).
-            if (mAudioManager.getStreamVolume(
+            // Play ringtones if stream volume is over 0 or if it is a haptic-only ringtone
+            // (typically because ringer mode is vibrate).
+            boolean isHapticOnly = AudioManager.hasHapticChannels(mContext, mUri)
+                    && !mAudioAttributes.areHapticChannelsMuted() && mVolume == 0;
+            if (isHapticOnly || mAudioManager.getStreamVolume(
                     AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
                 startLocalPlayer();
             }
@@ -413,6 +453,10 @@ public class Ringtone {
 
     private void destroyLocalPlayer() {
         if (mLocalPlayer != null) {
+            if (mHapticGenerator != null) {
+                mHapticGenerator.release();
+                mHapticGenerator = null;
+            }
             mLocalPlayer.setOnCompletionListener(null);
             mLocalPlayer.reset();
             mLocalPlayer.release();

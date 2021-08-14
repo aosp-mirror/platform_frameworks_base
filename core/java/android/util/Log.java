@@ -44,9 +44,7 @@ import java.net.UnknownHostException;
  * You can then <a href="{@docRoot}studio/debug/am-logcat.html">view the logs in logcat</a>.
  *
  * <p>The order in terms of verbosity, from least to most is
- * ERROR, WARN, INFO, DEBUG, VERBOSE.  Verbose should never be compiled
- * into an application except during development.  Debug logs are compiled
- * in but stripped at runtime.  Error, warning and info logs are always kept.
+ * ERROR, WARN, INFO, DEBUG, VERBOSE.
  *
  * <p><b>Tip:</b> A good convention is to declare a <code>TAG</code> constant
  * in your class:
@@ -227,7 +225,7 @@ public final class Log {
      * @param level The level to check.
      * @return Whether or not that this is allowed to be logged.
      * @throws IllegalArgumentException is thrown if the tag.length() > 23
-     *         for Nougat (7.0) releases (API <= 23) and prior, there is no
+     *         for Nougat (7.0) and prior releases (API <= 25), there is no
      *         tag limit of concern after this API level.
      */
     @FastNative

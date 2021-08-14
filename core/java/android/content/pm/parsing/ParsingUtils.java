@@ -33,8 +33,12 @@ import java.io.IOException;
 /** @hide **/
 public class ParsingUtils {
 
-    // TODO(b/135203078): Consolidate log tags
     public static final String TAG = "PackageParsing";
+
+    public static final String ANDROID_RES_NAMESPACE = "http://schemas.android.com/apk/res/android";
+
+    public static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_TARGET_SDK_VERSION = 0;
 
     @Nullable
     public static String buildClassName(String pkg, CharSequence clsSeq) {
@@ -62,7 +66,7 @@ public class ParsingUtils {
             return input.error("Bad element under " + parentTag + ": " + parser.getName());
         }
         Slog.w(TAG, "Unknown element under " + parentTag + ": "
-                + parser.getName() + " at " + pkg.getBaseCodePath() + " "
+                + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                 + parser.getPositionDescription());
         XmlUtils.skipCurrentTag(parser);
         return input.success(null); // Type doesn't matter

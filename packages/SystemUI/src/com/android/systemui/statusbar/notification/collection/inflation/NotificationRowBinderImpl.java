@@ -24,6 +24,7 @@ import android.os.Build;
 import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -32,7 +33,6 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.icon.IconManager;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline;
@@ -45,10 +45,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /** Handles inflating and updating views for notifications. */
-@Singleton
+@SysUISingleton
 public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";
@@ -59,7 +58,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     private final NotifBindPipeline mNotifBindPipeline;
     private final RowContentBindStage mRowContentBindStage;
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final Provider<RowInflaterTask> mRowInflaterTaskProvider;
     private final ExpandableNotificationRowComponent.Builder
             mExpandableNotificationRowComponentBuilder;
@@ -79,7 +77,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotifBindPipeline notifBindPipeline,
             RowContentBindStage rowContentBindStage,
-            NotificationInterruptStateProvider notificationInterruptionStateProvider,
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
             IconManager iconManager,
@@ -90,7 +87,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mMessagingUtil = notificationMessagingUtil;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mNotificationLockscreenUserManager = notificationLockscreenUserManager;
-        mNotificationInterruptStateProvider = notificationInterruptionStateProvider;
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
         mIconManager = iconManager;
@@ -120,7 +116,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     @Override
     public void inflateViews(
             NotificationEntry entry,
-            Runnable onDismissRunnable,
             NotificationRowContentBinder.InflationCallback callback)
             throws InflationException {
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
@@ -131,7 +126,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             row.reset();
             updateRow(entry, row);
             inflateContentViews(entry, row, callback);
-            entry.getRowController().setOnDismissRunnable(onDismissRunnable);
         } else {
             mIconManager.createIcons(entry);
             mRowInflaterTaskProvider.get().inflate(mContext, parent, entry,
@@ -141,12 +135,12 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                                 mExpandableNotificationRowComponentBuilder
                                         .expandableNotificationRow(row)
                                         .notificationEntry(entry)
-                                        .onDismissRunnable(onDismissRunnable)
                                         .onExpandClickListener(mPresenter)
+                                        .listContainer(mListContainer)
                                         .build();
                         ExpandableNotificationRowController rowController =
                                 component.getExpandableNotificationRowController();
-                        rowController.init();
+                        rowController.init(entry);
                         entry.setRowController(rowController);
                         bindRow(entry, row);
                         updateRow(entry, row);
@@ -166,7 +160,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mNotificationRemoteInputManager.bindRow(row);
         row.setOnActivatedListener(mPresenter);
         entry.setRow(row);
-        row.setEntry(entry);
         mNotifBindPipeline.manageRow(entry, row);
         mBindRowCallback.onBindRow(row);
     }

@@ -454,8 +454,10 @@ public class BtHelper {
         }
         final BluetoothDevice btDevice = deviceList.get(0);
         // the device is guaranteed CONNECTED
-        mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(btDevice,
-                BluetoothA2dp.STATE_CONNECTED, BluetoothProfile.A2DP_SINK, true, -1);
+        mDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(btDevice,
+                    BluetoothA2dp.STATE_CONNECTED, BluetoothProfile.A2DP_SINK,
+                        true, -1));
     }
 
     /*package*/ synchronized void onA2dpSinkProfileConnected(BluetoothProfile profile) {
@@ -592,21 +594,28 @@ public class BtHelper {
         return result;
     }
 
+    // Return `(null)` if given BluetoothDevice is null. Otherwise, return the anonymized address.
+    private String getAnonymizedAddress(BluetoothDevice btDevice) {
+        return btDevice == null ? "(null)" : btDevice.getAnonymizedAddress();
+    }
+
     // @GuardedBy("AudioDeviceBroker.mSetModeLock")
     //@GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     @GuardedBy("BtHelper.this")
     private void setBtScoActiveDevice(BluetoothDevice btDevice) {
-        Log.i(TAG, "setBtScoActiveDevice: " + mBluetoothHeadsetDevice + " -> " + btDevice);
+        Log.i(TAG, "setBtScoActiveDevice: " + getAnonymizedAddress(mBluetoothHeadsetDevice)
+                + " -> " + getAnonymizedAddress(btDevice));
         final BluetoothDevice previousActiveDevice = mBluetoothHeadsetDevice;
         if (Objects.equals(btDevice, previousActiveDevice)) {
             return;
         }
         if (!handleBtScoActiveDeviceChange(previousActiveDevice, false)) {
             Log.w(TAG, "setBtScoActiveDevice() failed to remove previous device "
-                    + previousActiveDevice);
+                    + getAnonymizedAddress(previousActiveDevice));
         }
         if (!handleBtScoActiveDeviceChange(btDevice, true)) {
-            Log.e(TAG, "setBtScoActiveDevice() failed to add new device " + btDevice);
+            Log.e(TAG, "setBtScoActiveDevice() failed to add new device "
+                    + getAnonymizedAddress(btDevice));
             // set mBluetoothHeadsetDevice to null when failing to add new device
             btDevice = null;
         }
@@ -726,7 +735,7 @@ public class BtHelper {
                         mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                     } else {
                         Log.w(TAG, "requestScoState: connect to "
-                                + mBluetoothHeadsetDevice
+                                + getAnonymizedAddress(mBluetoothHeadsetDevice)
                                 + " failed, mScoAudioMode=" + mScoAudioMode);
                         broadcastScoConnectionState(
                                 AudioManager.SCO_AUDIO_STATE_DISCONNECTED);

@@ -31,7 +31,6 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -39,35 +38,36 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.service.quicksettings.Tile;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Prefs;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.FileDescriptor;
@@ -90,6 +90,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     protected static final Object ARG_SHOW_TRANSIENT_ENABLING = new Object();
 
+    private static final int READY_STATE_NOT_READY = 0;
+    private static final int READY_STATE_READYING = 1;
+    private static final int READY_STATE_READY = 2;
+
     protected final QSHost mHost;
     protected final Context mContext;
     // @NonFinalForTesting
@@ -100,7 +104,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final StatusBarStateController mStatusBarStateController;
     protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
+    private final FalsingManager mFalsingManager;
     private final QSLogger mQSLogger;
+    private volatile int mReadyState;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -128,8 +134,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * Handles clicks by the user.
      *
      * Calls to the controller should be made here to set the new state of the device.
+     *
+     * @param view The view that was clicked.
      */
-    abstract protected void handleClick();
+    protected abstract void handleClick(@Nullable View view);
 
     /**
      * Update state of the tile based on device state
@@ -151,10 +159,20 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     abstract public int getMetricsCategory();
 
+    /**
+     * Performs initialization of the tile
+     *
+     * Use this to perform initialization of the tile. Empty by default.
+     */
+    protected void handleInitialize() {
+
+    }
+
     protected QSTileImpl(
             QSHost host,
             Looper backgroundLooper,
             Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
@@ -167,19 +185,21 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
         mUiHandler = mainHandler;
         mHandler = new H(backgroundLooper);
+        mFalsingManager = falsingManager;
         mQSLogger = qsLogger;
         mMetricsLogger = metricsLogger;
         mStatusBarStateController = statusBarStateController;
         mActivityStarter = activityStarter;
 
-        mState = newTileState();
-        mTmpState = newTileState();
+        resetStates();
         mUiHandler.post(() -> mLifecycle.setCurrentState(CREATED));
     }
 
     protected final void resetStates() {
         mState = newTileState();
         mTmpState = newTileState();
+        mState.spec = mTileSpec;
+        mTmpState.spec = mTileSpec;
     }
 
     @NonNull
@@ -216,6 +236,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public void setTileSpec(String tileSpec) {
         mTileSpec = tileSpec;
+        mState.spec = tileSpec;
+        mTmpState.spec = tileSpec;
     }
 
     public QSHost getHost() {
@@ -263,17 +285,19 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.REMOVE_CALLBACKS);
     }
 
-    public void click() {
+    public void click(@Nullable View view) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.sendEmptyMessage(H.CLICK);
+        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            mHandler.obtainMessage(H.CLICK, view).sendToTarget();
+        }
     }
 
-    public void secondaryClick() {
+    public void secondaryClick(@Nullable View view) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
@@ -281,22 +305,18 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 getInstanceId());
         mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
                 mState.state);
-        mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
+        mHandler.obtainMessage(H.SECONDARY_CLICK, view).sendToTarget();
     }
 
-    public void longClick() {
+    @Override
+    public void longClick(@Nullable View view) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_LONG_PRESS, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.sendEmptyMessage(H.LONG_CLICK);
-
-        Prefs.putInt(
-                mContext,
-                Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-                QuickStatusBarHeader.MAX_TOOLTIP_SHOWN_COUNT);
+        mHandler.obtainMessage(H.LONG_CLICK, view).sendToTarget();
     }
 
     public LogMaker populate(LogMaker logMaker) {
@@ -336,6 +356,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.DESTROY);
     }
 
+    /**
+     * Schedules initialization of the tile.
+     *
+     * Should be called upon creation of the tile, before performing other operations
+     */
+    public void initialize() {
+        mHandler.sendEmptyMessage(H.INITIALIZE);
+    }
+
     public TState getState() {
         return mState;
     }
@@ -360,21 +389,36 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     /**
+     * Posts a stale message to the background thread.
+     */
+    public void postStale() {
+        mHandler.sendEmptyMessage(H.STALE);
+    }
+
+    /**
      * Handles secondary click on the tile.
      *
      * Defaults to {@link QSTileImpl#handleClick}
+     *
+     * @param view The view that was clicked.
      */
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         // Default to normal click.
-        handleClick();
+        handleClick(view);
     }
 
     /**
      * Handles long click on the tile by launching the {@link Intent} defined in
-     * {@link QSTileImpl#getLongClickIntent}
+     * {@link QSTileImpl#getLongClickIntent}.
+     *
+     * @param view The view from which the opening window will be animated.
      */
-    protected void handleLongClick() {
-        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
+    protected void handleLongClick(@Nullable View view) {
+        ActivityLaunchAnimator.Controller animationController =
+                view != null ? ActivityLaunchAnimator.Controller.fromView(view,
+                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE) : null;
+        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
+                animationController);
     }
 
     /**
@@ -386,7 +430,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected void handleRefreshState(Object arg) {
         handleUpdateState(mTmpState, arg);
-        final boolean changed = mTmpState.copyTo(mState);
+        boolean changed = mTmpState.copyTo(mState);
+        if (mReadyState == READY_STATE_READYING) {
+            mReadyState = READY_STATE_READY;
+            changed = true;
+        }
         if (changed) {
             mQSLogger.logTileUpdated(mTileSpec, mState);
             handleStateChanged();
@@ -459,6 +507,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                     // should not refresh it anymore.
                     if (mLifecycle.getCurrentState().equals(DESTROYED)) return;
                     mLifecycle.setCurrentState(RESUMED);
+                    if (mReadyState == READY_STATE_NOT_READY) {
+                        mReadyState = READY_STATE_READYING;
+                    }
                     refreshState(); // Ensure we get at least one refresh after listening.
                 });
             }
@@ -478,7 +529,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private void updateIsFullQs() {
         for (Object listener : mListeners) {
-            if (TilePage.class.equals(listener.getClass())) {
+            if (SideLabelTileLayout.class.equals(listener.getClass())) {
                 mIsFullQs = 1;
                 return;
             }
@@ -509,9 +560,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
         EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                userRestriction, ActivityManager.getCurrentUser());
+                userRestriction, mHost.getUserId());
         if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                userRestriction, ActivityManager.getCurrentUser())) {
+                userRestriction, mHost.getUserId())) {
             state.disabledByPolicy = true;
             mEnforcedAdmin = admin;
         } else {
@@ -531,19 +582,13 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     public abstract CharSequence getTileLabel();
 
-    public static int getColorForState(Context context, int state) {
-        switch (state) {
-            case Tile.STATE_UNAVAILABLE:
-                return Utils.getDisabled(context,
-                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary));
-            case Tile.STATE_INACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
-            case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
-            default:
-                Log.e("QSTile", "Invalid state " + state);
-                return 0;
-        }
+    /**
+     * @return {@code true} if the tile has refreshed state at least once after having set its
+     *         lifecycle to {@link Lifecycle.State#RESUMED}.
+     */
+    @Override
+    public boolean isTileReady() {
+        return mReadyState == READY_STATE_READY;
     }
 
     protected final class H extends Handler {
@@ -562,6 +607,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         private static final int SET_LISTENING = 13;
         @VisibleForTesting
         protected static final int STALE = 14;
+        private static final int INITIALIZE = 15;
 
         @VisibleForTesting
         protected H(Looper looper) {
@@ -588,14 +634,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                                 mContext, mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
-                        handleClick();
+                        handleClick((View) msg.obj);
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
-                    handleSecondaryClick();
+                    handleSecondaryClick((View) msg.obj);
                 } else if (msg.what == LONG_CLICK) {
                     name = "handleLongClick";
-                    handleLongClick();
+                    handleLongClick((View) msg.obj);
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";
                     handleRefreshState(msg.obj);
@@ -620,6 +666,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 } else if (msg.what == STALE) {
                     name = "handleStale";
                     handleStale();
+                } else if (msg.what == INITIALIZE) {
+                    name = "initialize";
+                    handleInitialize();
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"మూసివేయి"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"విస్తరింపజేయి"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"సెట్టింగ్‌లు"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"మెనూ"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
+    <string name="pip_play" msgid="3496151081459417097">"ప్లే చేయి"</string>
+    <string name="pip_pause" msgid="690688849510295232">"పాజ్ చేయి"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"దాటవేసి మునుపటి దానికి వెళ్లు"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"పరిమాణం మార్చు"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"స్క్రీన్ విభజనతో యాప్‌ పని చేయకపోవచ్చు."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"విభజన స్క్రీన్ విభాగిని"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ఎడమవైపు పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ఎడమవైపు 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ఎడమవైపు 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"ఎడమవైపు 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"కుడివైపు పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ఎగువ పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"ఎగువ 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ఎగువ 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ఎగువ 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"దిగువ పూర్తి స్క్రీన్"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"వన్-హ్యాండెడ్ మోడ్‌ను ఉపయోగించడం"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"నిష్క్రమించడానికి, స్క్రీన్ కింది భాగం నుండి పైకి స్వైప్ చేయండి లేదా యాప్ పైన ఎక్కడైనా ట్యాప్ చేయండి"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"వన్-హ్యాండెడ్ మోడ్‌ను ప్రారంభిస్తుంది"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"వన్-హ్యాండెడ్ మోడ్ నుండి నిష్క్రమింపజేస్తుంది"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ఓవర్‌ఫ్లో"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"స్ట్యాక్‌కు తిరిగి జోడించండి"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> మరియు మరో <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"ఎగువ ఎడమవైపునకు జరుపు"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ఎగువ కుడివైపునకు జరుపు"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"దిగువ ఎడమవైపునకు తరలించు"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"దిగవు కుడివైపునకు జరుపు"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> సెట్టింగ్‌లు"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"బబుల్‌ను విస్మరించు"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"సంభాషణను బబుల్ చేయవద్దు"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"బబుల్స్‌ను ఉపయోగించి చాట్ చేయండి"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్స్ లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"బబుల్స్‌ను ఎప్పుడైనా నియంత్రించండి"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ఈ యాప్ నుండి వచ్చే బబుల్స్‌ను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"అర్థమైంది"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ఇటీవలి బబుల్స్ మరియు తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"బబుల్"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"మేనేజ్ చేయండి"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"బబుల్ విస్మరించబడింది."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"ఈ యాప్‌ను రీస్టార్ట్ చేయడానికి ట్యాప్ చేసి, ఆపై పూర్తి స్క్రీన్‌లోకి వెళ్లండి."</string>
+    <string name="got_it" msgid="4428750913636945527">"అర్థమైంది"</string>
+</resources>

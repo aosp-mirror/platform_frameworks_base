@@ -296,7 +296,7 @@ public class OverlayConfig {
             if (p.getOverlayTarget() != null && isSystem) {
                 overlays.add(new ParsedOverlayInfo(p.getPackageName(), p.getOverlayTarget(),
                         p.getTargetSdkVersion(), p.isOverlayIsStatic(), p.getOverlayPriority(),
-                        new File(p.getBaseCodePath())));
+                        new File(p.getBaseApkPath())));
             }
         });
         return overlays;

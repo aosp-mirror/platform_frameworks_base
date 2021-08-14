@@ -21,11 +21,14 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -53,15 +56,7 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(true));
 
         oldUserState = new PackageUserState();
-        oldUserState.appLinkGeneration = 6;
-        assertThat(testUserState.equals(oldUserState), is(false));
-
-        oldUserState = new PackageUserState();
         oldUserState.ceDataInode = 4000L;
-        assertThat(testUserState.equals(oldUserState), is(false));
-
-        oldUserState = new PackageUserState();
-        oldUserState.domainVerificationStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserState();
@@ -354,4 +349,40 @@ public class PackageUserStateTest {
         assertLastPackageUsageSet(
                 testState6, PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
     }
+
+    @Test
+    public void testOverlayPaths() {
+        final PackageUserState testState = new PackageUserState();
+        assertFalse(testState.setOverlayPaths(null));
+        assertFalse(testState.setOverlayPaths(new OverlayPaths.Builder().build()));
+
+        assertTrue(testState.setOverlayPaths(new OverlayPaths.Builder()
+                .addApkPath("/path/to/some.apk").build()));
+        assertFalse(testState.setOverlayPaths(new OverlayPaths.Builder()
+                .addApkPath("/path/to/some.apk").build()));
+
+        assertTrue(testState.setOverlayPaths(new OverlayPaths.Builder().build()));
+        assertFalse(testState.setOverlayPaths(null));
+    }
+    @Test
+    public void testSharedLibOverlayPaths() {
+        final PackageUserState testState = new PackageUserState();
+        final String LIB_ONE = "lib1";
+        final String LIB_TW0 = "lib2";
+        assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, null));
+        assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE,
+                new OverlayPaths.Builder().build()));
+
+        assertTrue(testState.setSharedLibraryOverlayPaths(LIB_ONE, new OverlayPaths.Builder()
+                .addApkPath("/path/to/some.apk").build()));
+        assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, new OverlayPaths.Builder()
+                .addApkPath("/path/to/some.apk").build()));
+        assertTrue(testState.setSharedLibraryOverlayPaths(LIB_TW0, new OverlayPaths.Builder()
+                .addApkPath("/path/to/some.apk").build()));
+
+        assertTrue(testState.setSharedLibraryOverlayPaths(LIB_ONE,
+                new OverlayPaths.Builder().build()));
+        assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, null));
+    }
+
 }

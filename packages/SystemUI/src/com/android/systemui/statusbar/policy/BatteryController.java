@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
 
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.FileDescriptor;
@@ -41,6 +41,13 @@ public interface BatteryController extends DemoMode, Dumpable,
      * Returns {@code true} if the device is currently plugged in.
      */
     boolean isPluggedIn();
+
+    /**
+     * Returns {@code true} if the device is currently plugged in via wireless charger.
+     */
+    default boolean isPluggedInWireless() {
+        return false;
+    }
 
     /**
      * Returns {@code true} if the device is currently in power save mode.
@@ -104,6 +111,9 @@ public interface BatteryController extends DemoMode, Dumpable,
         }
 
         default void onExtremeBatterySaverChanged(boolean isExtreme) {
+        }
+
+        default void onWirelessChargingChanged(boolean isWirlessCharging) {
         }
     }
 

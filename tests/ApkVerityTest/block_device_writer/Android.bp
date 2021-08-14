@@ -60,3 +60,9 @@ cc_test {
     test_suites: ["general-tests", "pts", "vts"],
     gtest: false,
 }
+
+java_library_host {
+    name: "block_device_writer_jar",
+    srcs: ["src/**/*.java"],
+    libs: ["tradefed", "junit"],
+}

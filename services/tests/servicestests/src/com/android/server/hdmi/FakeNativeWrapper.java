@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 
@@ -24,10 +25,14 @@ import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Fake {@link NativeWrapper} useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
+    private static final String TAG = "FakeNativeWrapper";
+
     private final int[] mPollAddressResponse =
             new int[] {
                 SendMessageResult.NACK,
@@ -48,8 +53,12 @@ final class FakeNativeWrapper implements NativeWrapper {
             };
 
     private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
+    private final Map<Integer, Boolean> mPortConnectionStatus = new HashMap<>();
+    private final HashMap<Integer, Integer> mMessageSendResult = new HashMap<>();
     private int mMyPhysicalAddress = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
+    private HdmiCecController.HdmiCecCallback mCallback = null;
+    private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
 
     @Override
     public String nativeInit() {
@@ -57,7 +66,9 @@ final class FakeNativeWrapper implements NativeWrapper {
     }
 
     @Override
-    public void setCallback(HdmiCecController.HdmiCecCallback callback) {}
+    public void setCallback(HdmiCecController.HdmiCecCallback callback) {
+        this.mCallback = callback;
+    }
 
     @Override
     public int nativeSendCecCommand(
@@ -65,9 +76,10 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
-            mResultMessages.add(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));
+            HdmiCecMessage message = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+            mResultMessages.add(message);
+            return mMessageSendResult.getOrDefault(message.getOpcode(), SendMessageResult.SUCCESS);
         }
-        return SendMessageResult.SUCCESS;
     }
 
     @Override
@@ -85,7 +97,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetVersion() {
-        return 0;
+        return mCecVersion;
     }
 
     @Override
@@ -113,7 +125,39 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public boolean nativeIsConnected(int port) {
-        return false;
+        Boolean isConnected = mPortConnectionStatus.get(port);
+        return isConnected == null ? false : isConnected;
+    }
+
+    public void setPortConnectionStatus(int port, boolean connected) {
+        mPortConnectionStatus.put(port, connected);
+    }
+
+    public void setCecVersion(@HdmiControlManager.HdmiCecVersion int cecVersion) {
+        mCecVersion = cecVersion;
+    }
+
+    public void onCecMessage(HdmiCecMessage hdmiCecMessage) {
+        if (mCallback == null) {
+            return;
+        }
+        int source = hdmiCecMessage.getSource();
+        int destination = hdmiCecMessage.getDestination();
+        byte[] body = new byte[hdmiCecMessage.getParams().length + 1];
+        int i = 0;
+        body[i++] = (byte) hdmiCecMessage.getOpcode();
+        for (byte param : hdmiCecMessage.getParams()) {
+            body[i++] = param;
+        }
+        mCallback.onCecMessage(source, destination, body);
+    }
+
+    public void onHotplugEvent(int port, boolean connected) {
+        if (mCallback == null) {
+            return;
+        }
+
+        mCallback.onHotplugEvent(port, connected);
     }
 
     public List<HdmiCecMessage> getResultMessages() {
@@ -130,6 +174,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setPollAddressResponse(int logicalAddress, int response) {
         mPollAddressResponse[logicalAddress] = response;
+    }
+
+    public void setMessageSendResult(int opcode, int result) {
+        mMessageSendResult.put(opcode, result);
     }
 
     @VisibleForTesting

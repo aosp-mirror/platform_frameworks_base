@@ -19,12 +19,13 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -36,6 +37,7 @@ import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -103,9 +105,12 @@ public final class MediaSession {
      * System only flag for a session that needs to have priority over all other
      * sessions. This flag ensures this session will receive media button events
      * regardless of the current ordering in the system.
+     * If there are two or more sessions with this flag, the last session that sets this flag
+     * will be the global priority session.
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
 
     /**
@@ -127,6 +132,7 @@ public final class MediaSession {
     public @interface SessionFlags { }
 
     private final Object mLock = new Object();
+    private Context mContext;
     private final int mMaxBitmapSize;
 
     private final Token mSessionToken;
@@ -190,6 +196,7 @@ public final class MediaSession {
                     + "parcelables");
         }
 
+        mContext = context;
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new CallbackStub(this);
@@ -273,12 +280,41 @@ public final class MediaSession {
      *
      * @param mbr The {@link PendingIntent} to send the media button event to.
      * @see PendingIntent#getActivity
+     *
+     * @deprecated Use {@link #setMediaButtonBroadcastReceiver(ComponentName)} instead.
      */
+    @Deprecated
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
-            mBinder.setMediaButtonReceiver(mbr);
+            mBinder.setMediaButtonReceiver(mbr, mContext.getPackageName());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
+        }
+    }
+
+    /**
+     * Set the component name of the manifest-declared {@link android.content.BroadcastReceiver}
+     * class that should receive media buttons. This allows restarting playback after the session
+     * has been stopped. If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON}
+     * intent will be sent to the broadcast receiver.
+     * <p>
+     * Note: The given {@link android.content.BroadcastReceiver} should belong to the same package
+     * as the context that was given when creating {@link MediaSession}.
+     *
+     * @param broadcastReceiver the component name of the BroadcastReceiver class
+     */
+    public void setMediaButtonBroadcastReceiver(@Nullable ComponentName broadcastReceiver) {
+        try {
+            if (broadcastReceiver != null) {
+                if (!TextUtils.equals(broadcastReceiver.getPackageName(),
+                        mContext.getPackageName())) {
+                    throw new IllegalArgumentException("broadcastReceiver should belong to the same"
+                            + " package as the context given when creating MediaSession.");
+                }
+            }
+            mBinder.setMediaButtonBroadcastReceiver(broadcastReceiver);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setMediaButtonBroadcastReceiver.", e);
         }
     }
 
@@ -461,7 +497,9 @@ public final class MediaSession {
         int fields = 0;
         MediaDescription description = null;
         if (metadata != null) {
-            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+            metadata = new MediaMetadata.Builder(metadata)
+                    .setBitmapDimensionLimit(mMaxBitmapSize)
+                    .build();
             if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
                 duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             }
@@ -490,7 +528,12 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(queue == null ? null : new ParceledListSlice(queue));
+            if (queue == null) {
+                mBinder.resetQueue();
+            } else {
+                IBinder binder = mBinder.getBinderForSetQueue();
+                ParcelableListBinder.send(binder, queue);
+            }
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
@@ -596,25 +639,6 @@ public final class MediaSession {
             return mCallback.mCurrentControllerInfo.getPackageName();
         }
         return null;
-    }
-
-    /**
-     * Return true if this is considered an active playback state.
-     *
-     * @hide
-     */
-    public static boolean isActiveState(int state) {
-        switch (state) {
-            case PlaybackState.STATE_FAST_FORWARDING:
-            case PlaybackState.STATE_REWINDING:
-            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
-            case PlaybackState.STATE_SKIPPING_TO_NEXT:
-            case PlaybackState.STATE_BUFFERING:
-            case PlaybackState.STATE_CONNECTING:
-            case PlaybackState.STATE_PLAYING:
-                return true;
-        }
-        return false;
     }
 
     /**
@@ -820,9 +844,10 @@ public final class MediaSession {
         }
 
         /**
-         * Gets the UID of this token.
+         * Gets the UID of the application that created the media session.
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public int getUid() {
             return mUid;
         }

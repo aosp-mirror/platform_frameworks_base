@@ -284,11 +284,13 @@ public class AccessibilityWindowManager {
          * Computes partial interactive region of given windowId.
          *
          * @param windowId The windowId
+         * @param forceComputeRegion set outRegion when the windowId matches one on the screen even
+         *                           though the region is not covered by other windows above it.
          * @param outRegion The output to which to write the bounds.
-         * @return true if outRegion is not empty.
+         * @return {@code true} if outRegion is not empty.
          */
         boolean computePartialInteractiveRegionForWindowLocked(int windowId,
-                @NonNull Region outRegion) {
+                boolean forceComputeRegion, @NonNull Region outRegion) {
             if (mWindows == null) {
                 return false;
             }
@@ -309,6 +311,9 @@ public class AccessibilityWindowManager {
                         currentWindow.getRegionInScreen(currentWindowRegions);
                         outRegion.set(currentWindowRegions);
                         windowInteractiveRegion = outRegion;
+                        if (forceComputeRegion) {
+                            windowInteractiveRegionChanged = true;
+                        }
                         continue;
                     }
                 } else if (currentWindow.getType()
@@ -702,12 +707,12 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_PHONE:
                 case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
                 case WindowManager.LayoutParams.TYPE_TOAST:
-                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG: {
+                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG: {
                     return AccessibilityWindowInfo.TYPE_APPLICATION;
                 }
 
-                case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
-                case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG: {
+                case WindowManager.LayoutParams.TYPE_INPUT_METHOD: {
                     return AccessibilityWindowInfo.TYPE_INPUT_METHOD;
                 }
 
@@ -726,7 +731,7 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_SCREENSHOT:
-                case WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY: {
+                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
                 }
 
@@ -748,6 +753,13 @@ public class AccessibilityWindowManager {
          * Dumps all {@link AccessibilityWindowInfo}s here.
          */
         void dumpLocked(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            pw.append("Global Info [ ");
+            pw.println("Top focused display Id = " + mTopFocusedDisplayId);
+            pw.println("     Active Window Id = " + mActiveWindowId);
+            pw.println("     Top Focused Window Id = " + mTopFocusedWindowId);
+            pw.println("     Accessibility Focused Window Id = " + mAccessibilityFocusedWindowId
+                    + " ]");
+            pw.println();
             if (mWindows != null) {
                 final int windowCount = mWindows.size();
                 for (int j = 0; j < windowCount; j++) {
@@ -1234,10 +1246,13 @@ public class AccessibilityWindowManager {
      */
     public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
             @NonNull Region outRegion) {
-        windowId = resolveParentWindowIdLocked(windowId);
-        final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(windowId);
+        final int parentWindowId = resolveParentWindowIdLocked(windowId);
+        final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(
+                parentWindowId);
+
         if (observer != null) {
-            return observer.computePartialInteractiveRegionForWindowLocked(windowId, outRegion);
+            return observer.computePartialInteractiveRegionForWindowLocked(parentWindowId,
+                    parentWindowId != windowId, outRegion);
         }
 
         return false;

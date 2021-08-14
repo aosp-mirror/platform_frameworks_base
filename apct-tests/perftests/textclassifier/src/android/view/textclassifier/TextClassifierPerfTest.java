@@ -18,6 +18,7 @@ package android.view.textclassifier;
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
+import android.service.textclassifier.TextClassifierService;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -25,48 +26,73 @@ import androidx.test.filters.LargeTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Random;
 
-@RunWith(Parameterized.class)
 @LargeTest
 public class TextClassifierPerfTest {
-    /** Request contains meaning text, rather than garbled text. */
-    private static final int ACTUAL_REQUEST = 0;
-    private static final String RANDOM_CHAR_SET = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String TEXT = " Oh hi Mark, the number is (323) 654-6192.\n"
+            + "Anyway, I'll meet you at 1600 Pennsylvania Avenue NW.\n"
+            + "My flight is LX 38 and I'll arrive at 8:00pm.\n"
+            + "Also, check out www.google.com.\n";
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "size{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{{ACTUAL_REQUEST}, {10}, {100}, {1000}});
-    }
-
     private TextClassifier mTextClassifier;
-    private final int mSize;
-
-    public TextClassifierPerfTest(int size) {
-        mSize = size;
-    }
 
     @Before
     public void setUp() {
         Context context = InstrumentationRegistry.getTargetContext();
-        TextClassificationManager textClassificationManager =
-                context.getSystemService(TextClassificationManager.class);
-        mTextClassifier = textClassificationManager.getTextClassifier(TextClassifier.LOCAL);
+        mTextClassifier = TextClassifierService.getDefaultTextClassifierImplementation(context);
+    }
+
+    @Test
+    public void testClassifyText() {
+        TextClassification.Request request =
+                new TextClassification.Request.Builder(TEXT, 0, TEXT.length()).build();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mTextClassifier.classifyText(request);
+        }
+    }
+
+    @Test
+    public void testSuggestSelection() {
+        // Trying to select the phone number.
+        TextSelection.Request request =
+                new TextSelection.Request.Builder(
+                        TEXT,
+                        /* startIndex= */ 28,
+                        /* endIndex= */29)
+                        .build();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mTextClassifier.suggestSelection(request);
+        }
+    }
+
+    @Test
+    public void testGenerateLinks() {
+        TextLinks.Request request =
+                new TextLinks.Request.Builder(TEXT).build();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mTextClassifier.generateLinks(request);
+        }
     }
 
     @Test
     public void testSuggestConversationActions() {
-        String text = mSize == ACTUAL_REQUEST ? "Where are you?" : generateRandomString(mSize);
-        ConversationActions.Request request = createConversationActionsRequest(text);
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_OTHERS)
+                        .setText(TEXT)
+                        .build();
+        ConversationActions.Request request = new ConversationActions.Request.Builder(
+                Collections.singletonList(message))
+                .build();
+
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mTextClassifier.suggestConversationActions(request);
@@ -75,36 +101,10 @@ public class TextClassifierPerfTest {
 
     @Test
     public void testDetectLanguage() {
-        String text = mSize == ACTUAL_REQUEST
-                ? "これは日本語のテキストです" : generateRandomString(mSize);
-        TextLanguage.Request request = createTextLanguageRequest(text);
+        TextLanguage.Request request = new TextLanguage.Request.Builder(TEXT).build();
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mTextClassifier.detectLanguage(request);
         }
-    }
-
-    private static ConversationActions.Request createConversationActionsRequest(CharSequence text) {
-        ConversationActions.Message message =
-                new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_OTHERS)
-                        .setText(text)
-                        .build();
-        return new ConversationActions.Request.Builder(Collections.singletonList(message))
-                .build();
-    }
-
-    private static TextLanguage.Request createTextLanguageRequest(CharSequence text) {
-        return new TextLanguage.Request.Builder(text).build();
-    }
-
-    private static String generateRandomString(int length) {
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(RANDOM_CHAR_SET.length());
-            stringBuilder.append(RANDOM_CHAR_SET.charAt(index));
-        }
-        return stringBuilder.toString();
     }
 }

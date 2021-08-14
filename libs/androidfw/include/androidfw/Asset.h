@@ -91,7 +91,8 @@ public:
      * Get a pointer to a buffer with the entire contents of the file.
      * If `aligned` is true, the buffer data will be aligned to a 4-byte boundary.
      *
-     * Use this function if the asset can never reside on IncFs.
+     * If the buffer contents reside on IncFs, the entire buffer will be scanned to ensure the
+     * presence of the data before returning a raw pointer to the buffer.
      */
     virtual const void* getBuffer(bool aligned) = 0;
 
@@ -99,7 +100,8 @@ public:
      * Get a incfs::map_ptr<void> to a buffer with the entire contents of the file.
      * If `aligned` is true, the buffer data will be aligned to a 4-byte boundary.
      *
-     * Use this function if the asset can potentially reside on IncFs.
+     * Use this function if the asset can potentially reside on IncFs to avoid the scanning of the
+     * buffer contents done in Asset::getBuffer.
      */
     virtual incfs::map_ptr<void> getIncFsBuffer(bool aligned) = 0;
 
@@ -167,8 +169,8 @@ protected:
 private:
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
-    friend class ApkAssets;
-    friend class ZipAssetsProvider;
+    friend struct ZipAssetsProvider;
+    friend struct AssetsProvider;
 
     /*
      * Create the asset from a named file on disk.

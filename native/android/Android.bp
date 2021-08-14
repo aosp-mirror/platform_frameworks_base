@@ -45,6 +45,7 @@ cc_library_shared {
     defaults: ["libandroid_defaults"],
 
     srcs: [
+        "activity_manager.cpp",
         "asset_manager.cpp",
         "choreographer.cpp",
         "configuration.cpp",
@@ -55,6 +56,8 @@ cc_library_shared {
         "native_window_jni.cpp",
         "net.c",
         "obb.cpp",
+        "permission_manager.cpp",
+        "performance_hint.cpp",
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",
@@ -96,7 +99,10 @@ cc_library_shared {
         "libarect",
     ],
 
-    header_libs: ["libhwui_internal_headers"],
+    header_libs: [
+        "libhwui_internal_headers",
+        "libandroid_headers_private",
+    ],
 
     whole_static_libs: ["libnativewindow"],
 
@@ -104,10 +110,17 @@ cc_library_shared {
 
     include_dirs: ["bionic/libc/dns/include"],
 
+    local_include_dirs: ["include_platform"],
+
+    export_include_dirs: ["include_platform"],
+
     version_script: "libandroid.map.txt",
     stubs: {
         symbol_file: "libandroid.map.txt",
-        versions: ["29"],
+        versions: [
+            "29",
+            "31",
+        ],
     },
 }
 

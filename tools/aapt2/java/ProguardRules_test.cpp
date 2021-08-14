@@ -247,8 +247,10 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
 
   ResourceTable table;
   StdErrDiagnostics errDiagnostics;
-  table.AddResource(bar_layout->file.name, ConfigDescription::DefaultConfig(), "",
-                    util::make_unique<FileReference>(), &errDiagnostics);
+  table.AddResource(NewResourceBuilder(bar_layout->file.name)
+                        .SetValue(util::make_unique<FileReference>())
+                        .Build(),
+                    &errDiagnostics);
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
@@ -262,7 +264,7 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
       </View>)");
   foo_layout->file.name = test::ParseNameOrDie("com.foo:layout/foo");
 
-  XmlReferenceLinker xml_linker;
+  XmlReferenceLinker xml_linker(nullptr);
   ASSERT_TRUE(xml_linker.Consume(context.get(), bar_layout.get()));
   ASSERT_TRUE(xml_linker.Consume(context.get(), foo_layout.get()));
 

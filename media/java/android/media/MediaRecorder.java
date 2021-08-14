@@ -25,11 +25,16 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
+import android.content.Context;
 import android.hardware.Camera;
+import android.media.metrics.LogSessionId;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -48,6 +53,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -125,11 +131,25 @@ public class MediaRecorder implements AudioRouting,
 
     private int mChannelCount;
 
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
     /**
      * Default constructor.
+     *
+     * @deprecated Use {@link #MediaRecorder(Context)} instead
      */
+    @Deprecated
     public MediaRecorder() {
+        this(ActivityThread.currentApplication());
+    }
 
+    /**
+     * Default constructor.
+     *
+     * @param context Context the recorder belongs to
+     */
+    public MediaRecorder(@NonNull Context context) {
+        Objects.requireNonNull(context);
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -140,12 +160,35 @@ public class MediaRecorder implements AudioRouting,
         }
 
         mChannelCount = 1;
-        String packageName = ActivityThread.currentPackageName();
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this), packageName,
-                ActivityThread.currentOpPackageName());
+        try (ScopedParcelState attributionSourceState = context.getAttributionSource()
+                .asScopedParcelState()) {
+            native_setup(new WeakReference<>(this), ActivityThread.currentPackageName(),
+                    attributionSourceState.getParcel());
+        }
+    }
+
+    /**
+     * Sets the {@link LogSessionId} for MediaRecorder.
+     *
+     * @param id the global ID for monitoring the MediaRecorder performance
+     */
+    public void setLogSessionId(@NonNull LogSessionId id) {
+        Objects.requireNonNull(id);
+        mLogSessionId = id;
+        setParameter("log-session-id=" + id.getStringId());
+    }
+
+    /**
+     * Returns the {@link LogSessionId} for MediaRecorder.
+     *
+     * @return the global ID for monitoring the MediaRecorder performance
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     /**
@@ -379,6 +422,26 @@ public class MediaRecorder implements AudioRouting,
     @Retention(RetentionPolicy.SOURCE)
     public @interface Source {}
 
+    /** @hide */
+    @IntDef({
+        AudioSource.DEFAULT,
+        AudioSource.MIC,
+        AudioSource.VOICE_UPLINK,
+        AudioSource.VOICE_DOWNLINK,
+        AudioSource.VOICE_CALL,
+        AudioSource.CAMCORDER,
+        AudioSource.VOICE_RECOGNITION,
+        AudioSource.VOICE_COMMUNICATION,
+        AudioSource.REMOTE_SUBMIX,
+        AudioSource.UNPROCESSED,
+        AudioSource.VOICE_PERFORMANCE,
+        AudioSource.ECHO_REFERENCE,
+        AudioSource.RADIO_TUNER,
+        AudioSource.HOTWORD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemSource {}
+
     // TODO make AudioSource static (API change) and move this method inside the AudioSource class
     /**
      * @hide
@@ -549,6 +612,25 @@ public class MediaRecorder implements AudioRouting,
     };
 
     /**
+     * @hide
+     */
+    @IntDef({
+        OutputFormat.DEFAULT,
+        OutputFormat.THREE_GPP,
+        OutputFormat.MPEG_4,
+        OutputFormat.AMR_NB,
+        OutputFormat.AMR_WB,
+        OutputFormat.AAC_ADIF,
+        OutputFormat.AAC_ADTS,
+        OutputFormat.MPEG_2_TS,
+        OutputFormat.WEBM,
+        OutputFormat.HEIF,
+        OutputFormat.OGG,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OutputFormatValues {}
+
+    /**
      * Defines the audio encoding. These constants are used with
      * {@link MediaRecorder#setAudioEncoder(int)}.
      */
@@ -575,6 +657,22 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * @hide
+     */
+    @IntDef({
+        AudioEncoder.DEFAULT,
+        AudioEncoder.AMR_NB,
+        AudioEncoder.AMR_WB,
+        AudioEncoder.AAC,
+        AudioEncoder.HE_AAC,
+        AudioEncoder.AAC_ELD,
+        AudioEncoder.VORBIS,
+        AudioEncoder.OPUS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioEncoderValues {}
+
+    /**
      * Defines the video encoding. These constants are used with
      * {@link MediaRecorder#setVideoEncoder(int)}.
      */
@@ -590,6 +688,20 @@ public class MediaRecorder implements AudioRouting,
         public static final int VP8 = 4;
         public static final int HEVC = 5;
     }
+
+    /**
+     * @hide
+     */
+    @IntDef({
+        VideoEncoder.DEFAULT,
+        VideoEncoder.H263,
+        VideoEncoder.H264,
+        VideoEncoder.MPEG_4_SP,
+        VideoEncoder.VP8,
+        VideoEncoder.HEVC,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VideoEncoderValues {}
 
     /**
      * Sets the audio source to be used for recording. If this method is not
@@ -693,6 +805,47 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * Uses the settings from an AudioProfile for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the AudioProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setAudioProfile(@NonNull EncoderProfiles.AudioProfile profile) {
+        setAudioEncodingBitRate(profile.getBitrate());
+        setAudioChannels(profile.getChannels());
+        setAudioSamplingRate(profile.getSampleRate());
+        setAudioEncoder(profile.getCodec());
+    }
+
+    /**
+     * Uses the settings from a VideoProfile object for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the VideoProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setVideoProfile(@NonNull EncoderProfiles.VideoProfile profile) {
+        setVideoFrameRate(profile.getFrameRate());
+        setVideoSize(profile.getWidth(), profile.getHeight());
+        setVideoEncodingBitRate(profile.getBitrate());
+        setVideoEncoder(profile.getCodec());
+        if (profile.getProfile() >= 0) {
+            setVideoEncodingProfileLevel(profile.getProfile(), 0 /* level */);
+        }
+    }
+
+    /**
      * Set video frame capture rate. This can be used to set a different video frame capture
      * rate than the recorded video's playback rate. This method also sets the recording mode
      * to time lapse. In time lapse video recording, only video is recorded. Audio related
@@ -786,7 +939,7 @@ public class MediaRecorder implements AudioRouting,
      * setAudioSource()/setVideoSource().
      * @see android.media.MediaRecorder.OutputFormat
      */
-    public native void setOutputFormat(int output_format)
+    public native void setOutputFormat(@OutputFormatValues int output_format)
             throws IllegalStateException;
 
     /**
@@ -869,7 +1022,7 @@ public class MediaRecorder implements AudioRouting,
      * setOutputFormat() or after prepare().
      * @see android.media.MediaRecorder.AudioEncoder
      */
-    public native void setAudioEncoder(int audio_encoder)
+    public native void setAudioEncoder(@AudioEncoderValues int audio_encoder)
             throws IllegalStateException;
 
     /**
@@ -882,7 +1035,7 @@ public class MediaRecorder implements AudioRouting,
      * setOutputFormat() or after prepare()
      * @see android.media.MediaRecorder.VideoEncoder
      */
-    public native void setVideoEncoder(int video_encoder)
+    public native void setVideoEncoder(@VideoEncoderValues int video_encoder)
             throws IllegalStateException;
 
     /**
@@ -943,6 +1096,13 @@ public class MediaRecorder implements AudioRouting,
      * clipped internally to ensure the video recording can proceed smoothly based on
      * the capabilities of the platform.
      *
+     * <p>
+     * NB: the actual bitrate and other encoding characteristics may be affected by
+     * the minimum quality floor behavior introduced in
+     * {@link android.os.Build.VERSION_CODES#S}. More detail on how and where this
+     * impacts video encoding can be found in the
+     * {@link MediaCodec} page and looking for "quality floor" (near the top of the page).
+     *
      * @param bitRate the video encoding bit rate in bits per second.
      */
     public void setVideoEncodingBitRate(int bitRate) {
@@ -968,10 +1128,10 @@ public class MediaRecorder implements AudioRouting,
      * @throws IllegalArgumentException when an invalid profile or level value is used.
      */
     public void setVideoEncodingProfileLevel(int profile, int level) {
-        if (profile <= 0)  {
+        if (profile < 0)  {
             throw new IllegalArgumentException("Video encoding profile is not positive");
         }
-        if (level <= 0)  {
+        if (level < 0)  {
             throw new IllegalArgumentException("Video encoding level is not positive");
         }
         setParameter("video-param-encoder-profile=" + profile);
@@ -1507,14 +1667,7 @@ public class MediaRecorder implements AudioRouting,
         if (deviceId == 0) {
             return null;
         }
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == deviceId) {
-                return devices[i];
-            }
-        }
-        return null;
+        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_INPUTS);
     }
 
     /*
@@ -1747,12 +1900,23 @@ public class MediaRecorder implements AudioRouting,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static native final void native_init();
 
-    @UnsupportedAppUsage
-    private native final void native_setup(Object mediarecorder_this,
-            String clientName, String opPackageName) throws IllegalStateException;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "{@link MediaRecorder}")
+    private void native_setup(Object mediarecorderThis,
+            String clientName, String opPackageName) throws IllegalStateException {
+        AttributionSource attributionSource = AttributionSource.myAttributionSource()
+                .withPackageName(opPackageName);
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            native_setup(mediarecorderThis, clientName, attributionSourceState.getParcel());
+        }
+    }
+
+    private native void native_setup(Object mediarecorderThis,
+            String clientName, @NonNull Parcel attributionSource)
+            throws IllegalStateException;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private native final void native_finalize();
+    private native void native_finalize();
 
     @UnsupportedAppUsage
     private native void setParameter(String nameValuePair);
@@ -1898,4 +2062,3 @@ public class MediaRecorder implements AudioRouting,
 
     }
 }
-

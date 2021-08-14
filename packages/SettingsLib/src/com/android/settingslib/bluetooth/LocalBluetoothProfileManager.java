@@ -441,6 +441,10 @@ public class LocalBluetoothProfileManager {
         return mHearingAidProfile;
     }
 
+    SapProfile getSapProfile() {
+        return mSapProfile;
+    }
+
     @VisibleForTesting
     HidProfile getHidProfile() {
         return mHidProfile;

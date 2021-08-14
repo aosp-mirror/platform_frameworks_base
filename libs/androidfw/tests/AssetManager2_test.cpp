@@ -55,6 +55,12 @@ class AssetManager2Test : public ::testing::Test {
     basic_de_fr_assets_ = ApkAssets::Load("basic/basic_de_fr.apk");
     ASSERT_NE(nullptr, basic_de_fr_assets_);
 
+    basic_xhdpi_assets_ = ApkAssets::Load("basic/basic_xhdpi-v4.apk");
+    ASSERT_NE(nullptr, basic_de_fr_assets_);
+
+    basic_xxhdpi_assets_ = ApkAssets::Load("basic/basic_xxhdpi-v4.apk");
+    ASSERT_NE(nullptr, basic_de_fr_assets_);
+
     style_assets_ = ApkAssets::Load("styles/styles.apk");
     ASSERT_NE(nullptr, style_assets_);
 
@@ -87,6 +93,8 @@ class AssetManager2Test : public ::testing::Test {
  protected:
   std::unique_ptr<const ApkAssets> basic_assets_;
   std::unique_ptr<const ApkAssets> basic_de_fr_assets_;
+  std::unique_ptr<const ApkAssets> basic_xhdpi_assets_;
+  std::unique_ptr<const ApkAssets> basic_xxhdpi_assets_;
   std::unique_ptr<const ApkAssets> style_assets_;
   std::unique_ptr<const ApkAssets> lib_one_assets_;
   std::unique_ptr<const ApkAssets> lib_two_assets_;
@@ -223,6 +231,24 @@ TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
   auto name = assetmanager.GetResourceName(lib_one::R::string::foo);
   ASSERT_TRUE(name.has_value());
   ASSERT_EQ("com.android.lib_one:string/foo", ToFormattedResourceString(*name));
+}
+
+TEST_F(AssetManager2Test, GetResourceNameNonMatchingConfig) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_de_fr_assets_.get()});
+
+  auto value = assetmanager.GetResourceName(basic::R::string::test1);
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ("com.android.basic:string/test1", ToFormattedResourceString(*value));
+}
+
+TEST_F(AssetManager2Test, GetResourceTypeSpecFlags) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_de_fr_assets_.get()});
+
+  auto value = assetmanager.GetResourceTypeSpecFlags(basic::R::string::test1);
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(ResTable_typeSpec::SPEC_PUBLIC | ResTable_config::CONFIG_LOCALE, *value);
 }
 
 TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
@@ -440,6 +466,29 @@ TEST_F(AssetManager2Test, ResolveDeepIdReference) {
   auto result = assetmanager.ResolveReference(*value);
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(*low_ref, value->resid);
+}
+
+TEST_F(AssetManager2Test, DensityOverride) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get(), basic_xhdpi_assets_.get(),
+                             basic_xxhdpi_assets_.get()});
+  assetmanager.SetConfiguration({
+    .density = ResTable_config::DENSITY_XHIGH,
+    .sdkVersion = 21,
+  });
+
+  auto value = assetmanager.GetResource(basic::R::string::density, false /*may_be_bag*/);
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(Res_value::TYPE_STRING, value->type);
+  EXPECT_EQ("xhdpi", GetStringFromPool(assetmanager.GetStringPoolForCookie(value->cookie),
+                                       value->data));
+
+  value = assetmanager.GetResource(basic::R::string::density, false /*may_be_bag*/,
+                                   ResTable_config::DENSITY_XXHIGH);
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(Res_value::TYPE_STRING, value->type);
+  EXPECT_EQ("xxhdpi", GetStringFromPool(assetmanager.GetStringPoolForCookie(value->cookie),
+                                        value->data));
 }
 
 TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) {
@@ -716,7 +765,8 @@ TEST_F(AssetManager2Test, GetLastPathWithSingleApkAssets) {
 
   auto result = assetmanager.GetLastResourceResolution();
   EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
-            "\tFor config -de\n\tFound initial: com.android.basic", result);
+            "\tFor config - de\n"
+            "\tFound initial: basic/basic.apk", result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
@@ -735,9 +785,9 @@ TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
 
   auto result = assetmanager.GetLastResourceResolution();
   EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
-            "\tFor config -de\n"
-            "\tFound initial: com.android.basic\n"
-            "\tFound better: com.android.basic -de", result);
+            "\tFor config - de\n"
+            "\tFound initial: basic/basic.apk\n"
+            "\tFound better: basic/basic_de_fr.apk - de", result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {

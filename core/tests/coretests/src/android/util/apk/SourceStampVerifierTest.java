@@ -17,6 +17,7 @@
 package android.util.apk;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -196,6 +197,38 @@ public class SourceStampVerifierTest {
         assertTrue(result.isPresent());
         assertFalse(result.isVerified());
         assertNull(result.getCertificate());
+    }
+
+    @Test
+    public void testSourceStamp_validStampLineage() throws Exception {
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-lineage-valid.apk");
+        byte[] expectedStampCertHash = getSourceStampCertificateHashFromApk(mPrimaryApk);
+
+        SourceStampVerificationResult result =
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
+
+        assertTrue(result.isPresent());
+        assertTrue(result.isVerified());
+        assertNotNull(result.getCertificate());
+        byte[] actualStampCertHash =
+                MessageDigest.getInstance("SHA-256").digest(result.getCertificate().getEncoded());
+        assertArrayEquals(expectedStampCertHash, actualStampCertHash);
+        assertEquals(2, result.getCertificateLineage().size());
+        assertEquals(result.getCertificate(),
+                result.getCertificateLineage().get(result.getCertificateLineage().size() - 1));
+    }
+
+    @Test
+    public void testSourceStamp_invalidStampLineage() throws Exception {
+        mPrimaryApk = getApk("SourceStampVerifierTest/stamp-lineage-invalid.apk");
+
+        SourceStampVerificationResult result =
+                SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
+
+        assertTrue(result.isPresent());
+        assertFalse(result.isVerified());
+        assertNull(result.getCertificate());
+        assertTrue(result.getCertificateLineage().isEmpty());
     }
 
     private File getApk(String apkPath) throws IOException {

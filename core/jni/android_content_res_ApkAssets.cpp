@@ -16,6 +16,10 @@
 
 #define ATRACE_TAG ATRACE_TAG_RESOURCES
 
+#include <mutex>
+
+#include "signal.h"
+
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -24,7 +28,7 @@
 #include "utils/misc.h"
 #include "utils/Trace.h"
 
-#include "android_util_AssetManager_private.h"
+#include "android_content_res_ApkAssets.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/ScopedUtfChars.h"
@@ -47,6 +51,7 @@ static struct assetfiledescriptor_offsets_t {
 static struct assetsprovider_offsets_t {
   jclass classObject;
   jmethodID loadAssetFd;
+  jmethodID toString;
 } gAssetsProviderOffsets;
 
 static struct {
@@ -69,12 +74,42 @@ enum : format_type_t {
   FORMAT_DIRECTORY = 3,
 };
 
+Guarded<std::unique_ptr<const ApkAssets>>& ApkAssetsFromLong(jlong ptr) {
+    return *reinterpret_cast<Guarded<std::unique_ptr<const ApkAssets>>*>(ptr);
+}
+
+static jlong CreateGuardedApkAssets(std::unique_ptr<const ApkAssets> assets) {
+    auto guarded_assets = new Guarded<std::unique_ptr<const ApkAssets>>(std::move(assets));
+    return reinterpret_cast<jlong>(guarded_assets);
+}
+
+static void DeleteGuardedApkAssets(Guarded<std::unique_ptr<const ApkAssets>>& apk_assets) {
+    delete &apk_assets;
+}
+
 class LoaderAssetsProvider : public AssetsProvider {
  public:
   static std::unique_ptr<AssetsProvider> Create(JNIEnv* env, jobject assets_provider) {
-    return (!assets_provider) ? nullptr
+    return (!assets_provider) ? EmptyAssetsProvider::Create()
                               : std::unique_ptr<AssetsProvider>(new LoaderAssetsProvider(
-                                  env->NewGlobalRef(assets_provider)));
+                                    env, assets_provider));
+  }
+
+  bool ForEachFile(const std::string& /* root_path */,
+                   const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+    return true;
+  }
+
+  std::optional<std::string_view> GetPath() const override {
+    return {};
+  }
+
+  const std::string& GetDebugName() const override {
+    return debug_name_;
+  }
+
+  bool IsUpToDate() const override {
+    return true;
   }
 
   ~LoaderAssetsProvider() override {
@@ -142,20 +177,26 @@ class LoaderAssetsProvider : public AssetsProvider {
       *file_exists = true;
     }
 
-    return ApkAssets::CreateAssetFromFd(base::unique_fd(fd),
-                                        nullptr /* path */,
-                                        static_cast<off64_t>(mOffset),
-                                        static_cast<off64_t>(mLength));
+    return AssetsProvider::CreateAssetFromFd(base::unique_fd(fd),
+                                             nullptr /* path */,
+                                             static_cast<off64_t>(mOffset),
+                                             static_cast<off64_t>(mLength));
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoaderAssetsProvider);
 
-  explicit LoaderAssetsProvider(jobject assets_provider)
-    : assets_provider_(assets_provider) { }
+  explicit LoaderAssetsProvider(JNIEnv* env, jobject assets_provider) {
+    assets_provider_ = env->NewGlobalRef(assets_provider);
+    auto string_result = static_cast<jstring>(env->CallObjectMethod(
+        assets_provider_, gAssetsProviderOffsets.toString));
+    ScopedUtfChars str(env, string_result);
+    debug_name_ = std::string(str.c_str(), str.size());
+  }
 
   // The global reference to the AssetsProvider
   jobject assets_provider_;
+  std::string debug_name_;
 };
 
 static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -168,20 +209,29 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
   ATRACE_NAME(base::StringPrintf("LoadApkAssets(%s)", path.c_str()).c_str());
 
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  std::unique_ptr<const ApkAssets> apk_assets;
+  std::unique_ptr<ApkAssets> apk_assets;
   switch (format) {
-    case FORMAT_APK:
-      apk_assets = ApkAssets::Load(path.c_str(), property_flags, std::move(loader_assets));
-      break;
+    case FORMAT_APK: {
+        auto assets = MultiAssetsProvider::Create(std::move(loader_assets),
+                                                  ZipAssetsProvider::Create(path.c_str(),
+                                                                            property_flags));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
+    }
     case FORMAT_IDMAP:
       apk_assets = ApkAssets::LoadOverlay(path.c_str(), property_flags);
       break;
     case FORMAT_ARSC:
-      apk_assets = ApkAssets::LoadTable(path.c_str(), property_flags, std::move(loader_assets));
+      apk_assets = ApkAssets::LoadTable(AssetsProvider::CreateAssetFromFile(path.c_str()),
+                                        std::move(loader_assets),
+                                        property_flags);
       break;
-    case FORMAT_DIRECTORY:
-      apk_assets = ApkAssets::LoadFromDir(path.c_str(), property_flags,  std::move(loader_assets));
+    case FORMAT_DIRECTORY: {
+      auto assets = MultiAssetsProvider::Create(std::move(loader_assets),
+                                                DirectoryAssetsProvider::Create(path.c_str()));
+      apk_assets = ApkAssets::Load(std::move(assets), property_flags);
       break;
+    }
     default:
       const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
       jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
@@ -193,7 +243,7 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -221,13 +271,19 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
   std::unique_ptr<const ApkAssets> apk_assets;
   switch (format) {
-    case FORMAT_APK:
-      apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
-                                         property_flags, std::move(loader_assets));
-      break;
+    case FORMAT_APK: {
+        auto assets =
+                MultiAssetsProvider::Create(std::move(loader_assets),
+                                            ZipAssetsProvider::Create(std::move(dup_fd),
+                                                                      friendly_name_utf8.c_str(),
+                                                                      property_flags));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
+    }
     case FORMAT_ARSC:
-      apk_assets = ApkAssets::LoadTableFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
-                                              property_flags, std::move(loader_assets));
+      apk_assets = ApkAssets::LoadTable(
+          AssetsProvider::CreateAssetFromFd(std::move(dup_fd), nullptr /* path */),
+          std::move(loader_assets), property_flags);
       break;
     default:
       const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
@@ -241,7 +297,7 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -282,17 +338,24 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
   std::unique_ptr<const ApkAssets> apk_assets;
   switch (format) {
-    case FORMAT_APK:
-      apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
-                                         property_flags, std::move(loader_assets),
-                                         static_cast<off64_t>(offset),
-                                         static_cast<off64_t>(length));
-      break;
+    case FORMAT_APK: {
+        auto assets =
+                MultiAssetsProvider::Create(std::move(loader_assets),
+                                            ZipAssetsProvider::Create(std::move(dup_fd),
+                                                                      friendly_name_utf8.c_str(),
+                                                                      property_flags,
+                                                                      static_cast<off64_t>(offset),
+                                                                      static_cast<off64_t>(
+                                                                              length)));
+        apk_assets = ApkAssets::Load(std::move(assets), property_flags);
+        break;
+    }
     case FORMAT_ARSC:
-      apk_assets = ApkAssets::LoadTableFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
-                                              property_flags, std::move(loader_assets),
-                                              static_cast<off64_t>(offset),
-                                              static_cast<off64_t>(length));
+      apk_assets = ApkAssets::LoadTable(
+          AssetsProvider::CreateAssetFromFd(std::move(dup_fd), nullptr /* path */,
+                                            static_cast<off64_t>(offset),
+                                            static_cast<off64_t>(length)),
+          std::move(loader_assets), property_flags);
       break;
     default:
       const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
@@ -306,32 +369,43 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject assets_provider) {
-  auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  auto apk_assets = ApkAssets::LoadEmpty(flags, std::move(loader_assets));
-  return reinterpret_cast<jlong>(apk_assets.release());
+  auto apk_assets = ApkAssets::Load(LoaderAssetsProvider::Create(env, assets_provider), flags);
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  delete reinterpret_cast<ApkAssets*>(ptr);
+    DeleteGuardedApkAssets(ApkAssetsFromLong(ptr));
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return env->NewStringUTF(apk_assets->GetPath().c_str());
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    if (auto path = apk_assets->GetPath()) {
+        return env->NewStringUTF(path->data());
+  }
+  return nullptr;
+}
+
+static jstring NativeGetDebugName(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return env->NewStringUTF(apk_assets->GetDebugName().c_str());
 }
 
 static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
 static jboolean NativeIsUpToDate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
 }
 
 static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring file_name) {
@@ -340,7 +414,8 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
     return 0;
   }
 
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+  auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+  auto apk_assets = scoped_apk_assets->get();
   std::unique_ptr<Asset> asset = apk_assets->GetAssetsProvider()->Open(
       path_utf8.c_str(),Asset::AccessMode::ACCESS_RANDOM);
   if (asset == nullptr) {
@@ -351,8 +426,9 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
   const auto buffer = asset->getIncFsBuffer(true /* aligned */);
   const size_t length = asset->getLength();
   if (!buffer.convert<uint8_t>().verify(length)) {
-    jniThrowException(env, kResourcesNotFound, kIOErrorMessage);
-    return 0;
+      jniThrowException(env, "java/io/FileNotFoundException",
+                        "File not fully present due to incremental installation");
+      return 0;
   }
 
   // DynamicRefTable is only needed when looking up resource references. Opening an XML file
@@ -368,12 +444,13 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
 
 static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr,
                                          jstring overlayable_name) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
 
-  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
-  if (packages.empty()) {
-    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
-    return 0;
+    const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+    if (packages.empty()) {
+        jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+        return 0;
   }
 
   // TODO(b/119899133): Convert this to a search for the info rather than assuming it's at index 0
@@ -403,13 +480,14 @@ static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr
 }
 
 static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
 
-  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
-  if (packages.empty()) {
-    // Must throw to prevent bypass by returning false
-    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
-    return 0;
+    const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+    if (packages.empty()) {
+        // Must throw to prevent bypass by returning false
+        jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+        return 0;
   }
 
   const auto& overlayable_infos = packages[0]->GetOverlayableMap();
@@ -429,6 +507,7 @@ static const JNINativeMethod gApkAssetsMethods[] = {
      (void*)NativeLoadFromFdOffset},
     {"nativeDestroy", "(J)V", (void*)NativeDestroy},
     {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
+    {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
     {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
     {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
     {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
@@ -454,10 +533,11 @@ int register_android_content_res_ApkAssets(JNIEnv* env) {
   gAssetsProviderOffsets.loadAssetFd = GetMethodIDOrDie(
       env, gAssetsProviderOffsets.classObject, "loadAssetFd",
       "(Ljava/lang/String;I)Landroid/content/res/AssetFileDescriptor;");
+  gAssetsProviderOffsets.toString = GetMethodIDOrDie(
+      env, gAssetsProviderOffsets.classObject, "toString", "()Ljava/lang/String;");
 
   jclass parcelFd = FindClassOrDie(env, "android/os/ParcelFileDescriptor");
   gParcelFileDescriptorOffsets.detachFd = GetMethodIDOrDie(env, parcelFd, "detachFd", "()I");
-
   return RegisterMethodsOrDie(env, "android/content/res/ApkAssets", gApkAssetsMethods,
                               arraysize(gApkAssetsMethods));
 }

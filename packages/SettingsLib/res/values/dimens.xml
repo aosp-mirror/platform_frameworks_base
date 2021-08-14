@@ -25,15 +25,12 @@
     <dimen name="circle_avatar_size">40dp</dimen>
 
     <!-- Height of a user icon view -->
-    <dimen name="user_icon_view_height">56dp</dimen>
+    <dimen name="user_icon_view_height">24dp</dimen>
     <!-- User spinner -->
     <dimen name="user_spinner_height">72dp</dimen>
     <dimen name="user_spinner_padding">4dp</dimen>
     <dimen name="user_spinner_padding_sides">20dp</dimen>
     <dimen name="user_spinner_item_height">56dp</dimen>
-
-    <dimen name="two_target_pref_small_icon_size">24dp</dimen>
-    <dimen name="two_target_pref_medium_icon_size">32dp</dimen>
 
     <!-- Lock icon for preferences locked by admin -->
     <dimen name="restricted_icon_padding">4dp</dimen>
@@ -97,4 +94,8 @@
 
     <!-- Size of advanced icon -->
     <dimen name="advanced_icon_size">18dp</dimen>
+
+    <!-- Minimum width for the popup for updating a user's photo. -->
+    <dimen name="update_user_photo_popup_min_width">300dp</dimen>
+
 </resources>

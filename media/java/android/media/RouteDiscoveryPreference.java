@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -68,9 +69,10 @@ public final class RouteDiscoveryPreference implements Parcelable {
     private final Bundle mExtras;
 
     /**
-     * An empty discovery preference
+     * An empty discovery preference.
      * @hide
      */
+    @SystemApi
     public static final RouteDiscoveryPreference EMPTY =
             new Builder(Collections.emptyList(), false).build();
 

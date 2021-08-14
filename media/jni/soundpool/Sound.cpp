@@ -214,7 +214,7 @@ status_t Sound::doLoad()
         } else if (sampleRate > kMaxSampleRate) {
             ALOGE("%s: sample rate (%u) out of range", __func__, sampleRate);
             status = BAD_VALUE;
-        } else if (channelCount < 1 || channelCount > FCC_8) {
+        } else if (channelCount < 1 || channelCount > FCC_LIMIT) {
             ALOGE("%s: sample channel count (%d) out of range", __func__, channelCount);
             status = BAD_VALUE;
         } else {

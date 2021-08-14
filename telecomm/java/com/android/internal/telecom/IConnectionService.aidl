@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.telecom.CallAudioState;
+import android.telecom.Connection;
 import android.telecom.ConnectionRequest;
 import android.telecom.Logging.Session;
 import android.telecom.PhoneAccountHandle;
@@ -117,6 +118,10 @@ oneway interface IConnectionService {
     void pullExternalCall(String callId, in Session.Info sessionInfo);
 
     void sendCallEvent(String callId, String event, in Bundle extras, in Session.Info sessionInfo);
+
+    void onCallFilteringCompleted(String callId,
+            in Connection.CallFilteringCompletionInfo completionInfo,
+            in Session.Info sessionInfo);
 
     void onExtrasChanged(String callId, in Bundle extras, in Session.Info sessionInfo);
 

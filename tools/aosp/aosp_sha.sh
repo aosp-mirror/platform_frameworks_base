@@ -28,7 +28,7 @@ else
         if (( count == 0 )); then
             echo
         fi
-        echo -e "\033[0;31mThe source of truth for '$file' is in AOSP.\033[0m"
+        echo -e "\033[0;31;47mThe source of truth for '$file' is in AOSP.\033[0m"
         (( count++ ))
     done < <(git show --name-only --pretty=format: $1 | grep -- "$2")
     if (( count != 0 )); then

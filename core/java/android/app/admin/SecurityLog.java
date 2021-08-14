@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -84,7 +85,8 @@ public class SecurityLog {
             TAG_CRYPTO_SELF_TEST_COMPLETED,
             TAG_KEY_INTEGRITY_VIOLATION,
             TAG_CERT_VALIDATION_FAILURE,
-            TAG_CAMERA_POLICY_SET
+            TAG_CAMERA_POLICY_SET,
+            TAG_PASSWORD_COMPLEXITY_REQUIRED
     })
     public @interface SecurityLogTag {}
 
@@ -187,6 +189,7 @@ public class SecurityLog {
      * detected.
      * <li> {@code eio} indicates that an I/O error will be returned for an attempt to read
      * corrupted data blocks.
+     * <li> {@code disabled} indicates that integrity check is disabled.
      * For details see Verified Boot documentation.
      */
     public static final int TAG_OS_STARTUP = SecurityLogTags.SECURITY_OS_STARTUP;
@@ -342,7 +345,7 @@ public class SecurityLog {
     public static final int TAG_WIPE_FAILURE = SecurityLogTags.SECURITY_WIPE_FAILED;
 
     /**
-     * Indicates that an authentication key was generated. The log entry contains the following
+     * Indicates that a cryptographic key was generated. The log entry contains the following
      * information about the event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
@@ -475,6 +478,21 @@ public class SecurityLog {
      */
     public static final int TAG_CAMERA_POLICY_SET =
             SecurityLogTags.SECURITY_CAMERA_POLICY_SET;
+
+    /**
+     * Indicates that an admin has set a password complexity requirement, using the platform's
+     * pre-defined complexity levels. The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] Password complexity ({@code Integer})
+     *
+     * @see DevicePolicyManager#setRequiredPasswordComplexity(int)
+     */
+    public static final int TAG_PASSWORD_COMPLEXITY_REQUIRED =
+            SecurityLogTags.SECURITY_PASSWORD_COMPLEXITY_REQUIRED;
 
     /**
      * Event severity level indicating that the event corresponds to normal workflow.
@@ -616,6 +634,7 @@ public class SecurityLog {
                 case TAG_USER_RESTRICTION_ADDED:
                 case TAG_USER_RESTRICTION_REMOVED:
                 case TAG_CAMERA_POLICY_SET:
+                case TAG_PASSWORD_COMPLEXITY_REQUIRED:
                     return LEVEL_INFO;
                 case TAG_CERT_AUTHORITY_REMOVED:
                 case TAG_CRYPTO_SELF_TEST_COMPLETED:
@@ -746,7 +765,7 @@ public class SecurityLog {
          * @hide
          */
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SecurityEvent other = (SecurityEvent) o;

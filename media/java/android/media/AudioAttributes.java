@@ -743,6 +743,13 @@ public final class AudioAttributes implements Parcelable {
             if (mBundle != null) {
                 aa.mBundle = new Bundle(mBundle);
             }
+
+            // Allow the FLAG_HW_HOTWORD only for AudioSource.VOICE_RECOGNITION
+            if (mSource != MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    && (mFlags & FLAG_HW_HOTWORD) == FLAG_HW_HOTWORD) {
+                aa.mFlags &= ~FLAG_HW_HOTWORD;
+            }
+
             return aa;
         }
 
@@ -852,6 +859,27 @@ public final class AudioAttributes implements Parcelable {
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL_API_SET;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Request for capture in hotword mode.
+         *
+         * Requests an audio path optimized for Hotword detection use cases from
+         * the low power audio DSP. This is valid only for capture with
+         * audio source {@link MediaRecorder.AudioSource#VOICE_RECOGNITION}.
+         * There is no guarantee that this mode is available on the device.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
+        public @NonNull Builder setHotwordModeEnabled(boolean enable) {
+            if (enable) {
+                mFlags |= FLAG_HW_HOTWORD;
+            } else {
+                mFlags &= ~FLAG_HW_HOTWORD;
+            }
             return this;
         }
 
@@ -1239,53 +1267,61 @@ public final class AudioAttributes implements Parcelable {
         return usageToString(mUsage);
     }
 
-    /** @hide */
-    public static String usageToString(int usage) {
+    /**
+     * Returns the string representation for the usage constant passed as parameter.
+     *
+     * @param usage one of the {@link AudioAttributes} usage constants
+     * @return string representing the {@link AudioAttributes} usage constant passed as a parameter
+     *
+     * @hide
+     */
+    @NonNull
+    public static String usageToString(@AttributeSdkUsage int usage) {
         switch(usage) {
             case USAGE_UNKNOWN:
-                return new String("USAGE_UNKNOWN");
+                return "USAGE_UNKNOWN";
             case USAGE_MEDIA:
-                return new String("USAGE_MEDIA");
+                return "USAGE_MEDIA";
             case USAGE_VOICE_COMMUNICATION:
-                return new String("USAGE_VOICE_COMMUNICATION");
+                return "USAGE_VOICE_COMMUNICATION";
             case USAGE_VOICE_COMMUNICATION_SIGNALLING:
-                return new String("USAGE_VOICE_COMMUNICATION_SIGNALLING");
+                return "USAGE_VOICE_COMMUNICATION_SIGNALLING";
             case USAGE_ALARM:
-                return new String("USAGE_ALARM");
+                return "USAGE_ALARM";
             case USAGE_NOTIFICATION:
-                return new String("USAGE_NOTIFICATION");
+                return "USAGE_NOTIFICATION";
             case USAGE_NOTIFICATION_RINGTONE:
-                return new String("USAGE_NOTIFICATION_RINGTONE");
+                return "USAGE_NOTIFICATION_RINGTONE";
             case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
-                return new String("USAGE_NOTIFICATION_COMMUNICATION_REQUEST");
+                return "USAGE_NOTIFICATION_COMMUNICATION_REQUEST";
             case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
-                return new String("USAGE_NOTIFICATION_COMMUNICATION_INSTANT");
+                return "USAGE_NOTIFICATION_COMMUNICATION_INSTANT";
             case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
-                return new String("USAGE_NOTIFICATION_COMMUNICATION_DELAYED");
+                return "USAGE_NOTIFICATION_COMMUNICATION_DELAYED";
             case USAGE_NOTIFICATION_EVENT:
-                return new String("USAGE_NOTIFICATION_EVENT");
+                return "USAGE_NOTIFICATION_EVENT";
             case USAGE_ASSISTANCE_ACCESSIBILITY:
-                return new String("USAGE_ASSISTANCE_ACCESSIBILITY");
+                return "USAGE_ASSISTANCE_ACCESSIBILITY";
             case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
-                return new String("USAGE_ASSISTANCE_NAVIGATION_GUIDANCE");
+                return "USAGE_ASSISTANCE_NAVIGATION_GUIDANCE";
             case USAGE_ASSISTANCE_SONIFICATION:
-                return new String("USAGE_ASSISTANCE_SONIFICATION");
+                return "USAGE_ASSISTANCE_SONIFICATION";
             case USAGE_GAME:
-                return new String("USAGE_GAME");
+                return "USAGE_GAME";
             case USAGE_ASSISTANT:
-                return new String("USAGE_ASSISTANT");
+                return "USAGE_ASSISTANT";
             case USAGE_CALL_ASSISTANT:
-                return new String("USAGE_CALL_ASSISTANT");
+                return "USAGE_CALL_ASSISTANT";
             case USAGE_EMERGENCY:
-                return new String("USAGE_EMERGENCY");
+                return "USAGE_EMERGENCY";
             case USAGE_SAFETY:
-                return new String("USAGE_SAFETY");
+                return "USAGE_SAFETY";
             case USAGE_VEHICLE_STATUS:
-                return new String("USAGE_VEHICLE_STATUS");
+                return "USAGE_VEHICLE_STATUS";
             case USAGE_ANNOUNCEMENT:
-                return new String("USAGE_ANNOUNCEMENT");
+                return "USAGE_ANNOUNCEMENT";
             default:
-                return new String("unknown usage " + usage);
+                return "unknown usage " + usage;
         }
     }
 

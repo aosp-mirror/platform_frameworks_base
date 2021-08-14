@@ -18,6 +18,7 @@
 package android.hardware.usb;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +35,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
+import android.hardware.usb.gadget.V1_2.UsbSpeed;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -160,6 +162,22 @@ public class UsbManager {
             "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 
     /**
+     * Broadcast Action:  A broadcast for USB accessory handshaking information delivery
+     *
+     * This intent is sent when a USB accessory connect attempt
+     *
+     * <p>For more information about communicating with USB accessory handshake, refer to
+     * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
+     *
+     * {@hide}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public static final String ACTION_USB_ACCESSORY_HANDSHAKE =
+            "android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE";
+
+    /**
      * Boolean extra indicating whether USB is connected or disconnected.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
@@ -272,6 +290,34 @@ public class UsbManager {
     public static final String USB_FUNCTION_NCM = "ncm";
 
     /**
+     * Name of Gadget Hal Not Present;
+     *
+     * {@hide}
+     */
+    public static final String GADGET_HAL_UNKNOWN = "unknown";
+
+    /**
+     * Name of the USB Gadget Hal Version v1.0;
+     *
+     * {@hide}
+     */
+    public static final String GADGET_HAL_VERSION_1_0 = "V1_0";
+
+    /**
+     * Name of the USB Gadget Hal Version v1.1;
+     *
+     * {@hide}
+     */
+    public static final String GADGET_HAL_VERSION_1_1 = "V1_1";
+
+    /**
+     * Name of the USB Gadget Hal Version v1.2;
+     *
+     * {@hide}
+     */
+    public static final String GADGET_HAL_VERSION_1_2 = "V1_2";
+
+    /**
      * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
      * containing the {@link UsbPort} object for the port.
      *
@@ -303,6 +349,52 @@ public class UsbManager {
     public static final String EXTRA_ACCESSORY = "accessory";
 
     /**
+     * A long extra indicating ms from boot to get get_protocol UEvent
+     * This is obtained with SystemClock.elapsedRealtime()
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_UEVENT_TIME =
+            "android.hardware.usb.extra.ACCESSORY_UEVENT_TIME";
+
+    /**
+     * An integer extra indicating numbers of send string during handshake
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts
+     *
+     * <p>For more information about control request with identifying string information
+     * between communicating with USB accessory handshake, refer to
+     * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_STRING_COUNT =
+            "android.hardware.usb.extra.ACCESSORY_STRING_COUNT";
+
+    /**
+     * Boolean extra indicating whether got start accessory or not
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_START =
+            "android.hardware.usb.extra.ACCESSORY_START";
+
+    /**
+     * A long extra indicating ms from boot to sent {@link #ACTION_USB_ACCESSORY_HANDSHAKE}
+     * This is obtained with SystemClock.elapsedRealtime()
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_HANDSHAKE_END =
+            "android.hardware.usb.extra.ACCESSORY_HANDSHAKE_END";
+
+    /**
      * Name of extra added to the {@link android.app.PendingIntent}
      * passed into {@link #requestPermission(UsbDevice, PendingIntent)}
      * or {@link #requestPermission(UsbAccessory, PendingIntent)}
@@ -326,6 +418,142 @@ public class UsbManager {
      * @hide
      */
     public static final String EXTRA_CAN_BE_DEFAULT = "android.hardware.usb.extra.CAN_BE_DEFAULT";
+
+    /**
+     * The Value for USB gadget hal is not presented.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int GADGET_HAL_NOT_SUPPORTED = -1;
+
+    /**
+     * Value for Gadget Hal Version v1.0.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int GADGET_HAL_V1_0 = 10;
+
+    /**
+     * Value for Gadget Hal Version v1.1.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int GADGET_HAL_V1_1 = 11;
+
+    /**
+     * Value for Gadget Hal Version v1.2.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int GADGET_HAL_V1_2 = 12;
+
+    /**
+     * Value for USB_STATE is not configured.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1;
+
+    /**
+     * Value for USB Transfer Rate of Low Speed in Mbps (real value is 1.5Mbps).
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2;
+
+    /**
+     * Value for USB Transfer Rate of Full Speed in Mbps.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12;
+
+    /**
+     * Value for USB Transfer Rate of High Speed in Mbps.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480;
+
+    /**
+     * Value for USB Transfer Rate of Super Speed in Mbps.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_5G = 5 * 1024;
+
+    /**
+     * Value for USB Transfer Rate of 10G.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_10G = 10 * 1024;
+
+    /**
+     * Value for USB Transfer Rate of 20G.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_20G = 20 * 1024;
+
+    /**
+     * Value for USB Transfer Rate of 40G.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
+
+    /**
+     * The Value for USB hal is not presented.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_NOT_SUPPORTED = -1;
+
+    /**
+     * Value for USB Hal Version v1.0.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_0 = 10;
+
+    /**
+     * Value for USB Hal Version v1.1.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_1 = 11;
+
+    /**
+     * Value for USB Hal Version v1.2.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_2 = 12;
+
+    /**
+     * Value for USB Hal Version v1.3.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_3 = 13;
 
     /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
@@ -419,6 +647,25 @@ public class UsbManager {
             FUNCTION_NCM,
     })
     public @interface UsbFunctionMode {}
+
+    /** @hide */
+    @IntDef(prefix = { "GADGET_HAL_" }, value = {
+            GADGET_HAL_NOT_SUPPORTED,
+            GADGET_HAL_V1_0,
+            GADGET_HAL_V1_1,
+            GADGET_HAL_V1_2,
+    })
+    public @interface UsbGadgetHalVersion {}
+
+    /** @hide */
+    @IntDef(prefix = { "USB_HAL_" }, value = {
+            USB_HAL_NOT_SUPPORTED,
+            USB_HAL_V1_0,
+            USB_HAL_V1_1,
+            USB_HAL_V1_2,
+            USB_HAL_V1_3,
+    })
+    public @interface UsbHalVersion {}
 
     private final Context mContext;
     private final IUsbManager mService;
@@ -832,6 +1079,74 @@ public class UsbManager {
     }
 
     /**
+     * Get the Current USB Bandwidth.
+     * <p>
+     * This function returns the current USB bandwidth through USB Gadget HAL.
+     * It should be used when Android device is in USB peripheral mode and
+     * connects to a USB host. If USB state is not configued, API will return
+     * {@value #USB_DATA_TRANSFER_RATE_UNKNOWN}. In addition, the unit of the
+     * return value is Mbps.
+     * </p>
+     *
+     * @return The value of currently USB Bandwidth.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public int getUsbBandwidthMbps() {
+        int usbSpeed;
+
+        try {
+            usbSpeed = mService.getCurrentUsbSpeed();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return usbSpeedToBandwidth(usbSpeed);
+    }
+
+    /**
+     * Get the Current Gadget Hal Version.
+     * <p>
+     * This function returns the current Gadget Hal Version.
+     * </p>
+     *
+     * @return a integer {@code GADGET_HAL_*} represent hal version.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @UsbGadgetHalVersion int getGadgetHalVersion() {
+        try {
+            return mService.getGadgetHalVersion();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the Current USB Hal Version.
+     * <p>
+     * This function returns the current USB Hal Version.
+     * </p>
+     *
+     * @return a integer {@code USB_HAL_*} represent hal version.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @UsbHalVersion int getUsbHalVersion() {
+        try {
+            return mService.getUsbHalVersion();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets the USB Gadget.
      * <p>
      * Performs USB data stack reset through USB Gadget HAL.
@@ -845,6 +1160,28 @@ public class UsbManager {
     public void resetUsbGadget() {
         try {
             mService.resetUsbGadget();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable/Disable the USB data signaling.
+     * <p>
+     * Enables/Disables USB data path in all the USB ports.
+     * It will force to stop or restore USB data signaling.
+     * </p>
+     *
+     * @param enable enable or disable USB data signaling
+     * @return true enable or disable USB data successfully
+     *         false if something wrong
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public boolean enableUsbDataSignal(boolean enable) {
+        try {
+            return mService.enableUsbDataSignal(enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1026,5 +1363,62 @@ public class UsbManager {
             }
         }
         return ret;
+    }
+
+    /**
+     * Converts the given integer of USB speed to corresponding bandwidth.
+     *
+     * @return a value of USB bandwidth
+     *
+     * {@hide}
+     */
+    public static int usbSpeedToBandwidth(int speed) {
+        switch (speed) {
+            case UsbSpeed.USB4_GEN3_40Gb:
+                return USB_DATA_TRANSFER_RATE_40G;
+            case UsbSpeed.USB4_GEN3_20Gb:
+                return USB_DATA_TRANSFER_RATE_20G;
+            case UsbSpeed.USB4_GEN2_20Gb:
+                return USB_DATA_TRANSFER_RATE_20G;
+            case UsbSpeed.USB4_GEN2_10Gb:
+                return USB_DATA_TRANSFER_RATE_10G;
+            case UsbSpeed.SUPERSPEED_20Gb:
+                return USB_DATA_TRANSFER_RATE_20G;
+            case UsbSpeed.SUPERSPEED_10Gb:
+                return USB_DATA_TRANSFER_RATE_10G;
+            case UsbSpeed.SUPERSPEED:
+                return USB_DATA_TRANSFER_RATE_5G;
+            case UsbSpeed.HIGHSPEED:
+                return USB_DATA_TRANSFER_RATE_HIGH_SPEED;
+            case UsbSpeed.FULLSPEED:
+                return USB_DATA_TRANSFER_RATE_FULL_SPEED;
+            case UsbSpeed.LOWSPEED:
+                return USB_DATA_TRANSFER_RATE_LOW_SPEED;
+            default:
+                return USB_DATA_TRANSFER_RATE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts the given usb gadgdet hal version to String
+     *
+     * @return String representation of Usb Gadget Hal Version
+     *
+     * {@hide}
+     */
+    public static @NonNull String usbGadgetHalVersionToString(int version) {
+        String halVersion;
+
+        if (version == GADGET_HAL_V1_2) {
+            halVersion = GADGET_HAL_VERSION_1_2;
+        } else if (version == GADGET_HAL_V1_1) {
+            halVersion = GADGET_HAL_VERSION_1_1;
+        } else if (version == GADGET_HAL_V1_0) {
+            halVersion = GADGET_HAL_VERSION_1_0;
+        } else {
+            halVersion = GADGET_HAL_UNKNOWN;
+        }
+
+        return halVersion;
     }
 }

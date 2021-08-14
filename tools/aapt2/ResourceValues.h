@@ -28,6 +28,7 @@
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "StringPool.h"
+#include "ValueTransformer.h"
 #include "io/File.h"
 #include "text/Printer.h"
 #include "util/Maybe.h"
@@ -100,9 +101,8 @@ class Value {
   // Calls the appropriate overload of ConstValueVisitor.
   virtual void Accept(ConstValueVisitor* visitor) const = 0;
 
-  // Clone the value. `new_pool` is the new StringPool that
-  // any resources with strings should use when copying their string.
-  virtual Value* Clone(StringPool* new_pool) const = 0;
+  // Transform this Value into another Value using the transformer.
+  std::unique_ptr<Value> Transform(ValueTransformer& transformer) const;
 
   // Human readable printout of this value.
   virtual void Print(std::ostream* out) const = 0;
@@ -118,6 +118,9 @@ class Value {
   std::string comment_;
   bool weak_ = false;
   bool translatable_ = true;
+
+ private:
+  virtual Value* TransformValueImpl(ValueTransformer& transformer) const = 0;
 };
 
 // Inherit from this to get visitor accepting implementations for free.
@@ -129,12 +132,15 @@ struct BaseValue : public Value {
 
 // A resource item with a single value. This maps to android::ResTable_entry.
 struct Item : public Value {
-  // Clone the Item.
-  virtual Item* Clone(StringPool* new_pool) const override = 0;
-
   // Fills in an android::Res_value structure with this Item's binary representation.
   // Returns false if an error occurred.
   virtual bool Flatten(android::Res_value* out_value) const = 0;
+
+  // Transform this Item into another Item using the transformer.
+  std::unique_ptr<Item> Transform(ValueTransformer& transformer) const;
+
+ private:
+  virtual Item* TransformItemImpl(ValueTransformer& transformer) const = 0;
 };
 
 // Inherit from this to get visitor accepting implementations for free.
@@ -147,17 +153,19 @@ struct BaseItem : public Item {
 // A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
 // A reference can be symbolic (with the name set to a valid resource name) or be
 // numeric (the id is set to a valid resource ID).
-struct Reference : public BaseItem<Reference> {
-  enum class Type {
+struct Reference : public TransformableItem<Reference, BaseItem<Reference>> {
+  enum class Type : uint8_t {
     kResource,
     kAttribute,
   };
 
   Maybe<ResourceName> name;
   Maybe<ResourceId> id;
+  std::optional<uint32_t> type_flags;
   Reference::Type reference_type;
   bool private_reference = false;
   bool is_dynamic = false;
+  bool allow_raw = false;
 
   Reference();
   explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
@@ -166,7 +174,6 @@ struct Reference : public BaseItem<Reference> {
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  Reference* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
   void PrettyPrint(text::Printer* printer) const override;
 
@@ -178,27 +185,25 @@ bool operator<(const Reference&, const Reference&);
 bool operator==(const Reference&, const Reference&);
 
 // An ID resource. Has no real value, just a place holder.
-struct Id : public BaseItem<Id> {
+struct Id : public TransformableItem<Id, BaseItem<Id>> {
   Id() {
     weak_ = true;
   }
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out) const override;
-  Id* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
 // A raw, unprocessed string. This may contain quotations, escape sequences, and whitespace.
 // This shall *NOT* end up in the final resource table.
-struct RawString : public BaseItem<RawString> {
+struct RawString : public TransformableItem<RawString, BaseItem<RawString>> {
   StringPool::Ref value;
 
   explicit RawString(const StringPool::Ref& ref);
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  RawString* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
@@ -220,7 +225,7 @@ inline bool operator!=(const UntranslatableSection& a, const UntranslatableSecti
   return a.start != b.start || a.end != b.end;
 }
 
-struct String : public BaseItem<String> {
+struct String : public TransformableItem<String, BaseItem<String>> {
   StringPool::Ref value;
 
   // Sections of the string to NOT translate. Mainly used
@@ -232,12 +237,11 @@ struct String : public BaseItem<String> {
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  String* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
   void PrettyPrint(text::Printer* printer) const override;
 };
 
-struct StyledString : public BaseItem<StyledString> {
+struct StyledString : public TransformableItem<StyledString, BaseItem<StyledString>> {
   StringPool::StyleRef value;
 
   // Sections of the string to NOT translate. Mainly used
@@ -249,11 +253,10 @@ struct StyledString : public BaseItem<StyledString> {
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  StyledString* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
-struct FileReference : public BaseItem<FileReference> {
+struct FileReference : public TransformableItem<FileReference, BaseItem<FileReference>> {
   StringPool::Ref path;
 
   // A handle to the file object from which this file can be read.
@@ -269,12 +272,11 @@ struct FileReference : public BaseItem<FileReference> {
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  FileReference* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
 // Represents any other android::Res_value.
-struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
+struct BinaryPrimitive : public TransformableItem<BinaryPrimitive, BaseItem<BinaryPrimitive>> {
   android::Res_value value;
 
   BinaryPrimitive() = default;
@@ -283,12 +285,11 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
 
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
-  BinaryPrimitive* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
   void PrettyPrint(text::Printer* printer) const override;
 };
 
-struct Attribute : public BaseValue<Attribute> {
+struct Attribute : public TransformableValue<Attribute, BaseValue<Attribute>> {
   struct Symbol {
     Reference symbol;
     uint32_t value;
@@ -311,13 +312,14 @@ struct Attribute : public BaseValue<Attribute> {
   // TYPE_ENUMS are never compatible.
   bool IsCompatibleWith(const Attribute& attr) const;
 
-  Attribute* Clone(StringPool* new_pool) const override;
   std::string MaskString() const;
+  static std::string MaskString(uint32_t type_mask);
+
   void Print(std::ostream* out) const override;
   bool Matches(const Item& item, DiagMessage* out_msg = nullptr) const;
 };
 
-struct Style : public BaseValue<Style> {
+struct Style : public TransformableValue<Style, BaseValue<Style>> {
   struct Entry {
     Reference key;
     std::unique_ptr<Item> value;
@@ -333,7 +335,6 @@ struct Style : public BaseValue<Style> {
   std::vector<Entry> entries;
 
   bool Equals(const Value* value) const override;
-  Style* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 
   // Merges `style` into this Style. All identical attributes of `style` take precedence, including
@@ -341,31 +342,50 @@ struct Style : public BaseValue<Style> {
   void MergeWith(Style* style, StringPool* pool);
 };
 
-struct Array : public BaseValue<Array> {
+struct Array : public TransformableValue<Array, BaseValue<Array>> {
   std::vector<std::unique_ptr<Item>> elements;
 
   bool Equals(const Value* value) const override;
-  Array* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
-struct Plural : public BaseValue<Plural> {
+struct Plural : public TransformableValue<Plural, BaseValue<Plural>> {
   enum { Zero = 0, One, Two, Few, Many, Other, Count };
 
   std::array<std::unique_ptr<Item>, Count> values;
 
   bool Equals(const Value* value) const override;
-  Plural* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
 };
 
-struct Styleable : public BaseValue<Styleable> {
+struct Styleable : public TransformableValue<Styleable, BaseValue<Styleable>> {
   std::vector<Reference> entries;
 
   bool Equals(const Value* value) const override;
-  Styleable* Clone(StringPool* newPool) const override;
   void Print(std::ostream* out) const override;
   void MergeWith(Styleable* styleable);
+};
+
+struct Macro : public TransformableValue<Macro, BaseValue<Macro>> {
+  std::string raw_value;
+  StyleString style_string;
+  std::vector<UntranslatableSection> untranslatable_sections;
+
+  struct Namespace {
+    std::string alias;
+    std::string package_name;
+    bool is_private;
+
+    bool operator==(const Namespace& right) const {
+      return alias == right.alias && package_name == right.package_name &&
+             is_private == right.is_private;
+    }
+  };
+
+  std::vector<Namespace> alias_namespaces;
+
+  bool Equals(const Value* value) const override;
+  void Print(std::ostream* out) const override;
 };
 
 template <typename T>
@@ -378,6 +398,24 @@ typename std::enable_if<std::is_base_of<Value, T>::value, std::ostream&>::type o
   }
   return out;
 }
+
+struct CloningValueTransformer : public ValueTransformer {
+  explicit CloningValueTransformer(StringPool* new_pool);
+
+  std::unique_ptr<Reference> TransformDerived(const Reference* value) override;
+  std::unique_ptr<Id> TransformDerived(const Id* value) override;
+  std::unique_ptr<RawString> TransformDerived(const RawString* value) override;
+  std::unique_ptr<String> TransformDerived(const String* value) override;
+  std::unique_ptr<StyledString> TransformDerived(const StyledString* value) override;
+  std::unique_ptr<FileReference> TransformDerived(const FileReference* value) override;
+  std::unique_ptr<BinaryPrimitive> TransformDerived(const BinaryPrimitive* value) override;
+  std::unique_ptr<Attribute> TransformDerived(const Attribute* value) override;
+  std::unique_ptr<Style> TransformDerived(const Style* value) override;
+  std::unique_ptr<Array> TransformDerived(const Array* value) override;
+  std::unique_ptr<Plural> TransformDerived(const Plural* value) override;
+  std::unique_ptr<Styleable> TransformDerived(const Styleable* value) override;
+  std::unique_ptr<Macro> TransformDerived(const Macro* value) override;
+};
 
 }  // namespace aapt
 

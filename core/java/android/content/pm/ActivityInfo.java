@@ -18,6 +18,11 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.app.Activity;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -27,6 +32,7 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.Printer;
 
 import java.lang.annotation.Retention;
@@ -70,12 +76,28 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public static final int LAUNCH_SINGLE_INSTANCE = 3;
     /**
-     * The launch mode style requested by the activity.  From the
-     * {@link android.R.attr#launchMode} attribute, one of
-     * {@link #LAUNCH_MULTIPLE},
-     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or
-     * {@link #LAUNCH_SINGLE_INSTANCE}.
+     * Constant corresponding to <code>singleInstancePerTask</code> in
+     * the {@link android.R.attr#launchMode} attribute.
      */
+    public static final int LAUNCH_SINGLE_INSTANCE_PER_TASK = 4;
+
+    /** @hide */
+    @IntDef(prefix = "LAUNCH_", value = {
+            LAUNCH_MULTIPLE,
+            LAUNCH_SINGLE_TOP,
+            LAUNCH_SINGLE_TASK,
+            LAUNCH_SINGLE_INSTANCE,
+            LAUNCH_SINGLE_INSTANCE_PER_TASK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LaunchMode {
+    }
+
+    /**
+     * The launch mode style requested by the activity.  From the
+     * {@link android.R.attr#launchMode} attribute.
+     */
+    @LaunchMode
     public int launchMode;
 
     /**
@@ -234,7 +256,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @See {@link android.R.attr#maxAspectRatio}.
      * @hide
      */
-    public float maxAspectRatio;
+    private float mMaxAspectRatio;
 
     /**
      * Value indicating the minimum aspect ratio the activity supports.
@@ -243,7 +265,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @See {@link android.R.attr#minAspectRatio}.
      * @hide
      */
-    public float minAspectRatio;
+    private float mMinAspectRatio;
 
     /**
      * Indicates that the activity works well with size changes like display changing size.
@@ -502,8 +524,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * owned ActivityContainer such as that within an ActivityView. If not set and
      * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
+     *
+     * @deprecated this flag is no longer needed since ActivityView is now fully removed
+     * TODO(b/191165536): delete this flag since is no longer used
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
 
     /**
@@ -529,9 +555,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;
 
     /**
+     * Bit in {@link #privateFlags} indicating whether a home sound effect should be played if the
+     * home app moves to front after the activity with this flag set.
+     * Set from the {@link android.R.attr#playHomeTransitionSound} attribute.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 0x2;
+
+    /**
      * Options that have been set in the activity declaration in the manifest.
      * These include:
-     * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED}.
+     * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED},
+     * {@link #PRIVATE_FLAG_HOME_TRANSITION_SOUND}.
      * @hide
      */
     public int privateFlags;
@@ -832,6 +867,16 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public static final int CONFIG_WINDOW_CONFIGURATION = 0x20000000;
 
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle changes to font weight.  Set from the
+     * {@link android.R.attr#configChanges} attribute.  This is
+     * not a core resource configuration, but a higher-level value, so its
+     * constant starts at the high bits.
+     */
+
+    public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 0x10000000;
+
     /** @hide
      * Unfortunately the constants for config changes in native code are
      * different from ActivityInfo. :(  Here are the values we should use for the
@@ -854,6 +899,145 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
         Configuration.NATIVE_CONFIG_COLOR_MODE,             // COLOR_MODE
     };
+
+    /**
+     * This change id forces the packages it is applied to be resizable. It won't change whether
+     * the app can be put into multi-windowing mode, but allow the app to resize when the window
+     * container resizes, such as display size change.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long FORCE_RESIZE_APP = 174042936L; // buganizer id
+
+    /**
+     * This change id forces the packages it is applied to to be non-resizable.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long FORCE_NON_RESIZE_APP = 181136395L; // buganizer id
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity does not
+     * support size changes due to the android.supports_size_changes metadata flag either being
+     * unset or set to {@code false} on application or activity level.
+     *
+     * @hide
+     */
+    public static final int SIZE_CHANGES_UNSUPPORTED_METADATA = 0;
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity has been
+     * overridden to not support size changes through the compat framework change id
+     * {@link #FORCE_NON_RESIZE_APP}.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_UNSUPPORTED_OVERRIDE = 1;
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity supports size
+     * changes due to the android.supports_size_changes metadata flag being set to {@code true}
+     * either on application or activity level.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_SUPPORTED_METADATA = 2;
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity has been
+     * overridden to support size changes through the compat framework change id
+     * {@link #FORCE_RESIZE_APP}.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_SUPPORTED_OVERRIDE = 3;
+
+    /** @hide */
+    @IntDef(prefix = { "SIZE_CHANGES_" }, value = {
+            SIZE_CHANGES_UNSUPPORTED_METADATA,
+            SIZE_CHANGES_UNSUPPORTED_OVERRIDE,
+            SIZE_CHANGES_SUPPORTED_METADATA,
+            SIZE_CHANGES_SUPPORTED_OVERRIDE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SizeChangesSupportMode {}
+
+    /**
+     * This change id forces the packages it is applied to never have Display API sandboxing
+     * applied for a letterbox or SCM activity. The Display APIs will continue to provide
+     * DisplayArea bounds.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long NEVER_SANDBOX_DISPLAY_APIS = 184838306L; // buganizer id
+
+    /**
+     * This change id forces the packages it is applied to always have Display API sandboxing
+     * applied, regardless of windowing mode. The Display APIs will always provide the app bounds.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // buganizer id
+
+    /**
+     * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
+     * Enabling this change will allow the following min aspect ratio treatments to be applied:
+     * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
+     * OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     *
+     * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's
+     * manifest will be overridden to the largest enabled aspect ratio treatment unless the app's
+     * manifest value is higher.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
+
+    /**
+     * This change id sets the activity's min aspect ratio to a medium value as defined by
+     * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE.
+     *
+     * This treatment only takes effect if OVERRIDE_MIN_ASPECT_RATIO is also enabled.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_MEDIUM = 180326845L; // buganizer id
+
+    /** @hide Medium override aspect ratio, currently 3:2.  */
+    @TestApi
+    public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 3 / 2f;
+
+    /**
+     * This change id sets the activity's min aspect ratio to a large value as defined by
+     * OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE.
+     *
+     * This treatment only takes effect if OVERRIDE_MIN_ASPECT_RATIO is also enabled.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_LARGE = 180326787L; // buganizer id
+
+    /** @hide Large override aspect ratio, currently 16:9 */
+    @TestApi
+    public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 16 / 9f;
 
     /**
      * Convert Java change bits to native.
@@ -1019,8 +1203,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         requestedVrComponent = orig.requestedVrComponent;
         rotationAnimation = orig.rotationAnimation;
         colorMode = orig.colorMode;
-        maxAspectRatio = orig.maxAspectRatio;
-        minAspectRatio = orig.minAspectRatio;
+        mMaxAspectRatio = orig.mMaxAspectRatio;
+        mMinAspectRatio = orig.mMinAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
     }
 
@@ -1049,7 +1233,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean hasFixedAspectRatio() {
-        return maxAspectRatio != 0 || minAspectRatio != 0;
+        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
     }
 
     /**
@@ -1100,12 +1284,139 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
+     * Returns the reversed orientation.
+     * @hide
+     */
+    @ActivityInfo.ScreenOrientation
+    public static int reverseOrientation(@ActivityInfo.ScreenOrientation int orientation) {
+        switch (orientation) {
+            case SCREEN_ORIENTATION_LANDSCAPE:
+                return SCREEN_ORIENTATION_PORTRAIT;
+            case SCREEN_ORIENTATION_PORTRAIT:
+                return SCREEN_ORIENTATION_LANDSCAPE;
+            case SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                return SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+            case SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                return SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+            case SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                return SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+            case SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                return SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+            case SCREEN_ORIENTATION_USER_LANDSCAPE:
+                return SCREEN_ORIENTATION_USER_PORTRAIT;
+            case SCREEN_ORIENTATION_USER_PORTRAIT:
+                return SCREEN_ORIENTATION_USER_LANDSCAPE;
+            default:
+                return orientation;
+        }
+    }
+
+    /**
      * Returns true if the activity supports picture-in-picture.
      * @hide
      */
     @UnsupportedAppUsage
     public boolean supportsPictureInPicture() {
         return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
+    }
+
+    /**
+     * Returns whether the activity supports size changes.
+     * @hide
+     */
+    @SizeChangesSupportMode
+    public int supportsSizeChanges() {
+        if (CompatChanges.isChangeEnabled(FORCE_NON_RESIZE_APP,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
+        }
+
+        if (supportsSizeChanges) {
+            return SIZE_CHANGES_SUPPORTED_METADATA;
+        }
+
+        if (CompatChanges.isChangeEnabled(FORCE_RESIZE_APP,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
+        }
+
+        return SIZE_CHANGES_UNSUPPORTED_METADATA;
+    }
+
+    /**
+     * Returns if the activity should never be sandboxed to the activity window bounds.
+     * @hide
+     */
+    public boolean neverSandboxDisplayApis() {
+        return CompatChanges.isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))
+                || ConstrainDisplayApisConfig.neverConstrainDisplayApis(applicationInfo);
+    }
+
+    /**
+     * Returns if the activity should always be sandboxed to the activity window bounds.
+     * @hide
+     */
+    public boolean alwaysSandboxDisplayApis() {
+        return CompatChanges.isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))
+                || ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(applicationInfo);
+    }
+
+    /** @hide */
+    public void setMaxAspectRatio(float maxAspectRatio) {
+        this.mMaxAspectRatio = maxAspectRatio;
+    }
+
+    /** @hide */
+    public float getMaxAspectRatio() {
+        return mMaxAspectRatio;
+    }
+
+    /** @hide */
+    public void setMinAspectRatio(float minAspectRatio) {
+        this.mMinAspectRatio = minAspectRatio;
+    }
+
+    /**
+     * Returns the min aspect ratio of this activity.
+     *
+     * This takes into account the minimum aspect ratio as defined in the app's manifest and
+     * possible overrides as per OVERRIDE_MIN_ASPECT_RATIO.
+     *
+     * In the rare cases where the manifest minimum aspect ratio is required, use
+     * {@code getManifestMinAspectRatio}.
+     * @hide
+     */
+    public float getMinAspectRatio() {
+        if (applicationInfo == null || !CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return mMinAspectRatio;
+        }
+
+        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return Math.max(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE, mMinAspectRatio);
+        }
+
+        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return Math.max(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE, mMinAspectRatio);
+        }
+
+        return mMinAspectRatio;
+    }
+
+    /** @hide */
+    public float getManifestMinAspectRatio() {
+        return mMinAspectRatio;
     }
 
     /** @hide */
@@ -1143,6 +1454,22 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY";
             case RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION:
                 return "RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION";
+            default:
+                return "unknown=" + mode;
+        }
+    }
+
+    /** @hide */
+    public static String sizeChangesSupportModeToString(@SizeChangesSupportMode int mode) {
+        switch (mode) {
+            case SIZE_CHANGES_UNSUPPORTED_METADATA:
+                return "SIZE_CHANGES_UNSUPPORTED_METADATA";
+            case SIZE_CHANGES_UNSUPPORTED_OVERRIDE:
+                return "SIZE_CHANGES_UNSUPPORTED_OVERRIDE";
+            case SIZE_CHANGES_SUPPORTED_METADATA:
+                return "SIZE_CHANGES_SUPPORTED_METADATA";
+            case SIZE_CHANGES_SUPPORTED_OVERRIDE:
+                return "SIZE_CHANGES_SUPPORTED_OVERRIDE";
             default:
                 return "unknown=" + mode;
         }
@@ -1191,11 +1518,14 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (requestedVrComponent != null) {
             pw.println(prefix + "requestedVrComponent=" + requestedVrComponent);
         }
-        if (maxAspectRatio != 0) {
-            pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
+        if (getMaxAspectRatio() != 0) {
+            pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
         }
-        if (minAspectRatio != 0) {
-            pw.println(prefix + "minAspectRatio=" + minAspectRatio);
+        if (getMinAspectRatio() != 0) {
+            pw.println(prefix + "minAspectRatio=" + getMinAspectRatio());
+            if (getManifestMinAspectRatio() !=  getMinAspectRatio()) {
+                pw.println(prefix + "getManifestMinAspectRatio=" + getManifestMinAspectRatio());
+            }
         }
         if (supportsSizeChanges) {
             pw.println(prefix + "supportsSizeChanges=true");
@@ -1242,8 +1572,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeString8(requestedVrComponent);
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
-        dest.writeFloat(maxAspectRatio);
-        dest.writeFloat(minAspectRatio);
+        dest.writeFloat(mMaxAspectRatio);
+        dest.writeFloat(mMinAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
     }
 
@@ -1361,8 +1691,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         requestedVrComponent = source.readString8();
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
-        maxAspectRatio = source.readFloat();
-        minAspectRatio = source.readFloat();
+        mMaxAspectRatio = source.readFloat();
+        mMinAspectRatio = source.readFloat();
         supportsSizeChanges = source.readBoolean();
     }
 
@@ -1382,6 +1712,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final class WindowLayout {
         public WindowLayout(int width, float widthFraction, int height, float heightFraction,
                 int gravity, int minWidth, int minHeight) {
+            this(width, widthFraction, height, heightFraction, gravity, minWidth, minHeight,
+                    null /* windowLayoutAffinity */);
+        }
+
+        /** @hide */
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction,
+                int gravity, int minWidth, int minHeight, String windowLayoutAffinity) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
@@ -1389,6 +1726,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             this.gravity = gravity;
             this.minWidth = minWidth;
             this.minHeight = minHeight;
+            this.windowLayoutAffinity = windowLayoutAffinity;
         }
 
         /** @hide */
@@ -1469,6 +1807,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         /**
          * Affinity of window layout parameters. Activities with the same UID and window layout
          * affinity will share the same window dimension record.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_windowLayoutAffinity
          * @hide
          */
         public String windowLayoutAffinity;

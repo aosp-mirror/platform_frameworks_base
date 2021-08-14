@@ -16,12 +16,14 @@
 
 package com.android.location.provider;
 
-import android.os.IBinder;
-
 import android.location.Address;
 import android.location.GeocoderParams;
+import android.location.IGeocodeListener;
 import android.location.IGeocodeProvider;
+import android.os.IBinder;
+import android.os.RemoteException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,19 +40,32 @@ import java.util.List;
 public abstract class GeocodeProvider {
 
     private IGeocodeProvider.Stub mProvider = new IGeocodeProvider.Stub() {
-        public String getFromLocation(double latitude, double longitude, int maxResults,
-                GeocoderParams params, List<Address> addrs) {
-            return GeocodeProvider.this.onGetFromLocation(latitude, longitude, maxResults,
-                    params, addrs);
+        @Override
+        public void getFromLocation(double latitude, double longitude, int maxResults,
+                GeocoderParams params, IGeocodeListener listener) {
+            List<Address> results = new ArrayList<>();
+            String error = onGetFromLocation(latitude, longitude, maxResults, params, results);
+            try {
+                listener.onResults(error, results);
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
 
-        public String getFromLocationName(String locationName,
+        @Override
+        public void getFromLocationName(String locationName,
                 double lowerLeftLatitude, double lowerLeftLongitude,
                 double upperRightLatitude, double upperRightLongitude, int maxResults,
-                GeocoderParams params, List<Address> addrs) {
-            return GeocodeProvider.this.onGetFromLocationName(locationName, lowerLeftLatitude,
+                GeocoderParams params, IGeocodeListener listener) {
+            List<Address> results = new ArrayList<>();
+            String error = onGetFromLocationName(locationName, lowerLeftLatitude,
                     lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, params, addrs);
+                    maxResults, params, results);
+            try {
+                listener.onResults(error, results);
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
     };
 

@@ -18,7 +18,8 @@ android_test {
     ],
 
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
+        "compatibility-device-util-axt",
         "testng"
     ],
 

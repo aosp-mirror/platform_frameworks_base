@@ -35,7 +35,7 @@ import android.content.Context;
 import android.content.pm.ProviderInfo;
 import android.os.Bundle;
 
-import com.android.settingslib.drawer.MasterSwitchControllerTest.TestMasterSwitchController;
+import com.android.settingslib.drawer.PrimarySwitchControllerTest.TestPrimarySwitchController;
 import com.android.settingslib.drawer.SwitchController.MetaData;
 
 import org.junit.Before;
@@ -124,8 +124,8 @@ public class SwitchesProviderTest {
     }
 
     @Test
-    public void getSwitchData_shouldNotReturnMasterSwitchData() {
-        final SwitchController controller = new TestMasterSwitchController("123");
+    public void getSwitchData_shouldNotReturnPrimarySwitchData() {
+        final SwitchController controller = new TestPrimarySwitchController("123");
         mSwitchesProvider.addSwitchController(controller);
         mSwitchesProvider.attachInfo(mContext, mProviderInfo);
 

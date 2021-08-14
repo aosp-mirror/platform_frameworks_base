@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IVold;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,63 +29,25 @@ import java.util.Set;
  * @hide Only for use within the system server.
  */
 public abstract class StorageManagerInternal {
-
     /**
-     * Policy that influences how external storage is mounted and reported.
-     */
-    public interface ExternalStorageMountPolicy {
-        /**
-         * Gets the external storage mount mode for the given uid.
-         *
-         * @param uid The UID for which to determine mount mode.
-         * @param packageName The package in the UID for making the call.
-         * @return The mount mode.
-         *
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_NONE
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_DEFAULT
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_READ
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_WRITE
-         */
-        public int getMountMode(int uid, String packageName);
-
-        /**
-         * Gets whether external storage should be reported to the given UID.
-         *
-         * @param uid The UID for which to determine whether it has external storage.
-         * @param packageName The package in the UID for making the call.
-         * @return Weather to report external storage.
-         * @return True to report the state of external storage, false to
-         *     report it as unmounted.
-         */
-        public boolean hasExternalStorage(int uid, String packageName);
-    }
-
-    /**
-     * Adds a policy for determining how external storage is mounted and reported.
-     * The mount mode is the most conservative result from querying all registered
-     * policies. Similarly, the reported state is the most conservative result from
-     * querying all registered policies.
-     *
-     * @param policy The policy to add.
-     */
-    public abstract void addExternalStoragePolicy(ExternalStorageMountPolicy policy);
-
-    /**
-     * Notify the mount service that the mount policy for a UID changed.
-     * @param uid The UID for which policy changed.
-     * @param packageName The package in the UID for making the call.
-     */
-    public abstract void onExternalStoragePolicyChanged(int uid, String packageName);
-
-    /**
-     * Gets the mount mode to use for a given UID as determined by consultin all
-     * policies.
+     * Gets the mount mode to use for a given UID
      *
      * @param uid The UID for which to get mount mode.
      * @param packageName The package in the UID for making the call.
      * @return The mount mode.
      */
     public abstract int getExternalStorageMountMode(int uid, String packageName);
+
+    /**
+     * Checks whether the {@code packageName} with {@code uid} has full external storage access via
+     * the {@link MANAGE_EXTERNAL_STORAGE} permission.
+     *
+     * @param uid the UID for which to check access.
+     * @param packageName the package in the UID for making the call.
+     * @return whether the {@code packageName} has full external storage access.
+     * Returns {@code true} if it has access, {@code false} otherwise.
+     */
+    public abstract boolean hasExternalStorageAccess(int uid, String packageName);
 
     /**
      * A listener for reset events in the StorageManagerService.
@@ -98,6 +61,11 @@ public abstract class StorageManagerInternal {
          */
         void onReset(IVold vold);
     }
+
+    /**
+     * Return true if fuse is mounted.
+     */
+    public abstract boolean isFuseMounted(int userId);
 
     /**
      * Create storage directories if it does not exist.
@@ -150,4 +118,21 @@ public abstract class StorageManagerInternal {
      * Return true if uid is external storage service.
      */
     public abstract boolean isExternalStorageService(int uid);
+
+    /**
+     * Frees cache held by ExternalStorageService.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed,
+     *                   null value indicates private internal volume.
+     * @param bytes number of bytes which need to be freed
+     */
+    public abstract void freeCache(@Nullable String volumeUuid, long bytes);
+
+    /**
+     * Returns the {@link VolumeInfo#getId()} values for the volumes matching
+     * {@link VolumeInfo#isPrimary()}
+     */
+    public abstract List<String> getPrimaryVolumeIds();
 }
