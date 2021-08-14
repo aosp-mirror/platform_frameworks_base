@@ -85,9 +85,9 @@
     </style>
 
     <style name="BarChart.Text"
-           parent="@android:style/TextAppearance.Material.Subhead">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="BarChart.Text.HeaderTitle">
@@ -99,7 +99,7 @@
     </style>
 
     <style name="BarChart.Text.Summary"
-           parent="@*android:style/TextAppearance.DeviceDefault.Body1">
+           parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">12sp</item>
     </style>
