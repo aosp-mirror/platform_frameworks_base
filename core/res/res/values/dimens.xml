@@ -237,6 +237,9 @@
          value is calculated in ConversationLayout#updateActionListPadding() -->
     <dimen name="notification_actions_padding_start">36dp</dimen>
 
+    <!-- The max width of a priority action button when it is collapsed to just the icon. -->
+    <dimen name="notification_actions_collapsed_priority_width">60dp</dimen>
+
     <!-- The start padding to optionally use (e.g. if there's extra space) for CallStyle
          notification actions.
          this = conversation_content_start (80dp) - button inset (4dp) - action padding (12dp) -->
