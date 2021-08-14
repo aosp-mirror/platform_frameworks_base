@@ -1077,8 +1077,7 @@ public abstract class PackageManager {
     public static final int ROLLBACK_DATA_POLICY_WIPE = 1;
 
     /**
-     * User data won't be backed up during install and won't be restored during rollback.
-     * TODO: Not implemented yet.
+     * User data won't be backed up during install and will remain unchanged during rollback.
      *
      * @hide
      */

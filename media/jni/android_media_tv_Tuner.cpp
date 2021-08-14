@@ -641,7 +641,7 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
 
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0) {
         sp<MediaEvent> mediaEventSp =
-                new MediaEvent(mFilterClient, makeFromAidl(mediaEvent.avMemory),
+                new MediaEvent(mFilterClient, dupFromAidl(mediaEvent.avMemory),
                                mediaEvent.avDataId, dataLength + offset, obj);
         mediaEventSp->mAvHandleRefCnt++;
         env->SetLongField(obj, eventContext, (jlong)mediaEventSp.get());

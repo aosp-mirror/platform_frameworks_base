@@ -20,7 +20,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
@@ -69,6 +68,9 @@ public class InternetDialogTest extends SysuiTestCase {
     private InternetDialogController mInternetDialogController;
 
     private InternetDialog mInternetDialog;
+    private View mDialogView;
+    private View mSubTitle;
+    private LinearLayout mMobileDataToggle;
     private LinearLayout mWifiToggle;
     private LinearLayout mConnectedWifi;
     private RecyclerView mWifiList;
@@ -94,15 +96,18 @@ public class InternetDialogTest extends SysuiTestCase {
         when(mInternetDialogController.getWifiEntryList()).thenReturn(Arrays.asList(mWifiEntry));
 
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
-                mInternetDialogController, true, true, mock(UiEventLogger.class), mHandler);
+                mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler);
         mInternetDialog.mAdapter = mInternetAdapter;
         mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
         mInternetDialog.show();
 
-        mWifiToggle = mInternetDialog.mDialogView.requireViewById(R.id.turn_on_wifi_layout);
-        mConnectedWifi = mInternetDialog.mDialogView.requireViewById(R.id.wifi_connected_layout);
-        mWifiList = mInternetDialog.mDialogView.requireViewById(R.id.wifi_list_layout);
-        mSeeAll = mInternetDialog.mDialogView.requireViewById(R.id.see_all_layout);
+        mDialogView = mInternetDialog.mDialogView;
+        mSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
+        mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_network_layout);
+        mWifiToggle = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
+        mConnectedWifi = mDialogView.requireViewById(R.id.wifi_connected_layout);
+        mWifiList = mDialogView.requireViewById(R.id.wifi_list_layout);
+        mSeeAll = mDialogView.requireViewById(R.id.see_all_layout);
     }
 
     @After
@@ -111,33 +116,41 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void hideWifiViews_WifiViewsGone() {
+        mInternetDialog.hideWifiViews();
+
+        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
+        assertThat(mWifiToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     public void updateDialog_withApmOn_internetDialogSubTitleGone() {
         when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
-        mInternetDialog.updateDialog();
-        final TextView view = mInternetDialog.mDialogView.requireViewById(
-                R.id.internet_dialog_subtitle);
 
-        assertThat(view.getVisibility()).isEqualTo(View.GONE);
+        mInternetDialog.updateDialog();
+
+        assertThat(mSubTitle.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
     public void updateDialog_withApmOff_internetDialogSubTitleVisible() {
         when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
-        mInternetDialog.updateDialog();
-        final TextView view = mInternetDialog.mDialogView.requireViewById(
-                R.id.internet_dialog_subtitle);
 
-        assertThat(view.getVisibility()).isEqualTo(View.VISIBLE);
+        mInternetDialog.updateDialog();
+
+        assertThat(mSubTitle.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
     public void updateDialog_withApmOn_mobileDataLayoutGone() {
         when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
-        mInternetDialog.updateDialog();
-        final LinearLayout linearLayout = mInternetDialog.mDialogView.requireViewById(
-                R.id.mobile_network_layout);
 
-        assertThat(linearLayout.getVisibility()).isEqualTo(View.GONE);
+        mInternetDialog.updateDialog();
+
+        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test

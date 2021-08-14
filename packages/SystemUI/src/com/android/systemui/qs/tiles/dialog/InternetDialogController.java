@@ -139,6 +139,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     protected InternetTelephonyCallback mInternetTelephonyCallback;
     @VisibleForTesting
     protected WifiUtils.InternetIconInjector mWifiIconInjector;
+    @VisibleForTesting
+    protected boolean mCanConfigWifi;
 
     @VisibleForTesting
     KeyguardStateController mKeyguardStateController;
@@ -193,7 +195,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
     }
 
-    void onStart(@NonNull InternetDialogCallback callback) {
+    void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
         if (DEBUG) {
             Log.d(TAG, "onStart");
         }
@@ -217,6 +219,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mConnectivityManager.registerNetworkCallback(new NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .build(), new DataConnectivityListener(), mHandler);
+        mCanConfigWifi = canConfigWifi;
         scanWifiAccessPoints();
     }
 
@@ -270,7 +273,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return null;
         }
 
-        if (!mWifiManager.isWifiEnabled()) {
+        if (mCanConfigWifi && !mWifiManager.isWifiEnabled()) {
             // When the airplane mode is off and Wi-Fi is disabled.
             //   Sub-Title: Wi-Fi is off
             if (DEBUG) {
@@ -290,10 +293,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
         final List<ScanResult> wifiList = mWifiManager.getScanResults();
         if (wifiList != null && wifiList.size() != 0) {
-            return mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT);
+            return mCanConfigWifi ? mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT) : null;
         }
 
-        if (isProgressBarVisible) {
+        if (mCanConfigWifi && isProgressBarVisible) {
             // When the Wi-Fi scan result callback is received
             //   Sub-Title: Searching for networks...
             return mContext.getText(SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS);
@@ -317,7 +320,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return mContext.getText(SUBTITLE_TEXT_ALL_CARRIER_NETWORK_UNAVAILABLE);
         }
 
-        if (!isMobileDataEnabled()) {
+        if (mCanConfigWifi && !isMobileDataEnabled()) {
             if (DEBUG) {
                 Log.d(TAG, "Mobile data off");
             }
@@ -331,7 +334,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return mContext.getText(SUBTITLE_TEXT_ALL_CARRIER_NETWORK_UNAVAILABLE);
         }
 
-        return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
+        if (mCanConfigWifi) {
+            return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
+        }
+        return null;
     }
 
     Drawable getInternetWifiDrawable(@NonNull WifiEntry wifiEntry) {
@@ -549,26 +555,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return summary;
     }
 
-    String getInternetWifiTitle() {
-        if (getInternetWifiEntry() == null) {
-            if (DEBUG) {
-                Log.d(TAG, "connected entry is null");
-            }
-            return "";
-        }
-        return getInternetWifiEntry().getTitle();
-    }
-
-    String getInternetWifiSummary() {
-        if (getInternetWifiEntry() == null) {
-            if (DEBUG) {
-                Log.d(TAG, "connected entry is null");
-            }
-            return "";
-        }
-        return getInternetWifiEntry().getSummary(false);
-    }
-
     void launchNetworkSetting() {
         mCallback.dismissDialog();
         mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
@@ -780,12 +766,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     }
 
     void scanWifiAccessPoints() {
-        mAccessPointController.scanForAccessPoints();
+        if (mCanConfigWifi) {
+            mAccessPointController.scanForAccessPoints();
+        }
     }
 
     @Override
     public void onAccessPointsChanged(List<WifiEntry> accessPoints) {
-        if (accessPoints == null) {
+        if (accessPoints == null || !mCanConfigWifi) {
             return;
         }
 
@@ -869,8 +857,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-                    || action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+            if (mCanConfigWifi && (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+                    || action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))) {
                 mCallback.onWifiStateReceived(context, intent);
             }
 

@@ -660,7 +660,7 @@ public class ScreenshotController {
                     + mLastScrollCaptureResponse.getWindowTitle() + "]");
 
             final ScrollCaptureResponse response = mLastScrollCaptureResponse;
-            mScreenshotView.showScrollChip(/* onClick */ () -> {
+            mScreenshotView.showScrollChip(response.getPackageName(), /* onClick */ () -> {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getDefaultDisplay().getRealMetrics(displayMetrics);
                 Bitmap newScreenshot = captureScreenshot(

@@ -67,6 +67,14 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
+    void setup() {
+        super.setup();
+        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
+            mEnabledEconomicPolicies.valueAt(i).setup();
+        }
+    }
+
+    @Override
     public long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
         long min = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {

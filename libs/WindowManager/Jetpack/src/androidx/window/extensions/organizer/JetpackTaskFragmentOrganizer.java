@@ -96,11 +96,11 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param activityIntent    Intent to start the secondary Activity with.
      * @param activityOptions   ActivityOptions to start the secondary Activity with.
      */
-    void startActivityToSide(IBinder launchingFragmentToken, Rect launchingFragmentBounds,
-            Activity launchingActivity, IBinder secondaryFragmentToken,
-            Rect secondaryFragmentBounds,  Intent activityIntent,
+    void startActivityToSide(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder launchingFragmentToken, @NonNull Rect launchingFragmentBounds,
+            @NonNull Activity launchingActivity, @NonNull IBinder secondaryFragmentToken,
+            @NonNull Rect secondaryFragmentBounds, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
         final IBinder ownerToken = launchingActivity.getActivityToken();
 
         // Create or resize the launching TaskFragment.
@@ -118,8 +118,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
         // Set adjacent to each other so that the containers below will be invisible.
         wct.setAdjacentTaskFragments(launchingFragmentToken, secondaryFragmentToken);
-
-        applyTransaction(wct);
     }
 
     /**

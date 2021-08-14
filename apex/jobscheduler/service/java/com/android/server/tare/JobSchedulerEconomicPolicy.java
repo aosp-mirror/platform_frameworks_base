@@ -16,6 +16,88 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_START_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_HIGH_RUNNING_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_HIGH_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_HIGH_START_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_LOW_RUNNING_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_LOW_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_LOW_START_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MAX_RUNNING_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MAX_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MAX_START_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_RUNNING_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
+import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
+import static android.app.tare.EconomyManager.KEY_JS_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_SEEN_INSTANT;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_SEEN_MAX;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_SEEN_ONGOING;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_OTHER_USER_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_OTHER_USER_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_OTHER_USER_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_TOP_ACTIVITY_INSTANT;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_TOP_ACTIVITY_MAX;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_TOP_ACTIVITY_ONGOING;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_WIDGET_INTERACTION_INSTANT;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_WIDGET_INTERACTION_MAX;
+import static android.app.tare.EconomyManager.KEY_JS_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.provider.Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS;
+
 import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
@@ -24,6 +106,13 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
+import android.util.Slog;
 import android.util.SparseArray;
 
 /**
@@ -31,6 +120,8 @@ import android.util.SparseArray;
  * JobScheduler.
  */
 public class JobSchedulerEconomicPolicy extends EconomicPolicy {
+    private static final String TAG = "TARE- " + JobSchedulerEconomicPolicy.class.getSimpleName();
+
     public static final int ACTION_JOB_MAX_START = TYPE_ACTION | POLICY_JS | 0;
     public static final int ACTION_JOB_MAX_RUNNING = TYPE_ACTION | POLICY_JS | 1;
     public static final int ACTION_JOB_HIGH_START = TYPE_ACTION | POLICY_JS | 2;
@@ -50,29 +141,50 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
             COST_MODIFIER_PROCESS_STATE
     };
 
+    private long mMinSatiatedBalance;
+    private long mMaxSatiatedBalance;
+    private long mMaxSatiatedCirculation;
+
+    private final KeyValueListParser mParser = new KeyValueListParser(',');
+    private final SettingsObserver mSettingsObserver;
+    private final InternalResourceService mInternalResourceService;
+
     private final SparseArray<Action> mActions = new SparseArray<>();
     private final SparseArray<Reward> mRewards = new SparseArray<>();
 
     JobSchedulerEconomicPolicy(InternalResourceService irs) {
         super(irs);
-        loadActions();
-        loadRewards();
+        mInternalResourceService = irs;
+        mSettingsObserver = new SettingsObserver(TareHandlerThread.getHandler());
+        loadConstants("");
+    }
+
+    @Override
+    void setup() {
+        super.setup();
+        ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
+        resolver.registerContentObserver(
+                Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        loadConstants(Settings.Global.getString(
+                mInternalResourceService.getContext().getContentResolver(),
+                TARE_JOB_SCHEDULER_CONSTANTS));
     }
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
         // TODO: incorporate time since usage
-        return arcToNarc(2000);
+        return mMinSatiatedBalance;
     }
 
     @Override
     long getMaxSatiatedBalance() {
-        return arcToNarc(60000);
+        return mMaxSatiatedBalance;
     }
 
     @Override
     long getMaxSatiatedCirculation() {
-        return arcToNarc(691200);
+        return mMaxSatiatedCirculation;
     }
 
     @NonNull
@@ -93,45 +205,134 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         return mRewards.get(rewardId);
     }
 
-    private void loadActions() {
-        mActions.put(ACTION_JOB_MAX_START,
-                new Action(ACTION_JOB_MAX_START, arcToNarc(3), arcToNarc(10)));
-        mActions.put(ACTION_JOB_MAX_RUNNING,
-                new Action(ACTION_JOB_MAX_RUNNING, arcToNarc(2), arcToNarc(5)));
-        mActions.put(ACTION_JOB_HIGH_START,
-                new Action(ACTION_JOB_HIGH_START, arcToNarc(3), arcToNarc(8)));
-        mActions.put(ACTION_JOB_HIGH_RUNNING,
-                new Action(ACTION_JOB_HIGH_RUNNING, arcToNarc(2), arcToNarc(4)));
-        mActions.put(ACTION_JOB_DEFAULT_START,
-                new Action(ACTION_JOB_DEFAULT_START, arcToNarc(3), arcToNarc(6)));
-        mActions.put(ACTION_JOB_DEFAULT_RUNNING,
-                new Action(ACTION_JOB_DEFAULT_RUNNING, arcToNarc(2), arcToNarc(3)));
-        mActions.put(ACTION_JOB_LOW_START,
-                new Action(ACTION_JOB_LOW_START, arcToNarc(3), arcToNarc(4)));
-        mActions.put(ACTION_JOB_LOW_RUNNING,
-                new Action(ACTION_JOB_LOW_RUNNING, arcToNarc(2), arcToNarc(2)));
-        mActions.put(ACTION_JOB_MIN_START,
-                new Action(ACTION_JOB_MIN_START, arcToNarc(3), arcToNarc(2)));
-        mActions.put(ACTION_JOB_MIN_RUNNING,
-                new Action(ACTION_JOB_MIN_RUNNING, arcToNarc(2), arcToNarc(1)));
-        mActions.put(ACTION_JOB_TIMEOUT,
-                new Action(ACTION_JOB_TIMEOUT, arcToNarc(30), arcToNarc(60)));
-    }
+    private void loadConstants(String policyValuesString) {
+        mActions.clear();
+        mRewards.clear();
 
-    private void loadRewards() {
-        mRewards.put(REWARD_TOP_ACTIVITY,
-                new Reward(REWARD_TOP_ACTIVITY,
-                        arcToNarc(0), /* .5 arcs */ arcToNarc(5) / 10, arcToNarc(15000)));
-        mRewards.put(REWARD_NOTIFICATION_SEEN,
-                new Reward(REWARD_NOTIFICATION_SEEN, arcToNarc(1), arcToNarc(0), arcToNarc(10)));
+        try {
+            mParser.setString(policyValuesString);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Global setting key incorrect: ", e);
+        }
+
+        mMinSatiatedBalance = arcToNarc(
+                mParser.getInt(KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP,
+                        DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP));
+        mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_JS_MAX_SATIATED_BALANCE,
+                DEFAULT_JS_MAX_SATIATED_BALANCE));
+        mMaxSatiatedCirculation = arcToNarc(mParser.getInt(KEY_JS_MAX_CIRCULATION,
+                DEFAULT_JS_MAX_CIRCULATION));
+
+        mActions.put(ACTION_JOB_MAX_START, new Action(ACTION_JOB_MAX_START,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MAX_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_MAX_START_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MAX_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE))));
+        mActions.put(ACTION_JOB_MAX_RUNNING, new Action(ACTION_JOB_MAX_RUNNING,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MAX_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE))));
+        mActions.put(ACTION_JOB_HIGH_START, new Action(ACTION_JOB_HIGH_START,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_HIGH_START_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE))));
+        mActions.put(ACTION_JOB_HIGH_RUNNING, new Action(ACTION_JOB_HIGH_RUNNING,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE))));
+        mActions.put(ACTION_JOB_DEFAULT_START, new Action(ACTION_JOB_DEFAULT_START,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE))));
+        mActions.put(ACTION_JOB_DEFAULT_RUNNING, new Action(ACTION_JOB_DEFAULT_RUNNING,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE))));
+        mActions.put(ACTION_JOB_LOW_START, new Action(ACTION_JOB_LOW_START,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_LOW_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_LOW_START_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_LOW_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE))));
+        mActions.put(ACTION_JOB_LOW_RUNNING, new Action(ACTION_JOB_LOW_RUNNING,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_LOW_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE))));
+        mActions.put(ACTION_JOB_MIN_START, new Action(ACTION_JOB_MIN_START,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MIN_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_MIN_START_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MIN_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE))));
+        mActions.put(ACTION_JOB_MIN_RUNNING, new Action(ACTION_JOB_MIN_RUNNING,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MIN_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE))));
+        mActions.put(ACTION_JOB_TIMEOUT, new Action(ACTION_JOB_TIMEOUT,
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP,
+                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP)),
+                arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE))));
+
+        mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_TOP_ACTIVITY_INSTANT,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT)),
+                (long) (arcToNarc(1) * mParser.getFloat(KEY_JS_REWARD_TOP_ACTIVITY_ONGOING,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_TOP_ACTIVITY_MAX,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX))));
+        mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_INSTANT,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT)),
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_ONGOING,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_MAX,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX))));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        arcToNarc(5), arcToNarc(0), arcToNarc(5000)));
-        mRewards.put(REWARD_WIDGET_INTERACTION,
-                new Reward(REWARD_WIDGET_INTERACTION,
-                        arcToNarc(10), arcToNarc(0), arcToNarc(5000)));
+                        arcToNarc(mParser.getInt(
+                                KEY_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT,
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT)),
+                        arcToNarc(mParser.getInt(
+                                KEY_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING,
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING)),
+                        arcToNarc(mParser.getInt(
+                                KEY_JS_REWARD_NOTIFICATION_INTERACTION_MAX,
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX))));
+        mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_INSTANT,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT)),
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_ONGOING,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING)),
+                arcToNarc(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_MAX,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX))));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        arcToNarc(10), arcToNarc(0), arcToNarc(5000)));
+                        arcToNarc(mParser.getInt(KEY_JS_REWARD_OTHER_USER_INTERACTION_INSTANT,
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT)),
+                        arcToNarc(mParser.getInt(
+                                KEY_JS_REWARD_OTHER_USER_INTERACTION_ONGOING,
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING)),
+                        arcToNarc(mParser.getInt(
+                                KEY_JS_REWARD_OTHER_USER_INTERACTION_MAX,
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX))));
+    }
+
+    private final class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            loadConstants(Settings.Global.getString(
+                    mInternalResourceService.getContext().getContentResolver(),
+                    TARE_JOB_SCHEDULER_CONSTANTS));
+        }
     }
 }

@@ -15,31 +15,20 @@
 package com.android.systemui.shared.plugins;
 
 import android.content.Context;
-import android.os.Looper;
 
 /**
  * Provides necessary components for initializing {@link PluginManagerImpl}.
  */
 public interface PluginInitializer {
 
-    Looper getBgLooper();
-
     /**
-     * Called from the bg looper during initialization of {@link PluginManagerImpl}.
+     * Return a list of plugins that don't get disabled when an exception occurs.
      */
-    void onPluginManagerInit();
+    String[] getPrivilegedPlugins(Context context);
 
-    String[] getWhitelistedPlugins(Context context);
-
-    PluginEnabler getPluginEnabler(Context context);
 
     /**
-     * Called from {@link PluginManagerImpl#handleWtfs()}.
+     * Called from {@link PluginInstanceManager}.
      */
     void handleWtfs();
-
-    /**
-     * Returns if pluging manager should run in debug mode.
-     */
-    boolean isDebuggable();
 }

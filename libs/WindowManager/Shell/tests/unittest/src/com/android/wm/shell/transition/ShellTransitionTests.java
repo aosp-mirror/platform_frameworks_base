@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECI
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -89,6 +90,9 @@ import java.util.ArrayList;
 
 /**
  * Tests for the shell transitions.
+ *
+ * Build/Install/Run:
+ *  atest WMShellUnitTests:ShellTransitionTests
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -302,6 +306,54 @@ public class ShellTransitionTests {
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         openAndTranslucent.getChanges().get(1).setFlags(FLAG_TRANSLUCENT);
         assertFalse(filter.matches(openAndTranslucent));
+    }
+
+    @Test
+    public void testTransitionFilterChecksTypeSet() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mTypeSet = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final TransitionInfo openOnly = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        assertTrue(filter.matches(openOnly));
+
+        final TransitionInfo toFrontOnly = new TransitionInfoBuilder(TRANSIT_TO_FRONT)
+                .addChange(TRANSIT_TO_FRONT).build();
+        assertTrue(filter.matches(toFrontOnly));
+
+        final TransitionInfo closeOnly = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_CLOSE).build();
+        assertFalse(filter.matches(closeOnly));
+    }
+
+    @Test
+    public void testTransitionFilterChecksFlags() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+
+        final TransitionInfo withFlag = new TransitionInfoBuilder(TRANSIT_TO_BACK,
+                TRANSIT_FLAG_KEYGUARD_GOING_AWAY)
+                .addChange(TRANSIT_TO_BACK).build();
+        assertTrue(filter.matches(withFlag));
+
+        final TransitionInfo withoutFlag = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        assertFalse(filter.matches(withoutFlag));
+    }
+
+    @Test
+    public void testTransitionFilterChecksNotFlags() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mNotFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+
+        final TransitionInfo withFlag = new TransitionInfoBuilder(TRANSIT_TO_BACK,
+                TRANSIT_FLAG_KEYGUARD_GOING_AWAY)
+                .addChange(TRANSIT_TO_BACK).build();
+        assertFalse(filter.matches(withFlag));
+
+        final TransitionInfo withoutFlag = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        assertTrue(filter.matches(withoutFlag));
     }
 
     @Test
@@ -534,7 +586,12 @@ public class ShellTransitionTests {
         final TransitionInfo mInfo;
 
         TransitionInfoBuilder(@WindowManager.TransitionType int type) {
-            mInfo = new TransitionInfo(type, 0 /* flags */);
+            this(type, 0 /* flags */);
+        }
+
+        TransitionInfoBuilder(@WindowManager.TransitionType int type,
+                @WindowManager.TransitionFlags int flags) {
+            mInfo = new TransitionInfo(type, flags);
             mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
         }
 

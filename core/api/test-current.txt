@@ -3338,7 +3338,7 @@ package android.window {
     ctor public WindowProviderService();
     method public final void attachToWindowToken(@NonNull android.os.IBinder);
     method @NonNull public int getInitialDisplayId();
-    method @Nullable public android.os.Bundle getWindowContextOptions();
+    method @CallSuper @Nullable public android.os.Bundle getWindowContextOptions();
     method public abstract int getWindowType();
   }
 

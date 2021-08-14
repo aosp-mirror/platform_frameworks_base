@@ -87,6 +87,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
+import static android.window.WindowContext.KEY_IS_WINDOW_PROVIDER_SERVICE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -1730,16 +1731,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     && mWindowContextListenerController.hasListener(windowContextToken)) {
                 final int windowContextType = mWindowContextListenerController
                         .getWindowType(windowContextToken);
+                final Bundle options = mWindowContextListenerController
+                        .getOptions(windowContextToken);
                 if (type != windowContextType) {
                     ProtoLog.w(WM_ERROR, "Window types in WindowContext and"
                             + " LayoutParams.type should match! Type from LayoutParams is %d,"
                             + " but type from WindowContext is %d", type, windowContextType);
-                    return WindowManagerGlobal.ADD_INVALID_TYPE;
+                    // We allow WindowProviderService to add window other than windowContextType,
+                    // but the WindowProviderService won't be associated with the window's
+                    // WindowToken.
+                    if (!options.getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, false)) {
+                        return WindowManagerGlobal.ADD_INVALID_TYPE;
+                    }
+                } else {
+                    mWindowContextListenerController.registerWindowContainerListener(
+                            windowContextToken, token, callingUid, type, options);
                 }
-                final Bundle options = mWindowContextListenerController
-                        .getOptions(windowContextToken);
-                mWindowContextListenerController.registerWindowContainerListener(
-                        windowContextToken, token, callingUid, type, options);
             }
 
             // From now on, no exceptions or errors allowed!
@@ -7086,6 +7093,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             "requestScrollCapture: caught exception dispatching to window."
                                     + "token=%s", targetWindow.mClient.asBinder());
                     responseBuilder.setWindowTitle(targetWindow.getName());
+                    responseBuilder.setPackageName(targetWindow.getOwningPackage());
                     responseBuilder.setDescription(String.format("caught exception: %s", e));
                     listener.onScrollCaptureResponse(responseBuilder.build());
                 }
@@ -8644,8 +8652,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imeTargetWindowTask == null) {
                 return false;
             }
-            final TaskSnapshot snapshot = mAtmService.getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                    false /* isLowResolution */);
+            final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
+                    imeTargetWindowTask.mUserId, false /* isLowResolution */,
+                    false /* restoreFromDisk */);
             return snapshot != null && snapshot.hasImeSurface();
         }
     }

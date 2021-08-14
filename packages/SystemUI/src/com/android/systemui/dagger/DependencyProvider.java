@@ -68,21 +68,15 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
-import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.unfold.UnfoldTransitionFactory;
-import com.android.unfold.UnfoldTransitionProgressProvider;
-import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -98,6 +92,9 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.unfold.UnfoldTransitionFactory;
+import com.android.unfold.UnfoldTransitionProgressProvider;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -193,13 +190,6 @@ public class DependencyProvider {
     @SysUISingleton
     public MetricsLogger provideMetricsLogger() {
         return new MetricsLogger();
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    public PluginManager providePluginManager(Context context) {
-        return new PluginManagerImpl(context, new PluginInitializerImpl());
     }
 
     /** */

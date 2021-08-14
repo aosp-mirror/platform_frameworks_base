@@ -5174,4 +5174,10 @@
          This flag should be enabled only when the product does not have any UI to toggle airplane
          mode like automotive devices.-->
     <bool name="config_autoResetAirplaneMode">false</bool>
+
+    <!-- Wear OS: the name of the package containing the device's sysui. -->
+    <string name="config_wearSysUiPackage" translatable="false"/>
+
+    <!-- Wear OS: the name of the main activity of the device's sysui. -->
+    <string name="config_wearSysUiMainActivity" translatable="false"/>
 </resources>
