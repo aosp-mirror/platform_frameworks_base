@@ -832,6 +832,17 @@ public class VoiceInteractionManagerService extends SystemService {
             mImpl.forceRestartHotwordDetector();
         }
 
+        // Called by Shell command
+        void setDebugHotwordLogging(boolean logging) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setTemporaryLogging without running voice interaction service");
+                    return;
+                }
+                mImpl.setDebugHotwordLoggingLocked(logging);
+            }
+        }
+
         @Override
         public void showSession(Bundle args, int flags) {
             synchronized (this) {
@@ -1885,17 +1896,19 @@ public class VoiceInteractionManagerService extends SystemService {
 
                         String serviceComponentName = serviceInfo.getComponentName()
                                 .flattenToShortString();
-
-                        String serviceRecognizerName = new ComponentName(pkg,
-                                voiceInteractionServiceInfo.getRecognitionService())
-                                .flattenToShortString();
+                        if (voiceInteractionServiceInfo.getRecognitionService() == null) {
+                            Slog.e(TAG, "The RecognitionService must be set to avoid boot "
+                                    + "loop on earlier platform version. Also make sure that this "
+                                    + "is a valid RecognitionService when running on Android 11 "
+                                    + "or earlier.");
+                            serviceComponentName = "";
+                        }
 
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.ASSISTANT, serviceComponentName, userId);
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_INTERACTION_SERVICE, serviceComponentName,
                                 userId);
-
                         return;
                     }
 
@@ -1932,6 +1945,29 @@ public class VoiceInteractionManagerService extends SystemService {
             @Override public void onChange(boolean selfChange) {
                 synchronized (VoiceInteractionManagerServiceStub.this) {
                     switchImplementationIfNeededLocked(false);
+                }
+            }
+        }
+
+        private void resetServicesIfNoRecognitionService(ComponentName serviceComponent,
+                int userHandle) {
+            for (ResolveInfo resolveInfo : queryInteractorServices(userHandle,
+                    serviceComponent.getPackageName())) {
+                VoiceInteractionServiceInfo serviceInfo =
+                        new VoiceInteractionServiceInfo(
+                                mContext.getPackageManager(),
+                                resolveInfo.serviceInfo);
+                if (!serviceInfo.getSupportsAssist()) {
+                    continue;
+                }
+                if (serviceInfo.getRecognitionService() == null) {
+                    Slog.e(TAG, "The RecognitionService must be set to "
+                            + "avoid boot loop on earlier platform version. "
+                            + "Also make sure that this is a valid "
+                            + "RecognitionService when running on Android 11 "
+                            + "or earlier.");
+                    setCurInteractor(null, userHandle);
+                    resetCurAssistant(userHandle);
                 }
             }
         }
@@ -2079,6 +2115,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                         change = isPackageAppearing(curInteractor.getPackageName());
                         if (change != PACKAGE_UNCHANGED) {
+                            resetServicesIfNoRecognitionService(curInteractor, userHandle);
                             // If current interactor is now appearing, for any reason, then
                             // restart our connection with it.
                             if (mImpl != null && curInteractor.getPackageName().equals(
@@ -2100,6 +2137,13 @@ public class VoiceInteractionManagerService extends SystemService {
                             resetCurAssistant(userHandle);
                             initForUser(userHandle);
                             return;
+                        }
+                        change = isPackageAppearing(curAssistant.getPackageName());
+                        if (change != PACKAGE_UNCHANGED) {
+                            // It is possible to update Assistant without a voice interactor to one
+                            // with a voice-interactor. We should make sure the recognition service
+                            // is set to avoid boot loop.
+                            resetServicesIfNoRecognitionService(curAssistant, userHandle);
                         }
                     }
 

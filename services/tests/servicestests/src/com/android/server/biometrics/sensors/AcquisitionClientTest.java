@@ -90,7 +90,8 @@ public class AcquisitionClientTest {
                 @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter callback) {
             super(context, lazyDaemon, token, callback, 0 /* userId */, "Test", 0 /* cookie */,
-                    TEST_SENSOR_ID /* sensorId */, 0 /* statsModality */, 0 /* statsAction */,
+                    TEST_SENSOR_ID /* sensorId */, true /* shouldVibrate */, 0 /* statsModality */,
+                    0 /* statsAction */,
                     0 /* statsClient */);
         }
 

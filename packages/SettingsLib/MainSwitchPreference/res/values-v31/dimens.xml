@@ -13,12 +13,25 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
+  -->
+
 <resources>
-    <style name="Theme.CollapsingToolbar.Settings" parent="@style/Theme.MaterialComponents.DayNight">
-        <item name="elevationOverlayEnabled">true</item>
-        <item name="elevationOverlayColor">?attr/colorPrimary</item>
-        <item name="colorPrimary">@*android:color/primary_device_default_settings_light</item>
-        <item name="colorAccent">@*android:color/accent_device_default_light</item>
-    </style>
+
+    <!-- Size of layout margin -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+
+    <!-- Size of layout margin left -->
+    <dimen name="settingslib_switchbar_padding_left">24dp</dimen>
+
+    <!-- Size of layout margin right -->
+    <dimen name="settingslib_switchbar_padding_right">16dp</dimen>
+
+    <!-- Minimum width of switch -->
+    <dimen name="settingslib_min_switch_width">52dp</dimen>
+
+    <!-- Minimum width of switch bar -->
+    <dimen name="settingslib_min_switch_bar_height">72dp</dimen>
+
+    <!-- Radius of switch bar -->
+    <dimen name="settingslib_switch_bar_radius">28dp</dimen>
 </resources>

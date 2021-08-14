@@ -296,8 +296,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
         if (mKeyguardPreferredRefreshRate > 0) {
             boolean onKeyguard = state.mStatusBarState == StatusBarState.KEYGUARD
-                    && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway
-                    && !state.mDozing;
+                    && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway;
             if (onKeyguard
                     && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
                 mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;

@@ -116,6 +116,16 @@ public final class JobServiceContext implements ServiceConnection {
     @VisibleForTesting
     int mVerb;
     private boolean mCancelled;
+    /**
+     * True if the previous job on this context successfully finished (ie. called jobFinished or
+     * dequeueWork with no work left).
+     */
+    private boolean mPreviousJobHadSuccessfulFinish;
+    /**
+     * The last time a job on this context didn't finish successfully, in the elapsed realtime
+     * timebase.
+     */
+    private long mLastUnsuccessfulFinishElapsed;
 
     /**
      * All the information maintained about the job currently being executed.
@@ -439,7 +449,9 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    return null;
+                }
                 if (mVerb == VERB_STOPPING || mVerb == VERB_FINISHED) {
                     // This job is either all done, or on its way out.  Either way, it
                     // should not dispatch any more work.  We will pick up any remaining
@@ -465,7 +477,11 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    // Return true instead of false here so we don't just kick the
+                    // Exception-throwing-can down the road to JobParameters.completeWork >:(
+                    return true;
+                }
                 return mRunningJob.completeWorkLocked(workId);
             }
         } finally {
@@ -554,18 +570,34 @@ public final class JobServiceContext implements ServiceConnection {
         return true;
     }
 
-    private void assertCallerLocked(JobCallback cb) {
+    /**
+     * Will throw a {@link SecurityException} if the callback is not for the currently running job,
+     * but may decide not to throw an exception if the call from the previous job appears to be an
+     * accident.
+     *
+     * @return true if the callback is for the current job, false otherwise
+     */
+    private boolean assertCallerLocked(JobCallback cb) {
         if (!verifyCallerLocked(cb)) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (!mPreviousJobHadSuccessfulFinish
+                    && (nowElapsed - mLastUnsuccessfulFinishElapsed) < 15_000L) {
+                // Don't punish apps for race conditions
+                return false;
+            }
+            // It's been long enough that the app should really not be calling into JS for the
+            // stopped job.
             StringBuilder sb = new StringBuilder(128);
             sb.append("Caller no longer running");
             if (cb.mStoppedReason != null) {
                 sb.append(", last stopped ");
-                TimeUtils.formatDuration(sElapsedRealtimeClock.millis() - cb.mStoppedTime, sb);
+                TimeUtils.formatDuration(nowElapsed - cb.mStoppedTime, sb);
                 sb.append(" because: ");
                 sb.append(cb.mStoppedReason);
             }
             throw new SecurityException(sb.toString());
         }
+        return true;
     }
 
     /**
@@ -911,6 +943,11 @@ public final class JobServiceContext implements ServiceConnection {
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
         final int internalStopReason = mParams.getInternalStopReasonCode();
+        mPreviousJobHadSuccessfulFinish =
+                (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
+        if (!mPreviousJobHadSuccessfulFinish) {
+            mLastUnsuccessfulFinishElapsed = sElapsedRealtimeClock.millis();
+        }
         mJobPackageTracker.noteInactive(completedJob, internalStopReason, reason);
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.getSourceUid(), null, completedJob.getBatteryName(),

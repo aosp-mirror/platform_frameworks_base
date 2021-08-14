@@ -81,6 +81,7 @@ import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -146,6 +147,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private LockPatternUtils mLockPatternUtils;
     @Mock
     private IActivityManager mIActivityManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -154,6 +157,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
     @Captor
     private ArgumentCaptor<KeyguardIndication> mKeyguardIndicationCaptor;
+    @Captor
+    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    private KeyguardStateController.Callback mKeyguardStateControllerCallback;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
@@ -213,7 +219,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager);
+                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager,
+                mKeyguardBypassController);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -223,6 +230,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.mRotateTextViewController = mRotateTextViewController;
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         clearInvocations(mIBatteryStats);
+
+        verify(mKeyguardStateController).addCallback(
+                mKeyguardStateControllerCallbackCaptor.capture());
+        mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
     }
 
     @Test
@@ -500,6 +511,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
@@ -529,7 +541,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         reset(mKeyguardUpdateMonitor);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mController.onUnlockedChanged();
+        mKeyguardStateControllerCallback.onUnlockedChanged();
         verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
     }
 
@@ -572,7 +584,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void updateMonitor_listener() {
         createController();
-        verify(mKeyguardStateController).addCallback(eq(mController));
+        verify(mKeyguardStateController).addCallback(any());
         verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
     }
 

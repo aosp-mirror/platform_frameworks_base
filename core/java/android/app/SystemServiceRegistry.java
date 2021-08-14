@@ -158,7 +158,6 @@ import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
-import android.os.IHintManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
 import android.os.ISystemUpdateManager;
@@ -600,10 +599,7 @@ public final class SystemServiceRegistry {
             @Override
             public PerformanceHintManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                IBinder hintBinder = ServiceManager.getServiceOrThrow(
-                        Context.PERFORMANCE_HINT_SERVICE);
-                IHintManager hintService = IHintManager.Stub.asInterface(hintBinder);
-                return new PerformanceHintManager(hintService);
+                return PerformanceHintManager.create();
             }});
 
         registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,

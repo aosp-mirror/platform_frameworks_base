@@ -321,6 +321,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         final String mOwningProcessName;
         int mAcquisitionCount;
         AssociationState.SourceState mAssociation;
+        private Object mProcStatsLock;  // Internal lock for accessing AssociationState
 
         public ExternalProcessHandle(IBinder token, int owningUid, String owningProcessName) {
             mToken = token;
@@ -353,17 +354,21 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
                             + provider.name.toShortString() + ": proc=" + provider.proc);
                 } else {
-                    mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
-                            provider.name.getClassName()).startSource(mOwningUid,
-                            mOwningProcessName, null);
-
+                    mProcStatsLock = provider.proc.mService.mProcessStats.mLock;
+                    synchronized (mProcStatsLock) {
+                        mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
+                                provider.name.getClassName()).startSource(mOwningUid,
+                                mOwningProcessName, null);
+                    }
                 }
             }
         }
 
         public void stopAssociation() {
             if (mAssociation != null) {
-                mAssociation.stop();
+                synchronized (mProcStatsLock) {
+                    mAssociation.stop();
+                }
                 mAssociation = null;
             }
         }

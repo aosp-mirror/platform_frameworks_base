@@ -88,13 +88,10 @@ public class NumPadButton extends AlphaOptimizedImageButton {
      * Reload colors from resources.
      **/
     public void reloadColors() {
-        if (mAnimator != null) {
-            mAnimator.reloadColors(getContext());
-	} else {
-            // Needed for old style pin
-            int textColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
-                    .getDefaultColor();
-            ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(textColor));
-        }
+        if (mAnimator != null) mAnimator.reloadColors(getContext());
+
+        int textColor = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorBackground);
+        ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(textColor));
     }
 }

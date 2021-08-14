@@ -239,8 +239,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             // Fetch all the surface controls and pass them to the client to get the animation
             // started. Cancel any existing recents animation running synchronously (do not hold the
             // WM lock)
-            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
-                    "startRecentsActivity");
+            if (mWindowManager.getRecentsAnimationController() != null) {
+                mWindowManager.getRecentsAnimationController().forceCancelAnimation(
+                        REORDER_MOVE_TO_ORIGINAL_POSITION, "startRecentsActivity");
+            }
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, mDefaultTaskDisplayArea.getDisplayId(),
                     mTaskSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
