@@ -79,7 +79,6 @@ public abstract class PanelViewController {
     protected long mDownTime;
     protected boolean mTouchSlopExceededBeforeDown;
     private float mMinExpandHeight;
-    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mVibrateOnOpening;
     protected boolean mIsLaunchAnimationRunning;
@@ -182,6 +181,7 @@ public abstract class PanelViewController {
     protected final KeyguardStateController mKeyguardStateController;
     protected final SysuiStatusBarStateController mStatusBarStateController;
     protected final AmbientState mAmbientState;
+    protected final LockscreenGestureLogger mLockscreenGestureLogger;
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
@@ -217,10 +217,12 @@ public abstract class PanelViewController {
             LatencyTracker latencyTracker,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            LockscreenGestureLogger lockscreenGestureLogger,
             AmbientState ambientState) {
         mAmbientState = ambientState;
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mLockscreenGestureLogger = lockscreenGestureLogger;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
