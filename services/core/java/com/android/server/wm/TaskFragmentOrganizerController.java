@@ -199,6 +199,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
                 Throwable exception) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                    "Sending TaskFragment error exception=%s", exception.toString());
             final Bundle exceptionBundle = putExceptionInBundle(exception);
             try {
                 organizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
@@ -313,6 +315,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
             Throwable exception) {
         validateAndGetState(organizer);
+        Slog.w(TAG, "onTaskFragmentError ", exception);
         PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent(organizer,
                 errorCallbackToken, exception, PendingTaskFragmentEvent.EVENT_ERROR);
         mPendingTaskFragmentEvents.add(pendingEvent);

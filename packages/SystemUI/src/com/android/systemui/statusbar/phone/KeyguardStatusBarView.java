@@ -321,7 +321,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 
@@ -475,8 +475,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
     /**
      * Set the clipping on the top of the view.
+     *
+     * Should only be called from {@link KeyguardStatusBarViewController}.
      */
-    public void setTopClipping(int topClipping) {
+    void setTopClipping(int topClipping) {
         if (topClipping != mTopClipping) {
             mTopClipping = topClipping;
             updateClipping();

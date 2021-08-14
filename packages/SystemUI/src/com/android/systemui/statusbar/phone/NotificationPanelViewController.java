@@ -884,10 +884,14 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
 
+        mKeyguardStatusBarViewController =
+                mKeyguardStatusBarViewComponentFactory.build(mKeyguardStatusBar)
+                        .getKeyguardStatusBarViewController();
+        mKeyguardStatusBarViewController.init();
+
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarView,
-                mKeyguardStatusBar,
                 keyguardUserSwitcherView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
@@ -979,23 +983,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
             UserAvatarView userAvatarView,
-            KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
-
-        KeyguardStatusBarViewComponent statusBarViewComponent =
-                mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
-        if (mKeyguardStatusBarViewController != null) {
-            // TODO(b/194181195): This shouldn't be necessary.
-            mKeyguardStatusBarViewController.destroy();
-        }
-        mKeyguardStatusBarViewController =
-                statusBarViewComponent.getKeyguardStatusBarViewController();
-        mKeyguardStatusBarViewController.init();
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
@@ -1014,16 +1007,16 @@ public class NotificationPanelViewController extends PanelViewController {
                     userSwitcherComponent.getKeyguardQsUserSwitchController();
             mKeyguardQsUserSwitchController.setNotificationPanelViewController(this);
             mKeyguardQsUserSwitchController.init();
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(true);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(true);
         } else if (keyguardUserSwitcherView != null) {
             KeyguardUserSwitcherComponent userSwitcherComponent =
                     mKeyguardUserSwitcherComponentFactory.build(keyguardUserSwitcherView);
             mKeyguardUserSwitcherController =
                     userSwitcherComponent.getKeyguardUserSwitcherController();
             mKeyguardUserSwitcherController.init();
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(true);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(true);
         } else {
-            mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(false);
+            mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(false);
         }
     }
 
@@ -1156,7 +1149,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                mKeyguardStatusBar, keyguardUserSwitcherView);
+                keyguardUserSwitcherView);
 
         // Update keyguard bottom area
         int index = mView.indexOfChild(mKeyguardBottomArea);
@@ -2445,7 +2438,6 @@ public class NotificationPanelViewController extends PanelViewController {
             boolean qsVisible) {
         // Fancy clipping for quick settings
         int radius = mScrimCornerRadius;
-        int statusBarClipTop = 0;
         boolean clipStatusView = false;
         if (!mShouldUseSplitNotificationShade) {
             // The padding on this area is large enough that we can use a cheaper clipping strategy
@@ -2454,7 +2446,6 @@ public class NotificationPanelViewController extends PanelViewController {
             float screenCornerRadius = mRecordingController.isRecording() ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
-            statusBarClipTop = top - mKeyguardStatusBar.getTop();
         }
         if (mQs != null) {
             float qsTranslation = 0;
@@ -2492,8 +2483,13 @@ public class NotificationPanelViewController extends PanelViewController {
             mScrimController.setNotificationsBounds(left, top, right, bottom);
         }
 
+        if (mShouldUseSplitNotificationShade) {
+            mKeyguardStatusBarViewController.setNoTopClipping();
+        } else {
+            mKeyguardStatusBarViewController.updateTopClipping(top);
+        }
+
         mScrimController.setScrimCornerRadius(radius);
-        mKeyguardStatusBar.setTopClipping(statusBarClipTop);
         int nsslLeft = left - mNotificationStackScrollLayoutController.getLeft();
         int nsslRight = right - mNotificationStackScrollLayoutController.getLeft();
         int nsslTop = top - mNotificationStackScrollLayoutController.getTop();
