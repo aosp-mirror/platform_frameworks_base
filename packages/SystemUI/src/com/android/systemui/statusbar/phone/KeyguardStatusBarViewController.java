@@ -159,17 +159,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     @Override
     protected void onViewDetached() {
-        destroy();
-    }
-
-    @Override
-    public void destroy() {
-        // Don't receive future #onViewAttached calls so that we don't accidentally have two
-        // controllers registered for the same view.
-        // TODO(b/194181195): This shouldn't be necessary.
-        super.destroy();
-        mBatteryMeterViewController.destroy();
-
         mConfigurationController.removeCallback(mConfigurationListener);
         mAnimationScheduler.removeCallback(mAnimationCallback);
         mUserInfoController.removeCallback(mOnUserInfoChangedListener);
@@ -183,6 +172,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.onThemeChanged(mTintedIconManager);
     }
 
+    /** Sets whether user switcher is enabled. */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+        mView.setKeyguardUserSwitcherEnabled(enabled);
+    }
+
     /** Sets whether this controller should listen to battery updates. */
     public void setBatteryListening(boolean listening) {
         if (listening == mBatteryListening) {
@@ -194,6 +188,21 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         } else {
             mBatteryController.removeCallback(mBatteryStateChangeCallback);
         }
+    }
+
+    /** Set the view to have no top clipping. */
+    public void setNoTopClipping() {
+        mView.setTopClipping(0);
+    }
+
+    /**
+     * Update the view's top clipping based on the value of notificationPanelTop and the view's
+     * current top.
+     *
+     * @param notificationPanelTop the current top of the notification panel view.
+     */
+    public void updateTopClipping(int notificationPanelTop) {
+        mView.setTopClipping(notificationPanelTop - mView.getTop());
     }
 
     /** */
