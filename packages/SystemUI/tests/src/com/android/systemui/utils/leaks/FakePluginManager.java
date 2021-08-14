@@ -22,7 +22,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 
 public class FakePluginManager implements PluginManager {
 
-    private final BaseLeakChecker<PluginListener> mLeakChecker;
+    private final BaseLeakChecker<PluginListener<?>> mLeakChecker;
 
     public FakePluginManager(LeakCheck test) {
         mLeakChecker = new BaseLeakChecker<>(test, "Plugin");
@@ -30,7 +30,7 @@ public class FakePluginManager implements PluginManager {
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class cls, boolean allowMultiple) {
+            Class<?> cls, boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
@@ -62,7 +62,7 @@ public class FakePluginManager implements PluginManager {
     }
 
     @Override
-    public String[] getWhitelistedPlugins() {
+    public String[] getPrivilegedPlugins() {
         return new String[0];
     }
 

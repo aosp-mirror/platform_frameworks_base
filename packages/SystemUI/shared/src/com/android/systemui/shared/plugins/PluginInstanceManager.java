@@ -67,17 +67,13 @@ public class PluginInstanceManager<T extends Plugin> {
     private final PackageManager mPm;
     private final PluginManagerImpl mManager;
     private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
+    private final PluginInitializer mInitializer;
 
-    PluginInstanceManager(Context context, String action, PluginListener<T> listener,
-            boolean allowMultiple, Looper looper, VersionInfo version, PluginManagerImpl manager) {
-        this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
-                manager, manager.isDebuggable(), manager.getWhitelistedPlugins());
-    }
-
-    @VisibleForTesting
     PluginInstanceManager(Context context, PackageManager pm, String action,
             PluginListener<T> listener, boolean allowMultiple, Looper looper, VersionInfo version,
-            PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist) {
+            PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist,
+            PluginInitializer initializer) {
+        mInitializer = initializer;
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mPluginHandler = new PluginHandler(looper);
         mManager = manager;
@@ -214,7 +210,7 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "onPluginConnected");
                     PluginPrefs.setHasPlugins(mContext);
                     PluginInfo<T> info = (PluginInfo<T>) msg.obj;
-                    mManager.handleWtfs();
+                    mInitializer.handleWtfs();
                     if (!(msg.obj instanceof PluginFragment)) {
                         // Only call onDestroy for plugins that aren't fragments, as fragments
                         // will get the onCreate as part of the fragment lifecycle.
@@ -414,6 +410,33 @@ public class PluginInstanceManager<T extends Plugin> {
                 return null;
             }
             return pv;
+        }
+    }
+
+    /**
+     * Construct a {@link PluginInstanceManager}
+     */
+    public static class Factory {
+        private final Context mContext;
+        private final PackageManager mPackageManager;
+        private final Looper mLooper;
+        private final PluginInitializer mInitializer;
+
+        public Factory(Context context, PackageManager packageManager, Looper looper,
+                PluginInitializer initializer) {
+            mContext = context;
+            mPackageManager = packageManager;
+            mLooper = looper;
+            mInitializer = initializer;
+        }
+
+        <T extends Plugin> PluginInstanceManager<T> create(
+                String action,
+                PluginListener<T> listener, boolean allowMultiple, VersionInfo version,
+                PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist) {
+            return new PluginInstanceManager<>(mContext, mPackageManager, action, listener,
+                    allowMultiple, mLooper, version, manager, debuggable, pluginWhitelist,
+                    mInitializer);
         }
     }
 

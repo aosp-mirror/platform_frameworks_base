@@ -62,8 +62,8 @@
         <item name="android:src">@drawable/ic_backspace_24dp</item>
     </style>
     <style name="NumPadKey.Enter">
-      <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
-      <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
+        <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike"
            parent="@android:style/Widget.DeviceDefault.TextView">
