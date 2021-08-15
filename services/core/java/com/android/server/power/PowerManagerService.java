@@ -129,6 +129,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -1506,7 +1507,11 @@ public final class PowerManagerService extends SystemService
                 mRequestWaitForNegativeProximity = true;
             }
 
-            wakeLock.mLock.unlinkToDeath(wakeLock, 0);
+            try {
+                wakeLock.mLock.unlinkToDeath(wakeLock, 0);
+            } catch (NoSuchElementException e) {
+                Slog.wtf(TAG, "Failed to unlink wakelock", e);
+            }
             removeWakeLockLocked(wakeLock, index);
         }
     }
