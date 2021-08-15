@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
@@ -38,8 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
@@ -61,7 +58,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Mock
     private WifiEntry mInternetWifiEntry;
     @Mock
-    private WifiEntry mWifiEntry;
+    private List<WifiEntry> mWifiEntries;
     @Mock
     private InternetAdapter mInternetAdapter;
     @Mock
@@ -85,20 +82,17 @@ public class InternetDialogTest extends SysuiTestCase {
         when(mInternetWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
         when(mInternetWifiEntry.isDefaultNetwork()).thenReturn(true);
         when(mInternetWifiEntry.hasInternetAccess()).thenReturn(true);
-        when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
-        when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
+        when(mWifiEntries.size()).thenReturn(1);
 
         when(mInternetDialogController.getMobileNetworkTitle()).thenReturn(MOBILE_NETWORK_TITLE);
         when(mInternetDialogController.getMobileNetworkSummary())
                 .thenReturn(MOBILE_NETWORK_SUMMARY);
         when(mInternetDialogController.getWifiManager()).thenReturn(mWifiManager);
-        when(mInternetDialogController.getInternetWifiEntry()).thenReturn(mInternetWifiEntry);
-        when(mInternetDialogController.getWifiEntryList()).thenReturn(Arrays.asList(mWifiEntry));
 
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
                 mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler);
         mInternetDialog.mAdapter = mInternetAdapter;
-        mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
+        mInternetDialog.onAccessPointsChanged(mWifiEntries, mInternetWifiEntry);
         mInternetDialog.show();
 
         mDialogView = mInternetDialog.mDialogView;
@@ -165,7 +159,8 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void updateDialog_wifiOnAndNoConnectedWifi_hideConnectedWifi() {
-        mInternetDialog.mConnectedWifiEntry = null;
+        // The precondition WiFi ON is already in setUp()
+        mInternetDialog.onAccessPointsChanged(mWifiEntries, null /* connectedEntry*/);
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
 
         mInternetDialog.updateDialog();
@@ -175,7 +170,8 @@ public class InternetDialogTest extends SysuiTestCase {
 
     @Test
     public void updateDialog_wifiOnAndNoWifiList_hideWifiListAndSeeAll() {
-        when(mInternetDialogController.getWifiEntryList()).thenReturn(null);
+        // The precondition WiFi ON is already in setUp()
+        mInternetDialog.onAccessPointsChanged(null /* wifiEntries */, mInternetWifiEntry);
 
         mInternetDialog.updateDialog();
 
@@ -258,9 +254,6 @@ public class InternetDialogTest extends SysuiTestCase {
     public void showProgressBar_wifiEnabledWithWifiEntry_showProgressBarThenHide() {
         Mockito.reset(mHandler);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
-        List<ScanResult> wifiScanResults = mock(ArrayList.class);
-        when(wifiScanResults.size()).thenReturn(1);
-        when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
 
         mInternetDialog.showProgressBar();
 
@@ -277,12 +270,10 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void showProgressBar_wifiEnabledWithoutWifiScanResults_showProgressBarThenHideSearch() {
+    public void showProgressBar_wifiEnabledWithoutWifiEntries_showProgressBarThenHideSearch() {
         Mockito.reset(mHandler);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
-        List<ScanResult> wifiScanResults = mock(ArrayList.class);
-        when(wifiScanResults.size()).thenReturn(0);
-        when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
+        mInternetDialog.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry*/);
 
         mInternetDialog.showProgressBar();
 
