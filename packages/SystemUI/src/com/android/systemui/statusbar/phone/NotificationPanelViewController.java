@@ -482,7 +482,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mLinearDarkAmount;
 
     private boolean mPulsing;
-    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
     private boolean mHideIconsDuringLaunchAnimation = true;
@@ -739,12 +738,21 @@ public class NotificationPanelViewController extends PanelViewController {
             SplitShadeHeaderController splitShadeHeaderController,
             LockscreenSmartspaceController lockscreenSmartspaceController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            LockscreenGestureLogger lockscreenGestureLogger,
             NotificationRemoteInputManager remoteInputManager,
             ControlsComponent controlsComponent) {
-        super(view, falsingManager, dozeLog, keyguardStateController,
-                (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
-                statusBarTouchableRegionManager, ambientState);
+        super(view,
+                falsingManager,
+                dozeLog,
+                keyguardStateController,
+                (SysuiStatusBarStateController) statusBarStateController,
+                vibratorHelper,
+                statusBarKeyguardViewManager,
+                latencyTracker,
+                flingAnimationUtilsBuilder.get(),
+                statusBarTouchableRegionManager,
+                lockscreenGestureLogger,
+                ambientState);
         mView = view;
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
