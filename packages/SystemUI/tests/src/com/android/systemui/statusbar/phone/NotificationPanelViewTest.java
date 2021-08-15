@@ -332,6 +332,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private LockscreenSmartspaceController mLockscreenSmartspaceController;
     @Mock
     private FrameLayout mSplitShadeSmartspaceContainer;
+    @Mock
+    private LockscreenGestureLogger mLockscreenGestureLogger;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -489,6 +491,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mSplitShadeHeaderController,
                 mLockscreenSmartspaceController,
                 mUnlockedScreenOffAnimationController,
+                mLockscreenGestureLogger,
                 mNotificationRemoteInputManager,
                 mControlsComponent);
         mNotificationPanelViewController.initDependencies(

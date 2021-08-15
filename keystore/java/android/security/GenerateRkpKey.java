@@ -25,6 +25,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,7 +90,8 @@ public class GenerateRkpKey {
         }
         intent.setComponent(comp);
         mCountDownLatch = new CountDownLatch(1);
-        if (!mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
+        Executor executor = Executors.newCachedThreadPool();
+        if (!mContext.bindService(intent, Context.BIND_AUTO_CREATE, executor, mConnection)) {
             throw new RemoteException("Failed to bind to GenerateRkpKeyService");
         }
         try {
