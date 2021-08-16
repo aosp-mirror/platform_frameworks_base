@@ -187,6 +187,10 @@ class ActivityMetricsLogger {
             return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.allDrawn();
         }
 
+        boolean hasActiveTransitionInfo() {
+            return mAssociatedTransitionInfo != null;
+        }
+
         boolean contains(ActivityRecord r) {
             return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.contains(r);
         }
@@ -336,10 +340,11 @@ class ActivityMetricsLogger {
         }
 
         /** Only keep the records which can be drawn. */
-        void updatePendingDraw() {
+        void updatePendingDraw(boolean keepInitializing) {
             for (int i = mPendingDrawActivities.size() - 1; i >= 0; i--) {
                 final ActivityRecord r = mPendingDrawActivities.get(i);
-                if (!r.mVisibleRequested) {
+                if (!r.mVisibleRequested
+                        && !(keepInitializing && r.isState(ActivityRecord.State.INITIALIZING))) {
                     if (DEBUG_METRICS) Slog.i(TAG, "Discard pending draw " + r);
                     mPendingDrawActivities.remove(i);
                 }
@@ -663,7 +668,7 @@ class ActivityMetricsLogger {
         // visible such as after the top task is finished.
         for (int i = mTransitionInfoList.size() - 2; i >= 0; i--) {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
-            prevInfo.updatePendingDraw();
+            prevInfo.updatePendingDraw(false /* keepInitializing */);
             if (prevInfo.allDrawn()) {
                 abort(prevInfo, "nothing will be drawn");
             }
@@ -749,7 +754,9 @@ class ActivityMetricsLogger {
             info.mCurrentTransitionDelayMs = info.calculateDelay(timestampNs);
             info.mReason = activityToReason.valueAt(index);
             info.mLoggedTransitionStarting = true;
-            info.updatePendingDraw();
+            // Do not remove activity in initializing state because the transition may be started
+            // by starting window. The initializing activity may be requested to visible soon.
+            info.updatePendingDraw(true /* keepInitializing */);
             if (info.allDrawn()) {
                 done(false /* abort */, info, "notifyTransitionStarting - all windows drawn",
                         timestampNs);
