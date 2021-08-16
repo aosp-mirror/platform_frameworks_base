@@ -5387,8 +5387,8 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                pillColor = Colors.flattenAlpha(getPrimaryAccentColor(p), bgColor);
-                textColor = Colors.flattenAlpha(bgColor, pillColor);
+                pillColor = Colors.flattenAlpha(getColors(p).getTertiaryAccentColor(), bgColor);
+                textColor = Colors.flattenAlpha(getColors(p).getOnAccentTextColor(), pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -12303,6 +12303,8 @@ public class Notification implements Parcelable
         private int mSecondaryTextColor = COLOR_INVALID;
         private int mPrimaryAccentColor = COLOR_INVALID;
         private int mSecondaryAccentColor = COLOR_INVALID;
+        private int mTertiaryAccentColor = COLOR_INVALID;
+        private int mOnAccentTextColor = COLOR_INVALID;
         private int mErrorColor = COLOR_INVALID;
         private int mContrastColor = COLOR_INVALID;
         private int mRippleAlpha = 0x33;
@@ -12360,7 +12362,7 @@ public class Notification implements Parcelable
 
             if (isColorized) {
                 if (rawColor == COLOR_DEFAULT) {
-                    int[] attrs = {R.attr.colorAccentTertiary};
+                    int[] attrs = {R.attr.colorAccentSecondary};
                     try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                         mBackgroundColor = getColor(ta, 0, Color.WHITE);
                     }
@@ -12377,6 +12379,8 @@ public class Notification implements Parcelable
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
+                mTertiaryAccentColor = flattenAlpha(mPrimaryTextColor, mBackgroundColor);
+                mOnAccentTextColor = mBackgroundColor;
                 mErrorColor = mPrimaryTextColor;
                 mRippleAlpha = 0x33;
             } else {
@@ -12387,6 +12391,8 @@ public class Notification implements Parcelable
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
                         R.attr.colorAccentSecondary,
+                        R.attr.colorAccentTertiary,
+                        R.attr.textColorOnAccent,
                         R.attr.colorError,
                         R.attr.colorControlHighlight
                 };
@@ -12397,8 +12403,10 @@ public class Notification implements Parcelable
                     mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
                     mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
                     mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 6, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 7, 0x33ffffff));
+                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12417,6 +12425,14 @@ public class Notification implements Parcelable
                 }
                 if (mSecondaryAccentColor == COLOR_INVALID) {
                     mSecondaryAccentColor = mContrastColor;
+                }
+                if (mTertiaryAccentColor == COLOR_INVALID) {
+                    mTertiaryAccentColor = mContrastColor;
+                }
+                if (mOnAccentTextColor == COLOR_INVALID) {
+                    mOnAccentTextColor = ColorUtils.setAlphaComponent(
+                            ContrastColorUtil.resolvePrimaryColor(
+                                    ctx, mTertiaryAccentColor, nightMode), 0xFF);
                 }
                 if (mErrorColor == COLOR_INVALID) {
                     mErrorColor = mPrimaryTextColor;
@@ -12481,6 +12497,16 @@ public class Notification implements Parcelable
         /** @return the theme's secondary accent color for colored UI elements. */
         public @ColorInt int getSecondaryAccentColor() {
             return mSecondaryAccentColor;
+        }
+
+        /** @return the theme's tertiary accent color for colored UI elements. */
+        public @ColorInt int getTertiaryAccentColor() {
+            return mTertiaryAccentColor;
+        }
+
+        /** @return the theme's text color to be used on the tertiary accent color. */
+        public @ColorInt int getOnAccentTextColor() {
+            return mOnAccentTextColor;
         }
 
         /**
