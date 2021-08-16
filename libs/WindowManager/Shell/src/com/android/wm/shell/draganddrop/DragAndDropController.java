@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -48,6 +49,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
@@ -67,14 +69,17 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private final Context mContext;
     private final DisplayController mDisplayController;
+    private final DragAndDropEventLogger mLogger;
     private SplitScreenController mSplitScreen;
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
-    public DragAndDropController(Context context, DisplayController displayController) {
+    public DragAndDropController(Context context, DisplayController displayController,
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mDisplayController = displayController;
+        mLogger = new DragAndDropEventLogger(uiEventLogger);
     }
 
     public void initialize(Optional<SplitScreenController> splitscreen) {
@@ -179,6 +184,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
                         event.getClipData());
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
+                mLogger.logStart(event);
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
@@ -198,7 +204,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             case ACTION_DRAG_ENDED:
                 // TODO(b/169894807): Ensure sure it's not possible to get ENDED without DROP
                 // or EXITED
-                if (!pd.dragLayout.hasDropped()) {
+                if (pd.dragLayout.hasDropped()) {
+                    mLogger.logDrop();
+                } else {
                     pd.activeDragCount--;
                     pd.dragLayout.hide(event, () -> {
                         if (pd.activeDragCount == 0) {
@@ -208,6 +216,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                         }
                     });
                 }
+                mLogger.logEnd();
                 break;
         }
         return true;
