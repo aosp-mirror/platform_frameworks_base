@@ -404,6 +404,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // Another round without setting visibility of the trampoline activity.
         onActivityLaunchedTrampoline();
+        mTrampolineActivity.setState(ActivityRecord.State.PAUSING, "test");
         notifyWindowsDrawn(mTopActivity);
         // If the transition can start, the invisible activities should be discarded and the launch
         // event be reported successfully.
