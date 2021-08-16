@@ -5935,6 +5935,10 @@ public abstract class Context {
      * more general access to the URI's content provider then this check will
      * always fail.
      *
+     * <strong>Note:</strong> On SDK Version {@link android.os.Build.VERSION_CODES#S},
+     * calling this method from a secondary-user's context will incorrectly return
+     * {@link PackageManager#PERMISSION_DENIED} for all {code uris}.
+     *
      * @param uris The list of URIs that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
