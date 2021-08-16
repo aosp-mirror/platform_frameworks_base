@@ -109,6 +109,7 @@ import com.android.systemui.communal.CommunalHostView;
 import com.android.systemui.communal.CommunalHostViewController;
 import com.android.systemui.communal.CommunalSource;
 import com.android.systemui.communal.CommunalSourceMonitor;
+import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -327,6 +328,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final CommunalSourceMonitor mCommunalSourceMonitor;
+    private final CommunalStateController mCommunalStateController;
     private final ConversationNotificationManager mConversationNotificationManager;
     private final AuthController mAuthController;
     private final MediaHierarchyManager mMediaHierarchyManager;
@@ -711,6 +713,32 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     };
 
+    private final CommunalStateController.Callback mCommunalStateCallback =
+            new CommunalStateController.Callback() {
+                @Override
+                public void onCommunalViewShowingChanged() {
+                    mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
+                            mBarState,
+                            mKeyguardStateController.isKeyguardFadingAway(),
+                            mStatusBarStateController.goingToFullShade(),
+                            mBarState);
+                    if (mKeyguardUserSwitcherController != null) {
+                        mKeyguardUserSwitcherController.setKeyguardUserSwitcherVisibility(
+                                mBarState,
+                                mKeyguardStateController.isKeyguardFadingAway(),
+                                mStatusBarStateController.goingToFullShade(),
+                                mBarState);
+                    }
+                    if (mKeyguardQsUserSwitchController != null) {
+                        mKeyguardQsUserSwitchController.setKeyguardQsUserSwitchVisibility(
+                                mBarState,
+                                mKeyguardStateController.isKeyguardFadingAway(),
+                                mStatusBarStateController.goingToFullShade(),
+                                mBarState);
+                    }
+                }
+    };
+
     private final FalsingTapListener mFalsingTapListener = new FalsingTapListener() {
         @Override
         public void onDoubleTapRequired() {
@@ -735,6 +763,7 @@ public class NotificationPanelViewController extends PanelViewController {
             FalsingCollector falsingCollector,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
+            CommunalStateController communalStateController,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController, DozeLog dozeLog,
             DozeParameters dozeParameters, CommandQueue commandQueue, VibratorHelper vibratorHelper,
@@ -811,6 +840,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
+        mCommunalStateController = communalStateController;
         mCommunalViewComponentFactory = communalViewComponentFactory;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
@@ -4660,6 +4690,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mFalsingManager.addTapListener(mFalsingTapListener);
             mKeyguardIndicationController.init();
             registerSettingsChangeListener();
+            mCommunalStateController.addCallback(mCommunalStateCallback);
         }
 
         @Override
@@ -4674,6 +4705,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // Clear source when detached.
             setCommunalSource(null /*source*/);
             mFalsingManager.removeTapListener(mFalsingTapListener);
+            mCommunalStateController.removeCallback(mCommunalStateCallback);
         }
     }
 
