@@ -40,6 +40,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
@@ -55,7 +60,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
 
@@ -101,10 +108,14 @@ public class SizeCompatTests extends WindowTestsBase {
 
     private Task mTask;
     private ActivityRecord mActivity;
+    private ActivityMetricsLogger mActivityMetricsLogger;
     private Properties mInitialConstrainDisplayApisFlags;
 
     @Before
     public void setUp() throws Exception {
+        mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
+        clearInvocations(mActivityMetricsLogger);
+        doReturn(mActivityMetricsLogger).when(mAtm.mTaskSupervisor).getActivityMetricsLogger();
         mInitialConstrainDisplayApisFlags = DeviceConfig.getProperties(
                 NAMESPACE_CONSTRAIN_DISPLAY_APIS);
         DeviceConfig.setProperties(
@@ -1939,13 +1950,19 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(1000, 2500);
 
         assertFalse(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity, APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED);
 
         prepareUnresizable(mActivity, /* maxAspect= */ 2, SCREEN_ORIENTATION_PORTRAIT);
         assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(mActivity.inSizeCompatMode());
         assertTrue(mActivity.areBoundsLetterboxed());
 
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO);
+
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE);
         rotateDisplay(mActivity.mDisplayContent, ROTATION_0);
 
         // After returning to the original rotation, bounds are computed in
@@ -1955,6 +1972,18 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(mActivity.inSizeCompatMode());
         assertTrue(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO);
+
+        // After setting the visibility of the activity to false, areBoundsLetterboxed() still
+        // returns true but the NOT_VISIBLE App Compat state is logged.
+        mActivity.setVisibility(false);
+        assertTrue(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity, APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE);
+        mActivity.setVisibility(true);
+        assertTrue(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO);
     }
 
     @Test
@@ -1963,12 +1992,15 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
 
         assertFalse(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity, APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED);
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
         assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(mActivity.inSizeCompatMode());
         assertTrue(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION);
     }
 
     @Test
@@ -1978,12 +2010,15 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
         assertFalse(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity, APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED);
 
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
 
         assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertTrue(mActivity.inSizeCompatMode());
         assertTrue(mActivity.areBoundsLetterboxed());
+        verifyLogAppCompatState(mActivity,
+                APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE);
     }
 
     /**
@@ -2195,6 +2230,11 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity max bounds are sandboxed due to size compat mode.
         assertThat(activity.getConfiguration().windowConfiguration.getMaxBounds())
                 .isEqualTo(activity.getWindowConfiguration().getBounds());
+    }
+
+    private void verifyLogAppCompatState(ActivityRecord activity, int state) {
+        verify(mActivityMetricsLogger, atLeastOnce()).logAppCompatState(
+                argThat(r -> activity == r && r.getAppCompatState() == state));
     }
 
     static Configuration rotateDisplay(DisplayContent display, int rotation) {
