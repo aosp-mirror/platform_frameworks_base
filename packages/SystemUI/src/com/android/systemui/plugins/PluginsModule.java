@@ -21,7 +21,6 @@ import static com.android.systemui.util.concurrency.GlobalConcurrencyModule.PRE_
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Looper;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginEnabler;
@@ -71,16 +70,16 @@ public abstract class PluginsModule {
     @Singleton
     static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
             PackageManager packageManager, @Main Executor mainExecutor,
-            @Named(PLUGIN_THREAD) Looper pluginLooper, PluginInitializer initializer) {
+            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer) {
         return new PluginInstanceManager.Factory(
-                context, packageManager, mainExecutor, pluginLooper, initializer);
+                context, packageManager, mainExecutor, pluginExecutor, initializer);
     }
 
     @Provides
     @Singleton
     @Named(PLUGIN_THREAD)
-    static Looper providesPluginLooper(ThreadFactory threadFactory) {
-        return threadFactory.buildLooperOnNewThread("plugin");
+    static Executor providesPluginExecutor(ThreadFactory threadFactory) {
+        return threadFactory.buildExecutorOnNewThread("plugin");
     }
 
     @Provides
