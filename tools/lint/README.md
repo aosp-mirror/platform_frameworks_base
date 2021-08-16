@@ -30,6 +30,7 @@ java_library_static {
 m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/android_common/lint/lint-report.html
 ```
    (Lint report can be found in the same path, i.e. `out/../lint-report.html`)
+
 3. Now lint issues should appear on gerrit!
 
 **Notes:**
