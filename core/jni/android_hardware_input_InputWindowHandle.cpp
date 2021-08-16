@@ -26,6 +26,7 @@
 #include <ui/Region.h>
 #include <utils/threads.h>
 
+#include <android/graphics/matrix.h>
 #include <gui/WindowInfo.h>
 #include "SkRegion.h"
 #include "android_hardware_input_InputApplicationHandle.h"
@@ -74,6 +75,7 @@ static struct {
     jfieldID displayId;
     jfieldID replaceTouchableRegionWithCrop;
     WeakRefHandleField touchableRegionSurfaceControl;
+    jfieldID transform;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -305,6 +307,13 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.inputFeatures,
                      static_cast<int32_t>(windowInfo.inputFeatures.get()));
 
+    float transformVals[9];
+    for (int i = 0; i < 9; i++) {
+        transformVals[i] = windowInfo.transform[i % 3][i / 3];
+    }
+    ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformVals));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.transform, matrixObj.get());
+
     return inputWindowHandle;
 }
 
@@ -428,6 +437,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop, clazz,
             "replaceTouchableRegionWithCrop", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.transform, clazz, "transform",
+                 "Landroid/graphics/Matrix;");
 
     jclass weakRefClazz;
     FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");

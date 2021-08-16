@@ -34,6 +34,16 @@ __BEGIN_DECLS
  */
 ANDROID_API bool AMatrix_getContents(JNIEnv* env, jobject matrixObj, float values[9]);
 
+/**
+ * Returns a new Matrix jobject that contains the values passed in as initial values.
+ * @param values The 9 values of the 3x3 matrix in the following order.
+ *               values[0] = scaleX  values[1] = skewX   values[2] = transX
+ *               values[3] = skewY   values[4] = scaleY  values[5] = transY
+ *               values[6] = persp0  values[7] = persp1  values[8] = persp2
+ * @return The matrix jobject
+ */
+ANDROID_API jobject AMatrix_newInstance(JNIEnv* env, float values[9]);
+
 __END_DECLS
 
 #endif // ANDROID_GRAPHICS_MATRIX_H
