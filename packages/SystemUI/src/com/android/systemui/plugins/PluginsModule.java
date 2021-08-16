@@ -23,15 +23,18 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Looper;
 
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.plugins.PluginPrefs;
+import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -46,7 +49,7 @@ import dagger.Provides;
  * Covers code both in com.android.systemui.plugins and code in
  * com.android.systemui.shared.plugins.
  */
-@Module
+@Module(includes = {GlobalConcurrencyModule.class})
 public abstract class PluginsModule {
     public static final String PLUGIN_THREAD = "plugin_thread";
     public static final String PLUGIN_DEBUG = "plugin_debug";
@@ -67,10 +70,10 @@ public abstract class PluginsModule {
     @Provides
     @Singleton
     static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
-            PackageManager packageManager, @Named(PLUGIN_THREAD) Looper pluginLooper,
-            PluginInitializer initializer) {
+            PackageManager packageManager, @Main Executor mainExecutor,
+            @Named(PLUGIN_THREAD) Looper pluginLooper, PluginInitializer initializer) {
         return new PluginInstanceManager.Factory(
-                context, packageManager, pluginLooper, initializer);
+                context, packageManager, mainExecutor, pluginLooper, initializer);
     }
 
     @Provides

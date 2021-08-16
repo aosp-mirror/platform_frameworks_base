@@ -65,14 +65,4 @@ public class FakePluginManager implements PluginManager {
     public String[] getPrivilegedPlugins() {
         return new String[0];
     }
-
-    @Override
-    public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
-        return null;
-    }
-
-    @Override
-    public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
-        return null;
-    }
 }
