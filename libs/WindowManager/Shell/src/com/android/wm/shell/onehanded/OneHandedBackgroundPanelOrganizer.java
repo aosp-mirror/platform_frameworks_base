@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.onehanded;
 
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
@@ -46,7 +48,7 @@ import java.util.concurrent.Executor;
  * the screen has entered one handed mode.
  */
 public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
-        implements OneHandedAnimationCallback {
+        implements OneHandedAnimationCallback, OneHandedState.OnStateChangedListener {
     private static final String TAG = "OneHandedBackgroundPanelOrganizer";
     private static final int THEME_COLOR_OFFSET = 10;
     private static final int ALPHA_ANIMATION_DURATION = 200;
@@ -56,6 +58,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
     private final OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mTransactionFactory;
 
+    private @OneHandedState.State int mCurrentState;
     private ValueAnimator mAlphaAnimator;
 
     private float mTranslationFraction;
@@ -180,6 +183,9 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
      * Called when transition finished.
      */
     public void onStopFinished() {
+        if (mAlphaAnimator == null) {
+            return;
+        }
         mAlphaAnimator.start();
     }
 
@@ -224,6 +230,10 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
      */
     public void onConfigurationChanged() {
         updateThemeColors();
+
+        if (mCurrentState != STATE_ACTIVE) {
+            return;
+        }
         showBackgroundPanelLayer();
     }
 
@@ -240,6 +250,11 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
 
     private float adjustColor(int origColor) {
         return Math.max(origColor - THEME_COLOR_OFFSET, 0) / 255.0f;
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        mCurrentState = newState;
     }
 
     void dump(@NonNull PrintWriter pw) {
