@@ -952,4 +952,12 @@
     <dimen name="secondary_waterfall_display_top_edge_size">0px</dimen>
     <dimen name="secondary_waterfall_display_right_edge_size">0px</dimen>
     <dimen name="secondary_waterfall_display_bottom_edge_size">0px</dimen>
+
+    <!-- Rounded corner settings for secondary built-in display -->
+    <dimen name="secondary_rounded_corner_radius">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom_adjustment">0px</dimen>
 </resources>
