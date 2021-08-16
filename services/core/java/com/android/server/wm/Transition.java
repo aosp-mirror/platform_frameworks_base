@@ -139,6 +139,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArraySet<WindowContainer> mTargets = null;
 
+    /**
+     * Set of participating windowtokens (activity/wallpaper) which are visible at the end of
+     * the transition animation.
+     */
+    private final ArraySet<WindowToken> mVisibleAtTransitionEndTokens = new ArraySet<>();
+
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
     private IRemoteCallback mClientAnimationStartCallback = null;
@@ -345,7 +351,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar != null) {
-                if (!ar.isVisibleRequested()) {
+                boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(ar);
+                // We need both the expected visibility AND current requested-visibility to be
+                // false. If it is expected-visible but not currently visible, it means that
+                // another animation is queued-up to animate this to invisibility, so we can't
+                // remove the surfaces yet. If it is currently visible, but not expected-visible,
+                // then doing commitVisibility here would actually be out-of-order and leave the
+                // activity in a bad state.
+                if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
                     boolean commitVisibility = true;
                     if (ar.getDeferHidingClient() && ar.getTask() != null) {
                         if (ar.pictureInPictureArgs != null
@@ -368,17 +381,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         activitiesWentInvisible = true;
                     }
                 }
-                if (mChanges.get(ar).mVisible != ar.isVisibleRequested()) {
+                if (mChanges.get(ar).mVisible != visibleAtTransitionEnd) {
                     // Legacy dispatch relies on this (for now).
-                    ar.mEnteringAnimation = ar.isVisibleRequested();
+                    ar.mEnteringAnimation = visibleAtTransitionEnd;
                 }
                 mController.dispatchLegacyAppTransitionFinished(ar);
             }
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
-            if (wt != null && !wt.isVisibleRequested()) {
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "  Commit wallpaper becoming invisible: %s", wt);
-                wt.commitVisibility(false /* visible */);
+            if (wt != null) {
+                final boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(wt);
+                if (!visibleAtTransitionEnd && !wt.isVisibleRequested()) {
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "  Commit wallpaper becoming invisible: %s", wt);
+                    wt.commitVisibility(false /* visible */);
+                }
             }
         }
         if (activitiesWentInvisible) {
@@ -486,6 +502,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     transaction.show(p.getSurfaceControl());
                 }
             }
+        }
+
+        // Record windowtokens (activity/wallpaper) that are expected to be visible after the
+        // transition animation. This will be used in finishTransition to prevent prematurely
+        // committing visibility.
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mParticipants.valueAt(i);
+            if (wc.asWindowToken() == null || !wc.isVisibleRequested()) continue;
+            mVisibleAtTransitionEndTokens.add(wc.asWindowToken());
         }
 
         mStartTransaction = transaction;
