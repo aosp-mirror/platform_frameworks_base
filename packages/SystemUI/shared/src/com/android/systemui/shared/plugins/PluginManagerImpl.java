@@ -30,7 +30,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Looper;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -41,8 +40,6 @@ import android.widget.Toast;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 
 import dalvik.system.PathClassLoader;
 
@@ -107,38 +104,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     public PluginEnabler getPluginEnabler() {
         return mPluginEnabler;
-    }
-
-    // TODO(mankoff): This appears to be only called from tests. Remove?
-    public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
-        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
-        if (info == null) {
-            throw new RuntimeException(cls + " doesn't provide an interface");
-        }
-        if (TextUtils.isEmpty(info.action())) {
-            throw new RuntimeException(cls + " doesn't provide an action");
-        }
-        return getOneShotPlugin(info.action(), cls);
-    }
-
-    public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new RuntimeException("Must be called from UI thread");
-        }
-        // Passing null causes compiler to complain about incompatible (generic) types.
-        PluginListener<T> dummy = null;
-        PluginInstanceManager<T> p = mInstanceManagerFactory.create(
-                action, dummy, false, new VersionInfo().addClass(cls), this,
-                isDebuggable(), getPrivilegedPlugins());
-        mPluginPrefs.addAction(action);
-        PluginInfo<T> info = p.getPlugin();
-        if (info != null) {
-            mOneShotPackages.add(info.mPackage);
-            mHasOneShot = true;
-            startListening();
-            return info.mPlugin;
-        }
-        return null;
     }
 
     public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {

@@ -15,7 +15,6 @@
 package com.android.systemui.shared.plugins;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
@@ -42,7 +41,6 @@ import android.content.pm.ServiceInfo;
 import android.os.HandlerThread;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -50,8 +48,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.Requires;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,6 +82,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     ComponentName mTestPluginComponentName =
             new ComponentName(WHITELISTED_PACKAGE, TestPlugin.class.getName());
     private PluginInitializer mInitializer;
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() throws Exception {
@@ -98,8 +98,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockVersionInfo = mock(VersionInfo.class);
         mInitializer = mock(PluginInitializer.class);
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, true, new String[0], mInitializer);
+                mMockListener, true, mFakeExecutor, mHandlerThread.getLooper(),
+                mMockVersionInfo, mMockManager, true, new String[0], mInitializer);
         sMockPlugin = mock(Plugin.class);
         when(sMockPlugin.getVersion()).thenReturn(1);
     }
@@ -110,23 +110,14 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         sMockPlugin = null;
     }
 
-    @UiThreadTest
     @Test
-    public void testGetPlugin() throws Exception {
-        setupFakePmQuery();
-        PluginInfo p = mPluginInstanceManager.getPlugin();
-        assertNotNull(p.mPlugin);
-        verify(sMockPlugin).onCreate(any(), any());
-    }
-
-    @Test
-    public void testNoPlugins() throws Exception {
+    public void testNoPlugins() {
         when(mMockPm.queryIntentServices(any(), anyInt())).thenReturn(
                 Collections.emptyList());
         mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
 
         verify(mMockListener, never()).onPluginConnected(any(), any());
     }
@@ -148,7 +139,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mPluginInstanceManager.destroy();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
+
 
         // Verify shutdown lifecycle
         verify(mMockListener).onPluginDisconnected(ArgumentCaptor.forClass(Plugin.class).capture());
@@ -165,7 +157,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
+
 
         // Plugin shouldn't be connected because it is the wrong version.
         verify(mMockListener, never()).onPluginConnected(any(), any());
@@ -179,7 +172,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mPluginInstanceManager.onPackageChange("com.android.systemui");
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
 
         // Verify the old one was destroyed.
         verify(mMockListener).onPluginDisconnected(ArgumentCaptor.forClass(Plugin.class).capture());
@@ -195,14 +188,14 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNonDebuggable() throws Exception {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[0], mInitializer);
+                mMockListener, true, mFakeExecutor, mHandlerThread.getLooper(),
+                mMockVersionInfo, mMockManager, false, new String[0], mInitializer);
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);;
+        mFakeExecutor.runAllReady();
 
         // Non-debuggable build should receive no plugins.
         verify(mMockListener, never()).onPluginConnected(any(), any());
@@ -212,14 +205,15 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNonDebuggable_whitelist() throws Exception {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[] {WHITELISTED_PACKAGE}, mInitializer);
+                mMockListener, true, mFakeExecutor, mHandlerThread.getLooper(),
+                mMockVersionInfo, mMockManager, false,
+                new String[] {WHITELISTED_PACKAGE}, mInitializer);
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
 
         // Verify startup lifecycle
         verify(sMockPlugin).onCreate(ArgumentCaptor.forClass(Context.class).capture(),
@@ -256,8 +250,9 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     @Test
     public void testDisableWhitelisted() throws Exception {
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
-                mMockManager, false, new String[] {WHITELISTED_PACKAGE}, mInitializer);
+                mMockListener, true, mFakeExecutor, mHandlerThread.getLooper(),
+                mMockVersionInfo, mMockManager, false, new String[] {WHITELISTED_PACKAGE},
+                mInitializer);
         createPlugin(); // Get into valid created state.
 
         mPluginInstanceManager.disableAll();
@@ -294,7 +289,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
-        waitForIdleSync(mPluginInstanceManager.mMainHandler);
+        mFakeExecutor.runAllReady();
     }
 
     // Real context with no registering/unregistering of receivers.
