@@ -142,6 +142,12 @@ public class LocalDisplayAdapterTest {
                 .thenReturn(mockArray);
         when(mMockedResources.obtainTypedArray(R.array.config_waterfallCutoutArray))
                 .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerRadiusArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerTopRadiusArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerBottomRadiusArray))
+                .thenReturn(mockArray);
     }
 
     @After
