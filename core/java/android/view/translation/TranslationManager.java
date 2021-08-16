@@ -23,12 +23,12 @@ import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SynchronousResultReceiver;
 import android.util.ArrayMap;
@@ -271,13 +271,10 @@ public final class TranslationManager {
             if (result.resultCode != STATUS_SYNC_CALL_SUCCESS) {
                 return Collections.emptySet();
             }
-            Parcelable[] parcelables = result.bundle.getParcelableArray(EXTRA_CAPABILITIES);
-            ArraySet<TranslationCapability> capabilities = new ArraySet();
-            for (Parcelable obj : parcelables) {
-                if (obj instanceof TranslationCapability) {
-                    capabilities.add((TranslationCapability) obj);
-                }
-            }
+            ParceledListSlice<TranslationCapability> listSlice =
+                    result.bundle.getParcelable(EXTRA_CAPABILITIES);
+            ArraySet<TranslationCapability> capabilities =
+                    new ArraySet<>(listSlice == null ? null : listSlice.getList());
             return capabilities;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
