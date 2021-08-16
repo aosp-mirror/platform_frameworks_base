@@ -779,6 +779,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     private ArrayMap<String, PackageAssociationInfo> mAllowedAssociations;
 
+    @GuardedBy("this")
+    final ComponentAliasResolver mComponentAliasResolver;
+
     /**
      * Tracks association information for a particular package along with debuggability.
      * <p> Associations for a package A are allowed to package B if B is part of the
@@ -2220,6 +2223,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
         mFgBroadcastQueue = mBgBroadcastQueue = mOffloadBroadcastQueue = null;
+        mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2346,6 +2350,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mInternal = new LocalService();
         mPendingStartActivityUids = new PendingStartActivityUids(mContext);
         mTraceErrorLogger = new TraceErrorLogger();
+        mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -4784,6 +4789,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         showConsoleNotificationIfActive();
 
         t.traceEnd();
+
+        // Load the component aliases.
+        mComponentAliasResolver.update(
+                mConstants.mEnableComponentAlias, mConstants.mComponentAliasOverrides);
     }
 
     private void showConsoleNotificationIfActive() {
@@ -8791,6 +8800,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpUsers(pw);
+
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            mComponentAliasResolver.dump(pw);
         }
     }
 
@@ -9107,6 +9122,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     opti++;
                 }
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
+            } else if ("component-alias".equals(cmd)) {
+                mComponentAliasResolver.dump(pw);
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
