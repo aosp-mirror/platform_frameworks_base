@@ -3669,6 +3669,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
+            if (mStartingData != null && mVisible && task != null) {
+                // A corner case that the app terminates its trampoline activity on a separated
+                // process by killing itself. Transfer the starting window to the next activity
+                // which will be visible, so the dead activity can be removed immediately (no
+                // longer animating) and the reveal animation can play normally on next activity.
+                final ActivityRecord top = task.topRunningActivity();
+                if (top != null && !top.mVisible && top.shouldBeVisible()) {
+                    top.transferStartingWindow(this);
+                }
+            }
             removeFromHistory("appDied");
         }
     }
