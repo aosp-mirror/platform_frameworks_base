@@ -3859,6 +3859,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        /** Notifications returned here will have allowlistToken stripped from them. */
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
                 StatusBarNotification sbn) {
             if (sbn.getUserId() == userId) {
@@ -3866,11 +3867,16 @@ public class NotificationManagerService extends SystemService {
                     // We could pass back a cloneLight() but clients might get confused and
                     // try to send this thing back to notify() again, which would not work
                     // very well.
+                    Notification notification = sbn.getNotification().clone();
+                    // Remove background token before returning notification to untrusted app, this
+                    // ensures the app isn't able to perform background operations that are
+                    // associated with notification interactions.
+                    notification.setAllowlistToken(null);
                     return new StatusBarNotification(
                             sbn.getPackageName(),
                             sbn.getOpPkg(),
                             sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                            sbn.getNotification().clone(),
+                            notification,
                             sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
                 }
             }
