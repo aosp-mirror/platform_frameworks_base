@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -50,6 +51,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
     @NonNull private final ConfigurationController mConfigurationController;
+    @NonNull private final SystemClock mSystemClock;
     @NonNull private final UdfpsController mUdfpsController;
 
     private boolean mShowingUdfpsBouncer;
@@ -59,6 +61,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private int mStatusBarState;
     private float mTransitionToFullShadeProgress;
     private float mLastDozeAmount;
+    private long mLastUdfpsBouncerShowTime = -1;
 
     /**
      * hidden amount of pin/pattern/password bouncer
@@ -79,6 +82,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
             @NonNull ConfigurationController configurationController,
+            @NonNull SystemClock systemClock,
             @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -87,6 +91,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardViewMediator = keyguardViewMediator;
         mLockScreenShadeTransitionController = transitionController;
         mConfigurationController = configurationController;
+        mSystemClock = systemClock;
         mUdfpsController = udfpsController;
     }
 
@@ -155,6 +160,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         mShowingUdfpsBouncer = show;
+        if (mShowingUdfpsBouncer) {
+            mLastUdfpsBouncerShowTime = mSystemClock.uptimeMillis();
+        }
         updatePauseAuth();
         if (mShowingUdfpsBouncer) {
             if (mStatusBarState == StatusBarState.SHADE_LOCKED) {
@@ -218,13 +226,22 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * If we were previously showing the udfps bouncer, hide it and instead show the regular
      * (pin/pattern/password) bouncer.
      *
-     * Does nothing if we weren't previously showing the udfps bouncer.
+     * Does nothing if we weren't previously showing the UDFPS bouncer.
      */
     private void maybeShowInputBouncer() {
-        if (mShowingUdfpsBouncer) {
+        if (mShowingUdfpsBouncer && hasUdfpsBouncerShownWithMinTime()) {
             mKeyguardViewManager.showBouncer(true);
             mKeyguardViewManager.resetAlternateAuth(false);
         }
+    }
+
+    /**
+     * Whether the udfps bouncer has shown for at least 200ms before allowing touches outside
+     * of the udfps icon area to dismiss the udfps bouncer and show the pin/pattern/password
+     * bouncer.
+     */
+    private boolean hasUdfpsBouncerShownWithMinTime() {
+        return (mSystemClock.uptimeMillis() - mLastUdfpsBouncerShowTime) > 200;
     }
 
     /**
