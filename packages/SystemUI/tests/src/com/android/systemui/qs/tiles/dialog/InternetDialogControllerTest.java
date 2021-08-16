@@ -3,11 +3,16 @@ package com.android.systemui.qs.tiles.dialog;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
@@ -19,6 +24,9 @@ import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -32,9 +40,6 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wifitrackerlib.WifiEntry;
-
-import androidx.annotation.Nullable;
-import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,13 +73,15 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
     private GlobalSettings mGlobalSettings;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private NetworkController.AccessPointController mAccessPointController;
     @Mock
-    private WifiEntry mWifiEntryConnected = mock(WifiEntry.class);
+    private WifiEntry mConnectedEntry;
     @Mock
     private WifiInfo mWifiInfo;
     @Mock
@@ -94,6 +101,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mCallback);
+        mInternetDialogController.mActivityStarter = mActivityStarter;
+        mInternetDialogController.mConnectedEntry = mConnectedEntry;
     }
 
     @Test
@@ -188,7 +197,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getConnectedWifiTitle_withNoConnectedEntry_returnNull() {
-        mInternetDialogController.setConnectedWifiEntry(null);
+        mInternetDialogController.mConnectedEntry = null;
 
         assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiTitle(),
                 ""));
@@ -196,8 +205,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getConnectedWifiTitle_withConnectedEntry_returnTitle() {
-        mInternetDialogController.setConnectedWifiEntry(mWifiEntryConnected);
-        when(mWifiEntryConnected.getTitle()).thenReturn(CONNECTED_TITLE);
+        when(mConnectedEntry.getTitle()).thenReturn(CONNECTED_TITLE);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiTitle(),
                 CONNECTED_TITLE));
@@ -205,7 +213,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getConnectedWifiSummary_withNoConnectedEntry_returnNull() {
-        mInternetDialogController.setConnectedWifiEntry(null);
+        mInternetDialogController.mConnectedEntry = null;
 
         assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiSummary(),
                 ""));
@@ -213,11 +221,50 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getConnectedWifiSummary_withConnectedEntry_returnSummary() {
-        mInternetDialogController.setConnectedWifiEntry(mWifiEntryConnected);
-        when(mWifiEntryConnected.getSummary(false)).thenReturn(CONNECTED_SUMMARY);
+        when(mConnectedEntry.getSummary(false)).thenReturn(CONNECTED_SUMMARY);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiSummary(),
                 CONNECTED_SUMMARY));
+    }
+
+    @Test
+    public void getWifiDetailsSettingsIntent_withNoConnectedEntry_returnNull() {
+        mInternetDialogController.mConnectedEntry = null;
+
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
+    }
+
+    @Test
+    public void getWifiDetailsSettingsIntent_withNoConnectedEntryKey_returnNull() {
+        when(mConnectedEntry.getKey()).thenReturn(null);
+
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
+    }
+
+    @Test
+    public void getWifiDetailsSettingsIntent_withConnectedEntryKey_returnIntent() {
+        when(mConnectedEntry.getKey()).thenReturn("test_key");
+
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNotNull();
+    }
+
+    @Test
+    public void launchWifiNetworkDetailsSetting_withNoConnectedEntry_doNothing() {
+        mInternetDialogController.mConnectedEntry = null;
+
+        mInternetDialogController.launchWifiNetworkDetailsSetting();
+
+        verify(mActivityStarter, never())
+                .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
+    }
+
+    @Test
+    public void launchWifiNetworkDetailsSetting_withConnectedEntryKey_startActivity() {
+        when(mConnectedEntry.getKey()).thenReturn("test_key");
+
+        mInternetDialogController.launchWifiNetworkDetailsSetting();
+
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
     private String getResourcesString(String name) {
@@ -231,7 +278,6 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     private class MockInternetDialogController extends InternetDialogController {
 
-        private WifiEntry mConnectedEntry;
         private GlobalSettings mGlobalSettings;
         private boolean mIsAirplaneModeOn;
 
@@ -255,15 +301,6 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         public void setAirplaneModeEnabled(boolean enabled) {
             mIsAirplaneModeOn = enabled;
-        }
-
-        @Override
-        WifiEntry getConnectedWifiEntry() {
-            return mConnectedEntry;
-        }
-
-        public void setConnectedWifiEntry(WifiEntry connectedEntry) {
-            mConnectedEntry = connectedEntry;
         }
     }
 }

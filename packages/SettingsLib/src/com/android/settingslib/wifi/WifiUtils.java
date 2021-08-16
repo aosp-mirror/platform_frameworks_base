@@ -20,10 +20,12 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_
 import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNetworkSelectionDisableReason;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.net.wifi.WifiInfo;
+import android.os.Bundle;
 import android.os.SystemClock;
 
 import androidx.annotation.VisibleForTesting;
@@ -35,6 +37,23 @@ import java.util.Map;
 public class WifiUtils {
 
     private static final int INVALID_RSSI = -127;
+
+    /**
+     * The intent action shows network details settings to allow configuration of Wi-Fi.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: The calling package should put the chosen
+     * com.android.wifitrackerlib.WifiEntry#getKey() to a string extra in the request bundle into
+     * the {@link #KEY_CHOSEN_WIFIENTRY_KEY}.
+     * <p>
+     * Output: Nothing.
+     */
+    public static final String ACTION_WIFI_DETAILS_SETTINGS =
+            "android.settings.WIFI_DETAILS_SETTINGS";
+    public static final String KEY_CHOSEN_WIFIENTRY_KEY = "key_chosen_wifientry_key";
+    public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args";
 
     static final int[] WIFI_PIE = {
             com.android.internal.R.drawable.ic_wifi_signal_0,
@@ -277,5 +296,18 @@ public class WifiUtils {
 
     public static boolean isMeteredOverridden(WifiConfiguration config) {
         return config.meteredOverride != WifiConfiguration.METERED_OVERRIDE_NONE;
+    }
+
+    /**
+     * Returns the Intent for Wi-Fi network details settings.
+     *
+     * @param key The Wi-Fi entry key
+     */
+    public static Intent getWifiDetailsSettingsIntent(String key) {
+        final Intent intent = new Intent(ACTION_WIFI_DETAILS_SETTINGS);
+        final Bundle bundle = new Bundle();
+        bundle.putString(KEY_CHOSEN_WIFIENTRY_KEY, key);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, bundle);
+        return intent;
     }
 }

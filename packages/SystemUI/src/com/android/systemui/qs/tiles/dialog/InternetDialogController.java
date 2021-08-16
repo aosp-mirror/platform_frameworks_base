@@ -36,6 +36,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -48,6 +50,10 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -56,6 +62,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.net.SignalStrengthUtil;
+import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -77,10 +84,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 public class InternetDialogController implements WifiEntry.DisconnectCallback,
         NetworkController.AccessPointController.AccessPointCallback {
@@ -104,7 +107,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
     private WifiManager mWifiManager;
     private Context mContext;
-    private ActivityStarter mActivityStarter;
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
@@ -115,16 +117,19 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private MobileMappings.Config mConfig = null;
     private Executor mExecutor;
     private AccessPointController mAccessPointController;
-    private IntentFilter mWifiStateFilter;
+    private IntentFilter mConnectionStateFilter;
     private InternetDialogCallback mCallback;
     private List<WifiEntry> mWifiEntry;
-    private WifiEntry mConnectedEntry;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+    @VisibleForTesting
+    protected ActivityStarter mActivityStarter;
+    @VisibleForTesting
+    protected WifiEntry mConnectedEntry;
     @VisibleForTesting
     protected SubscriptionManager.OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
     @VisibleForTesting
@@ -168,8 +173,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mSubscriptionManager = subscriptionManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mWifiStateFilter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mWifiStateFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mConnectionStateFilter = new IntentFilter();
+        mConnectionStateFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        mConnectionStateFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mConnectionStateFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         mUiEventLogger = uiEventLogger;
         mActivityStarter = starter;
         mAccessPointController = accessPointController;
@@ -183,12 +190,16 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mCallback = callback;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
         mAccessPointController.addAccessPointCallback(this);
-        mBroadcastDispatcher.registerReceiver(mWifiStateReceiver, mWifiStateFilter, mExecutor);
+        mBroadcastDispatcher.registerReceiver(mConnectionStateReceiver, mConnectionStateFilter,
+                mExecutor);
         // Listen the subscription changes
         mOnSubscriptionsChangedListener = new InternetOnSubscriptionChangedListener();
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mOnSubscriptionsChangedListener);
         mDefaultDataSubId = getDefaultDataSubscriptionId();
+        if (DEBUG) {
+            Log.d(TAG, "Init, SubId: " + mDefaultDataSubId);
+        }
         mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
         mInternetTelephonyCallback = new InternetTelephonyCallback();
         mTelephonyManager.registerTelephonyCallback(mExecutor, mInternetTelephonyCallback);
@@ -203,7 +214,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (DEBUG) {
             Log.d(TAG, "onStop");
         }
-        mBroadcastDispatcher.unregisterReceiver(mWifiStateReceiver);
+        mBroadcastDispatcher.unregisterReceiver(mConnectionStateReceiver);
         mTelephonyManager.unregisterTelephonyCallback(mInternetTelephonyCallback);
         mSubscriptionManager.removeOnSubscriptionsChangedListener(
                 mOnSubscriptionsChangedListener);
@@ -224,6 +235,17 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     @VisibleForTesting
     protected Intent getSettingsIntent() {
         return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    protected Intent getWifiDetailsSettingsIntent() {
+        String key = mConnectedEntry == null ? null : mConnectedEntry.getKey();
+        if (TextUtils.isEmpty(key)) {
+            if (DEBUG) {
+                Log.d(TAG, "connected entry's key is empty");
+            }
+            return null;
+        }
+        return WifiUtils.getWifiDetailsSettingsIntent(key);
     }
 
     CharSequence getDialogTitleText() {
@@ -533,6 +555,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
     }
 
+    void launchWifiNetworkDetailsSetting() {
+        Intent intent = getWifiDetailsSettingsIntent();
+        if (intent != null) {
+            mCallback.dismissDialog();
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+        }
+    }
+
     void connectCarrierNetwork() {
         final MergedCarrierEntry mergedCarrierEntry =
                 mAccessPointController.getMergedCarrierEntry();
@@ -626,13 +656,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     }
 
     boolean isDataStateInService() {
-        if (mTelephonyManager == null) {
-            if (DEBUG) {
-                Log.d(TAG, "TelephonyManager is null, can not detect mobile state.");
-            }
-            return false;
-        }
-        return mTelephonyManager.getDataState() == TelephonyManager.DATA_CONNECTED;
+        final ServiceState serviceState = mTelephonyManager.getServiceState();
+        NetworkRegistrationInfo regInfo =
+                (serviceState == null) ? null : serviceState.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        return (regInfo == null) ? false : regInfo.isRegistered();
     }
 
     boolean isVoiceStateInService() {
@@ -793,15 +822,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
         @Override
         public void onSubscriptionsChanged() {
-            mDefaultDataSubId = getDefaultDataSubscriptionId();
-            if (SubscriptionManager.isUsableSubscriptionId(mDefaultDataSubId)) {
-                mTelephonyManager.unregisterTelephonyCallback(mInternetTelephonyCallback);
-
-                mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
-                mTelephonyManager.registerTelephonyCallback(mHandler::post,
-                        mInternetTelephonyCallback);
-                mCallback.onSubscriptionsChanged(mDefaultDataSubId);
-            }
+            updateListener();
         }
     }
 
@@ -817,12 +838,45 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
     }
 
-    private final BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConnectionStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mCallback.onWifiStateReceived(context, intent);
+            final String action = intent.getAction();
+            if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+                    || action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                mCallback.onWifiStateReceived(context, intent);
+            }
+
+            if (action.equals(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
+                if (DEBUG) {
+                    Log.d(TAG, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED");
+                }
+                updateListener();
+            }
         }
     };
+
+    private void updateListener() {
+        int defaultDataSubId = getDefaultDataSubscriptionId();
+        if (mDefaultDataSubId == getDefaultDataSubscriptionId()) {
+            if (DEBUG) {
+                Log.d(TAG, "DDS: no change");
+            }
+            return;
+        }
+
+        mDefaultDataSubId = defaultDataSubId;
+        if (DEBUG) {
+            Log.d(TAG, "DDS: defaultDataSubId:" + mDefaultDataSubId);
+        }
+        if (SubscriptionManager.isUsableSubscriptionId(mDefaultDataSubId)) {
+            mTelephonyManager.unregisterTelephonyCallback(mInternetTelephonyCallback);
+            mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
+            mTelephonyManager.registerTelephonyCallback(mHandler::post,
+                    mInternetTelephonyCallback);
+            mCallback.onSubscriptionsChanged(mDefaultDataSubId);
+        }
+    }
 
     interface InternetDialogCallback {
 

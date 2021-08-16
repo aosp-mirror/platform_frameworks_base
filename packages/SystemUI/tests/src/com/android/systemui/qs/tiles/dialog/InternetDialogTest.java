@@ -73,7 +73,7 @@ public class InternetDialogTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mInternetDialog = new MockInternetDialog(mContext, mInternetDialogFactory,
-                mInternetDialogController, true, mUiEventLogger, mHandler);
+                mInternetDialogController, true, true, mUiEventLogger, mHandler);
         mInternetDialog.show();
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(SUB_ID);
         when(mMockWifiManager.isWifiEnabled()).thenReturn(true);
@@ -178,10 +178,10 @@ public class InternetDialogTest extends SysuiTestCase {
         private String mConnectedWifiSummary;
 
         MockInternetDialog(Context context, InternetDialogFactory internetDialogFactory,
-                InternetDialogController internetDialogController, boolean aboveStatusBar,
-                UiEventLogger uiEventLogger, @Main Handler handler) {
-            super(context, internetDialogFactory, internetDialogController, aboveStatusBar,
-                    uiEventLogger, handler);
+                InternetDialogController internetDialogController, boolean canConfigMobileData,
+                boolean aboveStatusBar, UiEventLogger uiEventLogger, @Main Handler handler) {
+            super(context, internetDialogFactory, internetDialogController, canConfigMobileData,
+                    aboveStatusBar, uiEventLogger, handler);
             mAdapter = mInternetAdapter;
             mWifiManager = mMockWifiManager;
         }
