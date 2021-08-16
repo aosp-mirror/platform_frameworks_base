@@ -49,6 +49,7 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 
 import java.util.concurrent.TimeUnit;
 
@@ -108,16 +109,18 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         final ActivityMetricsLogger.LaunchingState launchingState =
                 new ActivityMetricsLogger.LaunchingState();
         spyOn(launchingState);
-        doReturn(true).when(launchingState).contains(eq(secondActivity));
+        doReturn(true).when(launchingState).hasActiveTransitionInfo();
+        doReturn(true).when(launchingState).contains(
+                ArgumentMatchers.argThat(r -> r == firstActivity || r == secondActivity));
         // The test case already runs inside global lock, so above thread can only execute after
         // this waiting method that releases the lock.
         mSupervisor.waitActivityVisibleOrLaunched(taskToFrontWait, firstActivity, launchingState);
 
         // Assert that the thread is finished.
         assertTrue(condition.block(TIMEOUT_MS));
-        assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
-        assertEquals(taskToFrontWait.who, secondActivity.mActivityComponent);
-        assertEquals(taskToFrontWait.launchState, WaitResult.LAUNCH_STATE_HOT);
+        assertEquals(START_TASK_TO_FRONT, taskToFrontWait.result);
+        assertEquals(secondActivity.mActivityComponent, taskToFrontWait.who);
+        assertEquals(WaitResult.LAUNCH_STATE_HOT, taskToFrontWait.launchState);
         // START_TASK_TO_FRONT means that another component will be visible, so the component
         // should not be assigned as the first activity.
         assertNull(launchedComponent[0]);
