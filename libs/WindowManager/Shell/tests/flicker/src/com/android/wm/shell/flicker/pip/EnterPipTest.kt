@@ -93,7 +93,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      * Checks that the pip app window remains inside the display bounds throughout the whole
      * animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
         testSpec.assertWm {
@@ -131,7 +131,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     /**
      * Checks that [pipApp] window becomes pinned
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipWindowBecomesPinned() {
         testSpec.assertWm {
@@ -144,7 +144,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     /**
      * Checks [LAUNCHER_COMPONENT] layer remains visible throughout the animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun launcherLayerBecomesVisible() {
         testSpec.assertLayers {
