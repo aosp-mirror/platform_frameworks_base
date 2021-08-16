@@ -114,7 +114,6 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -244,7 +243,6 @@ public class Dependency {
     @Inject Lazy<BluetoothController> mBluetoothController;
     @Inject Lazy<LocationController> mLocationController;
     @Inject Lazy<RotationLockController> mRotationLockController;
-    @Inject Lazy<NetworkController> mNetworkController;
     @Inject Lazy<ZenModeController> mZenModeController;
     @Inject Lazy<HotspotController> mHotspotController;
     @Inject Lazy<CastController> mCastController;
@@ -388,8 +386,6 @@ public class Dependency {
         mProviders.put(LocationController.class, mLocationController::get);
 
         mProviders.put(RotationLockController.class, mRotationLockController::get);
-
-        mProviders.put(NetworkController.class, mNetworkController::get);
 
         mProviders.put(ZenModeController.class, mZenModeController::get);
 
