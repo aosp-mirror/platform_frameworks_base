@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.NetworkKey;
 import android.net.RssiCurve;
 import android.net.ScoredNetwork;
@@ -146,6 +147,17 @@ public class WifiUtilsTest {
         mWifiConfig.meteredHint = true;
         mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
         assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
+    }
+
+    @Test
+    public void getWifiDetailsSettingsIntent_returnsCorrectValues() {
+        final String key = "test_key";
+
+        final Intent intent = WifiUtils.getWifiDetailsSettingsIntent(key);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DETAILS_SETTINGS);
+        final Bundle bundle = intent.getBundleExtra(WifiUtils.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+        assertThat(bundle.getString(WifiUtils.KEY_CHOSEN_WIFIENTRY_KEY)).isEqualTo(key);
     }
 
     private static ArrayList<ScanResult> buildScanResultCache() {
