@@ -116,7 +116,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
-import com.android.systemui.idle.IdleHostView;
 import com.android.systemui.idle.IdleHostViewController;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.media.KeyguardMediaController;
@@ -941,12 +940,16 @@ public class NotificationPanelViewController extends PanelViewController {
                         .getKeyguardStatusBarViewController();
         mKeyguardStatusBarViewController.init();
 
+        IdleViewComponent idleViewComponent = mIdleViewComponentFactory
+                .build(mView.findViewById(R.id.idle_host_view));
+        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
+        mIdleHostViewController.init();
+
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarView,
                 keyguardUserSwitcherView,
-                mCommunalView,
-                mView.findViewById(R.id.idle_host_view));
+                mCommunalView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
@@ -1038,17 +1041,12 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
             UserAvatarView userAvatarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView,
-            CommunalHostView communalView,
-            IdleHostView idleHostView) {
+            CommunalHostView communalView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
-
-        IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
-        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
-        mIdleHostViewController.init();
 
         if (communalView != null) {
             CommunalViewComponent communalViewComponent =
@@ -1218,8 +1216,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                keyguardUserSwitcherView, mCommunalView,
-                mView.findViewById(R.id.idle_host_view));
+                keyguardUserSwitcherView, mCommunalView);
 
         // Update keyguard bottom area
         int index = mView.indexOfChild(mKeyguardBottomArea);
