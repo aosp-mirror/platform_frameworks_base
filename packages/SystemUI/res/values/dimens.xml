@@ -56,11 +56,6 @@
     <!-- The amount by which the arrow is shifted to avoid the finger-->
     <dimen name="navigation_edge_finger_offset">48dp</dimen>
 
-    <!-- Luminance threshold to determine black/white contrast for the navigation affordances -->
-    <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
-    <!-- Luminance change threshold that allows applying new value if difference was exceeded -->
-    <item name="navigation_luminance_change_threshold" type="dimen" format="float">0.05</item>
-
     <dimen name="floating_rotation_button_diameter">40dp</dimen>
     <dimen name="floating_rotation_button_min_margin">20dp</dimen>
     <dimen name="floating_rotation_button_taskbar_left_margin">20dp</dimen>
