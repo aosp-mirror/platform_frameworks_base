@@ -67,10 +67,22 @@ public abstract class GlobalConcurrencyModule {
      * Provide a Main-Thread Executor.
      */
     @Provides
+    @Singleton
     @Main
     public static Executor provideMainExecutor(Context context) {
         return context.getMainExecutor();
     }
+
+    /**
+     * Provide a Main-Thread DelayableExecutor.
+     */
+    @Provides
+    @Singleton
+    @Main
+    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
+        return new ExecutorImpl(looper);
+    }
+
 
     /** */
     @Binds

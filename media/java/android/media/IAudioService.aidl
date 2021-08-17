@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioFormat;
 import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
@@ -34,6 +35,7 @@ import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
+import android.media.ISpatializerCallback;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -392,4 +394,24 @@ interface IAudioService {
     void registerModeDispatcher(IAudioModeDispatcher dispatcher);
 
     oneway void unregisterModeDispatcher(IAudioModeDispatcher dispatcher);
+
+    int getSpatializerImmersiveAudioLevel();
+
+    boolean isSpatializerEnabled();
+
+    void setSpatializerFeatureEnabled(boolean enabled);
+
+    void setSpatializerEnabledForDevice(boolean enabled, in AudioDeviceAttributes device);
+
+    boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
+
+    void registerSpatializerCallback(in ISpatializerCallback callback);
+
+    void unregisterSpatializerCallback(in ISpatializerCallback callback);
+
+    List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices();
+
+    void addSpatializerCompatibleAudioDevice(in AudioDeviceAttributes ada);
+
+    void removeSpatializerCompatibleAudioDevice(in AudioDeviceAttributes ada);
 }

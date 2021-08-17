@@ -93,11 +93,13 @@ import android.media.ICommunicationDeviceDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
+import android.media.ISpatializerCallback;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaMetrics;
 import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
+import android.media.Spatializer;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
@@ -8226,6 +8228,82 @@ public class AudioService extends IAudioService.Stub
         }
         return true;
     }
+
+    //==========================================================================================
+    private final SpatializerHelper mSpatializerHelper = new SpatializerHelper();
+
+    /** @see AudioManager#getSpatializerImmersiveAudioLevel() */
+    public int getSpatializerImmersiveAudioLevel() {
+        return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+    }
+
+    /** @see Spatializer#isEnabled() */
+    public boolean isSpatializerEnabled() {
+        return false;
+    }
+
+    /** @see Spatializer#canBeSpatialized() */
+    public boolean canBeSpatialized(
+            @NonNull AudioAttributes attributes, @NonNull AudioFormat format) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(format);
+        return mSpatializerHelper.canBeSpatialized(attributes, format);
+    }
+
+    /** @see Spatializer.SpatializerInfoDispatcherStub */
+    public void registerSpatializerCallback(
+            @NonNull ISpatializerCallback dispatcher) {
+        Objects.requireNonNull(dispatcher);
+        mSpatializerHelper.registerStateCallback(dispatcher);
+    }
+
+    /** @see Spatializer.SpatializerInfoDispatcherStub */
+    public void unregisterSpatializerCallback(
+            @NonNull ISpatializerCallback dispatcher) {
+        Objects.requireNonNull(dispatcher);
+        mSpatializerHelper.unregisterStateCallback(dispatcher);
+    }
+
+    /** @see Spatializer#getSpatializerCompatibleAudioDevices() */
+    public @NonNull List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices() {
+        enforceModifyAudioRoutingPermission();
+        return mSpatializerHelper.getCompatibleAudioDevices();
+    }
+
+    /** @see Spatializer#addSpatializerCompatibleAudioDevice(AudioDeviceAttributes) */
+    public void addSpatializerCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(ada);
+        mSpatializerHelper.addCompatibleAudioDevice(ada);
+    }
+
+    /** @see Spatializer#removeSpatializerCompatibleAudioDevice(AudioDeviceAttributes) */
+    public void removeSpatializerCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(ada);
+        mSpatializerHelper.removeCompatibleAudioDevice(ada);
+    }
+
+    /** @see AudioManager#setSpatializerFeatureEnabled(boolean) */
+    public void setSpatializerFeatureEnabled(boolean enabled) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing MODIFY_DEFAULT_AUDIO_EFFECTS permission");
+        }
+        mSpatializerHelper.setEnabled(enabled);
+    }
+
+    /** @see Spatializer#setEnabledForDevice(boolean, AudioDeviceAttributes)
+     * @see Spatializer#setEnabled(boolean)
+     */
+    public void setSpatializerEnabledForDevice(boolean enabled,
+            @NonNull AudioDeviceAttributes ada) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(ada);
+        mSpatializerHelper.setEnabledForDevice(enabled, ada);
+    }
+
 
     //==========================================================================================
     private boolean readCameraSoundForced() {

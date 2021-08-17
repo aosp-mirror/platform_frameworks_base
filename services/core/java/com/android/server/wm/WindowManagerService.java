@@ -87,7 +87,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
-import static android.window.WindowContext.KEY_IS_WINDOW_PROVIDER_SERVICE;
+import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -1740,7 +1740,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // We allow WindowProviderService to add window other than windowContextType,
                     // but the WindowProviderService won't be associated with the window's
                     // WindowToken.
-                    if (!options.getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, false)) {
+                    if (!isWindowProviderService(options)) {
                         return WindowManagerGlobal.ADD_INVALID_TYPE;
                     }
                 } else {
@@ -7907,30 +7907,37 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public String getImeControlTargetNameForLogging(int displayId) {
+        public ImeTargetInfo onToggleImeRequested(boolean show, IBinder focusedToken,
+                IBinder requestToken, int displayId) {
+            final String focusedWindowName;
+            final String requestWindowName;
+            final String imeControlTargetName;
+            final String imeLayerTargetName;
             synchronized (mGlobalLock) {
+                final WindowState focusedWin = mWindowMap.get(focusedToken);
+                focusedWindowName = focusedWin != null ? focusedWin.getName() : "null";
+                final WindowState requestWin = mWindowMap.get(requestToken);
+                requestWindowName = requestWin != null ? requestWin.getName() : "null";
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
-                    return null;
+                if (dc != null) {
+                    final InsetsControlTarget controlTarget = dc.getImeTarget(IME_TARGET_CONTROL);
+                    if (controlTarget != null) {
+                        final WindowState w = InsetsControlTarget.asWindowOrNull(controlTarget);
+                        imeControlTargetName = w != null ? w.getName() : controlTarget.toString();
+                    } else {
+                        imeControlTargetName = "null";
+                    }
+                    final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_LAYERING);
+                    imeLayerTargetName = target != null ? target.getWindow().getName() : "null";
+                    if (show) {
+                        dc.onShowImeRequested();
+                    }
+                } else {
+                    imeControlTargetName = imeLayerTargetName = "no-display";
                 }
-                final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_CONTROL);
-                if (target == null) {
-                    return null;
-                }
-                final WindowState win = target.getWindow();
-                return win != null ? win.getName() : target.toString();
             }
-        }
-
-        @Override
-        public String getImeTargetNameForLogging(int displayId) {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
-                    return null;
-                }
-                return dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getName();
-            }
+            return new ImeTargetInfo(focusedWindowName, requestWindowName, imeControlTargetName,
+                    imeLayerTargetName);
         }
 
         @Override

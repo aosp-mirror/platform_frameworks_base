@@ -3262,11 +3262,13 @@ package android.hardware.display {
   public final class DisplayManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS) public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
+    method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfigurationForDisplay(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BRIGHTNESS_SLIDER_USAGE) public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.util.Pair<float[],float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfigurationForDisplay(@NonNull android.hardware.display.BrightnessConfiguration, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_SATURATION) public void setSaturationLevel(float);
   }
 
@@ -5368,6 +5370,12 @@ package android.media {
 
   public final class RouteDiscoveryPreference implements android.os.Parcelable {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
+  }
+
+  public class Spatializer {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
   }
 
 }

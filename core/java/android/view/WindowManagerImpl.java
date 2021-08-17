@@ -24,7 +24,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.window.WindowProvider.KEY_IS_WINDOW_PROVIDER_SERVICE;
+import static android.window.WindowProviderService.isWindowProviderService;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -177,8 +177,7 @@ public final class WindowManagerImpl implements WindowManager {
                 + " Please create another Window Context via"
                 + " createWindowContext(getDisplay(), " + windowType + ", null)"
                 + " to add window with type:" + windowType);
-        if (!windowProvider.getWindowContextOptions().getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE,
-                false)) {
+        if (!isWindowProviderService(windowProvider.getWindowContextOptions())) {
             throw exception;
         }
         // Throw IncorrectCorrectViolation if the Window Context is allowed to provide multiple
