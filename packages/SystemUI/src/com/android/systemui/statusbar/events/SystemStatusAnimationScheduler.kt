@@ -100,17 +100,20 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
         // Don't deal with threading for now (no need let's be honest)
         Assert.isMainThread()
-        if (event.priority > scheduledEvent?.priority ?: -1 ||
-            scheduledEvent?.shouldUpdateFromEvent(event) == true) {
+        if ((event.priority > scheduledEvent?.priority ?: -1) &&
+                animationState != ANIMATING_OUT &&
+                (animationState != SHOWING_PERSISTENT_DOT && event.forceVisible)) {
+            // events can only be scheduled if a higher priority or no other event is in progress
             if (DEBUG) {
                 Log.d(TAG, "scheduling event $event")
             }
-            if (event.showAnimation) {
-                scheduleEvent(event)
-            } else if (event.forceVisible) {
-                hasPersistentDot = true
-                notifyTransitionToPersistentDot()
+
+            scheduleEvent(event)
+        } else if (scheduledEvent?.shouldUpdateFromEvent(event) == true) {
+            if (DEBUG) {
+                Log.d(TAG, "updating current event from: $event")
             }
+            scheduledEvent?.updateFromEvent(event)
         } else {
             if (DEBUG) {
                 Log.d(TAG, "ignoring event $event")
@@ -142,22 +145,16 @@ class SystemStatusAnimationScheduler @Inject constructor(
      * Clear the scheduled event (if any) and schedule a new one
      */
     private fun scheduleEvent(event: StatusEvent) {
-        if (animationState == ANIMATING_OUT ||
-            (animationState == SHOWING_PERSISTENT_DOT && event.forceVisible)) {
-            // do not schedule an event or change the current one
-            return
-        }
+        scheduledEvent = event
 
-        // If we are showing the chip, possibly update the current event, rather than replacing
-        if (scheduledEvent?.shouldUpdateFromEvent(event) == true) {
-            scheduledEvent?.updateFromEvent(event)
-            return
-        } else {
-            scheduledEvent = event
-        }
-
-        if (scheduledEvent!!.forceVisible) {
+        if (event.forceVisible) {
             hasPersistentDot = true
+        }
+
+        // If animations are turned off, we'll transition directly to the dot
+        if (!event.showAnimation && event.forceVisible) {
+            notifyTransitionToPersistentDot()
+            return
         }
 
         // Schedule the animation to start after a debounce period
@@ -218,7 +215,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     private fun notifyTransitionToPersistentDot(): Animator? {
         val anims: List<Animator> = listeners.mapNotNull {
-            it.onSystemStatusAnimationTransitionToPersistentDot()
+            it.onSystemStatusAnimationTransitionToPersistentDot(scheduledEvent?.contentDescription)
         }
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
@@ -346,7 +343,10 @@ interface SystemStatusAnimationCallback {
     @JvmDefault fun onSystemChromeAnimationEnd() {}
 
     // Best method name, change my mind
-    @JvmDefault fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? { return null }
+    @JvmDefault
+    fun onSystemStatusAnimationTransitionToPersistentDot(contentDescription: String?): Animator? {
+        return null
+    }
     @JvmDefault fun onHidePersistentDot(): Animator? { return null }
 }
 
