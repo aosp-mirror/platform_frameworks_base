@@ -20181,8 +20181,10 @@ package android.media {
     method public int getAllowedCapturePolicy();
     method public int getContentType();
     method public int getFlags();
+    method public int getSpatializationBehavior();
     method public int getUsage();
     method public int getVolumeControlStream();
+    method public boolean isContentSpatialized();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALLOW_CAPTURE_BY_ALL = 1; // 0x1
     field public static final int ALLOW_CAPTURE_BY_NONE = 3; // 0x3
@@ -20196,6 +20198,8 @@ package android.media {
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
     field @Deprecated public static final int FLAG_LOW_LATENCY = 256; // 0x100
+    field public static final int SPATIALIZATION_BEHAVIOR_AUTO = 0; // 0x0
+    field public static final int SPATIALIZATION_BEHAVIOR_NEVER = 1; // 0x1
     field public static final int USAGE_ALARM = 4; // 0x4
     field public static final int USAGE_ASSISTANCE_ACCESSIBILITY = 11; // 0xb
     field public static final int USAGE_ASSISTANCE_NAVIGATION_GUIDANCE = 12; // 0xc
@@ -20222,7 +20226,9 @@ package android.media {
     method public android.media.AudioAttributes.Builder setContentType(int);
     method public android.media.AudioAttributes.Builder setFlags(int);
     method @NonNull public android.media.AudioAttributes.Builder setHapticChannelsMuted(boolean);
+    method @NonNull public android.media.AudioAttributes.Builder setIsContentSpatialized(boolean);
     method public android.media.AudioAttributes.Builder setLegacyStreamType(int);
+    method @NonNull public android.media.AudioAttributes.Builder setSpatializationBehavior(int);
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
@@ -20447,6 +20453,7 @@ package android.media {
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
+    method @Nullable public android.media.Spatializer getSpatializer();
     method public int getStreamMaxVolume(int);
     method public int getStreamMinVolume(int);
     method public int getStreamVolume(int);
@@ -23841,6 +23848,17 @@ package android.media {
 
   public static interface SoundPool.OnLoadCompleteListener {
     method public void onLoadComplete(android.media.SoundPool, int, int);
+  }
+
+  public class Spatializer {
+    method public void addOnSpatializerEnabledChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerEnabledChangedListener);
+    method public boolean canBeSpatialized(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioFormat);
+    method public boolean isEnabled();
+    method public void removeOnSpatializerEnabledChangedListener(@NonNull android.media.Spatializer.OnSpatializerEnabledChangedListener);
+  }
+
+  public static interface Spatializer.OnSpatializerEnabledChangedListener {
+    method public void onSpatializerEnabledChanged(boolean);
   }
 
   public final class SubtitleData {
