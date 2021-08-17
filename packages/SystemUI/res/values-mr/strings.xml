@@ -637,7 +637,7 @@
     <string name="output_title" msgid="3938776561655668350">"मीडिया आउटपुट"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"फोन कॉल आउटपुट"</string>
     <string name="output_none_found" msgid="5488087293120982770">"कोणतीही डिव्हाइस सापडली नाहीत"</string>
-    <string name="output_none_found_service_off" msgid="935667567681386368">"कोणतीही डिव्हाइस सापडली नाहीत. <xliff:g id="SERVICE">%1$s</xliff:g> सुरू करून पाहा"</string>
+    <string name="output_none_found_service_off" msgid="935667567681386368">"कोणतीही डिव्हाइस सापडली नाहीत. <xliff:g id="SERVICE">%1$s</xliff:g> सुरू करून पहा"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"ब्लूटूथ"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"वाय-फाय"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ब्लूटूथ आणि वाय-फाय"</string>
@@ -725,7 +725,7 @@
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>
-    <string name="see_more_title" msgid="7409317011708185729">"आणखी पाहा"</string>
+    <string name="see_more_title" msgid="7409317011708185729">"आणखी पहा"</string>
     <string name="appops_camera" msgid="5215967620896725715">"हे अ‍ॅप कॅमेरा वापरत आहे."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"हे अ‍ॅप मायक्रोफोन वापरत आहे."</string>
     <string name="appops_overlay" msgid="4822261562576558490">"हे अ‍ॅप स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे."</string>
@@ -924,14 +924,14 @@
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"तापल्‍यामुळे फोन बंद झाला"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"तुमचा फोन आता नेहमीप्रमाणे काम करत आहे.\nअधिक माहितीसाठी टॅप करा"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"तुमचा फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. तुमचा फोन आता व्‍यवस्थित सुरू आहे.\n\nतुम्ही असे केल्यास तुमचा फोन खूप तापेल:\n	•संसाधन केंद्रित अ‍ॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अ‍ॅप यासारखे)\n	•मोठ्या फाइल डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये तुमचा फोन वापरणे"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"काय काळजी घ्यावी ते पाहा"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"काय काळजी घ्यावी ते पहा"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"फोन ऊष्ण होत आहे"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"फोन थंड होईपर्यंत काही वैशिष्ट्ये मर्यादित केली.\nअधिक माहितीसाठी टॅप करा"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"तुमचा फोन स्वयंचलितपणे थंड होईल. तुम्ही अद्यापही तुमचा फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nतुमचा फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"काय काळजी घ्यावी ते पाहा"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"काय काळजी घ्यावी ते पहा"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"चार्जर अनप्लग करा"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"हे डिव्हाइस चार्ज करताना समस्या आहे. पॉवर अडॅप्टर अनप्लग करा आणि शक्य तेवढी काळजी घ्या कदाचित केबल गरम असू शकते."</string>
-    <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"काय काळजी घ्यावी ते पाहा"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"काय काळजी घ्यावी ते पहा"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"डावा शॉर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"उजवा शॉर्टकट"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"डावा शॉर्टकट देखील अनलॉक करतो"</string>
