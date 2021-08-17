@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.graphics.Matrix;
 import android.graphics.Region;
 import android.gui.TouchOcclusionMode;
 import android.os.IBinder;
@@ -116,6 +117,12 @@ public final class InputWindowHandle {
      */
     public boolean replaceTouchableRegionWithCrop;
 
+    /**
+     * The transform that should be applied to the Window to get it from screen coordinates to
+     * window coordinates
+     */
+    public Matrix transform;
+
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle, int displayId) {
@@ -130,6 +137,8 @@ public final class InputWindowHandle {
                         .append(frameRight).append(",").append(frameBottom).append("]")
                 .append(", touchableRegion=").append(touchableRegion)
                 .append(", visible=").append(visible)
+                .append(", scaleFactor=").append(scaleFactor)
+                .append(", transform=").append(transform)
                 .toString();
 
     }

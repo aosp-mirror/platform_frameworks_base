@@ -20,8 +20,8 @@
 <com.android.keyguard.KeyguardPINView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/keyguard_pin_view"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/keyguard_pin_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
@@ -52,7 +52,7 @@
 
             androidprv:layout_constraintTop_toTopOf="parent"
             androidprv:layout_constraintBottom_toTopOf="@id/key1"
-            androidprv:layout_constraintVertical_bias="1.0">
+            androidprv:layout_constraintVertical_bias="0.0">
 
             <com.android.keyguard.PasswordTextView
                 android:id="@+id/pinEntry"

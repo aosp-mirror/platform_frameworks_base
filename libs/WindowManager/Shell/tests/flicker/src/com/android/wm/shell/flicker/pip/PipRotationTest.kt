@@ -41,7 +41,22 @@ import org.junit.runners.Parameterized
 
 /**
  * Test Pip Stack in bounds after rotations.
+ *
  * To run this test: `atest WMShellFlickerTests:PipRotationTest`
+ *
+ * Actions:
+ *     Launch a [pipApp] in pip mode
+ *     Launch another app [fixedApp] (appears below pip)
+ *     Rotate the screen from [testSpec.config.startRotation] to [testSpec.config.endRotation]
+ *     (usually, 0->90 and 90->0)
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited from [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -50,8 +65,8 @@ import org.junit.runners.Parameterized
 @Group3
 class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
-    private val startingBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-    private val endingBounds = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
+    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = false) { configuration ->
@@ -66,49 +81,109 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
             transitions {
                 setRotation(configuration.endRotation)
             }
-            teardown {
-                eachRun {
-                    setRotation(Surface.ROTATION_0)
-                }
-            }
         }
 
+    /**
+     * Checks that all parts of the screen are covered at the start and end of the transition
+     */
     @Presubmit
     @Test
     override fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation,
         testSpec.config.endRotation, allStates = false)
 
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     */
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() =
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
+    /**
+     * Checks the position of the status bar at the start and end of the transition
+     */
     @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
+    /**
+     * Checks that [fixedApp] layer is within [screenBoundsStart] at the start of the transition
+     */
     @Presubmit
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp.component).coversExactly(startingBounds)
-            visibleRegion(pipApp.component).coversAtMost(startingBounds)
+            visibleRegion(fixedApp.component).coversExactly(screenBoundsStart)
         }
     }
 
+    /**
+     * Checks that [fixedApp] layer is within [screenBoundsEnd] at the end of the transition
+     */
     @Presubmit
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp.component).coversExactly(endingBounds)
-            visibleRegion(pipApp.component).coversAtMost(endingBounds)
+            visibleRegion(fixedApp.component).coversExactly(screenBoundsEnd)
+        }
+    }
+
+    /**
+     * Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition
+     */
+    @Presubmit
+    @Test
+    fun pipLayerRotates_StartingBounds() {
+        testSpec.assertLayersStart {
+            visibleRegion(pipApp.component).coversAtMost(screenBoundsStart)
+        }
+    }
+
+    /**
+     * Checks that [pipApp] layer is within [screenBoundsEnd] at the end of the transition
+     */
+    @Presubmit
+    @Test
+    fun pipLayerRotates_EndingBounds() {
+        testSpec.assertLayersEnd {
+            visibleRegion(pipApp.component).coversAtMost(screenBoundsEnd)
+        }
+    }
+
+    /**
+     * Ensure that the [pipApp] window does not obscure the [fixedApp] at the start of the
+     * transition
+     */
+    @Presubmit
+    @Test
+    fun pipIsAboveFixedAppWindow_Start() {
+        testSpec.assertWmStart {
+            isAboveWindow(pipApp.component, fixedApp.component)
+        }
+    }
+
+    /**
+     * Ensure that the [pipApp] window does not obscure the [fixedApp] at the end of the
+     * transition
+     */
+    @Presubmit
+    @Test
+    fun pipIsAboveFixedAppWindow_End() {
+        testSpec.assertWmEnd {
+            isAboveWindow(pipApp.component, fixedApp.component)
         }
     }
 
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

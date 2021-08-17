@@ -218,6 +218,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     /** All storage permissions */
     private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
+    /** All nearby devices permissions */
+    private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
@@ -234,6 +236,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
     }
 
     /** Set of source package names for Privileged Permission Allowlist */
@@ -3077,13 +3082,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Permission bp = mRegistry.getPermission(permission);
                 if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
-
                     if ((flags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
-
                         int flagsToRemove = FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 
+                        // We're willing to preserve an implicit "Nearby devices"
+                        // permission grant if this app was already able to interact
+                        // with nearby devices via background location access
+                        boolean preserveGrant = false;
+                        if (ArrayUtils.contains(NEARBY_DEVICES_PERMISSIONS, permission)
+                                && ps.isPermissionGranted(
+                                        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                && (ps.getPermissionFlags(
+                                        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                        & (FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
+                                                | FLAG_PERMISSION_REVOKED_COMPAT)) == 0) {
+                            preserveGrant = true;
+                        }
+
                         if ((flags & BLOCKING_PERMISSION_FLAGS) == 0
-                                && supportsRuntimePermissions) {
+                                && supportsRuntimePermissions
+                                && !preserveGrant) {
                             if (ps.revokePermission(bp)) {
                                 if (DEBUG_PERMISSIONS) {
                                     Slog.i(TAG, "Revoking runtime permission "

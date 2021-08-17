@@ -1439,6 +1439,14 @@
     <integer-array name="config_autoBrightnessLcdBacklightValues">
     </integer-array>
 
+    <!-- Array of output values for LCD backlight in doze mode corresponding to the lux values
+         in the config_autoBrightnessLevels array.  This array should have size one greater
+         than the size of the config_autoBrightnessLevels array.
+         The brightness values must be between 0 and 255 and be non-decreasing.
+         This must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessLcdBacklightValues_doze">
+    </integer-array>
+
     <!-- Array of desired screen brightness in nits corresponding to the lux values
          in the config_autoBrightnessLevels array. As with config_screenBrightnessMinimumNits and
          config_screenBrightnessMaximumNits, the display brightness is defined as the measured

@@ -2112,6 +2112,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Slog.e(TAG, "Failed to verify session " + sessionId + " [" + msgWithErrorCode + "]");
         // Session is sealed and committed but could not be verified, we need to destroy it.
         destroyInternal();
+        if (isMultiPackage()) {
+            for (PackageInstallerSession childSession : getChildSessions()) {
+                childSession.destroyInternal();
+            }
+        }
         if (isStaged()) {
             mStagedSession.setSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);

@@ -88,6 +88,10 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
 
         // Wait on WMHelper or simply wait for 3 seconds
         wmHelper?.waitFor("hasPipWindow") { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
+        // when entering pip, the dismiss button is visible at the start. to ensure the pip
+        // animation is complete, wait until the pip dismiss button is no longer visible. 
+        // b/176822698: dismiss-only state will be removed in the future
+        uiDevice.wait(Until.gone(By.res(SYSTEMUI_PACKAGE, "dismiss")), FIND_TIMEOUT)
     }
 
     fun clickStartMediaSessionButton() {

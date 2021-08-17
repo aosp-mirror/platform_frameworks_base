@@ -23,6 +23,8 @@ import static com.android.server.wm.Task.TAG_VISIBILITY;
 import android.annotation.Nullable;
 import android.util.Slog;
 
+import java.util.ArrayList;
+
 /** Helper class to ensure activities are in the right visible state for a container. */
 class EnsureActivitiesVisibleHelper {
     private final TaskFragment mTaskFragment;
@@ -98,16 +100,36 @@ class EnsureActivitiesVisibleHelper {
                 && mTaskFragment.isTopActivityFocusable()
                 && (starting == null || !starting.isDescendantOf(mTaskFragment));
 
+        ArrayList<TaskFragment> adjacentTaskFragments = null;
         for (int i = mTaskFragment.mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mTaskFragment.mChildren.get(i);
             if (child.asTaskFragment() != null) {
                 final TaskFragment childTaskFragment = child.asTaskFragment();
                 childTaskFragment.updateActivityVisibilities(starting, configChanges,
                         preserveWindows, notifyClients);
-                mBehindFullyOccludedContainer = childTaskFragment.getBounds().equals(
+                mBehindFullyOccludedContainer |= childTaskFragment.getBounds().equals(
                         mTaskFragment.getBounds());
                 if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
                     mAboveTop = false;
+                }
+
+                if (mBehindFullyOccludedContainer) {
+                    continue;
+                }
+
+                if (adjacentTaskFragments != null && adjacentTaskFragments.contains(
+                        childTaskFragment)) {
+                    // Everything behind two adjacent TaskFragments are occluded.
+                    mBehindFullyOccludedContainer = true;
+                    continue;
+                }
+
+                final TaskFragment adjacentTaskFrag = childTaskFragment.getAdjacentTaskFragment();
+                if (adjacentTaskFrag != null) {
+                    if (adjacentTaskFragments == null) {
+                        adjacentTaskFragments = new ArrayList<>();
+                    }
+                    adjacentTaskFragments.add(adjacentTaskFrag);
                 }
             } else if (child.asActivityRecord() != null) {
                 setActivityVisibilityState(child.asActivityRecord(), starting, resumeTopActivity);

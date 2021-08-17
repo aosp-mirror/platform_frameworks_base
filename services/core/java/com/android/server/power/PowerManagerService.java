@@ -4112,7 +4112,10 @@ public final class PowerManagerService extends SystemService
         if (sQuiescent) {
             // Pass the optional "quiescent" argument to the bootloader to let it know
             // that it should not turn the screen/lights on.
-            reason = reason + ",quiescent";
+            if (reason != ""){
+                reason += ",";
+            }
+            reason = reason + "quiescent";
         }
 
         SystemProperties.set("sys.powerctl", "reboot," + reason);
