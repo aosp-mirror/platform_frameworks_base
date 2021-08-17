@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.gestural;
+package com.android.systemui.shared.navigationbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.content.res.Resources;
+import android.annotation.TargetApi;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Handler;
 import android.view.CompositionSamplingListener;
 import android.view.SurfaceControl;
@@ -27,16 +28,21 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
-import com.android.systemui.R;
-
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 /**
  * A helper class to sample regions on the screen and inspect its luminosity.
  */
+@TargetApi(Build.VERSION_CODES.Q)
 public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         View.OnLayoutChangeListener {
+
+    // Luminance threshold to determine black/white contrast for the navigation affordances.
+    // Passing the threshold of this luminance value will make the button black otherwise white
+    private static final float NAVIGATION_LUMINANCE_THRESHOLD = 0.5f;
+    // Luminance change threshold that allows applying new value if difference was exceeded
+    private static final float NAVIGATION_LUMINANCE_CHANGE_THRESHOLD = 0.05f;
 
     private final Handler mHandler = new Handler();
     private final View mSampledView;
@@ -62,9 +68,6 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private boolean mWaitingOnDraw;
     private boolean mIsDestroyed;
 
-    // Passing the threshold of this luminance value will make the button black otherwise white
-    private final float mLuminanceThreshold;
-    private final float mLuminanceChangeThreshold;
     private boolean mFirstSamplingAfterStart;
     private boolean mWindowVisible;
     private boolean mWindowHasBlurs;
@@ -100,9 +103,6 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         mSampledView.addOnAttachStateChangeListener(this);
         mSampledView.addOnLayoutChangeListener(this);
 
-        final Resources res = sampledView.getResources();
-        mLuminanceThreshold = res.getFloat(R.dimen.navigation_luminance_threshold);
-        mLuminanceChangeThreshold = res.getFloat(R.dimen.navigation_luminance_change_threshold);
         mCallback = samplingCallback;
     }
 
@@ -217,8 +217,10 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
 
         // If the difference between the new luma and the current luma is larger than threshold
         // then apply the current luma, this is to prevent small changes causing colors to flicker
-        if (Math.abs(mCurrentMedianLuma - mLastMedianLuma) > mLuminanceChangeThreshold) {
-            mCallback.onRegionDarknessChanged(medianLuma < mLuminanceThreshold /* isRegionDark */);
+        if (Math.abs(mCurrentMedianLuma - mLastMedianLuma)
+                > NAVIGATION_LUMINANCE_CHANGE_THRESHOLD) {
+            mCallback.onRegionDarknessChanged(
+                    medianLuma < NAVIGATION_LUMINANCE_THRESHOLD /* isRegionDark */);
             mLastMedianLuma = medianLuma;
         }
     }
