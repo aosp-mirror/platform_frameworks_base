@@ -3275,11 +3275,13 @@ package android.hardware.display {
   public final class DisplayManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS) public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
+    method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getBrightnessConfigurationForDisplay(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BRIGHTNESS_SLIDER_USAGE) public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method @Nullable @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.util.Pair<float[],float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfigurationForDisplay(@NonNull android.hardware.display.BrightnessConfiguration, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_SATURATION) public void setSaturationLevel(float);
   }
 
