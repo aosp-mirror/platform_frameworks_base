@@ -45,7 +45,7 @@
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ఖాళీ లేదు"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు. కొంత స్థలాన్ని ఖాళీ చేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"యాప్ కనుగొనబడలేదు"</string>
-    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ఇన్‌స్టాల్ చేసిన యాప్‌ల జాబితాలో యాప్ కనుగొనబడలేదు."</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ఇన్‌స్టాల్ చేసిన యాప్‌ల లిస్ట్‌లో యాప్ కనుగొనబడలేదు."</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"అనుమతించబడలేదు"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ప్రస్తుత వినియోగదారు ఈ అన్ఇన్‌స్టాలేషన్ చేసేందుకు అనుమతించబడరు."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"లోపం"</string>
