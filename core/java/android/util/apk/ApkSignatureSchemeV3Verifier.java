@@ -209,7 +209,7 @@ public class ApkSignatureSchemeV3Verifier {
         if (contentDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
             byte[] verityDigest = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
             result.verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
-                    verityDigest, apk.length(), signatureInfo);
+                    verityDigest, apk.getChannel().size(), signatureInfo);
         }
 
         result.digest = pickBestDigestForV4(contentDigests);

@@ -4133,7 +4133,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // control of all writes to the file in question.
 
         // We must complete all stack dumps within 20 seconds.
-        long remainingTime = 20 * 1000;
+        long remainingTime = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
         // As applications are usually interested with the ANR stack traces, but we can't share with
         // them the stack traces other than their own stacks. So after the very first PID is
@@ -13831,9 +13831,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
@@ -14701,9 +14701,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
-            final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-            if (gpuDmaBufUsage >= 0) {
-                final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+            final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+            if (gpuPrivateUsage >= 0) {
+                final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                 memInfoBuilder.append("      GPU: ");
                 memInfoBuilder.append(stringifyKBSize(gpuUsage));
                 memInfoBuilder.append(" (");

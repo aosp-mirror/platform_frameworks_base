@@ -3876,6 +3876,11 @@
   <java-symbol type="bool" name="config_bugReportHandlerEnabled" />
   <java-symbol type="string" name="config_defaultBugReportHandlerApp" />
 
+  <!-- For profcollect report uploader -->
+  <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
   <!-- For Accessibility system actions -->
@@ -4075,4 +4080,7 @@
   <java-symbol type="array" name="config_keep_warming_services" />
 
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
+
+  <java-symbol type="bool" name="config_telephony5gStandalone" />
+  <java-symbol type="bool" name="config_telephony5gNonStandalone" />
 </resources>

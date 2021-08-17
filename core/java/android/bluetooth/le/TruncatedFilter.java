@@ -23,8 +23,11 @@ import java.util.List;
 /**
  * A special scan filter that lets the client decide how the scan record should be stored.
  *
+ * @deprecated this is not used anywhere
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public final class TruncatedFilter {
     private final ScanFilter mFilter;

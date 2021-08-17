@@ -3226,6 +3226,13 @@
     <permission android:name="android.permission.TRIGGER_SHELL_BUGREPORT"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to trigger profcollect report upload via shell.
+        <p>Not for use by third-party applications.
+        @hide
+    -->
+    <permission android:name="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to be the status bar.  Currently used only by SystemUI.apk
     @hide -->
     <permission android:name="android.permission.STATUS_BAR_SERVICE"

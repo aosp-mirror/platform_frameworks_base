@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.RadioAccessSpecifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,11 +77,26 @@ public final class AvailableNetworkInfo implements Parcelable {
      * Opportunistic network service will use these bands to scan.
      *
      * When no specific bands are specified (empty array or null) CBRS band
-     * {@link AccessNetworkConstants.EutranBand.BAND_48} will be used for network scan.
+     * {@link AccessNetworkConstants.EutranBand.BAND_48
+     * } will be used for network scan.
      *
      * See {@link AccessNetworkConstants} for details.
+     *
+     * @deprecated use {@link #mRadioAccessSpecifiers} instead
      */
+    @Deprecated
     private ArrayList<Integer> mBands;
+
+    /**
+     * Returns a list of {@link RadioAccessSpecifier} associated with the available network.
+     * Opportunistic network service will use this to determine which bands to scan for.
+     *
+     * If this entry is left empty, {@link RadioAcccessSpecifier}s with {@link AccessNetworkType}s
+     * of {@link AccessNetworkConstants.AccessNetworkType.EUTRAN} and {@link
+     * AccessNetworkConstants.AccessNetworkType.NGRAN} with bands 48 and 71 on each will be assumed
+     * by Opportunistic network service.
+     */
+    private ArrayList<RadioAccessSpecifier> mRadioAccessSpecifiers;
 
     /**
      * Return subscription Id of the available network.
@@ -129,6 +145,22 @@ public final class AvailableNetworkInfo implements Parcelable {
         return (List<Integer>) mBands.clone();
     }
 
+    /**
+     * Returns a list of {@link RadioAccessSpecifier} associated with the available network.
+     * Opportunistic network service will use this to determine which bands to scan for.
+     *
+     * the returned value is one of {@link AccessNetworkConstants.AccessNetworkType}. When no
+     * specific access network type is specified, {@link RadioAccessSpecifier}s with {@link
+     * AccessNetworkType}s of {@link AccessNetworkConstants.AccessNetworkType.EUTRAN} and {@link
+     * AccessNetworkConstants.AccessNetworkType.NGRAN} with bands 48 and 71 on each will be assumed
+     * by Opportunistic network service.
+     * @return the access network type associated with the available network.
+     * @hide
+     */
+    public List<RadioAccessSpecifier>  getRadioAccessSpecifiers() {
+        return (List<RadioAccessSpecifier>) mRadioAccessSpecifiers.clone();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -140,6 +172,7 @@ public final class AvailableNetworkInfo implements Parcelable {
         dest.writeInt(mPriority);
         dest.writeStringList(mMccMncs);
         dest.writeList(mBands);
+        dest.writeList(mRadioAccessSpecifiers);
     }
 
     private AvailableNetworkInfo(Parcel in) {
@@ -149,14 +182,25 @@ public final class AvailableNetworkInfo implements Parcelable {
         in.readStringList(mMccMncs);
         mBands = new ArrayList<>();
         in.readList(mBands, Integer.class.getClassLoader());
+        mRadioAccessSpecifiers = new ArrayList<>();
+        in.readList(mRadioAccessSpecifiers, RadioAccessSpecifier.class.getClassLoader());
     }
 
     public AvailableNetworkInfo(int subId, int priority, @NonNull List<String> mccMncs,
             @NonNull List<Integer> bands) {
+        this(subId, priority, mccMncs, bands,
+                new ArrayList<RadioAccessSpecifier>());
+    }
+
+    /** @hide */
+    private AvailableNetworkInfo(int subId, int priority, @NonNull List<String> mccMncs,
+            @NonNull List<Integer> bands, @NonNull List<RadioAccessSpecifier>
+            radioAccessSpecifiers) {
         mSubId = subId;
         mPriority = priority;
         mMccMncs = new ArrayList<String>(mccMncs);
         mBands = new ArrayList<Integer>(bands);
+        mRadioAccessSpecifiers = new ArrayList<RadioAccessSpecifier>(radioAccessSpecifiers);
     }
 
     @Override
@@ -177,12 +221,13 @@ public final class AvailableNetworkInfo implements Parcelable {
             && mPriority == ani.mPriority
             && (((mMccMncs != null)
             && mMccMncs.equals(ani.mMccMncs)))
-            && mBands.equals(ani.mBands));
+            && mBands.equals(ani.mBands))
+            && mRadioAccessSpecifiers.equals(ani.getRadioAccessSpecifiers());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSubId, mPriority, mMccMncs, mBands);
+        return Objects.hash(mSubId, mPriority, mMccMncs, mBands, mRadioAccessSpecifiers);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AvailableNetworkInfo> CREATOR =
@@ -204,6 +249,72 @@ public final class AvailableNetworkInfo implements Parcelable {
             + " mSubId: " + mSubId
             + " mPriority: " + mPriority
             + " mMccMncs: " + Arrays.toString(mMccMncs.toArray())
-            + " mBands: " + Arrays.toString(mBands.toArray()));
+            + " mBands: " + Arrays.toString(mBands.toArray())
+            + " mRadioAccessSpecifiers: " + Arrays.toString(mRadioAccessSpecifiers.toArray()));
+    }
+
+    /**
+     * Provides a convenient way to set the fields of a {@link AvailableNetworkInfo} when
+     * creating a new instance.
+     *
+     * <p>The example below shows how you might create a new {@code AvailableNetworkInfo}:
+     *
+     * <pre><code>
+     *
+     * AvailableNetworkInfo aNI = new AvailableNetworkInfo.Builder()
+     *     .setSubId(1)
+     *     .setPriority(AvailableNetworkInfo.PRIORITY_MED)
+     *     .build();
+     * </code></pre>
+     *
+     * @hide
+     */
+    public static final class Builder {
+        private int mSubId = Integer.MIN_VALUE;
+        private int mPriority = AvailableNetworkInfo.PRIORITY_LOW;
+        private ArrayList<String> mMccMncs = new ArrayList<>();
+        private ArrayList<Integer> mBands = new ArrayList<>();
+        private ArrayList<RadioAccessSpecifier> mRadioAccessSpecifiers = new ArrayList<>();
+
+        public @NonNull Builder setSubId(int subId) {
+            mSubId = subId;
+            return this;
+        }
+
+        public @NonNull Builder setPriority(int priority) {
+            if (priority > AvailableNetworkInfo.PRIORITY_LOW
+                    || priority < AvailableNetworkInfo.PRIORITY_HIGH) {
+                throw new IllegalArgumentException("A valid priority must be set");
+            }
+            mPriority = priority;
+            return this;
+        }
+
+        public @NonNull Builder setMccMncs(@NonNull ArrayList<String> mccMncs) {
+            Objects.requireNonNull(mccMncs, "A non-null ArrayList of mccmncs must be set. An empty "
+                    + "list is still accepted. Please read documentation in "
+                    + "AvailableNetworkService to see consequences of an empty Arraylist.");
+            mMccMncs = mccMncs;
+            return this;
+        }
+
+        public @NonNull Builder setRadioAccessSpecifiers(
+                @NonNull ArrayList<RadioAccessSpecifier> radioAccessSpecifiers) {
+            Objects.requireNonNull(radioAccessSpecifiers, "A non-null ArrayList of "
+                    + "RadioAccessSpecifiers must be set. An empty list is still accepted. Please "
+                    + "read documentation in AvailableNetworkService to see consequences of an "
+                    + "empty Arraylist.");
+            mRadioAccessSpecifiers = radioAccessSpecifiers;
+            return this;
+        }
+
+        public @NonNull AvailableNetworkInfo build() {
+            if (mSubId == Integer.MIN_VALUE) {
+                throw new IllegalArgumentException("A valid subId must be set");
+            }
+
+            return new AvailableNetworkInfo(mSubId, mPriority, mMccMncs, mBands,
+                    mRadioAccessSpecifiers);
+        }
     }
 }
