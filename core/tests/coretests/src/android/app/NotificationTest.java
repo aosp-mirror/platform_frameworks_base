@@ -399,6 +399,8 @@ public class NotificationTest {
             assertEquals(cDay.getSecondaryTextColor(), cNight.getSecondaryTextColor());
             assertEquals(cDay.getPrimaryAccentColor(), cNight.getPrimaryAccentColor());
             assertEquals(cDay.getSecondaryAccentColor(), cNight.getSecondaryAccentColor());
+            assertEquals(cDay.getTertiaryAccentColor(), cNight.getTertiaryAccentColor());
+            assertEquals(cDay.getOnAccentTextColor(), cNight.getOnAccentTextColor());
             assertEquals(cDay.getProtectionColor(), cNight.getProtectionColor());
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
@@ -413,20 +415,26 @@ public class NotificationTest {
         assertThat(c.getSecondaryTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getPrimaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getSecondaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getTertiaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getOnAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getErrorColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getContrastColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getRippleAlpha()).isAtLeast(0x00);
         assertThat(c.getRippleAlpha()).isAtMost(0xff);
 
-        // Assert that various colors have sufficient contrast
+        // Assert that various colors have sufficient contrast with the background
         assertContrastIsAtLeast(c.getPrimaryTextColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getSecondaryTextColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getPrimaryAccentColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getErrorColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getContrastColor(), c.getBackgroundColor(), 4.5);
 
-        // This accent color is only used for emphasized buttons
+        // These colors are only used for emphasized buttons; they do not need contrast
         assertContrastIsAtLeast(c.getSecondaryAccentColor(), c.getBackgroundColor(), 1);
+        assertContrastIsAtLeast(c.getTertiaryAccentColor(), c.getBackgroundColor(), 1);
+
+        // The text that is used within the accent color DOES need to have contrast
+        assertContrastIsAtLeast(c.getOnAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
     }
 
     private void assertContrastIsAtLeast(int foreground, int background, double minContrast) {
