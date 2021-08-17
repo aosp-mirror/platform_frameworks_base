@@ -178,6 +178,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
         // Ignore privacy icons because they show in the space above QQS
         updatePrivacyIconSlots();
+        mIconContainer.addIgnoredSlot(
+                getResources().getString(com.android.internal.R.string.status_bar_managed_profile));
         mIconContainer.setShouldRestrictIcons(false);
         mStatusBarIconController.addIconGroup(mIconManager);
 
