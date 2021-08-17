@@ -87,7 +87,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
-import static android.window.WindowContext.KEY_IS_WINDOW_PROVIDER_SERVICE;
+import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -1740,7 +1740,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // We allow WindowProviderService to add window other than windowContextType,
                     // but the WindowProviderService won't be associated with the window's
                     // WindowToken.
-                    if (!options.getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, false)) {
+                    if (!isWindowProviderService(options)) {
                         return WindowManagerGlobal.ADD_INVALID_TYPE;
                     }
                 } else {
