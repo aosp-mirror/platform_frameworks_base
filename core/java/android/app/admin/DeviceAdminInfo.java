@@ -37,11 +37,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,30 +54,6 @@ import java.util.HashMap;
  */
 public final class DeviceAdminInfo implements Parcelable {
     static final String TAG = "DeviceAdminInfo";
-
-    /**
-     * A type of policy that this device admin can use: profile owner on an organization-owned
-     * device.
-     *
-     * @hide
-     */
-    public static final int USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER = -3;
-
-    /**
-     * A type of policy that this device admin can use: device owner meta-policy
-     * for an admin that is designated as owner of the device.
-     *
-     * @hide
-     */
-    public static final int USES_POLICY_DEVICE_OWNER = -2;
-
-    /**
-     * A type of policy that this device admin can use: profile owner meta-policy
-     * for admins that have been installed as owner of some user profile.
-     *
-     * @hide
-     */
-    public static final int USES_POLICY_PROFILE_OWNER = -1;
 
     /**
      * A type of policy that this device admin can use: limit the passwords
@@ -496,16 +473,15 @@ public final class DeviceAdminInfo implements Parcelable {
     }
 
     /** @hide */
-    public void writePoliciesToXml(XmlSerializer out)
+    public void writePoliciesToXml(TypedXmlSerializer out)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        out.attribute(null, "flags", Integer.toString(mUsesPolicies));
+        out.attributeInt(null, "flags", mUsesPolicies);
     }
 
     /** @hide */
-    public void readPoliciesFromXml(XmlPullParser parser)
+    public void readPoliciesFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
-        mUsesPolicies = Integer.parseInt(
-                parser.getAttributeValue(null, "flags"));
+        mUsesPolicies = parser.getAttributeInt(null, "flags");
     }
 
     public void dump(Printer pw, String prefix) {

@@ -392,8 +392,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return null;
             }
 
-            ResourceClientProfile profile =
-                    new ResourceClientProfile(tvInputSessionId, priorityHint);
+            ResourceClientProfile profile = new ResourceClientProfile();
+            profile.tvInputSessionId = tvInputSessionId;
+            profile.useCase = priorityHint;
             ResourceClientProfile holderProfile = connection.getResourceClientProfileLocked();
             if (holderProfile != null && trm != null
                     && !trm.isHigherPriority(profile, holderProfile)) {

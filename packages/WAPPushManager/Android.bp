@@ -21,6 +21,7 @@ license {
 
 android_app {
     name: "WAPPushManager",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     platform_apis: true,
     libs: ["telephony-common"],

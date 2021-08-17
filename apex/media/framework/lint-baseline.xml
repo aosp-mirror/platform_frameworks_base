@@ -3,12 +3,67 @@
 
     <issue
         id="NewApi"
+        message="Call requires API level 31 (current min is 29): `new android.media.ApplicationMediaCapabilities.Builder`"
+        errorLine1="                            new ApplicationMediaCapabilities.Builder();"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/ApplicationMediaCapabilities.java"
+            line="208"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 29): `new android.media.ApplicationMediaCapabilities.Builder`"
+        errorLine1="        ApplicationMediaCapabilities.Builder builder = new ApplicationMediaCapabilities.Builder();"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/ApplicationMediaCapabilities.java"
+            line="314"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.RemoteException#rethrowFromSystemServer`"
+        errorLine1="            e.rethrowFromSystemServer();"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaCommunicationManager.java"
+            line="110"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.Parcel#writeParcelableCreator`"
+        errorLine1="        dest.writeParcelableCreator((Parcelable) parcelable);"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParceledListSlice.java"
+            line="77"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.Parcel#readParcelableCreator`"
+        errorLine1="        return from.readParcelableCreator(loader);"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParceledListSlice.java"
+            line="82"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
         message="Field requires API level R (current min is 29): `android.media.MediaParser.TrackData#mediaFormat`"
         errorLine1="            this.mediaFormat = mediaFormat;"
         errorLine2="            ~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="271"
+            line="273"
             column="13"/>
     </issue>
 
@@ -19,7 +74,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="272"
+            line="274"
             column="13"/>
     </issue>
 
@@ -30,7 +85,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="293"
+            line="295"
             column="13"/>
     </issue>
 
@@ -41,7 +96,7 @@
         errorLine2="            ~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="294"
+            line="296"
             column="13"/>
     </issue>
 
@@ -52,7 +107,7 @@
         errorLine2="                                                                 ~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="300"
+            line="302"
             column="66"/>
     </issue>
 
@@ -63,7 +118,7 @@
         errorLine2="                                    ~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="300"
+            line="302"
             column="37"/>
     </issue>
 
@@ -74,7 +129,7 @@
         errorLine2="                               ~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="311"
+            line="313"
             column="32"/>
     </issue>
 
@@ -85,7 +140,7 @@
         errorLine2="                                                     ~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="312"
+            line="314"
             column="54"/>
     </issue>
 
@@ -96,7 +151,7 @@
         errorLine2="                                                                 ~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="312"
+            line="314"
             column="66"/>
     </issue>
 
@@ -107,7 +162,7 @@
         errorLine2="                   ~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="312"
+            line="314"
             column="20"/>
     </issue>
 
@@ -118,7 +173,7 @@
         errorLine2="                                 ~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="312"
+            line="314"
             column="34"/>
     </issue>
 
@@ -129,7 +184,7 @@
         errorLine2="                               ~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="317"
+            line="319"
             column="32"/>
     </issue>
 
@@ -140,7 +195,7 @@
         errorLine2="                                         ~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="318"
+            line="320"
             column="42"/>
     </issue>
 
@@ -151,8 +206,19 @@
         errorLine2="                                                 ~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="350"
+            line="352"
             column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 31 (current min is 29): `android.media.metrics.LogSessionId#LOG_SESSION_ID_NONE`"
+        errorLine1="    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1071"
+            column="51"/>
     </issue>
 
     <issue
@@ -162,7 +228,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1198"
+            line="1201"
             column="39"/>
     </issue>
 
@@ -173,7 +239,7 @@
         errorLine2="                                   ~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1284"
+            line="1287"
             column="36"/>
     </issue>
 
@@ -184,7 +250,7 @@
         errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1285"
+            line="1288"
             column="38"/>
     </issue>
 
@@ -195,7 +261,7 @@
         errorLine2="                            ~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1287"
+            line="1290"
             column="29"/>
     </issue>
 
@@ -206,7 +272,7 @@
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1287"
+            line="1290"
             column="49"/>
     </issue>
 
@@ -217,7 +283,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1566"
+            line="1579"
             column="21"/>
     </issue>
 
@@ -228,7 +294,7 @@
         errorLine2="                                                            ~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1859"
+            line="1872"
             column="61"/>
     </issue>
 
@@ -239,7 +305,7 @@
         errorLine2="                                                                   ~~~~~~~~~~~">
         <location
             file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
-            line="1892"
+            line="1905"
             column="68"/>
     </issue>
 

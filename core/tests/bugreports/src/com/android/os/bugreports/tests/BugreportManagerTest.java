@@ -389,6 +389,7 @@ public class BugreportManagerTest {
         final File f = File.createTempFile(prefix, extension);
         f.setReadable(true, true);
         f.setWritable(true, true);
+
         f.deleteOnExit();
         return f;
     }

@@ -168,12 +168,17 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
 
     /**
      * Enable automatic zero-initialization of native heap memory allocations.
      */
     public static final int NATIVE_HEAP_ZERO_INIT = 1 << 23;
+
+    /**
+     * Enable profiling from system services. This loads profiling related plugins in ART.
+     */
+    public static final int PROFILEABLE = 1 << 24;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;

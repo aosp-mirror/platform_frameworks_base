@@ -19,6 +19,13 @@ package android.view;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsSourceConsumerProto.HAS_WINDOW_FOCUS;
+import static android.view.InsetsSourceConsumerProto.INTERNAL_INSETS_TYPE;
+import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
+import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
+import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
+import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
@@ -26,8 +33,11 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
@@ -36,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -72,6 +83,11 @@ public class InsetsSourceConsumer {
     private final Supplier<Transaction> mTransactionSupplier;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
+
+    /**
+     * Whether the view has focus returned by {@link #onWindowFocusGained(boolean)}.
+     */
+    private boolean mHasViewFocusWhenWindowFocusGain;
     private Rect mPendingFrame;
     private Rect mPendingVisibleFrame;
 
@@ -101,7 +117,15 @@ public class InsetsSourceConsumer {
      */
     public void setControl(@Nullable InsetsSourceControl control,
             @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
-        if (mSourceControl == control) {
+        if (mType == ITYPE_IME) {
+            ImeTracing.getInstance().triggerClientDump("InsetsSourceConsumer#setControl",
+                    mController.getHost().getInputMethodManager(), null /* icProto */);
+        }
+        if (Objects.equals(mSourceControl, control)) {
+            if (mSourceControl != null && mSourceControl != control) {
+                mSourceControl.release(SurfaceControl::release);
+                mSourceControl = control;
+            }
             return;
         }
         SurfaceControl oldLeash = mSourceControl != null ? mSourceControl.getLeash() : null;
@@ -160,7 +184,9 @@ public class InsetsSourceConsumer {
                 if (oldLeash == null || newLeash == null || !oldLeash.isSameSurface(newLeash)) {
                     applyHiddenToControl();
                 }
-                if (!requestedVisible && !mIsAnimationPending) {
+
+                // Remove the surface that owned by last control when it lost.
+                if (!requestedVisible && !mIsAnimationPending && lastControl == null) {
                     removeSurface();
                 }
             }
@@ -210,8 +236,9 @@ public class InsetsSourceConsumer {
     /**
      * Called when current window gains focus
      */
-    public void onWindowFocusGained() {
+    public void onWindowFocusGained(boolean hasViewFocus) {
         mHasWindowFocus = true;
+        mHasViewFocusWhenWindowFocusGain = hasViewFocus;
     }
 
     /**
@@ -221,14 +248,20 @@ public class InsetsSourceConsumer {
         mHasWindowFocus = false;
     }
 
-    boolean hasWindowFocus() {
-        return mHasWindowFocus;
+    boolean hasViewFocusWhenWindowFocusGain() {
+        return mHasViewFocusWhenWindowFocusGain;
     }
 
     boolean applyLocalVisibilityOverride() {
         final InsetsSource source = mState.peekSource(mType);
         final boolean isVisible = source != null ? source.isVisible() : getDefaultVisibility(mType);
         final boolean hasControl = mSourceControl != null;
+
+        if (mType == ITYPE_IME) {
+            ImeTracing.getInstance().triggerClientDump(
+                    "InsetsSourceConsumer#applyLocalVisibilityOverride",
+                    mController.getHost().getInputMethodManager(), null /* icProto */);
+        }
 
         // We still need to let the legacy app know the visibility change even if we don't have the
         // control. If we don't have the source, we don't change the requested visibility for making
@@ -337,7 +370,17 @@ public class InsetsSourceConsumer {
     protected void setRequestedVisible(boolean requestedVisible) {
         if (mRequestedVisible != requestedVisible) {
             mRequestedVisible = requestedVisible;
-            mIsAnimationPending = false;
+
+            // We need an animation later if the leash of a real control (which has an insets hint)
+            // is not ready. The !mIsAnimationPending check is in case that the requested visibility
+            // is changed twice before playing the animation -- we don't need an animation in this
+            // case.
+            mIsAnimationPending = !mIsAnimationPending
+                    && mSourceControl != null
+                    && mSourceControl.getLeash() == null
+                    && !Insets.NONE.equals(mSourceControl.getInsetsHint());
+
+            mController.onRequestedVisibilityChanged(this);
             if (DEBUG) Log.d(TAG, "setRequestedVisible: " + requestedVisible);
         }
         if (applyLocalVisibilityOverride()) {
@@ -359,5 +402,22 @@ public class InsetsSourceConsumer {
         }
         t.apply();
         onPerceptible(mRequestedVisible);
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(INTERNAL_INSETS_TYPE, InsetsState.typeToString(mType));
+        proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
+        proto.write(IS_REQUESTED_VISIBLE, mRequestedVisible);
+        if (mSourceControl != null) {
+            mSourceControl.dumpDebug(proto, SOURCE_CONTROL);
+        }
+        if (mPendingFrame != null) {
+            mPendingFrame.dumpDebug(proto, PENDING_FRAME);
+        }
+        if (mPendingVisibleFrame != null) {
+            mPendingVisibleFrame.dumpDebug(proto, PENDING_VISIBLE_FRAME);
+        }
+        proto.end(token);
     }
 }

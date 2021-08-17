@@ -89,6 +89,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -228,7 +229,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final String TEST_SSID = "AndroidAP";
     private static final String TEST_IMSI = "310210";
     private static final int TEST_SUB_ID = 42;
-    private static final int TEST_NET_ID = 24;
+    private static final Network TEST_NETWORK = mock(Network.class, CALLS_REAL_METHODS);
+
 
     private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
     private static NetworkTemplate sTemplateCarrierMetered =
@@ -1640,7 +1642,7 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testOpportunisticQuota() throws Exception {
-        final Network net = new Network(TEST_NET_ID);
+        final Network net = TEST_NETWORK;
         final NetworkPolicyManagerInternal internal = LocalServices
                 .getService(NetworkPolicyManagerInternal.class);
 
@@ -1762,11 +1764,10 @@ public class NetworkPolicyManagerServiceTest {
             assertNotNull(callback);
             expectNetworkStateSnapshot(true /* roaming */);
             callback.onCapabilitiesChanged(
-                    new Network(TEST_NET_ID),
-                    buildNetworkCapabilities(TEST_SUB_ID, true /* roaming */));
+                    TEST_NETWORK, buildNetworkCapabilities(TEST_SUB_ID, true /* roaming */));
 
             assertEquals(0, internal.getSubscriptionOpportunisticQuota(
-                    new Network(TEST_NET_ID), NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH));
+                    TEST_NETWORK, NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH));
         }
     }
 
@@ -2051,14 +2052,14 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private NetworkCapabilities buildNetworkCapabilities(int subId, boolean roaming) {
-        final NetworkCapabilities nc = new NetworkCapabilities();
-        nc.addTransportType(TRANSPORT_CELLULAR);
+        final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
+        builder.addTransportType(TRANSPORT_CELLULAR);
         if (!roaming) {
-            nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
+            builder.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-        nc.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+        builder.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
                 .setSubscriptionId(subId).build());
-        return nc;
+        return builder.build();
     }
 
     private NetworkPolicy buildDefaultFakeCarrierPolicy() {
@@ -2099,10 +2100,9 @@ public class NetworkPolicyManagerServiceTest {
     private static NetworkStateSnapshot buildWifi() {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
-        networkCapabilities.addTransportType(TRANSPORT_WIFI);
-        networkCapabilities.setSSID(TEST_SSID);
-        return new NetworkStateSnapshot(new Network(TEST_NET_ID), networkCapabilities, prop,
+        final NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
+                .addTransportType(TRANSPORT_WIFI).setSsid(TEST_SSID).build();
+        return new NetworkStateSnapshot(TEST_NETWORK, networkCapabilities, prop,
                 null /*subscriberId*/, TYPE_WIFI);
     }
 
@@ -2124,7 +2124,7 @@ public class NetworkPolicyManagerServiceTest {
         when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
                 .thenReturn(mCarrierConfig);
         List<NetworkStateSnapshot> snapshots = List.of(new NetworkStateSnapshot(
-                new Network(TEST_NET_ID),
+                TEST_NETWORK,
                 buildNetworkCapabilities(TEST_SUB_ID, roaming),
                 buildLinkProperties(TEST_IFACE), TEST_IMSI, TYPE_MOBILE));
         when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);

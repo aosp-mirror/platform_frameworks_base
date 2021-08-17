@@ -14,9 +14,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.NotificationChannel;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
@@ -78,7 +80,7 @@ public class NotificationListenerWithPlugins extends NotificationListenerService
 
     /**
      * Called when listener receives a onNotificationPosted.
-     * Returns true to indicate this callback should be skipped.
+     * Returns true if there's a plugin determining to skip the default callbacks.
      */
     public boolean onPluginNotificationPosted(StatusBarNotification sbn,
             final RankingMap rankingMap) {
@@ -92,12 +94,26 @@ public class NotificationListenerWithPlugins extends NotificationListenerService
 
     /**
      * Called when listener receives a onNotificationRemoved.
-     * Returns true to indicate this callback should be skipped.
+     * Returns true if there's a plugin determining to skip the default callbacks.
      */
     public boolean onPluginNotificationRemoved(StatusBarNotification sbn,
             final RankingMap rankingMap) {
         for (NotificationListenerController plugin : mPlugins) {
             if (plugin.onNotificationRemoved(sbn, rankingMap)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called when listener receives a onNotificationChannelModified.
+     * Returns true if there's a plugin determining to skip the default callbacks.
+     */
+    public boolean onPluginNotificationChannelModified(
+            String pkgName, UserHandle user, NotificationChannel channel, int modificationType) {
+        for (NotificationListenerController plugin : mPlugins) {
+            if (plugin.onNotificationChannelModified(pkgName, user, channel, modificationType)) {
                 return true;
             }
         }

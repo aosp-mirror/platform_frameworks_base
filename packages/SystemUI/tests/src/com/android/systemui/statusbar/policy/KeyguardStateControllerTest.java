@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,12 +50,14 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private LockPatternUtils mLockPatternUtils;
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private SmartspaceTransitionController mSmartSpaceTransitionController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mKeyguardStateController = new KeyguardStateControllerImpl(mContext,
-                mKeyguardUpdateMonitor, mLockPatternUtils);
+                mKeyguardUpdateMonitor, mLockPatternUtils, mSmartSpaceTransitionController);
     }
 
     @Test
@@ -141,6 +144,16 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
         ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
 
         verify(callback).onUnlockedChanged();
+    }
+
+    @Test
+    public void testKeyguardDismissAmountCallbackInvoked() {
+        KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
+        mKeyguardStateController.addCallback(callback);
+
+        mKeyguardStateController.notifyKeyguardDismissAmountChanged(100f, false);
+
+        verify(callback).onKeyguardDismissAmountChanged();
     }
 
 }

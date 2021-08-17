@@ -272,7 +272,8 @@ public class ThumbnailUtils {
         if (mimeType.equals("image/heif")
                 || mimeType.equals("image/heif-sequence")
                 || mimeType.equals("image/heic")
-                || mimeType.equals("image/heic-sequence")) {
+                || mimeType.equals("image/heic-sequence")
+                || mimeType.equals("image/avif")) {
             try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
                 retriever.setDataSource(file.getAbsolutePath());
                 bitmap = retriever.getThumbnailImageAtIndex(-1,

@@ -27,6 +27,17 @@ using ::testing::SizeIs;
 
 namespace aapt {
 
+// Test that a max package name size 223 is valid.
+static const std::string kMaxPackageName =
+    "com.foo.nameRw8ajIGbYmqPuO0K7TYJFsI2pjlDAS0pYOYQlJvtQux"
+    "SoBKV1hMyNh4XfmcMj8OgPHfFaTXeKEHFMdGQHpw9Dz9Uqr8h1krgJLRv2aXyPCsGdVwBJzfZ4COVRiX3sc9O"
+    "CUrTTvZe6wXlgKb5Qz5qdkTBZ5euzGeoyZwestDTBIgT5exAl5efnznwzceS7VsIntgY10UUQvaoTsLBO6l";
+// Test that a long package name size 224 is invalid.
+static const std::string kLongPackageName =
+    "com.foo.nameRw8ajIGbYmqPuO0K7TYJFsI2pjlDAS0pYOYQlJvtQu"
+    "xSoBKV1hMyNh4XfmcMj8OgPHfFaTXeKEHFMdGQHpw9Dz9Uqr8h1krgJLRv2aXyPCsGdVwBJzfZ4COVRiX3sc9O"
+    "CUrTTvZe6wXlgKb5Qz5qdkTBZ5euzGeoyZwestDTBIgT5exAl5efnznwzceS7VsIntgY10UUQvaoTsLBO6le";
+
 TEST(UtilTest, TrimOnlyWhitespace) {
   const StringPiece trimmed = util::TrimWhitespace("\n        ");
   EXPECT_TRUE(trimmed.empty());
@@ -108,6 +119,7 @@ TEST(UtilTest, IsAndroidPackageName) {
   EXPECT_TRUE(util::IsAndroidPackageName("com.foo.test_thing"));
   EXPECT_TRUE(util::IsAndroidPackageName("com.foo.testing_thing_"));
   EXPECT_TRUE(util::IsAndroidPackageName("com.foo.test_99_"));
+  EXPECT_TRUE(util::IsAndroidPackageName(kMaxPackageName));
 
   EXPECT_FALSE(util::IsAndroidPackageName("android._test"));
   EXPECT_FALSE(util::IsAndroidPackageName("com"));
@@ -116,6 +128,27 @@ TEST(UtilTest, IsAndroidPackageName) {
   EXPECT_FALSE(util::IsAndroidPackageName(".android"));
   EXPECT_FALSE(util::IsAndroidPackageName(".."));
   EXPECT_FALSE(util::IsAndroidPackageName("cøm.foo"));
+  EXPECT_FALSE(util::IsAndroidPackageName(kLongPackageName));
+}
+
+TEST(UtilTest, IsAndroidSharedUserId) {
+  EXPECT_TRUE(util::IsAndroidSharedUserId("android", "foo"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", "android.test"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", "com.foo"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", "com.foo.test_thing"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", "com.foo.testing_thing_"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", "com.foo.test_99_"));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", ""));
+  EXPECT_TRUE(util::IsAndroidSharedUserId("com.foo", kMaxPackageName));
+
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", "android._test"));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", "com"));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", "_android"));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", "android."));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", ".android"));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", ".."));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", "cøm.foo"));
+  EXPECT_FALSE(util::IsAndroidSharedUserId("com.foo", kLongPackageName));
 }
 
 TEST(UtilTest, FullyQualifiedClassName) {

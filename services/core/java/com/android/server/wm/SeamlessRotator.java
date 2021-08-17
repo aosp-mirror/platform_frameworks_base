@@ -35,9 +35,6 @@ import java.io.StringWriter;
  * Helper class for seamless rotation.
  *
  * Works by transforming the {@link WindowState} back into the old display rotation.
- *
- * Uses {@link Transaction#deferTransactionUntil(SurfaceControl, IBinder, long)} instead of
- * latching on the buffer size to allow for seamless 180 degree rotations.
  */
 public class SeamlessRotator {
 
@@ -103,23 +100,12 @@ public class SeamlessRotator {
      * Removing the transform and the result of the {@link WindowState} layout are both tied to the
      * {@link WindowState} next frame, such that they apply at the same time the client draws the
      * window in the new orientation.
-     *
-     * In the case of a rotation timeout, we want to remove the transform immediately and not defer
-     * it.
      */
-    public void finish(WindowState win, boolean timeout) {
-        final Transaction t = win.getPendingTransaction();
-        finish(t, win);
-        if (win.mWinAnimator.mSurfaceController != null && !timeout) {
-            t.deferTransactionUntil(win.mSurfaceControl,
-                    win.getClientViewRootSurface(), win.getFrameNumber());
-            t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
-                    win.getClientViewRootSurface(), win.getFrameNumber());
-        }
-    }
-
-    /** Removes the transform and restore to the original last position. */
     void finish(Transaction t, WindowContainer win) {
+        if (win.mSurfaceControl == null || !win.mSurfaceControl.isValid()) {
+            return;
+        }
+
         mTransform.reset();
         t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
         t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);

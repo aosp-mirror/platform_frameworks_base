@@ -47,4 +47,19 @@ bool UidHasWriteAccessToPath(uid_t uid ATTRIBUTE_UNUSED, const std::string& path
 }
 #endif
 
+std::string RandomStringForPath(const size_t length) {
+  constexpr char kChars[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  constexpr size_t kCharLastIndex = sizeof(kChars) - 1;
+
+  std::string out_rand;
+  out_rand.reserve(length);
+
+  std::random_device rd;
+  std::uniform_int_distribution<int> dist(0, kCharLastIndex);
+  for (size_t i = 0; i < length; i++) {
+    out_rand[i] = kChars[dist(rd) % (kCharLastIndex)];
+  }
+  return out_rand;
+}
+
 }  // namespace android::idmap2::utils

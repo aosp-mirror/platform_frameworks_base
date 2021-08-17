@@ -54,7 +54,6 @@ TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
 TEST(AutoVersionerTest, VersionStylesForTable) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("app", 0x7f)
           .AddValue(
               "app:style/Foo", test::ParseConfigOrDie("v4"),
               ResourceId(0x7f020000),

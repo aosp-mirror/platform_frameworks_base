@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 
+#include "ResourceUtils.h"
 #include "Result.h"
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
@@ -29,8 +30,7 @@
 
 namespace android::idmap2 {
 
-class XmlParser {
- public:
+struct XmlParser {
   using Event = ResXMLParser::event_code_t;
   class iterator;
 
@@ -39,8 +39,11 @@ class XmlParser {
     Event event() const;
     std::string name() const;
 
-    Result<std::string> GetAttributeStringValue(const std::string& name) const;
     Result<Res_value> GetAttributeValue(const std::string& name) const;
+    Result<Res_value> GetAttributeValue(ResourceId attr, const std::string& label) const;
+
+    Result<std::string> GetAttributeStringValue(const std::string& name) const;
+    Result<std::string> GetAttributeStringValue(ResourceId attr, const std::string& label) const;
 
     bool operator==(const Node& rhs) const;
     bool operator!=(const Node& rhs) const;
@@ -123,23 +126,19 @@ class XmlParser {
   };
 
   // Creates a new xml parser beginning at the first tag.
-  static Result<std::unique_ptr<const XmlParser>> Create(const void* data, size_t size,
-                                                         bool copy_data = false);
-  ~XmlParser();
+  static Result<XmlParser> Create(const void* data, size_t size, bool copy_data = false);
 
   inline iterator tree_iterator() const {
-    return iterator(tree_);
+    return iterator(*tree_);
   }
 
   inline const ResStringPool& get_strings() const {
-    return tree_.getStrings();
+    return tree_->getStrings();
   }
 
  private:
-  XmlParser() = default;
-  mutable ResXMLTree tree_;
-
-  DISALLOW_COPY_AND_ASSIGN(XmlParser);
+  explicit XmlParser(std::unique_ptr<ResXMLTree> tree);
+  mutable std::unique_ptr<ResXMLTree> tree_;
 };
 
 }  // namespace android::idmap2

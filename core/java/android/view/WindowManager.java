@@ -17,6 +17,27 @@
 package android.view;
 
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.View.STATUS_BAR_DISABLE_BACK;
+import static android.view.View.STATUS_BAR_DISABLE_CLOCK;
+import static android.view.View.STATUS_BAR_DISABLE_EXPAND;
+import static android.view.View.STATUS_BAR_DISABLE_HOME;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
+import static android.view.View.STATUS_BAR_DISABLE_RECENT;
+import static android.view.View.STATUS_BAR_DISABLE_SEARCH;
+import static android.view.View.STATUS_BAR_DISABLE_SYSTEM_INFO;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
+import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowInsets.Side.BOTTOM;
 import static android.view.WindowInsets.Side.LEFT;
 import static android.view.WindowInsets.Side.RIGHT;
@@ -60,8 +81,11 @@ import static android.view.WindowLayoutParamsProto.X;
 import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -69,18 +93,23 @@ import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.Gravity.GravityFlags;
 import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Side.InsetsSide;
@@ -93,6 +122,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * The interface that apps use to talk to the window manager.
@@ -131,187 +162,263 @@ public interface WindowManager extends ViewManager {
     /** @hide */
     String INPUT_CONSUMER_RECENTS_ANIMATION = "recents_animation_input_consumer";
 
+    /** @hide */
+    int SHELL_ROOT_LAYER_DIVIDER = 0;
+    /** @hide */
+    int SHELL_ROOT_LAYER_PIP = 1;
+
+    /**
+     * Declares the layer the shell root will belong to. This is for z-ordering.
+     * @hide
+     */
+    @IntDef(prefix = { "SHELL_ROOT_LAYER_" }, value = {
+            SHELL_ROOT_LAYER_DIVIDER,
+            SHELL_ROOT_LAYER_PIP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ShellRootLayer {}
+
     /**
      * Not set up for a transition.
      * @hide
      */
-    int TRANSIT_UNSET = -1;
+    int TRANSIT_OLD_UNSET = -1;
 
     /**
      * No animation for transition.
      * @hide
      */
-    int TRANSIT_NONE = 0;
+    int TRANSIT_OLD_NONE = 0;
 
     /**
      * A window in a new activity is being opened on top of an existing one in the same task.
      * @hide
      */
-    int TRANSIT_ACTIVITY_OPEN = 6;
+    int TRANSIT_OLD_ACTIVITY_OPEN = 6;
 
     /**
      * The window in the top-most activity is being closed to reveal the previous activity in the
      * same task.
      * @hide
      */
-    int TRANSIT_ACTIVITY_CLOSE = 7;
+    int TRANSIT_OLD_ACTIVITY_CLOSE = 7;
 
     /**
      * A window in a new task is being opened on top of an existing one in another activity's task.
      * @hide
      */
-    int TRANSIT_TASK_OPEN = 8;
+    int TRANSIT_OLD_TASK_OPEN = 8;
 
     /**
      * A window in the top-most activity is being closed to reveal the previous activity in a
      * different task.
      * @hide
      */
-    int TRANSIT_TASK_CLOSE = 9;
+    int TRANSIT_OLD_TASK_CLOSE = 9;
 
     /**
      * A window in an existing task is being displayed on top of an existing one in another
      * activity's task.
      * @hide
      */
-    int TRANSIT_TASK_TO_FRONT = 10;
+    int TRANSIT_OLD_TASK_TO_FRONT = 10;
 
     /**
      * A window in an existing task is being put below all other tasks.
      * @hide
      */
-    int TRANSIT_TASK_TO_BACK = 11;
+    int TRANSIT_OLD_TASK_TO_BACK = 11;
 
     /**
      * A window in a new activity that doesn't have a wallpaper is being opened on top of one that
      * does, effectively closing the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_CLOSE = 12;
+    int TRANSIT_OLD_WALLPAPER_CLOSE = 12;
 
     /**
      * A window in a new activity that does have a wallpaper is being opened on one that didn't,
      * effectively opening the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_OPEN = 13;
+    int TRANSIT_OLD_WALLPAPER_OPEN = 13;
 
     /**
      * A window in a new activity is being opened on top of an existing one, and both are on top
      * of the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
+    int TRANSIT_OLD_WALLPAPER_INTRA_OPEN = 14;
 
     /**
      * The window in the top-most activity is being closed to reveal the previous activity, and
      * both are on top of the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+    int TRANSIT_OLD_WALLPAPER_INTRA_CLOSE = 15;
 
     /**
      * A window in a new task is being opened behind an existing one in another activity's task.
      * The new window will show briefly and then be gone.
      * @hide
      */
-    int TRANSIT_TASK_OPEN_BEHIND = 16;
+    int TRANSIT_OLD_TASK_OPEN_BEHIND = 16;
 
     /**
      * An activity is being relaunched (e.g. due to configuration change).
      * @hide
      */
-    int TRANSIT_ACTIVITY_RELAUNCH = 18;
-
-    /**
-     * A task is being docked from recents.
-     * @hide
-     */
-    int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
+    int TRANSIT_OLD_ACTIVITY_RELAUNCH = 18;
 
     /**
      * Keyguard is going away.
      * @hide
      */
-    int TRANSIT_KEYGUARD_GOING_AWAY = 20;
+    int TRANSIT_OLD_KEYGUARD_GOING_AWAY = 20;
 
     /**
      * Keyguard is going away with showing an activity behind that requests wallpaper.
      * @hide
      */
-    int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
+    int TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
 
     /**
      * Keyguard is being occluded.
      * @hide
      */
-    int TRANSIT_KEYGUARD_OCCLUDE = 22;
+    int TRANSIT_OLD_KEYGUARD_OCCLUDE = 22;
 
     /**
      * Keyguard is being unoccluded.
      * @hide
      */
-    int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
+    int TRANSIT_OLD_KEYGUARD_UNOCCLUDE = 23;
 
     /**
      * A translucent activity is being opened.
      * @hide
      */
-    int TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+    int TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN = 24;
 
     /**
      * A translucent activity is being closed.
      * @hide
      */
-    int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+    int TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE = 25;
 
     /**
      * A crashing activity is being closed.
      * @hide
      */
-    int TRANSIT_CRASHING_ACTIVITY_CLOSE = 26;
+    int TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE = 26;
 
     /**
      * A task is changing windowing modes
      * @hide
      */
-    int TRANSIT_TASK_CHANGE_WINDOWING_MODE = 27;
+    int TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE = 27;
 
     /**
-     * A display which can only contain one task is being shown because the first activity is
-     * started or it's being turned on.
      * @hide
      */
-    int TRANSIT_SHOW_SINGLE_TASK_DISPLAY = 28;
+    @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
+            TRANSIT_OLD_UNSET,
+            TRANSIT_OLD_NONE,
+            TRANSIT_OLD_ACTIVITY_OPEN,
+            TRANSIT_OLD_ACTIVITY_CLOSE,
+            TRANSIT_OLD_TASK_OPEN,
+            TRANSIT_OLD_TASK_CLOSE,
+            TRANSIT_OLD_TASK_TO_FRONT,
+            TRANSIT_OLD_TASK_TO_BACK,
+            TRANSIT_OLD_WALLPAPER_CLOSE,
+            TRANSIT_OLD_WALLPAPER_OPEN,
+            TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
+            TRANSIT_OLD_WALLPAPER_INTRA_CLOSE,
+            TRANSIT_OLD_TASK_OPEN_BEHIND,
+            TRANSIT_OLD_ACTIVITY_RELAUNCH,
+            TRANSIT_OLD_KEYGUARD_GOING_AWAY,
+            TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+            TRANSIT_OLD_KEYGUARD_OCCLUDE,
+            TRANSIT_OLD_KEYGUARD_UNOCCLUDE,
+            TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
+            TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
+            TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
+            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionOldType {}
+
+    /** @hide */
+    int TRANSIT_NONE = 0;
+    /**
+     * A window that didn't exist before has been created and made visible.
+     * @hide
+     */
+    int TRANSIT_OPEN = 1;
+    /**
+     * A window that was visible no-longer exists (was finished or destroyed).
+     * @hide
+     */
+    int TRANSIT_CLOSE = 2;
+    /**
+     * A window that already existed but was not visible is made visible.
+     * @hide
+     */
+    int TRANSIT_TO_FRONT = 3;
+    /**
+     * A window that was visible is made invisible but still exists.
+     * @hide
+     */
+    int TRANSIT_TO_BACK = 4;
+    /** @hide */
+    int TRANSIT_RELAUNCH = 5;
+    /**
+     * A window is visible before and after but changes in some way (eg. it resizes or changes
+     * windowing-mode).
+     * @hide
+     */
+    int TRANSIT_CHANGE = 6;
+    /**
+     * The keyguard was visible and has been dismissed.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_GOING_AWAY = 7;
+    /**
+     * A window is appearing above a locked keyguard.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_OCCLUDE = 8;
+    /**
+     * A window is made invisible revealing a locked keyguard.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
+    /**
+     * The first slot for custom transition types. Callers (like Shell) can make use of custom
+     * transition types for dealing with special cases. These types are effectively ignored by
+     * Core and will just be passed along as part of TransitionInfo objects. An example is
+     * split-screen using a custom type for it's snap-to-dismiss action. By using a custom type,
+     * Shell can properly dispatch the results of that transition to the split-screen
+     * implementation.
+     * @hide
+     */
+    int TRANSIT_FIRST_CUSTOM = 10;
 
     /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
-            TRANSIT_UNSET,
             TRANSIT_NONE,
-            TRANSIT_ACTIVITY_OPEN,
-            TRANSIT_ACTIVITY_CLOSE,
-            TRANSIT_TASK_OPEN,
-            TRANSIT_TASK_CLOSE,
-            TRANSIT_TASK_TO_FRONT,
-            TRANSIT_TASK_TO_BACK,
-            TRANSIT_WALLPAPER_CLOSE,
-            TRANSIT_WALLPAPER_OPEN,
-            TRANSIT_WALLPAPER_INTRA_OPEN,
-            TRANSIT_WALLPAPER_INTRA_CLOSE,
-            TRANSIT_TASK_OPEN_BEHIND,
-            TRANSIT_ACTIVITY_RELAUNCH,
-            TRANSIT_DOCK_TASK_FROM_RECENTS,
+            TRANSIT_OPEN,
+            TRANSIT_CLOSE,
+            TRANSIT_TO_FRONT,
+            TRANSIT_TO_BACK,
+            TRANSIT_RELAUNCH,
+            TRANSIT_CHANGE,
             TRANSIT_KEYGUARD_GOING_AWAY,
-            TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
-            TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
-            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
-            TRANSIT_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_TASK_CHANGE_WINDOWING_MODE,
-            TRANSIT_SHOW_SINGLE_TASK_DISPLAY
+            TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}
@@ -341,12 +448,35 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: App is crashed.
+     * @hide
+     */
+    int TRANSIT_FLAG_APP_CRASHED = 0x10;
+
+    /**
+     * Transition flag: A window in a new task is being opened behind an existing one in another
+     * activity's task.
+     * @hide
+     */
+    int TRANSIT_FLAG_OPEN_BEHIND = 0x20;
+
+    /**
+     * Transition flag: The keyguard is locked throughout the whole transition.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_APP_CRASHED,
+            TRANSIT_FLAG_OPEN_BEHIND,
+            TRANSIT_FLAG_KEYGUARD_LOCKED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -380,6 +510,40 @@ public interface WindowManager extends ViewManager {
             REMOVE_CONTENT_MODE_DESTROY,
     })
     @interface RemoveContentMode {}
+
+    /**
+     * Display IME Policy: The IME should appear on the local display.
+     * @hide
+     */
+    @TestApi
+    int DISPLAY_IME_POLICY_LOCAL = 0;
+
+    /**
+     * Display IME Policy: The IME should appear on the fallback display.
+     * @hide
+     */
+    @TestApi
+    int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1;
+
+    /**
+     * Display IME Policy: The IME should be hidden.
+     *
+     * Setting this policy will prevent the IME from making a connection. This
+     * will prevent any IME from receiving metadata about input.
+     * @hide
+     */
+    @TestApi
+    int DISPLAY_IME_POLICY_HIDE = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef({
+            DISPLAY_IME_POLICY_LOCAL,
+            DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
+            DISPLAY_IME_POLICY_HIDE,
+    })
+    @interface DisplayImePolicy {}
 
     /**
      * Exception that is thrown when trying to add view whose
@@ -451,6 +615,10 @@ public interface WindowManager extends ViewManager {
      * For example, for activities in multi-window mode, the metrics returned are based on the
      * current bounds that the user has selected for the {@link android.app.Activity Activity}'s
      * task.
+     * <p>
+     * In most scenarios, {@link #getCurrentWindowMetrics()} rather than
+     * {@link #getMaximumWindowMetrics()} is the correct API to use, since it ensures values reflect
+     * window size when the app is not fullscreen.
      *
      * @see #getMaximumWindowMetrics()
      * @see WindowMetrics
@@ -462,21 +630,31 @@ public interface WindowManager extends ViewManager {
     /**
      * Returns the largest {@link WindowMetrics} an app may expect in the current system state.
      * <p>
-     * The metrics describe the size of the largest potential area the window might occupy with
-     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
-     * <p>
      * The value of this is based on the largest <b>potential</b> windowing state of the system.
      *
      * For example, for activities in multi-window mode, the metrics returned are based on the
      * what the bounds would be if the user expanded the {@link android.app.Activity Activity}'s
      * task to cover the entire screen.
-     *
+     * <p>
+     * The metrics describe the size of the largest potential area the window might occupy with
+     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
+     * such a window would have.
+     * <p>
      * Note that this might still be smaller than the size of the physical display if certain areas
      * of the display are not available to windows created in this {@link Context}.
      *
-     * @see #getMaximumWindowMetrics()
+     * For example, given that there's a device which have a multi-task mode to limit activities
+     * to a half screen. In this case, {@link #getMaximumWindowMetrics()} reports the bounds of
+     * the half screen which the activity is located.
+     * <p>
+     * <b>Generally {@link #getCurrentWindowMetrics()} is the correct API to use</b> for choosing
+     * UI layouts. {@link #getMaximumWindowMetrics()} are only appropriate when the application
+     * needs to know the largest possible size it can occupy if the user expands/maximizes it on the
+     * screen.
+     *
+     * @see #getCurrentWindowMetrics()
      * @see WindowMetrics
+     * @see Display#getRealSize(Point)
      */
     default @NonNull WindowMetrics getMaximumWindowMetrics() {
         throw new UnsupportedOperationException();
@@ -497,22 +675,32 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Message for taking fullscreen screenshot
+     * Invoke screenshot flow to capture a full-screen image.
      * @hide
      */
     int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
-     * Message for taking screenshot of selected region.
+     * Invoke screenshot flow allowing the user to select a region.
      * @hide
      */
     int TAKE_SCREENSHOT_SELECTED_REGION = 2;
 
     /**
-     * Message for handling a screenshot flow with an image provided by the caller.
+     * Invoke screenshot flow with an image provided by the caller.
      * @hide
      */
     int TAKE_SCREENSHOT_PROVIDED_IMAGE = 3;
+
+    /**
+     * Enum listing the types of screenshot requests available.
+     *
+     * @hide
+     */
+    @IntDef({TAKE_SCREENSHOT_FULLSCREEN,
+            TAKE_SCREENSHOT_SELECTED_REGION,
+            TAKE_SCREENSHOT_PROVIDED_IMAGE})
+    @interface ScreenshotType {}
 
     /**
      * Enum listing the possible sources from which a screenshot was originated. Used for logging.
@@ -524,7 +712,8 @@ public interface WindowManager extends ViewManager {
             ScreenshotSource.SCREENSHOT_KEY_OTHER,
             ScreenshotSource.SCREENSHOT_OVERVIEW,
             ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS,
-            ScreenshotSource.SCREENSHOT_OTHER})
+            ScreenshotSource.SCREENSHOT_OTHER,
+            ScreenshotSource.SCREENSHOT_VENDOR_GESTURE})
     @interface ScreenshotSource {
         int SCREENSHOT_GLOBAL_ACTIONS = 0;
         int SCREENSHOT_KEY_CHORD = 1;
@@ -532,6 +721,7 @@ public interface WindowManager extends ViewManager {
         int SCREENSHOT_OVERVIEW = 3;
         int SCREENSHOT_ACCESSIBILITY_ACTIONS = 4;
         int SCREENSHOT_OTHER = 5;
+        int SCREENSHOT_VENDOR_GESTURE = 6;
     }
 
     /**
@@ -605,27 +795,140 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Sets that the display should show IME.
+     * Sets the policy for how the display should show IME.
      *
      * @param displayId Display ID.
-     * @param shouldShow Indicates that the display should show IME.
+     * @param imePolicy Indicates the policy for how the display should show IME.
      * @hide
      */
     @TestApi
-    default void setShouldShowIme(int displayId, boolean shouldShow) {
+    default void setDisplayImePolicy(int displayId, @DisplayImePolicy int imePolicy) {
     }
 
     /**
-     * Indicates that the display should show IME.
+     * Indicates the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @return {@code true} if the display should show IME when an input field becomes
-     * focused on it.
+     * @return The policy for how the display should show IME.
      * @hide
      */
     @TestApi
-    default boolean shouldShowIme(int displayId) {
+    default @DisplayImePolicy int getDisplayImePolicy(int displayId) {
+        return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+    }
+
+    /**
+     * <p>
+     * Returns whether cross-window blur is currently enabled. This affects both window blur behind
+     * (see {@link LayoutParams#setBlurBehindRadius}) and window background blur (see
+     * {@link Window#setBackgroundBlurRadius}).
+     * </p><p>
+     * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
+     * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
+     * when minimal post processing is requested. In such situations, no blur will be computed or
+     * drawn, so the blur target area will not be blurred. To handle this, the app might want to
+     * change its theme to one that does not use blurs. To listen for cross-window blur
+     * enabled/disabled events, use {@link #addCrossWindowBlurEnabledListener}.
+     * </p>
+     *
+     * @see #addCrossWindowBlurEnabledListener
+     * @see LayoutParams#setBlurBehindRadius
+     * @see Window#setBackgroundBlurRadius
+     */
+    default boolean isCrossWindowBlurEnabled() {
         return false;
+    }
+
+    /**
+     * <p>
+     * Adds a listener, which will be called when cross-window blurs are enabled/disabled at
+     * runtime. This affects both window blur behind (see {@link LayoutParams#setBlurBehindRadius})
+     * and window background blur (see {@link Window#setBackgroundBlurRadius}).
+     * </p><p>
+     * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
+     * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
+     * when minimal post processing is requested. In such situations, no blur will be computed or
+     * drawn, so the blur target area will not be blurred. To handle this, the app might want to
+     * change its theme to one that does not use blurs.
+     * </p><p>
+     * The listener will be called on the main thread.
+     * </p><p>
+     * If the listener is added successfully, it will be called immediately with the current
+     * cross-window blur enabled state.
+     * </p>
+     *
+     * @param listener the listener to be added. It will be called back with a boolean parameter,
+     *                 which is true if cross-window blur is enabled and false if it is disabled
+     *
+     * @see #removeCrossWindowBlurEnabledListener
+     * @see #isCrossWindowBlurEnabled
+     * @see LayoutParams#setBlurBehindRadius
+     * @see Window#setBackgroundBlurRadius
+     */
+    default void addCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * <p>
+     * Adds a listener, which will be called when cross-window blurs are enabled/disabled at
+     * runtime. This affects both window blur behind (see {@link LayoutParams#setBlurBehindRadius})
+     * and window background blur (see {@link Window#setBackgroundBlurRadius}).
+     * </p><p>
+     * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
+     * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
+     * when minimal post processing is requested. In such situations, no blur will be computed or
+     * drawn, so the blur target area will not be blurred. To handle this, the app might want to
+     * change its theme to one that does not use blurs.
+     * </p><p>
+     * If the listener is added successfully, it will be called immediately with the current
+     * cross-window blur enabled state.
+     * </p>
+     *
+     * @param executor {@link Executor} to handle the listener callback
+     * @param listener the listener to be added. It will be called back with a boolean parameter,
+     *                 which is true if cross-window blur is enabled and false if it is disabled
+     *
+     * @see #removeCrossWindowBlurEnabledListener
+     * @see #isCrossWindowBlurEnabled
+     * @see LayoutParams#setBlurBehindRadius
+     * @see Window#setBackgroundBlurRadius
+     */
+    default void addCrossWindowBlurEnabledListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * Removes a listener, previously added with {@link #addCrossWindowBlurEnabledListener}
+     *
+     * @param listener the listener to be removed
+     *
+     * @see #addCrossWindowBlurEnabledListener
+     */
+    default void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * @hide
+     */
+    static String transitTypeToString(@TransitionType int type) {
+        switch (type) {
+            case TRANSIT_NONE: return "NONE";
+            case TRANSIT_OPEN: return "OPEN";
+            case TRANSIT_CLOSE: return "CLOSE";
+            case TRANSIT_TO_FRONT: return "TO_FRONT";
+            case TRANSIT_TO_BACK: return "TO_BACK";
+            case TRANSIT_RELAUNCH: return "RELAUNCH";
+            case TRANSIT_CHANGE: return "CHANGE";
+            case TRANSIT_KEYGUARD_GOING_AWAY: return "KEYGUARD_GOING_AWAY";
+            case TRANSIT_KEYGUARD_OCCLUDE: return "KEYGUARD_OCCLUDE";
+            case TRANSIT_KEYGUARD_UNOCCLUDE: return "KEYGUARD_UNOCCLUDE";
+            case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
+            default:
+                if (type > TRANSIT_FIRST_CUSTOM) {
+                    return "FIRST_CUSTOM+" + (type - TRANSIT_FIRST_CUSTOM);
+                }
+                return "UNKNOWN(" + type + ")";
+        }
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
@@ -1018,10 +1321,8 @@ public interface WindowManager extends ViewManager {
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows.
          *
-         * @deprecated This became API by accident and was never intended to be used for
-         * applications.
+         * @removed
          */
-        @Deprecated
         public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
 
         /**
@@ -1218,14 +1519,6 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_STATUS_BAR_ADDITIONAL = FIRST_SYSTEM_WINDOW + 41;
 
         /**
-         * Similar to TYPE_APPLICATION_OVERLAY, but trusted to overlay other windows since it is
-         * is coming from the system.
-         * @hide
-         */
-        // TODO(b/155781676): Remove and replace call points with trustedOverlay when that is ready.
-        public static final int TYPE_TRUSTED_APPLICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 42;
-
-        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -1240,32 +1533,54 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @IntDef(prefix = "TYPE_", value = {
-                TYPE_ACCESSIBILITY_OVERLAY,
-                TYPE_APPLICATION,
-                TYPE_APPLICATION_ATTACHED_DIALOG,
-                TYPE_APPLICATION_MEDIA,
-                TYPE_APPLICATION_OVERLAY,
-                TYPE_APPLICATION_PANEL,
-                TYPE_APPLICATION_STARTING,
-                TYPE_APPLICATION_SUB_PANEL,
                 TYPE_BASE_APPLICATION,
+                TYPE_APPLICATION,
+                TYPE_APPLICATION_STARTING,
                 TYPE_DRAWN_APPLICATION,
+                TYPE_APPLICATION_PANEL,
+                TYPE_APPLICATION_MEDIA,
+                TYPE_APPLICATION_SUB_PANEL,
+                TYPE_APPLICATION_ATTACHED_DIALOG,
+                TYPE_APPLICATION_MEDIA_OVERLAY,
+                TYPE_APPLICATION_ABOVE_SUB_PANEL,
+                TYPE_STATUS_BAR,
+                TYPE_SEARCH_BAR,
+                TYPE_PHONE,
+                TYPE_SYSTEM_ALERT,
+                TYPE_KEYGUARD,
+                TYPE_TOAST,
+                TYPE_SYSTEM_OVERLAY,
+                TYPE_PRIORITY_PHONE,
+                TYPE_SYSTEM_DIALOG,
+                TYPE_KEYGUARD_DIALOG,
+                TYPE_SYSTEM_ERROR,
                 TYPE_INPUT_METHOD,
                 TYPE_INPUT_METHOD_DIALOG,
-                TYPE_KEYGUARD,
-                TYPE_KEYGUARD_DIALOG,
-                TYPE_PHONE,
-                TYPE_PRIORITY_PHONE,
-                TYPE_PRIVATE_PRESENTATION,
-                TYPE_SEARCH_BAR,
-                TYPE_STATUS_BAR,
-                TYPE_STATUS_BAR_PANEL,
-                TYPE_SYSTEM_ALERT,
-                TYPE_SYSTEM_DIALOG,
-                TYPE_SYSTEM_ERROR,
-                TYPE_SYSTEM_OVERLAY,
-                TYPE_TOAST,
                 TYPE_WALLPAPER,
+                TYPE_STATUS_BAR_PANEL,
+                TYPE_SECURE_SYSTEM_OVERLAY,
+                TYPE_DRAG,
+                TYPE_STATUS_BAR_SUB_PANEL,
+                TYPE_POINTER,
+                TYPE_NAVIGATION_BAR,
+                TYPE_VOLUME_OVERLAY,
+                TYPE_BOOT_PROGRESS,
+                TYPE_INPUT_CONSUMER,
+                TYPE_NAVIGATION_BAR_PANEL,
+                TYPE_DISPLAY_OVERLAY,
+                TYPE_MAGNIFICATION_OVERLAY,
+                TYPE_PRIVATE_PRESENTATION,
+                TYPE_VOICE_INTERACTION,
+                TYPE_ACCESSIBILITY_OVERLAY,
+                TYPE_VOICE_INTERACTION_STARTING,
+                TYPE_DOCK_DIVIDER,
+                TYPE_QS_DIALOG,
+                TYPE_SCREENSHOT,
+                TYPE_PRESENTATION,
+                TYPE_APPLICATION_OVERLAY,
+                TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                TYPE_NOTIFICATION_SHADE,
+                TYPE_STATUS_BAR_ADDITIONAL
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface WindowType {}
@@ -1319,9 +1634,7 @@ public interface WindowManager extends ViewManager {
          *  Use {@link #dimAmount} to control the amount of dim. */
         public static final int FLAG_DIM_BEHIND        = 0x00000002;
 
-        /** Window flag: blur everything behind this window.
-         * @deprecated Blurring is no longer supported. */
-        @Deprecated
+        /** Window flag: enable blur behind for this window. */
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
 
         /** Window flag: this window won't ever get key input focus, so the
@@ -1339,7 +1652,63 @@ public interface WindowManager extends ViewManager {
          * can use {@link #FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */
         public static final int FLAG_NOT_FOCUSABLE      = 0x00000008;
 
-        /** Window flag: this window can never receive touch events. */
+        /**
+         * Window flag: this window can never receive touch events.
+         *
+         * <p>The intention of this flag is to leave the touch to be handled by some window below
+         * this window (in Z order).
+         *
+         * <p>Starting from Android {@link Build.VERSION_CODES#S}, for security reasons, touch
+         * events that pass through windows containing this flag (ie. are within the bounds of the
+         * window) will only be delivered to the touch-consuming window if one (or more) of the
+         * items below are true:
+         * <ol>
+         *   <li><b>Same UID</b>: This window belongs to the same UID that owns the touch-consuming
+         *   window.
+         *   <li><b>Trusted windows</b>: This window is trusted. Trusted windows include (but are
+         *   not limited to) accessibility windows ({@link #TYPE_ACCESSIBILITY_OVERLAY}), the IME
+         *   ({@link #TYPE_INPUT_METHOD}) and assistant windows (TYPE_VOICE_INTERACTION). Windows of
+         *   type {@link #TYPE_APPLICATION_OVERLAY} are <b>not</b> trusted, see below.
+         *   <li><b>Invisible windows</b>: This window is {@link View#GONE} or
+         *   {@link View#INVISIBLE}.
+         *   <li><b>Fully transparent windows</b>: This window has {@link LayoutParams#alpha} equal
+         *   to 0.
+         *   <li><b>One SAW window with enough transparency</b>: This window is of type {@link
+         *   #TYPE_APPLICATION_OVERLAY}, has {@link LayoutParams#alpha} below or equal to the
+         *   <a href="#MaximumOpacity">maximum obscuring opacity</a> (see below) and it's the
+         *   <b>only</b> window of type {@link #TYPE_APPLICATION_OVERLAY} from this UID in the touch
+         *   path.
+         *   <li><b>Multiple SAW windows with enough transparency</b>: The multiple overlapping
+         *   {@link #TYPE_APPLICATION_OVERLAY} windows in the
+         *   touch path from this UID have a <b>combined obscuring opacity</b> below or equal to
+         *   the <a href="#MaximumOpacity">maximum obscuring opacity</a>. See section
+         *   <a href="#ObscuringOpacity">Combined obscuring opacity</a> below on how to compute this
+         *   value.
+         * </ol>
+         * <p>If none of these cases hold, the touch will not be delivered and a message will be
+         * logged to logcat.</p>
+         *
+         * <a name="MaximumOpacity"></a>
+         * <h3>Maximum obscuring opacity</h3>
+         * <p>This value is <b>0.8</b>. Apps that want to gather this value from the system rather
+         * than hard-coding it might want to use {@link
+         * android.hardware.input.InputManager#getMaximumObscuringOpacityForTouch()}.</p>
+         *
+         * <a name="ObscuringOpacity"></a>
+         * <h3>Combined obscuring opacity</h3>
+         *
+         * <p>The <b>combined obscuring opacity</b> of a set of windows is obtained by combining the
+         * opacity values of all windows in the set using the associative and commutative operation
+         * defined as:
+         * <pre>
+         * opacity({A,B}) = 1 - (1 - opacity(A))*(1 - opacity(B))
+         * </pre>
+         * <p>where {@code opacity(X)} is the {@link LayoutParams#alpha} of window X. So, for a set
+         * of windows {@code {W1, .., Wn}}, the combined obscuring opacity will be:
+         * <pre>
+         * opacity({W1, .., Wn}) = 1 - (1 - opacity(W1)) * ... * (1 - opacity(Wn))
+         * </pre>
+         */
         public static final int FLAG_NOT_TOUCHABLE      = 0x00000010;
 
         /** Window flag: even when this window is focusable (its
@@ -1726,6 +2095,46 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS = 0x80000000;
 
         /**
+         * @hide
+         */
+        @IntDef(flag = true, prefix = "FLAG_", value = {
+                FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
+                FLAG_DIM_BEHIND,
+                FLAG_BLUR_BEHIND,
+                FLAG_NOT_FOCUSABLE,
+                FLAG_NOT_TOUCHABLE,
+                FLAG_NOT_TOUCH_MODAL,
+                FLAG_TOUCHABLE_WHEN_WAKING,
+                FLAG_KEEP_SCREEN_ON,
+                FLAG_LAYOUT_IN_SCREEN,
+                FLAG_LAYOUT_NO_LIMITS,
+                FLAG_FULLSCREEN,
+                FLAG_FORCE_NOT_FULLSCREEN,
+                FLAG_DITHER,
+                FLAG_SECURE,
+                FLAG_SCALED,
+                FLAG_IGNORE_CHEEK_PRESSES,
+                FLAG_LAYOUT_INSET_DECOR,
+                FLAG_ALT_FOCUSABLE_IM,
+                FLAG_WATCH_OUTSIDE_TOUCH,
+                FLAG_SHOW_WHEN_LOCKED,
+                FLAG_SHOW_WALLPAPER,
+                FLAG_TURN_SCREEN_ON,
+                FLAG_DISMISS_KEYGUARD,
+                FLAG_SPLIT_TOUCH,
+                FLAG_HARDWARE_ACCELERATED,
+                FLAG_LAYOUT_IN_OVERSCAN,
+                FLAG_TRANSLUCENT_STATUS,
+                FLAG_TRANSLUCENT_NAVIGATION,
+                FLAG_LOCAL_FOCUS_MODE,
+                FLAG_SLIPPERY,
+                FLAG_LAYOUT_ATTACHED_IN_DECOR,
+                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Flags {}
+
+        /**
          * Various behavioral options/flags.  Default is none.
          *
          * @see #FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
@@ -1820,27 +2229,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                     name = "DRAWS_SYSTEM_BAR_BACKGROUNDS")
         }, formatToHexString = true)
+        @Flags
         public int flags;
-
-        /**
-         * If the window has requested hardware acceleration, but this is not
-         * allowed in the process it is in, then still render it as if it is
-         * hardware accelerated.  This is used for the starting preview windows
-         * in the system process, which don't need to have the overhead of
-         * hardware acceleration (they are just a static rendering), but should
-         * be rendered as such to match the actual window of the app even if it
-         * is hardware accelerated.
-         * Even if the window isn't hardware accelerated, still do its rendering
-         * as if it was.
-         * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
-         * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
-         * is generally disabled. This flag must be specified in addition to
-         * {@link #FLAG_HARDWARE_ACCELERATED} to enable hardware acceleration for system
-         * windows.
-         *
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED = 0x00000001;
 
         /**
          * In the system process, we globally do not use hardware acceleration
@@ -1863,6 +2253,15 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
+
+        /**
+         * When set {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows will stay visible, even if
+         * {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for another
+         * visible window.
+         * @hide
+         */
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public static final int PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
 
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
@@ -1911,15 +2310,6 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
-
-        /**
-         * Flag indicating that the x, y, width, and height members should be
-         * ignored (and thus their previous value preserved). For example
-         * because they are being managed externally through repositionChild.
-         *
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_PRESERVE_GEOMETRY = 0x00002000;
 
         /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
@@ -1981,13 +2371,12 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
 
         /**
-         * Flag to indicate that this window should be considered a screen decoration similar to the
-         * nav bar and status bar. This will cause this window to affect the window insets reported
-         * to other windows when it is visible.
+         * Flag to prevent the window from being magnified by the accessibility magnifier.
+         *
+         * TODO(b/190623172): This is a temporary solution and need to find out another way instead.
          * @hide
          */
-        @RequiresPermission(permission.STATUS_BAR_SERVICE)
-        public static final int PRIVATE_FLAG_IS_SCREEN_DECOR = 0x00400000;
+        public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 0x00400000;
 
         /**
          * Flag to indicate that the status bar window is in a state such that it forces showing
@@ -2034,10 +2423,31 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x10000000;
 
         /**
+         * Flag to indicate that the window is a trusted overlay.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_TRUSTED_OVERLAY = 0x20000000;
+
+        /**
          * Flag to indicate that the parent frame of a window should be inset by IME.
          * @hide
          */
         public static final int PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME = 0x40000000;
+
+        /**
+         * Flag to indicate that we want to intercept and handle global drag and drop for all users.
+         * This flag allows a window to considered for drag events even if not visible, and will
+         * receive drags for all active users in the system.
+         *
+         * Additional data is provided to windows with this flag, including the {@link ClipData}
+         * including all items with the {@link DragEvent#ACTION_DRAG_STARTED} event, and the
+         * actual drag surface with the {@link DragEvent#ACTION_DROP} event. If the window consumes,
+         * the drop, then the cleanup of the drag surface (provided as a part of
+         * {@link DragEvent#ACTION_DROP}) will be relinquished to the window.
+         * @hide
+         */
+        @RequiresPermission(permission.MANAGE_ACTIVITY_TASKS)
+        public static final int PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP = 0x80000000;
 
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
@@ -2053,15 +2463,44 @@ public interface WindowManager extends ViewManager {
         public @interface SystemFlags {}
 
         /**
+         * @hide
+         */
+        @IntDef(flag = true, prefix="PRIVATE_FLAG_", value = {
+                PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                PRIVATE_FLAG_SYSTEM_ERROR,
+                PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
+                PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                PRIVATE_FLAG_NOT_MAGNIFIABLE,
+                PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
+                PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                PRIVATE_FLAG_USE_BLAST,
+                PRIVATE_FLAG_APPEARANCE_CONTROLLED,
+                PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
+                PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
+                PRIVATE_FLAG_TRUSTED_OVERLAY,
+                PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+        })
+        public @interface PrivateFlags {}
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
         @UnsupportedAppUsage
         @ViewDebug.ExportedProperty(flagMapping = {
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
-                        equals = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
-                        name = "FAKE_HARDWARE_ACCELERATED"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
                         equals = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
@@ -2095,10 +2534,6 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         name = "FORCE_STATUS_BAR_VISIBLE"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        name = "PRESERVE_GEOMETRY"),
-                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         name = "FORCE_DECOR_VIEW_VISIBILITY"),
@@ -2127,9 +2562,9 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                         name = "IS_ROUNDED_CORNERS_OVERLAY"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_IS_SCREEN_DECOR,
-                        equals = PRIVATE_FLAG_IS_SCREEN_DECOR,
-                        name = "IS_SCREEN_DECOR"),
+                        mask = PRIVATE_FLAG_NOT_MAGNIFIABLE,
+                        equals = PRIVATE_FLAG_NOT_MAGNIFIABLE,
+                        name = "NOT_MAGNIFIABLE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                         equals = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
@@ -2138,6 +2573,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_USE_BLAST,
+                        equals = PRIVATE_FLAG_USE_BLAST,
+                        name = "USE_BLAST"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
@@ -2149,8 +2588,25 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
-                        name = "FIT_INSETS_CONTROLLED")
+                        name = "FIT_INSETS_CONTROLLED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_TRUSTED_OVERLAY,
+                        equals = PRIVATE_FLAG_TRUSTED_OVERLAY,
+                        name = "TRUSTED_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                        equals = PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                        name = "INSET_PARENT_FRAME_BY_IME"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                        equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
         })
+        @PrivateFlags
         @TestApi
         public int privateFlags;
 
@@ -2338,6 +2794,7 @@ public interface WindowManager extends ViewManager {
          *
          * @see Gravity
          */
+        @GravityFlags
         public int gravity;
 
         /**
@@ -2374,6 +2831,15 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public boolean hasManualSurfaceInsets;
+
+        /**
+         * Whether we should use global insets state when report insets to the window. When set to
+         * {@code true}, all the insets will be reported to the window regardless of the z-order.
+         * Otherwise, only the insets above the given window will be reported.
+         *
+         * @hide
+         */
+        public boolean receiveInsetsIgnoringZOrder;
 
         /**
          * Whether the previous surface insets should be used vs. what is currently set. When set
@@ -2504,6 +2970,18 @@ public interface WindowManager extends ViewManager {
         public IBinder token = null;
 
         /**
+         * The token of {@link android.window.WindowContext}. It is usually a
+         * {@link android.app.WindowTokenClient} and is used for associating the params with an
+         * existing node in the WindowManager hierarchy and getting the corresponding
+         * {@link Configuration} and {@link android.content.res.Resources} values with updates
+         * propagated from the server side.
+         *
+         * @hide
+         */
+        @Nullable
+        public IBinder mWindowContextToken = null;
+
+        /**
          * Name of the package owning this window.
          */
         public String packageName = null;
@@ -2545,6 +3023,54 @@ public interface WindowManager extends ViewManager {
         public int preferredDisplayModeId;
 
         /**
+         * The min display refresh rate while the window is in focus.
+         *
+         * This value is ignored if {@link #preferredDisplayModeId} is set.
+         * @hide
+         */
+        public float preferredMinDisplayRefreshRate;
+
+        /**
+         * The max display refresh rate while the window is in focus.
+         *
+         * This value is ignored if {@link #preferredDisplayModeId} is set.
+         * @hide
+         */
+        public float preferredMaxDisplayRefreshRate;
+
+        /**
+         * An internal annotation for flags that can be specified to {@link #systemUiVisibility}
+         * and {@link #subtreeSystemUiVisibility}.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "" }, value = {
+            SYSTEM_UI_FLAG_VISIBLE,
+            SYSTEM_UI_FLAG_LOW_PROFILE,
+            SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_FULLSCREEN,
+            SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+            SYSTEM_UI_FLAG_LAYOUT_STABLE,
+            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
+            SYSTEM_UI_FLAG_IMMERSIVE,
+            SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
+            SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+            STATUS_BAR_DISABLE_EXPAND,
+            STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
+            STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
+            STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
+            STATUS_BAR_DISABLE_SYSTEM_INFO,
+            STATUS_BAR_DISABLE_HOME,
+            STATUS_BAR_DISABLE_BACK,
+            STATUS_BAR_DISABLE_CLOCK,
+            STATUS_BAR_DISABLE_RECENT,
+            STATUS_BAR_DISABLE_SEARCH,
+        })
+        public @interface SystemUiVisibilityFlags {}
+
+        /**
          * Control the visibility of the status bar.
          *
          * @see View#STATUS_BAR_VISIBLE
@@ -2553,6 +3079,7 @@ public interface WindowManager extends ViewManager {
          * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
          * instead.
          */
+        @SystemUiVisibilityFlags
         @Deprecated
         public int systemUiVisibility;
 
@@ -2561,6 +3088,7 @@ public interface WindowManager extends ViewManager {
          * The ui visibility as requested by the views in this hierarchy.
          * the combined value should be systemUiVisibility | subtreeSystemUiVisibility.
          */
+        @SystemUiVisibilityFlags
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int subtreeSystemUiVisibility;
 
@@ -2574,11 +3102,9 @@ public interface WindowManager extends ViewManager {
         @UnsupportedAppUsage
         public boolean hasSystemUiListeners;
 
-
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(
-                flag = true,
                 value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER,
@@ -2741,6 +3267,19 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
 
         /**
+         * An internal annotation for flags that can be specified to {@link #inputFeatures}.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
+            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
+            INPUT_FEATURE_NO_INPUT_CHANNEL,
+            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+        })
+        public @interface InputFeatureFlags {}
+
+        /**
          * Control special features of the input subsystem.
          *
          * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
@@ -2748,6 +3287,7 @@ public interface WindowManager extends ViewManager {
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @hide
          */
+        @InputFeatureFlags
         @UnsupportedAppUsage
         public int inputFeatures;
 
@@ -2825,6 +3365,18 @@ public interface WindowManager extends ViewManager {
          * @see android.view.Window#setPreferMinimalPostProcessing
          */
         public boolean preferMinimalPostProcessing = false;
+
+        /**
+         * Specifies the amount of blur to be used to blur everything behind the window.
+         * The effect is similar to the dimAmount, but instead of dimming, the content behind
+         * will be blurred.
+         *
+         * The blur behind radius range starts at 0, which means no blur, and increases until 150
+         * for the densest blur.
+         *
+         * @see #setBlurBehindRadius
+         */
+        private int mBlurBehindRadius = 0;
 
         /**
          * The color mode requested by this window. The target display may
@@ -2918,8 +3470,8 @@ public interface WindowManager extends ViewManager {
         /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
-         * @param types which types of insets that this window should avoid. The initial value of
-         *              this object includes all system bars.
+         * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
+         *              The initial value of this object includes all system bars.
          */
         public void setFitInsetsTypes(@InsetsType int types) {
             mFitInsetsTypes = types;
@@ -2948,7 +3500,52 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
-         * @return the insets types that this window is avoiding overlapping.
+         * Specifies that the window should be considered a trusted system overlay. Trusted system
+         * overlays are ignored when considering whether windows are obscured during input
+         * dispatch. Requires the {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}
+         * permission.
+         *
+         * {@see android.view.MotionEvent#FLAG_WINDOW_IS_OBSCURED}
+         * {@see android.view.MotionEvent#FLAG_WINDOW_IS_PARTIALLY_OBSCURED}
+         * @hide
+         */
+        public void setTrustedOverlay() {
+            privateFlags |= PRIVATE_FLAG_TRUSTED_OVERLAY;
+        }
+
+        /**
+         * When set on {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows they stay visible,
+         * even if {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for
+         * another visible window.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public void setSystemApplicationOverlay(boolean isSystemApplicationOverlay) {
+            if (isSystemApplicationOverlay) {
+                privateFlags |= PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            } else {
+                privateFlags &= ~PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            }
+        }
+
+        /**
+         * Returns if this window is marked as being a system application overlay.
+         * @see LayoutParams#setSystemApplicationOverlay(boolean)
+         *
+         * <p>Note: the owner of the window must hold
+         * {@link android.Manifest.permission#SYSTEM_APPLICATION_OVERLAY} for this to have any
+         * effect.
+         * @hide
+         */
+        @SystemApi
+        public boolean isSystemApplicationOverlay() {
+            return (privateFlags & PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
+                    == PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+        }
+
+        /**
+         * @return the {@link WindowInsets.Type}s that this window is avoiding overlapping.
          */
         public @InsetsType int getFitInsetsTypes() {
             return mFitInsetsTypes;
@@ -3073,6 +3670,51 @@ public interface WindowManager extends ViewManager {
             return mColorMode;
         }
 
+        /**
+         * <p>
+         * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
+         * but instead of dimmed, the content behind the window will be blurred (or combined with
+         * the dim amount, if such is specified).
+         * </p><p>
+         * The density of the blur is set by the blur radius. The radius defines the size
+         * of the neighbouring area, from which pixels will be averaged to form the final
+         * color for each pixel. The operation approximates a Gaussian blur.
+         * A radius of 0 means no blur. The higher the radius, the denser the blur.
+         * </p><p>
+         * Note the difference with {@link android.view.Window#setBackgroundBlurRadius},
+         * which blurs only within the bounds of the window. Blur behind blurs the whole screen
+         * behind the window.
+         * </p><p>
+         * Requires {@link #FLAG_BLUR_BEHIND} to be set.
+         * </p><p>
+         * Cross-window blur might not be supported by some devices due to GPU limitations. It can
+         * also be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling
+         * is used or when minimal post processing is requested. In such situations, no blur will
+         * be computed or drawn, resulting in there being no depth separation between the window
+         * and the content behind it. To avoid this, the app might want to use more
+         * {@link #dimAmount} on its window. To listen for cross-window blur enabled/disabled
+         * events, use {@link #addCrossWindowBlurEnabledListener}.
+         * </p>
+         * @param blurBehindRadius The blur radius to use for blur behind in pixels
+         *
+         * @see #FLAG_BLUR_BEHIND
+         * @see #getBlurBehindRadius
+         * @see WindowManager#addCrossWindowBlurEnabledListener
+         * @see Window#setBackgroundBlurRadius
+         */
+        public void setBlurBehindRadius(@IntRange(from = 0) int blurBehindRadius) {
+            mBlurBehindRadius = blurBehindRadius;
+        }
+
+        /**
+         * Returns the blur behind radius of the window.
+         *
+         * @see #setBlurBehindRadius
+         */
+        public int getBlurBehindRadius() {
+            return mBlurBehindRadius;
+        }
+
         /** @hide */
         @SystemApi
         public final void setUserActivityTimeout(long timeout) {
@@ -3083,6 +3725,37 @@ public interface WindowManager extends ViewManager {
         @SystemApi
         public final long getUserActivityTimeout() {
             return userActivityTimeout;
+        }
+
+        /**
+         * Sets the {@link android.app.WindowContext} token.
+         *
+         * @see #getWindowContextToken()
+         *
+         * @hide
+         */
+        @TestApi
+        public final void setWindowContextToken(@NonNull IBinder token) {
+            mWindowContextToken = token;
+        }
+
+        /**
+         * Gets the {@link android.app.WindowContext} token.
+         *
+         * The token is usually a {@link android.app.WindowTokenClient} and is used for associating
+         * the params with an existing node in the WindowManager hierarchy and getting the
+         * corresponding {@link Configuration} and {@link android.content.res.Resources} values with
+         * updates propagated from the server side.
+         *
+         * @see android.app.WindowTokenClient
+         * @see Context#createWindowContext(Display, int, Bundle)
+         *
+         * @hide
+         */
+        @TestApi
+        @Nullable
+        public final IBinder getWindowContextToken() {
+            return mWindowContextToken;
         }
 
         public int describeContents() {
@@ -3110,22 +3783,26 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(buttonBrightness);
             out.writeInt(rotationAnimation);
             out.writeStrongBinder(token);
+            out.writeStrongBinder(mWindowContextToken);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
             out.writeFloat(preferredRefreshRate);
             out.writeInt(preferredDisplayModeId);
+            out.writeFloat(preferredMinDisplayRefreshRate);
+            out.writeFloat(preferredMaxDisplayRefreshRate);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
-            out.writeInt(hasSystemUiListeners ? 1 : 0);
+            out.writeBoolean(hasSystemUiListeners);
             out.writeInt(inputFeatures);
             out.writeLong(userActivityTimeout);
             out.writeInt(surfaceInsets.left);
             out.writeInt(surfaceInsets.top);
             out.writeInt(surfaceInsets.right);
             out.writeInt(surfaceInsets.bottom);
-            out.writeInt(hasManualSurfaceInsets ? 1 : 0);
-            out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
+            out.writeBoolean(hasManualSurfaceInsets);
+            out.writeBoolean(receiveInsetsIgnoringZOrder);
+            out.writeBoolean(preservePreviousSurfaceInsets);
             out.writeLong(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
             out.writeInt(mColorMode);
@@ -3136,6 +3813,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(mFitInsetsSides);
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
+            out.writeInt(mBlurBehindRadius);
             if (providesInsetsTypes != null) {
                 out.writeInt(providesInsetsTypes.length);
                 out.writeIntArray(providesInsetsTypes);
@@ -3177,22 +3855,26 @@ public interface WindowManager extends ViewManager {
             buttonBrightness = in.readFloat();
             rotationAnimation = in.readInt();
             token = in.readStrongBinder();
+            mWindowContextToken = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
             preferredRefreshRate = in.readFloat();
             preferredDisplayModeId = in.readInt();
+            preferredMinDisplayRefreshRate = in.readFloat();
+            preferredMaxDisplayRefreshRate = in.readFloat();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
-            hasSystemUiListeners = in.readInt() != 0;
+            hasSystemUiListeners = in.readBoolean();
             inputFeatures = in.readInt();
             userActivityTimeout = in.readLong();
             surfaceInsets.left = in.readInt();
             surfaceInsets.top = in.readInt();
             surfaceInsets.right = in.readInt();
             surfaceInsets.bottom = in.readInt();
-            hasManualSurfaceInsets = in.readInt() != 0;
-            preservePreviousSurfaceInsets = in.readInt() != 0;
+            hasManualSurfaceInsets = in.readBoolean();
+            receiveInsetsIgnoringZOrder = in.readBoolean();
+            preservePreviousSurfaceInsets = in.readBoolean();
             accessibilityIdOfAnchor = in.readLong();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mColorMode = in.readInt();
@@ -3203,6 +3885,7 @@ public interface WindowManager extends ViewManager {
             mFitInsetsSides = in.readInt();
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
+            mBlurBehindRadius = in.readInt();
             int insetsTypesLength = in.readInt();
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
@@ -3255,6 +3938,12 @@ public interface WindowManager extends ViewManager {
         public static final int INSET_FLAGS_CHANGED = 1 << 27;
         /** {@hide} */
         public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
+        /** {@hide} */
+        public static final int BLUR_BEHIND_RADIUS_CHANGED = 1 << 29;
+        /** {@hide} */
+        public static final int PREFERRED_MIN_DISPLAY_REFRESH_RATE = 1 << 30;
+        /** {@hide} */
+        public static final int PREFERRED_MAX_DISPLAY_REFRESH_RATE = 1 << 31;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -3335,6 +4024,11 @@ public interface WindowManager extends ViewManager {
                 // already have one.
                 token = o.token;
             }
+            if (mWindowContextToken == null) {
+                // NOTE: token only copied if the recipient doesn't
+                // already have one.
+                mWindowContextToken = o.mWindowContextToken;
+            }
             if (packageName == null) {
                 // NOTE: packageName only copied if the recipient doesn't
                 // already have one.
@@ -3381,6 +4075,16 @@ public interface WindowManager extends ViewManager {
                 changes |= PREFERRED_DISPLAY_MODE_ID;
             }
 
+            if (preferredMinDisplayRefreshRate != o.preferredMinDisplayRefreshRate) {
+                preferredMinDisplayRefreshRate = o.preferredMinDisplayRefreshRate;
+                changes |= PREFERRED_MIN_DISPLAY_REFRESH_RATE;
+            }
+
+            if (preferredMaxDisplayRefreshRate != o.preferredMaxDisplayRefreshRate) {
+                preferredMaxDisplayRefreshRate = o.preferredMaxDisplayRefreshRate;
+                changes |= PREFERRED_MAX_DISPLAY_REFRESH_RATE;
+            }
+
             if (systemUiVisibility != o.systemUiVisibility
                     || subtreeSystemUiVisibility != o.subtreeSystemUiVisibility) {
                 systemUiVisibility = o.systemUiVisibility;
@@ -3413,6 +4117,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SURFACE_INSETS_CHANGED;
             }
 
+            if (receiveInsetsIgnoringZOrder != o.receiveInsetsIgnoringZOrder) {
+                receiveInsetsIgnoringZOrder = o.receiveInsetsIgnoringZOrder;
+                changes |= SURFACE_INSETS_CHANGED;
+            }
+
             if (preservePreviousSurfaceInsets != o.preservePreviousSurfaceInsets) {
                 preservePreviousSurfaceInsets = o.preservePreviousSurfaceInsets;
                 changes |= SURFACE_INSETS_CHANGED;
@@ -3438,6 +4147,11 @@ public interface WindowManager extends ViewManager {
             if (preferMinimalPostProcessing != o.preferMinimalPostProcessing) {
                 preferMinimalPostProcessing = o.preferMinimalPostProcessing;
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
+            }
+
+            if (mBlurBehindRadius != o.mBlurBehindRadius) {
+                mBlurBehindRadius = o.mBlurBehindRadius;
+                changes |= BLUR_BEHIND_RADIUS_CHANGED;
             }
 
             // This can't change, it's only set at window creation time.
@@ -3575,6 +4289,14 @@ public interface WindowManager extends ViewManager {
                 sb.append(" preferredDisplayMode=");
                 sb.append(preferredDisplayModeId);
             }
+            if (preferredMinDisplayRefreshRate != 0) {
+                sb.append(" preferredMinDisplayRefreshRate=");
+                sb.append(preferredMinDisplayRefreshRate);
+            }
+            if (preferredMaxDisplayRefreshRate != 0) {
+                sb.append(" preferredMaxDisplayRefreshRate=");
+                sb.append(preferredMaxDisplayRefreshRate);
+            }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");
                 sb.append(hasSystemUiListeners);
@@ -3596,12 +4318,19 @@ public interface WindowManager extends ViewManager {
                     sb.append(" (!preservePreviousSurfaceInsets)");
                 }
             }
+            if (receiveInsetsIgnoringZOrder) {
+                sb.append(" receive insets ignoring z-order");
+            }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
             }
             if (preferMinimalPostProcessing) {
                 sb.append(" preferMinimalPostProcessing=");
                 sb.append(preferMinimalPostProcessing);
+            }
+            if (mBlurBehindRadius != 0) {
+                sb.append(" blurBehindRadius=");
+                sb.append(mBlurBehindRadius);
             }
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(
@@ -3867,5 +4596,26 @@ public interface WindowManager extends ViewManager {
                     return Integer.toString(inputFeature);
             }
         }
+    }
+
+    /**
+     * Holds the WM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
+     * @hide
+     */
+    @TestApi
+    default void holdLock(IBinder token, int durationMs) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Used for testing to check if the system supports TaskSnapshot mechanism.
+     * @hide
+     */
+    @TestApi
+    default boolean isTaskSnapshotSupported() {
+        return false;
     }
 }

@@ -1,0 +1,293 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/app/alarmmanager.proto";
+import "frameworks/base/core/proto/android/app/pendingintent.proto";
+import "frameworks/base/core/proto/android/internal/locallog.proto";
+import "frameworks/base/core/proto/android/os/worksource.proto";
+import "frameworks/base/core/proto/android/server/appstatetracker.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+package com.android.server.alarm;
+
+option java_multiple_files = true;
+
+// next ID: 43
+message AlarmManagerServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 current_time = 1;
+    optional int64 elapsed_realtime = 2;
+    optional int64 last_time_change_clock_time = 3;
+    optional int64 last_time_change_realtime = 4;
+    // Current settings
+    optional ConstantsProto settings = 5;
+
+    // Dump from AppStateTracker.
+    optional AppStateTrackerProto app_state_tracker = 6;
+
+    optional bool is_interactive = 7;
+    // Only valid if is_interactive is false.
+    optional int64 time_since_non_interactive_ms = 8;
+    // Only valid if is_interactive is false.
+    optional int64 max_wakeup_delay_ms = 9;
+    // Only valid if is_interactive is false.
+    optional int64 time_since_last_dispatch_ms = 10;
+    // Only valid if is_interactive is false.
+    optional int64 time_until_next_non_wakeup_delivery_ms = 11;
+
+    // Can be negative if the non-wakeup alarm time is in the past (non-wakeup
+    // alarms aren't delivered unil the next time the device wakes up).
+    optional int64 time_until_next_non_wakeup_alarm_ms = 12;
+    optional int64 time_until_next_wakeup_ms = 13;
+    optional int64 time_since_last_wakeup_ms = 14;
+    // Time since the last wakeup was set.
+    optional int64 time_since_last_wakeup_set_ms = 15;
+    optional int64 time_change_event_count = 16;
+    // The current set of user exempted apps for device idle mode, meaning
+    // these are allowed to freely schedule alarms. These are app IDs, not UIDs.
+    // This field is currently unused.
+    repeated int32 device_idle_user_exempt_app_ids = 17;
+
+    repeated AlarmClockMetadataProto next_alarm_clock_metadata = 18;
+
+    repeated BatchProto pending_alarm_batches = 19;
+
+    // List of alarms per uid deferred due to user applied background restrictions
+    // on the source app.
+    repeated AlarmProto pending_user_blocked_background_alarms = 20;
+
+    // When idling mode will end. Will be empty if the device is not currently
+    // idling.
+    optional AlarmProto pending_idle_until = 21;
+
+    // Any alarms that we don't want to run during idle mode. Will be empty if the
+    // device is not currently idling.
+    repeated AlarmProto pending_while_idle_alarms = 22;
+
+    // This is a special alarm that will put the system into idle until it goes
+    // off. The caller has given the time they want this to happen at.
+    optional AlarmProto next_wake_from_idle = 23;
+
+    repeated AlarmProto past_due_non_wakeup_alarms = 24;
+
+    // Number of delayed alarms.
+    optional int32 delayed_alarm_count = 25;
+    // The total amount of time alarms had been delayed. Overlapping alarms are
+    // only counted once (ie. If two alarms were meant to trigger at the same time
+    // but were delayed by 5 seconds, the total time would be 5 seconds).
+    optional int64 total_delay_time_ms = 26;
+    optional int64 max_delay_duration_ms = 27;
+    optional int64 max_non_interactive_duration_ms = 28;
+
+    optional int32 broadcast_ref_count = 29;
+    // Canonical count of (operation.send() - onSendFinished()) and listener
+    // send/complete/timeout invocations.
+    optional int32 pending_intent_send_count = 30;
+    optional int32 pending_intent_finish_count = 31;
+    optional int32 listener_send_count = 32;
+    optional int32 listener_finish_count = 33;
+
+    repeated InFlightProto outstanding_deliveries = 34;
+
+    message LastAllowWhileIdleDispatch {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        // In the 'elapsed' timebase.
+        optional int64 time_ms = 2;
+
+        // Time when the next while-idle is allowed, in the 'elapsed' timebase.
+        optional int64 next_allowed_ms = 3;
+    }
+
+    // Whether the short or long while-idle timeout should be used for each UID.
+    repeated int32 use_allow_while_idle_short_time = 35;
+
+    // For each uid, this is the last time we dispatched an "allow while idle"
+    // alarm, used to determine the earliest we can dispatch the next such alarm.
+    repeated LastAllowWhileIdleDispatch last_allow_while_idle_dispatch_times = 36;
+
+    optional com.android.internal.util.LocalLogProto recent_problems = 37;
+
+    message TopAlarm {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        optional string package_name = 2;
+        optional FilterStatsProto filter = 3;
+    }
+    repeated TopAlarm top_alarms = 38;
+
+    message AlarmStat {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional BroadcastStatsProto broadcast = 1;
+        repeated FilterStatsProto filters = 2;
+    }
+    repeated AlarmStat alarm_stats = 39;
+
+    repeated IdleDispatchEntryProto allow_while_idle_dispatches = 40;
+    repeated WakeupEventProto recent_wakeup_history = 41;
+
+    repeated AlarmProto pending_alarms = 42;
+}
+
+// This is a soft wrapper for alarm clock information. It is not representative
+// of an android.app.AlarmManager.AlarmClockInfo object.
+message AlarmClockMetadataProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 user = 1;
+    optional bool is_pending_send = 2;
+    // This value is UTC wall clock time in milliseconds, as returned by
+    // System#currentTimeMillis() for example.
+    optional int64 trigger_time_ms = 3;
+}
+
+// A com.android.server.AlarmManagerService.Alarm object.
+message AlarmProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string tag = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional .android.app.AlarmManagerProto.AlarmType type = 2;
+    // How long until the alarm goes off, in the 'elapsed' timebase. Can be
+    // negative if 'when' is in the past.
+    optional int64 time_until_when_elapsed_ms = 3;
+    optional int64 window_length_ms = 4;
+    optional int64 repeat_interval_ms = 5;
+    optional int32 count = 6;
+    optional int32 flags = 7;
+    optional .android.app.AlarmClockInfoProto alarm_clock = 8;
+    optional .android.app.PendingIntentProto operation = 9;
+    optional string listener = 10 [ (.android.privacy).dest = DEST_EXPLICIT ];
+}
+
+// A com.android.server.AlarmManagerService.Batch object.
+message BatchProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Start time in terms of elapsed realtime.
+    optional int64 start_realtime = 1;
+    // End time in terms of elapsed realtime.
+    optional int64 end_realtime = 2;
+    optional int32 flags = 3;
+    repeated AlarmProto alarms = 4;
+}
+
+// A com.android.server.AlarmManagerService.BroadcastStats object.
+message BroadcastStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 uid = 1;
+    optional string package_name = 2;
+    // The total amount of time this broadcast was in flight.
+    optional int64 total_flight_duration_ms = 3;
+    optional int32 count = 4;
+    optional int32 wakeup_count = 5;
+    // The last time this first became active (when nesting changed from 0 to 1)
+    // in terms of elapsed realtime.
+    optional int64 start_time_realtime = 6;
+    // The broadcast is active if nesting > 0.
+    optional int32 nesting = 7;
+}
+
+// A com.android.server.AlarmManagerService.Constants object.
+message ConstantsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Minimum futurity of a new alarm.
+    optional int64 min_futurity_duration_ms = 1;
+    // Minimum alarm recurrence interval.
+    optional int64 min_interval_duration_ms = 2;
+    // Direct alarm listener callback timeout.
+    optional int64 listener_timeout_duration_ms = 3;
+    // Minimum time between ALLOW_WHILE_IDLE alarms when system is not idle.
+    optional int64 allow_while_idle_short_duration_ms = 4;
+    // Minimum time between ALLOW_WHILE_IDLE alarms when system is idling.
+    optional int64 allow_while_idle_long_duration_ms = 5;
+    // BroadcastOptions.setTemporaryAppWhitelistDuration() to use for FLAG_ALLOW_WHILE_IDLE.
+    optional int64 allow_while_idle_whitelist_duration_ms = 6;
+    // Maximum alarm recurrence interval.
+    optional int64 max_interval_duration_ms = 7;
+}
+
+// A com.android.server.AlarmManagerService.FilterStats object.
+message FilterStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
+    optional string tag = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    // The last time this filter when in flight, in terms of elapsed realtime.
+    optional int64 last_flight_time_realtime = 2;
+    // The total amount of time this filter was in flight.
+    optional int64 total_flight_duration_ms = 3;
+    optional int32 count = 4;
+    optional int32 wakeup_count = 5;
+    // The last time this first became active (when nesting changed from 0 to 1)
+    // in terms of elapsed realtime.
+    optional int64 start_time_realtime = 6;
+    // The filter is active if nesting > 0.
+    optional int32 nesting = 7;
+}
+
+// A com.android.server.AlarmManagerService.IdleDispatchEntry object.
+message IdleDispatchEntryProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 uid = 1;
+    optional string pkg = 2;
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
+    optional string tag = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string op = 4;
+    // Time when this entry was created, in terms of elapsed realtime.
+    optional int64 entry_creation_realtime = 5;
+    // For a RESCHEDULED op, this is the last time we dispatched an "allow while
+    // idle" alarm for the UID. For a SET op, this is when the alarm was
+    // triggered. Times are in the 'elapsed' timebase.
+    optional int64 arg_realtime = 6;
+}
+
+// A com.android.server.AlarmManagerService.InFlight object.
+message InFlightProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 uid = 1;
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
+    optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional int64 when_elapsed_ms = 3;
+    optional .android.app.AlarmManagerProto.AlarmType alarm_type = 4;
+    optional .android.app.PendingIntentProto pending_intent = 5;
+    optional BroadcastStatsProto broadcast_stats = 6;
+    optional FilterStatsProto filter_stats = 7;
+    optional .android.os.WorkSourceProto work_source = 8;
+}
+
+// A com.android.server.AlarmManagerService.WakeupEvent object.
+message WakeupEventProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 uid = 1;
+    // The operation that caused the wakeup. May be an Intent action or a
+    // listener tag.
+    optional string action = 2;
+    optional int64 when = 3;
+}

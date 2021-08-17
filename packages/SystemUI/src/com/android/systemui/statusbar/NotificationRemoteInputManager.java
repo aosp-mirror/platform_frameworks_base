@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -31,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -69,8 +68,10 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import dagger.Lazy;
 
@@ -133,10 +134,11 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected Callback mCallback;
     protected final ArrayList<NotificationLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
-    private final RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
+    private final RemoteViews.InteractionHandler
+            mInteractionHandler = new RemoteViews.InteractionHandler() {
 
         @Override
-        public boolean onClickHandler(
+        public boolean onInteraction(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             mStatusBarLazy.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
                     "NOTIFICATION_CLICK");
@@ -161,32 +163,56 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ActivityManager.getService().resumeAppSwitches();
             } catch (RemoteException e) {
             }
-            return mCallback.handleRemoteViewClick(view, pendingIntent, () -> {
-                Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
-                options.second.setLaunchWindowingMode(
-                        WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-                mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
-                return RemoteViews.startPendingIntent(view, pendingIntent, options);
+            Notification.Action action = getActionFromView(view, entry, pendingIntent);
+            return mCallback.handleRemoteViewClick(view, pendingIntent,
+                    action == null ? false : action.isAuthenticationRequired(), () -> {
+                    Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
+                    mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
+                    boolean started = RemoteViews.startPendingIntent(view, pendingIntent, options);
+                    if (started) releaseNotificationIfKeptForRemoteInputHistory(entry);
+                    return started;
             });
+        }
+
+        private @Nullable Notification.Action getActionFromView(View view,
+                NotificationEntry entry, PendingIntent actionIntent) {
+            Integer actionIndex = (Integer)
+                    view.getTag(com.android.internal.R.id.notification_action_index_tag);
+            if (actionIndex == null) {
+                return null;
+            }
+            if (entry == null) {
+                Log.w(TAG, "Couldn't determine notification for click.");
+                return null;
+            }
+
+            // Notification may be updated before this function is executed, and thus play safe
+            // here and verify that the action object is still the one that where the click happens.
+            StatusBarNotification statusBarNotification = entry.getSbn();
+            Notification.Action[] actions = statusBarNotification.getNotification().actions;
+            if (actions == null || actionIndex >= actions.length) {
+                Log.w(TAG, "statusBarNotification.getNotification().actions is null or invalid");
+                return null ;
+            }
+            final Notification.Action action =
+                    statusBarNotification.getNotification().actions[actionIndex];
+            if (!Objects.equals(action.actionIntent, actionIntent)) {
+                Log.w(TAG, "actionIntent does not match");
+                return null;
+            }
+            return action;
         }
 
         private void logActionClick(
                 View view,
                 NotificationEntry entry,
                 PendingIntent actionIntent) {
-            Integer actionIndex = (Integer)
-                    view.getTag(com.android.internal.R.id.notification_action_index_tag);
-            if (actionIndex == null) {
-                // Custom action button, not logging.
+            Notification.Action action = getActionFromView(view, entry, actionIntent);
+            if (action == null) {
                 return;
             }
             ViewParent parent = view.getParent();
-            if (entry == null) {
-                Log.w(TAG, "Couldn't determine notification for click.");
-                return;
-            }
-            StatusBarNotification statusBarNotification = entry.getSbn();
-            String key = statusBarNotification.getKey();
+            String key = entry.getSbn().getKey();
             int buttonIndex = -1;
             // If this is a default template, determine the index of the button.
             if (view.getId() == com.android.internal.R.id.action0 &&
@@ -195,25 +221,10 @@ public class NotificationRemoteInputManager implements Dumpable {
                 buttonIndex = actionGroup.indexOfChild(view);
             }
             final int count = mEntryManager.getActiveNotificationsCount();
-            final int rank = mEntryManager
-                    .getActiveNotificationUnfiltered(key).getRanking().getRank();
+            final int rank = entry.getRanking().getRank();
 
-            // Notification may be updated before this function is executed, and thus play safe
-            // here and verify that the action object is still the one that where the click happens.
-            Notification.Action[] actions = statusBarNotification.getNotification().actions;
-            if (actions == null || actionIndex >= actions.length) {
-                Log.w(TAG, "statusBarNotification.getNotification().actions is null or invalid");
-                return;
-            }
-            final Notification.Action action =
-                    statusBarNotification.getNotification().actions[actionIndex];
-            if (!Objects.equals(action.actionIntent, actionIntent)) {
-                Log.w(TAG, "actionIntent does not match");
-                return;
-            }
             NotificationVisibility.NotificationLocation location =
-                    NotificationLogger.getNotificationLocation(
-                            mEntryManager.getActiveNotificationUnfiltered(key));
+                    NotificationLogger.getNotificationLocation(entry);
             final NotificationVisibility nv =
                     NotificationVisibility.obtain(key, rank, count, true, location);
             mClickNotifier.onNotificationActionClick(key, buttonIndex, action, nv, false);
@@ -358,7 +369,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         });
         mSmartReplyController.setCallback((entry, reply) -> {
             StatusBarNotification newSbn =
-                    rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */,
+                    rebuildNotificationWithRemoteInputInserted(entry, reply, true /* showSpinner */,
                             null /* mimeType */, null /* uri */);
             mEntryManager.updateNotification(newSbn, null /* ranking */);
         });
@@ -377,7 +388,28 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
             PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo) {
+        return activateRemoteInput(view, inputs, input, pendingIntent, editedSuggestionInfo,
+                null /* userMessageContent */, null /* authBypassCheck */);
+    }
 
+    /**
+     * Activates a given {@link RemoteInput}
+     *
+     * @param view The view of the action button or suggestion chip that was tapped.
+     * @param inputs The remote inputs that need to be sent to the app.
+     * @param input The remote input that needs to be activated.
+     * @param pendingIntent The pending intent to be sent to the app.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
+     * @param userMessageContent User-entered text with which to initialize the remote input view.
+     * @param authBypassCheck Optional auth bypass check associated with this remote input
+     *         activation. If {@code null}, we never bypass.
+     * @return Whether the {@link RemoteInput} was activated.
+     */
+    public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
+            PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo,
+            @Nullable String userMessageContent,
+            @Nullable AuthBypassPredicate authBypassCheck) {
         ViewParent p = view.getParent();
         RemoteInputView riv = null;
         ExpandableNotificationRow row = null;
@@ -399,40 +431,9 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         row.setUserExpanded(true);
 
-        if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
-            final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-
-            final boolean isLockedManagedProfile =
-                    mUserManager.getUserInfo(userId).isManagedProfile()
-                    && mKeyguardManager.isDeviceLocked(userId);
-
-            final boolean isParentUserLocked;
-            if (isLockedManagedProfile) {
-                final UserInfo profileParent = mUserManager.getProfileParent(userId);
-                isParentUserLocked = (profileParent != null)
-                        && mKeyguardManager.isDeviceLocked(profileParent.id);
-            } else {
-                isParentUserLocked = false;
-            }
-
-            if (mLockscreenUserManager.isLockscreenPublicMode(userId)
-                    || mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
-                // If the parent user is no longer locked, and the user to which the remote input
-                // is destined is a locked, managed profile, then onLockedWorkRemoteInput should be
-                // called to unlock it.
-                if (isLockedManagedProfile && !isParentUserLocked) {
-                    mCallback.onLockedWorkRemoteInput(userId, row, view);
-                } else {
-                    // Even if we don't have security we should go through this flow, otherwise
-                    // we won't go to the shade.
-                    mCallback.onLockedRemoteInput(row, view);
-                }
-                return true;
-            }
-            if (isLockedManagedProfile) {
-                mCallback.onLockedWorkRemoteInput(userId, row, view);
-                return true;
-            }
+        final boolean deferBouncer = authBypassCheck != null;
+        if (!deferBouncer && showBouncerForRemoteInput(view, pendingIntent, row)) {
+            return true;
         }
 
         if (riv != null && !riv.isAttachedToWindow()) {
@@ -450,7 +451,10 @@ public class NotificationRemoteInputManager implements Dumpable {
                 && !row.getPrivateLayout().getExpandedChild().isShown()) {
             // The expanded layout is selected, but it's not shown yet, let's wait on it to
             // show before we do the animation.
-            mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
+            mCallback.onMakeExpandedVisibleForRemoteInput(row, view, deferBouncer, () -> {
+                activateRemoteInput(view, inputs, input, pendingIntent, editedSuggestionInfo,
+                        userMessageContent, authBypassCheck);
+            });
             return true;
         }
 
@@ -480,8 +484,60 @@ public class NotificationRemoteInputManager implements Dumpable {
         riv.setPendingIntent(pendingIntent);
         riv.setRemoteInput(inputs, input, editedSuggestionInfo);
         riv.focusAnimated();
+        if (userMessageContent != null) {
+            riv.setEditTextContent(userMessageContent);
+        }
+        if (deferBouncer) {
+            final ExpandableNotificationRow finalRow = row;
+            riv.setBouncerChecker(() -> !authBypassCheck.canSendRemoteInputWithoutBouncer()
+                    && showBouncerForRemoteInput(view, pendingIntent, finalRow));
+        }
 
         return true;
+    }
+
+    private boolean showBouncerForRemoteInput(View view, PendingIntent pendingIntent,
+            ExpandableNotificationRow row) {
+        if (mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
+            return false;
+        }
+
+        final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
+
+        final boolean isLockedManagedProfile =
+                mUserManager.getUserInfo(userId).isManagedProfile()
+                        && mKeyguardManager.isDeviceLocked(userId);
+
+        final boolean isParentUserLocked;
+        if (isLockedManagedProfile) {
+            final UserInfo profileParent = mUserManager.getProfileParent(userId);
+            isParentUserLocked = (profileParent != null)
+                    && mKeyguardManager.isDeviceLocked(profileParent.id);
+        } else {
+            isParentUserLocked = false;
+        }
+
+        if ((mLockscreenUserManager.isLockscreenPublicMode(userId)
+                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD)) {
+            // If the parent user is no longer locked, and the user to which the remote
+            // input
+            // is destined is a locked, managed profile, then onLockedWorkRemoteInput
+            // should be
+            // called to unlock it.
+            if (isLockedManagedProfile && !isParentUserLocked) {
+                mCallback.onLockedWorkRemoteInput(userId, row, view);
+            } else {
+                // Even if we don't have security we should go through this flow, otherwise
+                // we won't go to the shade.
+                mCallback.onLockedRemoteInput(row, view);
+            }
+            return true;
+        }
+        if (isLockedManagedProfile) {
+            mCallback.onLockedWorkRemoteInput(userId, row, view);
+            return true;
+        }
+        return false;
     }
 
     private RemoteInputView findRemoteInputView(View v) {
@@ -505,6 +561,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         return mLifetimeExtenders;
     }
 
+    @Nullable
     public RemoteInputController getController() {
         return mRemoteInputController;
     }
@@ -515,6 +572,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             mKeysKeptForRemoteInputHistory.remove(key);
         }
         if (mRemoteInputController.isRemoteInputActive(entry)) {
+            entry.mRemoteEditImeVisible = false;
             mRemoteInputController.removeRemoteInput(entry, null);
         }
     }
@@ -542,6 +600,26 @@ public class NotificationRemoteInputManager implements Dumpable {
                 || entry.hasJustSentRemoteInput());
     }
 
+    /**
+     * Checks if the notification is being kept due to the user sending an inline reply, and if
+     * so, releases that hold.  This is called anytime an action on the notification is dispatched
+     * (after unlock, if applicable), and will then wait a short time to allow the app to update the
+     * notification in response to the action.
+     */
+    private void releaseNotificationIfKeptForRemoteInputHistory(NotificationEntry entry) {
+        if (entry == null) {
+            return;
+        }
+        final String key = entry.getKey();
+        if (isNotificationKeptForRemoteInputHistory(key)) {
+            mMainHandler.postDelayed(() -> {
+                if (isNotificationKeptForRemoteInputHistory(key)) {
+                    mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
+                }
+            }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
+        }
+    }
+
     public boolean shouldKeepForSmartReplyHistory(NotificationEntry entry) {
         if (!FORCE_REMOTE_INPUT_HISTORY) {
             return false;
@@ -560,36 +638,29 @@ public class NotificationRemoteInputManager implements Dumpable {
     @VisibleForTesting
     StatusBarNotification rebuildNotificationForCanceledSmartReplies(
             NotificationEntry entry) {
-        return rebuildNotificationWithRemoteInput(entry, null /* remoteInputTest */,
+        return rebuildNotificationWithRemoteInputInserted(entry, null /* remoteInputTest */,
                 false /* showSpinner */, null /* mimeType */, null /* uri */);
     }
 
     @VisibleForTesting
-    StatusBarNotification rebuildNotificationWithRemoteInput(NotificationEntry entry,
+    StatusBarNotification rebuildNotificationWithRemoteInputInserted(NotificationEntry entry,
             CharSequence remoteInputText, boolean showSpinner, String mimeType, Uri uri) {
         StatusBarNotification sbn = entry.getSbn();
 
         Notification.Builder b = Notification.Builder
                 .recoverBuilder(mContext, sbn.getNotification().clone());
         if (remoteInputText != null || uri != null) {
-            RemoteInputHistoryItem[] oldHistoryItems = (RemoteInputHistoryItem[])
-                    sbn.getNotification().extras.getParcelableArray(
-                            Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-            RemoteInputHistoryItem[] newHistoryItems;
-
-            if (oldHistoryItems == null) {
-                newHistoryItems = new RemoteInputHistoryItem[1];
-            } else {
-                newHistoryItems = new RemoteInputHistoryItem[oldHistoryItems.length + 1];
-                System.arraycopy(oldHistoryItems, 0, newHistoryItems, 1, oldHistoryItems.length);
-            }
-            RemoteInputHistoryItem newItem;
-            if (uri != null) {
-                newItem = new RemoteInputHistoryItem(mimeType, uri, remoteInputText);
-            } else {
-                newItem = new RemoteInputHistoryItem(remoteInputText);
-            }
-            newHistoryItems[0] = newItem;
+            RemoteInputHistoryItem newItem = uri != null
+                    ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
+                    : new RemoteInputHistoryItem(remoteInputText);
+            Parcelable[] oldHistoryItems = sbn.getNotification().extras
+                    .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
+                    ? Stream.concat(
+                                Stream.of(newItem),
+                                Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
+                            .toArray(RemoteInputHistoryItem[]::new)
+                    : new RemoteInputHistoryItem[] { newItem };
             b.setRemoteInputHistory(newHistoryItems);
         }
         b.setShowRemoteInputSpinner(showSpinner);
@@ -633,8 +704,8 @@ public class NotificationRemoteInputManager implements Dumpable {
      *
      * @return on-click handler
      */
-    public RemoteViews.OnClickHandler getRemoteViewsOnClickHandler() {
-        return mOnClickHandler;
+    public RemoteViews.InteractionHandler getRemoteViewsOnClickHandler() {
+        return mInteractionHandler;
     }
 
     @VisibleForTesting
@@ -675,7 +746,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
                 String remoteInputMimeType = entry.remoteInputMimeType;
                 Uri remoteInputUri = entry.remoteInputUri;
-                StatusBarNotification newSbn = rebuildNotificationWithRemoteInput(entry,
+                StatusBarNotification newSbn = rebuildNotificationWithRemoteInputInserted(entry,
                         remoteInputText, false /* showSpinner */, remoteInputMimeType,
                         remoteInputUri);
                 entry.onRemoteInputInserted();
@@ -795,8 +866,11 @@ public class NotificationRemoteInputManager implements Dumpable {
          *
          * @param row
          * @param clickedView
+         * @param deferBouncer
+         * @param runnable
          */
-        void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row, View clickedView);
+        void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row, View clickedView,
+                boolean deferBouncer, Runnable runnable);
 
         /**
          * Return whether or not remote input should be handled for this view.
@@ -813,11 +887,12 @@ public class NotificationRemoteInputManager implements Dumpable {
          *
          * @param view
          * @param pendingIntent
+         * @param appRequestedAuth
          * @param defaultHandler
          * @return  true iff the click was handled
          */
         boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-                ClickHandler defaultHandler);
+                boolean appRequestedAuth, ClickHandler defaultHandler);
     }
 
     /**
@@ -831,5 +906,29 @@ public class NotificationRemoteInputManager implements Dumpable {
          * @return true iff the click was handled
          */
         boolean handleClick();
+    }
+
+    /**
+     * Predicate that is associated with a specific {@link #activateRemoteInput(View, RemoteInput[],
+     * RemoteInput, PendingIntent, EditedSuggestionInfo, String, AuthBypassPredicate)}
+     * invocation that determines whether or not the bouncer can be bypassed when sending the
+     * RemoteInput.
+     */
+    public interface AuthBypassPredicate {
+        /**
+         * Determines if the RemoteInput can be sent without the bouncer. Should be checked the
+         * same frame that the RemoteInput is to be sent.
+         */
+        boolean canSendRemoteInputWithoutBouncer();
+    }
+
+    /** Shows the bouncer if necessary */
+    public interface BouncerChecker {
+        /**
+         * Shows the bouncer if necessary in order to send a RemoteInput.
+         *
+         * @return {@code true} if the bouncer was shown, {@code false} otherwise
+         */
+        boolean showBouncerIfNecessary();
     }
 }

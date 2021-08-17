@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"တွဲဖက်ကိရိယာ မန်နေဂျာ"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ဖြင့် ချိတ်ဆက်ရန်&lt;strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ဖြင့် ချိတ်ဆက်ခြင်း &lt;strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; က စီမံခန့်ခွဲရန် <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို ရွေးချယ်ပါ"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"စက်"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"နာရီ"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"သင်၏ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကို စီမံခန့်ခွဲရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို ခွင့်ပြုပါ"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"သင်၏ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို စီမံခန့်ခွဲရန် ဤအက်ပ်ကိုလိုအပ်သည်။ <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"ခွင့်ပြုရန်"</string>
+    <string name="consent_no" msgid="2640796915611404382">"ခွင့်မပြုပါ"</string>
 </resources>

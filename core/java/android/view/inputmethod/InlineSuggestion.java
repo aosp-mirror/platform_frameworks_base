@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.util.Size;
 import android.util.Slog;
 import android.view.SurfaceControlViewHost;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.inline.InlineContentView;
 
@@ -38,6 +39,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 import com.android.internal.view.inline.IInlineContentCallback;
 import com.android.internal.view.inline.IInlineContentProvider;
+import com.android.internal.view.inline.InlineTooltipUi;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
@@ -75,6 +77,15 @@ public final class InlineSuggestion implements Parcelable {
     private InlineContentCallbackImpl mInlineContentCallback;
 
     /**
+     * Used to show up the inline suggestion tooltip.
+     *
+     * @hide
+     */
+    @Nullable
+    @DataClass.ParcelWith(InlineTooltipUiParceling.class)
+    private InlineTooltipUi mInlineTooltipUi;
+
+    /**
      * Creates a new {@link InlineSuggestion}, for testing purpose.
      *
      * @hide
@@ -82,7 +93,8 @@ public final class InlineSuggestion implements Parcelable {
     @TestApi
     @NonNull
     public static InlineSuggestion newInlineSuggestion(@NonNull InlineSuggestionInfo info) {
-        return new InlineSuggestion(info, null, /* inlineContentCallback */ null);
+        return new InlineSuggestion(info, null, /* inlineContentCallback */ null,
+                /* inlineTooltipUi */ null);
     }
 
     /**
@@ -92,7 +104,7 @@ public final class InlineSuggestion implements Parcelable {
      */
     public InlineSuggestion(@NonNull InlineSuggestionInfo info,
             @Nullable IInlineContentProvider contentProvider) {
-        this(info, contentProvider, /* inlineContentCallback */ null);
+        this(info, contentProvider, /* inlineContentCallback */ null, /* inlineTooltipUi */ null);
     }
 
     /**
@@ -136,9 +148,21 @@ public final class InlineSuggestion implements Parcelable {
                     "size is neither between min:" + minSize + " and max:" + maxSize
                             + ", nor wrap_content");
         }
-        mInlineContentCallback = getInlineContentCallback(context, callbackExecutor, callback);
+
+        InlineSuggestion toolTip = mInfo.getTooltip();
+        if (toolTip != null) {
+            if (mInlineTooltipUi == null) {
+                mInlineTooltipUi = new InlineTooltipUi(context);
+            }
+        } else {
+            mInlineTooltipUi = null;
+        }
+
+        mInlineContentCallback = getInlineContentCallback(context, callbackExecutor, callback,
+                mInlineTooltipUi);
         if (mContentProvider == null) {
             callbackExecutor.execute(() -> callback.accept(/* view */ null));
+            mInlineTooltipUi = null;
             return;
         }
         try {
@@ -148,6 +172,13 @@ public final class InlineSuggestion implements Parcelable {
             Slog.w(TAG, "Error creating suggestion content surface: " + e);
             callbackExecutor.execute(() -> callback.accept(/* view */ null));
         }
+        if (toolTip == null) return;
+
+        final Size tooltipSize = new Size(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        mInfo.getTooltip().inflate(context, tooltipSize, callbackExecutor, view -> {
+            Handler.getMain().post(() -> mInlineTooltipUi.setTooltipView(view));
+        });
     }
 
     /**
@@ -162,12 +193,13 @@ public final class InlineSuggestion implements Parcelable {
     }
 
     private synchronized InlineContentCallbackImpl getInlineContentCallback(Context context,
-            Executor callbackExecutor, Consumer<InlineContentView> callback) {
+            Executor callbackExecutor, Consumer<InlineContentView> callback,
+            InlineTooltipUi inlineTooltipUi) {
         if (mInlineContentCallback != null) {
             throw new IllegalStateException("Already called #inflate()");
         }
         return new InlineContentCallbackImpl(context, mContentProvider, callbackExecutor,
-                callback);
+                callback, inlineTooltipUi);
     }
 
     /**
@@ -267,14 +299,19 @@ public final class InlineSuggestion implements Parcelable {
         @Nullable
         private Consumer<SurfaceControlViewHost.SurfacePackage> mSurfacePackageConsumer;
 
+        @Nullable
+        private InlineTooltipUi mInlineTooltipUi;
+
         InlineContentCallbackImpl(@NonNull Context context,
                 @Nullable IInlineContentProvider inlineContentProvider,
                 @NonNull @CallbackExecutor Executor callbackExecutor,
-                @NonNull Consumer<InlineContentView> callback) {
+                @NonNull Consumer<InlineContentView> callback,
+                @Nullable InlineTooltipUi inlineTooltipUi) {
             mContext = context;
             mInlineContentProvider = inlineContentProvider;
             mCallbackExecutor = callbackExecutor;
             mCallback = callback;
+            mInlineTooltipUi = inlineTooltipUi;
         }
 
         @BinderThread
@@ -305,6 +342,17 @@ public final class InlineSuggestion implements Parcelable {
                 mCallbackExecutor.execute(() -> mCallback.accept(/* view */null));
             } else {
                 mView = new InlineContentView(mContext);
+                if (mInlineTooltipUi != null) {
+                    mView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                        @Override
+                        public void onLayoutChange(View v, int left, int top, int right,
+                                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                            if (mInlineTooltipUi != null) {
+                                mInlineTooltipUi.update(mView);
+                            }
+                        }
+                    });
+                }
                 mView.setLayoutParams(new ViewGroup.LayoutParams(width, height));
                 mView.setChildSurfacePackageUpdater(getSurfacePackageUpdater());
                 mCallbackExecutor.execute(() -> mCallback.accept(mView));
@@ -425,10 +473,25 @@ public final class InlineSuggestion implements Parcelable {
         }
     }
 
+    /**
+     * This class used to provide parcelling logic for InlineContentCallbackImpl. It's intended to
+     * make this parcelling a no-op, since it can't be parceled and we don't need to parcel it.
+     */
+    private static class InlineTooltipUiParceling implements
+            Parcelling<InlineTooltipUi> {
+        @Override
+        public void parcel(InlineTooltipUi item, Parcel dest, int parcelFlags) {
+        }
+
+        @Override
+        public InlineTooltipUi unparcel(Parcel source) {
+            return null;
+        }
+    }
 
 
 
-    // Code below generated by codegen v1.0.15.
+    // Code below generated by codegen v1.0.22.
     //
     // DO NOT MODIFY!
     // CHECKSTYLE:OFF Generated code
@@ -446,18 +509,22 @@ public final class InlineSuggestion implements Parcelable {
      *
      * @param inlineContentCallback
      *   Used to keep a strong reference to the callback so it doesn't get garbage collected.
+     * @param inlineTooltipUi
+     *   Used to show up the inline suggestion tooltip.
      * @hide
      */
     @DataClass.Generated.Member
     public InlineSuggestion(
             @NonNull InlineSuggestionInfo info,
             @Nullable IInlineContentProvider contentProvider,
-            @Nullable InlineContentCallbackImpl inlineContentCallback) {
+            @Nullable InlineContentCallbackImpl inlineContentCallback,
+            @Nullable InlineTooltipUi inlineTooltipUi) {
         this.mInfo = info;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInfo);
         this.mContentProvider = contentProvider;
         this.mInlineContentCallback = inlineContentCallback;
+        this.mInlineTooltipUi = inlineTooltipUi;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -485,6 +552,16 @@ public final class InlineSuggestion implements Parcelable {
         return mInlineContentCallback;
     }
 
+    /**
+     * Used to show up the inline suggestion tooltip.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public @Nullable InlineTooltipUi getInlineTooltipUi() {
+        return mInlineTooltipUi;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -494,7 +571,8 @@ public final class InlineSuggestion implements Parcelable {
         return "InlineSuggestion { " +
                 "info = " + mInfo + ", " +
                 "contentProvider = " + mContentProvider + ", " +
-                "inlineContentCallback = " + mInlineContentCallback +
+                "inlineContentCallback = " + mInlineContentCallback + ", " +
+                "inlineTooltipUi = " + mInlineTooltipUi +
         " }";
     }
 
@@ -513,7 +591,8 @@ public final class InlineSuggestion implements Parcelable {
         return true
                 && java.util.Objects.equals(mInfo, that.mInfo)
                 && java.util.Objects.equals(mContentProvider, that.mContentProvider)
-                && java.util.Objects.equals(mInlineContentCallback, that.mInlineContentCallback);
+                && java.util.Objects.equals(mInlineContentCallback, that.mInlineContentCallback)
+                && java.util.Objects.equals(mInlineTooltipUi, that.mInlineTooltipUi);
     }
 
     @Override
@@ -526,6 +605,7 @@ public final class InlineSuggestion implements Parcelable {
         _hash = 31 * _hash + java.util.Objects.hashCode(mInfo);
         _hash = 31 * _hash + java.util.Objects.hashCode(mContentProvider);
         _hash = 31 * _hash + java.util.Objects.hashCode(mInlineContentCallback);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mInlineTooltipUi);
         return _hash;
     }
 
@@ -540,6 +620,17 @@ public final class InlineSuggestion implements Parcelable {
         }
     }
 
+    @DataClass.Generated.Member
+    static Parcelling<InlineTooltipUi> sParcellingForInlineTooltipUi =
+            Parcelling.Cache.get(
+                    InlineTooltipUiParceling.class);
+    static {
+        if (sParcellingForInlineTooltipUi == null) {
+            sParcellingForInlineTooltipUi = Parcelling.Cache.put(
+                    new InlineTooltipUiParceling());
+        }
+    }
+
     @Override
     @DataClass.Generated.Member
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -549,10 +640,12 @@ public final class InlineSuggestion implements Parcelable {
         byte flg = 0;
         if (mContentProvider != null) flg |= 0x2;
         if (mInlineContentCallback != null) flg |= 0x4;
+        if (mInlineTooltipUi != null) flg |= 0x8;
         dest.writeByte(flg);
         dest.writeTypedObject(mInfo, flags);
         if (mContentProvider != null) dest.writeStrongInterface(mContentProvider);
         sParcellingForInlineContentCallback.parcel(mInlineContentCallback, dest, flags);
+        sParcellingForInlineTooltipUi.parcel(mInlineTooltipUi, dest, flags);
     }
 
     @Override
@@ -570,12 +663,14 @@ public final class InlineSuggestion implements Parcelable {
         InlineSuggestionInfo info = (InlineSuggestionInfo) in.readTypedObject(InlineSuggestionInfo.CREATOR);
         IInlineContentProvider contentProvider = (flg & 0x2) == 0 ? null : IInlineContentProvider.Stub.asInterface(in.readStrongBinder());
         InlineContentCallbackImpl inlineContentCallback = sParcellingForInlineContentCallback.unparcel(in);
+        InlineTooltipUi inlineTooltipUi = sParcellingForInlineTooltipUi.unparcel(in);
 
         this.mInfo = info;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInfo);
         this.mContentProvider = contentProvider;
         this.mInlineContentCallback = inlineContentCallback;
+        this.mInlineTooltipUi = inlineTooltipUi;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -595,10 +690,10 @@ public final class InlineSuggestion implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1589396017700L,
-            codegenVersion = "1.0.15",
+            time = 1615562097666L,
+            codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestion.java",
-            inputSignatures = "private static final  java.lang.String TAG\nprivate final @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo mInfo\nprivate final @android.annotation.Nullable com.android.internal.view.inline.IInlineContentProvider mContentProvider\nprivate @com.android.internal.util.DataClass.ParcelWith(android.view.inputmethod.InlineSuggestion.InlineContentCallbackImplParceling.class) @android.annotation.Nullable android.view.inputmethod.InlineSuggestion.InlineContentCallbackImpl mInlineContentCallback\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestion newInlineSuggestion(android.view.inputmethod.InlineSuggestionInfo)\npublic  void inflate(android.content.Context,android.util.Size,java.util.concurrent.Executor,java.util.function.Consumer<android.widget.inline.InlineContentView>)\nprivate static  boolean isValid(int,int,int)\nprivate synchronized  android.view.inputmethod.InlineSuggestion.InlineContentCallbackImpl getInlineContentCallback(android.content.Context,java.util.concurrent.Executor,java.util.function.Consumer<android.widget.inline.InlineContentView>)\nclass InlineSuggestion extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate final @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo mInfo\nprivate final @android.annotation.Nullable com.android.internal.view.inline.IInlineContentProvider mContentProvider\nprivate @com.android.internal.util.DataClass.ParcelWith(android.view.inputmethod.InlineSuggestion.InlineContentCallbackImplParceling.class) @android.annotation.Nullable android.view.inputmethod.InlineSuggestion.InlineContentCallbackImpl mInlineContentCallback\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(android.view.inputmethod.InlineSuggestion.InlineTooltipUiParceling.class) com.android.internal.view.inline.InlineTooltipUi mInlineTooltipUi\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestion newInlineSuggestion(android.view.inputmethod.InlineSuggestionInfo)\npublic  void inflate(android.content.Context,android.util.Size,java.util.concurrent.Executor,java.util.function.Consumer<android.widget.inline.InlineContentView>)\nprivate static  boolean isValid(int,int,int)\nprivate synchronized  android.view.inputmethod.InlineSuggestion.InlineContentCallbackImpl getInlineContentCallback(android.content.Context,java.util.concurrent.Executor,java.util.function.Consumer<android.widget.inline.InlineContentView>,com.android.internal.view.inline.InlineTooltipUi)\nclass InlineSuggestion extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -88,10 +88,12 @@
 ?audio/x-mpeg mp3
 
 ?image/bmp bmp
+?image/gif gif
 ?image/heic heic
 ?image/heic-sequence heics
 ?image/heif heif hif
 ?image/heif-sequence heifs
+?image/avif avif
 ?image/ico cur
 ?image/webp webp
 ?image/x-adobe-dng dng
@@ -138,7 +140,7 @@
 # that may have been defined earlier.
 
 application/pgp-signature pgp
-application/x-x509-ca-cert crt
+application/x-x509-ca-cert crt der
 audio/aac aac adts adt
 audio/basic snd
 audio/flac flac

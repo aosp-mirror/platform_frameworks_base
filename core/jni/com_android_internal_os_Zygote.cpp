@@ -174,6 +174,7 @@ static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
 static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
 
 static constexpr const char* kCurProfileDirPath = "/data/misc/profiles/cur";
+static constexpr const char* kRefProfileDirPath = "/data/misc/profiles/ref";
 
 /**
  * The maximum value that the gUSAPPoolSizeMax variable may take.  This value
@@ -189,6 +190,17 @@ static constexpr int PROCESS_PRIORITY_MIN = 19;
 
 /** The numeric value for the normal priority a process should have. */
 static constexpr int PROCESS_PRIORITY_DEFAULT = 0;
+
+/** Exponential back off parameters for storage dir check. */
+static constexpr unsigned int STORAGE_DIR_CHECK_RETRY_MULTIPLIER = 2;
+static constexpr unsigned int STORAGE_DIR_CHECK_INIT_INTERVAL_US = 50;
+static constexpr unsigned int STORAGE_DIR_CHECK_MAX_INTERVAL_US = 1000;
+/**
+ * Lower bound time we allow storage dir check to sleep.
+ * If it exceeds 2s, PROC_START_TIMEOUT_MSG will kill the starting app anyway,
+ * so it's fine to assume max retries is 5 mins.
+ */
+static constexpr int STORAGE_DIR_CHECK_TIMEOUT_US = 1000 * 1000 * 60 * 5;
 
 /**
  * A helper class containing accounting information for USAPs.
@@ -333,6 +345,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
     NATIVE_HEAP_ZERO_INIT = 1 << 23,
+    PROFILEABLE = 1 << 24,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1425,6 +1438,7 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   // Mount (namespace) tmpfs on profile directory, so apps no longer access
   // the original profile directory anymore.
   MountAppDataTmpFs(kCurProfileDirPath, fail_fn);
+  MountAppDataTmpFs(kRefProfileDirPath, fail_fn);
 
   // Create profile directory for this user.
   std::string actualCurUserProfile = StringPrintf("%s/%d", kCurProfileDirPath, user_id);
@@ -1438,15 +1452,50 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
         packageName.c_str());
     std::string mirrorCurPackageProfile = StringPrintf("/data_mirror/cur_profiles/%d/%s",
         user_id, packageName.c_str());
+    std::string actualRefPackageProfile = StringPrintf("%s/%s", kRefProfileDirPath,
+        packageName.c_str());
+    std::string mirrorRefPackageProfile = StringPrintf("/data_mirror/ref_profiles/%s",
+        packageName.c_str());
 
     if (access(mirrorCurPackageProfile.c_str(), F_OK) != 0) {
       ALOGW("Can't access app profile directory: %s", mirrorCurPackageProfile.c_str());
       continue;
     }
+    if (access(mirrorRefPackageProfile.c_str(), F_OK) != 0) {
+      ALOGW("Can't access app profile directory: %s", mirrorRefPackageProfile.c_str());
+      continue;
+    }
 
     PrepareDir(actualCurPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
     BindMount(mirrorCurPackageProfile, actualCurPackageProfile, fail_fn);
+    PrepareDir(actualRefPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
+    BindMount(mirrorRefPackageProfile, actualRefPackageProfile, fail_fn);
   }
+}
+
+static void WaitUntilDirReady(const std::string& target, fail_fn_t fail_fn) {
+  unsigned int sleepIntervalUs = STORAGE_DIR_CHECK_INIT_INTERVAL_US;
+
+  // This is just an approximate value as it doesn't need to be very accurate.
+  unsigned int sleepTotalUs = 0;
+
+  const char* dir_path = target.c_str();
+  while (sleepTotalUs < STORAGE_DIR_CHECK_TIMEOUT_US) {
+    if (access(dir_path, F_OK) == 0) {
+      return;
+    }
+    // Failed, so we add exponential backoff and retry
+    usleep(sleepIntervalUs);
+    sleepTotalUs += sleepIntervalUs;
+    sleepIntervalUs = std::min<unsigned int>(
+        sleepIntervalUs * STORAGE_DIR_CHECK_RETRY_MULTIPLIER,
+        STORAGE_DIR_CHECK_MAX_INTERVAL_US);
+  }
+  // Last chance and get the latest errno if it fails.
+  if (access(dir_path, F_OK) == 0) {
+    return;
+  }
+  fail_fn(CREATE_ERROR("Error dir is not ready %s: %s", dir_path, strerror(errno)));
 }
 
 static void BindMountStorageToLowerFs(const userid_t user_id, const uid_t uid,
@@ -1459,6 +1508,10 @@ static void BindMountStorageToLowerFs(const userid_t user_id, const uid_t uid,
         source = StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s", user_id, user_id, dir_name,
                               package);
     }
+
+  // Directory might be not ready, as prepareStorageDirs() is running asynchronously in ProcessList,
+  // so wait until dir is created.
+  WaitUntilDirReady(source, fail_fn);
   std::string target = StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package);
 
   // As the parent is mounted as tmpfs, we need to create the target dir here.

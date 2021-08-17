@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Pemasang pakej"</string>
     <string name="install" msgid="711829760615509273">"Pasang"</string>
+    <string name="update" msgid="3932142540719227615">"Kemas kini"</string>
     <string name="done" msgid="6632441120016885253">"Selesai"</string>
     <string name="cancel" msgid="1018267193425558088">"Batal"</string>
     <string name="installing" msgid="4921993079741206516">"Memasang…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Memasang <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikasi dipasang."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Adakah anda ingin memasang aplikasi ini?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Adakah anda mahu memasang kemas kini pada aplikasi yang sedia ada? Data anda yang sedia ada tidak akan hilang."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Adakah anda mahu memasang kemas kini pada aplikasi terbina dalam ini? Data anda yang sedia ada tidak akan hilang."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Adakah anda ingin memasang aplikasi ini?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Adakah anda mahu mengemas kini apl ini?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikasi tidak dipasang."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakej ini telah disekat daripada dipasang."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Apl tidak dipasang kerana pakej bercanggah dengan pakej yang sedia ada."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Tindakan pasang/nyahpasang tidak disokong pada Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Pemeringkatan apl…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Tidak diketahui"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Untuk keselamatan, tablet anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Untuk keselamatan, TV anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Untuk keselamatan, telefon anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Untuk keselamatan, tablet anda kini tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Untuk keselamatan, TV anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Untuk keselamatan anda, telefon anda kini tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefon dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada telefon anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada tablet anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada TV anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>

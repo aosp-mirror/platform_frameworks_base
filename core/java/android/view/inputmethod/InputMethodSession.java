@@ -17,6 +17,8 @@
 package android.view.inputmethod;
 
 import android.graphics.Rect;
+import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -172,7 +174,13 @@ public interface InputMethodSession {
      * @param hideFlags Provides additional operating flags.  May be
      * 0 or have the {@link  InputMethodManager#HIDE_IMPLICIT_ONLY},
      * {@link  InputMethodManager#HIDE_NOT_ALWAYS} bit set.
+     *
+     * @deprecated Starting in {@link Build.VERSION_CODES#S} the system no longer invokes this
+     * method, instead it explicitly shows or hides the IME. An {@code InputMethodService}
+     * wishing to toggle its own visibility should instead invoke {@link
+     * InputMethodService#requestShowSelf} or {@link InputMethodService#requestHideSelf}
      */
+    @Deprecated
     public void toggleSoftInput(int showFlags, int hideFlags);
 
     /**

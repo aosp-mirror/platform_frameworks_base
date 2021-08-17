@@ -24,16 +24,17 @@
     android:clipChildren="false"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:paddingStart="@*android:dimen/notification_content_margin_start">
+    android:paddingStart="@dimen/notification_shade_content_margin_horizontal">
 
     <!-- Package Info -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:clipToPadding="false">
+        android:paddingTop="@dimen/notification_guts_header_top_padding"
+        android:clipToPadding="true">
         <ImageView
             android:id="@+id/pkg_icon"
             android:layout_width="@dimen/notification_guts_conversation_icon_size"
@@ -107,9 +108,9 @@ asked for it -->
             android:layout_width="@dimen/notification_importance_toggle_size"
             android:layout_height="@dimen/notification_importance_toggle_size"
             android:layout_centerVertical="true"
-            android:background="@drawable/ripple_drawable"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/notification_more_settings"
-            android:src="@drawable/ic_settings"
+            android:src="@drawable/notif_settings_button"
             android:layout_alignParentEnd="true"
             android:tint="@color/notification_guts_link_icon_tint"/>
 
@@ -119,7 +120,7 @@ asked for it -->
         android:id="@+id/inline_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
+        android:paddingEnd="@dimen/notification_shade_content_margin_horizontal"
         android:layout_marginTop="@dimen/notification_guts_option_vertical_padding"
         android:clipChildren="false"
         android:clipToPadding="false"
@@ -149,6 +150,58 @@ asked for it -->
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical">
+            <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
+                android:id="@+id/automatic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/notification_importance_button_separation"
+                android:padding="@dimen/notification_importance_button_padding"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/notification_guts_priority_button_bg"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                >
+                    <ImageView
+                        android:id="@+id/automatic_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_notifications_automatic"
+                        android:background="@android:color/transparent"
+                        android:tint="@color/notification_guts_priority_contents"
+                        android:clickable="false"
+                        android:focusable="false"/>
+                    <TextView
+                        android:id="@+id/automatic_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/notification_importance_drawable_padding"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:textAppearance="@style/TextAppearance.NotificationImportanceButton"
+                        android:text="@string/notification_automatic_title"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/automatic_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/notification_importance_button_description_top_margin"
+                    android:visibility="gone"
+                    android:text="@string/notification_channel_summary_automatic"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
+            </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
             <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
                 android:id="@+id/alert"
@@ -287,6 +340,5 @@ asked for it -->
                 android:maxWidth="125dp"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </RelativeLayout>
-
     </LinearLayout>
 </com.android.systemui.statusbar.notification.row.NotificationInfo>

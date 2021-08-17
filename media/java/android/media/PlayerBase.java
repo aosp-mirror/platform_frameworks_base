@@ -19,12 +19,10 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -51,10 +49,6 @@ public abstract class PlayerBase {
     private static final boolean DEBUG = DEBUG_APP_OPS || false;
     private static IAudioService sService; //lazy initialization, use getService()
 
-    /** if true, only use OP_PLAY_AUDIO monitoring for logging, and rely on muting to happen
-     *  in AudioFlinger */
-    private static final boolean USE_AUDIOFLINGER_MUTING_FOR_OP = true;
-
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
 
@@ -78,7 +72,7 @@ public abstract class PlayerBase {
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
-    private int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
+    protected int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 
     @GuardedBy("mLock")
     private int mState;
@@ -90,11 +84,14 @@ public abstract class PlayerBase {
     private float mPanMultiplierR = 1.0f;
     @GuardedBy("mLock")
     private float mVolMultiplier = 1.0f;
+    @GuardedBy("mLock")
+    private int mDeviceId;
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
      * @param attr non-null audio attributes
      * @param class non-null class of the implementation of this abstract class
+     * @param sessionId the audio session Id
      */
     PlayerBase(@NonNull AudioAttributes attr, int implType) {
         if (attr == null) {
@@ -108,25 +105,11 @@ public abstract class PlayerBase {
     /**
      * Call from derived class when instantiation / initialization is successful
      */
-    protected void baseRegisterPlayer() {
-        if (!USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOps = IAppOpsService.Stub.asInterface(b);
-            // initialize mHasAppOpsPlayAudio
-            updateAppOpsPlayAudio();
-            // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
-            mAppOpsCallback = new IAppOpsCallbackWrapper(this);
-            try {
-                mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
-                        ActivityThread.currentPackageName(), mAppOpsCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error registering appOps callback", e);
-                mHasAppOpsPlayAudio = false;
-            }
-        }
+    protected void baseRegisterPlayer(int sessionId) {
         try {
             mPlayerIId = getService().trackPlayer(
-                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this)));
+                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this),
+                            sessionId));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
@@ -143,23 +126,54 @@ public abstract class PlayerBase {
         try {
             getService().playerAttributes(mPlayerIId, attr);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
+            Log.e(TAG, "Error talking to audio service, audio attributes will not be updated", e);
         }
         synchronized (mLock) {
-            boolean attributesChanged = (mAttributes != attr);
             mAttributes = attr;
-            updateAppOpsPlayAudio_sync(attributesChanged);
         }
     }
 
-    private void updateState(int state) {
+    /**
+     * To be called whenever the session ID of the player changes
+     * @param sessionId, the new session Id
+     */
+    void baseUpdateSessionId(int sessionId) {
+        try {
+            getService().playerSessionId(mPlayerIId, sessionId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to audio service, the session ID will not be updated", e);
+        }
+    }
+
+    void baseUpdateDeviceId(@Nullable AudioDeviceInfo deviceInfo) {
+        int deviceId = 0;
+        if (deviceInfo != null) {
+            deviceId = deviceInfo.getId();
+        }
+        int piid;
+        synchronized (mLock) {
+            piid = mPlayerIId;
+            mDeviceId = deviceId;
+        }
+        try {
+            getService().playerEvent(piid,
+                    AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID, deviceId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to audio service, "
+                    + deviceId
+                    + " device id will not be tracked for piid=" + piid, e);
+        }
+    }
+
+    private void updateState(int state, int deviceId) {
         final int piid;
         synchronized (mLock) {
             mState = state;
             piid = mPlayerIId;
+            mDeviceId = deviceId;
         }
         try {
-            getService().playerEvent(piid, state);
+            getService().playerEvent(piid, state, deviceId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, "
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerState(state)
@@ -167,14 +181,11 @@ public abstract class PlayerBase {
         }
     }
 
-    void baseStart() {
-        if (DEBUG) { Log.v(TAG, "baseStart() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
-        synchronized (mLock) {
-            if (isRestricted_sync()) {
-                playerSetVolume(true/*muting*/,0, 0);
-            }
+    void baseStart(int deviceId) {
+        if (DEBUG) {
+            Log.v(TAG, "baseStart() piid=" + mPlayerIId + " deviceId=" + deviceId);
         }
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED, deviceId);
     }
 
     void baseSetStartDelayMs(int delayMs) {
@@ -191,12 +202,12 @@ public abstract class PlayerBase {
 
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED, 0);
     }
 
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED, 0);
     }
 
     void baseSetPan(float pan) {
@@ -215,13 +226,11 @@ public abstract class PlayerBase {
 
     private void updatePlayerVolume() {
         final float finalLeftVol, finalRightVol;
-        final boolean isRestricted;
         synchronized (mLock) {
             finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL;
             finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR;
-            isRestricted = isRestricted_sync();
         }
-        playerSetVolume(isRestricted /*muting*/, finalLeftVol, finalRightVol);
+        playerSetVolume(false /*muting*/, finalLeftVol, finalRightVol);
     }
 
     void setVolumeMultiplier(float vol) {
@@ -242,9 +251,6 @@ public abstract class PlayerBase {
     int baseSetAuxEffectSendLevel(float level) {
         synchronized (mLock) {
             mAuxEffectSendLevel = level;
-            if (isRestricted_sync()) {
-                return AudioSystem.SUCCESS;
-            }
         }
         return playerSetAuxEffectSendLevel(false/*muting*/, level);
     }
@@ -276,98 +282,6 @@ public abstract class PlayerBase {
         } catch (Exception e) {
             // nothing to do here, the object is supposed to be released anyway
         }
-    }
-
-    private void updateAppOpsPlayAudio() {
-        synchronized (mLock) {
-            updateAppOpsPlayAudio_sync(false);
-        }
-    }
-
-    /**
-     * To be called whenever a condition that might affect audibility of this player is updated.
-     * Must be called synchronized on mLock.
-     */
-    void updateAppOpsPlayAudio_sync(boolean attributesChanged) {
-        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            return;
-        }
-        boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
-        try {
-            int mode = AppOpsManager.MODE_IGNORED;
-            if (mAppOps != null) {
-                mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                    mAttributes.getUsage(),
-                    Process.myUid(), ActivityThread.currentPackageName());
-            }
-            mHasAppOpsPlayAudio = (mode == AppOpsManager.MODE_ALLOWED);
-        } catch (RemoteException e) {
-            mHasAppOpsPlayAudio = false;
-        }
-
-        // AppsOps alters a player's volume; when the restriction changes, reflect it on the actual
-        // volume used by the player
-        try {
-            if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio ||
-                    attributesChanged) {
-                getService().playerHasOpPlayAudio(mPlayerIId, mHasAppOpsPlayAudio);
-                if (!isRestricted_sync()) {
-                    if (DEBUG_APP_OPS) {
-                        Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
-                                + "/" + mRightVolume);
-                    }
-                    playerSetVolume(false/*muting*/,
-                            mLeftVolume * mPanMultiplierL, mRightVolume * mPanMultiplierR);
-                    playerSetAuxEffectSendLevel(false/*muting*/, mAuxEffectSendLevel);
-                } else {
-                    if (DEBUG_APP_OPS) {
-                        Log.v(TAG, "updateAppOpsPlayAudio: muting player");
-                    }
-                    playerSetVolume(true/*muting*/, 0.0f, 0.0f);
-                    playerSetAuxEffectSendLevel(true/*muting*/, 0.0f);
-                }
-            }
-        } catch (Exception e) {
-            // failing silently, player might not be in right state
-        }
-    }
-
-    /**
-     * To be called by the subclass whenever an operation is potentially restricted.
-     * As the media player-common behavior are incorporated into this class, the subclass's need
-     * to call this method should be removed, and this method could become private.
-     * FIXME can this method be private so subclasses don't have to worry about when to check
-     *    the restrictions.
-     * @return
-     */
-    boolean isRestricted_sync() {
-        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            return false;
-        }
-        // check app ops
-        if (mHasAppOpsPlayAudio) {
-            return false;
-        }
-        // check bypass flag
-        if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
-            return false;
-        }
-        // check force audibility flag and camera restriction
-        if (((mAttributes.getAllFlags() & AudioAttributes.FLAG_AUDIBILITY_ENFORCED) != 0)
-                && (mAttributes.getUsage() == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)) {
-            boolean cameraSoundForced = false;
-            try {
-                cameraSoundForced = getService().isCameraSoundForced();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot access AudioService in isRestricted_sync()");
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Null AudioService in isRestricted_sync()");
-            }
-            if (cameraSoundForced) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static IAudioService getService()
@@ -439,26 +353,6 @@ public abstract class PlayerBase {
     abstract void playerStop();
 
     //=====================================================================
-    private static class IAppOpsCallbackWrapper extends IAppOpsCallback.Stub {
-        private final WeakReference<PlayerBase> mWeakPB;
-
-        public IAppOpsCallbackWrapper(PlayerBase pb) {
-            mWeakPB = new WeakReference<PlayerBase>(pb);
-        }
-
-        @Override
-        public void opChanged(int op, int uid, String packageName) {
-            if (op == AppOpsManager.OP_PLAY_AUDIO) {
-                if (DEBUG_APP_OPS) { Log.v(TAG, "opChanged: op=PLAY_AUDIO pack=" + packageName); }
-                final PlayerBase pb = mWeakPB.get();
-                if (pb != null) {
-                    pb.updateAppOpsPlayAudio();
-                }
-            }
-        }
-    }
-
-    //=====================================================================
     /**
      * Wrapper around an implementation of IPlayer for all subclasses of PlayerBase
      * that doesn't keep a strong reference on PlayerBase
@@ -520,11 +414,12 @@ public abstract class PlayerBase {
 
         @Override
         public void applyVolumeShaper(
-                @NonNull VolumeShaper.Configuration configuration,
-                @NonNull VolumeShaper.Operation operation) {
+                @NonNull VolumeShaperConfiguration configuration,
+                @NonNull VolumeShaperOperation operation) {
             final PlayerBase pb = mWeakPB.get();
             if (pb != null) {
-                pb.playerApplyVolumeShaper(configuration, operation);
+                pb.playerApplyVolumeShaper(VolumeShaper.Configuration.fromParcelable(configuration),
+                        VolumeShaper.Operation.fromParcelable(operation));
             }
         }
     }
@@ -540,16 +435,19 @@ public abstract class PlayerBase {
         public static final int AUDIO_ATTRIBUTES_DEFINED = 1;
         public final AudioAttributes mAttributes;
         public final IPlayer mIPlayer;
+        public final int mSessionId;
 
-        PlayerIdCard(int type, @NonNull AudioAttributes attr, @NonNull IPlayer iplayer) {
+        PlayerIdCard(int type, @NonNull AudioAttributes attr, @NonNull IPlayer iplayer,
+                     int sessionId) {
             mPlayerType = type;
             mAttributes = attr;
             mIPlayer = iplayer;
+            mSessionId = sessionId;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mPlayerType);
+            return Objects.hash(mPlayerType, mSessionId);
         }
 
         @Override
@@ -562,6 +460,7 @@ public abstract class PlayerBase {
             dest.writeInt(mPlayerType);
             mAttributes.writeToParcel(dest, 0);
             dest.writeStrongBinder(mIPlayer == null ? null : mIPlayer.asBinder());
+            dest.writeInt(mSessionId);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<PlayerIdCard> CREATOR
@@ -585,6 +484,7 @@ public abstract class PlayerBase {
             // IPlayer can be null if unmarshalling a Parcel coming from who knows where
             final IBinder b = in.readStrongBinder();
             mIPlayer = (b == null ? null : IPlayer.Stub.asInterface(b));
+            mSessionId = in.readInt();
         }
 
         @Override
@@ -595,7 +495,8 @@ public abstract class PlayerBase {
             PlayerIdCard that = (PlayerIdCard) o;
 
             // FIXME change to the binder player interface once supported as a member
-            return ((mPlayerType == that.mPlayerType) && mAttributes.equals(that.mAttributes));
+            return ((mPlayerType == that.mPlayerType) && mAttributes.equals(that.mAttributes)
+                    && (mSessionId == that.mSessionId));
         }
     }
 

@@ -21,6 +21,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -347,6 +348,23 @@ public class RemoteCallbackList<E extends IInterface> {
         try {
             for (int i = 0; i < itemCount; i++) {
                 action.accept((C) getBroadcastCookie(i));
+            }
+        } finally {
+            finishBroadcast();
+        }
+    }
+
+    /**
+     * Performs {@code action} on each callback and associated cookie, calling {@link
+     * #beginBroadcast()}/{@link #finishBroadcast()} before/after looping.
+     *
+     * @hide
+     */
+    public <C> void broadcast(BiConsumer<E, C> action) {
+        int itemCount = beginBroadcast();
+        try {
+            for (int i = 0; i < itemCount; i++) {
+                action.accept(getBroadcastItem(i), (C) getBroadcastCookie(i));
             }
         } finally {
             finishBroadcast();

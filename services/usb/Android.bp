@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.usb",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.usb-sources"],
 
     libs: [
@@ -28,7 +28,9 @@ java_library_static {
         "android.hardware.usb-V1.0-java",
         "android.hardware.usb-V1.1-java",
         "android.hardware.usb-V1.2-java",
+        "android.hardware.usb-V1.3-java",
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.usb.gadget-V1.1-java",
+        "android.hardware.usb.gadget-V1.2-java",
     ],
 }

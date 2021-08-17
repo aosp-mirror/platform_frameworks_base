@@ -16,10 +16,12 @@
 
 #include "RenderThread.h"
 
+#include <gui/TraceUtils.h>
 #include "../HardwareBitmapUploader.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
+#include "Properties.h"
 #include "Readback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
@@ -28,17 +30,18 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
 #include "utils/TimeUtils.h"
-#include "utils/TraceUtils.h"
 
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
 
+#include <dlfcn.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
 #include <utils/Mutex.h>
 #include <thread>
 
+#include <android-base/properties.h>
 #include <ui/FatVector.h>
 
 namespace android {
@@ -49,10 +52,74 @@ static bool gHasRenderThreadInstance = false;
 
 static JVMAttachHook gOnStartHook = nullptr;
 
+ASurfaceControlFunctions::ASurfaceControlFunctions() {
+    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    createFunc = (ASC_create)dlsym(handle_, "ASurfaceControl_create");
+    LOG_ALWAYS_FATAL_IF(createFunc == nullptr,
+                        "Failed to find required symbol ASurfaceControl_create!");
+
+    acquireFunc = (ASC_acquire) dlsym(handle_, "ASurfaceControl_acquire");
+    LOG_ALWAYS_FATAL_IF(acquireFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_acquire!");
+
+    releaseFunc = (ASC_release) dlsym(handle_, "ASurfaceControl_release");
+    LOG_ALWAYS_FATAL_IF(releaseFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_release!");
+
+    registerListenerFunc = (ASC_registerSurfaceStatsListener) dlsym(handle_,
+            "ASurfaceControl_registerSurfaceStatsListener");
+    LOG_ALWAYS_FATAL_IF(registerListenerFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_registerSurfaceStatsListener!");
+
+    unregisterListenerFunc = (ASC_unregisterSurfaceStatsListener) dlsym(handle_,
+            "ASurfaceControl_unregisterSurfaceStatsListener");
+    LOG_ALWAYS_FATAL_IF(unregisterListenerFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_unregisterSurfaceStatsListener!");
+
+    getAcquireTimeFunc = (ASCStats_getAcquireTime) dlsym(handle_,
+            "ASurfaceControlStats_getAcquireTime");
+    LOG_ALWAYS_FATAL_IF(getAcquireTimeFunc == nullptr,
+            "Failed to find required symbol ASurfaceControlStats_getAcquireTime!");
+
+    getFrameNumberFunc = (ASCStats_getFrameNumber) dlsym(handle_,
+            "ASurfaceControlStats_getFrameNumber");
+    LOG_ALWAYS_FATAL_IF(getFrameNumberFunc == nullptr,
+            "Failed to find required symbol ASurfaceControlStats_getFrameNumber!");
+
+    transactionCreateFunc = (AST_create)dlsym(handle_, "ASurfaceTransaction_create");
+    LOG_ALWAYS_FATAL_IF(transactionCreateFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_create!");
+
+    transactionDeleteFunc = (AST_delete)dlsym(handle_, "ASurfaceTransaction_delete");
+    LOG_ALWAYS_FATAL_IF(transactionDeleteFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_delete!");
+
+    transactionApplyFunc = (AST_apply)dlsym(handle_, "ASurfaceTransaction_apply");
+    LOG_ALWAYS_FATAL_IF(transactionApplyFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_apply!");
+
+    transactionReparentFunc = (AST_reparent)dlsym(handle_, "ASurfaceTransaction_reparent");
+    LOG_ALWAYS_FATAL_IF(transactionReparentFunc == nullptr,
+                        "Failed to find required symbol transactionReparentFunc!");
+
+    transactionSetVisibilityFunc =
+            (AST_setVisibility)dlsym(handle_, "ASurfaceTransaction_setVisibility");
+    LOG_ALWAYS_FATAL_IF(transactionSetVisibilityFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_setVisibility!");
+
+    transactionSetZOrderFunc = (AST_setZOrder)dlsym(handle_, "ASurfaceTransaction_setZOrder");
+    LOG_ALWAYS_FATAL_IF(transactionSetZOrderFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_setZOrder!");
+}
+
 void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
     RenderThread* rt = reinterpret_cast<RenderThread*>(data);
+    int64_t vsyncId = AChoreographer_getVsyncId(rt->mChoreographer);
+    int64_t frameDeadline = AChoreographer_getFrameDeadline(rt->mChoreographer);
+    int64_t frameInterval = AChoreographer_getFrameInterval(rt->mChoreographer);
     rt->mVsyncRequested = false;
-    if (rt->timeLord().vsyncReceived(frameTimeNanos) && !rt->mFrameCallbackTaskPending) {
+    if (rt->timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
+            frameInterval) && !rt->mFrameCallbackTaskPending) {
         ATRACE_NAME("queue mFrameCallbackTask");
         rt->mFrameCallbackTaskPending = true;
         nsecs_t runAt = (frameTimeNanos + rt->mDispatchFrameDelay);
@@ -116,10 +183,11 @@ JVMAttachHook RenderThread::getOnStartHook() {
 }
 
 RenderThread& RenderThread::getInstance() {
-    // This is a pointer because otherwise __cxa_finalize
-    // will try to delete it like a Good Citizen but that causes us to crash
-    // because we don't want to delete the RenderThread normally.
-    static RenderThread* sInstance = new RenderThread();
+    [[clang::no_destroy]] static sp<RenderThread> sInstance = []() {
+        sp<RenderThread> thread = sp<RenderThread>::make();
+        thread->start("RenderThread");
+        return thread;
+    }();
     gHasRenderThreadInstance = true;
     return *sInstance;
 }
@@ -132,9 +200,8 @@ RenderThread::RenderThread()
         , mRenderState(nullptr)
         , mEglManager(nullptr)
         , mFunctorManager(WebViewFunctorManager::instance())
-        , mVkManager(nullptr) {
+        , mGlobalProfileData(mJankDataMutex) {
     Properties::load();
-    start("RenderThread");
 }
 
 RenderThread::~RenderThread() {
@@ -166,7 +233,7 @@ void RenderThread::initThreadLocals() {
     initializeChoreographer();
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
-    mVkManager = new VulkanManager();
+    mVkManager = VulkanManager::getInstance();
     mCacheManager = new CacheManager();
 }
 
@@ -190,13 +257,17 @@ void RenderThread::requireGlContext() {
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
-    sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+    sk_sp<GrDirectContext> grContext(GrDirectContext::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
 
 void RenderThread::requireVkContext() {
-    if (mVkManager->hasVkContext()) {
+    // the getter creates the context in the event it had been destroyed by destroyRenderingContext
+    // Also check if we have a GrContext before returning fast. VulkanManager may be shared with
+    // the HardwareBitmapUploader which initializes the Vk context without persisting the GrContext
+    // in the rendering thread.
+    if (vulkanManager().hasVkContext() && mGrContext) {
         return;
     }
     mVkManager->initialize();
@@ -204,7 +275,7 @@ void RenderThread::requireVkContext() {
     initGrContextOptions(options);
     auto vkDriverVersion = mVkManager->getDriverVersion();
     cacheManager().configureContext(&options, &vkDriverVersion, sizeof(vkDriverVersion));
-    sk_sp<GrContext> grContext = mVkManager->createContext(options);
+    sk_sp<GrDirectContext> grContext = mVkManager->createContext(options);
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
@@ -212,6 +283,11 @@ void RenderThread::requireVkContext() {
 void RenderThread::initGrContextOptions(GrContextOptions& options) {
     options.fPreferExternalImagesOverES3 = true;
     options.fDisableDistanceFieldPaths = true;
+    if (android::base::GetBoolProperty(PROPERTY_REDUCE_OPS_TASK_SPLITTING, true)) {
+        options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kYes;
+    } else {
+        options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+    }
 }
 
 void RenderThread::destroyRenderingContext() {
@@ -222,37 +298,41 @@ void RenderThread::destroyRenderingContext() {
             mEglManager->destroy();
         }
     } else {
-        if (vulkanManager().hasVkContext()) {
-            setGrContext(nullptr);
-            vulkanManager().destroy();
-        }
+        setGrContext(nullptr);
+        mVkManager.clear();
     }
 }
 
-void RenderThread::dumpGraphicsMemory(int fd) {
-    globalProfileData()->dump(fd);
+VulkanManager& RenderThread::vulkanManager() {
+    if (!mVkManager.get()) {
+        mVkManager = VulkanManager::getInstance();
+    }
+    return *mVkManager.get();
+}
 
-    String8 cachesOutput;
-    String8 pipeline;
-    auto renderType = Properties::getRenderPipelineType();
-    switch (renderType) {
-        case RenderPipelineType::SkiaGL: {
-            mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
-            pipeline.appendFormat("Skia (OpenGL)");
-            break;
-        }
-        case RenderPipelineType::SkiaVulkan: {
-            mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
-            pipeline.appendFormat("Skia (Vulkan)");
-            break;
-        }
+static const char* pipelineToString() {
+    switch (auto renderType = Properties::getRenderPipelineType()) {
+        case RenderPipelineType::SkiaGL:
+            return "Skia (OpenGL)";
+        case RenderPipelineType::SkiaVulkan:
+            return "Skia (Vulkan)";
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-            break;
+    }
+}
+
+void RenderThread::dumpGraphicsMemory(int fd, bool includeProfileData) {
+    if (includeProfileData) {
+        globalProfileData()->dump(fd);
     }
 
-    dprintf(fd, "\n%s\n", cachesOutput.string());
-    dprintf(fd, "\nPipeline=%s\n", pipeline.string());
+    String8 cachesOutput;
+    mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
+    dprintf(fd, "\nPipeline=%s\n%s\n", pipelineToString(), cachesOutput.string());
+}
+
+void RenderThread::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
+    mCacheManager->getMemoryUsage(cpuUsage, gpuUsage);
 }
 
 Readback& RenderThread::readback() {
@@ -263,7 +343,7 @@ Readback& RenderThread::readback() {
     return *mReadback;
 }
 
-void RenderThread::setGrContext(sk_sp<GrContext> context) {
+void RenderThread::setGrContext(sk_sp<GrDirectContext> context) {
     mCacheManager->reset(context);
     if (mGrContext) {
         mRenderState->onContextDestroyed();
@@ -275,7 +355,7 @@ void RenderThread::setGrContext(sk_sp<GrContext> context) {
     }
 }
 
-sk_sp<GrContext> RenderThread::requireGrContext() {
+sk_sp<GrDirectContext> RenderThread::requireGrContext() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         requireGlContext();
     } else {

@@ -16,14 +16,14 @@
 
 #include "android/graphics/jni_runtime.h"
 
-#include <android/log.h>
-#include <nativehelper/JNIHelp.h>
-#include <sys/cdefs.h>
-
 #include <EGL/egl.h>
 #include <GraphicsJNI.h>
 #include <Properties.h>
 #include <SkGraphics.h>
+#include <android/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <sys/cdefs.h>
+#include <vulkan/vulkan.h>
 
 #undef LOG_TAG
 #define LOG_TAG "AndroidGraphicsJNI"
@@ -43,6 +43,7 @@ extern int register_android_graphics_Movie(JNIEnv* env);
 extern int register_android_graphics_NinePatch(JNIEnv*);
 extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
+extern int register_android_graphics_RenderEffect(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
 extern int register_android_graphics_YuvImage(JNIEnv* env);
 
@@ -61,6 +62,7 @@ extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv*);
 extern int register_android_graphics_Region(JNIEnv* env);
+extern int register_android_graphics_TextureLayer(JNIEnv* env);
 extern int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env);
 extern int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
@@ -72,11 +74,11 @@ extern int register_android_graphics_pdf_PdfEditor(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
+extern int register_android_graphics_text_TextShaper(JNIEnv *env);
 
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
-extern int register_android_view_TextureLayer(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 
 #ifdef NDEBUG
@@ -123,6 +125,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Picture),
     REG_JNI(register_android_graphics_Region),
     REG_JNI(register_android_graphics_Shader),
+    REG_JNI(register_android_graphics_RenderEffect),
+    REG_JNI(register_android_graphics_TextureLayer),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_YuvImage),
     REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory),
@@ -136,11 +140,11 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_pdf_PdfRenderer),
     REG_JNI(register_android_graphics_text_MeasuredText),
     REG_JNI(register_android_graphics_text_LineBreaker),
+    REG_JNI(register_android_graphics_text_TextShaper),
 
     REG_JNI(register_android_util_PathParser),
     REG_JNI(register_android_view_RenderNode),
     REG_JNI(register_android_view_DisplayListCanvas),
-    REG_JNI(register_android_view_TextureLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
 };
 
@@ -172,6 +176,11 @@ using android::uirenderer::RenderPipelineType;
 
 void zygote_preload_graphics() {
     if (Properties::peekRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        // Preload GL driver if HWUI renders with GL backend.
         eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    } else {
+        // Preload Vulkan driver if HWUI renders with Vulkan backend.
+        uint32_t apiVersion;
+        vkEnumerateInstanceVersion(&apiVersion);
     }
 }

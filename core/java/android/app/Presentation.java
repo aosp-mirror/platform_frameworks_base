@@ -16,29 +16,28 @@
 
 package android.app;
 
-import static android.content.Context.DISPLAY_SERVICE;
-import static android.content.Context.WINDOW_SERVICE;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.util.DisplayMetrics;
-import android.util.Log;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+import android.view.WindowManager.LayoutParams.WindowType;
+
+import java.util.Objects;
 
 /**
  * Base class for presentations.
@@ -153,11 +152,10 @@ import android.view.WindowManagerImpl;
 public class Presentation extends Dialog {
     private static final String TAG = "Presentation";
 
-    private static final int MSG_CANCEL = 1;
-
     private final Display mDisplay;
     private final DisplayManager mDisplayManager;
-    private final IBinder mToken = new Binder();
+    private final Handler mHandler = new Handler(Objects.requireNonNull(Looper.myLooper(),
+            "Presentation must be constructed on a looper thread."));
 
     /**
      * Creates a new presentation that is attached to the specified display
@@ -179,6 +177,11 @@ public class Presentation extends Dialog {
      * @param outerContext The context of the application that is showing the presentation.
      * The presentation will create its own context (see {@link #getContext()}) based
      * on this context and information about the associated display.
+     * From {@link android.os.Build.VERSION_CODES#S}, the presentation will create its own window
+     * context based on this context, information about the associated display. Customizing window
+     * type by {@link Window#setType(int) #getWindow#setType(int)} causes the mismatch of the window
+     * and the created window context, which leads to
+     * {@link android.view.WindowManager.InvalidDisplayException} when invoking {@link #show()}.
      * @param display The display to which the presentation should be attached.
      * @param theme A style resource describing the theme to use for the window.
      * See <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">
@@ -187,22 +190,51 @@ public class Presentation extends Dialog {
      * <var>outerContext</var>.  If 0, the default presentation theme will be used.
      */
     public Presentation(Context outerContext, Display display, int theme) {
-        super(createPresentationContext(outerContext, display, theme), theme, false);
+        this(outerContext, display, theme, INVALID_WINDOW_TYPE);
+    }
+
+    /**
+     * Creates a new presentation that is attached to the specified display
+     * using the optionally specified theme, and override the default window type for the
+     * presentation.
+     * @param outerContext The context of the application that is showing the presentation.
+     * The presentation will create its own context (see {@link #getContext()}) based
+     * on this context and information about the associated display.
+     * From {@link android.os.Build.VERSION_CODES#S}, the presentation will create its own window
+     * context based on this context, information about the associated display and the window type.
+     * If the window type is not specified, the presentation will choose the default type for the
+     * presentation.
+     * @param display The display to which the presentation should be attached.
+     * @param theme A style resource describing the theme to use for the window.
+     * See <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">
+     * Style and Theme Resources</a> for more information about defining and using
+     * styles.  This theme is applied on top of the current theme in
+     * <var>outerContext</var>.  If 0, the default presentation theme will be used.
+     * @param type Window type.
+     *
+     * @hide
+     */
+    public Presentation(@NonNull Context outerContext, @NonNull Display display, int theme,
+            @WindowType int type) {
+        super(createPresentationContext(outerContext, display, theme, type), theme, false);
 
         mDisplay = display;
-        mDisplayManager = (DisplayManager)getContext().getSystemService(DISPLAY_SERVICE);
-
-        final int windowType =
-                (display.getFlags() & Display.FLAG_PRIVATE) != 0 ? TYPE_PRIVATE_PRESENTATION
-                        : TYPE_PRESENTATION;
+        mDisplayManager = getContext().getSystemService(DisplayManager.class);
 
         final Window w = getWindow();
         final WindowManager.LayoutParams attr = w.getAttributes();
-        attr.token = mToken;
         w.setAttributes(attr);
         w.setGravity(Gravity.FILL);
-        w.setType(windowType);
+        w.setType(getWindowType(type, display));
         setCanceledOnTouchOutside(false);
+    }
+
+    private static @WindowType int getWindowType(@WindowType int type, @NonNull Display display) {
+        if (type != INVALID_WINDOW_TYPE) {
+            return type;
+        }
+        return (display.getFlags() & Display.FLAG_PRIVATE) != 0 ? TYPE_PRIVATE_PRESENTATION
+                : TYPE_PRESENTATION;
     }
 
     /**
@@ -229,16 +261,6 @@ public class Presentation extends Dialog {
     protected void onStart() {
         super.onStart();
         mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
-
-        // Since we were not watching for display changes until just now, there is a
-        // chance that the display metrics have changed.  If so, we will need to
-        // dismiss the presentation immediately.  This case is expected
-        // to be rare but surprising, so we'll write a log message about it.
-        if (!isConfigurationStillValid()) {
-            Log.i(TAG, "Presentation is being dismissed because the "
-                    + "display metrics have changed since it was created.");
-            mHandler.sendEmptyMessage(MSG_CANCEL);
-        }
     }
 
     @Override
@@ -273,10 +295,6 @@ public class Presentation extends Dialog {
      * Called by the system when the properties of the {@link Display} to which
      * the presentation is attached have changed.
      *
-     * If the display metrics have changed (for example, if the display has been
-     * resized or rotated), then the system automatically calls
-     * {@link #cancel} to dismiss the presentation.
-     *
      * @see #getDisplay
      */
     public void onDisplayChanged() {
@@ -289,28 +307,16 @@ public class Presentation extends Dialog {
 
     private void handleDisplayChanged() {
         onDisplayChanged();
-
-        // We currently do not support configuration changes for presentations
-        // (although we could add that feature with a bit more work).
-        // If the display metrics have changed in any way then the current configuration
-        // is invalid and the application must recreate the presentation to get
-        // a new context.
-        if (!isConfigurationStillValid()) {
-            Log.i(TAG, "Presentation is being dismissed because the "
-                    + "display metrics have changed since it was created.");
-            cancel();
-        }
     }
 
-    private boolean isConfigurationStillValid() {
-        DisplayMetrics dm = new DisplayMetrics();
-        mDisplay.getMetrics(dm);
-        return dm.equalsPhysical(getResources().getDisplayMetrics());
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@code N/A}")
+    private static Context createPresentationContext(Context outerContext, Display display,
+            int theme) {
+        return createPresentationContext(outerContext, display, theme, INVALID_WINDOW_TYPE);
     }
 
-    @UnsupportedAppUsage
     private static Context createPresentationContext(
-            Context outerContext, Display display, int theme) {
+            Context outerContext, Display display, int theme, @WindowType int type) {
         if (outerContext == null) {
             throw new IllegalArgumentException("outerContext must not be null");
         }
@@ -318,31 +324,15 @@ public class Presentation extends Dialog {
             throw new IllegalArgumentException("display must not be null");
         }
 
-        Context displayContext = outerContext.createDisplayContext(display);
+        Context windowContext = outerContext.createDisplayContext(display)
+                .createWindowContext(getWindowType(type, display), null /* options */);
         if (theme == 0) {
             TypedValue outValue = new TypedValue();
-            displayContext.getTheme().resolveAttribute(
+            windowContext.getTheme().resolveAttribute(
                     com.android.internal.R.attr.presentationTheme, outValue, true);
             theme = outValue.resourceId;
         }
-
-        // Derive the display's window manager from the outer window manager.
-        // We do this because the outer window manager have some extra information
-        // such as the parent window, which is important if the presentation uses
-        // an application window type.
-        final WindowManagerImpl outerWindowManager =
-                (WindowManagerImpl)outerContext.getSystemService(WINDOW_SERVICE);
-        final WindowManagerImpl displayWindowManager =
-                outerWindowManager.createPresentationWindowManager(displayContext);
-        return new ContextThemeWrapper(displayContext, theme) {
-            @Override
-            public Object getSystemService(String name) {
-                if (WINDOW_SERVICE.equals(name)) {
-                    return displayWindowManager;
-                }
-                return super.getSystemService(name);
-            }
-        };
+        return new ContextThemeWrapper(windowContext, theme);
     }
 
     private final DisplayListener mDisplayListener = new DisplayListener() {
@@ -361,17 +351,6 @@ public class Presentation extends Dialog {
         public void onDisplayChanged(int displayId) {
             if (displayId == mDisplay.getDisplayId()) {
                 handleDisplayChanged();
-            }
-        }
-    };
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_CANCEL:
-                    cancel();
-                    break;
             }
         }
     };

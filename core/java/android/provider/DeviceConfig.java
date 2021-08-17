@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.Settings.ResetMode;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -83,6 +84,15 @@ public final class DeviceConfig {
             "activity_manager_native_boot";
 
     /**
+     * Namespace for AlarmManager configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
+
+    /**
      * Namespace for all app compat related features.  These features will be applied
      * immediately upon change.
      *
@@ -97,6 +107,21 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
+
+    /**
+     * Namespace for all AppSearch related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APPSEARCH = "appsearch";
+
+    /**
+     * Namespace for app standby configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String NAMESPACE_APP_STANDBY = "app_standby";
 
     /**
      * Namespace for AttentionManagerService related features.
@@ -116,6 +141,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
+     * Namespace for battery saver feature.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_BATTERY_SAVER = "battery_saver";
+
+    /**
      * Namespace for blobstore feature that allows apps to share data blobs.
      *
      * @hide
@@ -130,6 +163,14 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_BLUETOOTH = "bluetooth";
+
+    /**
+     * Namespace for features relating to clipboard.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_CLIPBOARD = "clipboard";
 
     /**
      * Namespace for all networking connectivity related features.
@@ -147,6 +188,15 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+
+    /**
+     * Namespace for device idle configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
 
     /**
      * Namespace for how dex runs. The feature requires a reboot to reach a clean state.
@@ -201,12 +251,35 @@ public final class DeviceConfig {
             "intelligence_content_suggestions";
 
     /**
+     * Namespace for JobScheduler configurations.
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
+
+    /**
      * Namespace for all lmkd related features.
      *
      * @hide
      */
     @SystemApi
     public static final String NAMESPACE_LMKD_NATIVE = "lmkd_native";
+
+    /**
+     * Namespace for all location related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_LOCATION = "location";
+
+    /**
+     * Namespace for all media related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_MEDIA = "media";
 
     /**
      * Namespace for all media native related features.
@@ -242,6 +315,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PROFCOLLECT_NATIVE_BOOT = "profcollect_native_boot";
 
     /**
+     * Namespace for features related to Reboot Readiness detection.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_REBOOT_READINESS = "reboot_readiness";
+
+    /**
      * Namespace for Rollback flags that are applied immediately.
      *
      * @hide
@@ -256,6 +337,13 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
+
+    /**
+     * Namespace for Rotation Resolver Manager Service.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_ROTATION_RESOLVER = "rotation_resolver";
 
     /**
      * Namespace for all runtime related features that don't require a reboot to become active.
@@ -302,6 +390,38 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SETTINGS_STATS = "settings_stats";
 
     /**
+     * Namespace for all statsd java features that can be applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
+
+    /**
+     * Namespace for all statsd java features that are applied on boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
+
+    /**
+     * Namespace for all statsd native features that can be applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_NATIVE = "statsd_native";
+
+    /**
+     * Namespace for all statsd native features that are applied on boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
+
+    /**
      * Namespace for storage-related features.
      *
      * @deprecated Replace storage namespace with storage_native_boot.
@@ -326,6 +446,14 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_SYSTEMUI = "systemui";
+
+    /**
+     * Namespace for system time and time zone detection related features / behavior.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SYSTEM_TIME = "system_time";
 
     /**
      * Telephony related properties.
@@ -392,7 +520,8 @@ public final class DeviceConfig {
      */
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
-            Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME);
+            Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
+                    NAMESPACE_STATSD_JAVA_BOOT);
     /**
      * Privacy related properties definitions.
      *
@@ -446,6 +575,35 @@ public final class DeviceConfig {
      * @hide
      */
     public static final String NAMESPACE_CONFIGURATION = "configuration";
+
+    /**
+     * LatencyTracker properties definitions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_LATENCY_TRACKER = "latency_tracker";
+
+    /**
+     * InteractionJankMonitor properties definitions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_INTERACTION_JANK_MONITOR = "interaction_jank_monitor";
+
+    /**
+     * Namespace for game overlay related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
+
+    /**
+     * Namespace for Constrain Display APIs related features.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
@@ -529,7 +687,7 @@ public final class DeviceConfig {
      * @param name      The name of the property to look up.
      * @param defaultValue The value to return if the property does not exist or has no non-null
      *                     value.
-     * @return the corresponding value, or defaultValue if none exists.
+     * @return the correspondfing value, or defaultValue if none exists.
      * @hide
      */
     @SystemApi
@@ -667,10 +825,24 @@ public final class DeviceConfig {
     }
 
     /**
-     * Reset properties to their default values.
+     * Reset properties to their default values by removing the underlying values.
      * <p>
      * The method accepts an optional namespace parameter. If provided, only properties set within
      * that namespace will be reset. Otherwise, all properties will be reset.
+     * <p>
+     * Note: This method should only be used by {@link com.android.server.RescueParty}. It was
+     * designed to be used in the event of boot or crash loops caused by flag changes. It does not
+     * revert flag values to defaults - instead it removes the property entirely which causes the
+     * consumer of the flag to use hardcoded defaults upon retrieval.
+     * <p>
+     * To clear values for a namespace without removing the underlying properties, construct a
+     * {@link Properties} object with the caller's namespace and either an empty flag map, or some
+     * snapshot of flag values. Then use {@link #setProperties(Properties)} to remove all flags
+     * under the namespace, or set them to the values in the snapshot.
+     * <p>
+     * To revert values for testing, one should mock DeviceConfig using
+     * {@link com.android.server.testables.TestableDeviceConfig} where possible. Otherwise, fallback
+     * to using {@link #setProperties(Properties)} as outlined above.
      *
      * @param resetMode The reset mode to use.
      * @param namespace Optionally, the specific namespace which resets will be limited to.
@@ -682,6 +854,37 @@ public final class DeviceConfig {
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         Settings.Config.resetToDefaults(contentResolver, resetMode, namespace);
+    }
+
+    /**
+     * Disables or re-enables bulk modifications ({@link #setProperties(Properties)}) to device
+     * config values. This is intended for use during tests to prevent a sync operation clearing
+     * config values, which could influence the outcome of the tests, i.e. by changing behavior.
+     *
+     * @param syncDisabledMode the mode to use, see {@link Settings.Config#SYNC_DISABLED_MODE_NONE},
+     *     {@link Settings.Config#SYNC_DISABLED_MODE_PERSISTENT} and {@link
+     *     Settings.Config#SYNC_DISABLED_MODE_UNTIL_REBOOT}
+     *
+     * @see #isSyncDisabled()
+     * @hide
+     */
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static void setSyncDisabled(@SyncDisabledMode int syncDisabledMode) {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        Settings.Config.setSyncDisabled(contentResolver, syncDisabledMode);
+    }
+
+    /**
+     * Returns the current state of sync disabling, {@code true} when disabled, {@code false}
+     * otherwise.
+     *
+     * @see #setSyncDisabled(int)
+     * @hide
+     */
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean isSyncDisabled() {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.isSyncDisabled(contentResolver);
     }
 
     /**

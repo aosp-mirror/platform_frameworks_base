@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -25,6 +26,8 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.ArraySet;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
@@ -34,6 +37,25 @@ import java.util.Set;
  * Contains the attributes associated with the current IMS registration.
  */
 public final class ImsRegistrationAttributes implements Parcelable {
+
+    /**
+     * Attribute to specify if an EPDG tunnel is setup over the cellular internet APN.
+     * <p>
+     * If IMS is registered through an EPDG tunnel is setup over the cellular internet APN then this
+     * bit will be set. If IMS is registered through the IMS APN, then this bit will not be set.
+     *
+     */
+    public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1 << 0;
+
+    /** @hide */
+    // Defines the underlying radio technology type that we have registered for IMS over.
+    @IntDef(prefix = "ATTR_",
+            value = {
+                    ATTR_EPDG_OVER_CELL_INTERNET,
+            },
+            flag = true)
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsAttributeFlag {}
 
     /**
      * Builder for creating {@link ImsRegistrationAttributes} instances.
@@ -83,9 +105,20 @@ public final class ImsRegistrationAttributes implements Parcelable {
         public @NonNull ImsRegistrationAttributes build() {
             return new ImsRegistrationAttributes(mRegistrationTech,
                     RegistrationManager.getAccessType(mRegistrationTech),
-                    0 /* No attributes in AOSP */, mFeatureTags);
+                    getAttributeFlags(mRegistrationTech),
+                    mFeatureTags);
         }
 
+        /**
+         * @return attribute flags from the registration technology.
+         */
+        private static int getAttributeFlags(int imsRadioTech) {
+            int attributes = 0;
+            if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
+                attributes |= ATTR_EPDG_OVER_CELL_INTERNET;
+            }
+            return attributes;
+        }
     }
 
     private final int mRegistrationTech;
@@ -106,7 +139,7 @@ public final class ImsRegistrationAttributes implements Parcelable {
     public ImsRegistrationAttributes(
             @ImsRegistrationImplBase.ImsRegistrationTech int registrationTech,
             @AccessNetworkConstants.TransportType int transportType,
-            int imsAttributeFlags,
+            @ImsAttributeFlag int imsAttributeFlags,
             @Nullable Set<String> featureTags) {
         mRegistrationTech = registrationTech;
         mTransportType = transportType;
@@ -142,7 +175,7 @@ public final class ImsRegistrationAttributes implements Parcelable {
     /**
      * @return A bit-mask containing attributes associated with the IMS registration.
      */
-    public int getAttributeFlags() {
+    public @ImsAttributeFlag int getAttributeFlags() {
         return mImsAttributeFlags;
     }
 

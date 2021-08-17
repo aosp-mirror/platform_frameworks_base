@@ -17,4 +17,7 @@
 
 <resources>
     <dimen name="secondary_app_icon_size">32dp</dimen>
+    <dimen name="app_preference_padding_start">?android:attr/listPreferredItemPaddingStart</dimen>
+    <dimen name="app_icon_min_width">56dp</dimen>
+    <dimen name="two_target_min_width">72dp</dimen>
 </resources>

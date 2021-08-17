@@ -28,7 +28,9 @@ android_test {
         "androidx.test.rules",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
+        "collector-device-lib",
     ],
+    data: [":perfetto_artifacts"],
     platform_apis: true,
     test_suites: ["device-tests"],
 }

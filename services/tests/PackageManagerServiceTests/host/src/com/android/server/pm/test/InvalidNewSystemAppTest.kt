@@ -33,11 +33,11 @@ import org.junit.runner.RunWith
 class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
 
     companion object {
-        private const val TEST_PKG_NAME = "com.android.server.pm.test.dummy_app"
-        private const val VERSION_ONE = "PackageManagerDummyAppVersion1.apk"
-        private const val VERSION_TWO = "PackageManagerDummyAppVersion2.apk"
-        private const val VERSION_THREE_INVALID = "PackageManagerDummyAppVersion3Invalid.apk"
-        private const val VERSION_FOUR = "PackageManagerDummyAppVersion4.apk"
+        private const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
+        private const val VERSION_ONE = "PackageManagerTestAppVersion1.apk"
+        private const val VERSION_TWO = "PackageManagerTestAppVersion2.apk"
+        private const val VERSION_THREE_INVALID = "PackageManagerTestAppVersion3Invalid.apk"
+        private const val VERSION_FOUR = "PackageManagerTestAppVersion4.apk"
 
         @get:ClassRule
         val deviceRebootRule = SystemPreparer.TestRuleDelegate(true)
@@ -47,16 +47,17 @@ class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
             SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
-    @get:Rule
+    @Rule
+    @JvmField
     val rules = RuleChain.outerRule(tempFolder).around(preparer)!!
-    private val filePath = HostUtils.makePathForApk("PackageManagerDummyApp.apk", Partition.PRODUCT)
+    private val filePath = HostUtils.makePathForApk("PackageManagerTestApp.apk", Partition.PRODUCT)
 
     @Before
     @After
     fun removeApk() {
         device.uninstallPackage(TEST_PKG_NAME)
-        device.deleteFile(filePath.parent.toString())
-        device.reboot()
+        preparer.deleteFile(filePath.parent.toString())
+                .reboot()
     }
 
     @Test

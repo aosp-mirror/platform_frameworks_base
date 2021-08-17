@@ -226,7 +226,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } catch (SQLiteCantOpenDatabaseException e) {
-            String message = String.format("Cannot open database '%s'", file);
+            final StringBuilder message = new StringBuilder("Cannot open database '")
+                    .append(file).append('\'');
 
             try {
                 // Try to diagnose for common reasons. If something fails in here, that's fine;
@@ -236,20 +237,21 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 final Path dir = path.getParent();
 
                 if (!Files.isDirectory(dir)) {
-                    message += ": Directory " + dir + " doesn't exist";
+                    message.append(": Directory ").append(dir).append(" doesn't exist");
                 } else if (!Files.exists(path)) {
-                    message += ": File " + path + " doesn't exist";
+                    message.append(": File ").append(path).append(" doesn't exist");
                 } else if (!Files.isReadable(path)) {
-                    message += ": File " + path + " is not readable";
+                    message.append(": File ").append(path).append(" is not readable");
                 } else if (Files.isDirectory(path)) {
-                    message += ": Path " + path + " is a directory";
+                    message.append(": Path ").append(path).append(" is a directory");
                 } else {
-                    message += ": Unknown reason";
+                    message.append(": Unknown reason");
                 }
             } catch (Throwable th) {
-                message += ": Unknown reason; cannot examine filesystem: " + th.getMessage();
+                message.append(": Unknown reason; cannot examine filesystem: ")
+                        .append(th.getMessage());
             }
-            throw new SQLiteCantOpenDatabaseException(message, e);
+            throw new SQLiteCantOpenDatabaseException(message.toString(), e);
         } finally {
             mRecentOperations.endOperation(cookie);
         }
@@ -1293,11 +1295,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 } catch (SQLiteException ex) {
                     // Ignore.
                 }
-                String label = "  (attached) " + name;
+                StringBuilder label = new StringBuilder("  (attached) ").append(name);
                 if (!path.isEmpty()) {
-                    label += ": " + path;
+                    label.append(": ").append(path);
                 }
-                dbStatsList.add(new DbStats(label, pageCount, pageSize, 0, 0, 0, 0));
+                dbStatsList.add(new DbStats(label.toString(), pageCount, pageSize, 0, 0, 0, 0));
             }
         } catch (SQLiteException ex) {
             // Ignore.
@@ -1319,9 +1321,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private DbStats getMainDbStatsUnsafe(int lookaside, long pageCount, long pageSize) {
         // The prepared statement cache is thread-safe so we can access its statistics
         // even if we do not own the database connection.
-        String label = mConfiguration.path;
-        if (!mIsPrimaryConnection) {
-            label += " (" + mConnectionId + ")";
+        String label;
+        if (mIsPrimaryConnection) {
+            label = mConfiguration.path;
+        } else {
+            label = mConfiguration.path + " (" + mConnectionId + ")";
         }
         return new DbStats(label, pageCount, pageSize, lookaside,
                 mPreparedStatementCache.hitCount(),

@@ -35,6 +35,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import static java.util.Collections.singletonList;
+
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -46,6 +48,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -54,7 +57,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeL
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -71,7 +75,6 @@ import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -496,7 +499,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertTrue(entry.hasFinishedInitialization());
 
         // WHEN the pipeline is kicked off
-        mReadyForBuildListener.onBuildList(Arrays.asList(entry));
+        mReadyForBuildListener.onBuildList(singletonList(entry));
 
         // THEN the entry's initialization time is reset
         assertFalse(entry.hasFinishedInitialization());
@@ -609,13 +612,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a filter that removes all PACKAGE_4 notifs and sections that divide
         // notifs based on package name
         mListBuilder.addPreGroupFilter(new PackageFilter(PACKAGE_4));
-        final NotifSection pkg1Section = spy(new PackageSection(PACKAGE_1));
-        final NotifSection pkg2Section = spy(new PackageSection(PACKAGE_2));
+        final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1));
+        final NotifSectioner pkg2Sectioner = spy(new PackageSectioner(PACKAGE_2));
         // NOTE: no package 3 section explicitly added, so notifs with package 3 will get set by
         // ShadeListBuilder's sDefaultSection which will demote it to the last section
-        final NotifSection pkg4Section = spy(new PackageSection(PACKAGE_4));
-        final NotifSection pkg5Section = spy(new PackageSection(PACKAGE_5));
-        mListBuilder.setSections(Arrays.asList(pkg1Section, pkg2Section, pkg4Section, pkg5Section));
+        final NotifSectioner pkg4Sectioner = spy(new PackageSectioner(PACKAGE_4));
+        final NotifSectioner pkg5Sectioner = spy(new PackageSectioner(PACKAGE_5));
+        mListBuilder.setSectioners(
+                Arrays.asList(pkg1Sectioner, pkg2Sectioner, pkg4Sectioner, pkg5Sectioner));
+
+        final NotifSection pkg1Section = new NotifSection(pkg1Sectioner, 0);
+        final NotifSection pkg2Section = new NotifSection(pkg2Sectioner, 1);
+        final NotifSection pkg5Section = new NotifSection(pkg5Sectioner, 3);
 
         // WHEN we build a list with different packages
         addNotif(0, PACKAGE_4);
@@ -648,72 +656,61 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // THEN the first section (pkg1Section) is called on all top level elements (but
         // no children and no entries that were filtered out)
-        verify(pkg1Section).isInSection(mEntrySet.get(1));
-        verify(pkg1Section).isInSection(mEntrySet.get(2));
-        verify(pkg1Section).isInSection(mEntrySet.get(3));
-        verify(pkg1Section).isInSection(mEntrySet.get(7));
-        verify(pkg1Section).isInSection(mEntrySet.get(8));
-        verify(pkg1Section).isInSection(mEntrySet.get(9));
-        verify(pkg1Section).isInSection(mBuiltList.get(3));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(1));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(2));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(3));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(7));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(8));
+        verify(pkg1Sectioner).isInSection(mEntrySet.get(9));
+        verify(pkg1Sectioner).isInSection(mBuiltList.get(3));
 
-        verify(pkg1Section, never()).isInSection(mEntrySet.get(0));
-        verify(pkg1Section, never()).isInSection(mEntrySet.get(4));
-        verify(pkg1Section, never()).isInSection(mEntrySet.get(5));
-        verify(pkg1Section, never()).isInSection(mEntrySet.get(6));
-        verify(pkg1Section, never()).isInSection(mEntrySet.get(10));
+        verify(pkg1Sectioner, never()).isInSection(mEntrySet.get(0));
+        verify(pkg1Sectioner, never()).isInSection(mEntrySet.get(4));
+        verify(pkg1Sectioner, never()).isInSection(mEntrySet.get(5));
+        verify(pkg1Sectioner, never()).isInSection(mEntrySet.get(6));
+        verify(pkg1Sectioner, never()).isInSection(mEntrySet.get(10));
 
         // THEN the last section (pkg5Section) is not called on any of the entries that were
         // filtered or already in a section
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(0));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(1));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(2));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(4));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(5));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(6));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(7));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(8));
-        verify(pkg5Section, never()).isInSection(mEntrySet.get(10));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(0));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(1));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(2));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(4));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(5));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(6));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(7));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(8));
+        verify(pkg5Sectioner, never()).isInSection(mEntrySet.get(10));
 
-        verify(pkg5Section).isInSection(mEntrySet.get(3));
-        verify(pkg5Section).isInSection(mEntrySet.get(9));
+        verify(pkg5Sectioner).isInSection(mEntrySet.get(3));
+        verify(pkg5Sectioner).isInSection(mEntrySet.get(9));
 
         // THEN the correct section is assigned for entries in pkg1Section
-        assertEquals(pkg1Section, mEntrySet.get(2).getNotifSection());
-        assertEquals(0, mEntrySet.get(2).getSection());
-        assertEquals(pkg1Section, mEntrySet.get(7).getNotifSection());
-        assertEquals(0, mEntrySet.get(7).getSection());
+        assertEquals(pkg1Section, mEntrySet.get(2).getSection());
+        assertEquals(pkg1Section, mEntrySet.get(7).getSection());
 
         // THEN the correct section is assigned for entries in pkg2Section
-        assertEquals(pkg2Section, mEntrySet.get(1).getNotifSection());
-        assertEquals(1, mEntrySet.get(1).getSection());
-        assertEquals(pkg2Section, mEntrySet.get(8).getNotifSection());
-        assertEquals(1, mEntrySet.get(8).getSection());
-        assertEquals(pkg2Section, mBuiltList.get(3).getNotifSection());
-        assertEquals(1, mBuiltList.get(3).getSection());
+        assertEquals(pkg2Section, mEntrySet.get(1).getSection());
+        assertEquals(pkg2Section, mEntrySet.get(8).getSection());
+        assertEquals(pkg2Section, mBuiltList.get(3).getSection());
 
         // THEN no section was assigned to entries in pkg4Section (since they were filtered)
-        assertEquals(null, mEntrySet.get(0).getNotifSection());
-        assertEquals(-1, mEntrySet.get(0).getSection());
-        assertEquals(null, mEntrySet.get(10).getNotifSection());
-        assertEquals(-1, mEntrySet.get(10).getSection());
-
+        assertNull(mEntrySet.get(0).getSection());
+        assertNull(mEntrySet.get(10).getSection());
 
         // THEN the correct section is assigned for entries in pkg5Section
-        assertEquals(pkg5Section, mEntrySet.get(9).getNotifSection());
-        assertEquals(3, mEntrySet.get(9).getSection());
+        assertEquals(pkg5Section, mEntrySet.get(9).getSection());
 
         // THEN the children entries are assigned the same section as its parent
-        assertEquals(mBuiltList.get(3).getNotifSection(), child(5).entry.getNotifSection());
         assertEquals(mBuiltList.get(3).getSection(), child(5).entry.getSection());
-        assertEquals(mBuiltList.get(3).getNotifSection(), child(6).entry.getNotifSection());
         assertEquals(mBuiltList.get(3).getSection(), child(6).entry.getSection());
     }
 
     @Test
     public void testNotifUsesDefaultSection() {
         // GIVEN a Section for Package2
-        final NotifSection pkg2Section = spy(new PackageSection(PACKAGE_2));
-        mListBuilder.setSections(Arrays.asList(pkg2Section));
+        final NotifSectioner pkg2Section = spy(new PackageSectioner(PACKAGE_2));
+        mListBuilder.setSectioners(singletonList(pkg2Section));
 
         // WHEN we build a list with pkg1 and pkg2 packages
         addNotif(0, PACKAGE_1);
@@ -727,8 +724,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN the entry that didn't have an explicit section gets assigned the DefaultSection
-        assertEquals(1, notif(0).entry.getSection());
-        assertNotNull(notif(0).entry.getNotifSection());
+        assertNotNull(notif(0).entry.getSection());
+        assertEquals(1, notif(0).entry.getSectionIndex());
     }
 
     @Test
@@ -763,15 +760,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a bunch of registered listeners and pluggables
         NotifFilter preGroupFilter = spy(new PackageFilter(PACKAGE_1));
         NotifPromoter promoter = spy(new IdPromoter(3));
-        NotifSection section = spy(new PackageSection(PACKAGE_1));
+        NotifSectioner section = spy(new PackageSectioner(PACKAGE_1));
         NotifComparator comparator = spy(new HypeComparator(PACKAGE_4));
         NotifFilter preRenderFilter = spy(new PackageFilter(PACKAGE_5));
         mListBuilder.addPreGroupFilter(preGroupFilter);
         mListBuilder.addOnBeforeTransformGroupsListener(mOnBeforeTransformGroupsListener);
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(mOnBeforeSortListener);
-        mListBuilder.setComparators(Collections.singletonList(comparator));
-        mListBuilder.setSections(Arrays.asList(section));
+        mListBuilder.setComparators(singletonList(comparator));
+        mListBuilder.setSectioners(singletonList(section));
         mListBuilder.addOnBeforeFinalizeFilterListener(mOnBeforeFinalizeFilterListener);
         mListBuilder.addFinalizeFilter(preRenderFilter);
         mListBuilder.addOnBeforeRenderListListener(mOnBeforeRenderListListener);
@@ -821,13 +818,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a variety of pluggables
         NotifFilter packageFilter = new PackageFilter(PACKAGE_1);
         NotifPromoter idPromoter = new IdPromoter(4);
-        NotifSection section = new PackageSection(PACKAGE_1);
+        NotifSectioner section = new PackageSectioner(PACKAGE_1);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
 
         mListBuilder.addPreGroupFilter(packageFilter);
         mListBuilder.addPromoter(idPromoter);
-        mListBuilder.setSections(Arrays.asList(section));
-        mListBuilder.setComparators(Collections.singletonList(hypeComparator));
+        mListBuilder.setSectioners(singletonList(section));
+        mListBuilder.setComparators(singletonList(hypeComparator));
 
         // GIVEN a set of random notifs
         addNotif(0, PACKAGE_1);
@@ -968,12 +965,204 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStabilizeGroupsDoesNotAllowGrouping() {
+        // GIVEN one group child without a summary yet
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a group summary & child
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all notifications are top-level and the summary doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsAllowsGroupingAllNewNotifications() {
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with all new notification groups
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupSummary(3, PACKAGE_2, GROUP_2);
+        addGroupChild(4, PACKAGE_2, GROUP_2);
+        addGroupChild(5, PACKAGE_2, GROUP_2);
+
+        dispatchBuild();
+
+        // THEN all notifications are grouped since they're all new
+        verifyBuiltList(
+                group(
+                        summary(1),
+                        child(0),
+                        child(2)
+                ),
+                group(
+                        summary(3),
+                        child(4),
+                        child(5)
+                )
+        );
+    }
+
+
+    @Test
+    public void testStabilizeGroupsAllowsGroupingOnlyNewNotifications() {
+        // GIVEN one group child without a summary yet
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a group summary & child
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupSummary(3, PACKAGE_2, GROUP_2);
+        addGroupChild(4, PACKAGE_2, GROUP_2);
+        addGroupChild(5, PACKAGE_2, GROUP_2);
+
+        dispatchBuild();
+
+        // THEN all notifications are top-level and the summary doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                group(
+                        summary(3),
+                        child(4),
+                        child(5)
+                ),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsHidesGroupSummary() {
+        // GIVEN one group child with a summary
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild(); // group summary is hidden because it needs at least 2 children to group
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a child
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN the children notifications are top-level and the summary still doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsDelayedSummaryRendersAllNotifsTopLevel() {
+        // GIVEN group children posted without a summary
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupChild(3, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
+
+        // WHEN the delayed summary is posted
+        addGroupSummary(4, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all entries are top-level since group changes aren't allowed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3),
+                notif(4)
+        );
+
+        // WHEN visual stability manager allows group changes again
+        stabilityManager.setAllowGroupChanges(true);
+        stabilityManager.invalidateList();
+
+        // THEN entries are grouped
+        verifyBuiltList(
+                group(
+                        summary(4),
+                        child(0),
+                        child(1),
+                        child(2),
+                        child(3)
+                )
+        );
+    }
+
+    @Test
+    public void testStabilizeSectionDisallowsNewSection() {
+        // GIVEN one non-default sections
+        final NotifSectioner originalSectioner = new PackageSectioner(PACKAGE_1);
+        mListBuilder.setSectioners(List.of(originalSectioner));
+
+        // GIVEN notifications that's sectioned by sectioner1
+        addNotif(0, PACKAGE_1);
+        dispatchBuild();
+        assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
+
+        // WHEN section changes aren't allowed
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowSectionChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
+
+        // WHEN we try to change the section
+        final NotifSectioner newSectioner = new PackageSectioner(PACKAGE_1);
+        mListBuilder.setSectioners(List.of(newSectioner, originalSectioner));
+        dispatchBuild();
+
+        // THEN the section remains the same since section changes aren't allowed
+        assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
+
+        // WHEN section changes are allowed again
+        stabilityManager.setAllowSectionChanges(true);
+        stabilityManager.invalidateList();
+
+        // THEN the section updates
+        assertEquals(newSectioner, mEntrySet.get(0).getSection().getSectioner());
+    }
+
+    @Test
     public void testDispatchListOnBeforeSort() {
         // GIVEN a registered OnBeforeSortListener
         RecordingOnBeforeSortListener listener =
                 new RecordingOnBeforeSortListener();
         mListBuilder.addOnBeforeSortListener(listener);
-        mListBuilder.setComparators(Arrays.asList(new HypeComparator(PACKAGE_3)));
+        mListBuilder.setComparators(singletonList(new HypeComparator(PACKAGE_3)));
 
         // GIVEN some new notifs out of order
         addNotif(0, PACKAGE_1);
@@ -1003,8 +1192,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     @Test
     public void testDispatchListOnBeforeRender() {
         // GIVEN a registered OnBeforeRenderList
-        RecordingOnBeforeRenderistener listener =
-                new RecordingOnBeforeRenderistener();
+        RecordingOnBeforeRenderListener listener =
+                new RecordingOnBeforeRenderListener();
         mListBuilder.addOnBeforeRenderListListener(listener);
 
         // GIVEN some new notifs out of order
@@ -1093,7 +1282,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         NotifComparator comparator = new HypeComparator(PACKAGE_5);
         OnBeforeRenderListListener listener =
                 (list) -> comparator.invalidateList();
-        mListBuilder.setComparators(Collections.singletonList(comparator));
+        mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
         // WHEN we try to run the pipeline and the comparator is invalidated
@@ -1420,10 +1609,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     /** Represents a section for the passed pkg */
-    private static class PackageSection extends NotifSection {
+    private static class PackageSectioner extends NotifSectioner {
         private final String mPackage;
 
-        PackageSection(String pkg) {
+        PackageSectioner(String pkg) {
             super("PackageSection_" + pkg);
             mPackage = pkg;
         }
@@ -1454,13 +1643,46 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
-    private static class RecordingOnBeforeRenderistener
+    private static class RecordingOnBeforeRenderListener
             implements OnBeforeRenderListListener {
         List<ListEntry> mEntriesReceived;
 
         @Override
         public void onBeforeRenderList(List<ListEntry> list) {
             mEntriesReceived = new ArrayList<>(list);
+        }
+    }
+
+    private static class TestableStabilityManager extends NotifStabilityManager {
+        boolean mAllowGroupChanges = true;
+        boolean mAllowSectionChanges = true;
+
+        TestableStabilityManager() {
+            super("Test");
+        }
+
+        TestableStabilityManager setAllowGroupChanges(boolean allowGroupChanges) {
+            mAllowGroupChanges = allowGroupChanges;
+            return this;
+        }
+
+        TestableStabilityManager setAllowSectionChanges(boolean allowSectionChanges) {
+            mAllowSectionChanges = allowSectionChanges;
+            return this;
+        }
+
+        @Override
+        public void onBeginRun() {
+        }
+
+        @Override
+        public boolean isGroupChangeAllowed(NotificationEntry entry) {
+            return mAllowGroupChanges;
+        }
+
+        @Override
+        public boolean isSectionChangeAllowed(NotificationEntry entry) {
+            return mAllowSectionChanges;
         }
     }
 

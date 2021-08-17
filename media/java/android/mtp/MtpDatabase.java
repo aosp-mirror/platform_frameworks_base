@@ -27,10 +27,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.media.ApplicationMediaCapabilities;
 import android.media.ExifInterface;
+import android.media.MediaFormat;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
@@ -52,6 +56,7 @@ import com.google.android.collect.Sets;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,6 +101,8 @@ public class MtpDatabase implements AutoCloseable {
     private int mBatteryLevel;
     private int mBatteryScale;
     private int mDeviceType;
+    private String mHostType;
+    private boolean mSkipThumbForHost = false;
 
     private MtpServer mServer;
     private MtpStorageManager mManager;
@@ -187,6 +194,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
             MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL,
             MtpConstants.DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE,
+            MtpConstants.DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO,
     };
 
     @VisibleForNative
@@ -403,6 +411,8 @@ public class MtpDatabase implements AutoCloseable {
             }
             context.deleteDatabase(devicePropertiesName);
         }
+        mHostType = "";
+        mSkipThumbForHost = false;
     }
 
     @VisibleForNative
@@ -667,12 +677,24 @@ public class MtpDatabase implements AutoCloseable {
 
     @VisibleForNative
     private int getDeviceProperty(int property, long[] outIntValue, char[] outStringValue) {
+        int length;
+        String value;
+
         switch (property) {
             case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
                 // writable string properties kept in shared preferences
-                String value = mDeviceProperties.getString(Integer.toString(property), "");
-                int length = value.length();
+                value = mDeviceProperties.getString(Integer.toString(property), "");
+                length = value.length();
+                if (length > 255) {
+                    length = 255;
+                }
+                value.getChars(0, length, outStringValue, 0);
+                outStringValue[length] = 0;
+                return MtpConstants.RESPONSE_OK;
+            case MtpConstants.DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO:
+                value = mHostType;
+                length = value.length();
                 if (length > 255) {
                     length = 255;
                 }
@@ -712,6 +734,14 @@ public class MtpDatabase implements AutoCloseable {
                 e.putString(Integer.toString(property), stringValue);
                 return (e.commit() ? MtpConstants.RESPONSE_OK
                         : MtpConstants.RESPONSE_GENERAL_ERROR);
+            case MtpConstants.DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO:
+                mHostType = stringValue;
+                if (stringValue.startsWith("Android/")) {
+                    Log.d(TAG, "setDeviceProperty." + Integer.toHexString(property)
+                            + "=" + stringValue);
+                    mSkipThumbForHost = true;
+                }
+                return MtpConstants.RESPONSE_OK;
         }
 
         return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
@@ -752,6 +782,34 @@ public class MtpDatabase implements AutoCloseable {
         outFileLengthFormat[0] = obj.getSize();
         outFileLengthFormat[1] = obj.getFormat();
         return MtpConstants.RESPONSE_OK;
+    }
+
+    @VisibleForNative
+    private int openFilePath(String path, boolean transcode) {
+        Uri uri = MediaStore.scanFile(mContext.getContentResolver(), new File(path));
+        if (uri == null) {
+            Log.i(TAG, "Failed to obtain URI for openFile with transcode support: " + path);
+            return -1;
+        }
+
+        try {
+            Log.i(TAG, "openFile with transcode support: " + path);
+            Bundle bundle = new Bundle();
+            if (transcode) {
+                bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
+                        new ApplicationMediaCapabilities.Builder().addUnsupportedVideoMimeType(
+                                MediaFormat.MIMETYPE_VIDEO_HEVC).build());
+            } else {
+                bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
+                        new ApplicationMediaCapabilities.Builder().addSupportedVideoMimeType(
+                                MediaFormat.MIMETYPE_VIDEO_HEVC).build());
+            }
+            return mMediaProvider.openTypedAssetFileDescriptor(uri, "*/*", bundle)
+                    .getParcelFileDescriptor().detachFd();
+        } catch (RemoteException | FileNotFoundException e) {
+            Log.w(TAG, "Failed to openFile with transcode support: " + path, e);
+            return -1;
+        }
     }
 
     private int getObjectFormat(int handle) {
@@ -805,6 +863,10 @@ public class MtpDatabase implements AutoCloseable {
                     outLongs[0] = thumbOffsetAndSize != null ? thumbOffsetAndSize[1] : 0;
                     outLongs[1] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_X_DIMENSION, 0);
                     outLongs[2] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_Y_DIMENSION, 0);
+                    if (mSkipThumbForHost) {
+                        Log.d(TAG, "getThumbnailInfo: Skip runtime thumbnail.");
+                        return true;
+                    }
                     if (exif.getThumbnailRange() != null) {
                         if ((outLongs[0] == 0) || (outLongs[1] == 0) || (outLongs[2] == 0)) {
                             Log.d(TAG, "getThumbnailInfo: check thumb info:"
@@ -847,6 +909,10 @@ public class MtpDatabase implements AutoCloseable {
                 try {
                     ExifInterface exif = new ExifInterface(path);
 
+                    if (mSkipThumbForHost) {
+                        Log.d(TAG, "getThumbnailData: Skip runtime thumbnail.");
+                        return exif.getThumbnail();
+                    }
                     if (exif.getThumbnailRange() != null)
                         return exif.getThumbnail();
                 } catch (IOException e) {

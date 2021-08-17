@@ -44,12 +44,16 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
     <uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
+    <uses-permission android:name="android.permission.DEVICE_POWER"/>
     <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
@@ -137,14 +141,23 @@
     <!-- accessibility test permissions -->
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
 
+    <!-- vibrator test permissions -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- vr test permissions -->
     <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
 
     <!-- WindowMetricsTest permissions -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!-- WindowContextTest permissions -->
+    <uses-permission android:name="android.permission.MANAGE_APP_TOKENS" />
+
     <!-- Allow use of PendingIntent.getIntent() -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
+
+    <!-- ChooserActivityTest permissions-->
+    <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
     <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
@@ -152,29 +165,55 @@
         <meta-data
             android:name="android.content.APP_RESTRICTIONS"
             android:resource="@xml/app_restrictions" />
-        <activity android:name="android.view.ViewAttachTestActivity" android:label="View Attach Test">
+        <activity android:name="android.view.ViewAttachTestActivity"
+            android:label="View Attach Test"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="StubTestBrowserActivity" android:label="Stubbed Test Browser">
+        <activity android:name="android.view.ViewInputConnectionTestActivity"
+                  android:label="View Input Connection Test"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+        <activity android:name="StubTestBrowserActivity"
+            android:label="Stubbed Test Browser"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.FOR_TESTS_ONLY"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="android.test.TestBrowserTests" android:label="Test Browser Tests">
+        <activity android:name="android.test.TestBrowserTests"
+            android:label="Test Browser Tests"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.UNIT_TEST"/>
             </intent-filter>
         </activity>
 
+        <activity android:name="android.widget.CustomInputConnectionEditTextActivity"
+                  android:label="CustomInputConnectionEditTextActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.widget.TextViewActivity"
                 android:label="TextViewActivity"
                 android:screenOrientation="portrait"
+                android:exported="true"
                 android:theme="@android:style/Theme.Material.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -185,6 +224,7 @@
         <activity android:name="android.widget.DatePickerActivity"
                 android:label="DatePickerActivity"
                 android:screenOrientation="portrait"
+                android:exported="true"
                 android:theme="@android:style/Theme.Material.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -192,448 +232,524 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.DescendantFocusability" android:label="DescendantFocusability">
+        <activity android:name="android.widget.focus.DescendantFocusability"
+            android:label="DescendantFocusability"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.FocusAfterRemoval" android:label="FocusAfterRemoval">
+        <activity android:name="android.widget.focus.FocusAfterRemoval"
+            android:label="FocusAfterRemoval"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.RequestFocus" android:label="RequestFocus">
+        <activity android:name="android.widget.focus.RequestFocus"
+            android:label="RequestFocus"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.LinearLayoutGrid" android:label="LinearLayoutGrid">
+        <activity android:name="android.widget.focus.LinearLayoutGrid"
+            android:label="LinearLayoutGrid"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.ListOfEditTexts" android:label="ListOfEditTexts">
+        <activity android:name="android.widget.focus.ListOfEditTexts"
+            android:label="ListOfEditTexts"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.ListOfInternalSelectionViews" android:label="ListOfInternalSelectionViews">
+        <activity android:name="android.widget.focus.ListOfInternalSelectionViews"
+            android:label="ListOfInternalSelectionViews"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.ListWithFooterViewAndNewLabels" android:label="FocusListWithFooter">
+        <activity android:name="android.widget.focus.ListWithFooterViewAndNewLabels"
+            android:label="FocusListWithFooter"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.ListWithMailMessages" android:label="ListWithMailMessages">
+        <activity android:name="android.widget.focus.ListWithMailMessages"
+            android:label="ListWithMailMessages"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.HorizontalFocusSearch" android:label="HorizontalFocusSearch">
+        <activity android:name="android.widget.focus.HorizontalFocusSearch"
+            android:label="HorizontalFocusSearch"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.VerticalFocusSearch" android:label="VerticalFocusSearch">
+        <activity android:name="android.widget.focus.VerticalFocusSearch"
+            android:label="VerticalFocusSearch"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.AdjacentVerticalRectLists" android:label="AdjacentVerticalRectLists">
+        <activity android:name="android.widget.focus.AdjacentVerticalRectLists"
+            android:label="AdjacentVerticalRectLists"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.GoneParentFocusedChild" android:label="GoneParentFocusedChild">
+        <activity android:name="android.widget.focus.GoneParentFocusedChild"
+            android:label="GoneParentFocusedChild"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.frame.FrameLayoutGravity" android:label="FrameLayoutGravity">
+        <activity android:name="android.widget.layout.frame.FrameLayoutGravity" android:label="FrameLayoutGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.frame.FrameLayoutMargin" android:label="FrameLayoutMargin">
+        <activity android:name="android.widget.layout.frame.FrameLayoutMargin" android:label="FrameLayoutMargin"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.BaselineAlignmentCenterGravity" android:label="BaselineAlignmentCenterGravity">
+        <activity android:name="android.widget.layout.linear.BaselineAlignmentCenterGravity" android:label="BaselineAlignmentCenterGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.BaselineButtons" android:label="BaselineButtons">
+        <activity android:name="android.widget.layout.linear.BaselineButtons" android:label="BaselineButtons"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.FillInWrap" android:label="FillInWrap">
+        <activity android:name="android.widget.layout.linear.FillInWrap" android:label="FillInWrap"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.BaselineAlignmentZeroWidthAndWeight" android:label="Baseline0WidthAndWeight">
+        <activity android:name="android.widget.layout.linear.BaselineAlignmentZeroWidthAndWeight" android:label="Baseline0WidthAndWeight"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.HorizontalOrientationVerticalAlignment" android:label="HorizontalOrientationVerticalAlignment">
+        <activity android:name="android.widget.layout.linear.HorizontalOrientationVerticalAlignment" android:label="HorizontalOrientationVerticalAlignment"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.LLEditTextThenButton" android:label="LLEditTextThenButton">
+        <activity android:name="android.widget.layout.linear.LLEditTextThenButton" android:label="LLEditTextThenButton"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.LLOfButtons1" android:label="LLOfButtons1">
+        <activity android:name="android.widget.layout.linear.LLOfButtons1" android:label="LLOfButtons1"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.LinearLayoutEditTexts" android:label="LinearLayoutEditTexts">
+        <activity android:name="android.widget.layout.linear.LinearLayoutEditTexts" android:label="LinearLayoutEditTexts"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.LLOfButtons2" android:label="LLOfButtons2">
+        <activity android:name="android.widget.layout.linear.LLOfButtons2" android:label="LLOfButtons2"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.LLOfTwoFocusableInTouchMode" android:label="LLOfTwoFocusableInTouchMode">
+        <activity android:name="android.widget.layout.linear.LLOfTwoFocusableInTouchMode" android:label="LLOfTwoFocusableInTouchMode"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.Weight" android:label="Weight">
+        <activity android:name="android.widget.layout.linear.Weight" android:label="Weight"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.linear.WeightSum" android:label="WeightSum">
+        <activity android:name="android.widget.layout.linear.WeightSum" android:label="WeightSum"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.AdjacentListsWithAdjacentISVsInside" android:label="AdjacentListsWithAdjacentISVsInside">
+        <activity android:name="android.widget.listview.AdjacentListsWithAdjacentISVsInside" android:label="AdjacentListsWithAdjacentISVsInside"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListDividers" android:label="ListDividers">
+        <activity android:name="android.widget.listview.ListDividers" android:label="ListDividers"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListViewHeight" android:label="ListViewHeight">
+        <activity android:name="android.widget.listview.ListViewHeight" android:label="ListViewHeight"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.FixedWidth" android:label="CellFixedWidth">
+        <activity android:name="android.widget.layout.table.FixedWidth" android:label="CellFixedWidth"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.Weight" android:label="CellWeight">
+        <activity android:name="android.widget.layout.table.Weight" android:label="CellWeight"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.HorizontalGravity" android:label="CellHorizontalGravity">
+        <activity android:name="android.widget.layout.table.HorizontalGravity" android:label="CellHorizontalGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.VerticalGravity" android:label="CellVerticalGravity">
+        <activity android:name="android.widget.layout.table.VerticalGravity" android:label="CellVerticalGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.AddColumn" android:label="AddColumnInTable">
+        <activity android:name="android.widget.layout.table.AddColumn" android:label="AddColumnInTable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.layout.table.CellSpan" android:label="CellSpan">
+        <activity android:name="android.widget.layout.table.CellSpan" android:label="CellSpan"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.ButtonAboveTallInternalSelectionView" android:label="ButtonAboveTallInternalSelectionView">
+        <activity android:name="android.widget.scroll.ButtonAboveTallInternalSelectionView" android:label="ButtonAboveTallInternalSelectionView"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.ButtonsWithTallTextViewInBetween" android:label="scrollButtonsWithTallTextViewInBetween">
+        <activity android:name="android.widget.scroll.ButtonsWithTallTextViewInBetween" android:label="scrollButtonsWithTallTextViewInBetween"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.RequestRectangleVisible" android:label="ScrollToChildRect">
+        <activity android:name="android.widget.scroll.RequestRectangleVisible" android:label="ScrollToChildRect"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.RequestRectangleVisibleWithInternalScroll" android:label="ScrollToChildRectWithInternalScroll">
+        <activity android:name="android.widget.scroll.RequestRectangleVisibleWithInternalScroll" android:label="ScrollToChildRectWithInternalScroll"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.ScrollViewButtonsAndLabels" android:label="ScrollViewButtonsAndLabels">
+        <activity android:name="android.widget.scroll.ScrollViewButtonsAndLabels" android:label="ScrollViewButtonsAndLabels"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.ShortButtons" android:label="scrollShortButtons">
+        <activity android:name="android.widget.scroll.ShortButtons" android:label="scrollShortButtons"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.TallTextAboveButton" android:label="scrollTallTextAboveButton">
+        <activity android:name="android.widget.scroll.TallTextAboveButton" android:label="scrollTallTextAboveButton"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.scroll.arrowscroll.MultiPageTextWithPadding" android:label="arrowscrollMultiPageTextWithPadding">
+        <activity android:name="android.widget.scroll.arrowscroll.MultiPageTextWithPadding" android:label="arrowscrollMultiPageTextWithPadding"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.Include" android:label="IncludeTag">
+        <activity android:name="android.view.Include" android:label="IncludeTag"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.Merge" android:label="MergeTag">
+        <activity android:name="android.view.Merge" android:label="MergeTag"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.ScaleGesture" android:label="ScaleGesture">
+        <activity android:name="android.view.ScaleGesture" android:label="ScaleGesture"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.StubbedView" android:label="ViewStub">
+        <activity android:name="android.view.StubbedView" android:label="ViewStub"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.RunQueue" android:label="RunQueue">
+        <activity android:name="android.view.RunQueue" android:label="RunQueue"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.Visibility" android:label="Visibility">
+        <activity android:name="android.view.Visibility" android:label="Visibility"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.VisibilityCallback" android:label="VisibilityCallback">
+        <activity android:name="android.view.VisibilityCallback" android:label="VisibilityCallback"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.BigCache" android:label="BigCache">
+        <activity android:name="android.view.BigCache" android:label="BigCache"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.ZeroSized" android:label="ZeroSized">
+        <activity android:name="android.view.ZeroSized" android:label="ZeroSized"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.Disabled" android:label="Disabled">
+        <activity android:name="android.view.Disabled" android:label="Disabled"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.PopupWindowVisibility" android:label="PopupWindowVisibility">
+        <activity android:name="android.view.PopupWindowVisibility" android:label="PopupWindowVisibility"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.PreDrawListener" android:label="PreDrawListener">
+        <activity android:name="android.view.PreDrawListener" android:label="PreDrawListener"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.GlobalFocusChange" android:label="GlobalFocusChange">
+        <activity android:name="android.view.GlobalFocusChange" android:label="GlobalFocusChange"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListSetSelection" android:label="ListSetSelection">
+        <activity android:name="android.widget.listview.ListSetSelection" android:label="ListSetSelection"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListSimple" android:label="ListSimple">
+        <activity android:name="android.widget.listview.ListSimple" android:label="ListSimple"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListFilter" android:label="ListFilter">
+        <activity android:name="android.widget.listview.ListFilter" android:label="ListFilter"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListScrollListener" android:label="ListScrollListener">
+        <activity android:name="android.widget.listview.ListScrollListener" android:label="ListScrollListener"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListThrasher" android:label="ListThrasher">
+        <activity android:name="android.widget.listview.ListThrasher" android:label="ListThrasher"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListTakeFocusFromSide" android:label="ListTakeFocusFromSide">
+        <activity android:name="android.widget.listview.ListTakeFocusFromSide" android:label="ListTakeFocusFromSide"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListBottomGravity" android:label="ListBottomGravity">
+        <activity android:name="android.widget.listview.ListBottomGravity" android:label="ListBottomGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListBottomGravityMany" android:label="ListBottomGravityMany">
+        <activity android:name="android.widget.listview.ListBottomGravityMany" android:label="ListBottomGravityMany"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -641,105 +757,120 @@
         </activity>
 
 
-        <activity android:name="android.widget.listview.ListButtonsDiagonalAcrossItems" android:label="ListButtonsDiagonalAcrossItems">
+        <activity android:name="android.widget.listview.ListButtonsDiagonalAcrossItems" android:label="ListButtonsDiagonalAcrossItems"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListTopGravity" android:label="ListTopGravity">
+        <activity android:name="android.widget.listview.ListTopGravity" android:label="ListTopGravity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListTopGravityMany" android:label="ListTopGravityMany">
+        <activity android:name="android.widget.listview.ListTopGravityMany" android:label="ListTopGravityMany"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListEndingWithMultipleSeparators" android:label="ListEndingWithMultipleSeparators">
+        <activity android:name="android.widget.listview.ListEndingWithMultipleSeparators" android:label="ListEndingWithMultipleSeparators"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListGetSelectedView" android:label="ListGetSelectedView">
+        <activity android:name="android.widget.listview.ListGetSelectedView" android:label="ListGetSelectedView"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListInHorizontal" android:label="ListInHorizontal">
+        <activity android:name="android.widget.listview.ListInHorizontal" android:label="ListInHorizontal"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListInVertical" android:label="ListInVertical">
+        <activity android:name="android.widget.listview.ListInVertical" android:label="ListInVertical"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListInterleaveFocusables" android:label="ListInterleaveFocusables">
+        <activity android:name="android.widget.listview.ListInterleaveFocusables" android:label="ListInterleaveFocusables"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
              <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
          </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfItemsShorterThanScreen" android:label="ListOfItemsShorterThanScreen">
+        <activity android:name="android.widget.listview.ListOfItemsShorterThanScreen" android:label="ListOfItemsShorterThanScreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfItemsTallerThanScreen" android:label="ListOfItemsTallerThanScreen">
+        <activity android:name="android.widget.listview.ListOfItemsTallerThanScreen" android:label="ListOfItemsTallerThanScreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfThinItems" android:label="ListOfThinItems">
+        <activity android:name="android.widget.listview.ListOfThinItems" android:label="ListOfThinItems"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfShortTallShort" android:label="ListOfShortTallShort">
+        <activity android:name="android.widget.listview.ListOfShortTallShort" android:label="ListOfShortTallShort"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfShortShortTallShortShort" android:label="ListOfShortShortTallShortShort">
+        <activity android:name="android.widget.listview.ListOfShortShortTallShortShort" android:label="ListOfShortShortTallShortShort"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithOffScreenNextSelectable" android:label="ListWithOffScreenNextSelectable">
+        <activity android:name="android.widget.listview.ListWithOffScreenNextSelectable" android:label="ListWithOffScreenNextSelectable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithFirstScreenUnSelectable" android:label="ListWithFirstScreenUnSelectable">
+        <activity android:name="android.widget.listview.ListWithFirstScreenUnSelectable" android:label="ListWithFirstScreenUnSelectable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -747,329 +878,376 @@
         </activity>
 
 
-        <activity android:name="android.widget.listview.ListWithSeparators" android:label="ListWithSeparators">
+        <activity android:name="android.widget.listview.ListWithSeparators" android:label="ListWithSeparators"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithHeaders" android:label="ListWithHeaders">
+        <activity android:name="android.widget.listview.ListWithHeaders" android:label="ListWithHeaders"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithEditTextHeader" android:label="ListWithEditTextHeader">
+        <activity android:name="android.widget.listview.ListWithEditTextHeader" android:label="ListWithEditTextHeader"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithNoFadingEdge" android:label="ListWithNoFadingEdge">
+        <activity android:name="android.widget.listview.ListWithNoFadingEdge" android:label="ListWithNoFadingEdge"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithScreenOfNoSelectables" android:label="ListWithScreenOfNoSelectables">
+        <activity android:name="android.widget.listview.ListWithScreenOfNoSelectables" android:label="ListWithScreenOfNoSelectables"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListItemFocusablesFarApart" android:label="ListItemFocusablesFarApart">
+        <activity android:name="android.widget.listview.ListItemFocusablesFarApart" android:label="ListItemFocusablesFarApart"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListItemFocusableAboveUnfocusable" android:label="ListItemFocusableAboveUnfocusable">
+        <activity android:name="android.widget.listview.ListItemFocusableAboveUnfocusable" android:label="ListItemFocusableAboveUnfocusable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListItemFocusablesClose" android:label="ListItemFocusablesClose">
+        <activity android:name="android.widget.listview.ListItemFocusablesClose" android:label="ListItemFocusablesClose"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListLastItemPartiallyVisible" android:label="ListLastItemPartiallyVisible">
+        <activity android:name="android.widget.listview.ListLastItemPartiallyVisible" android:label="ListLastItemPartiallyVisible"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListItemsExpandOnSelection" android:label="ListItemsExpandOnSelection">
+        <activity android:name="android.widget.listview.ListItemsExpandOnSelection" android:label="ListItemsExpandOnSelection"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithOnItemSelectedAction" android:label="ListWithOnItemSelectedAction">
+        <activity android:name="android.widget.listview.ListWithOnItemSelectedAction" android:label="ListWithOnItemSelectedAction"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListItemISVAndButton" android:label="ListItemISVAndButton">
+        <activity android:name="android.widget.listview.ListItemISVAndButton" android:label="ListItemISVAndButton"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListOfTouchables" android:label="ListOfTouchables">
+        <activity android:name="android.widget.listview.ListOfTouchables" android:label="ListOfTouchables"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListRecyclerProfiling" android:label="ListRecyclerProfiling">
+        <activity android:name="android.widget.listview.ListRecyclerProfiling" android:label="ListRecyclerProfiling"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListHeterogeneous" android:label="ListHeterogeneous">
+        <activity android:name="android.widget.listview.ListHeterogeneous" android:label="ListHeterogeneous"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListHorizontalFocusWithinItemWins" android:label="ListHorizontalFocusWithinItemWins">
+        <activity android:name="android.widget.listview.ListHorizontalFocusWithinItemWins" android:label="ListHorizontalFocusWithinItemWins"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-      <activity android:name="android.widget.listview.ListManagedCursor" android:label="ListManagedCursor">
+      <activity android:name="android.widget.listview.ListManagedCursor" android:label="ListManagedCursor"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-      <activity android:name="android.widget.listview.ListWithEmptyView" android:label="ListWithEmptyView">
+      <activity android:name="android.widget.listview.ListWithEmptyView" android:label="ListWithEmptyView"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridInHorizontal" android:label="GridInHorizontal">
+        <activity android:name="android.widget.gridview.GridInHorizontal" android:label="GridInHorizontal"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridPadding" android:label="GridPadding">
+        <activity android:name="android.widget.gridview.GridPadding" android:label="GridPadding"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridInVertical" android:label="GridInVertical">
+        <activity android:name="android.widget.gridview.GridInVertical" android:label="GridInVertical"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridScrollListener" android:label="GridScrollListener">
+        <activity android:name="android.widget.gridview.GridScrollListener" android:label="GridScrollListener"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-         <activity android:name="android.widget.gridview.GridThrasher" android:label="GridThrasher">
+         <activity android:name="android.widget.gridview.GridThrasher" android:label="GridThrasher"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridSimple" android:label="GridSimple">
+        <activity android:name="android.widget.gridview.GridSimple" android:label="GridSimple"
+            android:exported="true">
            <intent-filter>
                <action android:name="android.intent.action.MAIN" />
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
        </activity>
 
-        <activity android:name="android.widget.gridview.GridDelete" android:label="GridDelete">
+        <activity android:name="android.widget.gridview.GridDelete" android:label="GridDelete"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-         <activity android:name="android.widget.gridview.GridSetSelection" android:label="GridSetSelection">
+         <activity android:name="android.widget.gridview.GridSetSelection" android:label="GridSetSelection"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridSetSelectionMany" android:label="GridSetSelectionMany">
+        <activity android:name="android.widget.gridview.GridSetSelectionMany" android:label="GridSetSelectionMany"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridSetSelectionStackFromBottom" android:label="GridSetSelectionStackFromBottom">
+        <activity android:name="android.widget.gridview.GridSetSelectionStackFromBottom" android:label="GridSetSelectionStackFromBottom"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridSetSelectionStackFromBottomMany" android:label="GridSetSelectionStackFromBottomMany">
+        <activity android:name="android.widget.gridview.GridSetSelectionStackFromBottomMany" android:label="GridSetSelectionStackFromBottomMany"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridStackFromBottom" android:label="GridStackFromBottom">
+        <activity android:name="android.widget.gridview.GridStackFromBottom" android:label="GridStackFromBottom"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridStackFromBottomMany" android:label="GridStackFromBottomMany">
+        <activity android:name="android.widget.gridview.GridStackFromBottomMany" android:label="GridStackFromBottomMany"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridVerticalSpacing" android:label="GridVerticalSpacing">
+        <activity android:name="android.widget.gridview.GridVerticalSpacing" android:label="GridVerticalSpacing"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridVerticalSpacingStackFromBottom" android:label="GridVerticalSpacingStackFromBottom">
+        <activity android:name="android.widget.gridview.GridVerticalSpacingStackFromBottom" android:label="GridVerticalSpacingStackFromBottom"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.gridview.GridSingleColumn" android:label="GridSingleColumn">
+        <activity android:name="android.widget.gridview.GridSingleColumn" android:label="GridSingleColumn"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.menu.ListContextMenu" android:label="ListContextMenu">
+        <activity android:name="android.view.menu.ListContextMenu" android:label="ListContextMenu"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.ViewGroupChildren" android:label="ViewGroup Children">
+        <activity android:name="android.view.ViewGroupChildren" android:label="ViewGroup Children"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.ViewTransientState" android:label="View Transient State">
+        <activity android:name="android.view.ViewTransientState" android:label="View Transient State"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.RemoteViewsActivity" android:label="RemoteViewsActicity">
+        <activity android:name="android.view.RemoteViewsActivity" android:label="RemoteViewsActicity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.BitmapDrawable" android:label="BitmapDrawable">
+        <activity android:name="android.view.BitmapDrawable" android:label="BitmapDrawable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.DrawableBgMinSize" android:label="DrawableBgMinSize">
+        <activity android:name="android.view.DrawableBgMinSize" android:label="DrawableBgMinSize"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.MutateDrawable" android:label="MutateDrawable">
+        <activity android:name="android.view.MutateDrawable" android:label="MutateDrawable"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.app.TranslucentFancyActivity" android:label="TranslucentFancyActivity">
+        <activity android:name="android.app.TranslucentFancyActivity" android:label="TranslucentFancyActivity"
+            android:exported="true">
            <intent-filter>
                <action android:name="android.intent.action.MAIN" />
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
        </activity>
 
-        <activity android:name="android.view.Longpress" android:label="Longpress">
+        <activity android:name="android.view.Longpress" android:label="Longpress"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.expandablelistview.ExpandableListWithHeaders" android:label="ExpandableListWithHeaders">
+        <activity android:name="android.widget.expandablelistview.ExpandableListWithHeaders" android:label="ExpandableListWithHeaders"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.listview.ListWithDisappearingItemBug" android:label="ListWithDisappearingItemBug">
+        <activity android:name="android.widget.listview.ListWithDisappearingItemBug" android:label="ListWithDisappearingItemBug"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.menu.ContextMenuActivity" android:label="ContextMenu" android:theme="@android:style/Theme.Material">
+        <activity android:name="android.view.menu.ContextMenuActivity" android:label="ContextMenu" android:theme="@android:style/Theme.Material"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.menu.MenuWith1Item" android:label="MenuWith1Item">
+        <activity android:name="android.view.menu.MenuWith1Item" android:label="MenuWith1Item"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1077,6 +1255,7 @@
         </activity>
 
         <activity android:name="android.view.menu.MenuLayoutPortrait" android:label="MenuLayoutPortrait"
+                android:exported="true"
                 android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1085,6 +1264,7 @@
         </activity>
 
         <activity android:name="android.view.menu.MenuLayoutLandscape" android:label="MenuLayoutLandscape"
+                android:exported="true"
                 android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1092,21 +1272,24 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.expandablelistview.InflatedExpandableListView" android:label="ExpandableListView Inflated">
+        <activity android:name="android.widget.expandablelistview.InflatedExpandableListView" android:label="ExpandableListView Inflated"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.expandablelistview.ExpandableListSimple" android:label="ExpandableListSimple">
+        <activity android:name="android.widget.expandablelistview.ExpandableListSimple" android:label="ExpandableListSimple"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.os.BrightnessLimit" android:label="BrightnessLimit">
+        <activity android:name="android.os.BrightnessLimit" android:label="BrightnessLimit"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1114,7 +1297,8 @@
         </activity>
 
         <activity android:name="android.widget.AutoCompleteTextViewSimple"
-                  android:label="AutoCompleteTextViewSimple">
+                  android:label="AutoCompleteTextViewSimple"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1122,34 +1306,39 @@
         </activity>
 
         <service android:name="android.webkit.AccessibilityInjectorTest$MockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
 
-        <activity android:name="android.widget.RadioGroupActivity" android:label="RadioGroupActivity">
+        <activity android:name="android.widget.RadioGroupActivity" android:label="RadioGroupActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.TextViewTestActivity" android:label="TextViewTestActivity">
+        <activity android:name="android.widget.TextViewTestActivity" android:label="TextViewTestActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.view.ViewCaptureTestActivity" android:label="ViewCaptureTestActivity">
+        <activity android:name="android.view.ViewCaptureTestActivity" android:label="ViewCaptureTestActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.app.Activity" android:label="Empty Activity">
+        <activity android:name="android.app.Activity" android:label="Empty Activity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1157,7 +1346,8 @@
         </activity>
 
         <activity android:name="android.view.accessibility.AccessibilityTestActivity"
-                  android:label="AccessibilityTestActivity" >
+                  android:label="AccessibilityTestActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1220,12 +1410,14 @@
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
         <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
 
-        <receiver android:name="android.app.activity.AbortReceiver">
+        <receiver android:name="android.app.activity.AbortReceiver"
+            android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_ABORT" />
             </intent-filter>
         </receiver>
-        <receiver android:name="android.app.activity.LocalReceiver">
+        <receiver android:name="android.app.activity.LocalReceiver"
+            android:exported="true">
             <intent-filter android:priority="-1">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_ABORT" />
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_ALL" />
@@ -1241,25 +1433,29 @@
             <meta-data android:name="com.android.frameworks.coretests.float" android:value="100.1" />
             <meta-data android:name="com.android.frameworks.coretests.reference" android:resource="@xml/metadata" />
         </receiver>
-        <receiver android:name="android.app.activity.ResultReceiver">
+        <receiver android:name="android.app.activity.ResultReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_RESULT" />
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.LocalGrantedReceiver"
-                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED">
+                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED"
+                android:exported="true">
             <intent-filter android:priority="-1">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_LOCAL_GRANTED" />
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.LocalDeniedReceiver"
-                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED">
+                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED"
+                android:exported="true">
             <intent-filter android:priority="-1">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_LOCAL_DENIED" />
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.RemoteReceiver"
-                android:process=":remoteReceiver">
+                android:process=":remoteReceiver"
+                android:exported="true">
             <intent-filter android:priority="2">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_ABORT" />
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_ALL" />
@@ -1268,13 +1464,15 @@
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.RemoteGrantedReceiver"
-                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED">
+                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED"
+                android:exported="true">
             <intent-filter android:priority="2">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_REMOTE_GRANTED" />
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.RemoteDeniedReceiver"
-                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED">
+                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED"
+                android:exported="true">
             <intent-filter android:priority="2">
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_REMOTE_DENIED" />
             </intent-filter>
@@ -1359,7 +1557,8 @@
         <!-- Application components used for search manager tests -->
 
         <activity android:name="android.app.activity.SearchableActivity"
-                android:label="Searchable Activity">
+                android:label="Searchable Activity"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -1372,7 +1571,8 @@
                 android:authorities="android.app.SuggestionProvider">
         </provider>
 
-        <activity android:name="android.webkit.AccessibilityInjectorTestActivity">
+        <activity android:name="android.webkit.AccessibilityInjectorTestActivity"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1380,7 +1580,8 @@
         </activity>
 
         <activity android:name="android.animation.BasicAnimatorActivity"
-                  android:screenOrientation="locked">
+                  android:screenOrientation="locked"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1388,14 +1589,16 @@
         </activity>
 
         <activity android:name="android.animation.AnimatorSetActivity"
-                  android:screenOrientation="locked">
+                  android:screenOrientation="locked"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.content.res.ResourceCacheActivity">
+        <activity android:name="android.content.res.ResourceCacheActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1408,7 +1611,8 @@
 
         <service
             android:name="android.print.test.services.FirstPrintService"
-            android:permission="android.permission.BIND_PRINT_SERVICE">
+            android:permission="android.permission.BIND_PRINT_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.printservice.PrintService" />
             </intent-filter>
@@ -1426,6 +1630,7 @@
         </activity>
 
         <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
+            android:configChanges="screenLayout|screenSize|orientation|smallestScreenSize"
             android:supportsPictureInPicture="true"
             android:exported="true">
         </activity>
@@ -1449,7 +1654,8 @@
                 android:exported="true" />
 
         <activity android:name="android.app.assist.EmptyLayoutActivity"
-                  android:label="My Title">
+                  android:label="My Title"
+                  android:exported="true">
            <intent-filter>
                <action android:name="android.intent.action.MAIN" />
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />

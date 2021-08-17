@@ -28,6 +28,7 @@ android_test {
         "androidx.test.rules",
         "apct-perftests-utils",
         "ActivityManagerPerfTestsUtils",
+        "collector-device-lib-platform",
     ],
     platform_apis: true,
     min_sdk_version: "25",

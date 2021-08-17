@@ -23,6 +23,8 @@
 
     <include layout="@layout/title" />
 
+    <include layout="@layout/profile_summary" />
+
     <include layout="@layout/buttons" />
 
 </LinearLayout>

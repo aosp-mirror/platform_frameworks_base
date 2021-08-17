@@ -19,5 +19,5 @@
 
 # Basic Parameters
 keyboard.layout = Vendor_0957_Product_0001
-keyboard.characterMap = Vendor_0957_Product_0001
+keyboard.doNotWakeByDefault = 1
 audio.mic = 1

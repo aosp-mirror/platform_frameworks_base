@@ -128,17 +128,18 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
-    @Test
-    public void testSelectAllSecureViaProviderApi() throws Exception {
-        setSettingViaProviderApiAndAssertSuccessfulChange(SETTING_TYPE_SECURE,
-                FAKE_SETTING_NAME, FAKE_SETTING_VALUE, false);
-        try {
-            queryAllSettingsViaProviderApiSettingAndAssertSettingPresent(SETTING_TYPE_SECURE,
-                    FAKE_SETTING_NAME);
-        } finally {
-            deleteStringViaProviderApi(SETTING_TYPE_SECURE, FAKE_SETTING_NAME);
-        }
-    }
+    // TODO(b/142206242): make this less flaky and re-enable it
+//    @Test
+//    public void testSelectAllSecureViaProviderApi() throws Exception {
+//        setSettingViaProviderApiAndAssertSuccessfulChange(SETTING_TYPE_SECURE,
+//                FAKE_SETTING_NAME, FAKE_SETTING_VALUE, false);
+//        try {
+//            queryAllSettingsViaProviderApiSettingAndAssertSettingPresent(SETTING_TYPE_SECURE,
+//                    FAKE_SETTING_NAME);
+//        } finally {
+//            deleteStringViaProviderApi(SETTING_TYPE_SECURE, FAKE_SETTING_NAME);
+//        }
+//    }
 
     @Test
     public void testSelectAllSystemViaProviderApi() throws Exception {
@@ -381,10 +382,11 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
-    @Test
-    public void testResetModeUntrustedClearGlobal() throws Exception {
-        testResetModeUntrustedClearCommon(SETTING_TYPE_GLOBAL);
-    }
+    // TODO(b/142206242): make this less flaky and re-enable it
+//    @Test
+//    public void testResetModeUntrustedClearGlobal() throws Exception {
+//        testResetModeUntrustedClearCommon(SETTING_TYPE_GLOBAL);
+//    }
 
     @Test
     public void testResetModeUntrustedClearSecure() throws Exception {
@@ -422,10 +424,11 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
-    @Test
-    public void testResetModeTrustedDefaultsGlobal() throws Exception {
-        testResetModeTrustedDefaultsCommon(SETTING_TYPE_GLOBAL);
-    }
+    // TODO(b/142206242): make this less flaky and re-enable it
+//    @Test
+//    public void testResetModeTrustedDefaultsGlobal() throws Exception {
+//        testResetModeTrustedDefaultsCommon(SETTING_TYPE_GLOBAL);
+//    }
 
     @Test
     public void testResetModeTrustedDefaultsSecure() throws Exception {

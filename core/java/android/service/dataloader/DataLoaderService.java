@@ -40,13 +40,15 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
- * The base class for implementing data loader service to control data loaders. Expecting
- * Incremental Service to bind to a children class of this.
+ * The base class for implementing a data loader service.
+ * <p>
+ * After calling commit() on the install session, the DataLoaderService is started and bound to
+ * provide the actual data bytes for the streaming session.
+ * The service will automatically be rebound until the streaming session has enough data to
+ * proceed with the installation.
  *
- * WARNING: This is a system API to aid internal development.
- * Use at your own risk. It will change or be removed without warning.
- *
- * TODO(b/136132412): update with latest API design
+ * @see android.content.pm.DataLoaderParams
+ * @see android.content.pm.PackageInstaller.SessionParams#setDataLoaderParams
  *
  * @hide
  */
@@ -56,7 +58,7 @@ public abstract class DataLoaderService extends Service {
     private final DataLoaderBinderService mBinder = new DataLoaderBinderService();
 
     /**
-     * Managed DataLoader interface. Each instance corresponds to a single installation session.
+     * DataLoader interface. Each instance corresponds to a single installation session.
      * @hide
      */
     @SystemApi
@@ -65,9 +67,13 @@ public abstract class DataLoaderService extends Service {
          * A virtual constructor.
          *
          * @param dataLoaderParams parameters set in the installation session
-         * @param connector FS API wrapper
-         * @return True if initialization of a Data Loader was successful. False will be reported to
-         * PackageManager and fail the installation
+         * {@link android.content.pm.PackageInstaller.SessionParams#setDataLoaderParams}
+         * @param connector Wrapper providing access to the installation image.
+         * @return true if initialization of a DataLoader was successful. False will notify the
+         * Installer {@link android.content.pm.PackageInstaller#STATUS_PENDING_STREAMING} and
+         * interrupt the session commit. The Installer is supposed to make sure DataLoader can
+         * proceed and then commit the session
+         * {@link android.content.pm.PackageInstaller.Session#commit}.
          */
         boolean onCreate(@NonNull DataLoaderParams dataLoaderParams,
                 @NonNull FileSystemConnector connector);
@@ -75,10 +81,35 @@ public abstract class DataLoaderService extends Service {
         /**
          * Prepare installation image. After this method succeeds installer will validate the files
          * and continue installation.
+         * The method should block until the files are prepared for installation.
+         * This can take up to session lifetime (~day). If the session lifetime is exceeded then
+         * any attempts to write new data will fail.
          *
-         * @param addedFiles   list of files created in this installation session.
-         * @param removedFiles list of files removed in this installation session.
-         * @return false if unable to create and populate all addedFiles.
+         * Example implementation:
+         * <code>
+         *     String localPath = "/data/local/tmp/base.apk";
+         *     session.addFile(LOCATION_DATA_APP, "base", 123456, localPath.getBytes(UTF_8), null);
+         *     ...
+         *     // onPrepareImage
+         *     for (InstallationFile file : addedFiles) {
+         *         String localPath = new String(file.getMetadata(), UTF_8);
+         *         File source = new File(localPath);
+         *         ParcelFileDescriptor fd = ParcelFileDescriptor.open(source, MODE_READ_ONLY);
+         *         try {
+         *             mConnector.writeData(file.getName(), 0, fd.getStatSize(), fd);
+         *         } finally {
+         *             IoUtils.closeQuietly(fd);
+         *         }
+         *     }
+         * </code>
+         * It is recommended to stream data into installation session directly from source, e.g.
+         * cloud data storage, to save local disk space.
+         *
+         * @param addedFiles   list of files created in this installation session
+         * {@link android.content.pm.PackageInstaller.Session#addFile}
+         * @param removedFiles list of files removed in this installation session
+         * {@link android.content.pm.PackageInstaller.Session#removeFile}
+         * @return false if unable to create and populate all addedFiles. Installation will fail.
          */
         boolean onPrepareImage(@NonNull Collection<InstallationFile> addedFiles,
                 @NonNull Collection<String> removedFiles);
@@ -86,8 +117,7 @@ public abstract class DataLoaderService extends Service {
 
     /**
      * DataLoader factory method.
-     *
-     * @return An instance of a DataLoader.
+     * An installation session uses it to create an instance of DataLoader.
      * @hide
      */
     @SystemApi
@@ -119,6 +149,7 @@ public abstract class DataLoaderService extends Service {
                     IoUtils.closeQuietly(control.incremental.cmd);
                     IoUtils.closeQuietly(control.incremental.pendingReads);
                     IoUtils.closeQuietly(control.incremental.log);
+                    IoUtils.closeQuietly(control.incremental.blocksWritten);
                 }
             }
         }
@@ -154,7 +185,7 @@ public abstract class DataLoaderService extends Service {
     }
 
     /**
-     * Used by the DataLoaderService implementations.
+     * Provides access to the installation image.
      *
      * @hide
      */
@@ -172,7 +203,8 @@ public abstract class DataLoaderService extends Service {
         /**
          * Write data to an installation file from an arbitrary FD.
          *
-         * @param name        name of file previously added to the installation session.
+         * @param name        name of file previously added to the installation session
+         * {@link InstallationFile#getName()}.
          * @param offsetBytes offset into the file to begin writing at, or 0 to start at the
          *                    beginning of the file.
          * @param lengthBytes total size of the file being written, used to preallocate the

@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Le code est incorrect."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Carte non valide."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Chargé"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • En charge sans fil"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge sans fil"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge…"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge rapide…"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge lente…"</string>

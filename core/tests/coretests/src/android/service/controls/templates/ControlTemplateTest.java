@@ -103,6 +103,17 @@ public class ControlTemplateTest {
     }
 
     @Test
+    public void testUnparcelingCorrectClass_thumbnail() {
+        ControlTemplate toParcel = new ThumbnailTemplate(TEST_ID, false, mIcon,
+                TEST_ACTION_DESCRIPTION);
+
+        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlTemplate.TYPE_THUMBNAIL, fromParcel.getTemplateType());
+        assertTrue(fromParcel instanceof ThumbnailTemplate);
+    }
+
+    @Test
     public void testUnparcelingCorrectClass_toggleRange() {
         ControlTemplate toParcel = new ToggleRangeTemplate(TEST_ID, mControlButton,
                 new RangeTemplate(TEST_ID, 0, 2, 1, 1, "%f"));

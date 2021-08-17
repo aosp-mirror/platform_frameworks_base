@@ -145,7 +145,7 @@ public interface TextClassifier {
     @StringDef({WIDGET_TYPE_TEXTVIEW, WIDGET_TYPE_EDITTEXT, WIDGET_TYPE_UNSELECTABLE_TEXTVIEW,
             WIDGET_TYPE_WEBVIEW, WIDGET_TYPE_EDIT_WEBVIEW, WIDGET_TYPE_CUSTOM_TEXTVIEW,
             WIDGET_TYPE_CUSTOM_EDITTEXT, WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW,
-            WIDGET_TYPE_NOTIFICATION, WIDGET_TYPE_UNKNOWN})
+            WIDGET_TYPE_NOTIFICATION, WIDGET_TYPE_CLIPBOARD, WIDGET_TYPE_UNKNOWN })
     @interface WidgetType {}
 
     /** The widget involved in the text classification context is a standard
@@ -172,6 +172,8 @@ public interface TextClassifier {
     String WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
     /** The widget involved in the text classification context is a notification */
     String WIDGET_TYPE_NOTIFICATION = "notification";
+    /** The text classification context is for use with the system clipboard. */
+    String WIDGET_TYPE_CLIPBOARD = "clipboard";
     /** The widget involved in the text classification context is of an unknown/unspecified type. */
     String WIDGET_TYPE_UNKNOWN = "unknown";
 

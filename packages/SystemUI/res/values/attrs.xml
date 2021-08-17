@@ -124,25 +124,30 @@
     <attr name="darkIconTheme" format="reference" />
     <attr name="wallpaperTextColor" format="reference|color" />
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
+    <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
+    <attr name="offStateColor" format="reference|color" />
+    <attr name="underSurfaceColor" format="reference|color" />
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
-        <attr name="singleLineButtonPaddingHorizontal" format="dimension" />
-        <attr name="doubleLineButtonPaddingHorizontal" format="dimension" />
         <attr name="buttonStrokeWidth" format="dimension" />
     </declare-styleable>
-
-    <!-- Used to style rotate suggestion button AVD animations -->
-    <attr name="rotateButtonStartAngle" format="float" />
-    <attr name="rotateButtonEndAngle" format="float" />
-    <attr name="rotateButtonScaleX" format="float" />
 
     <!-- Used to style charging animation AVD animation -->
     <attr name="chargingAnimColor" format="color" />
 
     <!-- Size of shadows/elevations on keyguard -->
     <attr name="shadowRadius" format="float" />
+
+    <attr name="handleThickness" format="dimension" />
+    <attr name="handleColor" format="color" />
+    <attr name="scrimColor" format="color" />
+    <!-- Int [0,255] for the alpha to be applied to scrimColor -->
+    <attr name="scrimAlpha" format="integer" />
+    <attr name="containerBackgroundColor" format="color" />
+
+    <attr name="isVertical" format="boolean" />
 
     <!-- Used display CarrierText in Keyguard or QS Footer -->
     <declare-styleable name="CarrierText">
@@ -160,6 +165,39 @@
         <attr name="cornerRadius" format="dimension" />
         <attr name="rippleMinSize" format="dimension" />
         <attr name="rippleMaxSize" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="UdfpsView">
+        <attr name="sensorPressureCoefficient" format="float"/>
+        <attr name="sensorTouchAreaCoefficient" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="AlphaTintDrawableWrapper">
+        <attr name="android:tint" />
+        <attr name="android:alpha" />
+    </declare-styleable>
+
+    <declare-styleable name="CropView">
+        <attr name="handleThickness" />
+        <attr name="handleColor" />
+        <attr name="scrimColor" />
+        <attr name="scrimAlpha" />
+        <attr name="containerBackgroundColor" />
+    </declare-styleable>
+
+    <declare-styleable name="MagnifierView">
+        <attr name="handleThickness" />
+        <attr name="handleColor" />
+        <attr name="scrimColor" />
+        <attr name="scrimAlpha" />
+        <attr name="borderThickness" format="dimension" />
+        <attr name="borderColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="DualHeightHorizontalLinearLayout">
+        <attr name="singleLineHeight" format="dimension" />
+        <attr name="singleLineVerticalPadding" format="dimension" />
+        <attr name="textViewId" format="reference" />
     </declare-styleable>
 </resources>
 

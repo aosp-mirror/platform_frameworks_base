@@ -18,5 +18,7 @@
     <privapp-permissions package="com.android.car.rotary">
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.car.permission.CAR_MONITOR_INPUT"/>
     </privapp-permissions>
 </permissions>
+

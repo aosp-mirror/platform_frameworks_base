@@ -223,6 +223,87 @@ android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject /*
                           audioChannels);
 }
 
+static jobject
+android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /* thiz */, jint id,
+                                                          jint quality)
+{
+    ALOGV("native_get_camcorder_profiles: %d %d", id, quality);
+    if (!isCamcorderQualityKnown(quality)) {
+        jniThrowException(env, "java/lang/RuntimeException", "Unknown camcorder profile quality");
+        return NULL;
+    }
+
+    camcorder_quality q = static_cast<camcorder_quality>(quality);
+    const MediaProfiles::CamcorderProfile *cp = sProfiles->getCamcorderProfile(id, q);
+    if (!cp) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Error retrieving camcorder profile params");
+        return NULL;
+    }
+
+    int duration         = cp->getDuration();
+    int fileFormat       = cp->getFileFormat();
+
+    jclass encoderProfilesClazz = env->FindClass("android/media/EncoderProfiles");
+    jmethodID encoderProfilesConstructorMethodID =
+        env->GetMethodID(encoderProfilesClazz, "<init>",
+                         "(II[Landroid/media/EncoderProfiles$VideoProfile;[Landroid/media/EncoderProfiles$AudioProfile;)V");
+
+    jclass videoProfileClazz = env->FindClass("android/media/EncoderProfiles$VideoProfile");
+    jmethodID videoProfileConstructorMethodID =
+        env->GetMethodID(videoProfileClazz, "<init>", "(IIIIII)V");
+
+    jclass audioProfileClazz = env->FindClass("android/media/EncoderProfiles$AudioProfile");
+    jmethodID audioProfileConstructorMethodID =
+        env->GetMethodID(audioProfileClazz, "<init>", "(IIIII)V");
+
+    jobjectArray videoCodecs = (jobjectArray)env->NewObjectArray(
+            cp->getVideoCodecs().size(), videoProfileClazz, nullptr);
+    {
+        int i = 0;
+        for (const MediaProfiles::VideoCodec *vc : cp->getVideoCodecs()) {
+            jobject videoCodec = env->NewObject(videoProfileClazz,
+                                                videoProfileConstructorMethodID,
+                                                vc->getCodec(),
+                                                vc->getFrameWidth(),
+                                                vc->getFrameHeight(),
+                                                vc->getFrameRate(),
+                                                vc->getBitrate(),
+                                                vc->getProfile());
+            env->SetObjectArrayElement(videoCodecs, i++, videoCodec);
+        }
+    }
+
+    jobjectArray audioCodecs;
+    if (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LIST_START
+            && quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END) {
+        // timelapse profiles do not have audio codecs
+        audioCodecs = (jobjectArray)env->NewObjectArray(0, audioProfileClazz, nullptr);
+    } else {
+        audioCodecs = (jobjectArray)env->NewObjectArray(
+                cp->getAudioCodecs().size(), audioProfileClazz, nullptr);
+        int i = 0;
+        for (const MediaProfiles::AudioCodec *ac : cp->getAudioCodecs()) {
+            jobject audioCodec = env->NewObject(audioProfileClazz,
+                                                audioProfileConstructorMethodID,
+                                                ac->getCodec(),
+                                                ac->getChannels(),
+                                                ac->getSampleRate(),
+                                                ac->getBitrate(),
+                                                ac->getProfile());
+
+            env->SetObjectArrayElement(audioCodecs, i++, audioCodec);
+        }
+    }
+
+    return env->NewObject(encoderProfilesClazz,
+                          encoderProfilesConstructorMethodID,
+                          duration,
+                          fileFormat,
+                          videoCodecs,
+                          audioCodecs);
+}
+
 static jboolean
 android_media_MediaProfiles_native_has_camcorder_profile(JNIEnv* /* env */, jobject /* thiz */,
                                                          jint id, jint quality)
@@ -319,6 +400,8 @@ static const JNINativeMethod gMethodsForCamcorderProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_camcorder_profile",           "(II)Landroid/media/CamcorderProfile;",
                                                                          (void *)android_media_MediaProfiles_native_get_camcorder_profile},
+    {"native_get_camcorder_profiles",          "(II)Landroid/media/EncoderProfiles;",
+                                                                         (void *)android_media_MediaProfiles_native_get_camcorder_profiles},
     {"native_has_camcorder_profile",           "(II)Z",
                                                                          (void *)android_media_MediaProfiles_native_has_camcorder_profile},
 };

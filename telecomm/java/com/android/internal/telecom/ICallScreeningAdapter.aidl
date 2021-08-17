@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.content.ComponentName;
+import android.telecom.CallScreeningService;
 
 /**
  * Internal remote callback interface for call screening services.
@@ -26,16 +27,6 @@ import android.content.ComponentName;
  * {@hide}
  */
 oneway interface ICallScreeningAdapter {
-    void allowCall(String callId);
-
-    void silenceCall(String callId);
-
-    void screenCallFurther(String callId);
-
-    void disallowCall(
-            String callId,
-            boolean shouldReject,
-            boolean shouldAddToCallLog,
-            boolean shouldShowNotification,
-            in ComponentName componentName);
+    void onScreeningResponse(String callId, in ComponentName componentName,
+            in CallScreeningService.ParcelableCallResponse response);
 }

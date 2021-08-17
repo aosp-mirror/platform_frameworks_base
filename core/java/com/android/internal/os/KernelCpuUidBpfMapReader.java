@@ -68,14 +68,15 @@ public abstract class KernelCpuUidBpfMapReader {
 
     final String mTag = this.getClass().getSimpleName();
     private int mErrors = 0;
-    private boolean mTracking = false;
     protected SparseArray<long[]> mData = new SparseArray<>();
     private long mLastReadTime = 0;
     protected final ReentrantReadWriteLock mLock = new ReentrantReadWriteLock();
     protected final ReentrantReadWriteLock.ReadLock mReadLock = mLock.readLock();
     protected final ReentrantReadWriteLock.WriteLock mWriteLock = mLock.writeLock();
 
-    public native boolean startTrackingBpfTimes();
+    public boolean startTrackingBpfTimes() {
+        return KernelCpuBpfTracking.startTracking();
+    }
 
     protected abstract boolean readBpfData();
 
@@ -116,7 +117,7 @@ public abstract class KernelCpuUidBpfMapReader {
         if (mErrors > ERROR_THRESHOLD) {
             return null;
         }
-        if (!mTracking && !startTrackingBpfTimes()) {
+        if (!startTrackingBpfTimes()) {
             Slog.w(mTag, "Failed to start tracking");
             mErrors++;
             return null;
@@ -182,7 +183,9 @@ public abstract class KernelCpuUidBpfMapReader {
         protected final native boolean readBpfData();
 
         @Override
-        public final native long[] getDataDimensions();
+        public final long[] getDataDimensions() {
+            return KernelCpuBpfTracking.getFreqsInternal();
+        }
 
         @Override
         public void removeUidsInRange(int startUid, int endUid) {

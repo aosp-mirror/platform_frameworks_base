@@ -34,6 +34,6 @@ public final class DiscreteValueValidator implements Validator {
 
     @Override
     public boolean validate(@Nullable String value) {
-        return ArrayUtils.contains(mValues, value);
+        return value == null || ArrayUtils.contains(mValues, value);
     }
 }

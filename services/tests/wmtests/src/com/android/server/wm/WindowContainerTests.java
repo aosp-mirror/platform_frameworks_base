@@ -16,13 +16,17 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -51,11 +55,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -64,6 +68,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -630,6 +635,22 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSetOrientation() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).build());
+        final TestWindowContainer child = spy(root.addChildWindow());
+        doReturn(true).when(root).handlesOrientationChangeFromDescendant();
+        child.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        child.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        // The ancestor should decide whether to dispatch the configuration change.
+        verify(child, never()).onConfigurationChanged(any());
+
+        doReturn(false).when(root).handlesOrientationChangeFromDescendant();
+        child.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        // The ancestor doesn't handle the request so the descendant applies the change directly.
+        verify(child).onConfigurationChanged(any());
+    }
+
+    @Test
     public void testCompareTo() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -786,12 +807,11 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = spy(builder.build());
 
-        final IBinder binder = mock(IBinder.class);
         final ActivityRecord activityRecord = mock(ActivityRecord.class);
         final TestWindowContainer child = root.addChildWindow();
 
-        child.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED, binder, activityRecord);
-        verify(root).onDescendantOrientationChanged(binder, activityRecord);
+        child.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED, activityRecord);
+        verify(root).onDescendantOrientationChanged(activityRecord);
     }
 
     @Test
@@ -808,19 +828,18 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testOnDisplayChanged() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
-        stack.getDisplayArea().removeStack(stack);
-        newDc.getDefaultTaskDisplayArea().addChild(stack, POSITION_TOP);
+        rootTask.getDisplayArea().removeRootTask(rootTask);
+        newDc.getDefaultTaskDisplayArea().addChild(rootTask, POSITION_TOP);
 
-        verify(stack).onDisplayChanged(newDc);
+        verify(rootTask).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
         verify(activity).onDisplayChanged(newDc);
-        assertEquals(newDc, stack.mDisplayContent);
+        assertEquals(newDc, rootTask.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
         assertEquals(newDc, activity.mDisplayContent);
     }
@@ -830,7 +849,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
-        final ActivityRecord r = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+        final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
         createWindow(null, TYPE_BASE_APPLICATION, r, "win");
@@ -852,23 +871,21 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testTaskCanApplyAnimation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity2 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
-        final ActivityRecord activity1 =
-                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent, task);
         verifyWindowContainerApplyAnimation(task, activity1, activity2);
     }
 
     @Test
-    public void testStackCanApplyAnimation() {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
-                createTaskInStack(stack, 0 /* userId */));
-        final ActivityRecord activity1 = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
-                createTaskInStack(stack, 0 /* userId */));
-        verifyWindowContainerApplyAnimation(stack, activity1, activity2);
+    public void testRootTaskCanApplyAnimation() {
+        final Task rootTask = createTask(mDisplayContent);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        verifyWindowContainerApplyAnimation(rootTask, activity1, activity2);
     }
 
     @Test
@@ -878,21 +895,21 @@ public class WindowContainerTests extends WindowTestsBase {
 
         assertNull(windowContainer.getDisplayArea());
 
-        // ActivityStack > WindowContainer
-        final ActivityStack activityStack = createTaskStackOnDisplay(mDisplayContent);
-        activityStack.addChild(windowContainer, 0);
-        activityStack.setParent(null);
+        // Task > WindowContainer
+        final Task task = createTask(mDisplayContent);
+        task.addChild(windowContainer, 0);
+        task.setParent(null);
 
         assertNull(windowContainer.getDisplayArea());
-        assertNull(activityStack.getDisplayArea());
+        assertNull(task.getDisplayArea());
 
-        // TaskDisplayArea > ActivityStack > WindowContainer
+        // TaskDisplayArea > Task > WindowContainer
         final TaskDisplayArea taskDisplayArea = new TaskDisplayArea(
                 mDisplayContent, mWm, "TaskDisplayArea", FEATURE_DEFAULT_TASK_CONTAINER);
-        taskDisplayArea.addChild(activityStack, 0);
+        taskDisplayArea.addChild(task, 0);
 
         assertEquals(taskDisplayArea, windowContainer.getDisplayArea());
-        assertEquals(taskDisplayArea, activityStack.getDisplayArea());
+        assertEquals(taskDisplayArea, task.getDisplayArea());
         assertEquals(taskDisplayArea, taskDisplayArea.getDisplayArea());
 
         // DisplayArea
@@ -907,8 +924,10 @@ public class WindowContainerTests extends WindowTestsBase {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 new IRemoteAnimationRunner.Stub() {
                     @Override
-                    public void onAnimationStart(RemoteAnimationTarget[] apps,
+                    public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                            RemoteAnimationTarget[] apps,
                             RemoteAnimationTarget[] wallpapers,
+                            RemoteAnimationTarget[] nonApps,
                             IRemoteAnimationFinishedCallback finishedCallback) {
                         try {
                             finishedCallback.onAnimationFinished();
@@ -922,7 +941,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
-        wc.getDisplayContent().prepareAppTransition(TRANSIT_TASK_OPEN, false);
+        wc.getDisplayContent().prepareAppTransition(TRANSIT_OPEN);
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();
@@ -933,7 +952,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // of the animation.
         ArrayList<WindowContainer<WindowState>> sources = new ArrayList<>();
         sources.add(act);
-        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false, sources));
+        assertTrue(wc.applyAnimation(null, TRANSIT_OLD_TASK_OPEN, true, false, sources));
 
         assertEquals(act, wc.getTopMostActivity());
         assertTrue(wc.isAnimating());
@@ -946,11 +965,110 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
-        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_TASK_OPEN, act,
-                mDisplayContent.mOpeningApps);
+        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_OLD_TASK_OPEN, act);
         verify(wc).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION), any());
         assertFalse(wc.isAnimating());
         assertFalse(act.isAnimating(PARENTS));
+    }
+
+    @Test
+    public void testRegisterWindowContainerListener() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mDisplayContent = mDisplayContent;
+        final TestWindowContainerListener listener = new TestWindowContainerListener();
+        Configuration config = container.getConfiguration();
+        Rect bounds = new Rect(0, 0, 10, 10);
+        config.windowConfiguration.setBounds(bounds);
+        config.densityDpi = 100;
+        container.onRequestedOverrideConfigurationChanged(config);
+        container.registerWindowContainerListener(listener);
+
+        assertEquals(mDisplayContent, listener.mDisplayContent);
+        assertEquals(bounds, listener.mConfiguration.windowConfiguration.getBounds());
+        assertEquals(100, listener.mConfiguration.densityDpi);
+
+        container.onDisplayChanged(mDefaultDisplay);
+        assertEquals(listener.mDisplayContent, mDefaultDisplay);
+
+        config = new Configuration();
+        bounds = new Rect(0, 0, 20, 20);
+        config.windowConfiguration.setBounds(bounds);
+        config.densityDpi = 200;
+
+        container.onRequestedOverrideConfigurationChanged(config);
+
+        assertEquals(bounds, listener.mConfiguration.windowConfiguration.getBounds());
+        assertEquals(200, listener.mConfiguration.densityDpi);
+    }
+
+    @Test
+    public void testFreezeInsets() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+
+        // Set visibility to false, verify the main window of the task will be set the frozen
+        // insets state immediately.
+        activity.setVisibility(false);
+        assertNotNull(win.getFrozenInsetsState());
+
+        // Now make it visible again, verify that the insets are immediately unfrozen.
+        activity.setVisibility(true);
+        assertNull(win.getFrozenInsetsState());
+    }
+
+    @Test
+    public void testFreezeInsetsStateWhenAppTransition() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
+        spyOn(win);
+        doReturn(true).when(task).okToAnimate();
+        ArrayList<WindowContainer> sources = new ArrayList<>();
+        sources.add(activity);
+
+        // Simulate the task applying the exit transition, verify the main window of the task
+        // will be set the frozen insets state before the animation starts
+        activity.setVisibility(false);
+        task.applyAnimation(null, TRANSIT_OLD_TASK_CLOSE, false /* enter */,
+                false /* isVoiceInteraction */, sources);
+        verify(win).freezeInsetsState();
+
+        // Simulate the task transition finished.
+        activity.commitVisibility(false, false);
+        task.onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION,
+                task.mSurfaceAnimator.getAnimation());
+
+        // Now make it visible again, verify that the insets are immediately unfrozen even before
+        // transition starts.
+        activity.setVisibility(true);
+        verify(win).clearFrozenInsetsState();
+    }
+
+    @Test
+    public void testAssignRelativeLayer() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceControl relativeParent = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+
+        // Trigger for first relative layer call.
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
+
+        // Not trigger for the same relative layer call.
+        clearInvocations(surfaceAnimator);
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
+        verify(surfaceAnimator, never()).setRelativeLayer(t, relativeParent, 1 /* layer */);
+
+        // Trigger for the same relative layer call if forceUpdate=true
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */, true /* forceUpdate */);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
@@ -1134,6 +1252,21 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         public void close() {
             mSession.kill();
+        }
+    }
+
+    private static class TestWindowContainerListener implements WindowContainerListener {
+        private Configuration mConfiguration = new Configuration();
+        private DisplayContent mDisplayContent;
+
+        @Override
+        public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+            mConfiguration.setTo(overrideConfiguration);
+        }
+
+        @Override
+        public void onDisplayChanged(DisplayContent dc) {
+            mDisplayContent = dc;
         }
     }
 }

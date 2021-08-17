@@ -197,7 +197,7 @@ import java.util.List;
  * Intent intent = new Intent(Intent.ACTION_MAIN, null);
  * intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
  * intent.setClass(context, YourIncomingCallActivity.class);
- * PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+ * PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
  *
  * // Build the notification as an ongoing high priority item; this ensures it will show as
  * // a heads up notification which slides down over top of the current content.

@@ -25,8 +25,6 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
-import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -368,14 +366,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      * @return whether invalid animations for vector drawable should be ignored.
      */
     private static boolean shouldIgnoreInvalidAnimation() {
-        Application app = ActivityThread.currentApplication();
-        if (app == null || app.getApplicationInfo() == null) {
-            return true;
-        }
-        if (app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
-            return true;
-        }
-        return false;
+        return android.graphics.Compatibility.getTargetSdkVersion() < Build.VERSION_CODES.N;
     }
 
     @Override

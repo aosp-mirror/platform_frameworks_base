@@ -626,6 +626,9 @@ message ActivityManagerServiceDumpProcessesProto {
         optional int32 target_uid = 1;
         optional int64 duration_ms = 2;
         optional string tag = 3;
+        optional int32 type = 4;
+        optional int32 reason_code = 5;
+        optional int32 calling_uid = 6;
     }
     repeated PendingTempWhitelist pending_temp_whitelist = 26;
 
@@ -775,6 +778,7 @@ message UidRecordProto {
         CHANGE_ACTIVE = 2;
         CHANGE_CACHED = 3;
         CHANGE_UNCACHED = 4;
+        CHANGE_CAPABILITY = 5;
     }
     repeated Change last_reported_changes = 8;
     optional int32 num_procs = 9;

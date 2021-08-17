@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
@@ -289,7 +290,7 @@ public class SparseBooleanArray implements Cloneable {
     }
 
     @Override
-    public boolean equals(Object that) {
+    public boolean equals(@Nullable Object that) {
       if (this == that) {
           return true;
       }

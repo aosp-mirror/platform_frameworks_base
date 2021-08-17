@@ -48,6 +48,10 @@ platform_bootclasspath {
     // bootclasspath.
     fragments: [
         {
+            apex: "com.android.appsearch",
+            module: "com.android.appsearch-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.art",
             module: "art-bootclasspath-fragment",
         },
@@ -78,6 +82,10 @@ platform_bootclasspath {
         {
             apex: "com.android.permission",
             module: "com.android.permission-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.scheduling",
+            module: "com.android.scheduling-bootclasspath-fragment",
         },
         {
             apex: "com.android.sdkext",

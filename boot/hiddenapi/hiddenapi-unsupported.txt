@@ -167,16 +167,6 @@ Landroid/media/IMediaScannerListener$Stub;-><init>()V
 Landroid/media/IMediaScannerService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IMediaScannerService;
 Landroid/media/session/ISessionManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/session/ISessionManager;
 Landroid/media/tv/ITvRemoteProvider$Stub;-><init>()V
-Landroid/net/IConnectivityManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveLinkProperties()Landroid/net/LinkProperties;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveNetworkInfo()Landroid/net/NetworkInfo;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getAllNetworkInfo()[Landroid/net/NetworkInfo;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getAllNetworks()[Landroid/net/Network;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetherableIfaces()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetherableUsbRegexs()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetheredIfaces()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->mRemote:Landroid/os/IBinder;
-Landroid/net/IConnectivityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/IConnectivityManager;
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkPolicyManager;
 Landroid/net/INetworkScoreService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkScoreService;
@@ -198,7 +188,6 @@ Landroid/os/IRemoteCallback$Stub;-><init>()V
 Landroid/os/IUpdateEngine$Stub;-><init>()V
 Landroid/os/IUserManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/IUserManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IUserManager;
-Landroid/os/IVibratorService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IVibratorService;
 Landroid/os/storage/IObbActionListener$Stub;-><init>()V
 Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/IStorageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/storage/IStorageManager;
@@ -262,7 +251,6 @@ Lcom/android/internal/app/IMediaContainerService$Stub;->asInterface(Landroid/os/
 Lcom/android/internal/app/IVoiceInteractionManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/app/IVoiceInteractionManagerService;
 Lcom/android/internal/appwidget/IAppWidgetService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/appwidget/IAppWidgetService;
 Lcom/android/internal/backup/IBackupTransport$Stub;-><init>()V
-Lcom/android/internal/location/ILocationProvider$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/location/ILocationProvider;
 Lcom/android/internal/os/IDropBoxManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/os/IDropBoxManagerService;
 Lcom/android/internal/policy/IKeyguardService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/policy/IKeyguardService;
 Lcom/android/internal/policy/IKeyguardStateCallback$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/policy/IKeyguardStateCallback;

@@ -53,8 +53,8 @@ import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
@@ -416,10 +416,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mIcon.icon;
     }
 
-    private Drawable getIcon(StatusBarIcon icon) {
-        Context notifContext = mNotification != null ?
-                mNotification.getPackageContext(getContext()) : getContext();
-        return getIcon(getContext(), notifContext, icon);
+    Drawable getIcon(StatusBarIcon icon) {
+        Context notifContext = getContext();
+        if (mNotification != null) {
+            notifContext = mNotification.getPackageContext(getContext());
+        }
+        return getIcon(getContext(), notifContext != null ? notifContext : getContext(), icon);
     }
 
     /**

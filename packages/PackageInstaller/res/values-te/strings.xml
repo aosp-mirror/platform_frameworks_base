@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"ప్యాకేజీ ఇన్‌స్టాలర్"</string>
     <string name="install" msgid="711829760615509273">"ఇన్‌స్టాల్ చేయి"</string>
+    <string name="update" msgid="3932142540719227615">"అప్‌డేట్ చేయి"</string>
     <string name="done" msgid="6632441120016885253">"పూర్తయింది"</string>
     <string name="cancel" msgid="1018267193425558088">"రద్దు చేయి"</string>
     <string name="installing" msgid="4921993079741206516">"ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"మీరు ఈ అప్లికేషన్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"మీరు ఇప్పటికే ఉన్న ఈ అప్లికేషన్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? ఇప్పటికే ఉన్న మీ డేటాను కోల్పోవడం సంభవించదు."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"మీరు ఈ అంతర్నిర్మిత అప్లికేషన్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? ఇప్పటికే ఉన్న మీ డేటాను కోల్పోవడం సంభవించదు."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"మీరు ఈ యాప్‌ను అప్‌డేట్ చేయాలనుకుంటున్నారా?"</string>
     <string name="install_failed" msgid="5777824004474125469">"యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ప్యాకేజీ ఇన్‌స్టాల్ కాకుండా బ్లాక్ చేయబడింది."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ప్యాకేజీ, అలాగే ఇప్పటికే ఉన్న ప్యాకేజీ మధ్య వైరుధ్యం ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wearలో ఇన్‌స్టాల్/అన్ఇన్‌స్టాల్ చర్యలకు మద్దతు లేదు."</string>
     <string name="message_staging" msgid="8032722385658438567">"యాప్‌ను సిద్ధం చేస్తుంది…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"తెలియదు"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టాబ్లెట్ అనుమతించబడదు."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టీవీ అనుమతించబడదు."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ ఫోన్ అనుమతించబడదు."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"మీ భద్రత దృష్ట్యా, ఈ సోర్సు నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టాబ్లెట్ ప్రస్తుతం అనుమతించబడదు. మీరు దీన్ని సెట్టింగ్‌లలో మార్చవచ్చు."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"మీ భద్రత దృష్ట్యా, ఈ సోర్సు నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టీవీ ప్రస్తుతం అనుమతించబడదు. మీరు దీన్ని సెట్టింగ్‌లలో మార్చవచ్చు."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"మీ భద్రత దృష్ట్యా, ఈ సోర్సు నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ ఫోన్ ప్రస్తుతం అనుమతించబడదు. మీరు దీన్ని సెట్టింగ్‌లలో మార్చవచ్చు."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"తెలియని యాప్‌లు మీ ఫోన్ పైన, వ్యక్తిగత డేటా పైన దాడి చేయడానికి ఎక్కువగా అవకాశం ఉంటుంది. ఈ యాప్ను ఇన్‌స్టాల్ చేయడం ద్వారా, దాని వినియోగంతో మీ ఫోన్‌కు ఏదైనా నష్టం జరిగితే లేదా మీ డేటాను కోల్పోతే అందుకు మీరే బాధ్యత వహిస్తారని అంగీకరిస్తున్నారు."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"మీ టాబ్లెట్ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టాబ్లెట్‌కు ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"మీ టీవీ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టీవీకి ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>

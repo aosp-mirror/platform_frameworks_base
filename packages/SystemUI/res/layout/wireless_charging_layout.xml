@@ -22,13 +22,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Circle animation -->
-    <ImageView
-        android:id="@+id/wireless_charging_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/wireless_charging_animation"/>
+    <com.android.systemui.statusbar.charging.ChargingRippleView
+        android:id="@+id/wireless_charging_ripple"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <!-- Text inside circle -->
     <LinearLayout

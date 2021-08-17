@@ -9,6 +9,7 @@ package {
 
 android_app {
     name: "SoundPicker",
+    defaults: ["platform_app_defaults"],
     manifest: "AndroidManifest.xml",
 
     static_libs: [

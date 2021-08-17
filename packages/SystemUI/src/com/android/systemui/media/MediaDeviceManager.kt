@@ -63,7 +63,13 @@ class MediaDeviceManager @Inject constructor(
      */
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
-    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    override fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData,
+        immediately: Boolean,
+        isSsReactivated: Boolean
+    ) {
         if (oldKey != null && oldKey != key) {
             val oldEntry = entries.remove(oldKey)
             oldEntry?.stop()

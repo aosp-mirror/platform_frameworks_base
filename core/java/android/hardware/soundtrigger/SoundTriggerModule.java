@@ -19,6 +19,9 @@ package android.hardware.soundtrigger;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.Identity;
+import android.media.permission.SafeCloseable;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -51,12 +54,39 @@ public class SoundTriggerModule {
     private EventHandlerDelegate mEventHandlerDelegate;
     private ISoundTriggerModule mService;
 
+    /**
+     * This variant is intended for use when the caller is acting an originator, rather than on
+     * behalf of a different entity, as far as authorization goes.
+     */
     SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
-            int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper)
+            int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper,
+            @NonNull Identity originatorIdentity)
             throws RemoteException {
         mId = moduleId;
         mEventHandlerDelegate = new EventHandlerDelegate(listener, looper);
-        mService = service.attach(moduleId, mEventHandlerDelegate);
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            mService = service.attachAsOriginator(moduleId, originatorIdentity,
+                    mEventHandlerDelegate);
+        }
+        mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
+    }
+
+    /**
+     * This variant is intended for use when the caller is acting as a middleman, i.e. on behalf of
+     * a different entity, as far as authorization goes.
+     */
+    SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
+            int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper,
+            @NonNull Identity middlemanIdentity, @NonNull Identity originatorIdentity)
+            throws RemoteException {
+        mId = moduleId;
+        mEventHandlerDelegate = new EventHandlerDelegate(listener, looper);
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            mService = service.attachAsMiddleman(moduleId, middlemanIdentity, originatorIdentity,
+                    mEventHandlerDelegate);
+        }
         mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
     }
 

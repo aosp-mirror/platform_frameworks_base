@@ -19,6 +19,7 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"स्विस जर्मन"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"बेल्जियन"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"बल्गेरियन"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"बल्गेरियन, फोनेटिक"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"इटालियन"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"डॅनिश"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"नॉर्वेजियन"</string>

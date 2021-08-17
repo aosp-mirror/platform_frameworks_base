@@ -19,10 +19,12 @@ package android.app.servertransaction;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -36,7 +38,7 @@ import java.util.Objects;
  * New intent message.
  * @hide
  */
-public class NewIntentItem extends ClientTransactionItem {
+public class NewIntentItem extends ActivityTransactionItem {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private List<ReferrerIntent> mIntents;
@@ -48,10 +50,10 @@ public class NewIntentItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityNewIntent");
-        client.handleNewIntent(token, mIntents);
+        client.handleNewIntent(r, mIntents);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -95,7 +97,7 @@ public class NewIntentItem extends ClientTransactionItem {
         mIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<NewIntentItem> CREATOR =
+    public static final @NonNull Parcelable.Creator<NewIntentItem> CREATOR =
             new Parcelable.Creator<NewIntentItem>() {
         public NewIntentItem createFromParcel(Parcel in) {
             return new NewIntentItem(in);
@@ -107,7 +109,7 @@ public class NewIntentItem extends ClientTransactionItem {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

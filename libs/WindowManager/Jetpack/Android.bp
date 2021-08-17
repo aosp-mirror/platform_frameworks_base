@@ -21,6 +21,7 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// Sidecar
 android_library_import {
     name: "window-sidecar",
     aars: ["window-sidecar-release.aar"],
@@ -29,13 +30,20 @@ android_library_import {
 
 java_library {
     name: "androidx.window.sidecar",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/androidx/window/sidecar/**/*.java",
+        "src/androidx/window/util/**/*.java",
+        "src/androidx/window/common/**/*.java",
+    ],
     static_libs: ["window-sidecar"],
     installable: true,
     sdk_version: "core_platform",
     system_ext_specific: true,
-    libs: ["framework", "androidx.annotation_annotation",],
-    required: ["androidx.window.sidecar.xml",],
+    libs: [
+        "framework",
+        "androidx.annotation_annotation",
+    ],
+    required: ["androidx.window.sidecar.xml"],
 }
 
 prebuilt_etc {
@@ -43,5 +51,40 @@ prebuilt_etc {
     system_ext_specific: true,
     sub_dir: "permissions",
     src: "androidx.window.sidecar.xml",
+    filename_from_src: true,
+}
+
+// Extensions
+// NOTE: This module is still under active development and must not
+// be used in production. Use 'androidx.window.sidecar' instead.
+android_library_import {
+    name: "window-extensions",
+    aars: ["window-extensions-release.aar"],
+    sdk_version: "current",
+}
+
+java_library {
+    name: "androidx.window.extensions",
+    srcs: [
+        "src/androidx/window/extensions/**/*.java",
+        "src/androidx/window/util/**/*.java",
+        "src/androidx/window/common/**/*.java",
+    ],
+    static_libs: ["window-extensions"],
+    installable: true,
+    sdk_version: "core_platform",
+    system_ext_specific: true,
+    libs: [
+        "framework",
+        "androidx.annotation_annotation",
+    ],
+    required: ["androidx.window.extensions.xml"],
+}
+
+prebuilt_etc {
+    name: "androidx.window.extensions.xml",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "androidx.window.extensions.xml",
     filename_from_src: true,
 }

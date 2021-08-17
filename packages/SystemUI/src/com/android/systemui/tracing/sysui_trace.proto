@@ -16,6 +16,8 @@
 
 syntax = "proto2";
 
+import "frameworks/base/libs/WindowManager/Shell/proto/wm_shell_trace.proto";
+
 package com.android.systemui.tracing;
 
 option java_multiple_files = true;
@@ -23,6 +25,7 @@ option java_multiple_files = true;
 message SystemUiTraceProto {
 
     optional EdgeBackGestureHandlerProto edge_back_gesture_handler = 1;
+    optional com.android.wm.shell.WmShellTraceProto wm_shell = 2;
 }
 
 message EdgeBackGestureHandlerProto {

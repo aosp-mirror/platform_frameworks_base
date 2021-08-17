@@ -298,7 +298,7 @@ class EventDispatcher {
         // Inject the injected pointers.
         int pointerIdBits = 0;
         final int pointerCount = prototype.getPointerCount();
-        final MotionEvent event = computeEventWithOriginalDown(prototype);
+        final MotionEvent event = computeInjectionDownEvent(prototype);
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Do not send event for already delivered pointers.
@@ -315,7 +315,7 @@ class EventDispatcher {
         }
     }
 
-    private MotionEvent computeEventWithOriginalDown(MotionEvent prototype) {
+    private MotionEvent computeInjectionDownEvent(MotionEvent prototype) {
         final int pointerCount = prototype.getPointerCount();
         if (pointerCount != mState.getReceivedPointerTracker().getReceivedPointerDownCount()) {
             Slog.w(LOG_TAG, "The pointer count doesn't match the received count.");

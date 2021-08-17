@@ -16,40 +16,38 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+
 import android.app.Notification;
-import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
-import com.android.systemui.util.Assert;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles ForegroundService and AppOp interactions with notifications.
  *  Tags notifications with appOps
  *  Lifetime extends notifications associated with an ongoing ForegroundService.
  *  Filters out notifications that represent foreground services that are no longer running
+ *  Puts foreground service notifications into the FGS section. See {@link NotifCoordinators} for
+ *      section ordering priority.
  *
  * Previously this logic lived in
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceController
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
  */
-@Singleton
+@SysUISingleton
 public class AppOpsCoordinator implements Coordinator {
     private static final String TAG = "AppOpsCoordinator";
 
@@ -73,17 +71,13 @@ public class AppOpsCoordinator implements Coordinator {
     public void attach(NotifPipeline pipeline) {
         mNotifPipeline = pipeline;
 
-        // extend the lifetime of foreground notification services to show for at least 5 seconds
-        mNotifPipeline.addNotificationLifetimeExtender(mForegroundLifetimeExtender);
-
-        // listen for new notifications to add appOps
-        mNotifPipeline.addCollectionListener(mNotifCollectionListener);
-
         // filter out foreground service notifications that aren't necessary anymore
         mNotifPipeline.addPreGroupFilter(mNotifFilter);
 
-        // when appOps change, update any relevant notifications to update appOps for
-        mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
+    }
+
+    public NotifSectioner getSectioner() {
+        return mNotifSectioner;
     }
 
     /**
@@ -101,155 +95,24 @@ public class AppOpsCoordinator implements Coordinator {
                             sbn.getUser().getIdentifier())) {
                 return true;
             }
-
-            // Filters out system alert notifications when unneeded
-            if (mForegroundServiceController.isSystemAlertNotification(sbn)) {
-                final String[] apps = sbn.getNotification().extras.getStringArray(
-                        Notification.EXTRA_FOREGROUND_APPS);
-                if (apps != null && apps.length >= 1) {
-                    if (!mForegroundServiceController.isSystemAlertWarningNeeded(
-                            sbn.getUser().getIdentifier(), apps[0])) {
-                        return true;
-                    }
-                }
-            }
             return false;
         }
     };
 
     /**
-     * Extends the lifetime of foreground notification services such that they show for at least
-     * five seconds
+     * Puts foreground service notifications into its own section.
      */
-    private final NotifLifetimeExtender mForegroundLifetimeExtender =
-            new NotifLifetimeExtender() {
-        private static final int MIN_FGS_TIME_MS = 5000;
-        private OnEndLifetimeExtensionCallback mEndCallback;
-        private Map<NotificationEntry, Runnable> mEndRunnables = new HashMap<>();
-
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService") {
         @Override
-        public String getName() {
-            return TAG;
-        }
-
-        @Override
-        public void setCallback(OnEndLifetimeExtensionCallback callback) {
-            mEndCallback = callback;
-        }
-
-        @Override
-        public boolean shouldExtendLifetime(NotificationEntry entry, int reason) {
-            if ((entry.getSbn().getNotification().flags
-                    & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
-                return false;
+        public boolean isInSection(ListEntry entry) {
+            NotificationEntry notificationEntry = entry.getRepresentativeEntry();
+            if (notificationEntry != null) {
+                Notification notification = notificationEntry.getSbn().getNotification();
+                return notification.isForegroundService()
+                        && notification.isColorized()
+                        && entry.getRepresentativeEntry().getImportance() > IMPORTANCE_MIN;
             }
-
-            final long currTime = System.currentTimeMillis();
-            final boolean extendLife = currTime - entry.getSbn().getPostTime() < MIN_FGS_TIME_MS;
-
-            if (extendLife) {
-                if (!mEndRunnables.containsKey(entry)) {
-                    final Runnable endExtensionRunnable = () -> {
-                        mEndRunnables.remove(entry);
-                        mEndCallback.onEndLifetimeExtension(
-                                mForegroundLifetimeExtender,
-                                entry);
-                    };
-
-                    final Runnable cancelRunnable = mMainExecutor.executeDelayed(
-                            endExtensionRunnable,
-                            MIN_FGS_TIME_MS - (currTime - entry.getSbn().getPostTime()));
-                    mEndRunnables.put(entry, cancelRunnable);
-                }
-            }
-
-            return extendLife;
-        }
-
-        @Override
-        public void cancelLifetimeExtension(NotificationEntry entry) {
-            Runnable cancelRunnable = mEndRunnables.remove(entry);
-            if (cancelRunnable != null) {
-                cancelRunnable.run();
-            }
+            return false;
         }
     };
-
-    /**
-     * Adds appOps to incoming and updating notifications
-     */
-    private NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
-        @Override
-        public void onEntryAdded(NotificationEntry entry) {
-            tagAppOps(entry);
-        }
-
-        @Override
-        public void onEntryUpdated(NotificationEntry entry) {
-            tagAppOps(entry);
-        }
-
-        private void tagAppOps(NotificationEntry entry) {
-            final StatusBarNotification sbn = entry.getSbn();
-            // note: requires that the ForegroundServiceController is updating their appOps first
-            ArraySet<Integer> activeOps =
-                    mForegroundServiceController.getAppOps(
-                            sbn.getUser().getIdentifier(),
-                            sbn.getPackageName());
-
-            entry.mActiveAppOps.clear();
-            if (activeOps != null) {
-                entry.mActiveAppOps.addAll(activeOps);
-            }
-        }
-    };
-
-    private void onAppOpsChanged(int code, int uid, String packageName, boolean active) {
-        mMainExecutor.execute(() -> handleAppOpsChanged(code, uid, packageName, active));
-    }
-
-    /**
-     * Update the appOp for the posted notification associated with the current foreground service
-     *
-     * @param code code for appOp to add/remove
-     * @param uid of user the notification is sent to
-     * @param packageName package that created the notification
-     * @param active whether the appOpCode is active or not
-     */
-    private void handleAppOpsChanged(int code, int uid, String packageName, boolean active) {
-        Assert.isMainThread();
-
-        int userId = UserHandle.getUserId(uid);
-
-        // Update appOps of the app's posted notifications with standard layouts
-        final ArraySet<String> notifKeys =
-                mForegroundServiceController.getStandardLayoutKeys(userId, packageName);
-        if (notifKeys != null) {
-            boolean changed = false;
-            for (int i = 0; i < notifKeys.size(); i++) {
-                final NotificationEntry entry = findNotificationEntryWithKey(notifKeys.valueAt(i));
-                if (entry != null
-                        && uid == entry.getSbn().getUid()
-                        && packageName.equals(entry.getSbn().getPackageName())) {
-                    if (active) {
-                        changed |= entry.mActiveAppOps.add(code);
-                    } else {
-                        changed |= entry.mActiveAppOps.remove(code);
-                    }
-                }
-            }
-            if (changed) {
-                mNotifFilter.invalidateList();
-            }
-        }
-    }
-
-    private NotificationEntry findNotificationEntryWithKey(String key) {
-        for (NotificationEntry entry : mNotifPipeline.getAllNotifs()) {
-            if (entry.getKey().equals(key)) {
-                return entry;
-            }
-        }
-        return null;
-    }
 }

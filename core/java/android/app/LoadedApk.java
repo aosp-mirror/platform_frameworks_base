@@ -56,9 +56,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.BaseDexClassLoader;
@@ -114,7 +114,8 @@ public final class LoadedApk {
     private String mAppDir;
     @UnsupportedAppUsage
     private String mResDir;
-    private String[] mOverlayDirs;
+    private String[] mLegacyOverlayDirs;
+    private String[] mOverlayPaths;
     @UnsupportedAppUsage
     private String mDataDir;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -156,6 +157,7 @@ public final class LoadedApk {
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
     private AppComponentFactory mAppComponentFactory;
+    private final Object mLock = new Object();
 
     Application getApplication() {
         return mApplication;
@@ -223,7 +225,8 @@ public final class LoadedApk {
         mSplitAppDirs = null;
         mSplitResDirs = null;
         mSplitClassLoaderNames = null;
-        mOverlayDirs = null;
+        mLegacyOverlayDirs = null;
+        mOverlayPaths = null;
         mDataDir = null;
         mDataDirFile = null;
         mDeviceProtectedDataDirFile = null;
@@ -286,7 +289,7 @@ public final class LoadedApk {
         return mSecurityViolation;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 172409979)
     public CompatibilityInfo getCompatibilityInfo() {
         return mDisplayAdjustments.getCompatibilityInfo();
     }
@@ -353,7 +356,7 @@ public final class LoadedApk {
         } else {
             addedPaths.addAll(newPaths);
         }
-        synchronized (this) {
+        synchronized (mLock) {
             createOrUpdateClassLoaderLocked(addedPaths);
             if (mResources != null) {
                 final String[] splitPaths;
@@ -365,8 +368,8 @@ public final class LoadedApk {
                 }
 
                 mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                        splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                        Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                        splitPaths, mLegacyOverlayDirs, mOverlayPaths,
+                        mApplicationInfo.sharedLibraryFiles, null, null, getCompatibilityInfo(),
                         getClassLoader(), mApplication == null ? null
                                 : mApplication.getResources().getLoaders());
             }
@@ -380,7 +383,8 @@ public final class LoadedApk {
         mApplicationInfo = aInfo;
         mAppDir = aInfo.sourceDir;
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
-        mOverlayDirs = aInfo.resourceDirs;
+        mLegacyOverlayDirs = aInfo.resourceDirs;
+        mOverlayPaths = aInfo.overlayPaths;
         mDataDir = aInfo.dataDir;
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
@@ -411,6 +415,12 @@ public final class LoadedApk {
             return;
         }
         for (SharedLibraryInfo lib : sharedLibraries) {
+            if (lib.isNative()) {
+                // Native shared lib doesn't contribute to the native lib search path. Its name is
+                // sent to libnativeloader and then the native shared lib is exported from the
+                // default linker namespace.
+                continue;
+            }
             List<String> paths = lib.getAllCodePaths();
             outSeenPaths.addAll(paths);
             for (String path : paths) {
@@ -536,6 +546,10 @@ public final class LoadedApk {
         if (aInfo.sharedLibraryFiles != null) {
             int index = 0;
             for (String lib : aInfo.sharedLibraryFiles) {
+                // sharedLibraryFiles might contain native shared libraries that are not APK paths.
+                if (!lib.endsWith(".apk")) {
+                    continue;
+                }
                 if (!outSeenPaths.contains(lib) && !outZipPaths.contains(lib)) {
                     outZipPaths.add(index, lib);
                     index++;
@@ -581,7 +595,9 @@ public final class LoadedApk {
      * include the base APK in the list of splits.
      */
     private class SplitDependencyLoaderImpl extends SplitDependencyLoader<NameNotFoundException> {
+        @GuardedBy("mLock")
         private final String[][] mCachedResourcePaths;
+        @GuardedBy("mLock")
         private final ClassLoader[] mCachedClassLoaders;
 
         SplitDependencyLoaderImpl(@NonNull SparseArray<int[]> dependencies) {
@@ -592,37 +608,41 @@ public final class LoadedApk {
 
         @Override
         protected boolean isSplitCached(int splitIdx) {
-            return mCachedClassLoaders[splitIdx] != null;
+            synchronized (mLock) {
+                return mCachedClassLoaders[splitIdx] != null;
+            }
         }
 
         @Override
         protected void constructSplit(int splitIdx, @NonNull int[] configSplitIndices,
                 int parentSplitIdx) throws NameNotFoundException {
-            final ArrayList<String> splitPaths = new ArrayList<>();
-            if (splitIdx == 0) {
-                createOrUpdateClassLoaderLocked(null);
-                mCachedClassLoaders[0] = mClassLoader;
+            synchronized (mLock) {
+                final ArrayList<String> splitPaths = new ArrayList<>();
+                if (splitIdx == 0) {
+                    createOrUpdateClassLoaderLocked(null);
+                    mCachedClassLoaders[0] = mClassLoader;
 
-                // Never add the base resources here, they always get added no matter what.
+                    // Never add the base resources here, they always get added no matter what.
+                    for (int configSplitIdx : configSplitIndices) {
+                        splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
+                    }
+                    mCachedResourcePaths[0] = splitPaths.toArray(new String[splitPaths.size()]);
+                    return;
+                }
+
+                // Since we handled the special base case above, parentSplitIdx is always valid.
+                final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
+                mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
+                        mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null,
+                        null, parent, mSplitClassLoaderNames[splitIdx - 1]);
+
+                Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
+                splitPaths.add(mSplitResDirs[splitIdx - 1]);
                 for (int configSplitIdx : configSplitIndices) {
                     splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
                 }
-                mCachedResourcePaths[0] = splitPaths.toArray(new String[splitPaths.size()]);
-                return;
+                mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
             }
-
-            // Since we handled the special base case above, parentSplitIdx is always valid.
-            final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
-            mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
-                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent,
-                    mSplitClassLoaderNames[splitIdx - 1]);
-
-            Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
-            splitPaths.add(mSplitResDirs[splitIdx - 1]);
-            for (int configSplitIdx : configSplitIndices) {
-                splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
-            }
-            mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
         }
 
         private int ensureSplitLoaded(String splitName) throws NameNotFoundException {
@@ -640,11 +660,17 @@ public final class LoadedApk {
         }
 
         ClassLoader getClassLoaderForSplit(String splitName) throws NameNotFoundException {
-            return mCachedClassLoaders[ensureSplitLoaded(splitName)];
+            final int idx = ensureSplitLoaded(splitName);
+            synchronized (mLock) {
+                return mCachedClassLoaders[idx];
+            }
         }
 
         String[] getSplitPathsForSplit(String splitName) throws NameNotFoundException {
-            return mCachedResourcePaths[ensureSplitLoaded(splitName)];
+            final int idx = ensureSplitLoaded(splitName);
+            synchronized (mLock) {
+                return mCachedResourcePaths[idx];
+            }
         }
     }
 
@@ -695,6 +721,12 @@ public final class LoadedApk {
         }
         List<ClassLoader> loaders = new ArrayList<>();
         for (SharedLibraryInfo info : sharedLibraries) {
+            if (info.isNative()) {
+                // Native shared lib doesn't contribute to the native lib search path. Its name is
+                // sent to libnativeloader and then the native shared lib is exported from the
+                // default linker namespace.
+                continue;
+            }
             loaders.add(createSharedLibraryLoader(
                     info, isBundledApp, librarySearchPath, libraryPermittedPath));
         }
@@ -718,6 +750,24 @@ public final class LoadedApk {
         }
     }
 
+    private StrictMode.VmPolicy allowVmViolations() {
+        if (mActivityThread == null) {
+            // When LoadedApk is used without an ActivityThread (usually in a
+            // zygote context), don't call into StrictMode, as it initializes
+            // the binder subsystem, which we don't want.
+            return null;
+        }
+
+        return StrictMode.allowVmViolations();
+    }
+
+    private void setVmPolicy(StrictMode.VmPolicy policy) {
+        if (mActivityThread != null && policy != null) {
+            StrictMode.setVmPolicy(policy);
+        }
+    }
+
+    @GuardedBy("mLock")
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
         if (mPackageName.equals("android")) {
             // Note: This branch is taken for system server and we don't need to setup
@@ -909,10 +959,19 @@ public final class LoadedApk {
                     mApplicationInfo.sharedLibraryInfos, isBundledApp, librarySearchPath,
                     libraryPermittedPath);
 
+            List<String> nativeSharedLibraries = new ArrayList<>();
+            if (mApplicationInfo.sharedLibraryInfos != null) {
+                for (SharedLibraryInfo info : mApplicationInfo.sharedLibraryInfos) {
+                    if (info.isNative()) {
+                        nativeSharedLibraries.add(info.getName());
+                    }
+                }
+            }
+
             mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(
                     zip, mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
-                    mApplicationInfo.classLoaderName, sharedLibraries);
+                    mApplicationInfo.classLoaderName, sharedLibraries, nativeSharedLibraries);
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
             setThreadPolicy(oldPolicy);
@@ -979,19 +1038,26 @@ public final class LoadedApk {
 
         // Temporarily disable logging of disk reads on the Looper thread as this is necessary -
         // and the loader will access the directory anyway if we don't check it.
-        StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
+        StrictMode.ThreadPolicy oldThreadPolicy = allowThreadDiskReads();
+
+        // Also disable logging of access to /data/user before CE storage is unlocked. The check
+        // below will return false (because the directory name we pass will not match the
+        // encrypted one), but that's correct.
+        StrictMode.VmPolicy oldVmPolicy = allowVmViolations();
+
         try {
             // We are constructing a classloader for a different package. It is likely,
             // but not certain, that we can't acccess its app data dir - so check.
             return new File(mDataDir).canExecute();
         } finally {
-            setThreadPolicy(oldPolicy);
+            setThreadPolicy(oldThreadPolicy);
+            setVmPolicy(oldVmPolicy);
         }
     }
 
     @UnsupportedAppUsage
     public ClassLoader getClassLoader() {
-        synchronized (this) {
+        synchronized (mLock) {
             if (mClassLoader == null) {
                 createOrUpdateClassLoaderLocked(null /*addedPaths*/);
             }
@@ -1076,6 +1142,10 @@ public final class LoadedApk {
                         mPackageName,
                         PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                         UserHandle.myUserId());
+        if (pi == null) {
+            throw new IllegalStateException("Unable to get package info for "
+                    + mPackageName + "; is package not installed?");
+        }
         /*
          * Two possible indications that this package could be
          * sharing its virtual machine with other packages:
@@ -1182,9 +1252,19 @@ public final class LoadedApk {
         return mSplitResDirs;
     }
 
+    /**
+     * Corresponds to {@link ApplicationInfo#resourceDirs}.
+     */
     @UnsupportedAppUsage
     public String[] getOverlayDirs() {
-        return mOverlayDirs;
+        return mLegacyOverlayDirs;
+    }
+
+    /**
+     * Corresponds to {@link ApplicationInfo#overlayPaths}.
+     */
+    public String[] getOverlayPaths() {
+        return mOverlayPaths;
     }
 
     public String getDataDir() {
@@ -1220,9 +1300,13 @@ public final class LoadedApk {
                 throw new AssertionError("null split not found");
             }
 
+            if (Process.myUid() == mApplicationInfo.uid) {
+                ResourcesManager.getInstance().initializeApplicationPaths(mResDir, splitPaths);
+            }
+
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                    splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                    Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                    splitPaths, mLegacyOverlayDirs, mOverlayPaths,
+                    mApplicationInfo.sharedLibraryFiles, null, null, getCompatibilityInfo(),
                     getClassLoader(), null);
         }
         return mResources;
@@ -1277,7 +1361,7 @@ public final class LoadedApk {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 throw new RuntimeException(
                     "Unable to instantiate application " + appClass
-                    + ": " + e.toString(), e);
+                    + " package " + mPackageName + ": " + e.toString(), e);
             }
         }
         mActivityThread.mAllApplications.add(app);
@@ -1586,7 +1670,10 @@ public final class LoadedApk {
                     try {
                         ClassLoader cl = mReceiver.getClass().getClassLoader();
                         intent.setExtrasClassLoader(cl);
-                        intent.prepareToEnterProcess();
+                        // TODO: determine at registration time if caller is
+                        // protecting themselves with signature permission
+                        intent.prepareToEnterProcess(ActivityThread.isProtectedBroadcast(intent),
+                                mContext.getAttributionSource());
                         setExtrasClassLoader(cl);
                         receiver.setPendingResult(this);
                         receiver.onReceive(mContext, intent);
@@ -1984,13 +2071,14 @@ public final class LoadedApk {
             }
             if (dead) {
                 mConnection.onBindingDied(name);
-            }
-            // If there is a new viable service, it is now connected.
-            if (service != null) {
-                mConnection.onServiceConnected(name, service);
             } else {
-                // The binding machinery worked, but the remote returned null from onBind().
-                mConnection.onNullBinding(name);
+                // If there is a new viable service, it is now connected.
+                if (service != null) {
+                    mConnection.onServiceConnected(name, service);
+                } else {
+                    // The binding machinery worked, but the remote returned null from onBind().
+                    mConnection.onNullBinding(name);
+                }
             }
         }
 

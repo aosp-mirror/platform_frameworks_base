@@ -462,7 +462,7 @@ public class FrameLayout extends ViewGroup {
 
         /**
          * Creates a new set of layout parameters with the specified width, height
-         * and weight.
+         * and gravity.
          *
          * @param width the width, either {@link #MATCH_PARENT},
          *              {@link #WRAP_CONTENT} or a fixed size in pixels

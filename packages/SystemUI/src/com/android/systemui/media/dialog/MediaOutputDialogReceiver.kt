@@ -20,8 +20,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
-import com.android.settingslib.media.MediaOutputSliceConstants
+import android.util.Log
+import com.android.settingslib.media.MediaOutputConstants
 import javax.inject.Inject
+
+private const val TAG = "MediaOutputDlgReceiver"
+private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 
 /**
  * BroadcastReceiver for handling media output intent
@@ -30,10 +34,15 @@ class MediaOutputDialogReceiver @Inject constructor(
     private val mediaOutputDialogFactory: MediaOutputDialogFactory
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (TextUtils.equals(MediaOutputSliceConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
+        if (TextUtils.equals(MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
                         intent.action)) {
-            mediaOutputDialogFactory.create(
-                    intent.getStringExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME), false)
+            val packageName: String? =
+                    intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
+            if (!TextUtils.isEmpty(packageName)) {
+                mediaOutputDialogFactory.create(packageName!!, false)
+            } else if (DEBUG) {
+                Log.e(TAG, "Unable to launch media output dialog. Package name is empty.")
+            }
         }
     }
 }

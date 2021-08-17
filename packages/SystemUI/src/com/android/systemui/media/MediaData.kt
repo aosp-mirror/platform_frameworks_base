@@ -31,9 +31,9 @@ data class MediaData(
      */
     val app: String?,
     /**
-     * Icon shown on player, close to app name.
+     * App icon shown on player.
      */
-    val appIcon: Drawable?,
+    val appIcon: Icon?,
     /**
      * Artist name.
      */
@@ -104,12 +104,17 @@ data class MediaData(
     /**
      * Set from the notification and used as fallback when PlaybackState cannot be determined
      */
-    val isClearable: Boolean = true
+    val isClearable: Boolean = true,
+
+    /**
+     * Timestamp when this player was last active.
+     */
+    var lastActive: Long = 0L
 )
 
 /** State of a media action. */
 data class MediaAction(
-    val drawable: Drawable?,
+    val icon: Icon?,
     val action: Runnable?,
     val contentDescription: CharSequence?
 )

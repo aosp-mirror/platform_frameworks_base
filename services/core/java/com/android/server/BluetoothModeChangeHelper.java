@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.RequiresPermission;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHearingAid;
@@ -101,6 +102,7 @@ public class BluetoothModeChangeHelper {
     }
 
     @VisibleForTesting
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void onAirplaneModeChanged(BluetoothManagerService managerService) {
         managerService.onAirplaneModeChanged();
     }

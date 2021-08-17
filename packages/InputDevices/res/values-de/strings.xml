@@ -19,6 +19,7 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Schweizerdeutsch"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belgisch"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bulgarisch"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"Bulgarisch – phonetisch"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"Italienisch"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"Dänisch"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Norwegisch"</string>
@@ -46,7 +47,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Persisch"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Aserbaidschanisch"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"Polnisch"</string>
-    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Belarussisch"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Weißrussisch"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Mongolisch"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Georgisch"</string>
 </resources>

@@ -31,9 +31,47 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <ViewStub
+        android:id="@+id/keyguard_qs_user_switch_stub"
+        android:layout="@layout/keyguard_qs_user_switch"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
     <include
-        layout="@layout/keyguard_status_view"
+        layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher_stub"
+        android:layout="@layout/keyguard_user_switcher"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <include layout="@layout/status_bar_expanded_plugin_frame"/>
+
+    <include layout="@layout/dock_info_bottom_area_overlay" />
+
+    <com.android.keyguard.LockIconView
+        android:id="@+id/lock_icon_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <!-- Background protection -->
+        <ImageView
+            android:id="@+id/lock_icon_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/fingerprint_bg"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/lock_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/lock_icon_padding"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"/>
+    </com.android.keyguard.LockIconView>
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
@@ -43,36 +81,47 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
+        <include
+            layout="@layout/keyguard_status_view"
+            android:visibility="gone"/>
+
         <include layout="@layout/dock_info_overlay" />
 
         <FrameLayout
             android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"
             android:layout_width="@dimen/qs_panel_width"
-            android:layout_height="match_parent"
-            android:layout_gravity="@integer/notification_panel_layout_gravity"
+            android:layout_height="0dp"
             android:clipToPadding="false"
             android:clipChildren="false"
-            systemui:viewType="com.android.systemui.plugins.qs.QS" />
+            systemui:viewType="com.android.systemui.plugins.qs.QS"
+            systemui:layout_constraintStart_toStartOf="parent"
+            systemui:layout_constraintEnd_toEndOf="parent"
+            systemui:layout_constraintTop_toTopOf="parent"
+            systemui:layout_constraintBottom_toBottomOf="parent"
+        />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/qs_edge_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            systemui:layout_constraintGuide_percent="0.5"
+            android:orientation="vertical"/>
 
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_marginTop="@dimen/notification_panel_margin_top"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
-            android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:layout_marginBottom="@dimen/close_handle_underlap" />
+            android:layout_marginBottom="@dimen/close_handle_underlap"
+            systemui:layout_constraintStart_toStartOf="parent"
+            systemui:layout_constraintEnd_toEndOf="parent"
+        />
 
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
 
         <include layout="@layout/photo_preview_overlay" />
-
-        <ViewStub
-            android:id="@+id/keyguard_user_switcher"
-            android:layout="@layout/keyguard_user_switcher"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent" />
 
         <include
             layout="@layout/keyguard_status_bar"
@@ -85,20 +134,27 @@
             android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
             android:text="@string/report_rejected_touch"
             android:visibility="gone" />
-
+        <com.android.systemui.statusbar.phone.TapAgainView
+            android:id="@+id/shade_falsing_tap_again"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            systemui:layout_constraintLeft_toLeftOf="parent"
+            systemui:layout_constraintRight_toRightOf="parent"
+            systemui:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="20dp"
+            android:paddingHorizontal="16dp"
+            android:minHeight="44dp"
+            android:elevation="4dp"
+            android:background="@drawable/rounded_bg_full"
+            android:gravity="center"
+            android:text="@string/tap_again"
+            android:visibility="gone"
+        />
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
-    <com.android.systemui.statusbar.AlphaOptimizedView
-        android:id="@+id/qs_navbar_scrim"
-        android:layout_height="96dp"
+    <FrameLayout
+        android:id="@+id/preview_container"
         android:layout_width="match_parent"
-        android:layout_gravity="bottom"
-        android:visibility="invisible"
-        android:background="@drawable/qs_navbar_scrim" />
-
-    <include layout="@layout/status_bar_expanded_plugin_frame"/>
+        android:layout_height="match_parent">
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView>

@@ -41,6 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class of data service. Services that extend DataService must register the service in
@@ -217,7 +218,7 @@ public abstract class DataService extends Service {
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason,
                 @Nullable LinkProperties linkProperties,
-                @IntRange(from = 0, to = 15) int pduSessionId, @Nullable SliceInfo sliceInfo,
+                @IntRange(from = 0, to = 15) int pduSessionId, @Nullable NetworkSliceInfo sliceInfo,
                 @Nullable TrafficDescriptor trafficDescriptor, boolean matchAllRuleAllowed,
                 @NonNull DataServiceCallback callback) {
             /* Call the old version since the new version isn't supported */
@@ -284,11 +285,11 @@ public abstract class DataService extends Service {
          *
          * Any resources being transferred cannot be released while a
          * handover is underway.
-         *
+         * <p/>
          * If a handover was unsuccessful, then the framework calls
          * {@link DataService#cancelHandover}.  The target transport retains ownership over any of
          * the resources being transferred.
-         *
+         * <p/>
          * If a handover was successful, the framework calls {@link DataService#deactivateDataCall}
          * with reason {@link DataService.REQUEST_REASON_HANDOVER}. The target transport now owns
          * the transferred resources and is responsible for releasing them.
@@ -299,21 +300,27 @@ public abstract class DataService extends Service {
          * @hide
          */
         public void startHandover(int cid, @NonNull DataServiceCallback callback) {
+            Objects.requireNonNull(callback, "callback cannot be null");
             // The default implementation is to return unsupported.
-            if (callback != null) {
-                Log.d(TAG, "startHandover: " + cid);
-                callback.onHandoverStarted(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
-            } else {
-                Log.e(TAG, "startHandover: " + cid + ", callback is null");
-            }
+            Log.d(TAG, "startHandover: " + cid);
+            callback.onHandoverStarted(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
         }
 
         /**
          * Indicates that a handover was cancelled after a call to
          * {@link DataService#startHandover}. This is called on the source transport.
-         *
+         * <p/>
          * Since the handover was unsuccessful, the source transport retains ownership over any of
          * the resources being transferred and is still responsible for releasing them.
+         * <p/>
+         * The handover can be cancelled up until either:
+         * <ul><li>
+         *     The handover was successful after receiving a successful response from
+         *     {@link DataService#setupDataCall} on the target transport.
+         * </li><li>
+         *     The data call on the source transport was lost.
+         * </li>
+         * </ul>
          *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
@@ -321,13 +328,10 @@ public abstract class DataService extends Service {
          * @hide
          */
         public void cancelHandover(int cid, @NonNull DataServiceCallback callback) {
+            Objects.requireNonNull(callback, "callback cannot be null");
             // The default implementation is to return unsupported.
-            if (callback != null) {
-                Log.d(TAG, "cancelHandover: " + cid);
-                callback.onHandoverCancelled(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
-            } else {
-                Log.e(TAG, "cancelHandover: " + cid + ", callback is null");
-            }
+            Log.d(TAG, "cancelHandover: " + cid);
+            callback.onHandoverCancelled(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
         }
 
         /**
@@ -414,13 +418,13 @@ public abstract class DataService extends Service {
         public final int reason;
         public final LinkProperties linkProperties;
         public final int pduSessionId;
-        public final SliceInfo sliceInfo;
+        public final NetworkSliceInfo sliceInfo;
         public final TrafficDescriptor trafficDescriptor;
         public final boolean matchAllRuleAllowed;
         public final IDataServiceCallback callback;
         SetupDataCallRequest(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
                 boolean allowRoaming, int reason, LinkProperties linkProperties, int pduSessionId,
-                SliceInfo sliceInfo, TrafficDescriptor trafficDescriptor,
+                NetworkSliceInfo sliceInfo, TrafficDescriptor trafficDescriptor,
                 boolean matchAllRuleAllowed, IDataServiceCallback callback) {
             this.accessNetworkType = accessNetworkType;
             this.dataProfile = dataProfile;
@@ -707,7 +711,7 @@ public abstract class DataService extends Service {
         @Override
         public void setupDataCall(int slotIndex, int accessNetworkType, DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming, int reason,
-                LinkProperties linkProperties, int pduSessionId, SliceInfo sliceInfo,
+                LinkProperties linkProperties, int pduSessionId, NetworkSliceInfo sliceInfo,
                 TrafficDescriptor trafficDescriptor, boolean matchAllRuleAllowed,
                 IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_SETUP_DATA_CALL, slotIndex, 0,

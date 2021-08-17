@@ -58,6 +58,7 @@ cc_library {
         "AssetDir.cpp",
         "AssetManager.cpp",
         "AssetManager2.cpp",
+        "AssetsProvider.cpp",
         "AttributeResolution.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
@@ -96,8 +97,8 @@ cc_library {
                 "libincfs",
                 "libutils",
                 "libz",
-                "libziparchive",
             ],
+            static_libs: ["libziparchive_for_incfs"],
             static: {
                 enabled: false,
             },
@@ -115,6 +116,11 @@ cc_library {
             ],
             shared_libs: [
                 "libz",
+            ],
+        },
+        linux_glibc: {
+            srcs: [
+                "CursorWindow.cpp",
             ],
         },
         windows: {
@@ -176,13 +182,22 @@ cc_test {
         android: {
             srcs: [
                 "tests/BackupData_test.cpp",
+                "tests/BackupHelpers_test.cpp",
+                "tests/CursorWindow_test.cpp",
                 "tests/ObbFile_test.cpp",
                 "tests/PosixUtils_test.cpp",
             ],
-            shared_libs: common_test_libs + ["libui"],
+            shared_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+                "libui",
+            ],
         },
         host: {
-            static_libs: common_test_libs + ["liblog", "libz"],
+            static_libs: common_test_libs + [
+                "liblog",
+                "libz",
+            ],
         },
     },
     data: [
@@ -205,9 +220,38 @@ cc_benchmark {
         // Actual benchmarks.
         "tests/AssetManager2_bench.cpp",
         "tests/AttributeResolution_bench.cpp",
+        "tests/CursorWindow_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],
     shared_libs: common_test_libs,
     data: ["tests/data/**/*.apk"],
+}
+
+cc_library {
+    name: "libandroidfw_fuzzer_lib",
+    defaults: ["libandroidfw_defaults"],
+    host_supported: true,
+    srcs: [
+        "CursorWindow.cpp",
+    ],
+    export_include_dirs: ["include"],
+    target: {
+        android: {
+            shared_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+            ],
+        },
+        host: {
+            static_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+            ],
+        },
+        darwin: {
+            // libbinder is not supported on mac
+            enabled: false,
+        },
+    },
 }

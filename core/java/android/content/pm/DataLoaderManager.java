@@ -41,6 +41,7 @@ public class DataLoaderManager {
      * @param dataLoaderId ID for the new data loader binder service.
      * @param params       DataLoaderParamsParcel object that contains data loader params, including
      *                     its package name, class name, and additional parameters.
+     * @param bindDelayMs  introduce a delay before actual bind in case we want to avoid busylooping
      * @param listener     Callback for the data loader service to report status back to the
      *                     caller.
      * @return false if 1) target ID collides with a data loader that is already bound to data
@@ -48,9 +49,9 @@ public class DataLoaderManager {
      * or 4) fails to bind to the specified data loader service, otherwise return true.
      */
     public boolean bindToDataLoader(int dataLoaderId, @NonNull DataLoaderParamsParcel params,
-            @NonNull IDataLoaderStatusListener listener) {
+            long bindDelayMs, @NonNull IDataLoaderStatusListener listener) {
         try {
-            return mService.bindToDataLoader(dataLoaderId, params, listener);
+            return mService.bindToDataLoader(dataLoaderId, params, bindDelayMs, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

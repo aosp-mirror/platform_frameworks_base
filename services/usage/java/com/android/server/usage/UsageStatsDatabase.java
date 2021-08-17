@@ -53,6 +53,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1504,6 +1505,10 @@ public class UsageStatsDatabase {
             pw.increaseIndent();
             pw.println("Counter: " + mPackagesTokenData.counter);
             pw.println("Tokens Map Size: " + mPackagesTokenData.tokensToPackagesMap.size());
+            if (!mPackagesTokenData.removedPackageTokens.isEmpty()) {
+                pw.println("Removed Package Tokens: "
+                        + Arrays.toString(mPackagesTokenData.removedPackageTokens.toArray()));
+            }
             for (int i = 0; i < mPackagesTokenData.tokensToPackagesMap.size(); i++) {
                 final int packageToken = mPackagesTokenData.tokensToPackagesMap.keyAt(i);
                 final String packageStrings = String.join(", ",

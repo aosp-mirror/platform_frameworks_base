@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"اتصال به‌صورت خودکار انجام نمی‌شود"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"دسترسی به اینترنت ندارد"</string>
     <string name="saved_network" msgid="7143698034077223645">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"اتصال به شبکه محدود برقرار شد"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏اتصال خودکار ازطریق %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رده‌بندی شبکه"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"‏متصل از طریق %1$s"</string>
@@ -86,8 +87,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"دستگاه ورودی"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"دسترسی به اینترنت"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"هم‌رسانی مخاطب"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استفاده برای هم‌رسانی مخاطب"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"اشتراک‌گذاری مخاطب"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استفاده برای اشتراک‌گذاری مخاطب"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"اشتراک‌گذاری اتصال اینترنت"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"پیام‌های نوشتاری"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"دسترسی سیم‌کارت"</string>
@@ -117,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"لغو"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"وقتی وصل باشید، مرتبط‌سازی اجازه دسترسی به مخاطبین و سابقه تماستان را فراهم می‌کند."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی نشد."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌خاطر پین یا کلیدواژه نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به خاطر یک پین یا کلیدواژه نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"ارتباط با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> امکان‌پذیر نیست."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی را رد کرد."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"رایانه"</string>
@@ -399,6 +400,11 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"غیرفعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"وضعیت حالت آماده به‌کار برنامه:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"تنظیمات تراتبدیل رسانه"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"ملغی کردن پیش‌فرض‌های تراتبدیل"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"فعال کردن تراتبدیل"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"فرض شود برنامه‌ها از قالب‌های مدرن پشتیبانی می‌کنند"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"نمایش اعلان‌های تراتبدیل"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"اجرای وب‌نما"</string>
@@ -408,8 +414,8 @@
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"تبدیل…"</string>
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"از قبل به رمزگذاری بر حسب فایل تبدیل شده است"</string>
     <string name="title_convert_fbe" msgid="5780013350366495149">"تبدیل به رمزگذاری مبتنی بر فایل"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تبدیل پارتیشن داده‌ای به رمزگذاری مبتنی بر فایل.\n !!هشدار!! این کار تمام داده‌هایتان را پاک می‌کند.\n این ویژگی در نسخه آلفا قرار دارد و ممکن است به‌درستی کار نکند.\n برای ادامه، «محو کردن داده و تبدیل…» را فشار دهید."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"محو کردن داده و تبدیل…"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تبدیل پارتیشن داده‌ای به رمزگذاری مبتنی بر فایل.\n !!هشدار!! این کار تمام داده‌هایتان را پاک می‌کند.\n این ویژگی در نسخه آلفا قرار دارد و ممکن است به‌درستی کار نکند.\n برای ادامه، «پاک کردن و تبدیل…» را فشار دهید."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"پاک کردن و تبدیل…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"حالت رنگ عکس"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏استفاده از sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"غیر فعال"</string>
@@ -418,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"قرمزدشواربینی (قرمز-سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"آبی‌دشواربینی (آبی-زرد)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"تصحیح رنگ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"تصحیح رنگ به شما امکان می‌دهد نحوه نمایش رنگ‌ها را در دستگاهتان تنظیم کنید"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"‏نحوه نمایش رنگ‌ها را در دستگاهتان تنظیم می‌کند. این ویژگی می‌تواند در موارد زیر مفید باشد:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp; وقتی می‌خواهید رنگ‌ها را با دقت بیشتری ببینید&lt;/li&gt; &lt;li&gt;&amp;nbsp;وقتی می‌خواهید رنگ‌ها را حذف کنید تا تمرکز بیشتری داشته باشید&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"توسط <xliff:g id="TITLE">%1$s</xliff:g> لغو شد"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است"</string>
@@ -444,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ممکن است رایانه لوحی به‌زودی خاموش شود (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ممکن است دستگاه به‌زودی خاموش شود (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> مانده تا شارژ کامل"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - بهینه‌سازی برای سلامت باتری"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
@@ -453,11 +461,12 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"درحال شارژ شدن آهسته"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"به برق وصل شده‌ است، درحال‌حاضر شارژ نمی‌شود"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"پر"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"توسط سرپرست سیستم کنترل می‌شود"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال شد"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"مجاز بودن"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"مجاز نبودن"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"مجاز"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"مجاز نیست"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"نصب برنامه‌های ناشناس"</string>
     <string name="home" msgid="973834627243661438">"صفحه اصلی تنظیمات"</string>
   <string-array name="battery_labels">
@@ -495,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"زمان کمتر."</string>
     <string name="cancel" msgid="5665114069455378395">"لغو"</string>
     <string name="okay" msgid="949938843324579502">"تأیید"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"زنگ‌های هشدار و یادآوری‌ها"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"مجاز کردن برای تنظیم زنگ هشدار و یادآوری"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"زنگ‌های هشدار و یادآوری‌ها"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"به این برنامه اجازه می‌دهد زنگ‌های هشدار و دیگر رویدادهای مبتنی بر زمان را زمان‌بندی کند. با این کار برنامه مجاز می‌شود حتی زمانی که از دستگاه استفاده نمی‌کنید بیدار و اجرا شود. توجه داشته باشید که لغو کردن این اجازه ممکن است باعث شود برنامه درست کار نکند، مخصوصاً اینکه همه زنگ‌های هشداری که برنامه زمان‌بندی کرده است دیگر کار نخواهند کرد."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"زمان‌بندی، زنگ هشدار، یادآوری، رویداد"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"روشن کردن"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"روشن کردن «مزاحم نشوید»"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"هرگز"</string>
@@ -509,6 +523,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"تا زمانی‌که آن را خاموش کنید"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"هم‌اکنون"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"بلندگوی تلفن"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"این تلفن"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
     <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
@@ -546,12 +561,48 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"قبل از ایجاد یک نمایه محدود، باید یک قفل صفحه را برای محافظت از برنامه‌ها و داده‌های شخصی خود تنظیم کنید."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"تنظیم قفل"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"رفتن به <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"درحال ایجاد کاربر جدید…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
+    <string name="user_nickname" msgid="262624187455825083">"نام مستعار"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"افزودن مهمان"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"حذف مهمان"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"مهمان"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"عکس گرفتن"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"انتخاب تصویر"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"انتخاب عکس"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"هدفون سیمی"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"روشن"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"خاموش"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"تغییر شبکه شرکت مخابراتی"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+‎"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+‎"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+‎"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+‎"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"داده تلفن همراه خاموش است"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"برای استفاده از داده تنظیم نشده است"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"بدون تلفن."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"یک نوار برای تلفن."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"دو نوار برای تلفن."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"سه نوار برای تلفن."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"قدرت امواج تلفن همراه کامل است."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"داده‌ای وجود ندارد."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"یک نوار برای داده."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"دو نوار برای داده."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"سه نوار برای داده."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"قدرت سیگنال داده کامل است."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"اترنت قطع شد."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"اترنت."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"تماس گرفته نشود."</string>
 </resources>

@@ -17,7 +17,15 @@
 
 package android.provider;
 
+import android.Manifest;
+import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.LongDef;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
+import android.annotation.UserHandleAware;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -30,6 +38,9 @@ import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.Build;
+import android.os.OutcomeReceiver;
+import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
@@ -44,9 +55,16 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The CallLog provider contains information about placed and received calls.
@@ -63,6 +81,12 @@ public class CallLog {
     public static final Uri CONTENT_URI =
         Uri.parse("content://" + AUTHORITY);
 
+    /** @hide */
+    public static final String CALL_COMPOSER_SEGMENT = "call_composer";
+
+    /** @hide */
+    public static final Uri CALL_COMPOSER_PICTURE_URI =
+            CONTENT_URI.buildUpon().appendPath(CALL_COMPOSER_SEGMENT).build();
 
     /**
      * The "shadow" provider stores calllog when the real calllog provider is encrypted.  The
@@ -73,6 +97,612 @@ public class CallLog {
      * @hide
      */
     public static final String SHADOW_AUTHORITY = "call_log_shadow";
+
+    /** @hide */
+    public static final Uri SHADOW_CALL_COMPOSER_PICTURE_URI = CALL_COMPOSER_PICTURE_URI.buildUpon()
+            .authority(SHADOW_AUTHORITY).build();
+
+    /**
+     * Describes an error encountered while storing a call composer picture in the call log.
+     * @hide
+     */
+    @SystemApi
+    public static class CallComposerLoggingException extends Throwable {
+        /**
+         * Indicates an unknown error.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * Indicates that the process hosting the call log died or otherwise encountered an
+         * unrecoverable error while storing the picture.
+         *
+         * The caller should retry if this error is encountered.
+         */
+        public static final int ERROR_REMOTE_END_CLOSED = 1;
+
+        /**
+         * Indicates that the device has insufficient space to store this picture.
+         *
+         * The caller should not retry if this error is encountered.
+         */
+        public static final int ERROR_STORAGE_FULL = 2;
+
+        /**
+         * Indicates that the {@link InputStream} passed to {@link #storeCallComposerPicture}
+         * was closed.
+         *
+         * The caller should retry if this error is encountered, and be sure to not close the stream
+         * before the callback is called this time.
+         */
+        public static final int ERROR_INPUT_CLOSED = 3;
+
+        /** @hide */
+        @IntDef(prefix = {"ERROR_"}, value = {
+                ERROR_UNKNOWN,
+                ERROR_REMOTE_END_CLOSED,
+                ERROR_STORAGE_FULL,
+                ERROR_INPUT_CLOSED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface CallComposerLoggingError { }
+
+        private final int mErrorCode;
+
+        public CallComposerLoggingException(@CallComposerLoggingError int errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * @return The error code for this exception.
+         */
+        public @CallComposerLoggingError int getErrorCode() {
+            return mErrorCode;
+        }
+
+        @Override
+        public String toString() {
+            String errorString;
+            switch (mErrorCode) {
+                case ERROR_UNKNOWN:
+                    errorString = "UNKNOWN";
+                    break;
+                case ERROR_REMOTE_END_CLOSED:
+                    errorString = "REMOTE_END_CLOSED";
+                    break;
+                case ERROR_STORAGE_FULL:
+                    errorString = "STORAGE_FULL";
+                    break;
+                case ERROR_INPUT_CLOSED:
+                    errorString = "INPUT_CLOSED";
+                    break;
+                default:
+                    errorString = "[[" + mErrorCode + "]]";
+                    break;
+            }
+            return "CallComposerLoggingException: " + errorString;
+        }
+    }
+
+    /**
+     * Supplies a call composer picture to the call log for persistent storage.
+     *
+     * This method is used by Telephony to store pictures selected by the user or sent from the
+     * remote party as part of a voice call with call composer. The {@link Uri} supplied in the
+     * callback can be used to retrieve the image via {@link ContentResolver#openFile} or stored in
+     * the {@link Calls} table in the {@link Calls#COMPOSER_PHOTO_URI} column.
+     *
+     * The caller is responsible for closing the {@link InputStream} after the callback indicating
+     * success or failure.
+     *
+     * @param context An instance of {@link Context}. The picture will be stored to the user
+     *                corresponding to {@link Context#getUser()}.
+     * @param input An input stream from which the picture to store should be read. The input data
+     *              must be decodeable as either a JPEG, PNG, or GIF image.
+     * @param executor The {@link Executor} on which to perform the file transfer operation and
+     *                 call the supplied callback.
+     * @param callback Callback that's called after the picture is successfully stored or when an
+     *                 error occurs.
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(allOf = {
+            Manifest.permission.WRITE_CALL_LOG,
+            Manifest.permission.INTERACT_ACROSS_USERS
+    })
+    public static void storeCallComposerPicture(@NonNull Context context,
+            @NonNull InputStream input,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Uri, CallComposerLoggingException> callback) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(input);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        executor.execute(() -> {
+            ByteArrayOutputStream tmpOut = new ByteArrayOutputStream();
+
+            // Read the entire input into memory first in case we have to write multiple times and
+            // the input isn't resettable.
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while (true) {
+                try {
+                    bytesRead = input.read(buffer);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "IOException while reading call composer pic from input: "
+                            + e);
+                    callback.onError(new CallComposerLoggingException(
+                            CallComposerLoggingException.ERROR_INPUT_CLOSED));
+                    return;
+                }
+                if (bytesRead < 0) {
+                    break;
+                }
+                tmpOut.write(buffer, 0, bytesRead);
+            }
+            byte[] picData = tmpOut.toByteArray();
+
+            UserManager userManager = context.getSystemService(UserManager.class);
+            UserHandle user = context.getUser();
+            // Nasty casework for the shadow calllog begins...
+            // First see if we're just inserting for one user. If so, insert into the shadow
+            // based on whether that user is unlocked.
+            UserHandle realUser = UserHandle.CURRENT.equals(user)
+                    ? android.os.Process.myUserHandle() : user;
+            if (realUser != UserHandle.ALL) {
+                Uri baseUri = userManager.isUserUnlocked(realUser) ? CALL_COMPOSER_PICTURE_URI
+                        : SHADOW_CALL_COMPOSER_PICTURE_URI;
+                Uri pictureInsertionUri = ContentProvider.maybeAddUserId(baseUri,
+                        realUser.getIdentifier());
+                Log.i(LOG_TAG, "Inserting call composer for single user at "
+                        + pictureInsertionUri);
+
+                try {
+                    Uri result = storeCallComposerPictureAtUri(
+                            context, pictureInsertionUri, false, picData);
+                    callback.onResult(result);
+                } catch (CallComposerLoggingException e) {
+                    callback.onError(e);
+                }
+                return;
+            }
+
+            // Next, see if the system user is locked. If so, only insert to the system shadow
+            if (!userManager.isUserUnlocked(UserHandle.SYSTEM)) {
+                Uri pictureInsertionUri = ContentProvider.maybeAddUserId(
+                        SHADOW_CALL_COMPOSER_PICTURE_URI,
+                        UserHandle.SYSTEM.getIdentifier());
+                Log.i(LOG_TAG, "Inserting call composer for all users, but system locked at "
+                        + pictureInsertionUri);
+                try {
+                    Uri result =
+                            storeCallComposerPictureAtUri(context, pictureInsertionUri,
+                                    true, picData);
+                    callback.onResult(result);
+                } catch (CallComposerLoggingException e) {
+                    callback.onError(e);
+                }
+                return;
+            }
+
+            // If we're inserting to all users and the system user is unlocked, then insert to all
+            // running users. Non running/still locked users will copy from the system when they
+            // start.
+            // First, insert to the system calllog to get the basename to use for the rest of the
+            // users.
+            Uri systemPictureInsertionUri = ContentProvider.maybeAddUserId(
+                    CALL_COMPOSER_PICTURE_URI,
+                    UserHandle.SYSTEM.getIdentifier());
+            Uri systemInsertedPicture;
+            try {
+                systemInsertedPicture =
+                        storeCallComposerPictureAtUri(context, systemPictureInsertionUri,
+                                true, picData);
+                Log.i(LOG_TAG, "Inserting call composer for all users, succeeded with system,"
+                        + " result is " + systemInsertedPicture);
+            } catch (CallComposerLoggingException e) {
+                callback.onError(e);
+                return;
+            }
+
+            // Next, insert into all users that have call log access AND are running AND are
+            // decrypted.
+            Uri strippedInsertionUri = ContentProvider.getUriWithoutUserId(systemInsertedPicture);
+            for (UserInfo u : userManager.getAliveUsers()) {
+                UserHandle userHandle = u.getUserHandle();
+                if (userHandle.isSystem()) {
+                    // Already written.
+                    continue;
+                }
+
+                if (!Calls.shouldHaveSharedCallLogEntries(
+                        context, userManager, userHandle.getIdentifier())) {
+                    // Shouldn't have calllog entries.
+                    continue;
+                }
+
+                if (userManager.isUserRunning(userHandle)
+                        && userManager.isUserUnlocked(userHandle)) {
+                    Uri insertionUri = ContentProvider.maybeAddUserId(strippedInsertionUri,
+                            userHandle.getIdentifier());
+                    Log.i(LOG_TAG, "Inserting call composer for all users, now on user "
+                            + userHandle + " inserting at " + insertionUri);
+                    try {
+                        storeCallComposerPictureAtUri(context, insertionUri, false, picData);
+                    } catch (CallComposerLoggingException e) {
+                        Log.e(LOG_TAG, "Error writing for user " + userHandle.getIdentifier()
+                                + ": " + e);
+                        // If one or more users failed but the system user succeeded, don't return
+                        // an error -- the image is still around somewhere, and we'll be able to
+                        // find it in the system user's call log if needed.
+                    }
+                }
+            }
+            callback.onResult(strippedInsertionUri);
+        });
+    }
+
+    private static Uri storeCallComposerPictureAtUri(
+            Context context, Uri insertionUri,
+            boolean forAllUsers, byte[] picData) throws CallComposerLoggingException {
+        Uri pictureFileUri;
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(Calls.ADD_FOR_ALL_USERS, forAllUsers ? 1 : 0);
+            pictureFileUri = context.getContentResolver().insert(insertionUri, cv);
+        } catch (ParcelableException e) {
+            // Most likely an IOException. We don't have a good way of distinguishing them so
+            // just return an unknown error.
+            throw new CallComposerLoggingException(CallComposerLoggingException.ERROR_UNKNOWN);
+        }
+        if (pictureFileUri == null) {
+            // If the call log provider returns null, it means that there's not enough space
+            // left to store the maximum-sized call composer image.
+            throw new CallComposerLoggingException(CallComposerLoggingException.ERROR_STORAGE_FULL);
+        }
+
+        try (ParcelFileDescriptor pfd =
+                     context.getContentResolver().openFileDescriptor(pictureFileUri, "w")) {
+            FileOutputStream output = new FileOutputStream(pfd.getFileDescriptor());
+            try {
+                output.write(picData);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Got IOException writing to remote end: " + e);
+                // Clean up our mess if we didn't successfully write the file.
+                context.getContentResolver().delete(pictureFileUri, null);
+                throw new CallComposerLoggingException(
+                        CallComposerLoggingException.ERROR_REMOTE_END_CLOSED);
+            }
+        } catch (FileNotFoundException e) {
+            throw new CallComposerLoggingException(CallComposerLoggingException.ERROR_UNKNOWN);
+        } catch (IOException e) {
+            // Ignore, this is only thrown upon closing.
+            Log.e(LOG_TAG, "Got IOException closing remote descriptor: " + e);
+        }
+        return pictureFileUri;
+    }
+
+    // Only call on the correct executor.
+    private static void sendCallComposerError(OutcomeReceiver<?, CallComposerLoggingException> cb,
+            int error) {
+        cb.onError(new CallComposerLoggingException(error));
+    }
+
+    /**
+     * Used as an argument to {@link Calls#addCall(Context, AddCallParams)}.
+     *
+     * Contains details to log about a call.
+     * @hide
+     */
+    public static class AddCallParams {
+
+        /**
+         * Builder for the add-call parameters.
+         */
+        public static final class AddCallParametersBuilder {
+            private CallerInfo mCallerInfo;
+            private String mNumber;
+            private String mPostDialDigits;
+            private String mViaNumber;
+            private int mPresentation = TelecomManager.PRESENTATION_UNKNOWN;
+            private int mCallType = Calls.INCOMING_TYPE;
+            private int mFeatures;
+            private PhoneAccountHandle mAccountHandle;
+            private long mStart;
+            private int mDuration;
+            private Long mDataUsage = Long.MIN_VALUE;
+            private boolean mAddForAllUsers;
+            private UserHandle mUserToBeInsertedTo;
+            private boolean mIsRead;
+            private int mCallBlockReason = Calls.BLOCK_REASON_NOT_BLOCKED;
+            private CharSequence mCallScreeningAppName;
+            private String mCallScreeningComponentName;
+            private long mMissedReason = Calls.MISSED_REASON_NOT_MISSED;
+            private int mPriority = Calls.PRIORITY_NORMAL;
+            private String mSubject;
+            private double mLatitude = Double.NaN;
+            private double mLongitude = Double.NaN;
+            private Uri mPictureUri;
+
+            /**
+             * @param callerInfo the CallerInfo object to get the target contact from.
+             */
+            public @NonNull AddCallParametersBuilder setCallerInfo(
+                    @NonNull CallerInfo callerInfo) {
+                mCallerInfo = callerInfo;
+                return this;
+            }
+
+            /**
+             * @param number the phone number to be added to the calls db
+             */
+            public @NonNull AddCallParametersBuilder setNumber(@NonNull String number) {
+                mNumber = number;
+                return this;
+            }
+
+            /**
+             * @param postDialDigits the post-dial digits that were dialed after the number,
+             *        if it was outgoing. Otherwise it is ''.
+             */
+            public @NonNull AddCallParametersBuilder setPostDialDigits(
+                    @NonNull String postDialDigits) {
+                mPostDialDigits = postDialDigits;
+                return this;
+            }
+
+            /**
+             * @param viaNumber the secondary number that the incoming call received with. If the
+             *        call was received with the SIM assigned number, then this field must be ''.
+             */
+            public @NonNull AddCallParametersBuilder setViaNumber(@NonNull String viaNumber) {
+                mViaNumber = viaNumber;
+                return this;
+            }
+
+            /**
+             * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
+             *        is set by the network and denotes the number presenting rules for
+             *        "allowed", "payphone", "restricted" or "unknown"
+             */
+            public @NonNull AddCallParametersBuilder setPresentation(int presentation) {
+                mPresentation = presentation;
+                return this;
+            }
+
+            /**
+             * @param callType enumerated values for "incoming", "outgoing", or "missed"
+             */
+            public @NonNull AddCallParametersBuilder setCallType(int callType) {
+                mCallType = callType;
+                return this;
+            }
+
+            /**
+             * @param features features of the call (e.g. Video).
+             */
+            public @NonNull AddCallParametersBuilder setFeatures(int features) {
+                mFeatures = features;
+                return this;
+            }
+
+            /**
+             * @param accountHandle The accountHandle object identifying the provider of the call
+             */
+            public @NonNull AddCallParametersBuilder setAccountHandle(
+                    @NonNull PhoneAccountHandle accountHandle) {
+                mAccountHandle = accountHandle;
+                return this;
+            }
+
+            /**
+             * @param start time stamp for the call in milliseconds
+             */
+            public @NonNull AddCallParametersBuilder setStart(long start) {
+                mStart = start;
+                return this;
+            }
+
+            /**
+             * @param duration call duration in seconds
+             */
+            public @NonNull AddCallParametersBuilder setDuration(int duration) {
+                mDuration = duration;
+                return this;
+            }
+
+            /**
+             * @param dataUsage data usage for the call in bytes or
+             *                  {@link Long#MIN_VALUE} if data usage was not tracked
+             *                  for the call.
+             */
+            public @NonNull AddCallParametersBuilder setDataUsage(long dataUsage) {
+                mDataUsage = dataUsage;
+                return this;
+            }
+
+            /**
+             * @param addForAllUsers If true, the call is added to the call log of all currently
+             *        running users. The caller must have the MANAGE_USERS permission if this is
+             *        true.
+             */
+            public @NonNull AddCallParametersBuilder setAddForAllUsers(
+                    boolean addForAllUsers) {
+                mAddForAllUsers = addForAllUsers;
+                return this;
+            }
+
+            /**
+             * @param userToBeInsertedTo {@link UserHandle} of user that the call is going to be
+             *                           inserted to. null if it is inserted to the current user.
+             *                           The value is ignored if {@link #setAddForAllUsers} is
+             *                           called with {@code true}.
+             */
+            @SuppressLint("UserHandleName")
+            public @NonNull AddCallParametersBuilder setUserToBeInsertedTo(
+                    @NonNull UserHandle userToBeInsertedTo) {
+                mUserToBeInsertedTo = userToBeInsertedTo;
+                return this;
+            }
+
+            /**
+             * @param isRead Flag to show if the missed call log has been read by the user or not.
+             *                Used for call log restore of missed calls.
+             */
+            public @NonNull AddCallParametersBuilder setIsRead(boolean isRead) {
+                mIsRead = isRead;
+                return this;
+            }
+
+            /**
+             * @param callBlockReason The reason why the call is blocked.
+             */
+            public @NonNull AddCallParametersBuilder setCallBlockReason(int callBlockReason) {
+                mCallBlockReason = callBlockReason;
+                return this;
+            }
+
+            /**
+             * @param callScreeningAppName The call screening application name which block the call.
+             */
+            public @NonNull AddCallParametersBuilder setCallScreeningAppName(
+                    @NonNull CharSequence callScreeningAppName) {
+                mCallScreeningAppName = callScreeningAppName;
+                return this;
+            }
+
+            /**
+             * @param callScreeningComponentName The call screening component name which blocked
+             *                                   the call.
+             */
+            public @NonNull AddCallParametersBuilder setCallScreeningComponentName(
+                    @NonNull String callScreeningComponentName) {
+                mCallScreeningComponentName = callScreeningComponentName;
+                return this;
+            }
+
+            /**
+             * @param missedReason The encoded missed information of the call.
+             */
+            public @NonNull AddCallParametersBuilder setMissedReason(long missedReason) {
+                mMissedReason = missedReason;
+                return this;
+            }
+
+            /**
+             * @param priority The priority of the call, either {@link Calls#PRIORITY_NORMAL}
+             *                 or {@link Calls#PRIORITY_URGENT} as sent via call composer
+             */
+            public @NonNull AddCallParametersBuilder setPriority(int priority) {
+                mPriority = priority;
+                return this;
+            }
+
+            /**
+             * @param subject The subject as sent via call composer.
+             */
+            public @NonNull AddCallParametersBuilder setSubject(@NonNull String subject) {
+                mSubject = subject;
+                return this;
+            }
+
+            /**
+             * @param latitude Latitude of the location sent via call composer.
+             */
+            public @NonNull AddCallParametersBuilder setLatitude(double latitude) {
+                mLatitude = latitude;
+                return this;
+            }
+
+            /**
+             * @param longitude Longitude of the location sent via call composer.
+             */
+            public @NonNull AddCallParametersBuilder setLongitude(double longitude) {
+                mLongitude = longitude;
+                return this;
+            }
+
+            /**
+             * @param pictureUri {@link Uri} returned from {@link #storeCallComposerPicture}.
+             *                   Associates that stored picture with this call in the log.
+             */
+            public @NonNull AddCallParametersBuilder setPictureUri(@NonNull Uri pictureUri) {
+                mPictureUri = pictureUri;
+                return this;
+            }
+
+            /**
+             * Builds the object
+             */
+            public @NonNull AddCallParams build() {
+                return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
+                        mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
+                        mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead, mCallBlockReason,
+                        mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
+                        mPriority, mSubject, mLatitude, mLongitude, mPictureUri);
+            }
+        }
+
+        private CallerInfo mCallerInfo;
+        private String mNumber;
+        private String mPostDialDigits;
+        private String mViaNumber;
+        private int mPresentation;
+        private int mCallType;
+        private int mFeatures;
+        private PhoneAccountHandle mAccountHandle;
+        private long mStart;
+        private int mDuration;
+        private long mDataUsage;
+        private boolean mAddForAllUsers;
+        private UserHandle mUserToBeInsertedTo;
+        private boolean mIsRead;
+        private int mCallBlockReason;
+        private CharSequence mCallScreeningAppName;
+        private String mCallScreeningComponentName;
+        private long mMissedReason;
+        private int mPriority;
+        private String mSubject;
+        private double mLatitude = Double.NaN;
+        private double mLongitude = Double.NaN;
+        private Uri mPictureUri;
+
+        private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
+                String viaNumber, int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle, long start, int duration, long dataUsage,
+                boolean addForAllUsers, UserHandle userToBeInsertedTo, boolean isRead,
+                int callBlockReason,
+                CharSequence callScreeningAppName, String callScreeningComponentName,
+                long missedReason,
+                int priority, String subject, double latitude, double longitude, Uri pictureUri) {
+            mCallerInfo = callerInfo;
+            mNumber = number;
+            mPostDialDigits = postDialDigits;
+            mViaNumber = viaNumber;
+            mPresentation = presentation;
+            mCallType = callType;
+            mFeatures = features;
+            mAccountHandle = accountHandle;
+            mStart = start;
+            mDuration = duration;
+            mDataUsage = dataUsage;
+            mAddForAllUsers = addForAllUsers;
+            mUserToBeInsertedTo = userToBeInsertedTo;
+            mIsRead = isRead;
+            mCallBlockReason = callBlockReason;
+            mCallScreeningAppName = callScreeningAppName;
+            mCallScreeningComponentName = callScreeningComponentName;
+            mMissedReason = missedReason;
+            mPriority = priority;
+            mSubject = subject;
+            mLatitude = latitude;
+            mLongitude = longitude;
+            mPictureUri = pictureUri;
+        }
+
+    }
 
     /**
      * Contains the recent calls.
@@ -753,6 +1383,83 @@ public class CallLog {
         public static final String MISSED_REASON = "missed_reason";
 
         /**
+         * The subject of the call, as delivered via call composer.
+         *
+         * For outgoing calls, contains the subject set by the local user. For incoming calls,
+         * contains the subject set by the remote caller. May be null if no subject was set.
+         * <p>Type: TEXT</p>
+         */
+        public static final String SUBJECT = "subject";
+
+        /**
+         * Used as a value in the {@link #PRIORITY} column.
+         *
+         * Indicates that the call is of normal priority. This is also the default value for calls
+         * that did not include call composer elements.
+         */
+        public static final int PRIORITY_NORMAL = 0;
+
+        /**
+         * Used as a value in the {@link #PRIORITY} column.
+         *
+         * Indicates that the call is of urgent priority.
+         */
+        public static final int PRIORITY_URGENT = 1;
+
+        /**
+         * The priority of the call, as delivered via call composer.
+         *
+         * For outgoing calls, contains the priority set by the local user. For incoming calls,
+         * contains the priority set by the remote caller. If no priority was set or the call
+         * did not include call composer elements, defaults to {@link #PRIORITY_NORMAL}.
+         * Valid values are {@link #PRIORITY_NORMAL} and {@link #PRIORITY_URGENT}.
+         * <p>Type: INTEGER</p>
+         */
+        public static final String PRIORITY = "priority";
+
+        /**
+         * A reference to the picture that was sent via call composer.
+         *
+         * The string contained in this field should be converted to an {@link Uri} via
+         * {@link Uri#parse(String)}, then passed to {@link ContentResolver#openFileDescriptor}
+         * in order to obtain a file descriptor to access the picture data.
+         *
+         * The user may choose to delete the picture associated with a call independently of the
+         * call log entry, in which case {@link ContentResolver#openFileDescriptor} may throw a
+         * {@link FileNotFoundException}.
+         *
+         * Note that pictures sent or received via call composer will not be included in any
+         * backups of the call log.
+         *
+         * <p>Type: TEXT</p>
+         */
+        public static final String COMPOSER_PHOTO_URI = "composer_photo_uri";
+
+        /**
+         * A reference to the location that was sent via call composer.
+         *
+         * This column contains the content URI of the corresponding entry in {@link Locations}
+         * table, which contains the actual location data. The
+         * {@link Manifest.permission#ACCESS_FINE_LOCATION} permission is required to access that
+         * table.
+         *
+         * If your app has the appropriate permissions, the location data may be obtained by
+         * converting the value of this column to an {@link Uri} via {@link Uri#parse}, then passing
+         * the result to {@link ContentResolver#query}.
+         *
+         * The user may choose to delete the location associated with a call independently of the
+         * call log entry, in which case the {@link Cursor} returned from
+         * {@link ContentResolver#query} will either be {@code null} or empty, with
+         * {@link Cursor#getCount()} returning {@code 0}.
+         *
+         * This column will not be populated when a call is received while the device is locked, and
+         * it will not be part of any backups.
+         *
+         * <p>Type: TEXT</p>
+         */
+        public static final String LOCATION = "location";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
@@ -826,6 +1533,7 @@ public class CallLog {
                 null /* callScreeningComponentName */, missedReason);
         }
 
+
         /**
          * Adds a call to the call log.
          *
@@ -871,19 +1579,52 @@ public class CallLog {
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
                 boolean isRead, int callBlockReason, CharSequence callScreeningAppName,
                 String callScreeningComponentName, long missedReason) {
+            AddCallParams.AddCallParametersBuilder builder =
+                    new AddCallParams.AddCallParametersBuilder();
+            builder.setCallerInfo(ci);
+            builder.setNumber(number);
+            builder.setPostDialDigits(postDialDigits);
+            builder.setViaNumber(viaNumber);
+            builder.setPresentation(presentation);
+            builder.setCallType(callType);
+            builder.setFeatures(features);
+            builder.setAccountHandle(accountHandle);
+            builder.setStart(start);
+            builder.setDuration(duration);
+            builder.setDataUsage(dataUsage == null ? Long.MIN_VALUE : dataUsage);
+            builder.setAddForAllUsers(addForAllUsers);
+            builder.setUserToBeInsertedTo(userToBeInsertedTo);
+            builder.setIsRead(isRead);
+            builder.setCallBlockReason(callBlockReason);
+            builder.setCallScreeningAppName(callScreeningAppName);
+            builder.setCallScreeningComponentName(callScreeningComponentName);
+            builder.setMissedReason(missedReason);
+
+            return addCall(context, builder.build());
+        }
+
+        /**
+         * Adds a call to the call log, using the provided parameters
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.  This could be of the shadow provider.  Do not return it to non-system apps,
+         *        as they don't have permissions.
+         * @hide
+         */
+        public static @NonNull Uri addCall(
+                @NonNull Context context, @NonNull AddCallParams params) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
-                        number, userToBeInsertedTo, addForAllUsers));
+                        params.mNumber, params.mUserToBeInsertedTo, params.mAddForAllUsers));
             }
             final ContentResolver resolver = context.getContentResolver();
 
-            String accountAddress = getLogAccountAddress(context, accountHandle);
+            String accountAddress = getLogAccountAddress(context, params.mAccountHandle);
 
-            int numberPresentation = getLogNumberPresentation(number, presentation);
-            String name = (ci != null) ? ci.getName() : "";
+            int numberPresentation = getLogNumberPresentation(params.mNumber, params.mPresentation);
+            String name = (params.mCallerInfo != null) ? params.mCallerInfo.getName() : "";
             if (numberPresentation != PRESENTATION_ALLOWED) {
-                number = "";
-                if (ci != null) {
+                params.mNumber = "";
+                if (params.mCallerInfo != null) {
                     name = "";
                 }
             }
@@ -891,41 +1632,46 @@ public class CallLog {
             // accountHandle information
             String accountComponentString = null;
             String accountId = null;
-            if (accountHandle != null) {
-                accountComponentString = accountHandle.getComponentName().flattenToString();
-                accountId = accountHandle.getId();
+            if (params.mAccountHandle != null) {
+                accountComponentString = params.mAccountHandle.getComponentName().flattenToString();
+                accountId = params.mAccountHandle.getId();
             }
 
-            ContentValues values = new ContentValues(6);
+            ContentValues values = new ContentValues(14);
 
-            values.put(NUMBER, number);
-            values.put(POST_DIAL_DIGITS, postDialDigits);
-            values.put(VIA_NUMBER, viaNumber);
+            values.put(NUMBER, params.mNumber);
+            values.put(POST_DIAL_DIGITS, params.mPostDialDigits);
+            values.put(VIA_NUMBER, params.mViaNumber);
             values.put(NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
-            values.put(TYPE, Integer.valueOf(callType));
-            values.put(FEATURES, features);
-            values.put(DATE, Long.valueOf(start));
-            values.put(DURATION, Long.valueOf(duration));
-            if (dataUsage != null) {
-                values.put(DATA_USAGE, dataUsage);
+            values.put(TYPE, Integer.valueOf(params.mCallType));
+            values.put(FEATURES, params.mFeatures);
+            values.put(DATE, Long.valueOf(params.mStart));
+            values.put(DURATION, Long.valueOf(params.mDuration));
+            if (params.mDataUsage != Long.MIN_VALUE) {
+                values.put(DATA_USAGE, params.mDataUsage);
             }
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
             values.put(CACHED_NAME, name);
-            values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
+            values.put(ADD_FOR_ALL_USERS, params.mAddForAllUsers ? 1 : 0);
 
-            if (callType == MISSED_TYPE) {
-                values.put(IS_READ, Integer.valueOf(isRead ? 1 : 0));
+            if (params.mCallType == MISSED_TYPE) {
+                values.put(IS_READ, Integer.valueOf(params.mIsRead ? 1 : 0));
             }
 
-            values.put(BLOCK_REASON, callBlockReason);
-            values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
-            values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
-            values.put(MISSED_REASON, Long.valueOf(missedReason));
+            values.put(BLOCK_REASON, params.mCallBlockReason);
+            values.put(CALL_SCREENING_APP_NAME, charSequenceToString(params.mCallScreeningAppName));
+            values.put(CALL_SCREENING_COMPONENT_NAME, params.mCallScreeningComponentName);
+            values.put(MISSED_REASON, Long.valueOf(params.mMissedReason));
+            values.put(PRIORITY, params.mPriority);
+            values.put(SUBJECT, params.mSubject);
+            if (params.mPictureUri != null) {
+                values.put(COMPOSER_PHOTO_URI, params.mPictureUri.toString());
+            }
 
-            if ((ci != null) && (ci.getContactId() > 0)) {
+            if ((params.mCallerInfo != null) && (params.mCallerInfo.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
                 // contacts may have the same number.
@@ -934,23 +1680,23 @@ public class CallLog {
 
                 // We should prefer normalized one (probably coming from
                 // Phone.NORMALIZED_NUMBER column) first. If it isn't available try others.
-                if (ci.normalizedNumber != null) {
-                    final String normalizedPhoneNumber = ci.normalizedNumber;
+                if (params.mCallerInfo.normalizedNumber != null) {
+                    final String normalizedPhoneNumber = params.mCallerInfo.normalizedNumber;
                     cursor = resolver.query(Phone.CONTENT_URI,
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
-                            new String[] { String.valueOf(ci.getContactId()),
+                            new String[] { String.valueOf(params.mCallerInfo.getContactId()),
                                     normalizedPhoneNumber},
                             null);
                 } else {
-                    final String phoneNumber = ci.getPhoneNumber() != null
-                        ? ci.getPhoneNumber() : number;
+                    final String phoneNumber = params.mCallerInfo.getPhoneNumber() != null
+                            ? params.mCallerInfo.getPhoneNumber() : params.mNumber;
                     cursor = resolver.query(
                             Uri.withAppendedPath(Callable.CONTENT_FILTER_URI,
                                     Uri.encode(phoneNumber)),
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =?",
-                            new String[] { String.valueOf(ci.getContactId()) },
+                            new String[] { String.valueOf(params.mCallerInfo.getContactId()) },
                             null);
                 }
 
@@ -959,10 +1705,10 @@ public class CallLog {
                         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                             final String dataId = cursor.getString(0);
                             updateDataUsageStatForData(resolver, dataId);
-                            if (duration >= MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS
-                                    && callType == Calls.OUTGOING_TYPE
-                                    && TextUtils.isEmpty(ci.normalizedNumber)) {
-                                updateNormalizedNumber(context, resolver, dataId, number);
+                            if (params.mDuration >= MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS
+                                    && params.mCallType == Calls.OUTGOING_TYPE
+                                    && TextUtils.isEmpty(params.mCallerInfo.normalizedNumber)) {
+                                updateNormalizedNumber(context, resolver, dataId, params.mNumber);
                             }
                         }
                     } finally {
@@ -998,7 +1744,18 @@ public class CallLog {
             final UserManager userManager = context.getSystemService(UserManager.class);
             final int currentUserId = userManager.getUserHandle();
 
-            if (addForAllUsers) {
+            if (params.mAddForAllUsers) {
+                if (userManager.isUserUnlocked(UserHandle.SYSTEM)) {
+                    // If the user is unlocked, insert to the location provider if a location is
+                    // provided. Do not store location if the device is still locked -- this
+                    // puts it into device-encrypted storage instead of credential-encrypted
+                    // storage.
+                    Uri locationUri = maybeInsertLocation(params, resolver, UserHandle.SYSTEM);
+                    if (locationUri != null) {
+                        values.put(Calls.LOCATION, locationUri.toString());
+                    }
+                }
+
                 // First, insert to the system user.
                 final Uri uriForSystem = addEntryAndRemoveExpiredEntries(
                         context, userManager, UserHandle.SYSTEM, values);
@@ -1015,7 +1772,7 @@ public class CallLog {
 
                 // Otherwise, insert to all other users that are running and unlocked.
 
-                final List<UserInfo> users = userManager.getUsers(true);
+                final List<UserInfo> users = userManager.getAliveUsers();
 
                 final int count = users.size();
                 for (int i = 0; i < count; i++) {
@@ -1038,6 +1795,12 @@ public class CallLog {
                     // start.
                     if (userManager.isUserRunning(userHandle)
                             && userManager.isUserUnlocked(userHandle)) {
+                        Uri locationUri = maybeInsertLocation(params, resolver, userHandle);
+                        if (locationUri != null) {
+                            values.put(Calls.LOCATION, locationUri.toString());
+                        } else {
+                            values.put(Calls.LOCATION, (String) null);
+                        }
                         final Uri uri = addEntryAndRemoveExpiredEntries(context, userManager,
                                 userHandle, values);
                         if (userId == currentUserId) {
@@ -1048,10 +1811,20 @@ public class CallLog {
             } else {
                 // Single-user entry. Just write to that user, assuming it's running.  If the
                 // user is encrypted, we write to the shadow calllog.
-
-                final UserHandle targetUserHandle = userToBeInsertedTo != null
-                        ? userToBeInsertedTo
+                final UserHandle targetUserHandle = params.mUserToBeInsertedTo != null
+                        ? params.mUserToBeInsertedTo
                         : UserHandle.of(currentUserId);
+
+                if (userManager.isUserRunning(targetUserHandle)
+                        && userManager.isUserUnlocked(targetUserHandle)) {
+                    Uri locationUri = maybeInsertLocation(params, resolver, targetUserHandle);
+                    if (locationUri != null) {
+                        values.put(Calls.LOCATION, locationUri.toString());
+                    } else {
+                        values.put(Calls.LOCATION, (String) null);
+                    }
+                }
+
                 result = addEntryAndRemoveExpiredEntries(context, userManager, targetUserHandle,
                         values);
             }
@@ -1168,6 +1941,27 @@ public class CallLog {
             }
         }
 
+        private static Uri maybeInsertLocation(AddCallParams params, ContentResolver resolver,
+                UserHandle user) {
+            if (Double.isNaN(params.mLatitude) || Double.isNaN(params.mLongitude)) {
+                return null;
+            }
+            ContentValues locationValues = new ContentValues();
+            locationValues.put(Locations.LATITUDE, params.mLatitude);
+            locationValues.put(Locations.LONGITUDE, params.mLongitude);
+            Uri locationUri = ContentProvider.maybeAddUserId(Locations.CONTENT_URI,
+                    user.getIdentifier());
+            try {
+                return resolver.insert(locationUri, locationValues);
+            } catch (SecurityException e) {
+                // This can happen if the caller doesn't have location permissions. If that's the
+                // case just skip the insertion.
+                Log.w(LOG_TAG, "Skipping inserting location because caller lacks"
+                        + " ACCESS_FINE_LOCATION.");
+                return null;
+            }
+        }
+
         private static void updateDataUsageStatForData(ContentResolver resolver, String dataId) {
             final Uri feedbackUri = DataUsageFeedback.FEEDBACK_URI.buildUpon()
                     .appendPath(dataId)
@@ -1273,5 +2067,48 @@ public class CallLog {
         public static boolean isUserMissed(long missedReason) {
             return missedReason >= (USER_MISSED_NO_ANSWER);
         }
+    }
+
+    /**
+     * Table that contains information on location data sent via call composer.
+     *
+     * All fields in this table require the {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission for access.
+     */
+    public static class Locations implements BaseColumns {
+        private Locations() {}
+        /**
+         * Authority for the locations content provider.
+         */
+        public static final String AUTHORITY = "call_composer_locations";
+
+        /**
+         * Content type for the location table.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/call_composer_location";
+
+        /**
+         * Content type for the location entries.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/call_composer_location";
+
+        /**
+         * The content URI for this table
+         */
+        @NonNull
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+
+        /**
+         * Latitude in degrees. See {@link android.location.Location#setLatitude(double)}.
+         * <p>Type: REAL</p>
+         */
+        public static final String LATITUDE = "latitude";
+
+        /**
+         * Longitude in degrees. See {@link android.location.Location#setLongitude(double)}.
+         * <p>Type: REAL</p>
+         */
+        public static final String LONGITUDE = "longitude";
     }
 }

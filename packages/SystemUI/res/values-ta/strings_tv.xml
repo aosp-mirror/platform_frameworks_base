@@ -19,10 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="844249465483874817">"பிக்ச்சர்-இன்-பிக்ச்சர்"</string>
-    <string name="pip_notification_unknown_title" msgid="4413256731340767259">"(தலைப்பு இல்லை)"</string>
-    <string name="pip_close" msgid="5775212044472849930">"PIPஐ மூடு"</string>
-    <string name="pip_fullscreen" msgid="3877997489869475181">"முழுத்திரை"</string>
     <string name="mic_active" msgid="5766614241012047024">"மைக்ரோஃபோன் செயலிலுள்ளது"</string>
     <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s உங்கள் மைக்ரோஃபோனைப் பயன்படுத்தியது"</string>
+    <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN இணைக்கப்பட்டது"</string>
+    <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN துண்டிக்கப்பட்டது"</string>
+    <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> வழியாக"</string>
+    <string name="tv_notification_panel_title" msgid="5311050946506276154">"அறிவிப்புகள்"</string>
+    <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"அறிவிப்புகள் எதுவுமில்லை"</string>
 </resources>

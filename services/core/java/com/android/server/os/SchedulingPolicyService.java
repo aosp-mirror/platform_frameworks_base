@@ -92,6 +92,12 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
                 prio > PRIORITY_MAX || Process.getThreadGroupLeader(tid) != pid) {
            return PackageManager.PERMISSION_DENIED;
         }
+        // If the calling UID is audio server, and this call is not for an app,
+        // then it must be for the audio HAL. Validate the UID of the thread.
+        if (Binder.getCallingUid() == Process.AUDIOSERVER_UID && !isForApp
+                && Process.getUidForPid(tid) != Process.AUDIOSERVER_UID) {
+            return PackageManager.PERMISSION_DENIED;
+        }
         if (Binder.getCallingUid() != Process.BLUETOOTH_UID) {
             try {
                 // make good use of our CAP_SYS_NICE capability

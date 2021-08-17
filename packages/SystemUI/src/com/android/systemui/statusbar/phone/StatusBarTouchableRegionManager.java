@@ -32,6 +32,8 @@ import android.view.WindowInsets;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -40,14 +42,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Manages what parts of the status bar are touchable. Clients are primarily UI that display in the
  * status bar even though the UI doesn't look like part of the status bar. Currently this consists
  * of HeadsUpNotifications.
  */
-@Singleton
+@SysUISingleton
 public final class StatusBarTouchableRegionManager implements Dumpable {
     private static final String TAG = "TouchableRegionManager";
 
@@ -222,7 +223,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    private void updateRegionForNotch(Region touchableRegion) {
+    void updateRegionForNotch(Region touchableRegion) {
         WindowInsets windowInsets = mNotificationShadeWindowView.getRootWindowInsets();
         if (windowInsets == null) {
             Log.w(TAG, "StatusBarWindowView is not attached.");

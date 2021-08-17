@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"වසන්න"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"දිග හරින්න"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"සැකසීම්"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"මෙනුව"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> පින්තූරය-තුළ-පින්තූරය තුළ වේ"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"ඔබට <xliff:g id="NAME">%s</xliff:g> මෙම විශේෂාංගය භාවිත කිරීමට අවශ්‍ය නැති නම්, සැකසීම් විවෘත කිරීමට තට්ටු කර එය ක්‍රියාවිරහිත කරන්න."</string>
+    <string name="pip_play" msgid="3496151081459417097">"ධාවනය කරන්න"</string>
+    <string name="pip_pause" msgid="690688849510295232">"විරාම කරන්න"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"ඊළඟ එකට පනින්න"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"පෙර එකට පනින්න"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ප්‍රතිප්‍රමාණ කරන්න"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"යෙදුම බෙදුම් තිරය සමග ක්‍රියා නොකළ හැකිය"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"යෙදුම බෙදුණු-තිරය සඳහා සහාය නොදක්වයි."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"යෙදුම ද්විතියික සංදර්ශකයක ක්‍රියා නොකළ හැකිය."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"යෙදුම ද්විතීයික සංදර්ශක මත දියත් කිරීම සඳහා සහාය නොදක්වයි."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"බෙදුම්-තිර වෙන්කරණය"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"වම් පූර්ණ තිරය"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"වම් 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"වම් 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"වම් 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"දකුණු පූර්ණ තිරය"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ඉහළම පූර්ණ තිරය"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"ඉහළම 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ඉහළම 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ඉහළම 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"පහළ පූර්ණ තිරය"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"තනි-අත් ප්‍රකාරය භාවිත කරමින්"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"පිටවීමට, තිරයේ පහළ සිට ඉහළට ස්වයිප් කරන්න හෝ යෙදුමට ඉහළින් ඕනෑම තැනක තට්ටු කරන්න"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"තනි අත් ප්‍රකාරය ආරම්භ කරන්න"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"තනි අත් ප්‍රකාරයෙන් පිටවන්න"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> බුබුළු සඳහා සැකසීම්"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"පිටාර යාම"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"අට්ටිය වෙත ආපසු එක් කරන්න"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> වෙතින් <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> වෙතින් <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> සහ තවත් <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ක්"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"ඉහළ වමට ගෙන යන්න"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ඉහළ දකුණට ගෙන යන්න"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"පහළ වමට ගෙන යන්න"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"පහළ දකුණට ගෙන යන්න"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> සැකසීම්"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"බුබුලු ඉවත ලන්න"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"සංවාදය බුබුලු නොදමන්න"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"බුබුලු භාවිතයෙන් කතාබහ කරන්න"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"නව සංවාද පාවෙන අයිකන හෝ බුබුලු ලෙස දිස් වේ. බුබුල විවෘත කිරීමට තට්ටු කරන්න. එය ගෙන යාමට අදින්න."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"ඕනෑම වේලාවක බුබුලු පාලනය කරන්න"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"මෙම යෙදුමෙන් බුබුලු ක්‍රියාවිරහිත කිරීමට කළමනාකරණය කරන්න තට්ටු කරන්න"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"තේරුණා"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"මෑත බුබුලු නැත"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"මෑත බුබුලු සහ ඉවත ලූ බුබුලු මෙහි දිස් වනු ඇත"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"බුබුළු"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"කළමනා කරන්න"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"බුබුල ඉවත දමා ඇත."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"මෙම යෙදුම යළි ඇරඹීමට සහ පූර්ණ තිරයට යාමට තට්ටු කරන්න."</string>
+    <string name="got_it" msgid="4428750913636945527">"තේරුණා"</string>
+</resources>

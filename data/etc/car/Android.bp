@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 // Privapp permission whitelist files
 
 package {
@@ -26,126 +24,120 @@ package {
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_android.car.cluster.loggingrenderer",
+    name: "allowed_privapp_com.android.carsystemui",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.carsystemui.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_android.car.cluster.loggingrenderer",
     sub_dir: "permissions",
     src: "android.car.cluster.loggingrenderer.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_android.car.cluster.sample",
+    name: "allowed_privapp_android.car.cluster.sample",
     sub_dir: "permissions",
     src: "android.car.cluster.sample.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_android.car.cluster",
+    name: "allowed_privapp_android.car.cluster",
     sub_dir: "permissions",
     src: "android.car.cluster.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_android.car.usb.handler",
+    name: "allowed_privapp_android.car.usb.handler",
     sub_dir: "permissions",
     src: "android.car.usb.handler.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.carlauncher",
+    name: "allowed_privapp_com.android.car.carlauncher",
     sub_dir: "permissions",
     src: "com.android.car.carlauncher.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.dialer",
+    name: "allowed_privapp_com.android.car.dialer",
     sub_dir: "permissions",
     src: "com.android.car.dialer.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.hvac",
+    name: "allowed_privapp_com.android.car.hvac",
     sub_dir: "permissions",
     src: "com.android.car.hvac.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.media",
+    name: "allowed_privapp_com.android.car.media",
     sub_dir: "permissions",
     src: "com.android.car.media.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.notification",
+    name: "allowed_privapp_com.android.car.notification",
     sub_dir: "permissions",
     src: "com.android.car.notification.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.radio",
+    name: "allowed_privapp_com.android.car.radio",
     sub_dir: "permissions",
     src: "com.android.car.radio.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.secondaryhome",
-    sub_dir: "permissions",
-    src: "com.android.car.secondaryhome.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.settings",
+    name: "allowed_privapp_com.android.car.settings",
     sub_dir: "permissions",
     src: "com.android.car.settings.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.themeplayground",
+    name: "allowed_privapp_com.android.car.themeplayground",
     sub_dir: "permissions",
     src: "com.android.car.themeplayground.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.trust",
-    sub_dir: "permissions",
-    src: "com.android.car.trust.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "privapp_whitelist_com.android.car",
+    name: "allowed_privapp_com.android.car",
     sub_dir: "permissions",
     src: "com.android.car.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.bugreport",
+    name: "allowed_privapp_com.android.car.bugreport",
     sub_dir: "permissions",
     src: "com.android.car.bugreport.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.google.android.car.kitchensink",
+    name: "allowed_privapp_com.google.android.car.kitchensink",
     sub_dir: "permissions",
     src: "com.google.android.car.kitchensink.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.developeroptions",
+    name: "allowed_privapp_com.android.car.developeroptions",
     sub_dir: "permissions",
     src: "com.android.car.developeroptions.xml",
     filename_from_src: true,
@@ -153,16 +145,31 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "privapp_allowlist_com.google.android.car.networking.preferenceupdater",
+    name: "allowed_privapp_com.android.car.rotary",
     sub_dir: "permissions",
-    src: "com.google.android.car.networking.preferenceupdater.xml",
+    src: "com.android.car.rotary.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.ui.paintbooth",
+    name: "allowed_privapp_com.android.car.ui.paintbooth",
     sub_dir: "permissions",
     src: "com.android.car.ui.paintbooth.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.car.provision",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.car.provision.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_allowlist_com.google.android.car.networking.preferenceupdater",
+    sub_dir: "permissions",
+    src: "com.google.android.car.networking.preferenceupdater.xml",
     filename_from_src: true,
 }
 
@@ -181,8 +188,15 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "allowed_privapp_com.android.car.rotary",
+    name: "allowed_privapp_com.android.car.cluster.home",
     sub_dir: "permissions",
-    src: "com.android.car.rotary.xml",
+    src: "com.android.car.cluster.home.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.car.messenger",
+    sub_dir: "permissions",
+    src: "com.android.car.messenger.xml",
     filename_from_src: true,
 }

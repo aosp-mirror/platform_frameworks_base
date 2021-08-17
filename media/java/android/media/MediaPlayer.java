@@ -16,11 +16,19 @@
 
 package android.media;
 
+import static android.Manifest.permission.BIND_IMS_SERVICE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,12 +38,15 @@ import android.media.SubtitleController.Anchor;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
@@ -79,16 +90,15 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
-
+import java.util.concurrent.Executor;
 
 /**
- * MediaPlayer class can be used to control playback
- * of audio/video files and streams. An example on how to use the methods in
- * this class can be found in {@link android.widget.VideoView}.
+ * MediaPlayer class can be used to control playback of audio/video files and streams.
  *
  * <p>MediaPlayer is not thread-safe. Creation of and all access to player instances
  * should be on the same thread. If registering <a href="#Callbacks">callbacks</a>,
@@ -655,6 +665,10 @@ public class MediaPlayer extends PlayerBase
      * result in an exception.</p>
      */
     public MediaPlayer() {
+        this(AudioSystem.AUDIO_SESSION_ALLOCATE);
+    }
+
+    private MediaPlayer(int sessionId) {
         super(new AudioAttributes.Builder().build(),
                 AudioPlaybackConfiguration.PLAYER_TYPE_JAM_MEDIAPLAYER);
 
@@ -670,13 +684,20 @@ public class MediaPlayer extends PlayerBase
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
 
+        AttributionSource attributionSource = AttributionSource.myAttributionSource();
+        // set the package name to empty if it was null
+        if (attributionSource.getPackageName() == null) {
+            attributionSource = attributionSource.withPackageName("");
+        }
+
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaPlayer>(this),
-                getCurrentOpPackageName());
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            native_setup(new WeakReference<MediaPlayer>(this), attributionSourceState.getParcel());
+        }
 
-        baseRegisterPlayer();
+        baseRegisterPlayer(sessionId);
     }
 
     /*
@@ -905,11 +926,11 @@ public class MediaPlayer extends PlayerBase
             AudioAttributes audioAttributes, int audioSessionId) {
 
         try {
-            MediaPlayer mp = new MediaPlayer();
+            MediaPlayer mp = new MediaPlayer(audioSessionId);
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.setAudioSessionId(audioSessionId);
+            mp.native_setAudioSessionId(audioSessionId);
             mp.setDataSource(context, uri);
             if (holder != null) {
                 mp.setDisplay(holder);
@@ -970,12 +991,12 @@ public class MediaPlayer extends PlayerBase
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resid);
             if (afd == null) return null;
 
-            MediaPlayer mp = new MediaPlayer();
+            MediaPlayer mp = new MediaPlayer(audioSessionId);
 
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.setAudioSessionId(audioSessionId);
+            mp.native_setAudioSessionId(audioSessionId);
 
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
@@ -1103,7 +1124,13 @@ public class MediaPlayer extends PlayerBase
     }
 
     private boolean attemptDataSource(ContentResolver resolver, Uri uri) {
-        try (AssetFileDescriptor afd = resolver.openAssetFileDescriptor(uri, "r")) {
+        boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_player_optimize",
+                false);
+        Bundle opts = new Bundle();
+        opts.putBoolean("android.provider.extra.ACCEPT_ORIGINAL_MEDIA_FORMAT", true);
+        try (AssetFileDescriptor afd = optimize
+                ? resolver.openTypedAssetFileDescriptor(uri, "*/*", opts)
+                : resolver.openAssetFileDescriptor(uri, "r")) {
             setDataSource(afd);
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
@@ -1244,7 +1271,15 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        _setDataSource(fd, offset, length);
+        try (ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd)) {
+            if (modernFd == null) {
+                _setDataSource(fd, offset, length);
+            } else {
+                _setDataSource(modernFd.getFileDescriptor(), offset, length);
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Ignoring IO error while setting data source", e);
+        }
     }
 
     private native void _setDataSource(FileDescriptor fd, long offset, long length)
@@ -1333,8 +1368,9 @@ public class MediaPlayer extends PlayerBase
     }
 
     private void startImpl() {
-        baseStart();
+        baseStart(0); // unknown device at this point
         stayAwake(true);
+        tryToEnableNativeRoutingCallback();
         _start();
     }
 
@@ -1360,6 +1396,7 @@ public class MediaPlayer extends PlayerBase
         stayAwake(false);
         _stop();
         baseStop();
+        tryToDisableNativeRoutingCallback();
     }
 
     private native void _stop() throws IllegalStateException;
@@ -1468,23 +1505,76 @@ public class MediaPlayer extends PlayerBase
         if (deviceId == 0) {
             return null;
         }
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == deviceId) {
-                return devices[i];
+        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+    }
+
+
+    /**
+     * Sends device list change notification to all listeners.
+     */
+    private void broadcastRoutingChange() {
+        AudioManager.resetAudioPortGeneration();
+        synchronized (mRoutingChangeListeners) {
+            // Prevent the case where an event is triggered by registering a routing change
+            // listener via the media player.
+            if (mEnableSelfRoutingMonitor) {
+                baseUpdateDeviceId(getRoutedDevice());
+            }
+            for (NativeRoutingEventHandlerDelegate delegate
+                    : mRoutingChangeListeners.values()) {
+                delegate.notifyClient();
             }
         }
-        return null;
+    }
+
+    /**
+     * Call BEFORE adding a routing callback handler and when enabling self routing listener
+     * @return returns true for success, false otherwise.
+     */
+    @GuardedBy("mRoutingChangeListeners")
+    private boolean testEnableNativeRoutingCallbacksLocked() {
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
+            try {
+                native_enableDeviceCallback(true);
+                return true;
+            } catch (IllegalStateException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "testEnableNativeRoutingCallbacks failed", e);
+                }
+            }
+        }
+        return false;
+    }
+
+    private void  tryToEnableNativeRoutingCallback() {
+        synchronized (mRoutingChangeListeners) {
+            if (!mEnableSelfRoutingMonitor) {
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
+            }
+        }
+    }
+
+    private void tryToDisableNativeRoutingCallback() {
+        synchronized (mRoutingChangeListeners) {
+            if (mEnableSelfRoutingMonitor) {
+                mEnableSelfRoutingMonitor = false;
+                testDisableNativeRoutingCallbacksLocked();
+            }
+        }
     }
 
     /*
-     * Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
+     * Call AFTER removing a routing callback handler and when disabling self routing listener
      */
     @GuardedBy("mRoutingChangeListeners")
-    private void enableNativeRoutingCallbacksLocked(boolean enabled) {
-        if (mRoutingChangeListeners.size() == 0) {
-            native_enableDeviceCallback(enabled);
+    private void testDisableNativeRoutingCallbacksLocked() {
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
+            try {
+                native_enableDeviceCallback(false);
+            } catch (IllegalStateException e) {
+                // Fail silently as media player state could have changed in between stop
+                // and disabling routing callback
+            }
         }
     }
 
@@ -1496,6 +1586,9 @@ public class MediaPlayer extends PlayerBase
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
             NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
+
+    @GuardedBy("mRoutingChangeListeners")
+    private boolean mEnableSelfRoutingMonitor;
 
     /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -1510,7 +1603,7 @@ public class MediaPlayer extends PlayerBase
             Handler handler) {
         synchronized (mRoutingChangeListeners) {
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                enableNativeRoutingCallbacksLocked(true);
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
                                 handler != null ? handler : mEventHandler));
@@ -1529,8 +1622,8 @@ public class MediaPlayer extends PlayerBase
         synchronized (mRoutingChangeListeners) {
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
-                enableNativeRoutingCallbacksLocked(false);
             }
+            testDisableNativeRoutingCallbacksLocked();
         }
     }
 
@@ -2093,6 +2186,8 @@ public class MediaPlayer extends PlayerBase
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
+        mOnRtpRxNoticeListener = null;
+        mOnRtpRxNoticeExecutor = null;
         synchronized (mTimeProviderLock) {
             if (mTimeProvider != null) {
                 mTimeProvider.close();
@@ -2292,7 +2387,13 @@ public class MediaPlayer extends PlayerBase
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException;
+    public void setAudioSessionId(int sessionId)
+            throws IllegalArgumentException, IllegalStateException {
+        native_setAudioSessionId(sessionId);
+        baseUpdateSessionId(sessionId);
+    }
+
+    private native void native_setAudioSessionId(int sessionId);
 
     /**
      * Returns the audio session ID.
@@ -2380,7 +2481,8 @@ public class MediaPlayer extends PlayerBase
     private native final int native_setMetadataFilter(Parcel request);
 
     private static native final void native_init();
-    private native void native_setup(Object mediaplayerThis, @NonNull String opPackageName);
+    private native void native_setup(Object mediaplayerThis,
+            @NonNull Parcel attributionSource);
     private native final void native_finalize();
 
     /**
@@ -2896,8 +2998,13 @@ public class MediaPlayer extends PlayerBase
 
         AssetFileDescriptor fd = null;
         try {
+            boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_player_optimize",
+                    false);
             ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openAssetFileDescriptor(uri, "r");
+            Bundle opts = new Bundle();
+            opts.putBoolean("android.provider.extra.ACCEPT_ORIGINAL_MEDIA_FORMAT", true);
+            fd = optimize ? resolver.openTypedAssetFileDescriptor(uri, "*/*", opts)
+                    : resolver.openAssetFileDescriptor(uri, "r");
             if (fd == null) {
                 return;
             }
@@ -3275,6 +3382,7 @@ public class MediaPlayer extends PlayerBase
 
     @Override
     protected void finalize() {
+        tryToDisableNativeRoutingCallback();
         baseRelease();
         native_finalize();
     }
@@ -3300,6 +3408,7 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
     private static final int MEDIA_TIME_DISCONTINUITY = 211;
+    private static final int MEDIA_RTP_RX_NOTICE = 300;
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private TimeProvider mTimeProvider;
@@ -3396,6 +3505,7 @@ public class MediaPlayer extends PlayerBase
                 break;
 
             case MEDIA_STARTED:
+                // fall through
             case MEDIA_PAUSED:
                 {
                     TimeProvider timeProvider = mTimeProvider;
@@ -3563,14 +3673,8 @@ public class MediaPlayer extends PlayerBase
                 break;
 
             case MEDIA_AUDIO_ROUTING_CHANGED:
-                AudioManager.resetAudioPortGeneration();
-                synchronized (mRoutingChangeListeners) {
-                    for (NativeRoutingEventHandlerDelegate delegate
-                            : mRoutingChangeListeners.values()) {
-                        delegate.notifyClient();
-                    }
-                }
-                return;
+                    broadcastRoutingChange();
+                    return;
 
             case MEDIA_TIME_DISCONTINUITY:
                 final OnMediaTimeDiscontinuityListener mediaTimeListener;
@@ -3606,6 +3710,32 @@ public class MediaPlayer extends PlayerBase
                             }
                         });
                     }
+                }
+                return;
+
+            case MEDIA_RTP_RX_NOTICE:
+                final OnRtpRxNoticeListener rtpRxNoticeListener = mOnRtpRxNoticeListener;
+                if (rtpRxNoticeListener == null) {
+                    return;
+                }
+                if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel) msg.obj;
+                    parcel.setDataPosition(0);
+                    int noticeType;
+                    int[] data;
+                    try {
+                        noticeType = parcel.readInt();
+                        int numOfArgs = parcel.dataAvail() / 4;
+                        data = new int[numOfArgs];
+                        for (int i = 0; i < numOfArgs; i++) {
+                            data[i] = parcel.readInt();
+                        }
+                    } finally {
+                        parcel.recycle();
+                    }
+                    mOnRtpRxNoticeExecutor.execute(() ->
+                            rtpRxNoticeListener
+                                    .onRtpRxNotice(mMediaPlayer, noticeType, data));
                 }
                 return;
 
@@ -3743,6 +3873,7 @@ public class MediaPlayer extends PlayerBase
     private final OnCompletionListener mOnCompletionInternalListener = new OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
+            tryToDisableNativeRoutingCallback();
             baseStop();
         }
     };
@@ -4047,6 +4178,151 @@ public class MediaPlayer extends PlayerBase
          */
         public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data);
     }
+
+    /**
+     * Interface definition of a callback to be invoked when
+     * RTP Rx connection has a notice.
+     *
+     * @see #setOnRtpRxNoticeListener
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnRtpRxNoticeListener
+    {
+        /**
+         * Called when an RTP Rx connection has a notice.
+         * <p>
+         * Basic format. All TYPE and ARG are 4 bytes unsigned integer in native byte order.
+         * <pre>{@code
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |      TYPE      |      ARG1     |      ARG2      |      ARG3      |
+         * +----------------+---------------+----------------+----------------+
+         * |      ARG4      |      ARG5     |      ...
+         * +----------------+---------------+-------------
+         * 16               20              24
+         *
+         *
+         * TYPE 100 - A notice of the first rtp packet received. No ARGs.
+         * 0
+         * +----------------+
+         * |      100       |
+         * +----------------+
+         *
+         *
+         * TYPE 101 - A notice of the first rtcp packet received. No ARGs.
+         * 0
+         * +----------------+
+         * |      101       |
+         * +----------------+
+         *
+         *
+         * TYPE 102 - A periodic report of a RTP statistics.
+         * TYPE 103 - An emergency report when serious packet loss has been detected
+         *            in between TYPE 102 events.
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |   102 or 103   |   FB type=0   |    Bitrate     |   Top #.Seq    |
+         * +----------------+---------------+----------------+----------------+
+         * |   Base #.Seq   |Prev Expt #.Pkt|   Recv #.Pkt   |Prev Recv #.Pkt |
+         * +----------------+---------------+----------------+----------------+
+         * Feedback (FB) type
+         *      - always 0.
+         * Bitrate
+         *      - amount of data received in this period.
+         * Top number of sequence
+         *      - highest RTP sequence number received in this period.
+         *      - monotonically increasing value.
+         * Base number of sequence
+         *      - the first RTP sequence number of the media stream.
+         * Previous Expected number of Packets
+         *      - expected count of packets received in the previous report.
+         * Received number of packet
+         *      - actual count of packets received in this report.
+         * Previous Received number of packet
+         *      - actual count of packets received in the previous report.
+         *
+         *
+         * TYPE 205 - Transport layer Feedback message. (RFC-5104 Sec.4.2)
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |      205       |FB type(1 or 3)|      SSRC      |      Value     |
+         * +----------------+---------------+----------------+----------------+
+         * Feedback (FB) type: determines the type of the event.
+         *      - if 1, we received a NACK request from the remote side.
+         *      - if 3, we received a TMMBR (Temporary Maximum Media Stream Bit Rate Request) from
+         *        the remote side.
+         * SSRC
+         *      - Remote side's SSRC value of the media sender (RFC-3550 Sec.5.1)
+         * Value: the FCI (Feedback Control Information) depending on the value of FB type
+         *      - if FB type is 1, the Generic NACK as specified in RFC-4585 Sec.6.2.1
+         *      - if FB type is 3, the TMMBR as specified in RFC-5104 Sec.4.2.1.1
+         *
+         *
+         * TYPE 206 - Payload-specific Feedback message. (RFC-5104 Sec.4.3)
+         * 0                4               8
+         * +----------------+---------------+----------------+
+         * |      206       |FB type(1 or 4)|      SSRC      |
+         * +----------------+---------------+----------------+
+         * Feedback (FB) type: determines the type of the event.
+         *      - if 1, we received a PLI request from the remote side.
+         *      - if 4, we received a FIR request from the remote side.
+         * SSRC
+         *      - Remote side's SSRC value of the media sender (RFC-3550 Sec.5.1)
+         *
+         *
+         * TYPE 300 - CVO (RTP Extension) message.
+         * 0                4
+         * +----------------+---------------+
+         * |      101       |     value     |
+         * +----------------+---------------+
+         * value
+         *      - clockwise rotation degrees of a received video (6.2.3 of 3GPP R12 TS 26.114).
+         *      - can be 0 (degree 0), 1 (degree 90), 2 (degree 180) or 3 (degree 270).
+         *
+         *
+         * TYPE 400 - Socket failed during receive. No ARGs.
+         * 0
+         * +----------------+
+         * |      400       |
+         * +----------------+
+         * }</pre>
+         *
+         * @param mp the {@code MediaPlayer} associated with this callback.
+         * @param noticeType TYPE of the event.
+         * @param params RTP Rx media data serialized as int[] array.
+         */
+        void onRtpRxNotice(@NonNull MediaPlayer mp, int noticeType, @NonNull int[] params);
+    }
+
+    /**
+     * Sets the listener to be invoked when an RTP Rx connection has a notice.
+     * The listener is required if MediaPlayer is configured for RTPSource by
+     * MediaPlayer.setDataSource(String8 rtpParams) of mediaplayer.h.
+     *
+     * @see OnRtpRxNoticeListener
+     *
+     * @param listener the listener called after a notice from RTP Rx.
+     * @param executor the {@link Executor} on which to post RTP Tx events.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(BIND_IMS_SERVICE)
+    public void setOnRtpRxNoticeListener(
+            @NonNull Context context,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnRtpRxNoticeListener listener) {
+        Objects.requireNonNull(context);
+        Preconditions.checkArgument(
+                context.checkSelfPermission(BIND_IMS_SERVICE) == PERMISSION_GRANTED,
+                BIND_IMS_SERVICE + " permission not granted.");
+        mOnRtpRxNoticeListener = Objects.requireNonNull(listener);
+        mOnRtpRxNoticeExecutor = Objects.requireNonNull(executor);
+    }
+
+    private OnRtpRxNoticeListener mOnRtpRxNoticeListener;
+    private Executor mOnRtpRxNoticeExecutor;
 
     /**
      * Register a callback to be invoked when a selected track has timed metadata available.

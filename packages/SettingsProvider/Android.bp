@@ -19,6 +19,7 @@ license {
 
 android_app {
     name: "SettingsProvider",
+    defaults: ["platform_app_defaults"],
     resource_dirs: ["res"],
     srcs: [
         "src/**/*.java",

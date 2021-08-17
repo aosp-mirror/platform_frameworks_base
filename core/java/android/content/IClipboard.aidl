@@ -27,6 +27,8 @@ import android.content.IOnPrimaryClipChangedListener;
  */
 interface IClipboard {
     void setPrimaryClip(in ClipData clip, String callingPackage, int userId);
+    void setPrimaryClipAsPackage(in ClipData clip, String callingPackage, int userId,
+            String sourcePackage);
     void clearPrimaryClip(String callingPackage, int userId);
     ClipData getPrimaryClip(String pkg, int userId);
     ClipDescription getPrimaryClipDescription(String callingPackage, int userId);
@@ -40,4 +42,6 @@ interface IClipboard {
      * Returns true if the clipboard contains text; false otherwise.
      */
     boolean hasClipboardText(String callingPackage, int userId);
+
+    String getPrimaryClipSource(String callingPackage, int userId);
 }

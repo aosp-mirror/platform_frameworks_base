@@ -58,6 +58,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -69,6 +70,7 @@ import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.IDataShareReadAdapter;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Pair;
@@ -81,6 +83,7 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureManager;
+import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.contentcapture.IDataShareWriteAdapter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -88,7 +91,6 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.GlobalWhitelistState;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -101,6 +103,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -133,6 +136,9 @@ public final class ContentCaptureManagerService extends
             CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_WRITE_FINISHED;
 
     private final LocalService mLocalService = new LocalService();
+
+    private final ContentCaptureManagerServiceStub mContentCaptureManagerServiceStub =
+            new ContentCaptureManagerServiceStub();
 
     @Nullable
     final LocalLog mRequestsHistory;
@@ -168,6 +174,9 @@ public final class ContentCaptureManagerService extends
 
     @GuardedBy("mLock")
     private final Set<String> mPackagesWithShareRequests = new HashSet<>();
+
+    private final RemoteCallbackList<IContentCaptureOptionsCallback> mCallbacks =
+            new RemoteCallbackList<>();
 
     final GlobalContentCaptureOptions mGlobalContentCaptureOptions =
             new GlobalContentCaptureOptions();
@@ -219,13 +228,12 @@ public final class ContentCaptureManagerService extends
 
     @Override // from SystemService
     public boolean isUserSupported(TargetUser user) {
-        return user.getUserInfo().isFull() || user.getUserInfo().isManagedProfile();
+        return user.isFull() || user.isManagedProfile();
     }
 
     @Override // from SystemService
     public void onStart() {
-        publishBinderService(CONTENT_CAPTURE_MANAGER_SERVICE,
-                new ContentCaptureManagerServiceStub());
+        publishBinderService(CONTENT_CAPTURE_MANAGER_SERVICE, mContentCaptureManagerServiceStub);
         publishLocalService(ContentCaptureManagerInternal.class, mLocalService);
     }
 
@@ -293,6 +301,37 @@ public final class ContentCaptureManagerService extends
     protected boolean isDisabledLocked(@UserIdInt int userId) {
         return mDisabledByDeviceConfig || isDisabledBySettingsLocked(userId)
                 || super.isDisabledLocked(userId);
+    }
+
+    @Override
+    protected void assertCalledByPackageOwner(@NonNull String packageName) {
+        try {
+            super.assertCalledByPackageOwner(packageName);
+        } catch (SecurityException e) {
+            final int callingUid = Binder.getCallingUid();
+
+            VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity
+                    hotwordDetectionServiceIdentity =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class)
+                            .getHotwordDetectionServiceIdentity();
+
+            if (callingUid != hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                super.assertCalledByPackageOwner(packageName);
+                return;
+            }
+
+            final String[] packages =
+                    getContext()
+                            .getPackageManager()
+                            .getPackagesForUid(hotwordDetectionServiceIdentity.getOwnerUid());
+            if (packages != null) {
+                for (String candidate : packages) {
+                    if (packageName.equals(candidate)) return; // Found it
+                }
+            }
+
+            throw e;
+        }
     }
 
     private boolean isDisabledBySettingsLocked(@UserIdInt int userId) {
@@ -492,6 +531,18 @@ public final class ContentCaptureManagerService extends
         }
     }
 
+    void updateOptions(String packageName, ContentCaptureOptions options) {
+        mCallbacks.broadcast((callback, pkg) -> {
+            if (pkg.equals(packageName)) {
+                try {
+                    callback.setContentCaptureOptions(options);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
+                }
+            }
+        });
+    }
+
     private ActivityManagerInternal getAmInternal() {
         synchronized (mLock) {
             if (mAm == null) {
@@ -602,10 +653,11 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void startSession(@NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, int sessionId, int flags,
-                @NonNull IResultReceiver result) {
-            Preconditions.checkNotNull(activityToken);
-            Preconditions.checkNotNull(sessionId);
+                @NonNull IBinder shareableActivityToken, @NonNull ComponentName componentName,
+                int sessionId, int flags, @NonNull IResultReceiver result) {
+            Objects.requireNonNull(activityToken);
+            Objects.requireNonNull(shareableActivityToken);
+            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             final ActivityPresentationInfo activityPresentationInfo = getAmInternal()
@@ -617,14 +669,14 @@ public final class ContentCaptureManagerService extends
                     setClientState(result, STATE_DISABLED, /* binder= */ null);
                     return;
                 }
-                service.startSessionLocked(activityToken, activityPresentationInfo, sessionId,
-                        Binder.getCallingUid(), flags, result);
+                service.startSessionLocked(activityToken, shareableActivityToken,
+                        activityPresentationInfo, sessionId, Binder.getCallingUid(), flags, result);
             }
         }
 
         @Override
         public void finishSession(int sessionId) {
-            Preconditions.checkNotNull(sessionId);
+            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
@@ -650,7 +702,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void removeData(@NonNull DataRemovalRequest request) {
-            Preconditions.checkNotNull(request);
+            Objects.requireNonNull(request);
             assertCalledByPackageOwner(request.getPackageName());
 
             final int userId = UserHandle.getCallingUserId();
@@ -663,8 +715,8 @@ public final class ContentCaptureManagerService extends
         @Override
         public void shareData(@NonNull DataShareRequest request,
                 @NonNull IDataShareWriteAdapter clientAdapter) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(clientAdapter);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(clientAdapter);
 
             assertCalledByPackageOwner(request.getPackageName());
 
@@ -754,6 +806,26 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
+        public void registerContentCaptureOptionsCallback(@NonNull String packageName,
+                IContentCaptureOptionsCallback callback) {
+            assertCalledByPackageOwner(packageName);
+
+            mCallbacks.register(callback, packageName);
+
+            // Set options here in case it was updated before this was registered.
+            final int userId = UserHandle.getCallingUserId();
+            final ContentCaptureOptions options = mGlobalContentCaptureOptions.getOptions(userId,
+                    packageName);
+            if (options != null) {
+                try {
+                    callback.setContentCaptureOptions(options);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
+                }
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
@@ -794,6 +866,23 @@ public final class ContentCaptureManagerService extends
                 throws RemoteException {
             new ContentCaptureManagerServiceShellCommand(ContentCaptureManagerService.this).exec(
                     this, in, out, err, args, callback, resultReceiver);
+        }
+
+        @Override
+        public void resetTemporaryService(@UserIdInt int userId) {
+            ContentCaptureManagerService.this.resetTemporaryService(userId);
+        }
+
+        @Override
+        public void setTemporaryService(
+                @UserIdInt int userId, @NonNull String serviceName, int duration) {
+            ContentCaptureManagerService.this.setTemporaryService(
+                    userId, serviceName, duration);
+        }
+
+        @Override
+        public void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+            ContentCaptureManagerService.this.setDefaultServiceEnabled(userId, enabled);
         }
     }
 

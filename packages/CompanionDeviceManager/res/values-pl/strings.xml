@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Menedżer urządzeń towarzyszących"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"Połącz z: &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"Połącz: &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; z: &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Wybierz profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, którym ma zarządzać aplikacja &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"urządzenie"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"zegarek"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"Zezwól na zarządzanie urządzeniem &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; przez aplikację &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"Ta aplikacja jest niezbędna do zarządzania profilem <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"Zezwól"</string>
+    <string name="consent_no" msgid="2640796915611404382">"Nie zezwalaj"</string>
 </resources>

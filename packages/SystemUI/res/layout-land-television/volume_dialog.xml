@@ -20,43 +20,35 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
-    android:theme="@style/qs_theme">
+    android:theme="@style/volume_dialog_theme">
 
     <FrameLayout
         android:id="@+id/volume_dialog"
-        android:minWidth="@dimen/volume_dialog_panel_width"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:background="@android:color/transparent"
-        android:paddingRight="@dimen/volume_dialog_panel_transparent_padding_right"
-        android:paddingTop="@dimen/volume_dialog_panel_transparent_padding"
-        android:paddingBottom="@dimen/volume_dialog_panel_transparent_padding"
-        android:paddingLeft="@dimen/volume_dialog_panel_transparent_padding"
+        android:padding="@dimen/volume_dialog_panel_transparent_padding"
         android:clipToPadding="false">
 
         <LinearLayout
-            android:id="@+id/main"
+            android:id="@+id/volume_dialog_rows_container"
             android:layout_width="wrap_content"
-            android:minWidth="@dimen/volume_dialog_panel_width"
             android:layout_height="wrap_content"
-            android:layout_marginTop="68dp"
             android:layout_gravity="right"
             android:orientation="vertical"
             android:translationZ="@dimen/volume_dialog_elevation"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:background="@drawable/rounded_bg_full">
+            android:background="@android:color/transparent">
 
             <LinearLayout
                 android:id="@+id/volume_dialog_rows"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="@dimen/volume_dialog_panel_width"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingRight="@dimen/volume_dialog_stream_padding"
-                android:paddingLeft="@dimen/volume_dialog_stream_padding">
+                android:background="@drawable/tv_volume_dialog_background">
                 <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
 

@@ -15,6 +15,8 @@
  */
 package com.android.server.pm.shortcutmanagertest;
 
+import static com.android.compatibility.common.util.SystemUtil.callWithShellPermissionIdentity;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Instrumentation;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.LocusId;
@@ -50,6 +53,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.test.MoreAsserts;
 import android.util.Log;
 
@@ -136,6 +140,20 @@ public class ShortcutManagerTestUtils {
         return sb.toString();
     }
 
+    public static List<String> extractShortcutIds(List<String> result) {
+        final String prefix = "ShortcutInfo {id=";
+        final String postfix = ", ";
+
+        List<String> ids = new ArrayList<>();
+        for (String line : result) {
+            if (line.contains(prefix)) {
+                ids.add(line.substring(
+                        line.indexOf(prefix) + prefix.length(), line.indexOf(postfix)));
+            }
+        }
+        return ids;
+    }
+
     public static boolean resultContains(List<String> result, String expected) {
         for (String line : result) {
             if (line.contains(expected)) {
@@ -157,6 +175,16 @@ public class ShortcutManagerTestUtils {
             fail("Didn't contain expected string=" + expected
                     + "\nActual:\n" + concatResult(result));
         }
+        return result;
+    }
+
+    public static List<String> assertHaveIds(List<String> result, String... expectedIds) {
+        assertSuccess(result);
+
+        final SortedSet<String> expected = new TreeSet<>(list(expectedIds));
+        final SortedSet<String> actual = new TreeSet<>(extractShortcutIds(result));
+        assertEquals(expected, actual);
+
         return result;
     }
 
@@ -193,33 +221,68 @@ public class ShortcutManagerTestUtils {
         return runShortcutCommand(instrumentation, command, result -> result.contains("Success"));
     }
 
-    public static String getDefaultLauncher(Instrumentation instrumentation) {
-        final String PREFIX = "Launcher: ComponentInfo{";
-        final String POSTFIX = "}";
-        final List<String> result = runShortcutCommandForSuccess(
-                instrumentation, "get-default-launcher --user "
-                + instrumentation.getContext().getUserId());
-        for (String s : result) {
-            if (s.startsWith(PREFIX) && s.endsWith(POSTFIX)) {
-                return s.substring(PREFIX.length(), s.length() - POSTFIX.length());
+    private static UserHandle getParentUser(Context context) {
+        final UserHandle user = context.getUser();
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        if (!userManager.isManagedProfile(user.getIdentifier())) {
+            return user;
+        }
+
+        final List<UserHandle> profiles = userManager.getUserProfiles();
+        for (UserHandle handle : profiles) {
+            if (!userManager.isManagedProfile(handle.getIdentifier())) {
+                return handle;
             }
         }
-        fail("Default launcher not found");
         return null;
     }
 
-    public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
-        runCommand(instrumentation, "cmd package set-home-activity --user "
-                + instrumentation.getContext().getUserId() + " " + component,
-                result -> result.contains("Success"));
-        runCommand(instrumentation, "cmd shortcut clear-default-launcher --user "
-                        + instrumentation.getContext().getUserId(),
-                result -> result.contains("Success"));
+    public static String getDefaultLauncher(Instrumentation instrumentation) throws Exception {
+        final Context context = instrumentation.getContext();
+        final RoleManager roleManager = context.getSystemService(RoleManager.class);
+        final UserHandle user = getParentUser(context);
+        List<String> roleHolders = callWithShellPermissionIdentity(
+                () -> roleManager.getRoleHoldersAsUser(RoleManager.ROLE_HOME, user));
+        int size = roleHolders.size();
+        if (size == 1) {
+            return roleHolders.get(0);
+        }
+
+        if (size > 1) {
+            fail("Too many launchers for user " + user.getIdentifier() + " using role "
+                    + RoleManager.ROLE_HOME + ": " + roleHolders);
+        } else {
+            fail("No default launcher for user " + user.getIdentifier() + " using role "
+                    + RoleManager.ROLE_HOME);
+        }
+        return null;
+    }
+
+    public static void setDefaultLauncher(Instrumentation instrumentation, String packageName) {
+        runCommandForNoOutput(instrumentation, "cmd role add-role-holder --user "
+                + instrumentation.getContext().getUserId() + " " + RoleManager.ROLE_HOME + " "
+                + packageName + " 0");
+        waitUntil("Failed to get shortcut access",
+                () -> hasShortcutAccess(instrumentation, packageName), 20);
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, Context packageContext) {
-        setDefaultLauncher(instrumentation, packageContext.getPackageName()
-                + "/android.content.pm.cts.shortcutmanager.packages.Launcher");
+        setDefaultLauncher(instrumentation, packageContext.getPackageName());
+    }
+
+    public static boolean hasShortcutAccess(Instrumentation instrumentation, String packageName) {
+        final List<String> result = runShortcutCommandForSuccess(instrumentation,
+                "has-shortcut-access --user " + instrumentation.getContext().getUserId()
+                        + " " + packageName);
+        for (String s : result) {
+            if (s.startsWith("true")) {
+                return true;
+            } else if (s.startsWith("false")) {
+                return false;
+            }
+        }
+        fail("Failed to check shortcut access");
+        return false;
     }
 
     public static void overrideConfig(Instrumentation instrumentation, String config) {

@@ -511,7 +511,7 @@ public class MmsServiceBroker extends SystemService {
                 contentUri = ContentProvider.maybeAddUserId(contentUri, callingUserId);
             }
 
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 final UriGrantsManagerInternal ugm = LocalServices
                         .getService(UriGrantsManagerInternal.class);

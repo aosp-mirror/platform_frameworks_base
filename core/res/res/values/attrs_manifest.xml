@@ -226,6 +226,9 @@
              to share specific features explicitly because they are being built
              together. -->
         <flag name="signatureOrSystem" value="3" />
+        <!-- <strong>Base permission type</strong>: a permission that is managed internally by the
+             system and only granted according to the protection flags. -->
+        <flag name="internal" value="4" />
         <!-- Additional flag from base permission type: this permission can also
              be granted to any applications installed as privileged apps on the system image.
              Please avoid using this option, as the
@@ -239,7 +242,9 @@
         <!-- Old synonym for "privileged". Deprecated in API level 23. -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
-             (optionally) be granted to development applications. -->
+             (optionally) be granted to development applications. Although undocumented, the
+              permission state used to be shared by all users (including future users), but it is
+              managed per-user since API level 31. -->
         <flag name="development" value="0x20" />
         <!-- Additional flag from base permission type: this permission is closely
              associated with an app op for controlling access. -->
@@ -280,9 +285,6 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system default text classifier -->
         <flag name="textClassifier" value="0x10000" />
-        <!-- Additional flag from base permission type: this permission will be granted to the
-             wellbeing app, as defined by the OEM. -->
-        <flag name="wellbeing" value="0x20000" />
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the document manager -->
         <flag name="documenter" value="0x40000" />
@@ -301,6 +303,15 @@
         <!-- Additional flag from base permission type: this permission will be granted to the
              retail demo app, as defined by the OEM. -->
         <flag name="retailDemo" value="0x1000000" />
+        <!-- Additional flag from base permission type: this permission will be granted to the
+             recents app. -->
+        <flag name="recents" value="0x2000000" />
+        <!-- Additional flag from base permission type: this permission is managed by role. -->
+        <flag name="role" value="0x4000000" />
+        <!-- Additional flag from base permission type: this permission can also be granted if the
+             requesting application is signed by, or has in its signing lineage, any of the
+             certificate digests declared in {@link android.R.attr#knownCerts}. -->
+        <flag name="knownSigner" value="0x8000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -342,12 +353,26 @@
              the app is uninstalled.
         -->
         <flag name="immutablyRestricted" value="0x10" />
+        <!--
+             Modifier for permission restriction. This permission cannot
+             be exempted by the installer.
+        -->
+        <flag name="installerExemptIgnored" value="0x20" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated
          with.  The group must have been defined with the
          {@link android.R.styleable#AndroidManifestPermissionGroup permission-group} tag. -->
     <attr name="permissionGroup" format="string" />
+
+    <!-- A reference to an array resource containing the signing certificate digests to be granted
+         this permission when using the {@code knownSigner} protection flag. The digest should
+         be computed over the DER encoding of the trusted certificate using the SHA-256 digest
+         algorithm.
+         <p>
+         If only a single signer is declared this can also be a string resource, or the digest
+         can be declared inline as the value for this attribute. -->
+    <attr name="knownCerts" format="reference|string" />
 
     <!-- Specify the name of a user ID that will be shared between multiple
          packages.  By default, each package gets its own unique user-id.
@@ -359,7 +384,9 @@
          package manager. As such, its use is strongly discouraged and may be
          removed in a future version of Android. Instead, apps should use proper
          communication mechanisms, such as services and content providers,
-         to facilitate interoperability between shared components. -->
+         to facilitate interoperability between shared components. Note that
+         existing apps cannot remove this value, as migrating off a
+         shared user ID is not supported. -->
     <attr name="sharedUserId" format="string" />
 
     <!-- Specify a label for the shared user UID of this package.  This is
@@ -795,8 +822,13 @@
             <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
             Stack</a> document for more details about tasks.-->
         <enum name="singleInstance" value="3" />
+        <!-- The activity can only be running as the root activity of the task, the first activity
+            that created the task, and therefore there will only be one instance of this activity
+            in a task. In constrast to the {@code singleTask} launch mode, this activity can be
+            started in multiple instances in different tasks if the
+            {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.-->
+        <enum name="singleInstancePerTask" value="4" />
     </attr>
-
     <!-- Specify the orientation an activity should be run in.  If not
          specified, it will run in the current preferred orientation
          of the screen.
@@ -992,6 +1024,9 @@
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
+        <!-- The font weight adjustment value has changed. Used to reflect the user increasing font
+             weight. -->
+        <flag name="fontWeightAdjustment" value="0x10000000" />
     </attr>
 
     <!-- Indicate that the activity can be launched as the embedded child of another
@@ -1337,7 +1372,7 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
-    <!-- Indicates that it is okay for this activity to be put in multi-window mode. Intended for a
+    <!-- Hint to platform that the activity works well in multi-window mode. Intended for a
          multi-window device where there can be multiple activities of various sizes on the screen
          at the same time.
 
@@ -1357,7 +1392,7 @@
          resizeable.
 
          <p>NOTE: The value of {@link android.R.attr#screenOrientation} is ignored for
-         resizeable activities when in multi-window mode. -->
+         resizeable activities when in multi-window mode before Android 12. -->
     <attr name="resizeableActivity" format="boolean" />
 
     <!-- Indicates that the activity specifically supports the picture-in-picture form of
@@ -1503,6 +1538,9 @@
 
     <attr name="usesNonSdkApi" format="boolean" />
 
+    <!-- Whether attributions provided are meant to be user-visible. -->
+    <attr name="attributionsAreUserVisible" format="boolean" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">
@@ -1511,7 +1549,8 @@
         <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play. -->
         <flag name="mediaPlayback" value="0x02" />
-        <!-- Ongoing phone call or video conference. -->
+        <!-- Ongoing operations related to phone calls, video conferencing,
+             or similar interactive communication. -->
         <flag name="phoneCall" value="0x04" />
         <!-- GPS, map, navigation location update. -->
         <flag name="location" value="0x08" />
@@ -1580,6 +1619,12 @@
        <enum name="async" value="1" />
        <enum name="sync" value="2" />
     </attr>
+
+    <!-- Attribution tag to be used for permission sub-attribution if a
+      permission is checked in  {@link android.content.Context#sendBroadcast(Intent, String)}.
+      Multiple tags can be specified separated by '|'.
+    -->
+    <attr name="attributionTags" format="string" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1754,6 +1799,8 @@
             <enum name="maps" value="6" />
             <!-- Apps which are primarily productivity apps, such as cloud storage or workplace apps. -->
             <enum name="productivity" value="7" />
+            <!-- Apps which are primarily accessibility apps, such as screen-readers. -->
+            <enum name="accessibility" value="8" />
         </attr>
 
         <!-- Declares the kind of classloader this application's classes must be loaded with -->
@@ -1824,6 +1871,33 @@
              -->
         <attr name="preserveLegacyExternalStorage" format="boolean" />
 
+        <!-- If {@code true} this app would like raw external storage access.
+
+        <p> This flag can only be used by apps holding
+        <ul>
+        <li>{@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission or
+        <li>{@link android.app.role}#SYSTEM_GALLERY role.
+        </ul>
+        <p> When the flag is set, all file path access on external storage will bypass database
+        operations that update MediaStore collection. Raw external storage access as a side effect
+        can improve performance of bulk file path operations but can cause unexpected behavior in
+        apps due to inconsistencies in MediaStore collection and lower file system.
+        When the flag is set, app should scan the file after file path operations to ensure
+        consistency of MediaStore collection.
+        <p> The flag can be set to false if the app doesn't do many bulk file path operations or if
+        app prefers the system to ensure the consistency of the MediaStore collection for file path
+        operations without scanning the file.
+
+        <p> The default value is {@code true} if
+        <ul>
+        <li>app has {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission and
+        targets targetSDK<=30.
+        <li>app has {@link android.app.role}#SYSTEM_GALLERY role and targetSDK<=29
+        </ul>
+        {@code false} otherwise.
+        -->
+        <attr name="requestRawExternalStorageAccess" format="boolean" />
+
         <!-- If {@code true} this app declares that it should be visible to all other apps on
              device, regardless of what they declare via the {@code queries} tags in their
              manifest.
@@ -1866,6 +1940,34 @@
             <!-- No longer used -->
             <enum name="disallowed" value="2" />
         </attr>
+
+        <!-- Declare the policy to deal with user data when rollback is committed. -->
+        <attr name="rollbackDataPolicy">
+            <!-- User data will be restored during rollback. -->
+            <enum name="restore" value="0" />
+            <!-- User data will be wiped out during rollback. -->
+            <enum name="wipe" value="1" />
+            <!-- User data will remain unchanged during rollback. -->
+            <enum name="retain" value="2" />
+        </attr>
+
+        <!-- Applications can set this attribute to an xml resource within their app where they
+         specified the rules determining which files and directories can be copied from the device
+         as part of backup or transfer operations.
+
+         See the <a href="{@docRoot}about/versions/12/backup-restore">Changes in backup and restore</a>
+         document for the format of the XML file.-->
+        <attr name="dataExtractionRules" format="reference"/>
+
+        <!-- @hide Request exemption from the foreground service restrictions introduced in S
+        (https://developer.android.com/about/versions/12/foreground-services)
+        Note the framework <b>ignores</b> this attribute at this time. Once apps target S or above,
+        there's no way to be exempted (without using a privileged permission).
+        -->
+        <attr name="requestForegroundServiceExemption" format="boolean" />
+
+        <!-- Whether attributions provided are meant to be user-visible. -->
+        <attr name="attributionsAreUserVisible" format="boolean" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -1879,8 +1981,6 @@
     <p>In case this attribution inherits from another attribution, this tag can contain one or
     multiple {@link #AndroidManifestAttributionInheritFrom inherit-from} tags. -->
     <declare-styleable name="AndroidManifestAttribution" parent="AndroidManifest">
-        <!-- TODO moltmann: Remove -->
-        <attr name="featureId" format="string" />
         <!-- Required identifier for a attribution. Can be passed to
         {@link android.content.Context#createAttributionContext} to create a context tagged with
         this attribution
@@ -1890,7 +1990,7 @@
         <attr name="label" format="string" />
     </declare-styleable>
 
-    <!-- Declares previously declared features this feature inherits from. -->
+    <!-- Declares previously declared attributions this attribution inherits from. -->
     <declare-styleable name="AndroidManifestAttributionInheritFrom"
                        parent="AndroidManifestAttribution">
         <!-- Identifier of the attribution this attribution inherits from -->
@@ -1923,6 +2023,7 @@
         <attr name="request" />
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
+        <attr name="knownCerts" />
     </declare-styleable>
 
     <!-- The <code>permission-group</code> tag declares a logical grouping of
@@ -2022,6 +2123,31 @@
         requested.  If it does support the feature, it will be as if the manifest didn't
         request it at all. -->
         <attr name="requiredNotFeature" format="string" />
+        <!-- Optional: set of flags that should apply to this permission request. Note that
+             these flags start at 0x4 to match PackageInfo.requestedPermissionsFlags. -->
+        <attr name="usesPermissionFlags">
+            <!-- Strong assertion by a developer that they will never use this
+                 permission to derive the physical location of the device, even
+                 when the app has been granted the ACCESS_FINE_LOCATION and/or
+                 ACCESS_COARSE_LOCATION permissions. -->
+            <flag name="neverForLocation" value="0x00010000" />
+        </attr>
+    </declare-styleable>
+
+    <!-- <code>required-feature</code> and <code>required-not-feature</code> elements inside
+         <code>uses-permission<code/> can be used to request the permission based on the fact
+         whether the system supports or does not support certain features.
+         If multiple <code>required-feature</code> and/or <code>required-not-feature</code> elements
+         are present, the permission will be “requested” only if the system supports all of the
+         listed "required-features" and does not support any of the "required-not-features".
+         -->
+    <declare-styleable name="AndroidManifestRequiredFeature">
+        <!-- The name of the feature. -->
+        <attr name="name" />
+    </declare-styleable>
+    <declare-styleable name="AndroidManifestRequiredNotFeature">
+        <!-- The name of the feature. -->
+        <attr name="name" />
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
@@ -2186,6 +2312,29 @@
               The default is true, meaning the application requires the
               library, and does not want to be installed on devices that
               don't support it.  If you set this to false, then this will
+              allow the application to be installed even if the library
+              doesn't exist, and you will need to check for its presence
+              dynamically at runtime. -->
+        <attr name="required" />
+    </declare-styleable>
+
+    <!-- The <code>uses-native-library</code> specifies a native shared library that this
+         package requires to be linked against.  Specifying this flag tells the
+         system to make the native library to be available to your app.
+
+         <p>On devices running R or lower, this is ignored and the app has access to all
+         the public native shared libraries that are exported from the platform. This is
+         also ignored if the app is targeting R or lower.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestUsesNativeLibrary" parent="AndroidManifestApplication">
+        <!-- Required name of the library you use. -->
+        <attr name="name" />
+        <!--  Specify whether this native library is required for the application.
+              The default is true, meaning the application requires the
+              library, and does not want to be installed on devices that
+              don't support it. If you set this to false, then this will
               allow the application to be installed even if the library
               doesn't exist, and you will need to check for its presence
               dynamically at runtime. -->
@@ -2448,15 +2597,26 @@
         <attr name="singleUser" />
         <attr name="directBootAware" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             <p>NOTE: This is only applicable to instant app. -->
         <attr name="splitName" />
+        <!-- Set of attribution tags that should be automatically applied to this component.
+             <p>
+             Each instance of this ContentProvider will be automatically configured with
+             Context.createAttributionContext() using the first attribution tag
+             contained here. -->
+        <attr name="attributionTags" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>grant-uri-permission</code> tag, a child of the
          {@link #AndroidManifestProvider provider} tag, describing a specific
          URI path that can be granted as a permission.  This tag can be
-         specified multiple time to supply multiple paths. -->
+         specified multiple time to supply multiple paths. If multiple
+         path matching attributes are supplied, they will be evaluated in the
+         following order with the first attribute being the only one honored:
+          <code>pathAdvancedPattern</code>, <code>pathPattern</code>,
+          <code>pathPrefix</code>, <code>pathSuffix</code>, <code>path</code>. -->
     <declare-styleable name="AndroidManifestGrantUriPermission"  parent="AndroidManifestProvider">
         <!-- Specify a URI path that must exactly match, as per
              {@link android.os.PatternMatcher} with
@@ -2476,18 +2636,37 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="pathPattern" format="string" />
+        <!-- Specify a URI path that matches an advanced pattern, as per
+             {@link android.os.PatternMatcher} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="pathAdvancedPattern" format="string"/>
+        <!-- Specify a URI path that must be a suffix to match, as per
+             {@link android.os.PatternMatcher} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="pathSuffix" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>path-permission</code> tag, a child of the
          {@link #AndroidManifestProvider provider} tag, describing a permission
          that allows access to a specific path in the provider.  This tag can be
-         specified multiple time to supply multiple paths. -->
+         specified multiple time to supply multiple paths. If multiple
+         path matching attributes are supplied, they will be evaluated in the
+         following order with the first attribute being the only one honored:
+          <code>pathAdvancedPattern</code>, <code>pathPattern</code>,
+          <code>pathPrefix</code>, <code>pathSuffix</code>, <code>path</code>.-->
     <declare-styleable name="AndroidManifestPathPermission"  parent="AndroidManifestProvider">
         <attr name="path" />
         <attr name="pathPrefix" />
         <attr name="pathPattern" />
         <attr name="pathAdvancedPattern" format="string"/>
+        <attr name="pathSuffix" />
         <attr name="permission" />
         <attr name="readPermission" />
         <attr name="writePermission" />
@@ -2541,7 +2720,8 @@
              must also be {@link android.R.attr#exported} if this flag is set. -->
         <attr name="externalService" format="boolean" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             <p>NOTE: This is only applicable to instant app. -->
         <attr name="splitName" />
         <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
              will be spawned from an Application Zygote, instead of the regular Zygote.
@@ -2561,6 +2741,12 @@
         <attr name="useAppZygote" format="boolean" />
         <!-- If this is a foreground service, specify its category. -->
         <attr name="foregroundServiceType" />
+        <!-- Set of attribution tags that should be automatically applied to this component.
+             <p>
+             Each instance of this Service will be automatically configured with
+             Context.createAttributionContext() using the first attribution tag
+             contained here. -->
+        <attr name="attributionTags" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
@@ -2598,6 +2784,12 @@
         <attr name="exported" />
         <attr name="singleUser" />
         <attr name="directBootAware" />
+        <!-- Set of attribution tags that should be automatically applied to this component.
+             <p>
+             Each instance of this BroadcastReceiver will be automatically configured with
+             Context.createAttributionContext() using the first attribution tag
+             contained here. -->
+        <attr name="attributionTags" />
     </declare-styleable>
 
     <!-- The <code>activity</code> tag declares an
@@ -2725,6 +2917,19 @@
 
              <p> See {@link android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING} -->
         <attr name="preferMinimalPostProcessing" format="boolean"/>
+        <!-- Set of attribution tags that should be automatically applied to this component.
+             <p>
+             Each instance of this Activity will be automatically configured with
+             Context.createAttributionContext() using the first attribution tag
+             contained here. -->
+        <attr name="attributionTags" />
+        <!-- Specifies whether a home sound effect should be played if the home app moves to
+             front after an activity with this flag set to <code>true</code>.
+             <p>The default value of this attribute is <code>true</code>.
+             <p>Also note that home sounds are only played if the device supports home sounds,
+             usually TVs.
+             <p>Requires permission {@code android.permission.DISABLE_SYSTEM_SOUND_EFFECTS}. -->
+        <attr name="playHomeTransitionSound" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -2764,6 +2969,7 @@
         <attr name="enabled" />
         <attr name="exported" />
         <attr name="parentActivityName" />
+        <attr name="attributionTags" />
     </declare-styleable>
 
     <!-- The <code>meta-data</code> tag is used to attach additional
@@ -2802,6 +3008,38 @@
              The resource identifier can later be retrieved from the meta data
              Bundle through {@link android.os.Bundle#getInt Bundle.getInt}. -->
         <attr name="resource" format="reference" />
+    </declare-styleable>
+
+    <!-- The <code>property</code> tag is used to attach additional data that can
+         be supplied to the parent component. A component element can contain any
+         number of <code>property</code> subelements. Valid names are any of the
+         <code>PROPERTY_</code> constants defined in the
+         {@link android.content.pm.PackageManager PackageManager} class. Values
+         are obtained using the appropriate method on the
+         {@link android.content.pm.PackageManager.Property PackageManager.Property} class.
+         <p>Ordinary values are specified through the value attribute. Resource IDs are
+         specified through the resource attribute.
+         <p>It is invalid to specify both a value and resource attributes. -->
+    <declare-styleable name="AndroidManifestProperty"
+         parent="AndroidManifestApplication
+                 AndroidManifestActivity
+                 AndroidManifestReceiver
+                 AndroidManifestProvider
+                 AndroidManifestService">
+        <attr name="name" />
+        <!-- Concrete value to assign to this property.
+             The data can later be retrieved from the property object
+             through
+             {@link android.content.pm.PackageManager.Property#getString Property.getString},
+             {@link android.content.pm.PackageManager.Property#getInteger Property.getInteger},
+             {@link android.content.pm.PackageManager.Property#getBoolean Property.getBoolean},
+             or {@link android.content.pm.PackageManager.Property#getFloat Property.getFloat}
+             depending on the type used here. -->
+        <attr name="value" />
+        <!-- The resource identifier to assign to this property.
+             The resource identifier can later be retrieved from the property object through
+             {@link android.content.pm.PackageManager.Property#getResourceId Property.getResourceId}. -->
+        <attr name="resource" />
     </declare-styleable>
 
     <!-- The <code>intent-filter</code> tag is used to construct an
@@ -2907,6 +3145,22 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="sspPattern" format="string" />
+        <!-- Specify a URI scheme specific part that matches an advanced pattern, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="sspAdvancedPattern" format="string" />
+        <!-- Specify a URI scheme specific part that must be a suffix to match, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="sspSuffix" format="string" />
         <!-- Specify a URI authority host that is handled, as per
              {@link android.content.IntentFilter#addDataAuthority
              IntentFilter.addDataAuthority()}.
@@ -2951,6 +3205,11 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="pathAdvancedPattern" />
+        <!-- Specify a URI path that must be a suffix to match, as per
+             {@link android.content.IntentFilter#addDataPath
+             IntentFilter.addDataPath()} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="pathSuffix" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -3171,6 +3430,28 @@
          then the system will set the same minimal height on all other activities in the task. It
          will also ignore any other minimal height attributes of non-root activities. -->
         <attr name="minHeight" />
+
+        <!-- Window layout affinity of this activity. Activities with the same window layout
+          affinity will share the same layout record. That is, if a user is opening an activity in
+          a new task on a display that can host freeform windows, and the user had opened a task
+          before and that task had a root activity who had the same window layout affinity, the
+          new task's window will be created in the same window mode and around the location which
+          the previously opened task was in.
+
+          <p>For example, if a user maximizes a task with root activity A and opens another
+          activity B that has the same window layout affinity as activity A has, activity B will
+          be created in fullscreen window mode. Similarly, if they move/resize a task with root
+          activity C and open another activity D that has the same window layout affinity as
+          activity C has, activity D will be in freeform window mode and as close to the position
+          of activity C as conditions permit. It doesn't require the user to keep the task with
+          activity A or activity C open. It won't, however, put any task into split-screen or PIP
+          window mode on launch.
+
+          <p>If the user is opening an activity with its window layout affinity for the first time,
+          the window mode and position is OEM defined.
+
+          <p>By default activity doesn't share any affinity with other activities. -->
+        <attr name="windowLayoutAffinity" format="string" />
     </declare-styleable>
 
     <!-- <code>restrict-update</code> tag restricts system apps from being updated unless the
@@ -3192,5 +3473,9 @@
         <!-- Flag indicating whether the application can be profiled by the shell user,
              even when running on a device that is running in user mode. -->
         <attr name="shell" format="boolean" />
+        <!-- Flag indicating whether the application can be profiled by system services, but not
+             necessarily via shell tools (for which also android:shell="true" must be set). If
+             false, the application cannot be profiled at all. Defaults to true. -->
+        <attr name="enabled" format="boolean" />
     </declare-styleable>
 </resources>

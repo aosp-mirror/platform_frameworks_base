@@ -17,8 +17,9 @@
 package com.android.server.location.gnss;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -26,25 +27,26 @@ import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.provider.Telephony.Carriers;
-import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
+import android.telephony.PhoneStateListener;
+import android.telephony.PreciseCallState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-import android.telephony.PreciseCallState;
-import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.location.GpsNetInitiatedHandler;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -385,10 +387,10 @@ class GnssNetworkConnectivityHandler {
     private ConnectivityManager.NetworkCallback createSuplConnectivityCallback() {
         return new ConnectivityManager.NetworkCallback() {
             @Override
-            public void onAvailable(Network network) {
+            public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
                 if (DEBUG) Log.d(TAG, "SUPL network connection available.");
                 // Specific to a change to a SUPL enabled network becoming ready
-                handleSuplConnectionAvailable(network);
+                handleSuplConnectionAvailable(network, linkProperties);
             }
 
             @Override
@@ -496,7 +498,7 @@ class GnssNetworkConnectivityHandler {
         return networkAttributes;
     }
 
-    private void handleSuplConnectionAvailable(Network network) {
+    private void handleSuplConnectionAvailable(Network network, LinkProperties linkProperties) {
         // TODO: The synchronous method ConnectivityManager.getNetworkInfo() should not be called
         //       inside the asynchronous ConnectivityManager.NetworkCallback methods.
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
@@ -528,7 +530,7 @@ class GnssNetworkConnectivityHandler {
                 setRouting();
             }
 
-            int apnIpType = getApnIpType(apn);
+            int apnIpType = getLinkIpType(linkProperties);
             if (DEBUG) {
                 String message = String.format(
                         "native_agps_data_conn_open: mAgpsApn=%s, mApnIpType=%s",
@@ -704,74 +706,32 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
-    private int getApnIpType(String apn) {
+    private int getLinkIpType(LinkProperties linkProperties) {
         ensureInHandlerThread();
-        if (apn == null) {
-            return APN_INVALID;
-        }
-        TelephonyManager phone = (TelephonyManager)
-                mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        // During an emergency call with an active sub id, get the Telephony Manager specific
-        // to the active sub to get the correct value from getServiceState and getNetworkType
-        if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
-            TelephonyManager subIdTelManager =
-                    phone.createForSubscriptionId(mActiveSubId);
-            if (subIdTelManager != null) {
-                phone = subIdTelManager;
+        boolean isIPv4 = false;
+        boolean isIPv6 = false;
+
+        List<LinkAddress> linkAddresses = linkProperties.getLinkAddresses();
+        for (LinkAddress linkAddress : linkAddresses) {
+            InetAddress inetAddress = linkAddress.getAddress();
+            if (inetAddress instanceof Inet4Address) {
+                isIPv4 = true;
+            } else if (inetAddress instanceof Inet6Address) {
+                isIPv6 = true;
             }
-        }
-        ServiceState serviceState = phone.getServiceState();
-        String projection = null;
-        String selection = null;
-
-        // Carrier configuration may override framework roaming state, we need to use the actual
-        // modem roaming state instead of the framework roaming state.
-        if (serviceState != null && serviceState.getDataRoamingFromRegistration()) {
-            projection = Carriers.ROAMING_PROTOCOL;
-        } else {
-            projection = Carriers.PROTOCOL;
-        }
-        // No SIM case for emergency
-        if (TelephonyManager.NETWORK_TYPE_UNKNOWN == phone.getNetworkType()
-                && AGPS_TYPE_EIMS == mAGpsType) {
-            selection = String.format(
-                "type like '%%emergency%%' and apn = '%s' and carrier_enabled = 1", apn);
-        } else {
-            selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
-        }
-        try (Cursor cursor = mContext.getContentResolver().query(
-                Carriers.CONTENT_URI,
-                new String[]{projection},
-                selection,
-                null,
-                Carriers.DEFAULT_SORT_ORDER)) {
-            if (null != cursor && cursor.moveToFirst()) {
-                return translateToApnIpType(cursor.getString(0), apn);
-            } else {
-                Log.e(TAG, "No entry found in query for APN: " + apn);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error encountered on APN query for: " + apn, e);
+            if (DEBUG) Log.d(TAG, "LinkAddress : " + inetAddress.toString());
         }
 
-        return APN_IPV4V6;
-    }
-
-    private int translateToApnIpType(String ipProtocol, String apn) {
-        if ("IP".equals(ipProtocol)) {
-            return APN_IPV4;
-        }
-        if ("IPV6".equals(ipProtocol)) {
-            return APN_IPV6;
-        }
-        if ("IPV4V6".equals(ipProtocol)) {
+        if (isIPv4 && isIPv6) {
             return APN_IPV4V6;
         }
-
-        // we hit the default case so the ipProtocol is not recognized
-        String message = String.format("Unknown IP Protocol: %s, for APN: %s", ipProtocol, apn);
-        Log.e(TAG, message);
-        return APN_IPV4V6;
+        if (isIPv4) {
+            return APN_IPV4;
+        }
+        if (isIPv6) {
+            return APN_IPV6;
+        }
+        return APN_INVALID;
     }
 
     // AGPS support

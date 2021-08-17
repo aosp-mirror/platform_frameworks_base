@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Er wordt niet automatisch verbinding gemaakt"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Geen internettoegang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Opgeslagen door \'<xliff:g id="NAME">%1$s</xliff:g>\'"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Verbonden met netwerk met datalimiet"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisch verbonden via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisch verbonden via provider van netwerkbeoordelingen"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Verbonden via %1$s"</string>
@@ -117,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuleren"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Koppelen verleent toegang tot je contacten en gespreksgeschiedenis wanneer de apparaten zijn verbonden."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> door een onjuiste pincode of toegangscode."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> vanwege een onjuiste pincode of toegangscode."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Kan niet communiceren met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Koppeling geweigerd door <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -161,7 +162,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Toonhoogte"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Is van invloed op de toon van de synthetisch gegenereerde spraak"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Taal"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Gebruik systeemtaal"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Systeemtaal gebruiken"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Taal niet geselecteerd"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"De taalspecifieke stem voor de gesproken tekst instellen"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Luisteren naar een voorbeeld"</string>
@@ -212,9 +213,9 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Draadloze foutopsporing"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Zet draadloze foutopsporing aan om beschikbare apparaten te bekijken en te gebruiken"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Apparaat koppelen met QR-code"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Koppel nieuwe apparaten via QR-codescanner"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Nieuwe apparaten koppelen via QR-codescanner"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Apparaat koppelen met koppelingscode"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koppel nieuwe apparaten via een zescijferige code"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Nieuwe apparaten koppelen via een zescijferige code"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Gekoppelde apparaten"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Momenteel verbonden"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Apparaatgegevens"</string>
@@ -226,16 +227,16 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wifi-koppelingscode"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Koppeling mislukt"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Zorg dat het apparaat is verbonden met hetzelfde netwerk."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Koppel apparaat via wifi door een QR-code te scannen"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Apparaat koppelen via wifi door een QR-code te scannen"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Apparaat koppelen…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kan het apparaat niet koppelen. De QR-code was onjuist of het apparaat is niet verbonden met hetzelfde netwerk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adres en poort"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-code scannen"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Koppel apparaat via wifi door een QR-code te scannen"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Apparaat koppelen via wifi door een QR-code te scannen"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Maak verbinding met een wifi-netwerk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, foutopsporing, ontwikkeling"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snelle link naar bugrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Toon een knop in het aan/uit-menu om een bugrapport te maken"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het aan/uit-menu tonen om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Snoop-logbestand voor bluetooth-HCI aanzetten"</string>
@@ -249,7 +250,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"App voor neplocatie: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Netwerken"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificering van draadloze weergave"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Uitgebreide wifi-logregistr. aanzetten"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Uitgebreide wifi-logregistratie insch."</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-scannen beperken"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Via wifi ondersteunde MAC-herschikking"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data altijd actief"</string>
@@ -274,31 +275,31 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"LDAC-codec voor Bluetooth-audio activeren\nSelectie: Afspeelkwaliteit"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privé-DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecteer de privé-DNS-modus"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecteer de modus Privé-DNS"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Uit"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostnaam van privé-DNS-provider"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Geef hostnaam van DNS-provider op"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan geen verbinding maken"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag het batterijverbruik en verbeter de netwerkprestaties"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Als deze modus aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat."</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Opties tonen voor certificering van draadloze weergave"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Logniveau voor wifi verhogen, tonen per SSID RSSI in wifi-kiezer"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaagt het batterijverbruik en verbetert de netwerkprestaties"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Als deze modus aanstaat, kan het MAC-adres van dit apparaat wijzigen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-buffergrootten"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Kies Logger-grootten per logbuffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Persistente loggeropslag wissen?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Wanneer we niet meer controleren met de persistente logger, zijn we verplicht de logger-gegevens op je apparaat te wissen."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Logger-gegevens persistent opslaan"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Logger-gegev. persistent opslaan"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Logboekbuffers selecteren die persistent op het apparaat worden opgeslagen"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB-configuratie selecteren"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB-configuratie selecteren"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Neplocaties toestaan"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Inspectie van weergavekenmerk aanzetten"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Houd mobiele data altijd actief, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gebruik hardwareversnelling voor tethering indien beschikbaar"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobiele data altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Hardwareversnelling voor tethering gebruiken indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Draadloze foutopsporing toestaan?"</string>
@@ -307,10 +308,10 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Ontwikkelingsinstellingen toestaan?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Apps verifiëren via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Controleer apps die zijn geïnstalleerd via ADB/ADT op schadelijk gedrag"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Toon bluetooth-apparaten zonder naam (alleen MAC-adressen)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zet de functie voor absoluut volume van bluetooth uit in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Zet de Gabeldorsche-functiestack voor bluetooth aan."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-apparaten zonder naam (alleen MAC-adressen) worden weergegeven"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Hiermee wordt de functie voor absoluut volume van Bluetooth uitgezet in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Hierdoor wordt de Gabeldorsche-functiestack voor bluetooth aangezet."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit aangezet."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokale terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Terminal-app aanzetten die lokale shell-toegang biedt"</string>
@@ -334,50 +335,50 @@
     <string name="pointer_location" msgid="7516929526199520173">"Cursorlocatie"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Schermoverlay met huidige aanraakgegevens"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tikken tonen"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Toon visuele feedback voor tikken"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Visuele feedback tonen voor tikken"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Oppervlakupdates tonen"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Flash volledige vensteroppervlakken bij updates"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Volledige vensteroppervlakken flashen bij updates"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Weergave-updates tonen"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash-weergaven in vensters bij update"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Hardwarelayer-upd. tonen"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardwarelagen knipperen groen bij updates"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Foutopsporing GPU-overbelasting"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW-overlays uitzetten"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Gebruik altijd GPU voor schermcompositing"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"GPU altijd gebruiken voor schermcompositing"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Kleurruimte simuleren"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL-sporen aanzetten"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB-audiorouting uitzetten"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Zet autom. routing naar USB-randapparatuur uit"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB-audiorouting uitsch."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Autom. routing naar USB-randapparatuur uitsch."</string>
     <string name="debug_layout" msgid="1659216803043339741">"Indelingsgrenzen tonen"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Toon clipgrenzen, marges en meer"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Clipgrenzen, marges en meer tonen"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"V.r.n.l.-indelingsrichting afdwingen"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Stel de schermindelingsrichting geforceerd in op v.r.n.l. voor alle talen"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA forceren"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"Zet 4x MSAA aan in OpenGL ES 2.0-apps"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA aanzetten in OpenGL ES 2.0-apps"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Foutopsporing niet-rechthoekig bijsnijden"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI-weergave van profiel"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU-foutopsporingslagen aanzetten"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Sta laden van GPU-foutopsporingslagen toe voor foutopsporingsapps"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laden van GPU-foutopsporingslagen toestaan voor foutopsporingsapps"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Uitgebreide leverancierslogboeken aanzetten"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Neem aanvullende apparaatspecifieke leverancierslogboeken op in bugrapporten. Deze kunnen privégegevens bevatten, meer batterijlading gebruiken en/of meer opslagruimte gebruiken."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Aanvullende apparaatspecifieke leverancierslogboeken opnemen in bugrapporten. Deze kunnen privégegevens bevatten, meer batterijlading gebruiken en/of meer opslagruimte gebruiken."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Venster­animatieschaal"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Overgangs­animatieschaal"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Duur van animatieschaal"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Secundaire displays simuleren"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Activiteiten niet opslaan"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Wis activiteit zodra de gebruiker ermee stopt"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Activiteit wissen zodra de gebruiker deze verlaat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Achtergrondproceslimiet"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ANR\'s op de achtergrond"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Toon dialoogvenster \'App reageert niet\' voor achtergrond-apps"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Dialoogvenster \'App reageert niet\' weergeven voor achtergrond-apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kanaalwaarschuwingen voor meldingen tonen"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Toont een waarschuwing op het scherm wanneer een app een melding post zonder geldig kanaal"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Formaat activiteiten geforceerd aanpasbaar maken"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak het formaat van alle activiteiten aanpasbaar, ongeacht de manifestwaarden."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Het formaat van alle activiteiten aanpasbaar maken, ongeacht de manifestwaarden."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Vensters met vrije vorm aanzetten"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Zet ondersteuning voor vensters met experimentele vrije vorm aan."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ondersteuning voor vensters met experimentele vrije vorm aanzetten."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Wachtwoord desktopback-up"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
@@ -399,8 +400,13 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inactief. Tik om te schakelen."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Actief. Tik om te schakelen."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Stand-bystatus app: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"Instellingen voor mediatranscodering"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Standaardwaarden voor transcodering overschrijven"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Transcodering aanzetten"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Aannemen dat apps moderne indelingen ondersteunen"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Transcoderingsmeldingen tonen"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Actieve services"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Bekijk en beheer services die momenteel actief zijn"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Services die momenteel actief zijn, bekijken en beheren"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementatie"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView-implementatie instellen"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Deze keuze is niet meer geldig. Probeer het opnieuw."</string>
@@ -418,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rood-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blauw-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurcorrectie"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Met kleurcorrectie kun je aanpassen hoe kleuren op je apparaat worden weergegeven"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Aanpassen hoe kleuren worden getoond op je apparaat. In de volgende gevallen kan dit handig zijn:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren duidelijker zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt focussen.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Nog ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -444,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet wordt binnenkort mogelijk uitgezet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Apparaat wordt binnenkort mogelijk uitgezet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Nog <xliff:g id="TIME">%1$s</xliff:g> tot opgeladen"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> tot opgeladen"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimaliseren voor batterijduur"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
@@ -453,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Langzaam opladen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wordt niet opgeladen"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Aangesloten, kan nu niet opladen"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Volledig"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ingesteld door beheerder"</string>
     <string name="disabled" msgid="8017887509554714950">"Uitgezet"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegestaan"</string>
@@ -478,7 +487,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Volgende"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Wachtwoord vereist"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Actieve invoermethoden"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik systeemtalen"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Systeemtalen gebruiken"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Instellingen openen voor <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> mislukt"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonsgegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode aanzetten?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Wanneer je telefoon opnieuw is opgestart, kan deze app pas worden gestart nadat je je telefoon hebt ontgrendeld"</string>
@@ -495,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Minder tijd."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuleren"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Instellen van wekkers en herinneringen toestaan"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Wekkers en herinneringen"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Toestaan dat deze app wekkers of andere op tijd gebaseerde afspraken plant. Hiermee kan de app worden geactiveerd en uitgevoerd, ook als je het apparaat niet gebruikt. Als je dit recht intrekt, kan de werking van de app worden verstoord (met name wekkers die de app heeft ingesteld, werken niet meer)."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"schema, wekker, herinnering, afspraak"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aanzetten"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zet Niet storen aan."</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nooit"</string>
@@ -505,10 +519,11 @@
     <string name="alarm_template" msgid="3346777418136233330">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duur"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vraag altijd"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Altijd vragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je uitzet"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefoonspeaker"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Deze telefoon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Zet het apparaat uit en weer aan."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedraad audioapparaat"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en feedback"</string>
@@ -546,12 +561,48 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Voordat je een beperkt profiel kunt maken, moet je een schermvergrendeling instellen om je apps en persoonsgegevens te beschermen."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Vergrendeling instellen"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Overschakelen naar <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Nieuwe gebruiker maken…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
+    <string name="user_nickname" msgid="262624187455825083">"Bijnaam"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast toevoegen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast verwijderen"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gast"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"Foto maken"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"Afbeelding kiezen"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"Foto selecteren"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Apparaatstandaard"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uitgezet"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aangezet"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Uit"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"Netwerk van provider wordt gewijzigd"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobiele data uit"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"Gebruik van gegevens is niet ingesteld"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"Geen telefoonsignaal."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefoon: één streepje."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefoon: twee streepjes."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefoon: drie streepjes."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefoonsignaal is op volle sterkte."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"Geen gegevens."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Gegevens: één streepje."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Gegevens: twee streepjes."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Gegevens: drie streepjes."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Gegevenssignaal is op volle sterkte."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetverbinding verbroken."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Geen gesprekken."</string>
 </resources>

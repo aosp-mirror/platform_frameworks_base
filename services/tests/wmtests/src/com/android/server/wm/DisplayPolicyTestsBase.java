@@ -27,7 +27,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
@@ -45,7 +45,6 @@ import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.View;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
@@ -68,7 +67,12 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
     @Before
     public void setUpDisplayPolicy() {
-        mDisplayPolicy = spy(mDisplayContent.getDisplayPolicy());
+        // Disable surface placement because it has no direct relation to layout policy and it also
+        // avoids some noises such as the display info is modified, screen frozen, config change.
+        mWm.mWindowPlacerLocked.deferLayout();
+
+        mDisplayPolicy = mDisplayContent.getDisplayPolicy();
+        spyOn(mDisplayPolicy);
 
         final TestContextWrapper context = new TestContextWrapper(
                 mDisplayPolicy.getContext(), mDisplayPolicy.getCurrentUserResources());
@@ -94,19 +98,18 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
         mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
         addWindow(mStatusBarWindow);
-        mDisplayPolicy.mLastSystemUiFlags |= View.STATUS_BAR_TRANSPARENT;
 
         mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
         addWindow(mNavBarWindow);
-        mDisplayPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
+
+        // Update source frame and visibility of insets providers.
+        mDisplayContent.getInsetsStateController().onPostLayout();
     }
 
     void addWindow(WindowState win) {
-        final int callingPid = Binder.getCallingPid();
-        final int callingUid = Binder.getCallingUid();
-        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
-        assertEquals(WindowManagerGlobal.ADD_OKAY,
-                mDisplayPolicy.validateAddingWindowLw(win.mAttrs, callingPid, callingUid));
+        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs);
+        assertEquals(WindowManagerGlobal.ADD_OKAY, mDisplayPolicy.validateAddingWindowLw(
+                win.mAttrs, Binder.getCallingPid(), Binder.getCallingUid()));
         mDisplayPolicy.addWindowLw(win, win.mAttrs);
         win.mHasSurface = true;
     }
@@ -114,7 +117,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     static Pair<DisplayInfo, WmDisplayCutout> displayInfoAndCutoutForRotation(int rotation,
             boolean withDisplayCutout, boolean isLongEdgeCutout) {
         final DisplayInfo info = new DisplayInfo();
-        WmDisplayCutout cutout = null;
+        WmDisplayCutout cutout = WmDisplayCutout.NO_CUTOUT;
 
         final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
         info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;

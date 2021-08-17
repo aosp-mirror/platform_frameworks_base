@@ -18,6 +18,7 @@ package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
 
+import android.annotation.Nullable;
 import android.graphics.PointF;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -249,7 +250,7 @@ public final class TonemapCurve {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         }

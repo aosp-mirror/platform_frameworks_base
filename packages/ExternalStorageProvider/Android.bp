@@ -9,6 +9,7 @@ package {
 
 android_app {
     name: "ExternalStorageProvider",
+    defaults: ["platform_app_defaults"],
 
     manifest: "AndroidManifest.xml",
 

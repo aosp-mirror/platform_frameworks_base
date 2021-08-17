@@ -36,8 +36,8 @@ import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import androidx.annotation.Keep
 import com.android.internal.graphics.ColorUtils
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import org.xmlpull.v1.XmlPullParser
 
 private const val RIPPLE_ANIM_DURATION = 800L
@@ -184,8 +184,13 @@ class LightSourceDrawable : Drawable() {
         throw UnsupportedOperationException("Color filters are not supported")
     }
 
-    override fun setAlpha(value: Int) {
-        throw UnsupportedOperationException("Alpha is not supported")
+    override fun setAlpha(alpha: Int) {
+        if (alpha == paint.alpha) {
+            return
+        }
+
+        paint.alpha = alpha
+        invalidateSelf()
     }
 
     /**

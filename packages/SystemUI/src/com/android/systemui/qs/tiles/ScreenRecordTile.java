@@ -22,13 +22,17 @@ import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -55,6 +59,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
@@ -62,8 +67,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             RecordingController controller,
             KeyguardDismissUtil keyguardDismissUtil
     ) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
         mKeyguardDismissUtil = keyguardDismissUtil;
@@ -78,7 +83,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mController.isStarting()) {
             cancelCountdown();
         } else if (mController.isRecording()) {
@@ -98,6 +103,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
         state.icon = ResourceIcon.get(R.drawable.ic_screenrecord);
+        // Show expand icon when clicking will open a dialog
+        state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
 
         if (isRecording) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
@@ -134,10 +141,10 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         getHost().collapsePanels();
         Intent intent = mController.getPromptIntent();
         ActivityStarter.OnDismissAction dismissAction = () -> {
-            mContext.startActivity(intent);
+            mHost.getUserContext().startActivity(intent);
             return false;
         };
-        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false);
+        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false, false);
     }
 
     private void cancelCountdown() {

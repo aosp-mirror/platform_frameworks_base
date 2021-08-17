@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_IDMAP2_COMMAND_UTILS_H_
-#define IDMAP2_IDMAP2_COMMAND_UTILS_H_
+#ifndef IDMAP2_IDMAP2_COMMANDUTILS_H_
+#define IDMAP2_IDMAP2_COMMANDUTILS_H_
+
+#include <string>
 
 #include "idmap2/PolicyUtils.h"
 #include "idmap2/Result.h"
 
-android::idmap2::Result<android::idmap2::Unit> Verify(const std::string& idmap_path,
-                                                      const std::string& target_path,
-                                                      const std::string& overlay_path,
-                                                      PolicyBitmask fulfilled_policies,
-                                                      bool enforce_overlayable);
+android::idmap2::Result<android::idmap2::Unit> Verify(
+    const std::string& idmap_path, const std::string& target_path, const std::string& overlay_path,
+    const std::string& overlay_name, PolicyBitmask fulfilled_policies, bool enforce_overlayable);
 
-#endif  // IDMAP2_IDMAP2_COMMAND_UTILS_H_
+#endif  // IDMAP2_IDMAP2_COMMANDUTILS_H_

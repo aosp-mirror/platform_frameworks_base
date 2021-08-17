@@ -124,6 +124,9 @@ cc_binary_host {
     srcs: ["Main.cpp"],
     use_version_lib: true,
     static_libs: ["libaapt"],
+    dist: {
+        targets: ["aapt2_artifacts"],
+    },
 }
 
 // ==========================================================

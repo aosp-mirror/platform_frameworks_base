@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Paketinstallation"</string>
     <string name="install" msgid="711829760615509273">"Installieren"</string>
+    <string name="update" msgid="3932142540719227615">"Aktualisieren"</string>
     <string name="done" msgid="6632441120016885253">"Fertig"</string>
     <string name="cancel" msgid="1018267193425558088">"Abbrechen"</string>
     <string name="installing" msgid="4921993079741206516">"Wird installiert…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird installiert…"</string>
     <string name="install_done" msgid="5987363587661783896">"App wurde installiert."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Möchtest du diese App installieren?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Möchtest du ein Update dieser vorhandenen App installieren? Deine bisherigen Daten gehen dabei nicht verloren."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Möchtest du ein Update dieser integrierten App installieren? Deine bisherigen Daten gehen dabei nicht verloren."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Möchtest du diese App installieren?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Möchtest du diese App aktualisieren?"</string>
     <string name="install_failed" msgid="5777824004474125469">"App wurde nicht installiert."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die Installation des Pakets wurde blockiert."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht installiert werden. Gib Speicherplatz frei und versuche es noch einmal."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"App nicht gefunden"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Die App wurde nicht in der Liste der installierten Apps gefunden."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Nicht zugelassen"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Nicht zulässig"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Der aktuelle Nutzer ist nicht dazu berechtigt, diese Deinstallation auszuführen."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Fehler"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"App konnte nicht deinstalliert werden."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Installations-/Deinstallationsaktion auf Android Wear nicht unterstützt."</string>
     <string name="message_staging" msgid="8032722385658438567">"App wird vorbereitet…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Unbekannt"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Aus Sicherheitsgründen kannst du auf dem Tablet keine unbekannten Apps aus dieser Quelle installieren."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Aus Sicherheitsgründen kannst du auf dem Fernseher keine unbekannten Apps aus dieser Quelle installieren."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Aus Sicherheitsgründen kannst du auf dem Smartphone keine unbekannten Apps aus dieser Quelle installieren."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Aus Sicherheitsgründen kannst du auf deinem Tablet zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Aus Sicherheitsgründen kannst du auf deinem Fernseher zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Aus Sicherheitsgründen kannst du auf deinem Smartphone zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Unbekannte Apps können gefährlich für dein Smartphone und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Smartphone und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Unbekannte Apps können gefährlich für dein Tablet und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Tablet und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Unbekannte Apps können gefährlich für deinen Fernseher und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Fernseher und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>

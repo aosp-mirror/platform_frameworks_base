@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,13 +29,13 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
@@ -62,7 +64,7 @@ public final class DeviceIdleJobsController extends StateController {
      * when the app is temp whitelisted or in the foreground.
      */
     private final ArraySet<JobStatus> mAllowInIdleJobs;
-    private final SparseBooleanArray mForegroundUids;
+    private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
     private final DeviceIdleUpdateFunctor mDeviceIdleUpdateFunctor;
     private final DeviceIdleJobsDelayHandler mHandler;
     private final PowerManager mPowerManager;
@@ -75,7 +77,6 @@ public final class DeviceIdleJobsController extends StateController {
     private int[] mDeviceIdleWhitelistAppIds;
     private int[] mPowerSaveTempWhitelistAppIds;
 
-    // onReceive
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -104,8 +105,10 @@ public final class DeviceIdleJobsController extends StateController {
                                     + Arrays.toString(mPowerSaveTempWhitelistAppIds));
                         }
                         boolean changed = false;
+                        final long nowElapsed = sElapsedRealtimeClock.millis();
                         for (int i = 0; i < mAllowInIdleJobs.size(); i++) {
-                            changed |= updateTaskStateLocked(mAllowInIdleJobs.valueAt(i));
+                            changed |=
+                                    updateTaskStateLocked(mAllowInIdleJobs.valueAt(i), nowElapsed);
                         }
                         if (changed) {
                             mStateChangedListener.onControllerStateChanged();
@@ -115,6 +118,10 @@ public final class DeviceIdleJobsController extends StateController {
             }
         }
     };
+
+    /** Criteria for whether or not we should a job's rush evaluation when the device exits Doze. */
+    private final Predicate<JobStatus> mShouldRushEvaluation = (jobStatus) ->
+            jobStatus.isRequestedExpeditedJob() || mForegroundUids.get(jobStatus.getSourceUid());
 
     public DeviceIdleJobsController(JobSchedulerService service) {
         super(service);
@@ -129,7 +136,6 @@ public final class DeviceIdleJobsController extends StateController {
                 mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
         mDeviceIdleUpdateFunctor = new DeviceIdleUpdateFunctor();
         mAllowInIdleJobs = new ArraySet<>();
-        mForegroundUids = new SparseBooleanArray();
         final IntentFilter filter = new IntentFilter();
         filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
@@ -147,18 +153,14 @@ public final class DeviceIdleJobsController extends StateController {
             }
             mDeviceIdleMode = enabled;
             if (DEBUG) Slog.d(TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
+            mDeviceIdleUpdateFunctor.prepare();
             if (enabled) {
                 mHandler.removeMessages(PROCESS_BACKGROUND_JOBS);
                 mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
             } else {
-                // When coming out of doze, process all foreground uids immediately, while others
-                // will be processed after a delay of 3 seconds.
-                for (int i = 0; i < mForegroundUids.size(); i++) {
-                    if (mForegroundUids.valueAt(i)) {
-                        mService.getJobStore().forEachJobForSourceUid(
-                                mForegroundUids.keyAt(i), mDeviceIdleUpdateFunctor);
-                    }
-                }
+                // When coming out of doze, process all foreground uids and EJs immediately,
+                // while others will be processed after a delay of 3 seconds.
+                mService.getJobStore().forEachJob(mShouldRushEvaluation, mDeviceIdleUpdateFunctor);
                 mHandler.sendEmptyMessageDelayed(PROCESS_BACKGROUND_JOBS, BACKGROUND_JOBS_DELAY);
             }
         }
@@ -180,7 +182,7 @@ public final class DeviceIdleJobsController extends StateController {
             Slog.d(TAG, "uid " + uid + " going " + (active ? "active" : "inactive"));
         }
         mForegroundUids.put(uid, active);
-        mDeviceIdleUpdateFunctor.mChanged = false;
+        mDeviceIdleUpdateFunctor.prepare();
         mService.getJobStore().forEachJobForSourceUid(uid, mDeviceIdleUpdateFunctor);
         if (mDeviceIdleUpdateFunctor.mChanged) {
             mStateChangedListener.onControllerStateChanged();
@@ -203,12 +205,12 @@ public final class DeviceIdleJobsController extends StateController {
                 UserHandle.getAppId(job.getSourceUid()));
     }
 
-    private boolean updateTaskStateLocked(JobStatus task) {
+    private boolean updateTaskStateLocked(JobStatus task, final long nowElapsed) {
         final boolean allowInIdle = ((task.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0)
                 && (mForegroundUids.get(task.getSourceUid()) || isTempWhitelistedLocked(task));
         final boolean whitelisted = isWhitelistedLocked(task);
         final boolean enableTask = !mDeviceIdleMode || whitelisted || allowInIdle;
-        return task.setDeviceNotDozingConstraintSatisfied(enableTask, whitelisted);
+        return task.setDeviceNotDozingConstraintSatisfied(nowElapsed, enableTask, whitelisted);
     }
 
     @Override
@@ -216,7 +218,7 @@ public final class DeviceIdleJobsController extends StateController {
         if ((jobStatus.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
             mAllowInIdleJobs.add(jobStatus);
         }
-        updateTaskStateLocked(jobStatus);
+        updateTaskStateLocked(jobStatus, sElapsedRealtimeClock.millis());
     }
 
     @Override
@@ -282,10 +284,16 @@ public final class DeviceIdleJobsController extends StateController {
 
     final class DeviceIdleUpdateFunctor implements Consumer<JobStatus> {
         boolean mChanged;
+        long mUpdateTimeElapsed = 0;
+
+        void prepare() {
+            mChanged = false;
+            mUpdateTimeElapsed = sElapsedRealtimeClock.millis();
+        }
 
         @Override
         public void accept(JobStatus jobStatus) {
-            mChanged |= updateTaskStateLocked(jobStatus);
+            mChanged |= updateTaskStateLocked(jobStatus, mUpdateTimeElapsed);
         }
     }
 
@@ -300,7 +308,7 @@ public final class DeviceIdleJobsController extends StateController {
                 case PROCESS_BACKGROUND_JOBS:
                     // Just process all the jobs, the ones in foreground should already be running.
                     synchronized (mLock) {
-                        mDeviceIdleUpdateFunctor.mChanged = false;
+                        mDeviceIdleUpdateFunctor.prepare();
                         mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
                         if (mDeviceIdleUpdateFunctor.mChanged) {
                             mStateChangedListener.onControllerStateChanged();

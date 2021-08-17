@@ -19,6 +19,14 @@
         },
         {
             "name": "SettingsProviderTest"
+        },
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.ReadableSettingsFieldsTest"
+                }
+            ]
         }
     ]
 }

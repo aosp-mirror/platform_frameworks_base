@@ -32,11 +32,13 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.util.mockito.any
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -47,8 +49,9 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -75,6 +78,7 @@ class CustomTileTest : SysuiTestCase() {
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
     @Mock private lateinit var serviceInfo: ServiceInfo
+    @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
 
     private lateinit var customTile: CustomTile
     private lateinit var testableLooper: TestableLooper
@@ -103,13 +107,17 @@ class CustomTileTest : SysuiTestCase() {
                 { tileHost },
                 testableLooper.looper,
                 Handler(testableLooper.looper),
+                FalsingManagerFake(),
                 metricsLogger,
                 statusBarStateController,
                 activityStarter,
-                qsLogger
+                qsLogger,
+                customTileStatePersister
         )
 
         customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile.initialize()
+        testableLooper.processAllMessages()
     }
 
     @Test
@@ -121,6 +129,8 @@ class CustomTileTest : SysuiTestCase() {
         `when`(userContext.userId).thenReturn(10)
 
         val tile = CustomTile.create(customTileBuilder, TILE_SPEC, userContext)
+        tile.initialize()
+        testableLooper.processAllMessages()
 
         assertEquals(10, tile.user)
     }
@@ -129,6 +139,8 @@ class CustomTileTest : SysuiTestCase() {
     fun testToggleableTileHasBooleanState() {
         `when`(tileServiceManager.isToggleableTile).thenReturn(true)
         customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile.initialize()
+        testableLooper.processAllMessages()
 
         assertTrue(customTile.state is QSTile.BooleanState)
         assertTrue(customTile.newTileState() is QSTile.BooleanState)
@@ -144,6 +156,9 @@ class CustomTileTest : SysuiTestCase() {
     fun testValueUpdatedInBooleanTile() {
         `when`(tileServiceManager.isToggleableTile).thenReturn(true)
         customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile.initialize()
+        testableLooper.processAllMessages()
+
         customTile.qsTile.icon = mock(Icon::class.java)
         `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))
                 .thenReturn(mock(Drawable::class.java))
@@ -170,5 +185,89 @@ class CustomTileTest : SysuiTestCase() {
         `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))
                 .thenReturn(null)
         customTile.handleUpdateState(customTile.newTileState(), null)
+    }
+
+    @Test
+    fun testNoLoadStateTileNotActive() {
+        // Not active by default
+        testableLooper.processAllMessages()
+
+        verify(customTileStatePersister, never()).readState(any())
+    }
+
+    @Test
+    fun testNoPersistedStateTileNotActive() {
+        // Not active by default
+        val t = Tile().apply {
+            state = Tile.STATE_INACTIVE
+        }
+        customTile.updateTileState(t)
+        testableLooper.processAllMessages()
+
+        verify(customTileStatePersister, never()).persistState(any(), any())
+    }
+
+    @Test
+    fun testPersistedStateRetrieved() {
+        val state = Tile.STATE_INACTIVE
+        val label = "test_label"
+        val subtitle = "test_subtitle"
+        val contentDescription = "test_content_description"
+        val stateDescription = "test_state_description"
+
+        val t = Tile().apply {
+            this.state = state
+            this.label = label
+            this.subtitle = subtitle
+            this.contentDescription = contentDescription
+            this.stateDescription = stateDescription
+        }
+        `when`(tileServiceManager.isActiveTile).thenReturn(true)
+        `when`(customTileStatePersister
+                .readState(TileServiceKey(componentName, customTile.user))).thenReturn(t)
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.initialize()
+        testableLooper.processAllMessages()
+
+        // Make sure we have an icon in the tile because we don't have a default icon
+        // This should not be overridden by the retrieved tile that has null icon.
+        tile.qsTile.icon = mock(Icon::class.java)
+        `when`(tile.qsTile.icon.loadDrawable(any(Context::class.java)))
+                .thenReturn(mock(Drawable::class.java))
+
+        tile.refreshState()
+
+        testableLooper.processAllMessages()
+
+        val tileState = tile.state
+
+        assertEquals(state, tileState.state)
+        assertEquals(label, tileState.label)
+        assertEquals(subtitle, tileState.secondaryLabel)
+        assertEquals(contentDescription, tileState.contentDescription)
+        assertEquals(stateDescription, tileState.stateDescription)
+    }
+
+    @Test
+    fun testStoreStateOnChange() {
+        val t = Tile().apply {
+            state = Tile.STATE_INACTIVE
+            label = "test_label"
+            subtitle = "test_subtitle"
+            contentDescription = "test_content_description"
+            stateDescription = "test_state_description"
+        }
+        `when`(tileServiceManager.isActiveTile).thenReturn(true)
+
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.initialize()
+        testableLooper.processAllMessages()
+
+        tile.updateTileState(t)
+
+        testableLooper.processAllMessages()
+
+        verify(customTileStatePersister)
+                .persistState(TileServiceKey(componentName, customTile.user), t)
     }
 }

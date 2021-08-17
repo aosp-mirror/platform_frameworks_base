@@ -133,10 +133,28 @@ public final class ImsCallProfile implements Parcelable {
      *      the video during voice call.
      *  conference_avail : Indicates if the session can be extended to the conference.
      */
+
     /**
+     * Indicates if the session is for a conference call or not. If not defined, should be
+     * considered {@code false}.
+     * Boolean extra properties - {@code true} / {@code false}.
+     *
+     * This extra is set on an instance of {@link ImsCallProfile} via {@link #setCallExtraBoolean}.
      * @hide
      */
-    public static final String EXTRA_CONFERENCE = "conference";
+    @SystemApi
+    public static final String EXTRA_CONFERENCE = "android.telephony.ims.extra.CONFERENCE";
+
+    /**
+     * The previous string of EXTRA_CONFERENCE. Use EXTRA_CONFERENCE whenever possible.
+     * For external app or vendor code backward compatibility, we should always set value for both
+     * EXTRA_CONFERENCE_DEPRECATED and EXTRA_CONFERENCE.
+     *
+     * @deprecated Remove when not needed anymore.
+     *
+     * @hide
+     */
+    public static final String EXTRA_CONFERENCE_DEPRECATED = "conference";
 
     /**
      * Boolean extra property set on an {@link ImsCallProfile} to indicate that this call is an
@@ -153,7 +171,27 @@ public final class ImsCallProfile implements Parcelable {
      * @hide
      */
     public static final String EXTRA_CALL_MODE_CHANGEABLE = "call_mode_changeable";
+
     /**
+     * Indicates if the session can be extended to a conference call. If not defined, should be
+     * considered {@code false}.
+     * Boolean extra properties - {@code true} / {@code false}.
+     *
+     * This extra is set on an instance of {@link ImsCallProfile} via {@link #setCallExtraBoolean}.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED =
+            "android.telephony.ims.extra.EXTENDING_TO_CONFERENCE_SUPPORTED";
+
+    /**
+     * The previous string of EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED.
+     * Use EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED whenever possible.
+     * For backward compatibility, we should always set value for both
+     * EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED and EXTRA_CONFERENCE_AVAIL.
+     *
+     * @deprecated Remove when not needed anymore.
+     *
      * @hide
      */
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
@@ -239,9 +277,22 @@ public final class ImsCallProfile implements Parcelable {
      * server infrastructure to get the picture. It can be set via
      * {@link #setCallExtra(String, String)}.
      *
+     * Note that this URL is not intended to be parsed by the IMS stack -- it should be sent
+     * directly to the network for consumption by the called party or forwarded directly from the
+     * network to the platform for caching and download.
+     *
      * Reference: RCC.20 Section 2.4.3.2
      */
     public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
+
+    /**
+     * Boolean extra indicating whether the call is a business call.
+     *
+     * This extra will be set to {@code true} if and only if the SIP INVITE headers contain the
+     * "Organization" header.
+     */
+    public static final String EXTRA_IS_BUSINESS_CALL =
+            "android.telephony.ims.extra.IS_BUSINESS_CALL";
 
     /**
      * Values for EXTRA_OIR / EXTRA_CNAP
@@ -410,6 +461,15 @@ public final class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_FORWARDED_NUMBER =
             "android.telephony.ims.extra.FORWARDED_NUMBER";
+
+    /**
+     * Extra key with an {@code boolean} value which can be set in
+     * {@link #setCallExtraBoolean(String, boolean)} to indicate whether call is a cross sim call.
+     * <p>
+     * Valid values are true if call is cross sim call else false.
+     */
+    public static final String EXTRA_IS_CROSS_SIM_CALL =
+            "android.telephony.ims.extra.IS_CROSS_SIM_CALL";
 
     /** @hide */
     public int mServiceType;
@@ -673,6 +733,10 @@ public final class ImsCallProfile implements Parcelable {
 
     /**
      * Set the call extra value (Parcelable), given the call extra name.
+     *
+     * Note that the {@link Parcelable} provided must be a class defined in the Android API surface,
+     * as opposed to a class defined by your app.
+     *
      * @param name call extra name
      * @param parcelable call extra value
      */
@@ -744,7 +808,9 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyCallTesting=" + mEmergencyCallTesting
                 + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency
                 + ", mRestrictCause=" + mRestrictCause
-                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus + " }";
+                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus
+                + ", mAcceptedRtpHeaderExtensions= " + mAcceptedRtpHeaderExtensionTypes
+                + " }";
     }
 
     @Override

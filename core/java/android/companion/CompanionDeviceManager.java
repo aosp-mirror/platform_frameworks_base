@@ -16,6 +16,7 @@
 
 package android.companion;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -24,6 +25,7 @@ import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
@@ -34,6 +36,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.util.ExceptionUtils;
 import android.util.Log;
 
 import java.util.Collections;
@@ -140,6 +143,10 @@ public final class CompanionDeviceManager {
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
+     * <p>When using {@link AssociationRequest#DEVICE_PROFILE_WATCH watch}
+     * {@link AssociationRequest.Builder#setDeviceProfile profile}, caller must also hold
+     * {@link Manifest.permission#REQUEST_COMPANION_PROFILE_WATCH}</p>
+     *
      * @param request specific details about this request
      * @param callback will be called once there's at least one device found for user to choose from
      * @param handler A handler to control which thread the callback will be delivered on, or null,
@@ -147,6 +154,9 @@ public final class CompanionDeviceManager {
      *
      * @see AssociationRequest
      */
+    @RequiresPermission(
+            value = Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH,
+            conditional = true)
     public void associate(
             @NonNull AssociationRequest request,
             @NonNull Callback callback,
@@ -298,6 +308,162 @@ public final class CompanionDeviceManager {
         try {
             return mService.isDeviceAssociatedForWifiConnection(
                     packageName, macAddress.toString(), user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets all package-device {@link Association}s for the current user.
+     *
+     * @return the associations list
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public @NonNull List<Association> getAllAssociations() {
+        if (!checkFeaturePresent()) {
+            return Collections.emptyList();
+        }
+        try {
+            return mService.getAssociationsForUser(mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether the bluetooth device represented by the mac address was recently associated
+     * with the companion app. This allows these devices to skip the Bluetooth pairing dialog if
+     * their pairing variant is {@link BluetoothDevice#PAIRING_VARIANT_CONSENT}.
+     *
+     * @param packageName the package name of the calling app
+     * @param deviceMacAddress the bluetooth device's mac address
+     * @param user the user handle that currently hosts the package being queried for a companion
+     *             device association
+     * @return true if it was recently associated and we can bypass the dialog, false otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public boolean canPairWithoutPrompt(@NonNull String packageName,
+            @NonNull String deviceMacAddress, @NonNull UserHandle user) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(deviceMacAddress, "device mac address cannot be null");
+        Objects.requireNonNull(user, "user handle cannot be null");
+        try {
+            return mService.canPairWithoutPrompt(packageName, deviceMacAddress,
+                    user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register to receive callbacks whenever the associated device comes in and out of range.
+     *
+     * The provided device must be {@link #associate associated} with the calling app before
+     * calling this method.
+     *
+     * Caller must implement a single {@link CompanionDeviceService} which will be bound to and
+     * receive callbacks to {@link CompanionDeviceService#onDeviceAppeared} and
+     * {@link CompanionDeviceService#onDeviceDisappeared}.
+     * The app doesn't need to remain running in order to receive its callbacks.
+     *
+     * Calling app must declare uses-permission
+     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * For Bluetooth LE devices this is based on scanning for device with the given address.
+     * For Bluetooth classic devices this is triggered when the device connects/disconnects.
+     * WiFi devices are not supported.
+     *
+     * If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
+     * Resolvable Private Address, and ensure the device is bonded to the phone so that android OS
+     * is able to resolve the address.
+     *
+     * @param deviceAddress a previously-associated companion device's address
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated
+     * with this app.
+     */
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void startObservingDevicePresence(@NonNull String deviceAddress)
+            throws DeviceNotAssociatedException {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+        Objects.requireNonNull(deviceAddress, "address cannot be null");
+        try {
+            mService.registerDevicePresenceListenerService(
+                    mContext.getPackageName(), deviceAddress);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister for receiving callbacks whenever the associated device comes in and out of range.
+     *
+     * The provided device must be {@link #associate associated} with the calling app before
+     * calling this method.
+     *
+     * Calling app must declare uses-permission
+     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * @param deviceAddress a previously-associated companion device's address
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated
+     * with this app.
+     */
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void stopObservingDevicePresence(@NonNull String deviceAddress)
+            throws DeviceNotAssociatedException {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+        Objects.requireNonNull(deviceAddress, "address cannot be null");
+        try {
+            mService.unregisterDevicePresenceListenerService(
+                    mContext.getPackageName(), deviceAddress);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+    }
+
+    /**
+     * Associates given device with given app for the given user directly, without UI prompt.
+     *
+     * @param packageName package name of the companion app
+     * @param macAddress mac address of the device to associate
+     * @param certificate The SHA256 digest of the companion app's signing certificate
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES)
+    public void associate(
+            @NonNull String packageName,
+            @NonNull MacAddress macAddress,
+            @NonNull byte[] certificate) {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(macAddress, "mac address cannot be null");
+
+        UserHandle user = android.os.Process.myUserHandle();
+        try {
+            mService.createAssociation(
+                    packageName, macAddress.toString(), user.getIdentifier(), certificate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

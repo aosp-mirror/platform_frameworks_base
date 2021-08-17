@@ -23,6 +23,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
+import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -48,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -60,6 +63,7 @@ public class InputMethodUtilsTest {
     private static final boolean IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE = true;
     private static final boolean IS_ASCII_CAPABLE = true;
     private static final boolean IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE = true;
+    private static final boolean CHECK_COUNTRY = true;
     private static final Locale LOCALE_EN = new Locale("en");
     private static final Locale LOCALE_EN_US = new Locale("en", "US");
     private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
@@ -668,8 +672,6 @@ public class InputMethodUtilsTest {
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
 
-        final boolean CHECK_COUNTRY = true;
-
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
@@ -794,6 +796,97 @@ public class InputMethodUtilsTest {
         }
     }
 
+    @Test
+    public void testChooseSystemVoiceIme() throws Exception {
+        final InputMethodInfo systemIme = createFakeInputMethodInfo("SystemIme", "fake.voice0",
+                true /* isSystem */);
+
+        // Returns null when the config value is null.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, null, ""));
+        }
+
+        // Returns null when the config value is empty.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, "", ""));
+        }
+
+        // Returns null when the configured package doesn't have an IME.
+        {
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+                    systemIme.getPackageName(), ""));
+        }
+
+        // Returns the right one when the current default is null.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), null));
+        }
+
+        // Returns the right one when the current default is empty.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), ""));
+        }
+
+        // Returns null when the current default isn't found.
+        {
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+                    systemIme.getPackageName(), systemIme.getId()));
+        }
+
+        // Returns null when there are multiple IMEs defined by the config package.
+        {
+            final InputMethodInfo secondIme = createFakeInputMethodInfo(systemIme.getPackageName(),
+                    "fake.voice1", true /* isSystem */);
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(secondIme.getId(), secondIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, systemIme.getPackageName(),
+                    ""));
+        }
+
+        // Returns the current one when the current default and config point to the same package.
+        {
+            final InputMethodInfo secondIme = createFakeInputMethodInfo("SystemIme", "fake.voice1",
+                    true /* isSystem */);
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(secondIme.getId(), secondIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), systemIme.getId()));
+        }
+
+        // Doesn't return the current default if it isn't a system app.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
+                    "fake.voice0", false /* isSystem */);
+            methodMap.put(nonSystemIme.getId(), nonSystemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    nonSystemIme.getPackageName(), nonSystemIme.getId()));
+        }
+
+        // Returns null if the configured one isn't a system app.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final InputMethodInfo nonSystemIme = createFakeInputMethodInfo(
+                    "FakeDefaultAutoVoiceIme", "fake.voice0", false /* isSystem */);
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(nonSystemIme.getId(), nonSystemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    nonSystemIme.getPackageName(), ""));
+        }
+    }
+
     private void assertDefaultEnabledImes(final ArrayList<InputMethodInfo> preinstalledImes,
             final Locale systemLocale, String... expectedImeNames) {
         final Context context = createTargetContextWithLocales(new LocaleList(systemLocale));
@@ -864,6 +957,25 @@ public class InputMethodUtilsTest {
     private static void verifyEquality(InputMethodSubtype expected, InputMethodSubtype actual) {
         assertEquals(expected, actual);
         assertEquals(expected.hashCode(), actual.hashCode());
+    }
+
+    private static InputMethodInfo createFakeInputMethodInfo(String packageName, String name,
+            boolean isSystem) {
+        final ResolveInfo ri = new ResolveInfo();
+        final ServiceInfo si = new ServiceInfo();
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = packageName;
+        ai.enabled = true;
+        if (isSystem) {
+            ai.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
+        si.applicationInfo = ai;
+        si.enabled = true;
+        si.packageName = packageName;
+        si.name = name;
+        si.exported = true;
+        ri.serviceInfo = si;
+        return new InputMethodInfo(ri, false, "", Collections.emptyList(), 1, true);
     }
 
     private static InputMethodInfo createFakeInputMethodInfo(String packageName, String name,

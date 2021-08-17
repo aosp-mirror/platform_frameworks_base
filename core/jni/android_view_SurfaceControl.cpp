@@ -26,7 +26,12 @@
 
 #include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
+#include <android/gui/BnScreenCaptureListener.h>
+#include <android/hardware/display/IDeviceProductInfoConstants.h>
+#include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/ISurfaceComposer.h>
@@ -38,16 +43,19 @@
 #include <private/gui/ComposerService.h>
 #include <stdio.h>
 #include <system/graphics.h>
+#include <ui/BlurRegion.h>
 #include <ui/ConfigStoreTypes.h>
 #include <ui/DeviceProductInfo.h>
-#include <ui/DisplayConfig.h>
-#include <ui/DisplayInfo.h>
+#include <ui/DisplayMode.h>
 #include <ui/DisplayedFrameStats.h>
+#include <ui/DynamicDisplayInfo.h>
 #include <ui/FrameStats.h>
 #include <ui/GraphicTypes.h>
 #include <ui/HdrCapabilities.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
+#include <ui/StaticDisplayInfo.h>
+#include <utils/LightRefBase.h>
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
@@ -81,11 +89,24 @@ static struct {
     jfieldID density;
     jfieldID secure;
     jfieldID deviceProductInfo;
-} gDisplayInfoClassInfo;
+} gStaticDisplayInfoClassInfo;
 
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID supportedDisplayModes;
+    jfieldID activeDisplayModeId;
+    jfieldID supportedColorModes;
+    jfieldID activeColorMode;
+    jfieldID hdrCapabilities;
+    jfieldID autoLowLatencyModeSupported;
+    jfieldID gameContentTypeSupported;
+} gDynamicDisplayInfoClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID id;
     jfieldID width;
     jfieldID height;
     jfieldID xDpi;
@@ -93,8 +114,8 @@ static struct {
     jfieldID refreshRate;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
-    jfieldID configGroup;
-} gDisplayConfigClassInfo;
+    jfieldID group;
+} gDisplayModeClassInfo;
 
 static struct {
     jfieldID bottom;
@@ -102,6 +123,30 @@ static struct {
     jfieldID right;
     jfieldID top;
 } gRectClassInfo;
+
+static struct {
+    jfieldID pixelFormat;
+    jfieldID sourceCrop;
+    jfieldID frameScaleX;
+    jfieldID frameScaleY;
+    jfieldID captureSecureLayers;
+    jfieldID allowProtected;
+    jfieldID uid;
+    jfieldID grayscale;
+} gCaptureArgsClassInfo;
+
+static struct {
+    jfieldID displayToken;
+    jfieldID width;
+    jfieldID height;
+    jfieldID useIdentityTransform;
+} gDisplayCaptureArgsClassInfo;
+
+static struct {
+    jfieldID layer;
+    jfieldID excludeLayers;
+    jfieldID childrenOnly;
+} gLayerCaptureArgsClassInfo;
 
 // Implements SkMallocPixelRef::ReleaseProc, to delete the screenshot on unref.
 void DeleteScreenshot(void* addr, void* context) {
@@ -135,11 +180,6 @@ static struct {
 
 static struct {
     jclass clazz;
-    jmethodID builder;
-} gGraphicBufferClassInfo;
-
-static struct {
-    jclass clazz;
     jmethodID ctor;
 } gDisplayedContentSampleClassInfo;
 
@@ -168,17 +208,33 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID builder;
-} gScreenshotGraphicBufferClassInfo;
+} gScreenshotHardwareBufferClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID onScreenCaptureComplete;
+} gScreenCaptureListenerClassInfo;
 
 static struct {
     jclass clazz;
     jmethodID ctor;
-    jfieldID defaultConfig;
+    jfieldID defaultMode;
+    jfieldID allowGroupSwitching;
     jfieldID primaryRefreshRateMin;
     jfieldID primaryRefreshRateMax;
     jfieldID appRequestRefreshRateMin;
     jfieldID appRequestRefreshRateMax;
-} gDesiredDisplayConfigSpecsClassInfo;
+} gDesiredDisplayModeSpecsClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID onJankDataAvailable;
+} gJankDataListenerClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gJankDataClassInfo;
 
 class JNamedColorSpace {
 public:
@@ -198,6 +254,15 @@ constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace
     }
 }
 
+constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpace) {
+    switch (colorSpace) {
+        case JNamedColorSpace::DISPLAY_P3:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
+    }
+}
+
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -209,6 +274,58 @@ constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode
             return ui::Dataspace::V0_SRGB;
     }
 }
+
+class ScreenCaptureListenerWrapper : public gui::BnScreenCaptureListener {
+public:
+    explicit ScreenCaptureListenerWrapper(JNIEnv* env, jobject jobject) {
+        env->GetJavaVM(&mVm);
+        screenCaptureListenerObject = env->NewGlobalRef(jobject);
+        LOG_ALWAYS_FATAL_IF(!screenCaptureListenerObject, "Failed to make global ref");
+    }
+
+    ~ScreenCaptureListenerWrapper() {
+        if (screenCaptureListenerObject) {
+            getenv()->DeleteGlobalRef(screenCaptureListenerObject);
+            screenCaptureListenerObject = nullptr;
+        }
+    }
+
+    binder::Status onScreenCaptureCompleted(
+            const gui::ScreenCaptureResults& captureResults) override {
+        JNIEnv* env = getenv();
+        if (captureResults.result != NO_ERROR || captureResults.buffer == nullptr) {
+            env->CallVoidMethod(screenCaptureListenerObject,
+                                gScreenCaptureListenerClassInfo.onScreenCaptureComplete, nullptr);
+            return binder::Status::ok();
+        }
+        captureResults.fence->waitForever("");
+        jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
+                env, captureResults.buffer->toAHardwareBuffer());
+        const jint namedColorSpace =
+                fromDataspaceToNamedColorSpaceValue(captureResults.capturedDataspace);
+        jobject screenshotHardwareBuffer =
+                env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
+                                            gScreenshotHardwareBufferClassInfo.builder,
+                                            jhardwareBuffer, namedColorSpace,
+                                            captureResults.capturedSecureLayers);
+        env->CallVoidMethod(screenCaptureListenerObject,
+                            gScreenCaptureListenerClassInfo.onScreenCaptureComplete,
+                            screenshotHardwareBuffer);
+        env->DeleteLocalRef(jhardwareBuffer);
+        env->DeleteLocalRef(screenshotHardwareBuffer);
+        return binder::Status::ok();
+    }
+
+private:
+    jobject screenCaptureListenerObject;
+    JavaVM* mVm;
+
+    JNIEnv* getenv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+};
 
 // ----------------------------------------------------------------------------
 
@@ -246,8 +363,13 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         }
     }
 
-    status_t err = client->createSurfaceChecked(
-            String8(name.c_str()), w, h, format, &surface, flags, parent, std::move(metadata));
+    sp<IBinder> parentHandle;
+    if (parent != nullptr) {
+        parentHandle = parent->getHandle();
+    }
+
+    status_t err = client->createSurfaceChecked(String8(name.c_str()), w, h, format, &surface,
+                                                flags, parentHandle, std::move(metadata));
     if (err == NAME_NOT_FOUND) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return 0;
@@ -272,6 +394,14 @@ static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     }
 }
 
+static void nativeSetDefaultBufferSize(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                       jint width, jint height) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    if (ctrl != NULL) {
+        ctrl->updateDefaultBufferSize(width, height);
+    }
+}
+
 static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
     int left = env->GetIntField(rectObj, gRectClassInfo.left);
     int top = env->GetIntField(rectObj, gRectClassInfo.top);
@@ -280,58 +410,76 @@ static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
     return Rect(left, top, right, bottom);
 }
 
-static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
-        jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
-        bool useIdentityTransform, int rotation, bool captureSecureLayers) {
-    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
-    if (displayToken == NULL) {
-        return NULL;
-    }
-    const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
-    const ui::Dataspace dataspace = pickDataspaceFromColorMode(colorMode);
-
-    Rect sourceCrop = rectFromObj(env, sourceCropObj);
-    sp<GraphicBuffer> buffer;
-    bool capturedSecureLayers = false;
-    status_t res = ScreenshotClient::capture(displayToken, dataspace,
-            ui::PixelFormat::RGBA_8888,
-            sourceCrop, width, height,
-            useIdentityTransform, ui::toRotation(rotation),
-            captureSecureLayers, &buffer, capturedSecureLayers);
-    if (res != NO_ERROR) {
-        return NULL;
-    }
-
-    const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
-    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
-            gScreenshotGraphicBufferClassInfo.builder,
-            buffer->getWidth(),
-            buffer->getHeight(),
-            buffer->getPixelFormat(),
-            (jint)buffer->getUsage(),
-            (jlong)buffer.get(),
-            namedColorSpace,
-            capturedSecureLayers);
+static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& captureArgs) {
+    captureArgs.pixelFormat = static_cast<ui::PixelFormat>(
+            env->GetIntField(captureArgsObject, gCaptureArgsClassInfo.pixelFormat));
+    captureArgs.sourceCrop =
+            rectFromObj(env,
+                        env->GetObjectField(captureArgsObject, gCaptureArgsClassInfo.sourceCrop));
+    captureArgs.frameScaleX =
+            env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScaleX);
+    captureArgs.frameScaleY =
+            env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScaleY);
+    captureArgs.captureSecureLayers =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.captureSecureLayers);
+    captureArgs.allowProtected =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.allowProtected);
+    captureArgs.uid = env->GetLongField(captureArgsObject, gCaptureArgsClassInfo.uid);
+    captureArgs.grayscale =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.grayscale);
 }
 
-static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
-        jlong layerObject, jobject sourceCropObj, jfloat frameScale,
-        jlongArray excludeObjectArray, jint format) {
+static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
+                                                       jobject displayCaptureArgsObject) {
+    DisplayCaptureArgs captureArgs;
+    getCaptureArgs(env, displayCaptureArgsObject, captureArgs);
 
-    auto layer = reinterpret_cast<SurfaceControl *>(layerObject);
-    if (layer == NULL) {
-        return NULL;
+    captureArgs.displayToken =
+            ibinderForJavaObject(env,
+                                 env->GetObjectField(displayCaptureArgsObject,
+                                                     gDisplayCaptureArgsClassInfo.displayToken));
+    captureArgs.width =
+            env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.width);
+    captureArgs.height =
+            env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.height);
+    captureArgs.useIdentityTransform =
+            env->GetBooleanField(displayCaptureArgsObject,
+                                 gDisplayCaptureArgsClassInfo.useIdentityTransform);
+    return captureArgs;
+}
+
+static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptureArgsObject,
+                                 jobject screenCaptureListenerObject) {
+    const DisplayCaptureArgs captureArgs =
+            displayCaptureArgsFromObject(env, displayCaptureArgsObject);
+
+    if (captureArgs.displayToken == NULL) {
+        return BAD_VALUE;
     }
 
-    Rect sourceCrop;
-    if (sourceCropObj != NULL) {
-        sourceCrop = rectFromObj(env, sourceCropObj);
+    sp<IScreenCaptureListener> captureListener =
+            new ScreenCaptureListenerWrapper(env, screenCaptureListenerObject);
+    return ScreenshotClient::captureDisplay(captureArgs, captureListener);
+}
+
+static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject,
+                                jobject screenCaptureListenerObject) {
+    LayerCaptureArgs captureArgs;
+    getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
+    SurfaceControl* layer = reinterpret_cast<SurfaceControl*>(
+            env->GetLongField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.layer));
+    if (layer == nullptr) {
+        return BAD_VALUE;
     }
 
-    std::unordered_set<sp<IBinder>,ISurfaceComposer::SpHash<IBinder>> excludeHandles;
+    captureArgs.layerHandle = layer->getHandle();
+    captureArgs.childrenOnly =
+            env->GetBooleanField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.childrenOnly);
+    jlongArray excludeObjectArray = reinterpret_cast<jlongArray>(
+            env->GetObjectField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.excludeLayers));
     if (excludeObjectArray != NULL) {
         const jsize len = env->GetArrayLength(excludeObjectArray);
-        excludeHandles.reserve(len);
+        captureArgs.excludeHandles.reserve(len);
 
         const jlong* objects = env->GetLongArrayElements(excludeObjectArray, nullptr);
         for (jsize i = 0; i < len; i++) {
@@ -340,36 +488,14 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
                 jniThrowNullPointerException(env, "Exclude layer is null");
                 return NULL;
             }
-            excludeHandles.emplace(excludeObject->getHandle());
+            captureArgs.excludeHandles.emplace(excludeObject->getHandle());
         }
         env->ReleaseLongArrayElements(excludeObjectArray, const_cast<jlong*>(objects), JNI_ABORT);
     }
 
-    sp<GraphicBuffer> buffer;
-    ui::Dataspace dataspace = ui::Dataspace::V0_SRGB;
-    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
-    if (displayToken != nullptr) {
-        const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
-        dataspace = pickDataspaceFromColorMode(colorMode);
-    }
-    status_t res = ScreenshotClient::captureChildLayers(layer->getHandle(), dataspace,
-                                                        static_cast<ui::PixelFormat>(format),
-                                                        sourceCrop, excludeHandles, frameScale,
-                                                        &buffer);
-    if (res != NO_ERROR) {
-        return NULL;
-    }
-
-    const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
-    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
-                                       gScreenshotGraphicBufferClassInfo.builder,
-                                       buffer->getWidth(),
-                                       buffer->getHeight(),
-                                       buffer->getPixelFormat(),
-                                       (jint)buffer->getUsage(),
-                                       (jlong)buffer.get(),
-                                       namedColorSpace,
-                                       false /* capturedSecureLayers */);
+    sp<IScreenCaptureListener> captureListener =
+            new ScreenCaptureListenerWrapper(env, screenCaptureListenerObject);
+    return ScreenshotClient::captureLayers(captureArgs, captureListener);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -390,19 +516,14 @@ static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz, jlong trans
     transaction->setAnimationTransaction();
 }
 
-static void nativeSetEarlyWakeup(JNIEnv* env, jclass clazz, jlong transactionObj) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setEarlyWakeup();
-}
-
 static void nativeSetEarlyWakeupStart(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupStart();
+    transaction->setEarlyWakeupStart();
 }
 
 static void nativeSetEarlyWakeupEnd(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupEnd();
+    transaction->setEarlyWakeupEnd();
 }
 
 static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -420,7 +541,7 @@ static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong transactionO
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto relative = reinterpret_cast<SurfaceControl *>(relativeToObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setRelativeLayer(ctrl, relative->getHandle(), zorder);
+    transaction->setRelativeLayer(ctrl, relative, zorder);
 }
 
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -448,6 +569,81 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
         dst.makeInvalid();
     }
     transaction->setGeometry(ctrl, source, dst, orientation);
+}
+
+static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                            jobject bufferObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    sp<GraphicBuffer> buffer(
+            android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env, bufferObject));
+    transaction->setBuffer(ctrl, buffer);
+}
+
+static void nativeSetColorSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                                jint colorSpace) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    ui::Dataspace dataspace = fromNamedColorSpaceValueToDataspace(colorSpace);
+    transaction->setDataspace(ctrl, dataspace);
+}
+
+static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                 jlong nativeObject, jobjectArray regions, jint regionsLength) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    std::vector<BlurRegion> blurRegionVector;
+    const int size = regionsLength;
+    float region[10];
+    for (int i = 0; i < size; i++) {
+        jfloatArray regionArray = (jfloatArray)env->GetObjectArrayElement(regions, i);
+        env->GetFloatArrayRegion(regionArray, 0, 10, region);
+        float blurRadius = region[0];
+        float alpha = region[1];
+        float left = region[2];
+        float top = region[3];
+        float right = region[4];
+        float bottom = region[5];
+        float cornerRadiusTL = region[6];
+        float cornerRadiusTR = region[7];
+        float cornerRadiusBL = region[8];
+        float cornerRadiusBR = region[9];
+
+        blurRegionVector.push_back(BlurRegion{.blurRadius = static_cast<uint32_t>(blurRadius),
+                                              .cornerRadiusTL = cornerRadiusTL,
+                                              .cornerRadiusTR = cornerRadiusTR,
+                                              .cornerRadiusBL = cornerRadiusBL,
+                                              .cornerRadiusBR = cornerRadiusBR,
+                                              .alpha = alpha,
+                                              .left = static_cast<int>(left),
+                                              .top = static_cast<int>(top),
+                                              .right = static_cast<int>(right),
+                                              .bottom = static_cast<int>(bottom)});
+    }
+
+    transaction->setBlurRegions(ctrl, blurRegionVector);
+}
+
+static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                   jlong nativeObject, jfloat width, jfloat height,
+                                   jfloat vecX, jfloat vecY,
+                                   jfloat maxStretchAmountX, jfloat maxStretchAmountY,
+                                   jfloat childRelativeLeft, jfloat childRelativeTop,
+                                   jfloat childRelativeRight, jfloat childRelativeBottom) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    auto stretch = StretchEffect{
+      .width = width,
+      .height = height,
+      .vectorX = vecX,
+      .vectorY = vecY,
+      .maxAmountX = maxStretchAmountX,
+      .maxAmountY = maxStretchAmountY,
+      .mappedChildBounds = FloatRect(
+          childRelativeLeft, childRelativeTop, childRelativeRight, childRelativeBottom)
+    };
+    transaction->setStretchEffect(ctrl, stretch);
 }
 
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -592,7 +788,7 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
-    transaction->setCrop_legacy(ctrl, crop);
+    transaction->setCrop(ctrl, crop);
 }
 
 static void nativeSetCornerRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -627,15 +823,24 @@ static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionOb
     transaction->setShadowRadius(ctrl, shadowRadius);
 }
 
+static void nativeSetTrustedOverlay(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean isTrustedOverlay) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setTrustedOverlay(ctrl, isTrustedOverlay);
+}
+
 static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
-                               jfloat frameRate, jint compatibility) {
+                               jfloat frameRate, jint compatibility, jint changeFrameRateStrategy) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
     const auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     // Our compatibility is a Surface.FRAME_RATE_COMPATIBILITY_* value, and
     // Transaction::setFrameRate() takes an ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_* value. The
     // values are identical though, so no need to convert anything.
-    transaction->setFrameRate(ctrl, frameRate, static_cast<int8_t>(compatibility));
+    transaction->setFrameRate(ctrl, frameRate, static_cast<int8_t>(compatibility),
+                              static_cast<int8_t>(changeFrameRateStrategy));
 }
 
 static jlong nativeAcquireFrameRateFlexibilityToken(JNIEnv* env, jclass clazz) {
@@ -677,7 +882,7 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
 
     jlong* values = env->GetLongArrayElements(array, 0);
     for (size_t i = 0; i < displayIds.size(); ++i) {
-        values[i] = static_cast<jlong>(displayIds[i]);
+        values[i] = static_cast<jlong>(displayIds[i].value);
     }
 
     env->ReleaseLongArrayElements(array, values, 0);
@@ -685,7 +890,8 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
 }
 
 static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
-    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(physicalDisplayId);
+    sp<IBinder> token =
+            SurfaceComposerClient::getPhysicalDisplayToken(PhysicalDisplayId(physicalDisplayId));
     return javaObjectForIBinder(env, token);
 }
 
@@ -867,149 +1073,181 @@ static jobject convertDeviceProductInfoToJavaObject(
     } else {
         LOG_FATAL("Unknown alternative for variant DeviceProductInfo::ManufactureOrModelDate");
     }
-
-    jintArray relativeAddress = nullptr;
-    if (info->relativeAddress != DeviceProductInfo::NO_RELATIVE_ADDRESS) {
-        relativeAddress = env->NewIntArray(info->relativeAddress.size());
-        jint* relativeAddressData = env->GetIntArrayElements(relativeAddress, nullptr);
-        for (size_t i = 0; i < info->relativeAddress.size(); i++) {
-            relativeAddressData[i] = static_cast<jint>(info->relativeAddress[i]);
-        }
-        env->ReleaseIntArrayElements(relativeAddress, relativeAddressData, 0);
+    jint connectionToSinkType;
+    // Relative address maps to HDMI physical address. All addresses are 4 digits long allowing
+    // for a 5–device-deep hierarchy. For more information, refer:
+    // Section 8.7 - Physical Address of HDMI Specification Version 1.3a
+    using android::hardware::display::IDeviceProductInfoConstants;
+    if (info->relativeAddress.size() != 4) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
+    } else if (info->relativeAddress[0] == 0) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN;
+    } else if (info->relativeAddress[1] == 0) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_DIRECT;
+    } else {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_TRANSITIVE;
     }
+
     return env->NewObject(gDeviceProductInfoClassInfo.clazz, gDeviceProductInfoClassInfo.ctor, name,
                           manufacturerPnpId, productId, modelYear, manufactureDate,
-                          relativeAddress);
+                          connectionToSinkType);
 }
 
-static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    DisplayInfo info;
+static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    ui::StaticDisplayInfo info;
     if (const auto token = ibinderForJavaObject(env, tokenObj);
-        !token || SurfaceComposerClient::getDisplayInfo(token, &info) != NO_ERROR) {
+        !token || SurfaceComposerClient::getStaticDisplayInfo(token, &info) != NO_ERROR) {
         return nullptr;
     }
 
-    jobject object = env->NewObject(gDisplayInfoClassInfo.clazz, gDisplayInfoClassInfo.ctor);
-    env->SetBooleanField(object, gDisplayInfoClassInfo.isInternal,
-                         info.connectionType == DisplayConnectionType::Internal);
-    env->SetFloatField(object, gDisplayInfoClassInfo.density, info.density);
-    env->SetBooleanField(object, gDisplayInfoClassInfo.secure, info.secure);
-    env->SetObjectField(object, gDisplayInfoClassInfo.deviceProductInfo,
+    jobject object =
+            env->NewObject(gStaticDisplayInfoClassInfo.clazz, gStaticDisplayInfoClassInfo.ctor);
+    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.isInternal,
+                         info.connectionType == ui::DisplayConnectionType::Internal);
+    env->SetFloatField(object, gStaticDisplayInfoClassInfo.density, info.density);
+    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.secure, info.secure);
+    env->SetObjectField(object, gStaticDisplayInfoClassInfo.deviceProductInfo,
                         convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo));
     return object;
 }
 
-static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    Vector<DisplayConfig> configs;
-    if (const auto token = ibinderForJavaObject(env, tokenObj); !token ||
-        SurfaceComposerClient::getDisplayConfigs(token, &configs) != NO_ERROR ||
-        configs.isEmpty()) {
+static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode& config) {
+    jobject object = env->NewObject(gDisplayModeClassInfo.clazz, gDisplayModeClassInfo.ctor);
+    env->SetIntField(object, gDisplayModeClassInfo.id, config.id);
+    env->SetIntField(object, gDisplayModeClassInfo.width, config.resolution.getWidth());
+    env->SetIntField(object, gDisplayModeClassInfo.height, config.resolution.getHeight());
+    env->SetFloatField(object, gDisplayModeClassInfo.xDpi, config.xDpi);
+    env->SetFloatField(object, gDisplayModeClassInfo.yDpi, config.yDpi);
+
+    env->SetFloatField(object, gDisplayModeClassInfo.refreshRate, config.refreshRate);
+    env->SetLongField(object, gDisplayModeClassInfo.appVsyncOffsetNanos, config.appVsyncOffset);
+    env->SetLongField(object, gDisplayModeClassInfo.presentationDeadlineNanos,
+                      config.presentationDeadline);
+    env->SetIntField(object, gDisplayModeClassInfo.group, config.group);
+    return object;
+}
+
+jobject convertHdrCapabilitiesToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
+    const auto& types = capabilities.getSupportedHdrTypes();
+    std::vector<int32_t> intTypes;
+    for (auto type : types) {
+        intTypes.push_back(static_cast<int32_t>(type));
+    }
+    auto typesArray = env->NewIntArray(types.size());
+    env->SetIntArrayRegion(typesArray, 0, intTypes.size(), intTypes.data());
+
+    return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gHdrCapabilitiesClassInfo.ctor,
+                          typesArray, capabilities.getDesiredMaxLuminance(),
+                          capabilities.getDesiredMaxAverageLuminance(),
+                          capabilities.getDesiredMinLuminance());
+}
+
+static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    ui::DynamicDisplayInfo info;
+    if (const auto token = ibinderForJavaObject(env, tokenObj);
+        !token || SurfaceComposerClient::getDynamicDisplayInfo(token, &info) != NO_ERROR) {
         return nullptr;
     }
 
-    jobjectArray configArray =
-            env->NewObjectArray(configs.size(), gDisplayConfigClassInfo.clazz, nullptr);
-
-    for (size_t c = 0; c < configs.size(); ++c) {
-        const DisplayConfig& config = configs[c];
-        jobject object =
-                env->NewObject(gDisplayConfigClassInfo.clazz, gDisplayConfigClassInfo.ctor);
-        env->SetIntField(object, gDisplayConfigClassInfo.width, config.resolution.getWidth());
-        env->SetIntField(object, gDisplayConfigClassInfo.height, config.resolution.getHeight());
-        env->SetFloatField(object, gDisplayConfigClassInfo.xDpi, config.xDpi);
-        env->SetFloatField(object, gDisplayConfigClassInfo.yDpi, config.yDpi);
-
-        env->SetFloatField(object, gDisplayConfigClassInfo.refreshRate, config.refreshRate);
-        env->SetLongField(object, gDisplayConfigClassInfo.appVsyncOffsetNanos,
-                          config.appVsyncOffset);
-        env->SetLongField(object, gDisplayConfigClassInfo.presentationDeadlineNanos,
-                          config.presentationDeadline);
-        env->SetIntField(object, gDisplayConfigClassInfo.configGroup, config.configGroup);
-        env->SetObjectArrayElement(configArray, static_cast<jsize>(c), object);
-        env->DeleteLocalRef(object);
-    }
-
-    return configArray;
-}
-
-static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jobject tokenObj,
-                                                   jobject desiredDisplayConfigSpecs) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == nullptr) return JNI_FALSE;
-
-    jint defaultConfig = env->GetIntField(desiredDisplayConfigSpecs,
-                                          gDesiredDisplayConfigSpecsClassInfo.defaultConfig);
-    jfloat primaryRefreshRateMin =
-            env->GetFloatField(desiredDisplayConfigSpecs,
-                               gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin);
-    jfloat primaryRefreshRateMax =
-            env->GetFloatField(desiredDisplayConfigSpecs,
-                               gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMax);
-    jfloat appRequestRefreshRateMin =
-            env->GetFloatField(desiredDisplayConfigSpecs,
-                               gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMin);
-    jfloat appRequestRefreshRateMax =
-            env->GetFloatField(desiredDisplayConfigSpecs,
-                               gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMax);
-
-    size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(token, defaultConfig,
-                                                                        primaryRefreshRateMin,
-                                                                        primaryRefreshRateMax,
-                                                                        appRequestRefreshRateMin,
-                                                                        appRequestRefreshRateMax);
-    return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
-}
-
-static jobject nativeGetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == nullptr) return nullptr;
-
-    int32_t defaultConfig;
-    float primaryRefreshRateMin;
-    float primaryRefreshRateMax;
-    float appRequestRefreshRateMin;
-    float appRequestRefreshRateMax;
-    if (SurfaceComposerClient::getDesiredDisplayConfigSpecs(token, &defaultConfig,
-                                                            &primaryRefreshRateMin,
-                                                            &primaryRefreshRateMax,
-                                                            &appRequestRefreshRateMin,
-                                                            &appRequestRefreshRateMax) !=
-        NO_ERROR) {
-        return nullptr;
-    }
-
-    return env->NewObject(gDesiredDisplayConfigSpecsClassInfo.clazz,
-                          gDesiredDisplayConfigSpecsClassInfo.ctor, defaultConfig,
-                          primaryRefreshRateMin, primaryRefreshRateMax, appRequestRefreshRateMin,
-                          appRequestRefreshRateMax);
-}
-
-static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return -1;
-    return static_cast<jint>(SurfaceComposerClient::getActiveConfig(token));
-}
-
-static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return NULL;
-    Vector<ui::ColorMode> colorModes;
-    if (SurfaceComposerClient::getDisplayColorModes(token, &colorModes) != NO_ERROR ||
-            colorModes.isEmpty()) {
+    jobject object =
+            env->NewObject(gDynamicDisplayInfoClassInfo.clazz, gDynamicDisplayInfoClassInfo.ctor);
+    if (object == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return NULL;
     }
 
-    jintArray colorModesArray = env->NewIntArray(colorModes.size());
+    const auto numModes = info.supportedDisplayModes.size();
+    jobjectArray modesArray = env->NewObjectArray(numModes, gDisplayModeClassInfo.clazz, nullptr);
+    for (size_t i = 0; i < numModes; i++) {
+        const ui::DisplayMode& mode = info.supportedDisplayModes[i];
+        jobject displayModeObj = convertDisplayModeToJavaObject(env, mode);
+        env->SetObjectArrayElement(modesArray, static_cast<jsize>(i), displayModeObj);
+        env->DeleteLocalRef(displayModeObj);
+    }
+    env->SetObjectField(object, gDynamicDisplayInfoClassInfo.supportedDisplayModes, modesArray);
+    env->SetIntField(object, gDynamicDisplayInfoClassInfo.activeDisplayModeId,
+                     info.activeDisplayModeId);
+
+    jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return NULL;
     }
     jint* colorModesArrayValues = env->GetIntArrayElements(colorModesArray, 0);
-    for (size_t i = 0; i < colorModes.size(); i++) {
-        colorModesArrayValues[i] = static_cast<jint>(colorModes[i]);
+    for (size_t i = 0; i < info.supportedColorModes.size(); i++) {
+        colorModesArrayValues[i] = static_cast<jint>(info.supportedColorModes[i]);
     }
     env->ReleaseIntArrayElements(colorModesArray, colorModesArrayValues, 0);
-    return colorModesArray;
+    env->SetObjectField(object, gDynamicDisplayInfoClassInfo.supportedColorModes, colorModesArray);
+
+    env->SetIntField(object, gDynamicDisplayInfoClassInfo.activeColorMode,
+                     static_cast<jint>(info.activeColorMode));
+
+    env->SetObjectField(object, gDynamicDisplayInfoClassInfo.hdrCapabilities,
+                        convertHdrCapabilitiesToJavaObject(env, info.hdrCapabilities));
+
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported,
+                         info.autoLowLatencyModeSupported);
+
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.gameContentTypeSupported,
+                         info.gameContentTypeSupported);
+    return object;
+}
+
+static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobject tokenObj,
+                                                 jobject DesiredDisplayModeSpecs) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == nullptr) return JNI_FALSE;
+
+    ui::DisplayModeId defaultMode = env->GetIntField(DesiredDisplayModeSpecs,
+                                                     gDesiredDisplayModeSpecsClassInfo.defaultMode);
+    jboolean allowGroupSwitching =
+            env->GetBooleanField(DesiredDisplayModeSpecs,
+                                 gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching);
+    jfloat primaryRefreshRateMin =
+            env->GetFloatField(DesiredDisplayModeSpecs,
+                               gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMin);
+    jfloat primaryRefreshRateMax =
+            env->GetFloatField(DesiredDisplayModeSpecs,
+                               gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMax);
+    jfloat appRequestRefreshRateMin =
+            env->GetFloatField(DesiredDisplayModeSpecs,
+                               gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMin);
+    jfloat appRequestRefreshRateMax =
+            env->GetFloatField(DesiredDisplayModeSpecs,
+                               gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMax);
+
+    size_t result = SurfaceComposerClient::setDesiredDisplayModeSpecs(token, defaultMode,
+                                                                      allowGroupSwitching,
+                                                                      primaryRefreshRateMin,
+                                                                      primaryRefreshRateMax,
+                                                                      appRequestRefreshRateMin,
+                                                                      appRequestRefreshRateMax);
+    return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
+}
+
+static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == nullptr) return nullptr;
+
+    ui::DisplayModeId defaultMode;
+    bool allowGroupSwitching;
+    float primaryRefreshRateMin;
+    float primaryRefreshRateMax;
+    float appRequestRefreshRateMin;
+    float appRequestRefreshRateMax;
+    if (SurfaceComposerClient::getDesiredDisplayModeSpecs(token, &defaultMode, &allowGroupSwitching,
+                                                          &primaryRefreshRateMin,
+                                                          &primaryRefreshRateMax,
+                                                          &appRequestRefreshRateMin,
+                                                          &appRequestRefreshRateMax) != NO_ERROR) {
+        return nullptr;
+    }
+
+    return env->NewObject(gDesiredDisplayModeSpecsClassInfo.clazz,
+                          gDesiredDisplayModeSpecsClassInfo.ctor, defaultMode, allowGroupSwitching,
+                          primaryRefreshRateMin, primaryRefreshRateMax, appRequestRefreshRateMin,
+                          appRequestRefreshRateMax);
 }
 
 static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject tokenObj) {
@@ -1070,12 +1308,6 @@ static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject toke
     env->SetObjectField(jprimaries, gDisplayPrimariesClassInfo.white, jwhite);
 
     return jprimaries;
-}
-
-static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return -1;
-    return static_cast<jint>(SurfaceComposerClient::getActiveColorMode(token));
 }
 
 static jintArray nativeGetCompositionDataspaces(JNIEnv* env, jclass) {
@@ -1266,93 +1498,34 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
-static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jlong barrierObject, jlong frameNumber) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    auto barrier = reinterpret_cast<SurfaceControl *>(barrierObject);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->deferTransactionUntil_legacy(ctrl, barrier->getHandle(), frameNumber);
-}
-
-static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jlong surfaceObject, jlong frameNumber) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<Surface> barrier = reinterpret_cast<Surface *>(surfaceObject);
-
-    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
-}
-
-static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jlong newParentObject) {
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->reparentChildren(ctrl, newParent->getHandle());
-}
-
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jlong newParentObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
+    transaction->reparent(ctrl, newParent);
 }
 
-static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->detachChildren(ctrl);
-}
-
-static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jint scalingMode) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setOverrideScalingMode(ctrl, scalingMode);
-}
-
-static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
+static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObject,
+                                   jintArray jHdrTypes) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
+    if (token == nullptr || jHdrTypes == nullptr) return;
 
-    HdrCapabilities capabilities;
-    SurfaceComposerClient::getHdrCapabilities(token, &capabilities);
+    int* hdrTypes = env->GetIntArrayElements(jHdrTypes, 0);
+    int numHdrTypes = env->GetArrayLength(jHdrTypes);
 
-    const auto& types = capabilities.getSupportedHdrTypes();
-    std::vector<int32_t> intTypes;
-    for (auto type : types) {
-        intTypes.push_back(static_cast<int32_t>(type));
+    std::vector<ui::Hdr> hdrTypesVector;
+    for (int i = 0; i < numHdrTypes; i++) {
+        hdrTypesVector.push_back(static_cast<ui::Hdr>(hdrTypes[i]));
     }
-    auto typesArray = env->NewIntArray(types.size());
-    env->SetIntArrayRegion(typesArray, 0, intTypes.size(), intTypes.data());
+    env->ReleaseIntArrayElements(jHdrTypes, hdrTypes, 0);
 
-    return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gHdrCapabilitiesClassInfo.ctor,
-            typesArray, capabilities.getDesiredMaxLuminance(),
-            capabilities.getDesiredMaxAverageLuminance(), capabilities.getDesiredMinLuminance());
-}
-
-static jboolean nativeGetAutoLowLatencyModeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getAutoLowLatencyModeSupport(token);
-}
-
-static jboolean nativeGetGameContentTypeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getGameContentTypeSupport(token);
+    status_t error = SurfaceComposerClient::overrideHdrTypes(token, hdrTypesVector);
+    if (error != NO_ERROR) {
+        jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                             "ACCESS_SURFACE_FLINGER is missing");
+    }
 }
 
 static void nativeSetAutoLowLatencyMode(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
@@ -1375,7 +1548,8 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) 
         doThrowNPE(env);
         return 0;
     }
-    sp<SurfaceControl> surface = SurfaceControl::readFromParcel(parcel);
+    sp<SurfaceControl> surface;
+    SurfaceControl::readFromParcel(*parcel, &surface);
     if (surface == nullptr) {
         return 0;
     }
@@ -1403,7 +1577,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     }
     SurfaceControl* const self = reinterpret_cast<SurfaceControl *>(nativeObject);
     if (self != nullptr) {
-        self->writeToParcel(parcel);
+        self->writeToParcel(*parcel);
     }
 }
 
@@ -1417,11 +1591,17 @@ static jboolean nativeGetDisplayBrightnessSupport(JNIEnv* env, jclass clazz,
 }
 
 static jboolean nativeSetDisplayBrightness(JNIEnv* env, jclass clazz, jobject displayTokenObject,
-        jfloat brightness) {
+                                           jfloat sdrBrightness, jfloat sdrBrightnessNits,
+                                           jfloat displayBrightness, jfloat displayBrightnessNits) {
     sp<IBinder> displayToken(ibinderForJavaObject(env, displayTokenObject));
     if (displayToken == nullptr) {
         return JNI_FALSE;
     }
+    gui::DisplayBrightness brightness;
+    brightness.sdrWhitePoint = sdrBrightness;
+    brightness.sdrWhitePointNits = sdrBrightnessNits;
+    brightness.displayBrightness = displayBrightness;
+    brightness.displayBrightnessNits = displayBrightnessNits;
     status_t error = SurfaceComposerClient::setDisplayBrightness(displayToken, brightness);
     return error == OK ? JNI_TRUE : JNI_FALSE;
 }
@@ -1437,6 +1617,13 @@ static void nativeWriteTransactionToParcel(JNIEnv* env, jclass clazz, jlong nati
             reinterpret_cast<SurfaceComposerClient::Transaction *>(nativeObject);
     if (self != nullptr) {
         self->writeToParcel(parcel);
+    }
+}
+
+static void nativeClearTransaction(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceComposerClient::Transaction* const self =
+            reinterpret_cast<SurfaceComposerClient::Transaction*>(nativeObject);
+    if (self != nullptr) {
         self->clear();
     }
 }
@@ -1484,9 +1671,140 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return reinterpret_cast<jlong>(surfaceControl->getHandle().get());
 }
 
+static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                   jobject toTokenObj, jstring windowNameJstr,
+                                   jobject focusedTokenObj, jstring focusedWindowNameJstr,
+                                   jint displayId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    if (toTokenObj == NULL) return;
+
+    sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
+    sp<IBinder> focusedToken;
+    if (focusedTokenObj != NULL) {
+        focusedToken = ibinderForJavaObject(env, focusedTokenObj);
+    }
+
+    FocusRequest request;
+    request.token = toToken;
+    if (windowNameJstr != NULL) {
+        ScopedUtfChars windowName(env, windowNameJstr);
+        request.windowName = windowName.c_str();
+    }
+
+    request.focusedToken = focusedToken;
+    if (focusedWindowNameJstr != NULL) {
+        ScopedUtfChars focusedWindowName(env, focusedWindowNameJstr);
+        request.focusedWindowName = focusedWindowName.c_str();
+    }
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
+}
+
+static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                        jlong frameTimelineVsyncId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    transaction->setFrameTimelineInfo(
+            {frameTimelineVsyncId, android::os::IInputConstants::INVALID_INPUT_EVENT_ID});
+}
+
+class JankDataListenerWrapper : public JankDataListener {
+public:
+    JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) {
+        mOnJankDataListenerWeak = env->NewWeakGlobalRef(onJankDataListenerObject);
+        env->GetJavaVM(&mVm);
+    }
+
+    ~JankDataListenerWrapper() {
+        JNIEnv* env = getEnv();
+        env->DeleteWeakGlobalRef(mOnJankDataListenerWeak);
+    }
+
+    void onJankDataAvailable(const std::vector<JankData>& jankData) {
+        JNIEnv* env = getEnv();
+
+        jobject target = env->NewLocalRef(mOnJankDataListenerWeak);
+        if (target == nullptr) return;
+
+        jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
+                gJankDataClassInfo.clazz, nullptr);
+        for (int i = 0; i < jankData.size(); i++) {
+            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
+                    gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
+            env->SetObjectArrayElement(jJankDataArray, i, jJankData);
+            env->DeleteLocalRef(jJankData);
+        }
+        env->CallVoidMethod(target,
+                gJankDataListenerClassInfo.onJankDataAvailable,
+                jJankDataArray);
+        env->DeleteLocalRef(jJankDataArray);
+        env->DeleteLocalRef(target);
+    }
+
+private:
+
+    JNIEnv* getEnv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+
+    JavaVM* mVm;
+    jobject mOnJankDataListenerWeak;
+};
+
+static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
+                                       jlong jankDataCallbackListenerPtr,
+                                       jlong nativeSurfaceControl) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl *>(nativeSurfaceControl));
+    if (surface == nullptr) {
+        return;
+    }
+    sp<JankDataListenerWrapper> wrapper =
+            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
+    TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
+}
+
+static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
+                                          jlong jankDataCallbackListenerPtr) {
+    sp<JankDataListenerWrapper> wrapper =
+            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
+    TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
+}
+
+static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
+                                                 jobject jankDataListenerObject) {
+    return reinterpret_cast<jlong>(
+            new JankDataListenerWrapper(env, jankDataListenerObject));
+}
+
+static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
+    return static_cast<jint>(SurfaceComposerClient::getGPUContextPriority());
+}
+
+static void nativeSetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl,
+                                   jint transformHint) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
+    if (surface == nullptr) {
+        return;
+    }
+    surface->setTransformHint(
+            ui::Transform::toRotationFlags(static_cast<ui::Rotation>(transformHint)));
+}
+
+static jint nativeGetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
+    ui::Transform::RotationFlags transformHintRotationFlags =
+            static_cast<ui::Transform::RotationFlags>(surface->getTransformHint());
+
+    return toRotationInt(ui::Transform::toRotation((transformHintRotationFlags)));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
+        // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
             (void*)nativeCreate },
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
@@ -1499,6 +1817,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
+    {"nativeUpdateDefaultBufferSize", "(JII)V",
+            (void*)nativeSetDefaultBufferSize},
     {"nativeCreateTransaction", "()J",
             (void*)nativeCreateTransaction },
     {"nativeApplyTransaction", "(JZ)V",
@@ -1509,8 +1829,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeMergeTransaction },
     {"nativeSetAnimationTransaction", "(J)V",
             (void*)nativeSetAnimationTransaction },
-    {"nativeSetEarlyWakeup", "(J)V",
-            (void*)nativeSetEarlyWakeup },
     {"nativeSetEarlyWakeupStart", "(J)V",
             (void*)nativeSetEarlyWakeupStart },
     {"nativeSetEarlyWakeupEnd", "(J)V",
@@ -1547,9 +1865,13 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBackgroundBlurRadius },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
+    {"nativeSetBlurRegions", "(JJ[[FI)V",
+            (void*)nativeSetBlurRegions },
+    {"nativeSetStretchEffect", "(JJFFFFFFFFFF)V",
+            (void*) nativeSetStretchEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
-    {"nativeSetFrameRate", "(JJFI)V",
+    {"nativeSetFrameRate", "(JJFII)V",
             (void*)nativeSetFrameRate },
     {"nativeAcquireFrameRateFlexibilityToken", "()J",
             (void*)nativeAcquireFrameRateFlexibilityToken },
@@ -1571,38 +1893,31 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayProjection },
     {"nativeSetDisplaySize", "(JLandroid/os/IBinder;II)V",
             (void*)nativeSetDisplaySize },
-    {"nativeGetDisplayInfo", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayInfo;",
-            (void*)nativeGetDisplayInfo },
-    {"nativeGetDisplayConfigs", "(Landroid/os/IBinder;)[Landroid/view/SurfaceControl$DisplayConfig;",
-            (void*)nativeGetDisplayConfigs },
-    {"nativeGetActiveConfig", "(Landroid/os/IBinder;)I",
-            (void*)nativeGetActiveConfig },
-    {"nativeSetDesiredDisplayConfigSpecs",
-            "(Landroid/os/IBinder;Landroid/view/SurfaceControl$DesiredDisplayConfigSpecs;)Z",
-            (void*)nativeSetDesiredDisplayConfigSpecs },
-    {"nativeGetDesiredDisplayConfigSpecs",
-            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DesiredDisplayConfigSpecs;",
-            (void*)nativeGetDesiredDisplayConfigSpecs },
-    {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
-            (void*)nativeGetDisplayColorModes},
-    {"nativeGetDisplayNativePrimaries", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",
+    {"nativeGetStaticDisplayInfo",
+            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$StaticDisplayInfo;",
+            (void*)nativeGetStaticDisplayInfo },
+    {"nativeGetDynamicDisplayInfo",
+            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DynamicDisplayInfo;",
+            (void*)nativeGetDynamicDisplayInfo },
+    {"nativeSetDesiredDisplayModeSpecs",
+            "(Landroid/os/IBinder;Landroid/view/SurfaceControl$DesiredDisplayModeSpecs;)Z",
+            (void*)nativeSetDesiredDisplayModeSpecs },
+    {"nativeGetDesiredDisplayModeSpecs",
+            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DesiredDisplayModeSpecs;",
+            (void*)nativeGetDesiredDisplayModeSpecs },
+    {"nativeGetDisplayNativePrimaries",
+            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",
             (void*)nativeGetDisplayNativePrimaries },
-    {"nativeGetActiveColorMode", "(Landroid/os/IBinder;)I",
-            (void*)nativeGetActiveColorMode},
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
-    {"nativeGetAutoLowLatencyModeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetAutoLowLatencyModeSupport },
     {"nativeSetAutoLowLatencyMode", "(Landroid/os/IBinder;Z)V",
             (void*)nativeSetAutoLowLatencyMode },
-    {"nativeGetGameContentTypeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetGameContentTypeSupport },
     {"nativeSetGameContentType", "(Landroid/os/IBinder;Z)V",
             (void*)nativeSetGameContentType },
     {"nativeGetCompositionDataspaces", "()[I",
             (void*)nativeGetCompositionDataspaces},
-    {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
-            (void*)nativeGetHdrCapabilities },
+    {"nativeOverrideHdrTypes", "(Landroid/os/IBinder;[I)V",
+                (void*)nativeOverrideHdrTypes },
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
@@ -1615,26 +1930,13 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeGetProtectedContentSupport", "()Z",
             (void*)nativeGetProtectedContentSupport },
-    {"nativeDeferTransactionUntil", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntil },
-    {"nativeDeferTransactionUntilSurface", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntilSurface },
-    {"nativeReparentChildren", "(JJJ)V",
-            (void*)nativeReparentChildren } ,
     {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
-    {"nativeSeverChildren", "(JJ)V",
-            (void*)nativeSeverChildren } ,
-    {"nativeSetOverrideScalingMode", "(JJI)V",
-            (void*)nativeSetOverrideScalingMode },
-    {"nativeScreenshot",
-            "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)"
-            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
-            (void*)nativeScreenshot },
+    {"nativeCaptureDisplay",
+            "(Landroid/view/SurfaceControl$DisplayCaptureArgs;Landroid/view/SurfaceControl$ScreenCaptureListener;)I",
+            (void*)nativeCaptureDisplay },
     {"nativeCaptureLayers",
-            "(Landroid/os/IBinder;JLandroid/graphics/Rect;"
-            "F[JI)"
-            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
+            "(Landroid/view/SurfaceControl$LayerCaptureArgs;Landroid/view/SurfaceControl$ScreenCaptureListener;)I",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
             (void*)nativeSetInputWindowInfo },
@@ -1650,23 +1952,49 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
+    {"nativeSetBuffer", "(JJLandroid/graphics/GraphicBuffer;)V",
+            (void*)nativeSetBuffer },
+    {"nativeSetColorSpace", "(JJI)V",
+            (void*)nativeSetColorSpace },
     {"nativeSyncInputWindows", "(J)V",
             (void*)nativeSyncInputWindows },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",
             (void*)nativeGetDisplayBrightnessSupport },
-    {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;F)Z",
+    {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;FFFF)Z",
             (void*)nativeSetDisplayBrightness },
     {"nativeReadTransactionFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadTransactionFromParcel },
     {"nativeWriteTransactionToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteTransactionToParcel },
+    {"nativeClearTransaction", "(J)V",
+            (void*)nativeClearTransaction },
     {"nativeMirrorSurface", "(J)J",
             (void*)nativeMirrorSurface },
     {"nativeSetGlobalShadowSettings", "([F[FFFF)V",
             (void*)nativeSetGlobalShadowSettings },
     {"nativeGetHandle", "(J)J",
             (void*)nativeGetHandle },
-    {"nativeSetFixedTransformHint", "(JJI)V", (void*)nativeSetFixedTransformHint},
+    {"nativeSetFixedTransformHint", "(JJI)V",
+            (void*)nativeSetFixedTransformHint},
+    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
+            (void*)nativeSetFocusedWindow},
+    {"nativeSetFrameTimelineVsync", "(JJ)V",
+            (void*)nativeSetFrameTimelineVsync },
+    {"nativeAddJankDataListener", "(JJ)V",
+            (void*)nativeAddJankDataListener },
+    {"nativeRemoveJankDataListener", "(J)V",
+            (void*)nativeRemoveJankDataListener },
+    {"nativeCreateJankDataListenerWrapper", "(Landroid/view/SurfaceControl$OnJankDataListener;)J",
+            (void*)nativeCreateJankDataListenerWrapper },
+    {"nativeGetGPUContextPriority", "()I",
+            (void*)nativeGetGPUContextPriority },
+    {"nativeSetTransformHint", "(JI)V",
+            (void*)nativeSetTransformHint },
+    {"nativeGetTransformHint", "(J)I",
+            (void*)nativeGetTransformHint },
+    {"nativeSetTrustedOverlay", "(JJZ)V",
+            (void*)nativeSetTrustedOverlay },
+        // clang-format on
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
@@ -1678,29 +2006,50 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gIntegerClassInfo.clazz = MakeGlobalRefOrDie(env, integerClass);
     gIntegerClassInfo.ctor = GetMethodIDOrDie(env, gIntegerClassInfo.clazz, "<init>", "(I)V");
 
-    jclass infoClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayInfo");
-    gDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, infoClazz);
-    gDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, infoClazz, "<init>", "()V");
-    gDisplayInfoClassInfo.isInternal = GetFieldIDOrDie(env, infoClazz, "isInternal", "Z");
-    gDisplayInfoClassInfo.density = GetFieldIDOrDie(env, infoClazz, "density", "F");
-    gDisplayInfoClassInfo.secure = GetFieldIDOrDie(env, infoClazz, "secure", "Z");
-    gDisplayInfoClassInfo.deviceProductInfo =
+    jclass infoClazz = FindClassOrDie(env, "android/view/SurfaceControl$StaticDisplayInfo");
+    gStaticDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, infoClazz);
+    gStaticDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, infoClazz, "<init>", "()V");
+    gStaticDisplayInfoClassInfo.isInternal = GetFieldIDOrDie(env, infoClazz, "isInternal", "Z");
+    gStaticDisplayInfoClassInfo.density = GetFieldIDOrDie(env, infoClazz, "density", "F");
+    gStaticDisplayInfoClassInfo.secure = GetFieldIDOrDie(env, infoClazz, "secure", "Z");
+    gStaticDisplayInfoClassInfo.deviceProductInfo =
             GetFieldIDOrDie(env, infoClazz, "deviceProductInfo",
                             "Landroid/hardware/display/DeviceProductInfo;");
 
-    jclass configClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayConfig");
-    gDisplayConfigClassInfo.clazz = MakeGlobalRefOrDie(env, configClazz);
-    gDisplayConfigClassInfo.ctor = GetMethodIDOrDie(env, configClazz, "<init>", "()V");
-    gDisplayConfigClassInfo.width = GetFieldIDOrDie(env, configClazz, "width", "I");
-    gDisplayConfigClassInfo.height = GetFieldIDOrDie(env, configClazz, "height", "I");
-    gDisplayConfigClassInfo.xDpi = GetFieldIDOrDie(env, configClazz, "xDpi", "F");
-    gDisplayConfigClassInfo.yDpi = GetFieldIDOrDie(env, configClazz, "yDpi", "F");
-    gDisplayConfigClassInfo.refreshRate = GetFieldIDOrDie(env, configClazz, "refreshRate", "F");
-    gDisplayConfigClassInfo.appVsyncOffsetNanos =
-            GetFieldIDOrDie(env, configClazz, "appVsyncOffsetNanos", "J");
-    gDisplayConfigClassInfo.presentationDeadlineNanos =
-            GetFieldIDOrDie(env, configClazz, "presentationDeadlineNanos", "J");
-    gDisplayConfigClassInfo.configGroup = GetFieldIDOrDie(env, configClazz, "configGroup", "I");
+    jclass dynamicInfoClazz = FindClassOrDie(env, "android/view/SurfaceControl$DynamicDisplayInfo");
+    gDynamicDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, dynamicInfoClazz);
+    gDynamicDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, dynamicInfoClazz, "<init>", "()V");
+    gDynamicDisplayInfoClassInfo.supportedDisplayModes =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "supportedDisplayModes",
+                            "[Landroid/view/SurfaceControl$DisplayMode;");
+    gDynamicDisplayInfoClassInfo.activeDisplayModeId =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "activeDisplayModeId", "I");
+    gDynamicDisplayInfoClassInfo.supportedColorModes =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
+    gDynamicDisplayInfoClassInfo.activeColorMode =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "activeColorMode", "I");
+    gDynamicDisplayInfoClassInfo.hdrCapabilities =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "hdrCapabilities",
+                            "Landroid/view/Display$HdrCapabilities;");
+    gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "autoLowLatencyModeSupported", "Z");
+    gDynamicDisplayInfoClassInfo.gameContentTypeSupported =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "gameContentTypeSupported", "Z");
+
+    jclass modeClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayMode");
+    gDisplayModeClassInfo.clazz = MakeGlobalRefOrDie(env, modeClazz);
+    gDisplayModeClassInfo.ctor = GetMethodIDOrDie(env, modeClazz, "<init>", "()V");
+    gDisplayModeClassInfo.id = GetFieldIDOrDie(env, modeClazz, "id", "I");
+    gDisplayModeClassInfo.width = GetFieldIDOrDie(env, modeClazz, "width", "I");
+    gDisplayModeClassInfo.height = GetFieldIDOrDie(env, modeClazz, "height", "I");
+    gDisplayModeClassInfo.xDpi = GetFieldIDOrDie(env, modeClazz, "xDpi", "F");
+    gDisplayModeClassInfo.yDpi = GetFieldIDOrDie(env, modeClazz, "yDpi", "F");
+    gDisplayModeClassInfo.refreshRate = GetFieldIDOrDie(env, modeClazz, "refreshRate", "F");
+    gDisplayModeClassInfo.appVsyncOffsetNanos =
+            GetFieldIDOrDie(env, modeClazz, "appVsyncOffsetNanos", "J");
+    gDisplayModeClassInfo.presentationDeadlineNanos =
+            GetFieldIDOrDie(env, modeClazz, "presentationDeadlineNanos", "J");
+    gDisplayModeClassInfo.group = GetFieldIDOrDie(env, modeClazz, "group", "I");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
@@ -1738,7 +2087,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
                              "Ljava/lang/String;"
                              "Ljava/lang/Integer;"
                              "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;"
-                             "[I)V");
+                             "I)V");
 
     jclass deviceProductInfoManufactureDateClazz =
             FindClassOrDie(env, "android/hardware/display/DeviceProductInfo$ManufactureDate");
@@ -1748,18 +2097,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetMethodIDOrDie(env, deviceProductInfoManufactureDateClazz, "<init>",
                              "(Ljava/lang/Integer;Ljava/lang/Integer;)V");
 
-    jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
-    gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
-    gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
-            "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
-
-    jclass screenshotGraphicsBufferClazz = FindClassOrDie(env,
-            "android/view/SurfaceControl$ScreenshotGraphicBuffer");
-    gScreenshotGraphicBufferClassInfo.clazz =
+    jclass screenshotGraphicsBufferClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$ScreenshotHardwareBuffer");
+    gScreenshotHardwareBufferClassInfo.clazz =
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
-    gScreenshotGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env,
-            screenshotGraphicsBufferClazz,
-            "createFromNative", "(IIIIJIZ)Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;");
+    gScreenshotHardwareBufferClassInfo.builder =
+            GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
+                                   "(Landroid/hardware/HardwareBuffer;IZ)Landroid/view/"
+                                   "SurfaceControl$ScreenshotHardwareBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,
             "android/hardware/display/DisplayedContentSample");
@@ -1795,23 +2140,75 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDisplayPrimariesClassInfo.white = GetFieldIDOrDie(env, displayPrimariesClazz, "white",
             "Landroid/view/SurfaceControl$CieXyz;");
 
-    jclass desiredDisplayConfigSpecsClazz =
-            FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayConfigSpecs");
-    gDesiredDisplayConfigSpecsClassInfo.clazz =
-            MakeGlobalRefOrDie(env, desiredDisplayConfigSpecsClazz);
-    gDesiredDisplayConfigSpecsClassInfo.ctor =
-            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IFFFF)V");
-    gDesiredDisplayConfigSpecsClassInfo.defaultConfig =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "defaultConfig", "I");
-    gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "primaryRefreshRateMin", "F");
-    gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMax =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "primaryRefreshRateMax", "F");
-    gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMin =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "appRequestRefreshRateMin", "F");
-    gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMax =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "appRequestRefreshRateMax", "F");
+    jclass DesiredDisplayModeSpecsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayModeSpecs");
+    gDesiredDisplayModeSpecsClassInfo.clazz = MakeGlobalRefOrDie(env, DesiredDisplayModeSpecsClazz);
+    gDesiredDisplayModeSpecsClassInfo.ctor =
+            GetMethodIDOrDie(env, gDesiredDisplayModeSpecsClassInfo.clazz, "<init>", "(IZFFFF)V");
+    gDesiredDisplayModeSpecsClassInfo.defaultMode =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "defaultMode", "I");
+    gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "allowGroupSwitching", "Z");
+    gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMin =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "primaryRefreshRateMin", "F");
+    gDesiredDisplayModeSpecsClassInfo.primaryRefreshRateMax =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "primaryRefreshRateMax", "F");
+    gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMin =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRefreshRateMin", "F");
+    gDesiredDisplayModeSpecsClassInfo.appRequestRefreshRateMax =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRefreshRateMax", "F");
 
+    jclass captureArgsClazz = FindClassOrDie(env, "android/view/SurfaceControl$CaptureArgs");
+    gCaptureArgsClassInfo.pixelFormat = GetFieldIDOrDie(env, captureArgsClazz, "mPixelFormat", "I");
+    gCaptureArgsClassInfo.sourceCrop =
+            GetFieldIDOrDie(env, captureArgsClazz, "mSourceCrop", "Landroid/graphics/Rect;");
+    gCaptureArgsClassInfo.frameScaleX = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScaleX", "F");
+    gCaptureArgsClassInfo.frameScaleY = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScaleY", "F");
+    gCaptureArgsClassInfo.captureSecureLayers =
+            GetFieldIDOrDie(env, captureArgsClazz, "mCaptureSecureLayers", "Z");
+    gCaptureArgsClassInfo.allowProtected =
+            GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
+    gCaptureArgsClassInfo.uid = GetFieldIDOrDie(env, captureArgsClazz, "mUid", "J");
+    gCaptureArgsClassInfo.grayscale = GetFieldIDOrDie(env, captureArgsClazz, "mGrayscale", "Z");
+
+    jclass displayCaptureArgsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$DisplayCaptureArgs");
+    gDisplayCaptureArgsClassInfo.displayToken =
+            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mDisplayToken", "Landroid/os/IBinder;");
+    gDisplayCaptureArgsClassInfo.width =
+            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mWidth", "I");
+    gDisplayCaptureArgsClassInfo.height =
+            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mHeight", "I");
+    gDisplayCaptureArgsClassInfo.useIdentityTransform =
+            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mUseIdentityTransform", "Z");
+
+    jclass layerCaptureArgsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$LayerCaptureArgs");
+    gLayerCaptureArgsClassInfo.layer =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeLayer", "J");
+    gLayerCaptureArgsClassInfo.excludeLayers =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeExcludeLayers", "[J");
+    gLayerCaptureArgsClassInfo.childrenOnly =
+            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mChildrenOnly", "Z");
+
+    jclass screenCaptureListenerClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$ScreenCaptureListener");
+    gScreenCaptureListenerClassInfo.clazz = MakeGlobalRefOrDie(env, screenCaptureListenerClazz);
+    gScreenCaptureListenerClassInfo.onScreenCaptureComplete =
+            GetMethodIDOrDie(env, screenCaptureListenerClazz, "onScreenCaptureComplete",
+                             "(Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;)V");
+
+    jclass jankDataClazz =
+                FindClassOrDie(env, "android/view/SurfaceControl$JankData");
+    gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
+    gJankDataClassInfo.ctor =
+            GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JI)V");
+    jclass onJankDataListenerClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
+    gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);
+    gJankDataListenerClassInfo.onJankDataAvailable =
+            GetMethodIDOrDie(env, onJankDataListenerClazz, "onJankDataAvailable",
+                             "([Landroid/view/SurfaceControl$JankData;)V");
     return err;
 }
 

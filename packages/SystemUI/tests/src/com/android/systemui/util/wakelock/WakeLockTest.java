@@ -19,6 +19,7 @@ package com.android.systemui.util.wakelock;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Build;
 import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
@@ -84,5 +85,15 @@ public class WakeLockTest extends SysuiTestCase {
 
         assertTrue(ran[0]);
         assertFalse(mInner.isHeld());
+    }
+
+    @Test
+    public void prodBuild_wakeLock_releaseWithoutAcquire_noThrow() {
+        if (Build.IS_ENG) {
+            return;
+        }
+
+        // shouldn't throw an exception on production builds
+        mWakeLock.release(WHY);
     }
 }

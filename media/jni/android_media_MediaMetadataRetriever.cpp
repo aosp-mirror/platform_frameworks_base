@@ -464,11 +464,13 @@ static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
                 || thumbPixels * 6 >= maxPixels) {
             frameMemory = retriever->getImageAtIndex(
                     index, colorFormat, false /*metaOnly*/, true /*thumbnail*/);
-            // TODO: Using unsecurePointer() has some associated security pitfalls
-            //       (see declaration for details).
-            //       Either document why it is safe in this case or address the
-            //       issue (e.g. by copying).
-            videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
+            if (frameMemory != 0) {
+                // TODO: Using unsecurePointer() has some associated security pitfalls
+                //       (see declaration for details).
+                //       Either document why it is safe in this case or address the
+                //       issue (e.g. by copying).
+                videoFrame = static_cast<VideoFrame *>(frameMemory->unsecurePointer());
+            }
 
             if (thumbPixels > maxPixels) {
                 int downscale = ceil(sqrt(thumbPixels / (float)maxPixels));
@@ -704,7 +706,7 @@ static const JNINativeMethod nativeMethods[] = {
             (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders
         },
 
-        {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V",
+        {"_setDataSource",   "(Ljava/io/FileDescriptor;JJ)V",
                 (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_setDataSource",   "(Landroid/media/MediaDataSource;)V",
                 (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},

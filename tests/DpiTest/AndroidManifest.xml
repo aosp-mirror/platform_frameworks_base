@@ -15,26 +15,34 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.dpi">
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="3" />
-    <supports-screens android:smallScreens="true" />
+     package="com.google.android.test.dpi">
+    <uses-sdk android:minSdkVersion="3"
+         android:targetSdkVersion="3"/>
+    <supports-screens android:smallScreens="true"/>
     <compatible-screens>
-        <screen android:screenSize="small" android:screenDensity="ldpi" />
-        <screen android:screenSize="small" android:screenDensity="xhdpi" />
-        <screen android:screenSize="large" android:screenDensity="hdpi" />
-        <screen android:screenSize="xlarge" android:screenDensity="mdpi" />
+        <screen android:screenSize="small"
+             android:screenDensity="ldpi"/>
+        <screen android:screenSize="small"
+             android:screenDensity="xhdpi"/>
+        <screen android:screenSize="large"
+             android:screenDensity="hdpi"/>
+        <screen android:screenSize="xlarge"
+             android:screenDensity="mdpi"/>
     </compatible-screens>
     <application android:label="DpiTest">
-        <activity android:name="DpiTestActivity">
+        <activity android:name="DpiTestActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="DpiTestNoCompatActivity" android:label="DpiTestNoCompat">
+        <activity android:name="DpiTestNoCompatActivity"
+             android:label="DpiTestNoCompat"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

@@ -42,10 +42,13 @@ android_test {
     test_suites: ["device-tests"],
 
     static_libs: [
+        "androidx.test.core",
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
+        "SettingsLibSettingsSpinner",
+        "SettingsLibUsageProgressBarPreference",
     ],
 
     dxflags: ["--multi-dex"],

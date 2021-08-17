@@ -23,7 +23,9 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Util class to get feature flag information.
@@ -36,14 +38,18 @@ public class FeatureFlagUtils {
     public static final String FFLAG_PREFIX = "sys.fflag.";
     public static final String FFLAG_OVERRIDE_PREFIX = FFLAG_PREFIX + "override.";
     public static final String PERSIST_PREFIX = "persist." + FFLAG_OVERRIDE_PREFIX;
-    public static final String SEAMLESS_TRANSFER = "settings_seamless_transfer";
     public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
-    public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
-    public static final String SETTINGS_FUSE_FLAG = "settings_fuse";
     /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
+    /** @hide */
+    public static final String SETTINGS_PROVIDER_MODEL = "settings_provider_model";
+    /** @hide */
+    public static final String SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES
+            = "settings_use_new_backup_eligibility_rules";
+    /** @hide */
+    public static final String SETTINGS_ENABLE_SECURITY_HUB = "settings_enable_security_hub";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -51,10 +57,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put(SETTINGS_FUSE_FLAG, "true");
-        DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
         DEFAULT_FLAGS.put("settings_skip_direction_mutable", "true");
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "true");
@@ -65,6 +68,16 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "true");
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
+        DEFAULT_FLAGS.put("settings_contextual_home", "false");
+        DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "true");
+        DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
+    }
+
+    private static final Set<String> PERSISTENT_FLAGS;
+    static {
+        PERSISTENT_FLAGS = new HashSet<>();
+        PERSISTENT_FLAGS.add(SETTINGS_PROVIDER_MODEL);
     }
 
     /**
@@ -86,8 +99,9 @@ public class FeatureFlagUtils {
             }
         }
 
-        // Step 2: check if feature flag has any override. Flag name: sys.fflag.override.<feature>
-        value = SystemProperties.get(FFLAG_OVERRIDE_PREFIX + feature);
+        // Step 2: check if feature flag has any override.
+        // Flag name: [persist.]sys.fflag.override.<feature>
+        value = SystemProperties.get(getSystemPropertyPrefix(feature) + feature);
         if (!TextUtils.isEmpty(value)) {
             return Boolean.parseBoolean(value);
         }
@@ -100,7 +114,8 @@ public class FeatureFlagUtils {
      * Override feature flag to new state.
      */
     public static void setEnabled(Context context, String feature, boolean enabled) {
-        SystemProperties.set(FFLAG_OVERRIDE_PREFIX + feature, enabled ? "true" : "false");
+        SystemProperties.set(getSystemPropertyPrefix(feature) + feature,
+                enabled ? "true" : "false");
     }
 
     /**
@@ -108,5 +123,9 @@ public class FeatureFlagUtils {
      */
     public static Map<String, String> getAllFeatureFlags() {
         return DEFAULT_FLAGS;
+    }
+
+    private static String getSystemPropertyPrefix(String feature) {
+        return PERSISTENT_FLAGS.contains(feature) ? PERSIST_PREFIX : FFLAG_OVERRIDE_PREFIX;
     }
 }

@@ -16,6 +16,9 @@
 
 package android.hardware.soundtrigger;
 
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENODEV;
 import static android.system.OsConstants.ENOSYS;
@@ -27,6 +30,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -34,9 +38,13 @@ import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioFormat;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.Identity;
+import android.media.permission.SafeCloseable;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.Status;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -514,7 +522,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -691,7 +699,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -832,7 +840,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1519,7 +1527,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -1622,7 +1630,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -1744,7 +1752,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -1811,7 +1819,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -1901,7 +1909,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -1943,16 +1951,6 @@ public class SoundTrigger {
     public static final int SERVICE_STATE_DISABLED = 1;
     private static Object mServiceLock = new Object();
     private static ISoundTriggerMiddlewareService mService;
-   /**
-     * @return returns current package name.
-     */
-    static String getCurrentOpPackageName() {
-        String packageName = ActivityThread.currentOpPackageName();
-        if (packageName == null) {
-            return "";
-        }
-        return packageName;
-    }
 
     /**
      * Translate an exception thrown from interaction with the underlying service to an error code.
@@ -2005,20 +2003,100 @@ public class SoundTrigger {
      *         - {@link #STATUS_BAD_VALUE} if modules is null
      *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
      *
+     * @deprecated Please use {@link #listModulesAsOriginator(ArrayList, Identity)} or
+     * {@link #listModulesAsMiddleman(ArrayList, Identity, Identity)}, based on whether the
+     * client is acting on behalf of its own identity or a separate identity.
      * @hide
      */
     @UnsupportedAppUsage
     public static int listModules(@NonNull ArrayList<ModuleProperties> modules) {
+        // TODO(ytai): This is a temporary hack to retain prior behavior, which makes
+        //  assumptions about process affinity and Binder context, namely that the binder calling ID
+        //  reliably reflects the originator identity.
+        Identity middlemanIdentity = new Identity();
+        middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+
+        Identity originatorIdentity = new Identity();
+        originatorIdentity.pid = Binder.getCallingPid();
+        originatorIdentity.uid = Binder.getCallingUid();
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            return listModulesAsMiddleman(modules, middlemanIdentity, originatorIdentity);
+        }
+    }
+
+    /**
+     * Returns a list of descriptors for all hardware modules loaded.
+     * This variant is intended for use when the caller itself is the originator of the operation.
+     * @param modules A ModuleProperties array where the list will be returned.
+     * @param originatorIdentity The identity of the originator, which will be used for permission
+     *                           purposes.
+     * @return - {@link #STATUS_OK} in case of success
+     *         - {@link #STATUS_ERROR} in case of unspecified error
+     *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
+     *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link #STATUS_BAD_VALUE} if modules is null
+     *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public static int listModulesAsOriginator(@NonNull ArrayList<ModuleProperties> modules,
+            @NonNull Identity originatorIdentity) {
         try {
-            SoundTriggerModuleDescriptor[] descs = getService().listModules();
-            modules.clear();
-            modules.ensureCapacity(descs.length);
-            for (SoundTriggerModuleDescriptor desc : descs) {
-                modules.add(ConversionUtil.aidl2apiModuleDescriptor(desc));
-            }
+            SoundTriggerModuleDescriptor[] descs = getService().listModulesAsOriginator(
+                    originatorIdentity);
+            convertDescriptorsToModuleProperties(descs, modules);
             return STATUS_OK;
         } catch (Exception e) {
             return handleException(e);
+        }
+    }
+
+    /**
+     * Returns a list of descriptors for all hardware modules loaded.
+     * This variant is intended for use when the caller is acting on behalf of a different identity
+     * for permission purposes.
+     * @param modules A ModuleProperties array where the list will be returned.
+     * @param middlemanIdentity The identity of the caller, acting as middleman.
+     * @param originatorIdentity The identity of the originator, which will be used for permission
+     *                           purposes.
+     * @return - {@link #STATUS_OK} in case of success
+     *         - {@link #STATUS_ERROR} in case of unspecified error
+     *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
+     *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link #STATUS_BAD_VALUE} if modules is null
+     *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
+     *
+     * @hide
+     */
+    @RequiresPermission(SOUNDTRIGGER_DELEGATE_IDENTITY)
+    public static int listModulesAsMiddleman(@NonNull ArrayList<ModuleProperties> modules,
+            @NonNull Identity middlemanIdentity,
+            @NonNull Identity originatorIdentity) {
+        try {
+            SoundTriggerModuleDescriptor[] descs = getService().listModulesAsMiddleman(
+                    middlemanIdentity, originatorIdentity);
+            convertDescriptorsToModuleProperties(descs, modules);
+            return STATUS_OK;
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    /**
+     * Converts an array of SoundTriggerModuleDescriptor into an (existing) ArrayList of
+     * ModuleProperties.
+     * @param descsIn The input descriptors.
+     * @param modulesOut The output list.
+     */
+    private static void convertDescriptorsToModuleProperties(
+            @NonNull SoundTriggerModuleDescriptor[] descsIn,
+            @NonNull ArrayList<ModuleProperties> modulesOut) {
+        modulesOut.clear();
+        modulesOut.ensureCapacity(descsIn.length);
+        for (SoundTriggerModuleDescriptor desc : descsIn) {
+            modulesOut.add(ConversionUtil.aidl2apiModuleDescriptor(desc));
         }
     }
 
@@ -2031,15 +2109,85 @@ public class SoundTrigger {
      *                is OK.
      * @return a valid sound module in case of success or null in case of error.
      *
+     * @deprecated Please use
+     * {@link #attachModuleAsOriginator(int, StatusListener, Handler, Identity)} or
+     * {@link #attachModuleAsMiddleman(int, StatusListener, Handler, Identity, Identity)}, based
+     * on whether the client is acting on behalf of its own identity or a separate identity.
      * @hide
      */
     @UnsupportedAppUsage
-    public static @NonNull SoundTriggerModule attachModule(int moduleId,
+    private static SoundTriggerModule attachModule(int moduleId,
             @NonNull StatusListener listener,
             @Nullable Handler handler) {
+        // TODO(ytai): This is a temporary hack to retain prior behavior, which makes
+        //  assumptions about process affinity and Binder context, namely that the binder calling ID
+        //  reliably reflects the originator identity.
+        Identity middlemanIdentity = new Identity();
+        middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+
+        Identity originatorIdentity = new Identity();
+        originatorIdentity.pid = Binder.getCallingPid();
+        originatorIdentity.uid = Binder.getCallingUid();
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            return attachModuleAsMiddleman(moduleId, listener, handler, middlemanIdentity,
+                    originatorIdentity);
+        }
+    }
+
+    /**
+     * Get an interface on a hardware module to control sound models and recognition on
+     * this module.
+     * This variant is intended for use when the caller is acting on behalf of a different identity
+     * for permission purposes.
+     * @param moduleId Sound module system identifier {@link ModuleProperties#mId}. mandatory.
+     * @param listener {@link StatusListener} interface. Mandatory.
+     * @param handler the Handler that will receive the callabcks. Can be null if default handler
+     *                is OK.
+     * @param middlemanIdentity The identity of the caller, acting as middleman.
+     * @param originatorIdentity The identity of the originator, which will be used for permission
+     *                           purposes.
+     * @return a valid sound module in case of success or null in case of error.
+     *
+     * @hide
+     */
+    @RequiresPermission(SOUNDTRIGGER_DELEGATE_IDENTITY)
+    public static SoundTriggerModule attachModuleAsMiddleman(int moduleId,
+            @NonNull SoundTrigger.StatusListener listener,
+            @Nullable Handler handler, Identity middlemanIdentity,
+            Identity originatorIdentity) {
         Looper looper = handler != null ? handler.getLooper() : Looper.getMainLooper();
         try {
-            return new SoundTriggerModule(getService(), moduleId, listener, looper);
+            return new SoundTriggerModule(getService(), moduleId, listener, looper,
+                    middlemanIdentity, originatorIdentity);
+        } catch (Exception e) {
+            Log.e(TAG, "", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get an interface on a hardware module to control sound models and recognition on
+     * this module.
+     * This variant is intended for use when the caller itself is the originator of the operation.
+     * @param moduleId Sound module system identifier {@link ModuleProperties#mId}. mandatory.
+     * @param listener {@link StatusListener} interface. Mandatory.
+     * @param handler the Handler that will receive the callabcks. Can be null if default handler
+     *                is OK.
+     * @param originatorIdentity The identity of the originator, which will be used for permission
+     *                           purposes.
+     * @return a valid sound module in case of success or null in case of error.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public static SoundTriggerModule attachModuleAsOriginator(int moduleId,
+            @NonNull SoundTrigger.StatusListener listener,
+            @Nullable Handler handler, @NonNull Identity originatorIdentity) {
+        Looper looper = handler != null ? handler.getLooper() : Looper.getMainLooper();
+        try {
+            return new SoundTriggerModule(getService(), moduleId, listener, looper,
+                    originatorIdentity);
         } catch (Exception e) {
             Log.e(TAG, "", e);
             return null;

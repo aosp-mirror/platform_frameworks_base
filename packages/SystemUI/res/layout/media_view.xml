@@ -25,15 +25,22 @@
     android:clipToPadding="false"
     android:gravity="center_horizontal|fill_vertical"
     android:forceHasOverlappingRendering="false"
-    android:background="@drawable/qs_media_background">
+    android:background="@drawable/qs_media_background"
+    android:theme="@style/MediaPlayer">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center_vertical_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5"
-        />
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/center_horizontal_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="48dp" />
 
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <FrameLayout
@@ -48,9 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
             android:gravity="start"
-            android:textSize="14sp" />
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/media_total_time"
@@ -58,13 +64,12 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
             android:gravity="end"
-            android:textSize="14sp" />
+            android:textSize="12sp" />
     </FrameLayout>
 
     <!--  Actions must be ordered left-to-right even in RTL layout.  However, they appear in a chain
-    with the album art and the title, and must as a group appear at the end of that chain.  This is
+    with the artist name, and must as a group appear at the end of that chain.  This is
     accomplished by having all actions appear in a LTR chain within the parent, and then biasing it
     to the right side, then this barrier is used to bound the text views.  -->
     <androidx.constraintlayout.widget.Barrier
@@ -72,38 +77,38 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_title"
         app:barrierDirection="start"
         app:constraint_referenced_ids="action0,action1,action2,action3,action4"
-        />
+         />
 
     <ImageButton
         android:id="@+id/action0"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action1"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action2"
-        style="@style/MediaPlayer.Button"
-        android:layout_width="52dp"
-        android:layout_height="52dp" />
+        style="@style/MediaPlayer.Action"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action3"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action4"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
@@ -111,49 +116,62 @@
     <ImageView
         android:id="@+id/album_art"
         android:layout_width="@dimen/qs_media_album_size"
-        android:layout_height="@dimen/qs_media_album_size" />
+        android:layout_height="@dimen/qs_media_album_size"
+        android:layout_gravity="center_vertical"
+        style="@style/MediaPlayer.Album"
+        android:background="@drawable/qs_media_art_background"
+        android:clipToOutline="true" />
 
     <!-- Seamless Output Switcher -->
     <LinearLayout
         android:id="@+id/media_seamless"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:foreground="@drawable/qs_media_seamless_background"
-        android:background="@drawable/qs_media_light_source"
+        android:layout_height="48dp"
         android:orientation="horizontal"
-        android:forceHasOverlappingRendering="false"
-        android:paddingStart="12dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="6dp">
-
-        <ImageView
-            android:id="@+id/media_seamless_image"
-            android:layout_width="@dimen/qs_seamless_icon_size"
-            android:layout_height="@dimen/qs_seamless_icon_size"
-            android:layout_marginEnd="8dp"
-            android:layout_gravity="center_vertical"
-            android:tint="@color/media_primary_text"
-            android:src="@*android:drawable/ic_media_seamless" />
-
-        <TextView
-            android:id="@+id/media_seamless_text"
+        android:gravity="top|end"
+        android:paddingTop="@dimen/qs_media_padding"
+        android:paddingEnd="@dimen/qs_media_padding"
+        android:background="@drawable/qs_media_light_source"
+        android:forceHasOverlappingRendering="false">
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
-            android:singleLine="true"
-            android:text="@*android:string/ext_media_seamless_action"
-            android:textColor="@color/media_primary_text"
-            android:textDirection="locale"
-            android:textSize="14sp" />
+            android:minHeight="@dimen/qs_seamless_height"
+            android:theme="@style/MediaPlayer.SolidButton"
+            android:background="@drawable/qs_media_seamless_background"
+            android:orientation="horizontal"
+            android:contentDescription="@string/quick_settings_media_device_label">
+            <ImageView
+                android:id="@+id/media_seamless_image"
+                android:layout_width="@dimen/qs_seamless_icon_size"
+                android:layout_height="@dimen/qs_seamless_icon_size"
+                android:layout_gravity="center"
+                android:tint="?android:attr/textColorPrimary"
+                android:src="@*android:drawable/ic_media_seamless" />
+            <TextView
+                android:id="@+id/media_seamless_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="4dp"
+                android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                android:singleLine="true"
+                android:text="@*android:string/ext_media_seamless_action"
+                android:textDirection="locale"
+                android:textSize="12sp"
+                android:lineHeight="16sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView
         android:id="@+id/media_seamless_fallback"
-        android:layout_width="@dimen/qs_seamless_icon_size"
-        android:layout_height="@dimen/qs_seamless_icon_size"
-        android:tint="@color/media_primary_text"
+        android:layout_width="@dimen/qs_seamless_fallback_icon_size"
+        android:layout_height="@dimen/qs_seamless_fallback_icon_size"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginStart="@dimen/qs_center_guideline_padding"
+        android:layout_marginEnd="@dimen/qs_seamless_fallback_margin"
+        android:tint="?android:attr/textColor"
         android:src="@drawable/ic_cast_connected"
         android:forceHasOverlappingRendering="false" />
 
@@ -161,145 +179,130 @@
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <SeekBar
         android:id="@+id/media_progress_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
+        style="@style/MediaPlayer.ProgressBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="true"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
-        android:paddingVertical="@dimen/qs_media_enabled_seekbar_vertical_padding"
-        android:thumbTint="@color/media_primary_text"
-        android:progressTint="@color/media_seekbar_progress"
-        android:progressBackgroundTint="@color/media_disabled"
+        android:paddingTop="@dimen/qs_media_enabled_seekbar_vertical_padding"
+        android:layout_marginTop="-22dp"
+        android:paddingBottom="2dp"
         android:splitTrack="false" />
-
-    <!-- App name -->
-    <TextView
-        android:id="@+id/app_name"
-        android:textColor="@color/media_primary_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
-        android:textDirection="locale"
-        android:textSize="14sp" />
 
     <!-- Song name -->
     <TextView
         android:id="@+id/header_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
         android:textSize="16sp" />
 
     <!-- Artist name -->
     <TextView
         android:id="@+id/header_artist"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_secondary_text"
+        style="@style/MediaPlayer.Subtitle"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
-        android:tint="@color/media_primary_text"
+        style="@style/MediaPlayer.AppIcon"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size" />
 
-    <!-- Constraints are set here as they are the same regardless of host -->
+    <!-- Long press menu -->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/qs_media_panel_outer_padding"
-        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
-        android:id="@+id/media_text"
-        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-        android:textColor="@color/media_primary_text"
-        android:text="@string/controls_media_title"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/remove_text"
-        app:layout_constraintVertical_chainStyle="spread_inside"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_padding"
         android:id="@+id/remove_text"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
         android:text="@string/controls_media_close_session"
-        app:layout_constraintTop_toBottomOf="@id/media_text"
+        android:gravity="center_horizontal|top"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/settings"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/cancel"/>
 
     <FrameLayout
         android:id="@+id/settings"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
+            android:id="@+id/settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:layout_gravity="center|bottom"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_settings_button" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/cancel"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
-        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintStart_toEndOf="@id/settings"
+        app:layout_constraintEnd_toStartOf="@id/dismiss"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/dismiss" >
+        app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:layout_gravity="center|bottom"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/cancel" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/dismiss"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
-        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="48dp"
+        app:layout_constraintHeight_min="48dp"
+        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
-            android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:layout_gravity="center|bottom"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_dismiss_button"
         />
     </FrameLayout>

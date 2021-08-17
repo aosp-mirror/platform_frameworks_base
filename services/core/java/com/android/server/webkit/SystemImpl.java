@@ -197,19 +197,6 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public boolean isFallbackLogicEnabled() {
-        // Note that this is enabled by default (i.e. if the setting hasn't been set).
-        return Settings.Global.getInt(AppGlobals.getInitialApplication().getContentResolver(),
-                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, 1) == 1;
-    }
-
-    @Override
-    public void enableFallbackLogic(boolean enable) {
-        Settings.Global.putInt(AppGlobals.getInitialApplication().getContentResolver(),
-                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, enable ? 1 : 0);
-    }
-
-    @Override
     public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {
         UserManager userManager = (UserManager)context.getSystemService(Context.USER_SERVICE);
         for(UserInfo userInfo : userManager.getUsers()) {

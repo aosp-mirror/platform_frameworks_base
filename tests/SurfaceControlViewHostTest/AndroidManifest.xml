@@ -13,10 +13,12 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.test.viewembed">
+     package="com.android.test.viewembed">
 
     <application>
-        <activity android:name="SurfaceControlViewHostTest" android:label="View Embedding Test">
+        <activity android:name="SurfaceControlViewHostTest"
+             android:label="View Embedding Test"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

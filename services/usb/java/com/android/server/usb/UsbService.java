@@ -200,7 +200,7 @@ public class UsbService extends IUsbManager.Stub {
         final IntentFilter filter = new IntentFilter();
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(receiver, filter, null, null);
+        mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, null);
     }
 
     /**
@@ -281,7 +281,7 @@ public class UsbService extends IUsbManager.Stub {
                 int pid = Binder.getCallingPid();
                 int user = UserHandle.getUserId(uid);
 
-                long ident = clearCallingIdentity();
+                final long ident = clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
@@ -318,7 +318,7 @@ public class UsbService extends IUsbManager.Stub {
             int uid = Binder.getCallingUid();
             int user = UserHandle.getUserId(uid);
 
-            long ident = clearCallingIdentity();
+            final long ident = clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
@@ -638,6 +638,32 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public int getCurrentUsbSpeed() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDeviceManager.getCurrentUsbSpeed();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public int getGadgetHalVersion() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDeviceManager.getGadgetHalVersion();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void resetUsbGadget() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
@@ -713,6 +739,38 @@ public class UsbService extends IUsbManager.Stub {
         try {
             if (mPortManager != null) {
                 mPortManager.enableContaminantDetection(portId, enable, null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public int getUsbHalVersion() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                return mPortManager.getUsbHalVersion();
+            } else {
+                return UsbManager.USB_HAL_NOT_SUPPORTED;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean enableUsbDataSignal(boolean enable) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                return mPortManager.enableUsbDataSignal(enable);
+            } else {
+                return false;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

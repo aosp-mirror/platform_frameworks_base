@@ -26,6 +26,6 @@ android_test {
     srcs: ["src/**/*.java"],
     certificate: "platform",
     platform_apis: true,
-    static_libs: ["android-support-test"],
+    static_libs: ["androidx.test.rules"],
     test_suites: ["device-tests"],
 }

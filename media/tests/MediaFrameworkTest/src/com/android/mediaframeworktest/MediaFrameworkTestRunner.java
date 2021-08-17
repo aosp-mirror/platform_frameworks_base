@@ -16,27 +16,28 @@
 
 package com.android.mediaframeworktest;
 
+import android.os.Bundle;
+import android.test.InstrumentationTestRunner;
+import android.test.InstrumentationTestSuite;
+
 import com.android.mediaframeworktest.functional.CameraTest;
 import com.android.mediaframeworktest.functional.MediaMetadataTest;
 import com.android.mediaframeworktest.functional.MediaMimeTest;
 import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
-import com.android.mediaframeworktest.functional.mediaplayback.MediaPlayerApiTest;
-import com.android.mediaframeworktest.functional.mediarecorder.MediaRecorderTest;
-import com.android.mediaframeworktest.functional.audio.SimTonesTest;
-import com.android.mediaframeworktest.functional.audio.MediaAudioTrackTest;
-import com.android.mediaframeworktest.functional.audio.MediaAudioManagerTest;
 import com.android.mediaframeworktest.functional.audio.MediaAudioEffectTest;
+import com.android.mediaframeworktest.functional.audio.MediaAudioManagerTest;
+import com.android.mediaframeworktest.functional.audio.MediaAudioTrackTest;
 import com.android.mediaframeworktest.functional.audio.MediaBassBoostTest;
 import com.android.mediaframeworktest.functional.audio.MediaEnvReverbTest;
 import com.android.mediaframeworktest.functional.audio.MediaEqualizerTest;
 import com.android.mediaframeworktest.functional.audio.MediaPresetReverbTest;
 import com.android.mediaframeworktest.functional.audio.MediaVirtualizerTest;
 import com.android.mediaframeworktest.functional.audio.MediaVisualizerTest;
-import junit.framework.TestSuite;
+import com.android.mediaframeworktest.functional.audio.SimTonesTest;
+import com.android.mediaframeworktest.functional.mediaplayback.MediaPlayerApiTest;
+import com.android.mediaframeworktest.functional.mediarecorder.MediaRecorderTest;
 
-import android.os.Bundle;
-import android.test.InstrumentationTestRunner;
-import android.test.InstrumentationTestSuite;
+import junit.framework.TestSuite;
 
 
 /**

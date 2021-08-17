@@ -11,6 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+java_defaults {
+    name: "FrameworkMockingServicesTests-jni-defaults",
+    jni_libs: [
+        "libactivitymanagermockingservicestestjni",
+    ],
+}
 
 package {
     // See: http://go/android-license-faq
@@ -23,21 +29,35 @@ package {
 
 android_test {
     name: "FrameworksMockingServicesTests",
+    defaults: ["FrameworkMockingServicesTests-jni-defaults"],
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     static_libs: [
         "services.core",
+        "services.devicepolicy",
         "services.net",
+        "services.usage",
         "service-jobscheduler",
         "service-permission.impl",
         "service-blobstore",
+        "service-appsearch",
+        "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.ext.truth",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "truth-prebuilt",
+        "hamcrest-library",
+        "servicestests-utils-mockito-extended",
+        "mockingservicestests-utils-mockito",
+        "servicestests-core-utils",
         "testables",
+        // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
+        "testng",
     ],
 
     libs: [
@@ -59,4 +79,18 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+java_library {
+    name: "mockingservicestests-utils-mockito",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "mockito-target-extended-minus-junit4",
+    ],
+    libs: [
+        "android.test.runner",
+    ],
 }

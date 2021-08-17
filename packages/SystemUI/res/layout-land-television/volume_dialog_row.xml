@@ -16,28 +16,31 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tag="row"
-    android:layout_width="@dimen/volume_dialog_row_width"
-    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/volume_dialog_panel_height"
     android:background="@android:color/transparent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:theme="@style/qs_theme">
+    android:theme="@style/volume_dialog_theme">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:padding="@dimen/tv_volume_dialog_row_padding"
         android:background="@android:color/transparent"
         android:gravity="center"
         android:layout_gravity="center"
-        android:orientation="horizontal" >
-        <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/volume_row_icon"
-            style="@style/VolumeButtons"
-            android:layout_width="@dimen/volume_dialog_tap_target_size"
-            android:layout_height="@dimen/volume_dialog_tap_target_size"
-            android:background="@drawable/ripple_drawable_20dp"
-            android:tint="@color/accent_tint_color_selector"
-            android:soundEffectsEnabled="false" />
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/volume_number"
+            android:layout_width="@dimen/tv_volume_dialog_bubble_size"
+            android:layout_height="@dimen/tv_volume_dialog_bubble_size"
+            android:maxLength="2"
+            android:gravity="center"
+            android:fontFeatureSettings="tnum"
+            android:background="@drawable/tv_volume_dialog_circle"
+            android:textSize="@dimen/tv_volume_number_text_size"
+            android:textColor="@color/tv_volume_dialog_accent"/>
         <TextView
             android:id="@+id/volume_row_header"
             android:layout_width="wrap_content"
@@ -50,18 +53,30 @@
             android:textAppearance="@style/TextAppearance.Volume.Header" />
         <FrameLayout
             android:id="@+id/volume_row_slider_frame"
-            android:layout_height="match_parent"
-            android:layoutDirection="ltr"
-            android:layout_width="@dimen/volume_dialog_row_width">
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/volume_dialog_panel_height">
             <SeekBar
                 android:id="@+id/volume_row_slider"
                 android:clickable="false"
-                android:layout_width="@dimen/volume_dialog_row_width"
+                android:layout_width="@dimen/volume_dialog_panel_height"
                 android:layout_height="match_parent"
-                android:layoutDirection="ltr"
                 android:layout_gravity="center"
-                android:rotation="0" />
+                android:layoutDirection="ltr"
+                android:maxHeight="@dimen/volume_dialog_slider_width"
+                android:minHeight="@dimen/volume_dialog_slider_width"
+                android:progressDrawable="@drawable/volume_row_seekbar"
+                android:thumb="@drawable/tv_volume_row_seek_thumb"
+                android:splitTrack="false"
+                android:rotation="270" />
         </FrameLayout>
+        <com.android.keyguard.AlphaOptimizedImageButton
+            android:id="@+id/volume_row_icon"
+            style="@style/VolumeButtons"
+            android:layout_width="@dimen/tv_volume_dialog_bubble_size"
+            android:layout_height="@dimen/tv_volume_dialog_bubble_size"
+            android:background="@drawable/tv_volume_dialog_circle"
+            android:tint="@color/accent_tint_color_selector"
+            android:soundEffectsEnabled="false" />
     </LinearLayout>
 
     <include layout="@layout/volume_dnd_icon"/>

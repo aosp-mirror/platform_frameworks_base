@@ -93,6 +93,7 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceEasyCorrectSuggestion">@style/TextAppearance.EasyCorrectSuggestion</item>
         <item name="textAppearanceMisspelledSuggestion">@style/TextAppearance.MisspelledSuggestion</item>
         <item name="textAppearanceAutoCorrectionSuggestion">@style/TextAppearance.AutoCorrectionSuggestion</item>
+        <item name="textAppearanceGrammarErrorSuggestion">@style/TextAppearance.GrammarErrorSuggestion</item>
 
         <item name="textAppearanceButton">@style/TextAppearance.Widget.Button</item>
 
@@ -166,6 +167,10 @@ please see themes_device_defaults.xml.
         <!-- Window attributes -->
         <item name="windowBackground">@drawable/screen_background_selector_dark</item>
         <item name="windowBackgroundFallback">?attr/colorBackground</item>
+        <item name="windowSplashScreenBackground">@color/transparent</item>
+        <item name="windowSplashScreenAnimatedIcon">@null</item>
+        <item name="windowSplashScreenBrandingImage">@null</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/transparent</item>
         <item name="windowClipToOutline">false</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>

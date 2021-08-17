@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -47,7 +48,7 @@ public class WallpaperColorsTest {
     }
 
     /**
-     * Sanity check to guarantee that white supports dark text and black doesn't
+     * Check that white supports dark text and black doesn't
      */
     @Test
     public void colorHintsTest() {
@@ -105,5 +106,27 @@ public class WallpaperColorsTest {
         Canvas canvas = new Canvas();
         // This would crash:
         canvas.drawBitmap(image, 0, 0, new Paint());
+    }
+
+    /**
+     * Parcelled WallpaperColors object should equal the original.
+     */
+    @Test
+    public void testParcelUnparcel() {
+        Bitmap image = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        WallpaperColors colors = WallpaperColors.fromBitmap(image);
+        Parcel parcel = Parcel.obtain();
+        colors.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        WallpaperColors reconstructed = new WallpaperColors(parcel);
+        parcel.recycle();
+        Assert.assertEquals("WallpaperColors recreated from Parcel should equal original",
+                colors, reconstructed);
+        Assert.assertEquals("getAllColors() on WallpaperColors recreated from Parcel should"
+                        + "return the same as the original",
+                colors.getAllColors(), reconstructed.getAllColors());
+        Assert.assertEquals("getMainColors() on WallpaperColors recreated from Parcel should"
+                        + "return the same as the original",
+                colors.getMainColors(), reconstructed.getMainColors());
     }
 }

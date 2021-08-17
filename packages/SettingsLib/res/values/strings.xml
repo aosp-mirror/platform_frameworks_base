@@ -64,8 +64,12 @@
     <string name="wifi_security_eap" translatable="false">WPA/WPA2/WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
     <string name="wifi_security_eap_wpa" translatable="false">WPA-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa_wpa2" translatable="false">WPA/WPA2-Enterprise</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
     <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA3 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa3" translatable="false">WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for Passpoint network -->
     <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
     <!-- Do not translate.  Terminology for wifi with WPA3 security -->
@@ -110,6 +114,9 @@
     <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
+    <!-- Summary for connect to metered access point [CHAR LIMIT=NONE] -->
+    <string name="connected_to_metered_access_point">Connected to metered network</string>
+
 
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
@@ -646,8 +653,8 @@
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
-    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
-    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
+    <!-- Setting Checkbox title whether to enable WiFi non-persistent mac randomization. [CHAR LIMIT=80] -->
+    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi non\u2011persistent MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -879,6 +886,9 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
+    <!-- UI debug setting: enable or disable window blurs [CHAR LIMIT=50] -->
+    <string name="window_blurs">Allow window-level blurs</string>
+
     <!-- UI debug setting: force anti-aliasing to render apps [CHAR LIMIT=25] -->
     <string name="force_msaa">Force 4x MSAA</string>
     <!-- UI debug setting: force anti-aliasing summary [CHAR LIMIT=50] -->
@@ -992,6 +1002,24 @@
     <string name="standby_bucket_summary">App standby
         state:<xliff:g id="bucket"> %s</xliff:g></string>
 
+    <!-- Settings item title for media transcoding settings. [CHAR LIMIT=85] -->
+    <string name="transcode_settings_title">Media transcoding settings</string>
+
+    <!-- Settings item title to enable user's control over further transcoding preferences. [CHAR LIMIT=85] -->
+    <string name="transcode_user_control">Override transcoding defaults</string>
+
+    <!-- Settings item title to enable transcoding globally. [CHAR LIMIT=85] -->
+    <string name="transcode_enable_all">Enable transcoding</string>
+
+    <!-- Settings item title to select the default behavior for transcoding if an encodig is not supported by an app. [CHAR LIMIT=85] -->
+    <string name="transcode_default">Assume apps support modern formats</string>
+
+    <!-- Settings item title to select whether to show transcoding notifications. [CHAR LIMIT=85] -->
+    <string name="transcode_notification">Show transcoding notifications</string>
+
+    <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
+    <string name="transcode_disable_cache">Disable transcoding cache</string>
+
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
@@ -1041,7 +1069,14 @@
     <!-- Title for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
     <string name="accessibility_display_daltonizer_preference_title">Color correction</string>
     <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_display_daltonizer_preference_subtitle"><![CDATA[Color correction allows you to adjust how colors are displayed on your device]]></string>
+    <string name="accessibility_display_daltonizer_preference_subtitle">
+        <![CDATA[
+        Adjust how colors display on your device. This can be helpful when you want to:<br/><br/>
+        <ol>
+            <li>&nbsp;See colors more accurately</li>
+            <li>&nbsp;Remove colors to help you focus</li>
+        </ol>
+        ]]></string>
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
@@ -1097,11 +1132,11 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until charged</string>
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until charged</string>
+    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Optimizing for battery health</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging temporarily limited</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1111,12 +1146,14 @@
     <string name="battery_info_status_charging_fast">Charging rapidly</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is slow.  -->
     <string name="battery_info_status_charging_slow">Charging slowly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging wirelessly.  -->
+    <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
+    <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
+    <string name="battery_info_status_not_charging">Connected, not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_not_charging">Plugged in, can\'t charge right now</string>
-    <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_full">Full</string>
+    <string name="battery_info_status_full">Charged</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
@@ -1243,6 +1280,21 @@
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
 
+    <!-- Label for the settings activity for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
+    <string name="alarms_and_reminders_label">Alarms and reminders</string>
+    <!-- Label for the switch to toggler the permission for scheduling alarms [CHAR LIMIT=50] -->
+    <string name="alarms_and_reminders_switch_title">Allow setting alarms and reminders</string>
+    <!-- Title for the setting screen for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
+    <string name="alarms_and_reminders_title">Alarms &amp; reminders</string>
+    <!-- Description that appears below the alarms_and_reminders switch [CHAR LIMIT=NONE] -->
+    <string name="alarms_and_reminders_footer_title">
+        Allow this app to set alarms and schedule time-sensitive actions.
+        This lets the app run in the background, which may use more battery.\n\nIf this permission
+        is off, existing alarms and time-based events scheduled by this app won\u2019t work.
+    </string>
+    <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
+    <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
+
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
@@ -1277,6 +1329,8 @@
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name">Phone speaker</string>
+    <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_phone">This phone</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
@@ -1356,13 +1410,34 @@
     <string name="user_set_lock_button">Set lock</string>
     <!-- Label for switching to other user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+    <!-- Dialog message when creating a new user [CHAR LIMIT=NONE] -->
+    <string name="creating_new_user_dialog_message">Creating new user…</string>
+    <!-- Text shown to notify that the creation of new user has failed. [CHAR LIMIT=40] -->
+    <string name="add_user_failed">Failed to create a new user</string>
+
+    <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
+    <string name="user_nickname">Nickname</string>
 
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">Add guest</string>
     <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_exit_guest">Remove guest</string>
+    <!-- Label for resetting guest session in the user switcher, which will remove all data from the current guest session [CHAR LIMIT=35] -->
+    <string name="guest_reset_guest">Reset guest</string>
     <!-- Name for the guest user [CHAR LIMIT=35] -->
     <string name="guest_nickname">Guest</string>
+    <!-- Title of the confirmation dialog to confirm resetting guest. [CHAR LIMIT=NONE] -->
+    <string name="guest_reset_guest_dialog_title">Reset guest?</string>
+    <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
+    <string name="guest_reset_guest_confirm_button">Reset</string>
+    <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
+    <string name="guest_resetting">Resetting guest\u2026</string>
+    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
+    <string name="user_image_take_photo">Take a photo</string>
+    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
+    <string name="user_image_choose_photo">Choose an image</string>
+    <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
+    <string name="user_image_photo_selector">Select photo</string>
 
     <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
     <string name="cached_apps_freezer_device_default">Device default</string>
@@ -1375,4 +1450,90 @@
 
     <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
     <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
+
+    <!-- Label for Wifi hotspot switch on. Toggles hotspot on [CHAR LIMIT=30] -->
+    <string name="wifi_hotspot_switch_on_text">On</string>
+    <!-- Label for Wifi hotspot switch off. Toggles hotspot off [CHAR LIMIT=30] -->
+    <string name="wifi_hotspot_switch_off_text">Off</string>
+
+    <!-- Content description of the carrier network changing icon. [CHAR LIMIT=NONE] -->
+    <string name="carrier_network_change_mode">Carrier network changing</string>
+
+    <!-- Content description of the data connection type 3G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3g">3G</string>
+
+    <!-- Content description of the data connection type Edge. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_edge">EDGE</string>
+
+    <!-- Content description of the data connection type CDMA. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_cdma">1X</string>
+
+    <!-- Content description of the data connection type GPRS. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_gprs">GPRS</string>
+
+    <!-- Content description of the data connection type 3.5G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3_5g">H</string>
+
+    <!-- Content description of the data connection type 3.5G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3_5g_plus">H+</string>
+
+    <!-- Content description of the data connection type 4G . [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g">4G</string>
+
+    <!-- Content description of the data connection type 4G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g_plus">4G+</string>
+
+    <!-- Content description of the data connection type LTE. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_lte">LTE</string>
+
+    <!-- Content description of the data connection type LTE+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_lte_plus">LTE+</string>
+
+    <!-- Content description of the data connection type 5Ge with HTML styling. DO NOT TRANSLATE [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5ge_html" translate="false"> &lt;i>5G &lt;small>E&lt;/small>&lt;/i> </string>
+
+    <!-- Content description of the data connection type 5G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5g" translatable="false">5G</string>
+
+    <!-- Content description of the data connection type 5G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5g_plus" translatable="false">5G+</string>
+
+    <!-- Content description of the data connection type Carrier WiFi. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_carrier_wifi">W+</string>
+
+    <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
+    <string name="cell_data_off_content_description">Mobile data off</string>
+
+    <!-- Content description of the cell data for not default subscription. [CHAR LIMIT=NONE] -->
+    <string name="not_default_data_content_description">Not set to use data</string>
+
+    <!-- Content description of the phone signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_phone">No phone.</string>
+    <!-- Content description of the phone signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_one_bar">Phone one bar.</string>
+    <!-- Content description of the phone signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_two_bars">Phone two bars.</string>
+    <!-- Content description of the phone signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_three_bars">Phone three bars.</string>
+    <!-- Content description of the phone signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_signal_full">Phone signal full.</string>
+
+    <!-- Content description of the data signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_data">No data.</string>
+    <!-- Content description of the data signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_one_bar">Data one bar.</string>
+    <!-- Content description of the data signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_two_bars">Data two bars.</string>
+    <!-- Content description of the data signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_three_bars">Data three bars.</string>
+    <!-- Content description of the data signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_signal_full">Data signal full.</string>
+
+    <!-- Content description of the Ethernet connection when disconnected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_ethernet_disconnected">Ethernet disconnected.</string>
+    <!-- Content description of the Ethernet connection when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_ethernet_connected">Ethernet.</string>
+
+    <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_calling">No calling.</string>
 </resources>

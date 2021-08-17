@@ -39,11 +39,10 @@ public class NinePatch {
      * Present on a 9 patch bitmap if it optical insets were manually included,
      * or if outline insets were automatically included by aapt.
      *
-     * @hide
+     * @hide For use by NinePatchDrawable, but must not be used outside the module.
      */
     public static class InsetStruct {
         @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
-        @UnsupportedAppUsage
         InsetStruct(int opticalLeft, int opticalTop, int opticalRight, int opticalBottom,
                 int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
                 float outlineRadius, int outlineAlpha, float decodeScale) {
@@ -86,7 +85,7 @@ public class NinePatch {
     /**
      * Used by native code. This pointer is an instance of Res_png_9patch*.
      *
-     * @hide
+     * @hide for use by android.graphics, but must not be used outside the module.
      */
     @UnsupportedAppUsage
     public long mNativeChunk;
@@ -117,20 +116,6 @@ public class NinePatch {
         mBitmap = bitmap;
         mSrcName = srcName;
         mNativeChunk = validateNinePatchChunk(chunk);
-    }
-
-    /**
-     * @hide
-     */
-    public NinePatch(NinePatch patch) {
-        mBitmap = patch.mBitmap;
-        mSrcName = patch.mSrcName;
-        if (patch.mPaint != null) {
-            mPaint = new Paint(patch.mPaint);
-        }
-        // No need to validate the 9patch chunk again, it was done by
-        // the instance we're copying from
-        mNativeChunk = patch.mNativeChunk;
     }
 
     @Override

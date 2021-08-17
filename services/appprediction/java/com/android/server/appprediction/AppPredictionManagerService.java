@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.Slog;
@@ -179,7 +180,8 @@ public class AppPredictionManagerService extends
             Context ctx = getContext();
             if (!(ctx.checkCallingPermission(PACKAGE_USAGE_STATS) == PERMISSION_GRANTED
                     || mServiceNameResolver.isTemporary(userId)
-                    || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
+                    || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())
+                    || Binder.getCallingUid() == Process.SYSTEM_UID)) {
 
                 String msg = "Permission Denial: " + func + " from pid="
                         + Binder.getCallingPid()
@@ -189,7 +191,7 @@ public class AppPredictionManagerService extends
                 throw new SecurityException(msg);
             }
 
-            long origId = Binder.clearCallingIdentity();
+            final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     final AppPredictionPerUserService service = getServiceForUserLocked(userId);

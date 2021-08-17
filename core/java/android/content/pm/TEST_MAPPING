@@ -14,6 +14,31 @@
     {
       "name": "CtsInstantAppTests",
       "file_patterns": ["(/|^)InstantApp[^/]*"]
+    },
+    {
+      "name": "CarrierAppIntegrationTestCases"
+    },
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.pm.cts"
+        }
+      ]
+    },
+    {
+      "name": "CtsIncrementalInstallHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.incrementalinstall.cts.IncrementalFeatureTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

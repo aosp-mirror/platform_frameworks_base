@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.widget.WidgetFlags;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -84,17 +86,19 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE, String.class);
+                Settings.Global.ANGLE_DEBUG_PACKAGE, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE, String.class);
+                Settings.Global.ANGLE_GL_DRIVER_ALL_ANGLE, int.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS, String.class);
+                Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES, String.class);
+                Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST, String.class);
+                Settings.Global.ANGLE_ALLOWLIST, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX, String.class);
+                Settings.Global.ANGLE_EGL_FEATURES, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, int.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_APP, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYERS, String.class);
@@ -140,6 +144,10 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_OPACITY,
                 WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class,
                 WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.LINE_SLOP_RATIO,
+                WidgetFlags.KEY_LINE_SLOP_RATIO, float.class,
+                WidgetFlags.LINE_SLOP_RATIO_DEFAULT));
         sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_NEW_MAGNIFIER,
                 WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class,
@@ -154,6 +162,7 @@ final class CoreSettingsObserver extends ContentObserver {
                 WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
         // add other device configs here...
     }
+    private static volatile boolean sDeviceConfigContextEntriesLoaded = false;
 
     private final Bundle mCoreSettings = new Bundle();
 
@@ -161,9 +170,27 @@ final class CoreSettingsObserver extends ContentObserver {
 
     public CoreSettingsObserver(ActivityManagerService activityManagerService) {
         super(activityManagerService.mHandler);
+
+        if (!sDeviceConfigContextEntriesLoaded) {
+            synchronized (sDeviceConfigEntries) {
+                if (!sDeviceConfigContextEntriesLoaded) {
+                    loadDeviceConfigContextEntries(activityManagerService.mContext);
+                    sDeviceConfigContextEntriesLoaded = true;
+                }
+            }
+        }
+
         mActivityManagerService = activityManagerService;
         beginObserveCoreSettings();
         sendCoreSettings();
+    }
+
+    private static void loadDeviceConfigContextEntries(Context context) {
+        sDeviceConfigEntries.add(new DeviceConfigEntry<>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS,
+                WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS, int.class,
+                context.getResources()
+                        .getInteger(R.integer.config_defaultAnalogClockSecondsHandFps)));
     }
 
     public Bundle getCoreSettingsLocked() {
@@ -217,16 +244,17 @@ final class CoreSettingsObserver extends ContentObserver {
 
     @VisibleForTesting
     void populateSettings(Bundle snapshot, Map<String, Class<?>> map) {
-        Context context = mActivityManagerService.mContext;
+        final Context context = mActivityManagerService.mContext;
+        final ContentResolver cr = context.getContentResolver();
         for (Map.Entry<String, Class<?>> entry : map.entrySet()) {
             String setting = entry.getKey();
             final String value;
             if (map == sSecureSettingToTypeMap) {
-                value = Settings.Secure.getString(context.getContentResolver(), setting);
+                value = Settings.Secure.getStringForUser(cr, setting, cr.getUserId());
             } else if (map == sSystemSettingToTypeMap) {
-                value = Settings.System.getString(context.getContentResolver(), setting);
+                value = Settings.System.getStringForUser(cr, setting, cr.getUserId());
             } else {
-                value = Settings.Global.getString(context.getContentResolver(), setting);
+                value = Settings.Global.getString(cr, setting);
             }
             if (value == null) {
                 snapshot.remove(setting);

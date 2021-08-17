@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
@@ -540,7 +541,7 @@ public final class ApduServiceInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (!(o instanceof ApduServiceInfo)) return false;
         ApduServiceInfo thatService = (ApduServiceInfo) o;

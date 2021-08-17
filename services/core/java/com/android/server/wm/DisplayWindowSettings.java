@@ -16,187 +16,50 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
-import android.os.Environment;
-import android.os.FileUtils;
 import android.provider.Settings;
-import android.util.AtomicFile;
-import android.util.Slog;
-import android.util.Xml;
 import android.view.Display;
-import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.WindowManager.DisplayImePolicy;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.XmlUtils;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.DisplayContent.ForceScalingMode;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Objects;
 
 /**
- * Current persistent settings about a display
+ * Current persistent settings about a display. Provides policies for display settings and
+ * delegates the persistence and lookup of settings values to the supplied {@link SettingsProvider}.
  */
 class DisplayWindowSettings {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayWindowSettings" : TAG_WM;
-
-    private static final String SYSTEM_DIRECTORY = "system";
-    private static final String DISPLAY_SETTINGS_FILE_NAME = "display_settings.xml";
-    private static final String VENDOR_DISPLAY_SETTINGS_PATH = "etc/" + DISPLAY_SETTINGS_FILE_NAME;
-    private static final String WM_DISPLAY_COMMIT_TAG = "wm-displays";
-
-    private static final int IDENTIFIER_UNIQUE_ID = 0;
-    private static final int IDENTIFIER_PORT = 1;
-    @IntDef(prefix = { "IDENTIFIER_" }, value = {
-            IDENTIFIER_UNIQUE_ID,
-            IDENTIFIER_PORT,
-    })
-    @interface DisplayIdentifierType {}
-
     private final WindowManagerService mService;
-    private final HashMap<String, Entry> mEntries = new HashMap<>();
-    private final SettingPersister mStorage;
+    private final SettingsProvider mSettingsProvider;
 
-    /**
-     * The preferred type of a display identifier to use when storing and retrieving entries.
-     * {@link #getIdentifier(DisplayInfo)} must be used to get current preferred identifier for each
-     * display. It will fall back to using {@link #IDENTIFIER_UNIQUE_ID} if the currently selected
-     * one is not applicable to a particular display.
-     */
-    @DisplayIdentifierType
-    private int mIdentifier = IDENTIFIER_UNIQUE_ID;
-
-    /** Interface for persisting the display window settings. */
-    interface SettingPersister {
-        InputStream openRead() throws IOException;
-        OutputStream startWrite() throws IOException;
-        void finishWrite(OutputStream os, boolean success);
-    }
-
-    private static class Entry {
-        private final String mName;
-        private int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-        private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
-        private int mUserRotation = Surface.ROTATION_0;
-        private int mForcedWidth;
-        private int mForcedHeight;
-        private int mForcedDensity;
-        private int mForcedScalingMode = FORCE_SCALING_MODE_AUTO;
-        private int mRemoveContentMode = REMOVE_CONTENT_MODE_UNDEFINED;
-        private boolean mShouldShowWithInsecureKeyguard = false;
-        private boolean mShouldShowSystemDecors = false;
-        private boolean mShouldShowIme = false;
-        private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
-
-        private Entry(String name) {
-            mName = name;
-        }
-
-        private Entry(String name, Entry copyFrom) {
-            this(name);
-            mWindowingMode = copyFrom.mWindowingMode;
-            mUserRotationMode = copyFrom.mUserRotationMode;
-            mUserRotation = copyFrom.mUserRotation;
-            mForcedWidth = copyFrom.mForcedWidth;
-            mForcedHeight = copyFrom.mForcedHeight;
-            mForcedDensity = copyFrom.mForcedDensity;
-            mForcedScalingMode = copyFrom.mForcedScalingMode;
-            mRemoveContentMode = copyFrom.mRemoveContentMode;
-            mShouldShowWithInsecureKeyguard = copyFrom.mShouldShowWithInsecureKeyguard;
-            mShouldShowSystemDecors = copyFrom.mShouldShowSystemDecors;
-            mShouldShowIme = copyFrom.mShouldShowIme;
-            mFixedToUserRotation = copyFrom.mFixedToUserRotation;
-        }
-
-        /** @return {@code true} if all values are default. */
-        private boolean isEmpty() {
-            return mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
-                    && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
-                    && mUserRotation == Surface.ROTATION_0
-                    && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
-                    && mForcedScalingMode == FORCE_SCALING_MODE_AUTO
-                    && mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED
-                    && !mShouldShowWithInsecureKeyguard
-                    && !mShouldShowSystemDecors
-                    && !mShouldShowIme
-                    && mFixedToUserRotation == IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
-        }
-    }
-
-    DisplayWindowSettings(WindowManagerService service) {
-        this(service, new AtomicFileStorage());
-    }
-
-    @VisibleForTesting
-    DisplayWindowSettings(WindowManagerService service, SettingPersister storageImpl) {
+    DisplayWindowSettings(WindowManagerService service, SettingsProvider settingsProvider) {
         mService = service;
-        mStorage = storageImpl;
-        readSettings();
-    }
-
-    private @Nullable Entry getEntry(DisplayInfo displayInfo) {
-        final String identifier = getIdentifier(displayInfo);
-        Entry entry;
-        // Try to get corresponding entry using preferred identifier for the current config.
-        if ((entry = mEntries.get(identifier)) != null) {
-            return entry;
-        }
-        // Else, fall back to the display name.
-        if ((entry = mEntries.get(displayInfo.name)) != null) {
-            // Found an entry stored with old identifier - upgrade to the new type now.
-            return updateIdentifierForEntry(entry, displayInfo);
-        }
-        return null;
-    }
-
-    private Entry getOrCreateEntry(DisplayInfo displayInfo) {
-        final Entry entry = getEntry(displayInfo);
-        return entry != null ? entry : new Entry(getIdentifier(displayInfo));
-    }
-
-    /**
-     * Upgrades the identifier of a legacy entry. Does it by copying the data from the old record
-     * and clearing the old key in memory. The entry will be written to storage next time when a
-     * setting changes.
-     */
-    private Entry updateIdentifierForEntry(Entry entry, DisplayInfo displayInfo) {
-        final Entry newEntry = new Entry(getIdentifier(displayInfo), entry);
-        removeEntry(displayInfo);
-        mEntries.put(newEntry.mName, newEntry);
-        return newEntry;
+        mSettingsProvider = settingsProvider;
     }
 
     void setUserRotation(DisplayContent displayContent, int rotationMode, int rotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mUserRotationMode = rotationMode;
-        entry.mUserRotation = rotation;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mUserRotationMode = rotationMode;
+        overrideSettings.mUserRotation = rotation;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     void setForcedSize(DisplayContent displayContent, int width, int height) {
@@ -204,14 +67,14 @@ class DisplayWindowSettings {
             final String sizeString = (width == 0 || height == 0) ? "" : (width + "," + height);
             Settings.Global.putString(mService.mContext.getContentResolver(),
                     Settings.Global.DISPLAY_SIZE_FORCED, sizeString);
-            return;
         }
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mForcedWidth = width;
-        entry.mForcedHeight = height;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mForcedWidth = width;
+        overrideSettings.mForcedHeight = height;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     void setForcedDensity(DisplayContent displayContent, int density, int userId) {
@@ -219,38 +82,47 @@ class DisplayWindowSettings {
             final String densityString = density == 0 ? "" : Integer.toString(density);
             Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
-            return;
         }
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mForcedDensity = density;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mForcedDensity = density;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     void setForcedScalingMode(DisplayContent displayContent, @ForceScalingMode int mode) {
         if (displayContent.isDefaultDisplay) {
             Settings.Global.putInt(mService.mContext.getContentResolver(),
                     Settings.Global.DISPLAY_SCALING_FORCE, mode);
-            return;
         }
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mForcedScalingMode = mode;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mForcedScalingMode = mode;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     void setFixedToUserRotation(DisplayContent displayContent, int fixedToUserRotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mFixedToUserRotation = fixedToUserRotation;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mFixedToUserRotation = fixedToUserRotation;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    private int getWindowingModeLocked(Entry entry, DisplayContent dc) {
-        int windowingMode = entry != null ? entry.mWindowingMode
-                : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+    void setIgnoreOrientationRequest(
+            DisplayContent displayContent, boolean ignoreOrientationRequest) {
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mIgnoreOrientationRequest = ignoreOrientationRequest;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+    }
+
+    private int getWindowingModeLocked(SettingsProvider.SettingsEntry settings, DisplayContent dc) {
+        int windowingMode = settings.mWindowingMode;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -269,22 +141,23 @@ class DisplayWindowSettings {
 
     int getWindowingModeLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
-        return getWindowingModeLocked(entry, dc);
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return getWindowingModeLocked(settings, dc);
     }
 
     void setWindowingModeLocked(DisplayContent dc, int mode) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mWindowingMode = mode;
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mWindowingMode = mode;
         dc.setWindowingMode(mode);
-        writeSettingsIfNeeded(entry, displayInfo);
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     int getRemoveContentModeLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
-        if (entry == null || entry.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        if (settings.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
             if (dc.isPrivate()) {
                 // For private displays by default content is destroyed on removal.
                 return REMOVE_CONTENT_MODE_DESTROY;
@@ -292,107 +165,127 @@ class DisplayWindowSettings {
             // For other displays by default content is moved to primary on removal.
             return REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
         }
-        return entry.mRemoveContentMode;
+        return settings.mRemoveContentMode;
     }
 
     void setRemoveContentModeLocked(DisplayContent dc, int mode) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mRemoveContentMode = mode;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mRemoveContentMode = mode;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     boolean shouldShowWithInsecureKeyguardLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
-        if (entry == null) {
-            return false;
-        }
-        return entry.mShouldShowWithInsecureKeyguard;
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return settings.mShouldShowWithInsecureKeyguard != null
+                ? settings.mShouldShowWithInsecureKeyguard : false;
     }
 
     void setShouldShowWithInsecureKeyguardLocked(DisplayContent dc, boolean shouldShow) {
         if (!dc.isPrivate() && shouldShow) {
-            Slog.e(TAG, "Public display can't be allowed to show content when locked");
-            return;
+            throw new IllegalArgumentException("Public display can't be allowed to show content"
+                    + " when locked");
         }
 
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mShouldShowWithInsecureKeyguard = shouldShow;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mShouldShowWithInsecureKeyguard = shouldShow;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+    }
+
+    void setDontMoveToTop(DisplayContent dc, boolean dontMoveToTop) {
+        DisplayInfo displayInfo = dc.getDisplayInfo();
+        SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getSettings(displayInfo);
+        overrideSettings.mDontMoveToTop = dontMoveToTop;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     boolean shouldShowSystemDecorsLocked(DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            // For default display should show system decors.
+            // Default display should show system decors.
             return true;
         }
 
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
-        if (entry == null) {
-            return false;
-        }
-        return entry.mShouldShowSystemDecors;
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return settings.mShouldShowSystemDecors != null ? settings.mShouldShowSystemDecors : false;
     }
 
     void setShouldShowSystemDecorsLocked(DisplayContent dc, boolean shouldShow) {
-        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY && !shouldShow) {
-            Slog.e(TAG, "Default display should show system decors");
-            return;
-        }
-
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mShouldShowSystemDecors = shouldShow;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mShouldShowSystemDecors = shouldShow;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    boolean shouldShowImeLocked(DisplayContent dc) {
+    @DisplayImePolicy int getImePolicyLocked(DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            // For default display should shows IME.
-            return true;
+            // Default display should show IME.
+            return DISPLAY_IME_POLICY_LOCAL;
         }
 
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getEntry(displayInfo);
-        if (entry == null) {
-            return false;
-        }
-        return entry.mShouldShowIme;
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return settings.mImePolicy != null ? settings.mImePolicy
+                : DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
     }
 
-    void setShouldShowImeLocked(DisplayContent dc, boolean shouldShow) {
-        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY && !shouldShow) {
-            Slog.e(TAG, "Default display should show IME");
-            return;
-        }
-
+    void setDisplayImePolicy(DisplayContent dc, @DisplayImePolicy int imePolicy) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mShouldShowIme = shouldShow;
-        writeSettingsIfNeeded(entry, displayInfo);
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mImePolicy = imePolicy;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
     void applySettingsToDisplayLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Entry entry = getOrCreateEntry(displayInfo);
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
         // Setting windowing mode first, because it may override overscan values later.
-        dc.setWindowingMode(getWindowingModeLocked(entry, dc));
+        final int windowingMode = getWindowingModeLocked(settings, dc);
+        dc.setWindowingMode(windowingMode);
 
-        dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
-                entry.mUserRotation, entry.mFixedToUserRotation);
+        final int userRotationMode = settings.mUserRotationMode != null
+                ? settings.mUserRotationMode : WindowManagerPolicy.USER_ROTATION_FREE;
+        final int userRotation = settings.mUserRotation != null
+                ? settings.mUserRotation : Surface.ROTATION_0;
+        final int mFixedToUserRotation = settings.mFixedToUserRotation != null
+                ? settings.mFixedToUserRotation : IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+        dc.getDisplayRotation().restoreSettings(userRotationMode, userRotation,
+                mFixedToUserRotation);
 
-        if (entry.mForcedDensity != 0) {
-            dc.mBaseDisplayDensity = entry.mForcedDensity;
-        }
-        if (entry.mForcedWidth != 0 && entry.mForcedHeight != 0) {
-            dc.updateBaseDisplayMetrics(entry.mForcedWidth, entry.mForcedHeight,
-                    dc.mBaseDisplayDensity);
-        }
-        dc.mDisplayScalingDisabled = entry.mForcedScalingMode == FORCE_SCALING_MODE_DISABLED;
+        final boolean hasDensityOverride = settings.mForcedDensity != 0;
+        final boolean hasSizeOverride = settings.mForcedWidth != 0 && settings.mForcedHeight != 0;
+        dc.mIsDensityForced = hasDensityOverride;
+        dc.mIsSizeForced = hasSizeOverride;
+
+        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
+                ? settings.mIgnoreOrientationRequest : false;
+        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
+
+        final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
+                ? settings.mIgnoreDisplayCutout : false;
+        dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
+
+        final int width = hasSizeOverride ? settings.mForcedWidth : dc.mInitialDisplayWidth;
+        final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
+        final int density = hasDensityOverride ? settings.mForcedDensity
+                : dc.mInitialDisplayDensity;
+        dc.updateBaseDisplayMetrics(width, height, density);
+
+        final int forcedScalingMode = settings.mForcedScalingMode != null
+                ? settings.mForcedScalingMode : FORCE_SCALING_MODE_AUTO;
+        dc.mDisplayScalingDisabled = forcedScalingMode == FORCE_SCALING_MODE_DISABLED;
+
+        boolean dontMoveToTop = settings.mDontMoveToTop != null
+                ? settings.mDontMoveToTop : false;
+        dc.mDontMoveToTop = dontMoveToTop;
     }
 
     /**
@@ -413,286 +306,309 @@ class DisplayWindowSettings {
         return false;
     }
 
-    private void readSettings() {
-        InputStream stream;
-        try {
-            stream = mStorage.openRead();
-        } catch (IOException e) {
-            Slog.i(TAG, "No existing display settings, starting empty");
-            return;
-        }
-        boolean success = false;
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                // Do nothing.
-            }
-
-            if (type != XmlPullParser.START_TAG) {
-                throw new IllegalStateException("no start tag found");
-            }
-
-            int outerDepth = parser.getDepth();
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                String tagName = parser.getName();
-                if (tagName.equals("display")) {
-                    readDisplay(parser);
-                } else if (tagName.equals("config")) {
-                    readConfig(parser);
-                } else {
-                    Slog.w(TAG, "Unknown element under <display-settings>: "
-                            + parser.getName());
-                    XmlUtils.skipCurrentTag(parser);
-                }
-            }
-            success = true;
-        } catch (IllegalStateException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } catch (NullPointerException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } catch (IndexOutOfBoundsException e) {
-            Slog.w(TAG, "Failed parsing " + e);
-        } finally {
-            if (!success) {
-                mEntries.clear();
-            }
-            try {
-                stream.close();
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    private int getIntAttribute(XmlPullParser parser, String name) {
-        return getIntAttribute(parser, name, 0 /* defaultValue */);
-    }
-
-    private int getIntAttribute(XmlPullParser parser, String name, int defaultValue) {
-        try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.parseInt(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    private boolean getBooleanAttribute(XmlPullParser parser, String name) {
-        return getBooleanAttribute(parser, name, false /* defaultValue */);
-    }
-
-    private boolean getBooleanAttribute(XmlPullParser parser, String name, boolean defaultValue) {
-        try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Boolean.parseBoolean(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    private void readDisplay(XmlPullParser parser) throws NumberFormatException,
-            XmlPullParserException, IOException {
-        String name = parser.getAttributeValue(null, "name");
-        if (name != null) {
-            Entry entry = new Entry(name);
-            entry.mWindowingMode = getIntAttribute(parser, "windowingMode",
-                    WindowConfiguration.WINDOWING_MODE_UNDEFINED);
-            entry.mUserRotationMode = getIntAttribute(parser, "userRotationMode",
-                    WindowManagerPolicy.USER_ROTATION_FREE);
-            entry.mUserRotation = getIntAttribute(parser, "userRotation",
-                    Surface.ROTATION_0);
-            entry.mForcedWidth = getIntAttribute(parser, "forcedWidth");
-            entry.mForcedHeight = getIntAttribute(parser, "forcedHeight");
-            entry.mForcedDensity = getIntAttribute(parser, "forcedDensity");
-            entry.mForcedScalingMode = getIntAttribute(parser, "forcedScalingMode",
-                    FORCE_SCALING_MODE_AUTO);
-            entry.mRemoveContentMode = getIntAttribute(parser, "removeContentMode",
-                    REMOVE_CONTENT_MODE_UNDEFINED);
-            entry.mShouldShowWithInsecureKeyguard = getBooleanAttribute(parser,
-                    "shouldShowWithInsecureKeyguard");
-            entry.mShouldShowSystemDecors = getBooleanAttribute(parser, "shouldShowSystemDecors");
-            entry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme");
-            entry.mFixedToUserRotation = getIntAttribute(parser, "fixedToUserRotation");
-            mEntries.put(name, entry);
-        }
-        XmlUtils.skipCurrentTag(parser);
-    }
-
-    private void readConfig(XmlPullParser parser) throws NumberFormatException,
-            XmlPullParserException, IOException {
-        mIdentifier = getIntAttribute(parser, "identifier");
-        XmlUtils.skipCurrentTag(parser);
-    }
-
-    private void writeSettingsIfNeeded(Entry changedEntry, DisplayInfo displayInfo) {
-        if (changedEntry.isEmpty() && !removeEntry(displayInfo)) {
-            // The entry didn't exist so nothing is changed and no need to update the file.
-            return;
-        }
-
-        mEntries.put(getIdentifier(displayInfo), changedEntry);
-        writeSettings();
-    }
-
-    private void writeSettings() {
-        OutputStream stream;
-        try {
-            stream = mStorage.startWrite();
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to write display settings: " + e);
-            return;
-        }
-
-        try {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
-            out.startDocument(null, true);
-
-            out.startTag(null, "display-settings");
-
-            out.startTag(null, "config");
-            out.attribute(null, "identifier", Integer.toString(mIdentifier));
-            out.endTag(null, "config");
-
-            for (Entry entry : mEntries.values()) {
-                out.startTag(null, "display");
-                out.attribute(null, "name", entry.mName);
-                if (entry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    out.attribute(null, "windowingMode", Integer.toString(entry.mWindowingMode));
-                }
-                if (entry.mUserRotationMode != WindowManagerPolicy.USER_ROTATION_FREE) {
-                    out.attribute(null, "userRotationMode",
-                            Integer.toString(entry.mUserRotationMode));
-                }
-                if (entry.mUserRotation != Surface.ROTATION_0) {
-                    out.attribute(null, "userRotation", Integer.toString(entry.mUserRotation));
-                }
-                if (entry.mForcedWidth != 0 && entry.mForcedHeight != 0) {
-                    out.attribute(null, "forcedWidth", Integer.toString(entry.mForcedWidth));
-                    out.attribute(null, "forcedHeight", Integer.toString(entry.mForcedHeight));
-                }
-                if (entry.mForcedDensity != 0) {
-                    out.attribute(null, "forcedDensity", Integer.toString(entry.mForcedDensity));
-                }
-                if (entry.mForcedScalingMode != FORCE_SCALING_MODE_AUTO) {
-                    out.attribute(null, "forcedScalingMode",
-                            Integer.toString(entry.mForcedScalingMode));
-                }
-                if (entry.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED) {
-                    out.attribute(null, "removeContentMode",
-                            Integer.toString(entry.mRemoveContentMode));
-                }
-                if (entry.mShouldShowWithInsecureKeyguard) {
-                    out.attribute(null, "shouldShowWithInsecureKeyguard",
-                            Boolean.toString(entry.mShouldShowWithInsecureKeyguard));
-                }
-                if (entry.mShouldShowSystemDecors) {
-                    out.attribute(null, "shouldShowSystemDecors",
-                            Boolean.toString(entry.mShouldShowSystemDecors));
-                }
-                if (entry.mShouldShowIme) {
-                    out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
-                }
-                if (entry.mFixedToUserRotation != IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT) {
-                    out.attribute(null, "fixedToUserRotation",
-                            Integer.toString(entry.mFixedToUserRotation));
-                }
-                out.endTag(null, "display");
-            }
-
-            out.endTag(null, "display-settings");
-            out.endDocument();
-            mStorage.finishWrite(stream, true /* success */);
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to write display window settings.", e);
-            mStorage.finishWrite(stream, false /* success */);
-        }
-    }
-
     /**
-     * Removes an entry from {@link #mEntries} cache. Looks up by new and previously used
-     * identifiers.
+     * Provides the functionality to lookup the {@link SettingsEntry settings} for a given
+     * {@link DisplayInfo}.
+     * <p>
+     * NOTE: All interactions with implementations of this provider <b>must</b> be thread-safe
+     * externally.
      */
-    private boolean removeEntry(DisplayInfo displayInfo) {
-        // Remove entry based on primary identifier.
-        boolean removed = mEntries.remove(getIdentifier(displayInfo)) != null;
-        // Ensure that legacy entries are cleared as well.
-        removed |= mEntries.remove(displayInfo.uniqueId) != null;
-        removed |= mEntries.remove(displayInfo.name) != null;
-        return removed;
-    }
+    interface SettingsProvider {
+        /**
+         * Returns the {@link SettingsEntry} for a given {@link DisplayInfo}. The values for the
+         * returned settings are guaranteed to match those previously set with
+         * {@link #updateOverrideSettings(DisplayInfo, SettingsEntry)} with all other values left
+         * to the implementation to determine.
+         */
+        @NonNull
+        SettingsEntry getSettings(@NonNull DisplayInfo info);
 
-    /** Gets the identifier of choice for the current config. */
-    private String getIdentifier(DisplayInfo displayInfo) {
-        if (mIdentifier == IDENTIFIER_PORT && displayInfo.address != null) {
-            // Config suggests using port as identifier for physical displays.
-            if (displayInfo.address instanceof DisplayAddress.Physical) {
-                byte port = ((DisplayAddress.Physical) displayInfo.address).getPort();
-                return "port:" + Byte.toUnsignedInt(port);
+        /**
+         * Returns the existing override settings for the given {@link DisplayInfo}. All calls to
+         * {@link #getSettings(DisplayInfo)} for the provided {@code info} are required to have
+         * their values overridden with all set values from the returned {@link SettingsEntry}.
+         *
+         * @see #getSettings(DisplayInfo)
+         * @see #updateOverrideSettings(DisplayInfo, SettingsEntry)
+         */
+        @NonNull
+        SettingsEntry getOverrideSettings(@NonNull DisplayInfo info);
+
+        /**
+         * Updates the override settings for a given {@link DisplayInfo}. All subsequent calls to
+         * {@link #getSettings(DisplayInfo)} for the provided {@link DisplayInfo} are required to
+         * have their values match all set values in {@code overrides}.
+         *
+         * @see #getSettings(DisplayInfo)
+         */
+        void updateOverrideSettings(@NonNull DisplayInfo info, @NonNull SettingsEntry overrides);
+
+        /**
+         * Settings for a display.
+         */
+        class SettingsEntry {
+            int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+            @Nullable
+            Integer mUserRotationMode;
+            @Nullable
+            Integer mUserRotation;
+            int mForcedWidth;
+            int mForcedHeight;
+            int mForcedDensity;
+            @Nullable
+            Integer mForcedScalingMode;
+            int mRemoveContentMode = REMOVE_CONTENT_MODE_UNDEFINED;
+            @Nullable
+            Boolean mShouldShowWithInsecureKeyguard;
+            @Nullable
+            Boolean mShouldShowSystemDecors;
+            @Nullable
+            Integer mImePolicy;
+            @Nullable
+            Integer mFixedToUserRotation;
+            @Nullable
+            Boolean mIgnoreOrientationRequest;
+            @Nullable
+            Boolean mIgnoreDisplayCutout;
+            @Nullable
+            Boolean mDontMoveToTop;
+
+            SettingsEntry() {}
+
+            SettingsEntry(SettingsEntry copyFrom) {
+                setTo(copyFrom);
             }
-        }
-        return displayInfo.uniqueId;
-    }
 
-    private static class AtomicFileStorage implements SettingPersister {
-        private final AtomicFile mAtomicFile;
-
-        AtomicFileStorage() {
-            final File folder = new File(Environment.getDataDirectory(), SYSTEM_DIRECTORY);
-            final File settingsFile = new File(folder, DISPLAY_SETTINGS_FILE_NAME);
-            // If display_settings.xml doesn't exist, try to copy the vendor's one instead
-            // in order to provide the vendor specific initialization.
-            if (!settingsFile.exists()) {
-                copyVendorSettings(settingsFile);
-            }
-            mAtomicFile = new AtomicFile(settingsFile, WM_DISPLAY_COMMIT_TAG);
-        }
-
-        private static void copyVendorSettings(File target) {
-            final File vendorFile = new File(Environment.getVendorDirectory(),
-                    VENDOR_DISPLAY_SETTINGS_PATH);
-            if (vendorFile.canRead()) {
-                try {
-                    FileUtils.copy(vendorFile, target);
-                } catch (IOException e) {
-                    Slog.e(TAG, "Failed to copy vendor display_settings.xml");
+            /**
+             * Copies all fields from {@code delta} into this {@link SettingsEntry} object, keeping
+             * track of whether a change has occurred.
+             *
+             * @return {@code true} if this settings have changed as a result of the copy,
+             *         {@code false} otherwise.
+             *
+             * @see #updateFrom(SettingsEntry)
+             */
+            boolean setTo(@NonNull SettingsEntry other) {
+                boolean changed = false;
+                if (other.mWindowingMode != mWindowingMode) {
+                    mWindowingMode = other.mWindowingMode;
+                    changed = true;
                 }
+                if (!Objects.equals(other.mUserRotationMode, mUserRotationMode)) {
+                    mUserRotationMode = other.mUserRotationMode;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mUserRotation, mUserRotation)) {
+                    mUserRotation = other.mUserRotation;
+                    changed = true;
+                }
+                if (other.mForcedWidth != mForcedWidth) {
+                    mForcedWidth = other.mForcedWidth;
+                    changed = true;
+                }
+                if (other.mForcedHeight != mForcedHeight) {
+                    mForcedHeight = other.mForcedHeight;
+                    changed = true;
+                }
+                if (other.mForcedDensity != mForcedDensity) {
+                    mForcedDensity = other.mForcedDensity;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mForcedScalingMode, mForcedScalingMode)) {
+                    mForcedScalingMode = other.mForcedScalingMode;
+                    changed = true;
+                }
+                if (other.mRemoveContentMode != mRemoveContentMode) {
+                    mRemoveContentMode = other.mRemoveContentMode;
+                    changed = true;
+                }
+                if (other.mShouldShowWithInsecureKeyguard != mShouldShowWithInsecureKeyguard) {
+                    mShouldShowWithInsecureKeyguard = other.mShouldShowWithInsecureKeyguard;
+                    changed = true;
+                }
+                if (other.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                    mShouldShowSystemDecors = other.mShouldShowSystemDecors;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mImePolicy, mImePolicy)) {
+                    mImePolicy = other.mImePolicy;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mFixedToUserRotation, mFixedToUserRotation)) {
+                    mFixedToUserRotation = other.mFixedToUserRotation;
+                    changed = true;
+                }
+                if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                    mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
+                    changed = true;
+                }
+                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                    mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
+                    changed = true;
+                }
+                if (other.mDontMoveToTop != mDontMoveToTop) {
+                    mDontMoveToTop = other.mDontMoveToTop;
+                    changed = true;
+                }
+                return changed;
             }
-        }
 
-        @Override
-        public InputStream openRead() throws FileNotFoundException {
-            return mAtomicFile.openRead();
-        }
-
-        @Override
-        public OutputStream startWrite() throws IOException {
-            return mAtomicFile.startWrite();
-        }
-
-        @Override
-        public void finishWrite(OutputStream os, boolean success) {
-            if (!(os instanceof FileOutputStream)) {
-                throw new IllegalArgumentException("Unexpected OutputStream as argument: " + os);
+            /**
+             * Copies the fields from {@code delta} into this {@link SettingsEntry} object, keeping
+             * track of whether a change has occurred. Any undefined fields in {@code delta} are
+             * ignored and not copied into the current {@link SettingsEntry}.
+             *
+             * @return {@code true} if this settings have changed as a result of the copy,
+             *         {@code false} otherwise.
+             *
+             * @see #setTo(SettingsEntry)
+             */
+            boolean updateFrom(@NonNull SettingsEntry delta) {
+                boolean changed = false;
+                if (delta.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED
+                        && delta.mWindowingMode != mWindowingMode) {
+                    mWindowingMode = delta.mWindowingMode;
+                    changed = true;
+                }
+                if (delta.mUserRotationMode != null
+                        && !Objects.equals(delta.mUserRotationMode, mUserRotationMode)) {
+                    mUserRotationMode = delta.mUserRotationMode;
+                    changed = true;
+                }
+                if (delta.mUserRotation != null
+                        && !Objects.equals(delta.mUserRotation, mUserRotation)) {
+                    mUserRotation = delta.mUserRotation;
+                    changed = true;
+                }
+                if (delta.mForcedWidth != 0 && delta.mForcedWidth != mForcedWidth) {
+                    mForcedWidth = delta.mForcedWidth;
+                    changed = true;
+                }
+                if (delta.mForcedHeight != 0 && delta.mForcedHeight != mForcedHeight) {
+                    mForcedHeight = delta.mForcedHeight;
+                    changed = true;
+                }
+                if (delta.mForcedDensity != 0 && delta.mForcedDensity != mForcedDensity) {
+                    mForcedDensity = delta.mForcedDensity;
+                    changed = true;
+                }
+                if (delta.mForcedScalingMode != null
+                        && !Objects.equals(delta.mForcedScalingMode, mForcedScalingMode)) {
+                    mForcedScalingMode = delta.mForcedScalingMode;
+                    changed = true;
+                }
+                if (delta.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED
+                        && delta.mRemoveContentMode != mRemoveContentMode) {
+                    mRemoveContentMode = delta.mRemoveContentMode;
+                    changed = true;
+                }
+                if (delta.mShouldShowWithInsecureKeyguard != null
+                        && delta.mShouldShowWithInsecureKeyguard
+                        != mShouldShowWithInsecureKeyguard) {
+                    mShouldShowWithInsecureKeyguard = delta.mShouldShowWithInsecureKeyguard;
+                    changed = true;
+                }
+                if (delta.mShouldShowSystemDecors != null
+                        && delta.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                    mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
+                    changed = true;
+                }
+                if (delta.mImePolicy != null
+                        && !Objects.equals(delta.mImePolicy, mImePolicy)) {
+                    mImePolicy = delta.mImePolicy;
+                    changed = true;
+                }
+                if (delta.mFixedToUserRotation != null
+                        && !Objects.equals(delta.mFixedToUserRotation, mFixedToUserRotation)) {
+                    mFixedToUserRotation = delta.mFixedToUserRotation;
+                    changed = true;
+                }
+                if (delta.mIgnoreOrientationRequest != null
+                        && delta.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                    mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
+                    changed = true;
+                }
+                if (delta.mIgnoreDisplayCutout != null
+                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                    mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
+                    changed = true;
+                }
+                if (delta.mDontMoveToTop != null
+                        && delta.mDontMoveToTop != mDontMoveToTop) {
+                    mDontMoveToTop = delta.mDontMoveToTop;
+                    changed = true;
+                }
+                return changed;
             }
-            FileOutputStream fos = (FileOutputStream) os;
-            if (success) {
-                mAtomicFile.finishWrite(fos);
-            } else {
-                mAtomicFile.failWrite(fos);
+
+            /** @return {@code true} if all values are unset. */
+            boolean isEmpty() {
+                return mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
+                        && mUserRotationMode == null
+                        && mUserRotation == null
+                        && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
+                        && mForcedScalingMode == null
+                        && mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED
+                        && mShouldShowWithInsecureKeyguard == null
+                        && mShouldShowSystemDecors == null
+                        && mImePolicy == null
+                        && mFixedToUserRotation == null
+                        && mIgnoreOrientationRequest == null
+                        && mIgnoreDisplayCutout == null
+                        && mDontMoveToTop == null;
+            }
+
+            @Override
+            public boolean equals(@Nullable Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                SettingsEntry that = (SettingsEntry) o;
+                return mWindowingMode == that.mWindowingMode
+                        && mForcedWidth == that.mForcedWidth
+                        && mForcedHeight == that.mForcedHeight
+                        && mForcedDensity == that.mForcedDensity
+                        && mRemoveContentMode == that.mRemoveContentMode
+                        && Objects.equals(mUserRotationMode, that.mUserRotationMode)
+                        && Objects.equals(mUserRotation, that.mUserRotation)
+                        && Objects.equals(mForcedScalingMode, that.mForcedScalingMode)
+                        && Objects.equals(mShouldShowWithInsecureKeyguard,
+                                that.mShouldShowWithInsecureKeyguard)
+                        && Objects.equals(mShouldShowSystemDecors, that.mShouldShowSystemDecors)
+                        && Objects.equals(mImePolicy, that.mImePolicy)
+                        && Objects.equals(mFixedToUserRotation, that.mFixedToUserRotation)
+                        && Objects.equals(mIgnoreOrientationRequest, that.mIgnoreOrientationRequest)
+                        && Objects.equals(mIgnoreDisplayCutout, that.mIgnoreDisplayCutout)
+                        && Objects.equals(mDontMoveToTop, that.mDontMoveToTop);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mWindowingMode, mUserRotationMode, mUserRotation, mForcedWidth,
+                        mForcedHeight, mForcedDensity, mForcedScalingMode, mRemoveContentMode,
+                        mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mImePolicy,
+                        mFixedToUserRotation, mIgnoreOrientationRequest, mIgnoreDisplayCutout,
+                        mDontMoveToTop);
+            }
+
+            @Override
+            public String toString() {
+                return "SettingsEntry{"
+                        + "mWindowingMode=" + mWindowingMode
+                        + ", mUserRotationMode=" + mUserRotationMode
+                        + ", mUserRotation=" + mUserRotation
+                        + ", mForcedWidth=" + mForcedWidth
+                        + ", mForcedHeight=" + mForcedHeight
+                        + ", mForcedDensity=" + mForcedDensity
+                        + ", mForcedScalingMode=" + mForcedScalingMode
+                        + ", mRemoveContentMode=" + mRemoveContentMode
+                        + ", mShouldShowWithInsecureKeyguard=" + mShouldShowWithInsecureKeyguard
+                        + ", mShouldShowSystemDecors=" + mShouldShowSystemDecors
+                        + ", mShouldShowIme=" + mImePolicy
+                        + ", mFixedToUserRotation=" + mFixedToUserRotation
+                        + ", mIgnoreOrientationRequest=" + mIgnoreOrientationRequest
+                        + ", mIgnoreDisplayCutout=" + mIgnoreDisplayCutout
+                        + ", mDontMoveToTop=" + mDontMoveToTop
+                        + '}';
             }
         }
     }

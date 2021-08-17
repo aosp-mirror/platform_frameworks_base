@@ -16,20 +16,32 @@
 
 package android.hardware.input;
 
-import android.annotation.CallbackExecutor;
+import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.media.AudioAttributes;
-import android.os.Binder;
+import android.hardware.SensorManager;
+import android.hardware.lights.Light;
+import android.hardware.lights.LightState;
+import android.hardware.lights.LightsManager;
+import android.hardware.lights.LightsRequest;
+import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
+import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVibratorStateListener;
+import android.os.InputEventInjectionSync;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -38,6 +50,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -48,13 +61,15 @@ import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
+import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.util.List;
 
 /**
@@ -68,6 +83,13 @@ public final class InputManager {
     private static final int MSG_DEVICE_ADDED = 1;
     private static final int MSG_DEVICE_REMOVED = 2;
     private static final int MSG_DEVICE_CHANGED = 3;
+
+    /** @hide */
+    public static final int[] BLOCK_UNTRUSTED_TOUCHES_MODES = {
+            BlockUntrustedTouchesMode.DISABLED,
+            BlockUntrustedTouchesMode.PERMISSIVE,
+            BlockUntrustedTouchesMode.BLOCK
+    };
 
     private static InputManager sInstance;
 
@@ -86,6 +108,7 @@ public final class InputManager {
     private TabletModeChangedListener mTabletModeChangedListener;
     private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
+    private InputDeviceSensorManager mInputDeviceSensorManager;
     /**
      * Broadcast Action: Query available keyboard layouts.
      * <p>
@@ -168,11 +191,43 @@ public final class InputManager {
     public static final int DEFAULT_POINTER_SPEED = 0;
 
     /**
+     * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
+     * @hide
+     */
+    public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
+
+    /**
+     * Default mode of the block untrusted touches mode feature.
+     * @hide
+     */
+    @BlockUntrustedTouchesMode
+    public static final int DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE =
+            BlockUntrustedTouchesMode.BLOCK;
+
+    /**
+     * Prevent touches from being consumed by apps if these touches passed through a non-trusted
+     * window from a different UID and are considered unsafe.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L;
+
+    /**
+     * Check whether apps are using FLAG_SLIPPERY for their windows. We expect that this flag is
+     * only used by the system components. If so, we can lock it down.
+     * @hide
+     */
+    @ChangeId
+    public static final long BLOCK_FLAG_SLIPPERY = android.os.IInputConstants.BLOCK_FLAG_SLIPPERY;
+
+    /**
      * Input Event Injection Synchronization Mode: None.
      * Never blocks.  Injection is asynchronous and is assumed always to be successful.
      * @hide
      */
-    public static final int INJECT_INPUT_EVENT_MODE_ASYNC = 0; // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_ASYNC = InputEventInjectionSync.NONE;
 
     /**
      * Input Event Injection Synchronization Mode: Wait for result.
@@ -182,7 +237,8 @@ public final class InputManager {
      * by the application.
      * @hide
      */
-    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT = 1;  // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT =
+            InputEventInjectionSync.WAIT_FOR_RESULT;
 
     /**
      * Input Event Injection Synchronization Mode: Wait for finish.
@@ -190,7 +246,8 @@ public final class InputManager {
      * @hide
      */
     @UnsupportedAppUsage(trackingBug = 171972397)
-    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH =
+            InputEventInjectionSync.WAIT_FOR_FINISHED;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -223,6 +280,33 @@ public final class InputManager {
 
     private InputManager(IInputManager im) {
         mIm = im;
+    }
+
+    /**
+     * Gets an instance of the input manager.
+     *
+     * @return The input manager instance.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static InputManager resetInstance(IInputManager inputManagerService) {
+        synchronized (InputManager.class) {
+            sInstance = new InputManager(inputManagerService);
+            return sInstance;
+        }
+    }
+
+    /**
+     * Clear the instance of the input manager.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void clearInstance() {
+        synchronized (InputManager.class) {
+            sInstance = null;
+        }
     }
 
     /**
@@ -832,6 +916,106 @@ public final class InputManager {
     }
 
     /**
+     * Returns the maximum allowed obscuring opacity per UID to propagate touches.
+     *
+     * <p>For certain window types (eg. {@link LayoutParams#TYPE_APPLICATION_OVERLAY}), the decision
+     * of honoring {@link LayoutParams#FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring
+     * opacity of the windows above the touch-consuming window, per UID. Check documentation of
+     * {@link LayoutParams#FLAG_NOT_TOUCHABLE} for more details.
+     *
+     * <p>The value returned is between 0 (inclusive) and 1 (inclusive).
+     *
+     * @see LayoutParams#FLAG_NOT_TOUCHABLE
+     */
+    @FloatRange(from = 0, to = 1)
+    public float getMaximumObscuringOpacityForTouch() {
+        Context context = ActivityThread.currentApplication();
+        return Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
+                DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+    }
+
+    /**
+     * Sets the maximum allowed obscuring opacity by UID to propagate touches.
+     *
+     * <p>For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
+     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
+     * above the touch-consuming window.
+     *
+     * <p>For a certain UID:
+     * <ul>
+     *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
+     *     the touch.
+     *     <li>Otherwise take all its windows of eligible window types above the touch-consuming
+     *     window, compute their combined obscuring opacity considering that {@code
+     *     opacity(A, B) = 1 - (1 - opacity(A))*(1 - opacity(B))}. If the computed value is
+     *     lesser than or equal to this setting and there are no other windows preventing the
+     *     touch, allow the UID to propagate the touch.
+     * </ul>
+     *
+     * <p>This value should be between 0 (inclusive) and 1 (inclusive).
+     *
+     * @see #getMaximumObscuringOpacityForTouch()
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setMaximumObscuringOpacityForTouch(@FloatRange(from = 0, to = 1) float opacity) {
+        if (opacity < 0 || opacity > 1) {
+            throw new IllegalArgumentException(
+                    "Maximum obscuring opacity for touch should be >= 0 and <= 1");
+        }
+        Context context = ActivityThread.currentApplication();
+        Settings.Global.putFloat(context.getContentResolver(),
+                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
+    }
+
+    /**
+     * Returns the current mode of the block untrusted touches feature, one of:
+     * <ul>
+     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
+     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
+     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    @BlockUntrustedTouchesMode
+    public int getBlockUntrustedTouchesMode(@NonNull Context context) {
+        int mode = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
+        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
+            Log.w(TAG, "Unknown block untrusted touches feature mode " + mode + ", using "
+                    + "default " + DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
+            return DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE;
+        }
+        return mode;
+    }
+
+    /**
+     * Sets the mode of the block untrusted touches feature to one of:
+     * <ul>
+     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
+     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
+     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setBlockUntrustedTouchesMode(@NonNull Context context,
+            @BlockUntrustedTouchesMode int mode) {
+        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
+            throw new IllegalArgumentException("Invalid feature mode " + mode);
+        }
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, mode);
+    }
+
+    /**
      * Queries the framework about whether any physical keys exist on the
      * any keyboard attached to the device that are capable of producing the given
      * array of key codes.
@@ -885,9 +1069,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link #INJECT_INPUT_EVENT_MODE_ASYNC},
-     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT}, or
-     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH}.
+     * {@link android.os.InputEventInjectionSync.NONE},
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
      * @return True if input event injection succeeded.
      *
      * @hide
@@ -897,9 +1081,9 @@ public final class InputManager {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
-        if (mode != INJECT_INPUT_EVENT_MODE_ASYNC
-                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
-                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+        if (mode != InputEventInjectionSync.NONE
+                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
+                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
         }
 
@@ -990,12 +1174,118 @@ public final class InputManager {
     }
 
     /**
+     * Get sensors information as list.
+     *
+     * @hide
+     */
+    public InputSensorInfo[] getSensorList(int deviceId) {
+        try {
+            return mIm.getSensorList(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable input device sensor
+     *
+     * @hide
+     */
+    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+            int maxBatchReportLatencyUs) {
+        try {
+            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                    maxBatchReportLatencyUs);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable input device sensor
+     *
+     * @hide
+     */
+    public void disableSensor(int deviceId, int sensorType) {
+        try {
+            mIm.disableSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Flush input device sensor
+     *
+     * @hide
+     */
+    public boolean flushSensor(int deviceId, int sensorType) {
+        try {
+            return mIm.flushSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register input device sensor listener
+     *
+     * @hide
+     */
+    public boolean registerSensorListener(IInputSensorEventListener listener) {
+        try {
+            return mIm.registerSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister input device sensor listener
+     *
+     * @hide
+     */
+    public void unregisterSensorListener(IInputSensorEventListener listener) {
+        try {
+            mIm.unregisterSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the battery status of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryStatus(int deviceId) {
+        try {
+            return mIm.getBatteryStatus(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the remaining battery capacity of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryCapacity(int deviceId) {
+        try {
+            return mIm.getBatteryCapacity(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.
      * @param displayPort The physical port of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1012,7 +1302,7 @@ public final class InputManager {
      * static association for the cleared input port will be restored.
      * @param inputPort The port of the input device to be cleared.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1021,6 +1311,41 @@ public final class InputManager {
             mIm.removePortAssociation(inputPort);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a runtime association between the input device name and display, by unique id. Input
+     * device names are expected to be unique.
+     * @param inputDeviceName The name of the input device.
+     * @param displayUniqueId The unique id of the associated display.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    public void addUniqueIdAssociation(@NonNull String inputDeviceName,
+            @NonNull String displayUniqueId) {
+        try {
+            mIm.addUniqueIdAssociation(inputDeviceName, displayUniqueId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+     * @param inputDeviceName The name of the input device.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    public void removeUniqueIdAssociation(@NonNull String inputDeviceName) {
+        try {
+            mIm.removeUniqueIdAssociation(inputDeviceName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1127,12 +1452,203 @@ public final class InputManager {
     }
 
     /**
-     * Gets a vibrator service associated with an input device, assuming it has one.
+     * Gets a vibrator service associated with an input device, always creates a new instance.
      * @return The vibrator, never null.
      * @hide
      */
-    public Vibrator getInputDeviceVibrator(int deviceId) {
-        return new InputDeviceVibrator(deviceId);
+    public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
+        return new InputDeviceVibrator(this, deviceId, vibratorId);
+    }
+
+    /**
+     * Gets a vibrator manager service associated with an input device, always creates a new
+     * instance.
+     * @return The vibrator manager, never null.
+     * @hide
+     */
+    @NonNull
+    public VibratorManager getInputDeviceVibratorManager(int deviceId) {
+        return new InputDeviceVibratorManager(InputManager.this, deviceId);
+    }
+
+    /*
+     * Get the list of device vibrators
+     * @return The list of vibrators IDs
+     */
+    int[] getVibratorIds(int deviceId) {
+        try {
+            return mIm.getVibratorIds(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform vibration effect
+     */
+    void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
+        try {
+            mIm.vibrate(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform combined vibration effect
+     */
+    void vibrate(int deviceId, CombinedVibration effect, IBinder token) {
+        try {
+            mIm.vibrateCombined(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Cancel an ongoing vibration
+     */
+    void cancelVibrate(int deviceId, IBinder token) {
+        try {
+            mIm.cancelVibrate(deviceId, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Check if input device is vibrating
+     */
+    boolean isVibrating(int deviceId)  {
+        try {
+            return mIm.isVibrating(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register input device vibrator state listener
+     */
+    boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.registerVibratorStateListener(deviceId, listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister input device vibrator state listener
+     */
+    boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.unregisterVibratorStateListener(deviceId, listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets a sensor manager service associated with an input device, always creates a new instance.
+     * @return The sensor manager, never null.
+     * @hide
+     */
+    @NonNull
+    public SensorManager getInputDeviceSensorManager(int deviceId) {
+        if (mInputDeviceSensorManager == null) {
+            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        }
+        return mInputDeviceSensorManager.getSensorManager(deviceId);
+    }
+
+    /**
+     * Gets a battery state object associated with an input device, assuming it has one.
+     * @return The battery, never null.
+     * @hide
+     */
+    public InputDeviceBatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+        return new InputDeviceBatteryState(this, deviceId, hasBattery);
+    }
+
+    /**
+     * Gets a lights manager associated with an input device, always creates a new instance.
+     * @return The lights manager, never null.
+     * @hide
+     */
+    @NonNull
+    public LightsManager getInputDeviceLightsManager(int deviceId) {
+        return new InputDeviceLightsManager(InputManager.this, deviceId);
+    }
+
+    /**
+     * Gets a list of light objects associated with an input device.
+     * @return The list of lights, never null.
+     */
+    @NonNull List<Light> getLights(int deviceId) {
+        try {
+            return mIm.getLights(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the state of an input device light.
+     * @return the light state
+     */
+    @NonNull LightState getLightState(int deviceId, @NonNull Light light) {
+        try {
+            return mIm.getLightState(deviceId, light.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to modify the states of multiple lights.
+     *
+     * @param request the settings for lights that should change
+     */
+    void requestLights(int deviceId, @NonNull LightsRequest request, IBinder token) {
+        try {
+            List<Integer> lightIdList = request.getLights();
+            int[] lightIds = new int[lightIdList.size()];
+            for (int i = 0; i < lightIds.length; i++) {
+                lightIds[i] = lightIdList.get(i);
+            }
+            List<LightState> lightStateList = request.getLightStates();
+            mIm.setLightStates(deviceId, lightIds,
+                    lightStateList.toArray(new LightState[lightStateList.size()]),
+                    token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Open light session for input device manager
+     *
+     * @param token The token for the light session
+     */
+    void openLightSession(int deviceId, String opPkg, @NonNull IBinder token) {
+        try {
+            mIm.openLightSession(deviceId, opPkg, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Close light session
+     *
+     */
+    void closeLightSession(int deviceId, @NonNull IBinder token) {
+        try {
+            mIm.closeLightSession(deviceId, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1242,90 +1758,6 @@ public final class InputManager {
                     boolean inTabletMode = (boolean) args.arg1;
                     mListener.onTabletModeChanged(whenNanos, inTabletMode);
                     break;
-            }
-        }
-    }
-
-    private final class InputDeviceVibrator extends Vibrator {
-        private final int mDeviceId;
-        private final Binder mToken;
-
-        public InputDeviceVibrator(int deviceId) {
-            mDeviceId = deviceId;
-            mToken = new Binder();
-        }
-
-        @Override
-        public boolean hasVibrator() {
-            return true;
-        }
-
-        @Override
-        public boolean isVibrating() {
-            throw new UnsupportedOperationException(
-                "isVibrating not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "addVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void addVibratorStateListener(
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "addVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "removeVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public boolean hasAmplitudeControl() {
-            return false;
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public void vibrate(int uid, String opPkg, VibrationEffect effect,
-                String reason, AudioAttributes attributes) {
-            long[] pattern;
-            int repeat;
-            if (effect instanceof VibrationEffect.OneShot) {
-                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-                pattern = new long[] { 0, oneShot.getDuration() };
-                repeat = -1;
-            } else if (effect instanceof VibrationEffect.Waveform) {
-                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
-                pattern = waveform.getTimings();
-                repeat = waveform.getRepeatIndex();
-            } else {
-                // TODO: Add support for prebaked effects
-                Log.w(TAG, "Pre-baked effects aren't supported on input devices");
-                return;
-            }
-
-            try {
-                mIm.vibrate(mDeviceId, pattern, repeat, mToken);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-        }
-
-        @Override
-        public void cancel() {
-            try {
-                mIm.cancelVibrate(mDeviceId, mToken);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
             }
         }
     }

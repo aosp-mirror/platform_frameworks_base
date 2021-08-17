@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -52,6 +53,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -170,6 +172,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public @Nullable ContextParams getParams() {
+        return mBase.getParams();
+    }
+
+    @Override
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();
     }
@@ -270,7 +277,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public File getExternalFilesDir(String type) {
+    public @Nullable File getExternalFilesDir(@Nullable String type) {
         return mBase.getExternalFilesDir(type);
     }
 
@@ -300,7 +307,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public File getExternalCacheDir() {
+    public @Nullable File getExternalCacheDir() {
         return mBase.getExternalCacheDir();
     }
 
@@ -322,7 +329,7 @@ public class ContextWrapper extends Context {
 
     /** @hide **/
     @Override
-    public File getPreloadsFileCache() {
+    public @Nullable File getPreloadsFileCache() {
         return mBase.getPreloadsFileCache();
     }
 
@@ -333,7 +340,7 @@ public class ContextWrapper extends Context {
 
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
-            DatabaseErrorHandler errorHandler) {
+            @Nullable DatabaseErrorHandler errorHandler) {
         return mBase.openOrCreateDatabase(name, mode, factory, errorHandler);
     }
 
@@ -412,7 +419,7 @@ public class ContextWrapper extends Context {
 
     /** @hide **/
     public void startActivityForResult(
-            String who, Intent intent, int requestCode, Bundle options) {
+            String who, Intent intent, int requestCode, @Nullable Bundle options) {
         mBase.startActivityForResult(who, intent, requestCode, options);
     }
 
@@ -422,13 +429,13 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void startActivity(Intent intent, Bundle options) {
+    public void startActivity(Intent intent, @Nullable Bundle options) {
         mBase.startActivity(intent, options);
     }
 
     /** @hide */
     @Override
-    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+    public void startActivityAsUser(Intent intent, @Nullable Bundle options, UserHandle user) {
         mBase.startActivityAsUser(intent, options, user);
     }
 
@@ -438,19 +445,21 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void startActivities(Intent[] intents, Bundle options) {
+    public void startActivities(Intent[] intents, @Nullable Bundle options) {
         mBase.startActivities(intents, options);
     }
 
     /** @hide */
     @Override
-    public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
+    public int startActivitiesAsUser(Intent[] intents, @Nullable Bundle options,
+            UserHandle userHandle) {
         return mBase.startActivitiesAsUser(intents, options, userHandle);
     }
 
     @Override
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags)
             throws IntentSender.SendIntentException {
         mBase.startIntentSender(intent, fillInIntent, flagsMask,
                 flagsValues, extraFlags);
@@ -458,8 +467,9 @@ public class ContextWrapper extends Context {
 
     @Override
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
-            Bundle options) throws IntentSender.SendIntentException {
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags, @Nullable Bundle options)
+            throws IntentSender.SendIntentException {
         mBase.startIntentSender(intent, fillInIntent, flagsMask,
                 flagsValues, extraFlags, options);
     }
@@ -470,7 +480,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void sendBroadcast(Intent intent, String receiverPermission) {
+    public void sendBroadcast(Intent intent, @Nullable String receiverPermission) {
         mBase.sendBroadcast(intent, receiverPermission);
     }
 
@@ -483,6 +493,20 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions) {
+        mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions);
+    }
+
+    /** @hide */
+    @Override
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable Bundle options) {
+        mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions, options);
+    }
+
+    /** @hide */
+    @Override
     public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions) {
         mBase.sendBroadcastAsUserMultiplePermissions(intent, user, receiverPermissions);
@@ -491,27 +515,28 @@ public class ContextWrapper extends Context {
     /** @hide */
     @SystemApi
     @Override
-    public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
+    public void sendBroadcast(Intent intent, @Nullable String receiverPermission,
+            @Nullable Bundle options) {
         mBase.sendBroadcast(intent, receiverPermission, options);
     }
 
     /** @hide */
     @Override
-    public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
+    public void sendBroadcast(Intent intent, @Nullable String receiverPermission, int appOp) {
         mBase.sendBroadcast(intent, receiverPermission, appOp);
     }
 
     @Override
     public void sendOrderedBroadcast(Intent intent,
-            String receiverPermission) {
+            @Nullable String receiverPermission) {
         mBase.sendOrderedBroadcast(intent, receiverPermission);
     }
 
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, String receiverPermission, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras) {
+            Intent intent, @Nullable String receiverPermission,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -521,10 +546,9 @@ public class ContextWrapper extends Context {
     @SystemApi
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, String receiverPermission, Bundle options,
-            BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras) {
+            Intent intent, @Nullable String receiverPermission, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
                 options, resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -533,9 +557,9 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras) {
+            Intent intent, @Nullable String receiverPermission, int appOp,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission, appOp,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -555,21 +579,22 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, Bundle options) {
+            @Nullable String receiverPermission, @Nullable Bundle options) {
         mBase.sendBroadcastAsUser(intent, user, receiverPermission, options);
     }
 
     /** @hide */
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, int appOp) {
+            @Nullable String receiverPermission, int appOp) {
         mBase.sendBroadcastAsUser(intent, user, receiverPermission, appOp);
     }
 
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
-            int initialCode, String initialData, Bundle initialExtras) {
+            @Nullable String receiverPermission, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
@@ -577,8 +602,9 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
+            @Nullable String receiverPermission, int appOp,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
@@ -586,8 +612,9 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, int appOp, Bundle options, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
+            @Nullable String receiverPermission, int appOp, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, options,
                 resultReceiver, scheduler, initialCode, initialData, initialExtras);
     }
@@ -648,10 +675,9 @@ public class ContextWrapper extends Context {
 
     @Override
     @Deprecated
-    public void sendStickyOrderedBroadcast(
-        Intent intent, BroadcastReceiver resultReceiver,
-        Handler scheduler, int initialCode, String initialData,
-        Bundle initialExtras) {
+    public void sendStickyOrderedBroadcast(Intent intent,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendStickyOrderedBroadcast(intent,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -672,16 +698,17 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     @Deprecated
-    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user,
+            @Nullable Bundle options) {
         mBase.sendStickyBroadcastAsUser(intent, user, options);
     }
 
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,
-            UserHandle user, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras) {
+            UserHandle user, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
         mBase.sendStickyOrderedBroadcastAsUser(intent, user, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
@@ -693,29 +720,26 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Intent registerReceiver(
-        BroadcastReceiver receiver, IntentFilter filter) {
+    public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter) {
         return mBase.registerReceiver(receiver, filter);
     }
 
     @Override
-    public Intent registerReceiver(
-        BroadcastReceiver receiver, IntentFilter filter, int flags) {
+    public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter,
+            int flags) {
         return mBase.registerReceiver(receiver, filter, flags);
     }
 
     @Override
-    public Intent registerReceiver(
-        BroadcastReceiver receiver, IntentFilter filter,
-        String broadcastPermission, Handler scheduler) {
+    public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter,
+            @Nullable String broadcastPermission, @Nullable Handler scheduler) {
         return mBase.registerReceiver(receiver, filter, broadcastPermission,
                 scheduler);
     }
 
     @Override
-    public Intent registerReceiver(
-        BroadcastReceiver receiver, IntentFilter filter,
-        String broadcastPermission, Handler scheduler, int flags) {
+    public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter,
+            @Nullable String broadcastPermission, @Nullable Handler scheduler, int flags) {
         return mBase.registerReceiver(receiver, filter, broadcastPermission,
                 scheduler, flags);
     }
@@ -733,9 +757,9 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     @UnsupportedAppUsage
-    public Intent registerReceiverAsUser(
-        BroadcastReceiver receiver, UserHandle user, IntentFilter filter,
-        String broadcastPermission, Handler scheduler) {
+    public Intent registerReceiverAsUser(@Nullable BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
         return mBase.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
                 scheduler);
     }
@@ -746,12 +770,12 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public ComponentName startService(Intent service) {
+    public @Nullable ComponentName startService(Intent service) {
         return mBase.startService(service);
     }
 
     @Override
-    public ComponentName startForegroundService(Intent service) {
+    public @Nullable ComponentName startForegroundService(Intent service) {
         return mBase.startForegroundService(service);
     }
 
@@ -763,14 +787,14 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     @UnsupportedAppUsage
-    public ComponentName startServiceAsUser(Intent service, UserHandle user) {
+    public @Nullable ComponentName startServiceAsUser(Intent service, UserHandle user) {
         return mBase.startServiceAsUser(service, user);
     }
 
     /** @hide */
     @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+    public @Nullable ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
         return mBase.startForegroundServiceAsUser(service, user);
     }
 
@@ -824,12 +848,12 @@ public class ContextWrapper extends Context {
 
     @Override
     public boolean startInstrumentation(ComponentName className,
-            String profileFile, Bundle arguments) {
+            @Nullable String profileFile, @Nullable Bundle arguments) {
         return mBase.startInstrumentation(className, profileFile, arguments);
     }
 
     @Override
-    public Object getSystemService(String name) {
+    public @Nullable Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
 
@@ -866,18 +890,18 @@ public class ContextWrapper extends Context {
 
     @Override
     public void enforcePermission(
-            String permission, int pid, int uid, String message) {
+            String permission, int pid, int uid, @Nullable String message) {
         mBase.enforcePermission(permission, pid, uid, message);
     }
 
     @Override
-    public void enforceCallingPermission(String permission, String message) {
+    public void enforceCallingPermission(String permission, @Nullable String message) {
         mBase.enforceCallingPermission(permission, message);
     }
 
     @Override
     public void enforceCallingOrSelfPermission(
-            String permission, String message) {
+            String permission, @Nullable String message) {
         mBase.enforceCallingOrSelfPermission(permission, message);
     }
 
@@ -901,6 +925,13 @@ public class ContextWrapper extends Context {
         return mBase.checkUriPermission(uri, pid, uid, modeFlags);
     }
 
+    @NonNull
+    @Override
+    public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
+            int modeFlags) {
+        return mBase.checkUriPermissions(uris, pid, uid, modeFlags);
+    }
+
     /** @hide */
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, IBinder callerToken) {
@@ -912,14 +943,26 @@ public class ContextWrapper extends Context {
         return mBase.checkCallingUriPermission(uri, modeFlags);
     }
 
+    @NonNull
+    @Override
+    public int[] checkCallingUriPermissions(@NonNull List<Uri> uris, int modeFlags) {
+        return mBase.checkCallingUriPermissions(uris, modeFlags);
+    }
+
     @Override
     public int checkCallingOrSelfUriPermission(Uri uri, int modeFlags) {
         return mBase.checkCallingOrSelfUriPermission(uri, modeFlags);
     }
 
+    @NonNull
     @Override
-    public int checkUriPermission(Uri uri, String readPermission,
-            String writePermission, int pid, int uid, int modeFlags) {
+    public int[] checkCallingOrSelfUriPermissions(@NonNull List<Uri> uris, int modeFlags) {
+        return mBase.checkCallingOrSelfUriPermissions(uris, modeFlags);
+    }
+
+    @Override
+    public int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission,
+            @Nullable String writePermission, int pid, int uid, int modeFlags) {
         return mBase.checkUriPermission(uri, readPermission, writePermission,
                 pid, uid, modeFlags);
     }
@@ -944,8 +987,8 @@ public class ContextWrapper extends Context {
 
     @Override
     public void enforceUriPermission(
-            Uri uri, String readPermission, String writePermission,
-            int pid, int uid, int modeFlags, String message) {
+            @Nullable Uri uri, @Nullable String readPermission, @Nullable String writePermission,
+            int pid, int uid, int modeFlags, @Nullable String message) {
         mBase.enforceUriPermission(
                 uri, readPermission, writePermission, pid, uid, modeFlags,
                 message);
@@ -1014,8 +1057,27 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @NonNull
+    public Context createWindowContext(@NonNull Display display, @WindowType int type,
+            @Nullable Bundle options) {
+        return mBase.createWindowContext(display, type, options);
+    }
+
+    @Override
+    @NonNull
+    public Context createContext(@NonNull ContextParams contextParams) {
+        return mBase.createContext(contextParams);
+    }
+
+    @Override
     public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
         return mBase.createAttributionContext(attributionTag);
+    }
+
+    @NonNull
+    @Override
+    public AttributionSource getAttributionSource() {
+        return mBase.getAttributionSource();
     }
 
     @Override
@@ -1068,6 +1130,14 @@ public class ContextWrapper extends Context {
         return mBase.createCredentialProtectedStorageContext();
     }
 
+    /** @hide */
+    @UiContext
+    @NonNull
+    @Override
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        return mBase.createTokenContext(token, display);
+    }
+
     @Override
     public boolean isDeviceProtectedStorage() {
         return mBase.isDeviceProtectedStorage();
@@ -1090,7 +1160,7 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
-    public IBinder getActivityToken() {
+    public @Nullable IBinder getActivityToken() {
         return mBase.getActivityToken();
     }
 
@@ -1098,8 +1168,16 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
-    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
-            int flags) {
+    public @Nullable IBinder getWindowContextToken() {
+        return mBase != null ? mBase.getWindowContextToken() : null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public @Nullable IServiceConnection getServiceDispatcher(ServiceConnection conn,
+            Handler handler, int flags) {
         return mBase.getServiceDispatcher(conn, handler, flags);
     }
 
@@ -1161,7 +1239,7 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
-    public ContentCaptureOptions getContentCaptureOptions() {
+    public @Nullable ContentCaptureOptions getContentCaptureOptions() {
         return mBase == null ? null : mBase.getContentCaptureOptions();
     }
 
@@ -1170,7 +1248,7 @@ public class ContextWrapper extends Context {
      */
     @TestApi
     @Override
-    public void setContentCaptureOptions(ContentCaptureOptions options) {
+    public void setContentCaptureOptions(@Nullable ContentCaptureOptions options) {
         if (mBase != null) {
             mBase.setContentCaptureOptions(options);
         }
@@ -1185,5 +1263,16 @@ public class ContextWrapper extends Context {
             return false;
         }
         return mBase.isUiContext();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isConfigurationContext() {
+        if (mBase == null) {
+            return false;
+        }
+        return mBase.isConfigurationContext();
     }
 }

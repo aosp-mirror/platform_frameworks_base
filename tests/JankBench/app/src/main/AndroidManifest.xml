@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,50 +14,48 @@
   ~ License.
   ~
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.benchmark">
+     package="com.android.benchmark">
 
-    <uses-sdk android:minSdkVersion="24" />
+    <uses-sdk android:minSdkVersion="24"/>
 
-    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <android:uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity
-            android:name=".app.HomeActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+    <application android:allowBackup="true"
+         android:icon="@mipmap/ic_launcher"
+         android:label="@string/app_name"
+         android:supportsRtl="true"
+         android:theme="@style/AppTheme">
+        <activity android:name=".app.HomeActivity"
+             android:label="@string/app_name"
+             android:theme="@style/AppTheme.NoActionBar"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".app.RunLocalBenchmarksActivity"
-            android:exported="true">
+        <activity android:name=".app.RunLocalBenchmarksActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.benchmark.ACTION_BENCHMARK" />
+                <action android:name="com.android.benchmark.ACTION_BENCHMARK"/>
             </intent-filter>
 
-            <meta-data
-                android:name="com.android.benchmark.benchmark_group"
-                android:resource="@xml/benchmark" />
+            <meta-data android:name="com.android.benchmark.benchmark_group"
+                 android:resource="@xml/benchmark"/>
         </activity>
-        <activity android:name=".ui.ListViewScrollActivity" />
-        <activity android:name=".ui.ImageListViewScrollActivity" />
-        <activity android:name=".ui.ShadowGridActivity" />
-        <activity android:name=".ui.TextScrollActivity" />
-        <activity android:name=".ui.EditTextInputActivity" />
-        <activity android:name=".synthetic.MemoryActivity" />
-        <activity android:name=".ui.FullScreenOverdrawActivity"></activity>
-        <activity android:name=".ui.BitmapUploadActivity"></activity>
+        <activity android:name=".ui.ListViewScrollActivity"/>
+        <activity android:name=".ui.ImageListViewScrollActivity"/>
+        <activity android:name=".ui.ShadowGridActivity"/>
+        <activity android:name=".ui.TextScrollActivity"/>
+        <activity android:name=".ui.EditTextInputActivity"/>
+        <activity android:name=".synthetic.MemoryActivity"/>
+        <activity android:name=".ui.FullScreenOverdrawActivity"/>
+        <activity android:name=".ui.BitmapUploadActivity"/>
     </application>
 
 </manifest>

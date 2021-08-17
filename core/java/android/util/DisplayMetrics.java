@@ -16,9 +16,9 @@
 
 package android.util;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.SystemProperties;
-
 
 /**
  * A structure describing general information about a display, such as its
@@ -362,7 +362,7 @@ public class DisplayMetrics {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return o instanceof DisplayMetrics && equals((DisplayMetrics)o);
     }
 

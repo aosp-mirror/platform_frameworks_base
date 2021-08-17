@@ -227,4 +227,41 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         assertThat(mediaTimeoutListener.isTimedOut(KEY)).isFalse()
     }
+
+    @Test
+    fun testOnSessionDestroyed_clearsTimeout() {
+        // GIVEN media that is paused
+        val mediaPaused = mediaData.copy(isPlaying = false)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaPaused)
+        verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // WHEN the session is destroyed
+        mediaCallbackCaptor.value.onSessionDestroyed()
+
+        // THEN the controller is unregistered and timeout run
+        verify(mediaController).unregisterCallback(anyObject())
+        assertThat(executor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun testSessionDestroyed_thenRestarts_resetsTimeout() {
+        // Assuming we have previously destroyed the session
+        testOnSessionDestroyed_clearsTimeout()
+
+        // WHEN we get an update with media playing
+        val playingState = mock(android.media.session.PlaybackState::class.java)
+        `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
+        `when`(mediaController.playbackState).thenReturn(playingState)
+        val mediaPlaying = mediaData.copy(isPlaying = true)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaPlaying)
+
+        // THEN the timeout runnable will update the state
+        assertThat(executor.numPending()).isEqualTo(1)
+        with(executor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        verify(timeoutCallback).invoke(eq(KEY), eq(false))
+    }
 }

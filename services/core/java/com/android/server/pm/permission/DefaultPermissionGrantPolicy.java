@@ -37,12 +37,14 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
+import android.media.midi.MidiManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.os.Message;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager;
@@ -60,18 +62,20 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.PackagesProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.SyncAdapterPackagesProvider;
+import com.android.server.ServiceThread;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal.PackagesProvider;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal.SyncAdapterPackagesProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -95,7 +99,7 @@ import java.util.Set;
  * to have an interface defined in the package manager but have the impl next to other
  * policy stuff like PhoneWindowManager
  */
-public final class DefaultPermissionGrantPolicy {
+final class DefaultPermissionGrantPolicy {
     private static final String TAG = "DefaultPermGrantPolicy"; // must be <= 23 chars
     private static final boolean DEBUG = false;
 
@@ -203,6 +207,14 @@ public final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
     }
 
+    private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
+    static {
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.UWB_RANGING);
+    }
+
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
     private static final String ACTION_TRACK = "com.android.fitness.TRACK";
@@ -269,7 +281,7 @@ public final class DefaultPermissionGrantPolicy {
             try {
                 return mContext.getPackageManager().getPermissionInfo(permissionName, 0);
             } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Permission not found: " + permissionName);
+                Slog.w(TAG, "Permission not found: " + permissionName);
                 return null;
             }
         }
@@ -290,9 +302,12 @@ public final class DefaultPermissionGrantPolicy {
         }
     };
 
-    DefaultPermissionGrantPolicy(Context context, Looper looper) {
+    DefaultPermissionGrantPolicy(@NonNull Context context) {
         mContext = context;
-        mHandler = new Handler(looper) {
+        HandlerThread handlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS) {
@@ -409,22 +424,24 @@ public final class DefaultPermissionGrantPolicy {
             grantRuntimePermissionsForSystemPackage(pm, userId, pkg);
         }
 
-        // Grant READ_PHONE_STATE to all system apps that have READ_PRIVILEGED_PHONE_STATE
+        // Re-grant READ_PHONE_STATE as non-fixed to all system apps that have
+        // READ_PRIVILEGED_PHONE_STATE and READ_PHONE_STATE granted -- this is to undo the fixed
+        // grant from R.
         for (PackageInfo pkg : packages) {
             if (pkg == null
                     || !doesPackageSupportRuntimePermissions(pkg)
                     || ArrayUtils.isEmpty(pkg.requestedPermissions)
-                    || !pkg.applicationInfo.isPrivilegedApp()) {
+                    || !pm.isGranted(Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                            pkg, UserHandle.of(userId))
+                    || !pm.isGranted(Manifest.permission.READ_PHONE_STATE, pkg,
+                            UserHandle.of(userId))) {
                 continue;
             }
-            for (String permission : pkg.requestedPermissions) {
-                if (Manifest.permission.READ_PRIVILEGED_PHONE_STATE.equals(permission)) {
-                    grantRuntimePermissions(pm, pkg,
-                            Collections.singleton(Manifest.permission.READ_PHONE_STATE),
-                            true, // systemFixed
-                            userId);
-                }
-            }
+
+            pm.updatePermissionFlags(Manifest.permission.READ_PHONE_STATE, pkg,
+                    PackageManager.FLAG_PERMISSION_SYSTEM_FIXED,
+                    0,
+                    UserHandle.of(userId));
         }
 
     }
@@ -624,7 +641,7 @@ public final class DefaultPermissionGrantPolicy {
         // Cell Broadcast Receiver
         grantSystemFixedPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, Intents.SMS_CB_RECEIVED_ACTION, userId),
-                userId, SMS_PERMISSIONS);
+                userId, SMS_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Carrier Provisioning Service
         grantPermissionsToSystemPackage(pm,
@@ -647,9 +664,11 @@ public final class DefaultPermissionGrantPolicy {
                 CALENDAR_PERMISSIONS);
 
         // Calendar provider sync adapters
-        grantPermissionToEachSystemPackage(pm,
-                getHeadlessSyncAdapterPackages(pm, calendarSyncAdapterPackages, userId),
-                userId, CALENDAR_PERMISSIONS);
+        if (calendarSyncAdapterPackages != null) {
+            grantPermissionToEachSystemPackage(pm,
+                    getHeadlessSyncAdapterPackages(pm, calendarSyncAdapterPackages, userId),
+                    userId, CALENDAR_PERMISSIONS);
+        }
 
         // Contacts
         grantPermissionsToSystemPackage(pm,
@@ -658,9 +677,11 @@ public final class DefaultPermissionGrantPolicy {
                 userId, CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
 
         // Contacts provider sync adapters
-        grantPermissionToEachSystemPackage(pm,
-                getHeadlessSyncAdapterPackages(pm, contactsSyncAdapterPackages, userId),
-                userId, CONTACTS_PERMISSIONS);
+        if (contactsSyncAdapterPackages != null) {
+            grantPermissionToEachSystemPackage(pm,
+                    getHeadlessSyncAdapterPackages(pm, contactsSyncAdapterPackages, userId),
+                    userId, CONTACTS_PERMISSIONS);
+        }
 
         // Contacts provider
         String contactsProviderPackage =
@@ -699,7 +720,8 @@ public final class DefaultPermissionGrantPolicy {
             for (String voiceInteractPackageName : voiceInteractPackageNames) {
                 grantPermissionsToSystemPackage(pm, voiceInteractPackageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
-                        PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
+                        PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                        NEARBY_DEVICES_PERMISSIONS);
             }
         }
 
@@ -724,16 +746,18 @@ public final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
                         ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
         if (locationExtraPackageNames != null) {
-            // Also grant location permission to location extra packages.
+            // Also grant location and activity recognition permission to location extra packages.
             for (String packageName : locationExtraPackageNames) {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
+                grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
+                        ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
 
@@ -764,9 +788,14 @@ public final class DefaultPermissionGrantPolicy {
             grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS);
 
             // Fitness tracking on watches
-            grantPermissionsToSystemPackage(pm,
+            if (mContext.getResources().getBoolean(R.bool.config_trackerAppNeedsPermissions)) {
+                Log.d(TAG, "Wear: Skipping permission grant for Default fitness tracker app : "
+                        + wearPackage);
+            } else {
+                grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
                     SENSORS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
+            }
         }
 
         // Print Spooler
@@ -795,7 +824,7 @@ public final class DefaultPermissionGrantPolicy {
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(pm,
                 CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
-                ALWAYS_LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Ringtone Picker
         grantSystemFixedPermissionsToSystemPackage(pm,
@@ -816,10 +845,10 @@ public final class DefaultPermissionGrantPolicy {
         if (!TextUtils.isEmpty(contentCapturePackageName)) {
             grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
                     PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS);
+                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
         }
 
-        // Atthention Service
+        // Attention Service
         String attentionServicePackageName =
                 mContext.getPackageManager().getAttentionServicePackageName();
         if (!TextUtils.isEmpty(attentionServicePackageName)) {
@@ -839,6 +868,11 @@ public final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(pm, systemCaptionsServicePackageName, userId,
                     MICROPHONE_PERMISSIONS);
         }
+
+        // Bluetooth MIDI Service
+        grantSystemFixedPermissionsToSystemPackage(pm,
+                MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, userId,
+                NEARBY_DEVICES_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackageForCategory(PackageManagerWrapper pm,
@@ -989,12 +1023,6 @@ public final class DefaultPermissionGrantPolicy {
                         userId);
             }
         }
-    }
-
-    public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
-        Log.i(TAG, "Granting permissions to default browser for user:" + userId);
-        grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                FOREGROUND_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(PackageManagerWrapper pm,
@@ -1401,11 +1429,8 @@ public final class DefaultPermissionGrantPolicy {
                 Slog.w(TAG, "Default permissions file " + file + " cannot be read");
                 continue;
             }
-            try (
-                InputStream str = new BufferedInputStream(new FileInputStream(file))
-            ) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(str, null);
+            try (InputStream str = new FileInputStream(file)) {
+                TypedXmlPullParser parser = Xml.resolvePullParser(str);
                 parse(pm, parser, grantExceptions);
             } catch (XmlPullParserException | IOException e) {
                 Slog.w(TAG, "Error reading default permissions file " + file, e);
@@ -1415,7 +1440,7 @@ public final class DefaultPermissionGrantPolicy {
         return grantExceptions;
     }
 
-    private void parse(PackageManagerWrapper pm, XmlPullParser parser,
+    private void parse(PackageManagerWrapper pm, TypedXmlPullParser parser,
             Map<String, List<DefaultPermissionGrant>> outGrantExceptions)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -1433,7 +1458,7 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void parseExceptions(PackageManagerWrapper pm, XmlPullParser parser,
+    private void parseExceptions(PackageManagerWrapper pm, TypedXmlPullParser parser,
             Map<String, List<DefaultPermissionGrant>> outGrantExceptions)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -1482,7 +1507,7 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void parsePermission(XmlPullParser parser, List<DefaultPermissionGrant>
+    private void parsePermission(TypedXmlPullParser parser, List<DefaultPermissionGrant>
             outPackageExceptions) throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         int type;
@@ -1500,8 +1525,10 @@ public final class DefaultPermissionGrantPolicy {
                     continue;
                 }
 
-                final boolean fixed = XmlUtils.readBooleanAttribute(parser, ATTR_FIXED);
-                final boolean whitelisted = XmlUtils.readBooleanAttribute(parser, ATTR_WHITELISTED);
+                final boolean fixed =
+                        parser.getAttributeBoolean(null, ATTR_FIXED, false);
+                final boolean whitelisted =
+                        parser.getAttributeBoolean(null, ATTR_WHITELISTED, false);
 
                 DefaultPermissionGrant exception = new DefaultPermissionGrant(
                         name, fixed, whitelisted);
@@ -1709,12 +1736,20 @@ public final class DefaultPermissionGrantPolicy {
                 int flagMask, int flagValues, @NonNull UserHandle user) {
             PermissionState state = getPermissionState(permission, pkg, user);
             state.initFlags();
-            state.newFlags |= flagValues & flagMask;
+            state.newFlags = (state.newFlags & ~flagMask) | (flagValues & flagMask);
         }
 
         @Override
         public void grantPermission(@NonNull String permission, @NonNull PackageInfo pkg,
                 @NonNull UserHandle user) {
+            if (PermissionManager.DEBUG_TRACE_GRANTS
+                    && PermissionManager.shouldTraceGrant(
+                    pkg.packageName, permission, user.getIdentifier())) {
+                Log.i(PermissionManager.LOG_TAG_TRACE_GRANTS,
+                        "PregrantPolicy is granting " + pkg.packageName + " "
+                                + permission + " for user " + user.getIdentifier(),
+                        new RuntimeException());
+            }
             PermissionState state = getPermissionState(permission, pkg, user);
             state.initGranted();
             state.newGranted = true;

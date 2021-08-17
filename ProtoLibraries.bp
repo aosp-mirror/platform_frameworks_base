@@ -35,9 +35,11 @@ gensrcs {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
+        ":service-permission-protos",
     ],
     output_extension: "srcjar",
 }
@@ -63,8 +65,10 @@ gensrcs {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
+        ":service-permission-protos",
     ],
 
     output_extension: "proto.h",
@@ -76,12 +80,14 @@ java_library_host {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         ":libstats_internal_protos",
         ":statsd_internal_protos",
         "cmds/am/proto/instrumentation_data.proto",
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
+        ":service-permission-protos",
     ],
     proto: {
         include_dirs: [
@@ -90,8 +96,9 @@ java_library_host {
         ],
         type: "full",
     },
+    // Protos have lots of MissingOverride and similar.
     errorprone: {
-        javacflags: ["-Xep:MissingOverride:OFF"], // b/72714520
+        javacflags: ["-XepDisableAllChecks"],
     },
 }
 
@@ -106,13 +113,16 @@ java_library {
     exclude_srcs: [
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
     ],
     sdk_version: "9",
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
     ],
 }
 
@@ -127,12 +137,15 @@ java_library {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
     ],
     exclude_srcs: [
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
     ],
     sdk_version: "core_current",
     // Protos have lots of MissingOverride and similar.
@@ -161,7 +174,9 @@ cc_defaults {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
+        ":service-permission-protos",
     ],
 }
 

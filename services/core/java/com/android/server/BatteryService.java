@@ -39,6 +39,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatteryProperty;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
@@ -59,6 +60,7 @@ import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.battery.BatteryServiceDumpProto;
+import android.sysprop.PowerProperties;
 import android.util.EventLog;
 import android.util.MutableInt;
 import android.util.Slog;
@@ -182,6 +184,7 @@ public final class BatteryService extends SystemService {
     private int mChargeStartLevel;
 
     private boolean mUpdatesStopped;
+    private boolean mBatteryInputSuspended;
 
     private Led mLed;
 
@@ -234,6 +237,8 @@ public final class BatteryService extends SystemService {
             invalidChargerObserver.startObserving(
                     "DEVPATH=/devices/virtual/switch/invalid_charger");
         }
+
+        mBatteryInputSuspended = PowerProperties.battery_input_suspended().orElse(false);
     }
 
     @Override
@@ -432,6 +437,10 @@ public final class BatteryService extends SystemService {
                 info.legacy.legacy.batteryChargeCounter);
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
                 info.legacy.legacy.batteryCurrent);
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "PlugType",
+                plugType(info.legacy.legacy));
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryStatus",
+                info.legacy.legacy.batteryStatus);
 
         synchronized (mLock) {
             if (!mUpdatesStopped) {
@@ -466,6 +475,18 @@ public final class BatteryService extends SystemService {
         dst.batteryTechnology = src.batteryTechnology;
     }
 
+    private static int plugType(HealthInfo healthInfo) {
+        if (healthInfo.chargerAcOnline) {
+            return BatteryManager.BATTERY_PLUGGED_AC;
+        } else if (healthInfo.chargerUsbOnline) {
+            return BatteryManager.BATTERY_PLUGGED_USB;
+        } else if (healthInfo.chargerWirelessOnline) {
+            return BatteryManager.BATTERY_PLUGGED_WIRELESS;
+        } else {
+            return BATTERY_PLUGGED_NONE;
+        }
+    }
+
     private void processValuesLocked(boolean force) {
         boolean logOutlier = false;
         long dischargeDuration = 0;
@@ -473,15 +494,7 @@ public final class BatteryService extends SystemService {
         mBatteryLevelCritical =
             mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
             && mHealthInfo.batteryLevel <= mCriticalBatteryLevel;
-        if (mHealthInfo.chargerAcOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
-        } else if (mHealthInfo.chargerUsbOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
-        } else if (mHealthInfo.chargerWirelessOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
-        } else {
-            mPlugType = BATTERY_PLUGGED_NONE;
-        }
+        mPlugType = plugType(mHealthInfo);
 
         if (DEBUG) {
             Slog.d(TAG, "Processing new values: "
@@ -876,6 +889,10 @@ public final class BatteryService extends SystemService {
         pw.println("  reset [-f]");
         pw.println("    Unfreeze battery state, returning to current hardware values.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
+        if (Build.IS_DEBUGGABLE) {
+            pw.println("  disable_charge");
+            pw.println("    Suspend charging even if plugged in. ");
+        }
     }
 
     static final int OPTION_FORCE_UPDATE = 1<<0;
@@ -901,19 +918,7 @@ public final class BatteryService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
-                if (!mUpdatesStopped) {
-                    copy(mLastHealthInfo, mHealthInfo);
-                }
-                mHealthInfo.chargerAcOnline = false;
-                mHealthInfo.chargerUsbOnline = false;
-                mHealthInfo.chargerWirelessOnline = false;
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    mUpdatesStopped = true;
-                    processValuesFromShellLocked(pw, opts);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+                unplugBattery(/* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
             } break;
             case "set": {
                 int opts = parseOptions(shell);
@@ -970,10 +975,11 @@ public final class BatteryService extends SystemService {
                             break;
                     }
                     if (update) {
-                        long ident = Binder.clearCallingIdentity();
+                        final long ident = Binder.clearCallingIdentity();
                         try {
                             mUpdatesStopped = true;
-                            processValuesFromShellLocked(pw, opts);
+                            processValuesLocked(
+                                    /* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
@@ -987,16 +993,12 @@ public final class BatteryService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    if (mUpdatesStopped) {
-                        mUpdatesStopped = false;
-                        copy(mHealthInfo, mLastHealthInfo);
-                        processValuesFromShellLocked(pw, opts);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+                resetBattery(/* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
+            } break;
+            case "suspend_input": {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+                suspendBatteryInput();
             } break;
             default:
                 return shell.handleDefaultCommands(cmd);
@@ -1004,9 +1006,59 @@ public final class BatteryService extends SystemService {
         return 0;
     }
 
-    private void processValuesFromShellLocked(PrintWriter pw, int opts) {
-        processValuesLocked((opts & OPTION_FORCE_UPDATE) != 0);
-        if ((opts & OPTION_FORCE_UPDATE) != 0) {
+    private void setChargerAcOnline(boolean online, boolean forceUpdate) {
+        if (!mUpdatesStopped) {
+            copy(mLastHealthInfo, mHealthInfo);
+        }
+        mHealthInfo.chargerAcOnline = online;
+        mUpdatesStopped = true;
+        Binder.withCleanCallingIdentity(() -> processValuesLocked(forceUpdate));
+    }
+
+    private void setBatteryLevel(int level, boolean forceUpdate) {
+        if (!mUpdatesStopped) {
+            copy(mLastHealthInfo, mHealthInfo);
+        }
+        mHealthInfo.batteryLevel = level;
+        mUpdatesStopped = true;
+        Binder.withCleanCallingIdentity(() -> processValuesLocked(forceUpdate));
+    }
+
+    private void unplugBattery(boolean forceUpdate, PrintWriter pw) {
+        if (!mUpdatesStopped) {
+            copy(mLastHealthInfo, mHealthInfo);
+        }
+        mHealthInfo.chargerAcOnline = false;
+        mHealthInfo.chargerUsbOnline = false;
+        mHealthInfo.chargerWirelessOnline = false;
+        mUpdatesStopped = true;
+        Binder.withCleanCallingIdentity(() -> processValuesLocked(forceUpdate, pw));
+    }
+
+    private void resetBattery(boolean forceUpdate, @Nullable PrintWriter pw) {
+        if (mUpdatesStopped) {
+            mUpdatesStopped = false;
+            copy(mHealthInfo, mLastHealthInfo);
+            Binder.withCleanCallingIdentity(() -> processValuesLocked(forceUpdate, pw));
+        }
+        if (mBatteryInputSuspended) {
+            PowerProperties.battery_input_suspended(false);
+            mBatteryInputSuspended = false;
+        }
+    }
+
+    private void suspendBatteryInput() {
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException(
+                    "battery suspend_input is only supported on debuggable builds");
+        }
+        PowerProperties.battery_input_suspended(true);
+        mBatteryInputSuspended = true;
+    }
+
+    private void processValuesLocked(boolean forceUpdate, @Nullable PrintWriter pw) {
+        processValuesLocked(forceUpdate);
+        if (pw != null && forceUpdate) {
             pw.println(mSequence);
         }
     }
@@ -1331,6 +1383,41 @@ public final class BatteryService extends SystemService {
             synchronized (mLock) {
                 return mInvalidCharger;
             }
+        }
+
+        @Override
+        public void setChargerAcOnline(boolean online, boolean forceUpdate) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
+            BatteryService.this.setChargerAcOnline(online, forceUpdate);
+        }
+
+        @Override
+        public void setBatteryLevel(int level, boolean forceUpdate) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
+            BatteryService.this.setBatteryLevel(level, forceUpdate);
+        }
+
+        @Override
+        public void unplugBattery(boolean forceUpdate) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
+            BatteryService.this.unplugBattery(forceUpdate, /* printWriter= */ null);
+        }
+
+        @Override
+        public void resetBattery(boolean forceUpdate) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
+            BatteryService.this.resetBattery(forceUpdate, /* printWriter= */ null);
+        }
+
+        @Override
+        public void suspendBatteryInput() {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
+            BatteryService.this.suspendBatteryInput();
         }
     }
 

@@ -19,20 +19,26 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+
+import java.lang.ref.WeakReference;
+
+import javax.inject.Inject;
 
 class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeActionHelper {
 
@@ -47,15 +53,19 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     private static final long SWIPE_MENU_TIMING = 200;
 
-    private NotificationMenuRowPlugin mCurrMenuRow;
+    // Hold a weak ref to the menu row so that it isn't accidentally retained in memory. The
+    // lifetime of the row should be the same as the ActivatableView, which is owned by the
+    // NotificationStackScrollLayout. If the notification isn't in the notification shade, then it
+    // isn't possible to swipe it and, so, this class doesn't need to "help."
+    private WeakReference<NotificationMenuRowPlugin> mCurrMenuRowRef;
     private boolean mIsExpanded;
     private boolean mPulsing;
 
     NotificationSwipeHelper(
-            int swipeDirection, NotificationCallback callback, Context context,
-            NotificationMenuRowPlugin.OnMenuEventListener menuListener,
-            FalsingManager falsingManager) {
-        super(swipeDirection, callback, context, falsingManager);
+            Resources resources, ViewConfiguration viewConfiguration,
+            FalsingManager falsingManager, int swipeDirection, NotificationCallback callback,
+            NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
+        super(swipeDirection, callback, resources, viewConfiguration, falsingManager);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -68,7 +78,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     public void clearTranslatingParentView() { setTranslatingParentView(null); }
 
     @VisibleForTesting
-    protected void setTranslatingParentView(View view) { mTranslatingParentView = view; };
+    protected void setTranslatingParentView(View view) { mTranslatingParentView = view; }
 
     public void setExposedMenuView(View view) {
         mMenuExposedView = view;
@@ -82,11 +92,17 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         return mMenuExposedView;
     }
 
-    public void setCurrentMenuRow(NotificationMenuRowPlugin menuRow) {
-        mCurrMenuRow = menuRow;
+    @VisibleForTesting
+    void setCurrentMenuRow(NotificationMenuRowPlugin menuRow) {
+        mCurrMenuRowRef = menuRow != null ? new WeakReference<>(menuRow) : null;
     }
 
-    public NotificationMenuRowPlugin getCurrentMenuRow() {  return mCurrMenuRow; }
+    public NotificationMenuRowPlugin getCurrentMenuRow() {
+        if (mCurrMenuRowRef == null) {
+            return null;
+        }
+        return mCurrMenuRowRef.get();
+    }
 
     @VisibleForTesting
     protected Handler getHandler() { return mHandler; }
@@ -102,8 +118,9 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void onChildSnappedBack(View animView, float targetLeft) {
-        if (mCurrMenuRow != null && targetLeft == 0) {
-            mCurrMenuRow.resetMenu();
+        final NotificationMenuRowPlugin menuRow = getCurrentMenuRow();
+        if (menuRow != null && targetLeft == 0) {
+            menuRow.resetMenu();
             clearCurrentMenuRow();
         }
     }
@@ -129,10 +146,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     @VisibleForTesting
     protected void initializeRow(SwipeableView row) {
         if (row.hasFinishedInitialization()) {
-            mCurrMenuRow = row.createMenu();
-            if (mCurrMenuRow != null) {
-                mCurrMenuRow.setMenuClickListener(mMenuListener);
-                mCurrMenuRow.onTouchStart();
+            final NotificationMenuRowPlugin menuRow = row.createMenu();
+            setCurrentMenuRow(menuRow);
+            if (menuRow != null) {
+                menuRow.setMenuClickListener(mMenuListener);
+                menuRow.onTouchStart();
             }
         }
     }
@@ -282,11 +300,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         mCallback.onSnooze(sbn, snoozeOption);
     }
 
-    @Override
-    public void snooze(StatusBarNotification sbn, int hours) {
-        mCallback.onSnooze(sbn, hours);
-    }
-
     @VisibleForTesting
     protected void handleMenuCoveredOrDismissed() {
         View exposedMenuView = getExposedMenuView();
@@ -309,6 +322,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         } else {
             return superGetViewTranslationAnimator(v, target, listener);
         }
+    }
+
+    @Override
+    protected float getTotalTranslationLength(View animView) {
+        return mCallback.getTotalTranslationLength(animView);
     }
 
     @Override
@@ -452,8 +470,51 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
         void onSnooze(StatusBarNotification sbn, SnoozeOption snoozeOption);
 
-        void onSnooze(StatusBarNotification sbn, int hours);
-
         void onDismiss();
+
+        /**
+         * Get the total translation length where we want to swipe to when dismissing the view. By
+         * default this is the size of the view, but can also be larger.
+         * @param animView the view to ask about
+         */
+        float getTotalTranslationLength(View animView);
+    }
+
+    static class Builder {
+        private final Resources mResources;
+        private final ViewConfiguration mViewConfiguration;
+        private final FalsingManager mFalsingManager;
+        private int mSwipeDirection;
+        private NotificationCallback mNotificationCallback;
+        private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
+
+        @Inject
+        Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
+                FalsingManager falsingManager) {
+            mResources = resources;
+            mViewConfiguration = viewConfiguration;
+            mFalsingManager = falsingManager;
+        }
+
+        Builder setSwipeDirection(int swipeDirection) {
+            mSwipeDirection = swipeDirection;
+            return this;
+        }
+
+        Builder setNotificationCallback(NotificationCallback notificationCallback) {
+            mNotificationCallback = notificationCallback;
+            return this;
+        }
+
+        Builder setOnMenuEventListener(
+                NotificationMenuRowPlugin.OnMenuEventListener onMenuEventListener) {
+            mOnMenuEventListener = onMenuEventListener;
+            return this;
+        }
+
+        NotificationSwipeHelper build() {
+            return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
+                    mSwipeDirection, mNotificationCallback, mOnMenuEventListener);
+        }
     }
 }

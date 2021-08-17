@@ -169,7 +169,7 @@ public final class HdmiPortInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append("port_id: ").append(mId).append(", ");
         s.append("type: ").append((mType == PORT_INPUT) ? "HDMI_IN" : "HDMI_OUT").append(", ");
         s.append("address: ").append(String.format("0x%04x", mAddress)).append(", ");

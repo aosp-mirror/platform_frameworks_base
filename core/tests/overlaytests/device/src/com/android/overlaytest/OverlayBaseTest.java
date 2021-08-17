@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.content.om.OverlayIdentifier;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -58,9 +59,12 @@ public abstract class OverlayBaseTest {
     static final int MODE_SINGLE_OVERLAY = 1;
     static final int MODE_MULTIPLE_OVERLAYS = 2;
 
-    static final String APP_OVERLAY_ONE_PKG = "com.android.overlaytest.app_overlay_one";
-    static final String APP_OVERLAY_TWO_PKG = "com.android.overlaytest.app_overlay_two";
-    static final String FRAMEWORK_OVERLAY_PKG = "com.android.overlaytest.framework";
+    static final OverlayIdentifier APP_OVERLAY_ONE_PKG =
+            new OverlayIdentifier("com.android.overlaytest.app_overlay_one");
+    static final OverlayIdentifier APP_OVERLAY_TWO_PKG =
+            new OverlayIdentifier("com.android.overlaytest.app_overlay_two");
+    static final OverlayIdentifier FRAMEWORK_OVERLAY_PKG =
+            new OverlayIdentifier("com.android.overlaytest.framework");
 
     protected OverlayBaseTest(int mode) {
         mMode = mode;

@@ -29,6 +29,7 @@ cc_binary_host {
         "libutils",
         "libcutils",
         "liblog",
+        "libui-types",
     ],
     target: {
         linux_glibc: {

@@ -19,7 +19,6 @@ package android.service.dreams;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.WindowInsets;
 
 import com.android.internal.R;
 
@@ -63,8 +62,6 @@ public class DreamActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        // Hide all insets (nav bar, status bar, etc) when the dream is showing
-        getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
         overridePendingTransition(R.anim.dream_activity_open_enter,
                                   R.anim.dream_activity_open_exit);
     }

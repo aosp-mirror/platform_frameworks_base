@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kobler ikke til automatisk"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internettilgang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Koble til et nettverk med datamåling"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisk tilkoblet via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisk tilkoblet via leverandør av nettverksvurdering"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Tilkoblet via %1$s"</string>
@@ -248,15 +249,15 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app for fiktiv plassering er angitt"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-tilfeldiggjøring"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av absolutt volum"</string>
-    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Slå på Gabeldorsche"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av funksjonen for absolutt volum"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktiver Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-versjon"</string>
@@ -278,10 +279,10 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Av"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisk"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Vertsnavn for privat DNS-leverandør"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av Wi-Fi-logging – vis per SSID RSSI i Wi-Fi-velgeren"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
@@ -344,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Feilsøk GPU-overtegning"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Slå av maskinvareoverlegg"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Bruk alltid GPU for skjermsammensetting"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargerom"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simuler fargeområde"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Slå på OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Slå av lydomkobling via USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå av automatisk lydomkobling til USB-enheter"</string>
@@ -359,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Slå på GPU-feilsøkingslag"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Detaljert leverandørlogging"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder flere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder ytterligere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>
@@ -399,6 +400,11 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ikke aktiv. Trykk for å slå av/på."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiv. Trykk for å slå av/på."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Hvilemodus:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"Innstillinger for omkoding av medier"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Overstyr omkodingsstandarder"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Slå på omkoding"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Anta at apper støtter moderne formater"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Vis omkodingsvarsler"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontrollér tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
@@ -418,11 +424,11 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grønn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Fargekorrigering"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Med fargekorrigering kan du justere hvordan farger vises på enheten din"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Juster hvordan farger vises på enheten. Dette kan være nyttig når du vil&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;se farger mer nøyaktig&lt;/li&gt; &lt;li&gt;&amp;nbsp;fjerne farger for å gjøre det enklere å fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen"</string>
-    <string name="power_discharging_duration" msgid="1076561255466053220">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
+    <string name="power_discharging_duration" msgid="1076561255466053220">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
@@ -444,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Nettbrettet slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Enheten slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> til batteriet er fulladet"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> til batteriet er fulladet"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – optimaliserer batteritilstanden"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Lader"</string>
@@ -453,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lader sakte"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Lader ikke"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Laderen er koblet til – kan ikke lade akkurat nå"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Fullt"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
     <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillatt"</string>
@@ -495,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mindre tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Gi tillatelse til å angi alarmer og påminnelser"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmer og påminnelser"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Tillat denne appen å planlegge alarmer eller andre tidsbaserte hendelser. Dette gjør at appen kan starte og kjøre, selv når du ikke bruker enheten. Hvis du opphever denne tillatelsen, kan det føre til feil med appen, blant annet at alarmer som appen har planlagt, ikke fungerer lenger."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"tidsplan, alarm, påminnelse, hendelse"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Aldri"</string>
@@ -509,6 +523,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonhøyttaler"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjelp og tilbakemelding"</string>
@@ -546,12 +561,48 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Før du kan opprette en begrenset profil, må du konfigurere skjermlåsen for å beskytte appene og de personlige dataene dine."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Angi lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bytt til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Oppretter en ny bruker …"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
+    <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til en gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gjest"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Standard for enheten"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Hodetelefoner med kabel"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobildata er slått av"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"Ikke konfigurert til å bruke data"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"Ingen telefon."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefon – én stolpe."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefon – to stolper."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefon – tre stolper."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefonsignal er fullt."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"Ingen data."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Data – én stolpe"</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Data – to stolper."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Data – tre stolper."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Datasignal er fullt."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet er frakoblet."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Ingen ringing."</string>
 </resources>

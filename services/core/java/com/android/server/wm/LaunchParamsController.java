@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
@@ -60,7 +61,7 @@ class LaunchParamsController {
      * Creates a {@link LaunchParamsController} with default registered
      * {@link LaunchParamsModifier}s.
      */
-    void registerDefaultModifiers(ActivityStackSupervisor supervisor) {
+    void registerDefaultModifiers(ActivityTaskSupervisor supervisor) {
         // {@link TaskLaunchParamsModifier} handles window layout preferences.
         registerModifier(new TaskLaunchParamsModifier(supervisor));
     }
@@ -72,10 +73,12 @@ class LaunchParamsController {
      * @param activity  The {@link ActivityRecord} currently being positioned.
      * @param source    The {@link ActivityRecord} from which activity was started from.
      * @param options   The {@link ActivityOptions} specified for the activity.
+     * @param request   The optional request from the activity starter.
+     * @param phase     The {@link LaunchParamsModifier.Phase} that the resolution should finish.
      * @param result    The resulting params.
      */
-    void calculate(Task task, WindowLayout layout, ActivityRecord activity,
-                   ActivityRecord source, ActivityOptions options, int phase, LaunchParams result) {
+    void calculate(Task task, WindowLayout layout, ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options, @Nullable Request request, int phase, LaunchParams result) {
         result.reset();
 
         if (task != null || activity != null) {
@@ -90,8 +93,8 @@ class LaunchParamsController {
             mTmpResult.reset();
             final LaunchParamsModifier modifier = mModifiers.get(i);
 
-            switch(modifier.onCalculate(task, layout, activity, source, options, phase, mTmpCurrent,
-                    mTmpResult)) {
+            switch(modifier.onCalculate(task, layout, activity, source, options, request, phase,
+                    mTmpCurrent, mTmpResult)) {
                 case RESULT_SKIP:
                     // Do not apply any results when we are told to skip
                     continue;
@@ -128,7 +131,8 @@ class LaunchParamsController {
 
     boolean layoutTask(Task task, WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
-        calculate(task, layout, activity, source, options, PHASE_BOUNDS, mTmpParams);
+        calculate(task, layout, activity, source, options, null /* request */, PHASE_BOUNDS,
+                mTmpParams);
 
         // No changes, return.
         if (mTmpParams.isEmpty()) {
@@ -140,15 +144,15 @@ class LaunchParamsController {
         try {
             if (mTmpParams.mPreferredTaskDisplayArea != null
                     && task.getDisplayArea() != mTmpParams.mPreferredTaskDisplayArea) {
-                mService.mRootWindowContainer.moveStackToTaskDisplayArea(task.getRootTaskId(),
+                mService.mRootWindowContainer.moveRootTaskToTaskDisplayArea(task.getRootTaskId(),
                         mTmpParams.mPreferredTaskDisplayArea, true /* onTop */);
             }
 
-            if (mTmpParams.hasWindowingMode()
-                    && mTmpParams.mWindowingMode != task.getStack().getWindowingMode()) {
+            if (mTmpParams.hasWindowingMode() && task.isRootTask()
+                    && mTmpParams.mWindowingMode != task.getWindowingMode()) {
                 final int activityType = activity != null
                         ? activity.getActivityType() : task.getActivityType();
-                task.getStack().setWindowingMode(task.getDisplayArea().validateWindowingMode(
+                task.setWindowingMode(task.getDisplayArea().validateWindowingMode(
                         mTmpParams.mWindowingMode, activity, task, activityType));
             }
 
@@ -156,8 +160,7 @@ class LaunchParamsController {
                 return false;
             }
 
-            if (task.getStack().inFreeformWindowingMode()) {
-                // Only set bounds if it's in freeform mode.
+            if (task.getRootTask().inMultiWindowMode()) {
                 task.setBounds(mTmpParams.mBounds);
                 return true;
             }
@@ -273,7 +276,8 @@ class LaunchParamsController {
         @interface Phase {}
 
         /**
-         * Stops once we are done with preferred display calculation.
+         * Stops once we are done with preferred display calculation. The result returned from this
+         * phase is only guaranteed to have a display area which display is the launch display.
          */
         int PHASE_DISPLAY = 0;
 
@@ -283,9 +287,14 @@ class LaunchParamsController {
         int PHASE_WINDOWING_MODE = 1;
 
         /**
+         * Stops once we are done with display area calculation.
+         */
+        int PHASE_DISPLAY_AREA = 2;
+
+        /**
          * Stops once we are done with window bounds calculation.
          */
-        int PHASE_BOUNDS = 2;
+        int PHASE_BOUNDS = 3;
 
         /**
          * Returns the launch params that the provided activity launch params should be overridden
@@ -305,15 +314,17 @@ class LaunchParamsController {
          *                      launched should have this be non-null.
          * @param source        the Activity that launched a new task. Could be {@code null}.
          * @param options       {@link ActivityOptions} used to start the activity with.
-         * @param phase         the calculation phase, see {@link LaunchParamsModifier.Phase}
+         * @param request       Optional data to give more context on the launch
+         * @param phase         the calculation phase, see {@link Phase}
          * @param currentParams launching params after the process of last {@link
          *                      LaunchParamsModifier}.
          * @param outParams     the result params to be set.
          * @return see {@link LaunchParamsModifier.Result}
          */
         @Result
-        int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
-                ActivityRecord source, ActivityOptions options, @Phase int phase,
-                LaunchParams currentParams, LaunchParams outParams);
+        int onCalculate(@Nullable Task task, @Nullable WindowLayout layout,
+                @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
+                @Nullable ActivityOptions options, @Nullable Request request,
+                @Phase int phase, LaunchParams currentParams, LaunchParams outParams);
     }
 }

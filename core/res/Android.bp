@@ -44,10 +44,78 @@ license {
     ],
 }
 
+genrule {
+    name: "remote-color-resources-compile-public",
+    tools: ["aapt2"],
+    srcs: [
+        "remote_color_resources_res/values/public.xml",
+    ],
+    out: ["values_public.arsc.flat"],
+    cmd: "$(location aapt2) compile $(in) -o $(genDir)",
+}
+
+genrule {
+    name: "remote-color-resources-compile-colors",
+    tools: ["aapt2"],
+    srcs: [
+        "remote_color_resources_res/values/colors.xml",
+    ],
+    out: ["values_colors.arsc.flat"],
+    cmd: "$(location aapt2) compile $(in) -o $(genDir)",
+}
+
+genrule {
+    name: "remote-color-resources-apk",
+    tools: ["aapt2"],
+    // The first input file in the list must be the manifest
+    srcs: [
+        "RemoteThemeColorsAndroidManifest.xml",
+        ":remote-color-resources-compile-public",
+        ":remote-color-resources-compile-colors",
+    ],
+    out: ["remote-color-resources.apk"],
+    cmd: "$(location aapt2) link -o $(out) --manifest $(in)"
+}
+
+genrule {
+    name: "remote-color-resources-arsc",
+    srcs: [":remote-color-resources-apk"],
+    out: ["res/raw/remote_views_color_resources.arsc"],
+    cmd: "mkdir -p $(genDir)/remote-color-resources-arsc && "
+        + "unzip -x $(in) resources.arsc -d $(genDir)/remote-color-resources-arsc && "
+        + "mkdir -p $$(dirname $(out)) && "
+        + "mv $(genDir)/remote-color-resources-arsc/resources.arsc $(out) && "
+        + "echo 'Created $(out)'"
+}
+
+genrule {
+    name: "remote-color-resources-arsc-zip",
+    tools: ["soong_zip"],
+    srcs: [
+        ":remote-color-resources-arsc",
+        "remote_color_resources_res/symbols.xml",
+    ],
+    out: ["remote_views_color_resources.zip"],
+    cmd: "INPUTS=($(in)) && "
+        + "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && "
+        + "mkdir -p $$RES_DIR/values && "
+        + "cp $${INPUTS[1]} $$RES_DIR/values && "
+        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
+}
+
 android_app {
     name: "framework-res",
     sdk_version: "core_platform",
     certificate: "platform",
+
+    srcs: [":remote-color-resources-arsc"],
+
+    // Disable dexpreopt and verify_uses_libraries check as the app
+    // contains no Java code to be dexpreopted.
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
 
     // Soong special-cases framework-res to install this alongside
     // the libraries at /system/framework/framework-res.apk.
@@ -63,6 +131,10 @@ android_app {
 
         // Allow overlay to add resource
         "--auto-add-overlay",
+    ],
+
+    resource_zips: [
+        ":remote-color-resources-arsc-zip",
     ],
 
     // Create package-export.apk, which other packages can use to get
@@ -89,6 +161,7 @@ filegroup {
     srcs: [
         "assets/**/*",
         "res/**/*",
+        ":remote-color-resources-arsc",
     ],
 }
 

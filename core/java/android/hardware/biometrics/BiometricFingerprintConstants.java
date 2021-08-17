@@ -16,11 +16,15 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.IntDef;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface containing all of the fingerprint-specific constants.
@@ -35,6 +39,31 @@ public interface BiometricFingerprintConstants {
     // Error messages from fingerprint hardware during initilization, enrollment, authentication or
     // removal. Must agree with the list in fingerprint.h
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FINGERPRINT_ERROR_HW_UNAVAILABLE,
+            FINGERPRINT_ERROR_UNABLE_TO_PROCESS,
+            FINGERPRINT_ERROR_TIMEOUT,
+            FINGERPRINT_ERROR_NO_SPACE,
+            FINGERPRINT_ERROR_CANCELED,
+            FINGERPRINT_ERROR_UNABLE_TO_REMOVE,
+            FINGERPRINT_ERROR_LOCKOUT,
+            FINGERPRINT_ERROR_VENDOR,
+            FINGERPRINT_ERROR_LOCKOUT_PERMANENT,
+            FINGERPRINT_ERROR_USER_CANCELED,
+            FINGERPRINT_ERROR_NO_FINGERPRINTS,
+            FINGERPRINT_ERROR_HW_NOT_PRESENT,
+            FINGERPRINT_ERROR_NEGATIVE_BUTTON,
+            BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_ERROR_RE_ENROLL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            FINGERPRINT_ERROR_UNKNOWN,
+            FINGERPRINT_ERROR_BAD_CALIBRATION})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FingerprintError {}
 
     /**
      * The hardware is unavailable. Try again later.
@@ -138,7 +167,25 @@ public interface BiometricFingerprintConstants {
      * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
      * @hide
      */
-    public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
+    int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
+
+    /**
+     * Authentication cannot proceed because re-enrollment is required.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_RE_ENROLL = 16;
+
+    /**
+     * Unknown error received from the HAL.
+     * @hide
+     */
+    int FINGERPRINT_ERROR_UNKNOWN = 17;
+
+    /**
+     * Error indicating that the fingerprint sensor has bad calibration.
+     * @hide
+     */
+    int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
 
     /**
      * @hide
@@ -149,6 +196,23 @@ public interface BiometricFingerprintConstants {
     //
     // Image acquisition messages. Must agree with those in fingerprint.h
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FINGERPRINT_ACQUIRED_GOOD,
+            FINGERPRINT_ACQUIRED_PARTIAL,
+            FINGERPRINT_ACQUIRED_INSUFFICIENT,
+            FINGERPRINT_ACQUIRED_IMAGER_DIRTY,
+            FINGERPRINT_ACQUIRED_TOO_SLOW,
+            FINGERPRINT_ACQUIRED_TOO_FAST,
+            FINGERPRINT_ACQUIRED_VENDOR,
+            FINGERPRINT_ACQUIRED_START,
+            FINGERPRINT_ACQUIRED_UNKNOWN,
+            FINGERPRINT_ACQUIRED_IMMOBILE,
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FingerprintAcquired {}
 
     /**
      * The image acquired was good.
@@ -208,6 +272,27 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_START = 7;
+
+    /**
+     * Unknown acquired code received from the HAL.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_UNKNOWN = 8;
+
+    /**
+     * This message may be sent during enrollment if the same area of the finger has already
+     * been captured during this enrollment session. In general, enrolling multiple areas of the
+     * same finger can help against false rejections.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
+
+    /**
+     * For sensors that require illumination, such as optical under-display fingerprint sensors,
+     * the image was too bright to be used for matching.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
 
     /**
      * @hide

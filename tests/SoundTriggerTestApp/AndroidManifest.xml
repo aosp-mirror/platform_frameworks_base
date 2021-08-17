@@ -1,27 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.test.soundtrigger">
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD" />
-    <uses-permission android:name="android.permission.MANAGE_SOUND_TRIGGER" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+     package="com.android.test.soundtrigger">
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"/>
+    <uses-permission android:name="android.permission.MANAGE_SOUND_TRIGGER"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application>
-        <activity
-            android:name=".SoundTriggerTestActivity"
-            android:label="SoundTrigger Test Application"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Material">
+        <activity android:name=".SoundTriggerTestActivity"
+             android:label="SoundTrigger Test Application"
+             android:screenOrientation="portrait"
+             android:theme="@android:style/Theme.Material"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service
-            android:name=".SoundTriggerTestService"
-            android:stopWithTask="false"
-            android:exported="true">
+        <service android:name=".SoundTriggerTestService"
+             android:stopWithTask="false"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.intent.action.MANAGE_SOUND_TRIGGER" />
+                <action android:name="com.android.intent.action.MANAGE_SOUND_TRIGGER"/>
             </intent-filter>
         </service>
     </application>

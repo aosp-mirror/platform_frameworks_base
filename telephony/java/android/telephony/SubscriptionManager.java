@@ -418,6 +418,26 @@ public class SubscriptionManager {
             SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI, "suw_restore");
 
     /**
+     * A content {@link Uri} used to receive updates on cross sim enabled user setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription cross sim calling enabled
+     * {@link ImsMmTelManager#isCrossSimCallingEnabled()}
+     * while your app is running. You can also use a {@link android.app.job.JobService}
+     * to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public static final Uri CROSS_SIM_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI,
+            SimInfo.COLUMN_CROSS_SIM_CALLING_ENABLED);
+
+    /**
      * TelephonyProvider unique key column name is the subscription id.
      * <P>Type: TEXT (String)</P>
      */
@@ -616,7 +636,7 @@ public class SubscriptionManager {
                     D2D_SHARING_SELECTED_CONTACTS,
                     D2D_SHARING_ALL
             })
-    public @interface DeviceToDeviceStatusSharing {}
+    public @interface DeviceToDeviceStatusSharingPreference {}
 
     /**
      * TelephonyProvider column name for device to device sharing status.
@@ -3382,7 +3402,10 @@ public class SubscriptionManager {
      * Set uicc applications being enabled or disabled.
      * The value will be remembered on the subscription and will be applied whenever it's present.
      * If the subscription in currently present, it will also apply the setting to modem
-     * immediately.
+     * immediately (the setting in the modem will not change until the modem receives and responds
+     * to the request, but typically this should only take a few seconds. The user visible setting
+     * available from SubscriptionInfo.areUiccApplicationsEnabled() will be updated
+     * immediately.)
      *
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      *
@@ -3472,29 +3495,31 @@ public class SubscriptionManager {
      * app uses this method to indicate with whom they wish to share device to device status
      * information.
      * @param sharing the status sharing preference
-     * @param subId the unique Subscription ID in database
+     * @param subscriptionId the unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharing(@DeviceToDeviceStatusSharing int sharing,
-            int subId) {
+    public void setDeviceToDeviceStatusSharingPreference(int subscriptionId,
+            @DeviceToDeviceStatusSharingPreference int sharing) {
         if (VDBG) {
-            logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: " + subId);
+            logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: "
+                    + subscriptionId);
         }
-        setSubscriptionPropertyHelper(subId, "setDeviceToDeviceSharingStatus",
-                (iSub)->iSub.setDeviceToDeviceStatusSharing(sharing, subId));
+        setSubscriptionPropertyHelper(subscriptionId, "setDeviceToDeviceSharingStatus",
+                (iSub)->iSub.setDeviceToDeviceStatusSharing(sharing, subscriptionId));
     }
 
     /**
      * Returns the user-chosen device to device status sharing preference
-     * @param subId Subscription id of subscription
+     * @param subscriptionId Subscription id of subscription
      * @return The device to device status sharing preference
      */
-    public @DeviceToDeviceStatusSharing int getDeviceToDeviceStatusSharing(int subId) {
+    public @DeviceToDeviceStatusSharingPreference int getDeviceToDeviceStatusSharingPreference(
+            int subscriptionId) {
         if (VDBG) {
-            logd("[getDeviceToDeviceStatusSharing] + subId: " + subId);
+            logd("[getDeviceToDeviceStatusSharing] + subId: " + subscriptionId);
         }
-        return getIntegerSubscriptionProperty(subId, D2D_STATUS_SHARING, D2D_SHARING_DISABLED,
-                mContext);
+        return getIntegerSubscriptionProperty(subscriptionId, D2D_STATUS_SHARING,
+                D2D_SHARING_DISABLED, mContext);
     }
 
     /**
@@ -3505,8 +3530,8 @@ public class SubscriptionManager {
      * @param subscriptionId The unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharingContacts(@NonNull List<Uri> contacts,
-            int subscriptionId) {
+    public void setDeviceToDeviceStatusSharingContacts(int subscriptionId,
+            @NonNull List<Uri> contacts) {
         String contactString = serializeUriLists(contacts);
         if (VDBG) {
             logd("[setDeviceToDeviceStatusSharingContacts] + contacts: " + contactString

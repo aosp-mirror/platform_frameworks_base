@@ -16,8 +16,8 @@ filegroup {
 
 java_library_static {
     name: "services.backup",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.backup-sources"],
     libs: ["services.core"],
-    static_libs: ["backuplib"],
+    static_libs: ["backuplib", "app-compat-annotations"],
 }

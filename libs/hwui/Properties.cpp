@@ -15,7 +15,9 @@
  */
 
 #include "Properties.h"
+
 #include "Debug.h"
+#include "log/log_main.h"
 #ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
 #endif
@@ -77,7 +79,14 @@ bool Properties::debuggingEnabled = false;
 bool Properties::isolatedProcess = false;
 
 int Properties::contextPriority = 0;
-int Properties::defaultRenderAhead = -1;
+float Properties::defaultSdrWhitePoint = 200.f;
+
+bool Properties::useHintManager = true;
+int Properties::targetCpuTimePercentage = 70;
+
+bool Properties::enableWebViewOverlays = false;
+
+StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
@@ -126,8 +135,11 @@ bool Properties::load() {
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
-    defaultRenderAhead = std::max(-1, std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD,
-            render_ahead().value_or(0))));
+    useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, true);
+    targetCpuTimePercentage = base::GetIntProperty(PROPERTY_TARGET_CPU_TIME_PERCENTAGE, 70);
+    if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
+
+    enableWebViewOverlays = base::GetBoolProperty(PROPERTY_WEBVIEW_OVERLAYS_ENABLED, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
@@ -189,15 +201,12 @@ RenderPipelineType Properties::getRenderPipelineType() {
     return sRenderPipelineType;
 }
 
-void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+void Properties::overrideRenderPipelineType(RenderPipelineType type, bool inUnitTest) {
     // If we're doing actual rendering then we can't change the renderer after it's been set.
-    // Unit tests can freely change this as often as it wants, though, as there's no actual
-    // GL rendering happening
-    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
-        LOG_ALWAYS_FATAL_IF(sRenderPipelineType != type,
-                "Trying to change pipeline but it's already set");
-        return;
-    }
+    // Unit tests can freely change this as often as it wants.
+    LOG_ALWAYS_FATAL_IF(sRenderPipelineType != RenderPipelineType::NotInitialized &&
+                                sRenderPipelineType != type && !inUnitTest,
+                        "Trying to change pipeline but it's already set.");
     sRenderPipelineType = type;
 }
 

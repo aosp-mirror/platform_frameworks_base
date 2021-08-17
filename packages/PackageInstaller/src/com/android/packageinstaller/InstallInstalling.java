@@ -25,14 +25,16 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.content.PackageHelper;
@@ -57,9 +59,6 @@ public class InstallInstalling extends AlertActivity {
 
     private static final String BROADCAST_ACTION =
             "com.android.packageinstaller.ACTION_INSTALL_COMMIT";
-
-    /** Listens to changed to the session and updates progress bar */
-    private PackageInstaller.SessionCallback mSessionCallback;
 
     /** Task that sends the package to the package installer */
     private InstallingAsyncTask mInstallingTask;
@@ -89,7 +88,8 @@ public class InstallInstalling extends AlertActivity {
                 getPackageManager().installExistingPackage(appInfo.packageName);
                 launchSuccess();
             } catch (PackageManager.NameNotFoundException e) {
-                launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                launchFailure(PackageInstaller.STATUS_FAILURE,
+                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
             }
         } else {
             final File sourceFile = new File(mPackageURI.getPath());
@@ -142,16 +142,21 @@ public class InstallInstalling extends AlertActivity {
 
                 File file = new File(mPackageURI.getPath());
                 try {
-                    PackageParser.PackageLite pkg = PackageParser.parsePackageLite(file, 0);
-                    params.setAppPackageName(pkg.packageName);
-                    params.setInstallLocation(pkg.installLocation);
-                    params.setSize(
-                            PackageHelper.calculateInstalledSize(pkg, false, params.abiOverride));
-                } catch (PackageParser.PackageParserException e) {
-                    Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.");
-                    Log.e(LOG_TAG,
-                            "Cannot calculate installed size " + file + ". Try only apk size.");
-                    params.setSize(file.length());
+                    final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+                    final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                            input.reset(), file, /* flags */ 0);
+                    if (result.isError()) {
+                        Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.");
+                        Log.e(LOG_TAG,
+                                "Cannot calculate installed size " + file + ". Try only apk size.");
+                        params.setSize(file.length());
+                    } else {
+                        final PackageLite pkg = result.getResult();
+                        params.setAppPackageName(pkg.getPackageName());
+                        params.setInstallLocation(pkg.getInstallLocation());
+                        params.setSize(
+                                PackageHelper.calculateInstalledSize(pkg, params.abiOverride));
+                    }
                 } catch (IOException e) {
                     Log.e(LOG_TAG,
                             "Cannot calculate installed size " + file + ". Try only apk size.");
@@ -163,19 +168,19 @@ public class InstallInstalling extends AlertActivity {
                             .addObserver(this, EventResultPersister.GENERATE_NEW_ID,
                                     this::launchFinishBasedOnResult);
                 } catch (EventResultPersister.OutOfIdsException e) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
                 }
 
                 try {
                     mSessionId = getPackageManager().getPackageInstaller().createSession(params);
                 } catch (IOException e) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
                 }
             }
 
             mCancelButton = mAlert.getButton(DialogInterface.BUTTON_NEGATIVE);
-
-            mSessionCallback = new InstallSessionCallback();
         }
     }
 
@@ -194,25 +199,20 @@ public class InstallInstalling extends AlertActivity {
     /**
      * Launch the "failure" version of the final package installer dialog
      *
+     * @param statusCode    The generic status code as returned by the package installer.
      * @param legacyStatus  The status as used internally in the package manager.
      * @param statusMessage The status description.
      */
-    private void launchFailure(int legacyStatus, String statusMessage) {
+    private void launchFailure(int statusCode, int legacyStatus, String statusMessage) {
         Intent failureIntent = new Intent(getIntent());
         failureIntent.setClass(this, InstallFailed.class);
         failureIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        failureIntent.putExtra(PackageInstaller.EXTRA_STATUS, statusCode);
         failureIntent.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, legacyStatus);
         failureIntent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, statusMessage);
 
         startActivity(failureIntent);
         finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        getPackageManager().getPackageInstaller().registerSessionCallback(mSessionCallback);
     }
 
     @Override
@@ -251,13 +251,6 @@ public class InstallInstalling extends AlertActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-
-        getPackageManager().getPackageInstaller().unregisterSessionCallback(mSessionCallback);
-    }
-
-    @Override
     protected void onDestroy() {
         if (mInstallingTask != null) {
             mInstallingTask.cancel(true);
@@ -289,39 +282,7 @@ public class InstallInstalling extends AlertActivity {
         if (statusCode == PackageInstaller.STATUS_SUCCESS) {
             launchSuccess();
         } else {
-            launchFailure(legacyStatus, statusMessage);
-        }
-    }
-
-
-    private class InstallSessionCallback extends PackageInstaller.SessionCallback {
-        @Override
-        public void onCreated(int sessionId) {
-            // empty
-        }
-
-        @Override
-        public void onBadgingChanged(int sessionId) {
-            // empty
-        }
-
-        @Override
-        public void onActiveChanged(int sessionId, boolean active) {
-            // empty
-        }
-
-        @Override
-        public void onProgressChanged(int sessionId, float progress) {
-            if (sessionId == mSessionId) {
-                ProgressBar progressBar = requireViewById(R.id.progress);
-                progressBar.setMax(Integer.MAX_VALUE);
-                progressBar.setProgress((int) (Integer.MAX_VALUE * progress));
-            }
-        }
-
-        @Override
-        public void onFinished(int sessionId, boolean success) {
-            // empty, finish is handled by InstallResultReceiver
+            launchFailure(statusCode, legacyStatus, statusMessage);
         }
     }
 
@@ -405,7 +366,7 @@ public class InstallInstalling extends AlertActivity {
                         InstallInstalling.this,
                         mInstallId,
                         broadcastIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
                 session.commit(pendingIntent.getIntentSender());
                 mCancelButton.setEnabled(false);
@@ -414,7 +375,8 @@ public class InstallInstalling extends AlertActivity {
                 getPackageManager().getPackageInstaller().abandonSession(mSessionId);
 
                 if (!isCancelled()) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INVALID_APK, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INVALID_APK, null);
                 }
             }
         }

@@ -16,13 +16,21 @@
 
 package android.view.inputmethod;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The InputConnection interface is the communication channel from an
@@ -122,14 +130,20 @@ import android.view.KeyEvent;
  * of each other, and the IME may use them however they see fit.</p>
  */
 public interface InputConnection {
+    /** @hide */
+    @IntDef(flag = true, prefix = { "GET_TEXT_" }, value = {
+            GET_TEXT_WITH_STYLES,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface GetTextType {}
+
     /**
-     * Flag for use with {@link #getTextAfterCursor} and
-     * {@link #getTextBeforeCursor} to have style information returned
-     * along with the text. If not set, {@link #getTextAfterCursor}
-     * sends only the raw text, without style or other spans. If set,
-     * it may return a complex CharSequence of both text and style
-     * spans. <strong>Editor authors</strong>: you should strive to
-     * send text with styles if possible, but it is not required.
+     * Flag for use with {@link #getTextAfterCursor}, {@link #getTextBeforeCursor} and
+     * {@link #getSurroundingText} to have style information returned along with the text. If not
+     * set, {@link #getTextAfterCursor} sends only the raw text, without style or other spans. If
+     * set, it may return a complex CharSequence of both text and style spans.
+     * <strong>Editor authors</strong>: you should strive to send text with styles if possible, but
+     * it is not required.
      */
     int GET_TEXT_WITH_STYLES = 0x0001;
 
@@ -174,13 +188,15 @@ public interface InputConnection {
      * the current line, and specifically do not return 0 characters unless
      * the cursor is really at the start of the text.</p>
      *
-     * @param n The expected length of the text.
+     * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text before the cursor position; the length of the
      * returned text might be less than <var>n</var>.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
-    CharSequence getTextBeforeCursor(int n, int flags);
+    @Nullable
+    CharSequence getTextBeforeCursor(@IntRange(from = 0) int n, int flags);
 
     /**
      * Get <var>n</var> characters of text after the current cursor
@@ -216,14 +232,16 @@ public interface InputConnection {
      * the current line, and specifically do not return 0 characters unless
      * the cursor is really at the end of the text.</p>
      *
-     * @param n The expected length of the text.
+     * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      *
      * @return the text after the cursor position; the length of the
      * returned text might be less than <var>n</var>.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
-    CharSequence getTextAfterCursor(int n, int flags);
+    @Nullable
+    CharSequence getTextAfterCursor(@IntRange(from = 0) int n, int flags);
 
     /**
      * Gets the selected text, if any.
@@ -255,13 +273,73 @@ public interface InputConnection {
      * consistent with the results of the latest edits.</p>
      *
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text that is currently selected, if any, or null if
      * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
      * later, returns false when the target application does not implement
      * this method.
      */
     CharSequence getSelectedText(int flags);
+
+    /**
+     * Gets the surrounding text around the current cursor, with <var>beforeLength</var> characters
+     * of text before the cursor (start of the selection), <var>afterLength</var> characters of text
+     * after the cursor (end of the selection), and all of the selected text. The range are for java
+     * characters, not glyphs that can be multiple characters.
+     *
+     * <p>This method may fail either if the input connection has become invalid (such as its
+     * process crashing), or the client is taking too long to respond with the text (it is given a
+     * couple seconds to return), or the protocol is not supported. In any of these cases, null is
+     * returned.
+     *
+     * <p>This method does not affect the text in the editor in any way, nor does it affect the
+     * selection or composing spans.</p>
+     *
+     * <p>If {@link #GET_TEXT_WITH_STYLES} is supplied as flags, the editor should return a
+     * {@link android.text.Spanned} with all the spans set on the text.</p>
+     *
+     * <p><strong>IME authors:</strong> please consider this will trigger an IPC round-trip that
+     * will take some time. Assume this method consumes a lot of time. If you are using this to get
+     * the initial surrounding text around the cursor, you may consider using
+     * {@link EditorInfo#getInitialTextBeforeCursor(int, int)},
+     * {@link EditorInfo#getInitialSelectedText(int)}, and
+     * {@link EditorInfo#getInitialTextAfterCursor(int, int)} to prevent IPC costs.</p>
+     *
+     * @param beforeLength The expected length of the text before the cursor.
+     * @param afterLength The expected length of the text after the cursor.
+     * @param flags Supplies additional options controlling how the text is returned. May be either
+     *              {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
+     * @return an {@link android.view.inputmethod.SurroundingText} object describing the surrounding
+     * text and state of selection, or null if the input connection is no longer valid, or the
+     * editor can't comply with the request for some reason, or the application does not implement
+     * this method. The length of the returned text might be less than the sum of
+     * <var>beforeLength</var> and <var>afterLength</var> .
+     * @throws IllegalArgumentException if {@code beforeLength} or {@code afterLength} is negative.
+     */
+    @Nullable
+    default SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength,
+            @GetTextType int flags) {
+        Preconditions.checkArgumentNonnegative(beforeLength);
+        Preconditions.checkArgumentNonnegative(afterLength);
+
+        CharSequence textBeforeCursor = getTextBeforeCursor(beforeLength, flags);
+        if (textBeforeCursor == null) {
+            return null;
+        }
+        CharSequence textAfterCursor = getTextAfterCursor(afterLength, flags);
+        if (textAfterCursor == null) {
+            return null;
+        }
+        CharSequence selectedText = getSelectedText(flags);
+        if (selectedText == null) {
+            selectedText = "";
+        }
+        CharSequence surroundingText =
+                TextUtils.concat(textBeforeCursor, selectedText, textAfterCursor);
+        return new SurroundingText(surroundingText, textBeforeCursor.length(),
+                textBeforeCursor.length() + selectedText.length(), -1);
+    }
 
     /**
      * Retrieve the current capitalization mode in effect at the
@@ -317,7 +395,7 @@ public interface InputConnection {
      *
      * @param request Description of how the text should be returned.
      * {@link android.view.inputmethod.ExtractedTextRequest}
-     * @param flags Additional options to control the client, either 0 or
+     * @param flags Additional options to control the client, either {@code 0} or
      * {@link #GET_EXTRACTED_TEXT_MONITOR}.
 
      * @return an {@link android.view.inputmethod.ExtractedText}
@@ -780,6 +858,20 @@ public interface InputConnection {
     boolean reportFullscreenMode(boolean enabled);
 
     /**
+     * Have the editor perform spell checking for the full content.
+     *
+     * <p>The editor can ignore this method call if it does not support spell checking.
+     *
+     * @return For editor authors, the return value will always be ignored. For IME authors, this
+     *         method returns true if the spell check request was sent (whether or not the
+     *         associated editor supports spell checking), false if the input connection is no
+     *         longer valid.
+     */
+    default boolean performSpellCheck() {
+        return false;
+    }
+
+    /**
      * API to send private commands from an input method to its
      * connected editor. This can be used to provide domain-specific
      * features that are only known between certain input methods and
@@ -910,4 +1002,23 @@ public interface InputConnection {
      */
     boolean commitContent(@NonNull InputContentInfo inputContentInfo, int flags,
             @Nullable Bundle opts);
+
+    /**
+     * Called by the input method to indicate that it consumes all input for itself, or no longer
+     * does so.
+     *
+     * <p>Editors should reflect that they are not receiving input by hiding the cursor if
+     * {@code imeConsumesInput} is {@code true}, and resume showing the cursor if it is
+     * {@code false}.
+     *
+     * @param imeConsumesInput {@code true} when the IME is consuming input and the cursor should be
+     * hidden, {@code false} when input to the editor resumes and the cursor should be shown again.
+     * @return For editor authors, the return value will always be ignored. For IME authors, this
+     *         method returns {@code true} if the request was sent (whether or not the associated
+     *         editor does something based on this request), {@code false} if the input connection
+     *         is no longer valid.
+     */
+    default boolean setImeConsumesInput(boolean imeConsumesInput) {
+        return false;
+    }
 }

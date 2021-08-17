@@ -41,9 +41,15 @@ java_library {
     installable: true,
 
     sdk_version: "module_current",
-    libs: ["framework-annotations-lib"],
+    libs: [
+        "androidx.annotation_annotation",
+        "framework-annotations-lib",
+    ],
     static_libs: [
-        "exoplayer2-extractor"
+        "exoplayer2-extractor",
+        "mediatranscoding_aidl_interface-java",
+        "modules-annotation-minsdk",
+        "modules-utils-build",
     ],
     jarjar_rules: "jarjar_rules.txt",
 
@@ -58,15 +64,19 @@ java_library {
     visibility: [
         "//frameworks/av/apex:__subpackages__",
         "//frameworks/base", // For framework-all
+        "//frameworks/base/apex/media/service",
     ],
 }
 
 filegroup {
     name: "updatable-media-srcs",
     srcs: [
+        "java/android/media/MediaFrameworkInitializer.java",
+        ":media-aidl-srcs",
+        ":mediaparceledlistslice-java-srcs",
         ":mediaparser-srcs",
         ":mediasession2-java-srcs",
-        ":mediasession2-aidl-srcs",
+        ":mediatranscoding-srcs",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -83,6 +93,16 @@ filegroup {
         "java/android/media/Session2CommandGroup.java",
         "java/android/media/Session2Link.java",
         "java/android/media/Session2Token.java",
+        "java/android/media/MediaCommunicationManager.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediaparceledlistslice-java-srcs",
+    srcs: [
+        "java/android/media/MediaParceledListSlice.java",
+        "java/android/media/BaseMediaParceledListSlice.java",
     ],
     path: "java",
 }
@@ -90,7 +110,17 @@ filegroup {
 filegroup {
     name: "mediaparser-srcs",
     srcs: [
-        "java/android/media/MediaParser.java"
+        "java/android/media/MediaParser.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediatranscoding-srcs",
+    srcs: [
+        "java/android/media/ApplicationMediaCapabilities.java",
+        "java/android/media/MediaFeature.java",
+        "java/android/media/MediaTranscodeManager.java",
     ],
     path: "java",
 }
@@ -105,6 +135,7 @@ java_sdk_library {
     srcs: [
         ":updatable-media-srcs",
     ],
+
     impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
 }
 

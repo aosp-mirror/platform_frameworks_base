@@ -99,6 +99,18 @@ public class GlobalWhitelistState {
     }
 
     /**
+     * Gets packages that are either entirely allowlisted or have components that are allowlisted
+     * for the given user.
+     */
+    public ArraySet<String> getWhitelistedPackages(@UserIdInt int userId) {
+        synchronized (mGlobalWhitelistStateLock) {
+            if (mWhitelisterHelpers == null) return null;
+            final WhitelistHelper helper = mWhitelisterHelpers.get(userId);
+            return helper == null ? null : helper.getWhitelistedPackages();
+        }
+    }
+
+    /**
      * Resets the allowlist for the given user.
      */
     public void resetWhitelist(@NonNull int userId) {

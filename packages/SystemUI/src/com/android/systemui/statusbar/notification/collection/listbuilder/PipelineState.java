@@ -81,9 +81,10 @@ public class PipelineState {
     public static final int STATE_PRE_GROUP_FILTERING = 3;
     public static final int STATE_GROUPING = 4;
     public static final int STATE_TRANSFORMING = 5;
-    public static final int STATE_SORTING = 6;
-    public static final int STATE_FINALIZE_FILTERING = 7;
-    public static final int STATE_FINALIZING = 8;
+    public static final int STATE_GROUP_STABILIZING = 6;
+    public static final int STATE_SORTING = 7;
+    public static final int STATE_FINALIZE_FILTERING = 8;
+    public static final int STATE_FINALIZING = 9;
 
     @IntDef(prefix = { "STATE_" }, value = {
             STATE_IDLE,
@@ -92,6 +93,7 @@ public class PipelineState {
             STATE_PRE_GROUP_FILTERING,
             STATE_GROUPING,
             STATE_TRANSFORMING,
+            STATE_GROUP_STABILIZING,
             STATE_SORTING,
             STATE_FINALIZE_FILTERING,
             STATE_FINALIZING,

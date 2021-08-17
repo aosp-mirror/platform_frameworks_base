@@ -26,8 +26,8 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -591,7 +591,7 @@ public class ViewState implements Dumpable {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                HeadsUpUtil.setIsClickedHeadsUpNotification(child, false);
+                HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(child, false);
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);

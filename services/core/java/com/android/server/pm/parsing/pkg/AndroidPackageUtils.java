@@ -21,12 +21,12 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedProvider;
@@ -58,7 +58,7 @@ public class AndroidPackageUtils {
         PackageImpl pkg = (PackageImpl) aPkg;
         ArrayList<String> paths = new ArrayList<>();
         if (pkg.isHasCode()) {
-            paths.add(pkg.getBaseCodePath());
+            paths.add(pkg.getBaseApkPath());
         }
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
@@ -77,7 +77,7 @@ public class AndroidPackageUtils {
     public static List<String> getAllCodePaths(AndroidPackage aPkg) {
         PackageImpl pkg = (PackageImpl) aPkg;
         ArrayList<String> paths = new ArrayList<>();
-        paths.add(pkg.getBaseCodePath());
+        paths.add(pkg.getBaseApkPath());
 
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
@@ -94,7 +94,7 @@ public class AndroidPackageUtils {
                 SharedLibraryInfo.TYPE_STATIC,
                 new VersionedPackage(pkg.getManifestPackageName(),
                         pkg.getLongVersionCode()),
-                null, null);
+                null, null, false /* isNative */);
     }
 
     public static SharedLibraryInfo createSharedLibraryForDynamic(AndroidPackage pkg, String name) {
@@ -103,7 +103,7 @@ public class AndroidPackageUtils {
                 SharedLibraryInfo.VERSION_UNDEFINED,
                 SharedLibraryInfo.TYPE_DYNAMIC, new VersionedPackage(pkg.getPackageName(),
                 pkg.getLongVersionCode()),
-                null, null);
+                null, null, false /* isNative */);
     }
 
     /**
@@ -149,7 +149,7 @@ public class AndroidPackageUtils {
         if (pkg.isSystem() && !isUpdatedSystemApp) {
             return false;
         }
-        if (IncrementalManager.isIncrementalPath(pkg.getCodePath())) {
+        if (IncrementalManager.isIncrementalPath(pkg.getPath())) {
             return false;
         }
         return true;
@@ -235,7 +235,7 @@ public class AndroidPackageUtils {
     }
 
     public static int getIcon(ParsingPackageRead pkg) {
-        return (PackageParser.sUseRoundIcon && pkg.getRoundIconRes() != 0)
+        return (ParsingPackageUtils.sUseRoundIcon && pkg.getRoundIconRes() != 0)
                 ? pkg.getRoundIconRes() : pkg.getIconRes();
     }
 

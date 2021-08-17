@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"패키지 설치 프로그램"</string>
     <string name="install" msgid="711829760615509273">"설치"</string>
+    <string name="update" msgid="3932142540719227615">"업데이트"</string>
     <string name="done" msgid="6632441120016885253">"완료"</string>
     <string name="cancel" msgid="1018267193425558088">"취소"</string>
     <string name="installing" msgid="4921993079741206516">"설치 중..."</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 설치 중…"</string>
     <string name="install_done" msgid="5987363587661783896">"앱이 설치되었습니다."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"이 애플리케이션을 설치하시겠습니까?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"이 기존 애플리케이션에 대한 업데이트를 설치하시겠습니까? 기존 데이터는 유지됩니다."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"이 내장 애플리케이션에 대한 업데이트를 설치하시겠습니까? 기존 데이터는 유지됩니다."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"이 앱을 설치하시겠습니까?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"이 앱을 업데이트하시겠습니까?"</string>
     <string name="install_failed" msgid="5777824004474125469">"앱이 설치되지 않았습니다."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"패키지 설치가 차단되었습니다."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"패키지가 기존 패키지와 충돌하여 앱이 설치되지 않았습니다."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear에서 지원되지 않는 설치/제거 작업"</string>
     <string name="message_staging" msgid="8032722385658438567">"앱 준비 중…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"알 수 없음"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"보안상의 이유로 이 소스의 알 수 없는 앱을 태블릿에 설치할 수 없습니다."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"보안상의 이유로 이 소스의 알 수 없는 앱을 TV에 설치할 수 없습니다."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"보안상의 이유로 이 소스의 알 수 없는 앱을 휴대전화에 설치할 수 없습니다."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"보안상의 이유로 이 출처의 알 수 없는 앱을 태블릿에 설치할 수 없습니다. 설정에서 변경할 수 있습니다."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"보안상의 이유로 현재 이 출처의 알 수 없는 앱을 TV에 설치할 수 없습니다. 설정에서 변경할 수 있습니다."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"보안상의 이유로 현재 이 출처의 알 수 없는 앱을 휴대전화에 설치할 수 없습니다. 설정에서 변경할 수 있습니다."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"휴대전화와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 휴대전화 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"태블릿과 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 태블릿 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 TV 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>

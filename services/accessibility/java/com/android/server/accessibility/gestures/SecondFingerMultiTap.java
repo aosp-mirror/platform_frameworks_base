@@ -53,7 +53,7 @@ class SecondFingerMultiTap extends GestureMatcher {
     }
 
     @Override
-    protected void clear() {
+    public void clear() {
         mCurrentTaps = 0;
         mBaseX = Float.NaN;
         mBaseY = Float.NaN;

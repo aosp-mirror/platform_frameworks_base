@@ -22,6 +22,7 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_VENDOR_GESTURE;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -37,6 +38,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_REQUESTED_OVERVIEW(304),
     @UiEvent(doc = "screenshot requested from accessibility actions")
     SCREENSHOT_REQUESTED_ACCESSIBILITY_ACTIONS(382),
+    @UiEvent(doc = "screenshot requested from vendor gesture")
+    SCREENSHOT_REQUESTED_VENDOR_GESTURE(638),
     @UiEvent(doc = "screenshot requested (other)")
     SCREENSHOT_REQUESTED_OTHER(305),
     @UiEvent(doc = "screenshot was saved")
@@ -57,8 +60,18 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_INTERACTION_TIMEOUT(310),
     @UiEvent(doc = "screenshot explicitly dismissed")
     SCREENSHOT_EXPLICIT_DISMISSAL(311),
+    @UiEvent(doc = "screenshot swiped to dismiss")
+    SCREENSHOT_SWIPE_DISMISSED(656),
     @UiEvent(doc = "screenshot reentered for new screenshot")
-    SCREENSHOT_REENTERED(640);
+    SCREENSHOT_REENTERED(640),
+    @UiEvent(doc = "Long screenshot button was shown to the user")
+    SCREENSHOT_LONG_SCREENSHOT_IMPRESSION(687),
+    @UiEvent(doc = "User has requested a long screenshot")
+    SCREENSHOT_LONG_SCREENSHOT_REQUESTED(688),
+    @UiEvent(doc = "User has shared a long screenshot")
+    SCREENSHOT_LONG_SCREENSHOT_SHARE(689),
+    @UiEvent(doc = "User has sent a long screenshot to the editor")
+    SCREENSHOT_LONG_SCREENSHOT_EDIT(690);
 
     private final int mId;
 
@@ -83,6 +96,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_OVERVIEW;
             case SCREENSHOT_ACCESSIBILITY_ACTIONS:
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_ACCESSIBILITY_ACTIONS;
+            case SCREENSHOT_VENDOR_GESTURE:
+                return ScreenshotEvent.SCREENSHOT_REQUESTED_VENDOR_GESTURE;
             case SCREENSHOT_OTHER:
             default:
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_OTHER;

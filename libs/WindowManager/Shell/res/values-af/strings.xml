@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"Maak toe"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Vou uit"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"Instellings"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"Kieslys"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk moet gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
+    <string name="pip_play" msgid="3496151081459417097">"Speel"</string>
+    <string name="pip_pause" msgid="690688849510295232">"Laat wag"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"Slaan oor na volgende"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Slaan oor na vorige"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Verander grootte"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Program sal dalk nie met verdeelde skerm werk nie."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Program steun nie verdeelde skerm nie."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Program sal dalk nie op \'n sekondêre skerm werk nie."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Program steun nie begin op sekondêre skerms nie."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Skermverdeler"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Volskerm links"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Links 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Links 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"Links 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Volskerm regs"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Volskerm bo"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"Bo 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Bo 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Bo 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Volskerm onder"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Gebruik eenhandmodus"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Swiep van die onderkant van die skerm af op of tik enige plek bo die program om uit te gaan"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Begin eenhandmodus"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Verlaat eenhandmodus"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Instellings vir <xliff:g id="APP_NAME">%1$s</xliff:g>-borrels"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Oorloop"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Voeg terug op stapel"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> vanaf <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> van <xliff:g id="APP_NAME">%2$s</xliff:g> en <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> meer af"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Beweeg na links bo"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Beweeg na regs bo"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Beweeg na links onder"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Beweeg na regs onder"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>-instellings"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Maak borrel toe"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Moenie dat gesprek \'n borrel word nie"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Klets met borrels"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nuwe gesprekke verskyn as swerwende ikone, of borrels Tik op borrel om dit oop te maak. Sleep om dit te skuif."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Beheer borrels enige tyd"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Bestuur om borrels vanaf hierdie program af te skakel"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Het dit"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen onlangse borrels nie"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Onlangse borrels en borrels wat toegemaak is, sal hier verskyn"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"Borrel"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Bestuur"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Borrel is toegemaak."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Tik om hierdie program te herbegin en maak volskerm oop."</string>
+    <string name="got_it" msgid="4428750913636945527">"Het dit"</string>
+</resources>

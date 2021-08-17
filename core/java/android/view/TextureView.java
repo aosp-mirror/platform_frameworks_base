@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.TextureLayer;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -248,7 +249,7 @@ public class TextureView extends View {
     private void destroyHardwareLayer() {
         if (mLayer != null) {
             mLayer.detachSurfaceTexture();
-            mLayer.destroy();
+            mLayer.close();
             mLayer = null;
             mMatrixChanged = true;
         }

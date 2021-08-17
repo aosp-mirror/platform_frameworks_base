@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
  * Copyright 2006, The Android Open Source Project
@@ -17,16 +18,20 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.testing.stubime">
-    <application android:label="Stub IME">
-        <service android:name="StubIme"
-                android:permission="android.permission.BIND_INPUT_METHOD">
+     package="com.android.testing.stubime">
+    <application android:label="Dummy IME">
+        <service android:name="DummyIme"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.view.InputMethod" />
+                <action android:name="android.view.InputMethod"/>
             </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+            <meta-data android:name="android.view.im"
+                android:resource="@xml/method"/>
         </service>
-        <activity android:name=".ImePreferences" android:label="Stub IME Settings">
+        <activity android:name=".ImePreferences"
+            android:label="Stub IME Settings"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>

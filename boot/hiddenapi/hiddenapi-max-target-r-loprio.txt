@@ -45,9 +45,6 @@ Lcom/android/ims/internal/uce/uceservice/IUceListener$Stub;-><init>()V
 Lcom/android/ims/internal/uce/uceservice/IUceService$Stub;-><init>()V
 Lcom/android/internal/app/IVoiceInteractionManagerService$Stub$Proxy;->showSessionFromSession(Landroid/os/IBinder;Landroid/os/Bundle;I)Z
 Lcom/android/internal/appwidget/IAppWidgetService$Stub;->TRANSACTION_bindAppWidgetId:I
-Lcom/android/internal/location/ILocationProvider$Stub;-><init>()V
-Lcom/android/internal/location/ILocationProviderManager$Stub;-><init>()V
-Lcom/android/internal/location/ILocationProviderManager$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/location/ILocationProviderManager;
 Lcom/android/internal/telephony/ITelephony$Stub;->DESCRIPTOR:Ljava/lang/String;
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_dial:I
 Lcom/android/internal/widget/IRemoteViewsFactory$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/widget/IRemoteViewsFactory;

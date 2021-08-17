@@ -149,21 +149,25 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
         return AHardwareBuffer_to_ANativeWindowBuffer(mScratchBuffer.get());
     }
 
-    AHardwareBuffer_Desc desc;
-    desc.usage = mUsage;
-    desc.format = mFormat;
-    desc.width = 1;
-    desc.height = 1;
-    desc.layers = 1;
-    desc.rfu0 = 0;
-    desc.rfu1 = 0;
-    AHardwareBuffer* newBuffer = nullptr;
-    int err = AHardwareBuffer_allocate(&desc, &newBuffer);
-    if (err) {
+    AHardwareBuffer_Desc desc = AHardwareBuffer_Desc{
+            .usage = mUsage,
+            .format = mFormat,
+            .width = 1,
+            .height = 1,
+            .layers = 1,
+            .rfu0 = 0,
+            .rfu1 = 0,
+    };
+
+    AHardwareBuffer* newBuffer;
+    int result = AHardwareBuffer_allocate(&desc, &newBuffer);
+
+    if (result != NO_ERROR) {
         // Allocate failed, that sucks
-        ALOGW("Failed to allocate scratch buffer, error=%d", err);
+        ALOGW("Failed to allocate scratch buffer, error=%d", result);
         return nullptr;
     }
+
     mScratchBuffer.reset(newBuffer);
     return AHardwareBuffer_to_ANativeWindowBuffer(newBuffer);
 }
@@ -274,7 +278,6 @@ int ReliableSurface::hook_query(const ANativeWindow *window, ANativeWindow_query
     int result = query(window, what, value);
     if (what == ANATIVEWINDOW_QUERY_MIN_UNDEQUEUED_BUFFERS && result == OK) {
         std::lock_guard _lock{rs->mMutex};
-        *value += rs->mExtraBuffers;
         rs->mExpectedBufferCount = *value + 2;
     }
     return result;

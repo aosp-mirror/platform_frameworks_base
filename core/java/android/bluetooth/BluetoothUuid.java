@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
@@ -34,6 +35,7 @@ import java.util.UUID;
  * @hide
  */
 @SystemApi
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class BluetoothUuid {
 
     /* See Bluetooth Assigned Numbers document - SDP section, to get the values of UUIDs

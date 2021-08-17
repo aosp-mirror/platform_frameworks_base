@@ -19,11 +19,13 @@ package com.android.systemui.statusbar.notification.row;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
+import com.android.systemui.statusbar.notification.stack.ViewState;
 
 public class FooterView extends StackScrollerDecorView {
     private final int mClearAllTopPadding;
@@ -93,14 +95,19 @@ public class FooterView extends StackScrollerDecorView {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        int textColor = getResources().getColor(R.color.notif_pill_text);
+        Resources.Theme theme = getContext().getTheme();
+        mDismissButton.setBackground(
+                getResources().getDrawable(R.drawable.notif_footer_btn_background, theme));
+        mDismissButton.setTextColor(textColor);
+        mManageButton.setBackground(
+                getResources().getDrawable(R.drawable.notif_footer_btn_background, theme));
+        mManageButton = findViewById(R.id.manage_text);
         mDismissButton.setText(R.string.clear_all_notifications_text);
+        mManageButton.setTextColor(textColor);
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
         showHistory(mShowHistory);
-    }
-
-    public boolean isButtonVisible() {
-        return mManageButton.getAlpha() != 0.0f;
     }
 
     @Override
@@ -109,13 +116,26 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     public class FooterViewState extends ExpandableViewState {
+        /**
+         * used to hide the content of the footer to animate.
+         * #hide is applied without animation, but #hideContent has animation.
+         */
+        public boolean hideContent;
+
+        @Override
+        public void copyFrom(ViewState viewState) {
+            super.copyFrom(viewState);
+            if (viewState instanceof FooterViewState) {
+                hideContent = ((FooterViewState) viewState).hideContent;
+            }
+        }
+
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             if (view instanceof FooterView) {
                 FooterView footerView = (FooterView) view;
-                boolean visible = this.clipTopAmount < mClearAllTopPadding;
-                footerView.setContentVisible(visible && footerView.isVisible());
+                footerView.setContentVisible(!hideContent);
             }
         }
     }

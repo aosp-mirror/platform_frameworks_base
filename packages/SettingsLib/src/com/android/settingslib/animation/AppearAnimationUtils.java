@@ -219,8 +219,19 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         }
     }
 
+    /**
+     * A static method to start translation y animation
+     */
     public static void startTranslationYAnimation(View view, long delay, long duration,
             float endTranslationY, Interpolator interpolator) {
+        startTranslationYAnimation(view, delay, duration, endTranslationY, interpolator, null);
+    }
+
+    /**
+     * A static method to start translation y animation
+     */
+    public static void startTranslationYAnimation(View view, long delay, long duration,
+            float endTranslationY, Interpolator interpolator, Animator.AnimatorListener listener) {
         Animator translationAnim;
         if (view.isHardwareAccelerated()) {
             RenderNodeAnimator translationAnimRt = new RenderNodeAnimator(
@@ -234,6 +245,9 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         translationAnim.setInterpolator(interpolator);
         translationAnim.setDuration(duration);
         translationAnim.setStartDelay(delay);
+        if (listener != null) {
+            translationAnim.addListener(listener);
+        }
         translationAnim.start();
     }
 

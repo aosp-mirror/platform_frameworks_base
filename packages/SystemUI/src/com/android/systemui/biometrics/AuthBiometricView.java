@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -24,7 +26,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -98,6 +102,13 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
+        /**
+         * Notify the receiver to start the fingerprint sensor.
+         *
+         * This is only applicable to multi-sensor devices that need to delay fingerprint auth
+         * (i.e face -> fingerprint).
+         */
+        int ACTION_START_DELAYED_FINGERPRINT_SENSOR = 7;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -115,8 +126,16 @@ public abstract class AuthBiometricView extends LinearLayout {
             return mBiometricView.findViewById(R.id.button_negative);
         }
 
-        public Button getPositiveButton() {
-            return mBiometricView.findViewById(R.id.button_positive);
+        public Button getCancelButton() {
+            return mBiometricView.findViewById(R.id.button_cancel);
+        }
+
+        public Button getUseCredentialButton() {
+            return mBiometricView.findViewById(R.id.button_use_credential);
+        }
+
+        public Button getConfirmButton() {
+            return mBiometricView.findViewById(R.id.button_confirm);
         }
 
         public Button getTryAgainButton() {
@@ -143,6 +162,10 @@ public abstract class AuthBiometricView extends LinearLayout {
             return mBiometricView.findViewById(R.id.biometric_icon);
         }
 
+        public View getIconHolderView() {
+            return mBiometricView.findViewById(R.id.biometric_icon_frame);
+        }
+
         public int getDelayAfterError() {
             return BiometricPrompt.HIDE_DIALOG_DELAY;
         }
@@ -153,32 +176,40 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     private final Injector mInjector;
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     protected final int mTextColorError;
     protected final int mTextColorHint;
 
     private AuthPanelController mPanelController;
-    private Bundle mBiometricPromptBundle;
+    private PromptInfo mPromptInfo;
     private boolean mRequireConfirmation;
     private int mUserId;
     private int mEffectiveUserId;
-    @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
+    private @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
 
     private TextView mTitleView;
     private TextView mSubtitleView;
     private TextView mDescriptionView;
+    private View mIconHolderView;
     protected ImageView mIconView;
     protected TextView mIndicatorView;
+
+    // Negative button position, exclusively for the app-specified behavior
     @VisibleForTesting Button mNegativeButton;
-    @VisibleForTesting Button mPositiveButton;
+    // Negative button position, exclusively for cancelling auth after passive auth success
+    @VisibleForTesting Button mCancelButton;
+    // Negative button position, shown if device credentials are allowed
+    @VisibleForTesting Button mUseCredentialButton;
+
+    // Positive button position,
+    @VisibleForTesting Button mConfirmButton;
     @VisibleForTesting Button mTryAgainButton;
 
     // Measurements when biometric view is showing text, buttons, etc.
-    private int mMediumHeight;
-    private int mMediumWidth;
+    @Nullable @VisibleForTesting AuthDialog.LayoutParams mLayoutParams;
 
-    private Callback mCallback;
+    protected Callback mCallback;
     protected @BiometricState int mState;
 
     private float mIconOriginalY;
@@ -265,8 +296,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         mPanelController = panelController;
     }
 
-    public void setBiometricPromptBundle(Bundle bundle) {
-        mBiometricPromptBundle = bundle;
+    public void setPromptInfo(PromptInfo promptInfo) {
+        mPromptInfo = promptInfo;
     }
 
     public void setCallback(Callback callback) {
@@ -298,16 +329,17 @@ public abstract class AuthBiometricView extends LinearLayout {
             mDescriptionView.setVisibility(View.GONE);
             mIndicatorView.setVisibility(View.GONE);
             mNegativeButton.setVisibility(View.GONE);
+            mUseCredentialButton.setVisibility(View.GONE);
 
             final float iconPadding = getResources()
                     .getDimension(R.dimen.biometric_dialog_icon_padding);
-            mIconView.setY(getHeight() - mIconView.getHeight() - iconPadding);
+            mIconHolderView.setY(getHeight() - mIconHolderView.getHeight() - iconPadding);
 
             // Subtract the vertical padding from the new height since it's only used to create
             // extra space between the other elements, and not part of the actual icon.
-            final int newHeight = mIconView.getHeight() + 2 * (int) iconPadding
-                    - mIconView.getPaddingTop() - mIconView.getPaddingBottom();
-            mPanelController.updateForContentDimensions(mMediumWidth, newHeight,
+            final int newHeight = mIconHolderView.getHeight() + 2 * (int) iconPadding
+                    - mIconHolderView.getPaddingTop() - mIconHolderView.getPaddingBottom();
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth, newHeight,
                     0 /* animateDurationMs */);
 
             mSize = newSize;
@@ -319,9 +351,9 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Animate the icon back to original position
             final ValueAnimator iconAnimator =
-                    ValueAnimator.ofFloat(mIconView.getY(), mIconOriginalY);
+                    ValueAnimator.ofFloat(mIconHolderView.getY(), mIconOriginalY);
             iconAnimator.addUpdateListener((animation) -> {
-                mIconView.setY((float) animation.getAnimatedValue());
+                mIconHolderView.setY((float) animation.getAnimatedValue());
             });
 
             // Animate the text
@@ -331,6 +363,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 mTitleView.setAlpha(opacity);
                 mIndicatorView.setAlpha(opacity);
                 mNegativeButton.setAlpha(opacity);
+                mCancelButton.setAlpha(opacity);
                 mTryAgainButton.setAlpha(opacity);
 
                 if (!TextUtils.isEmpty(mSubtitleView.getText())) {
@@ -350,8 +383,15 @@ public abstract class AuthBiometricView extends LinearLayout {
                     super.onAnimationStart(animation);
                     mTitleView.setVisibility(View.VISIBLE);
                     mIndicatorView.setVisibility(View.VISIBLE);
-                    mNegativeButton.setVisibility(View.VISIBLE);
-                    mTryAgainButton.setVisibility(View.VISIBLE);
+
+                    if (isDeviceCredentialAllowed()) {
+                        mUseCredentialButton.setVisibility(View.VISIBLE);
+                    } else {
+                        mNegativeButton.setVisibility(View.VISIBLE);
+                    }
+                    if (supportsManualRetry()) {
+                        mTryAgainButton.setVisibility(View.VISIBLE);
+                    }
 
                     if (!TextUtils.isEmpty(mSubtitleView.getText())) {
                         mSubtitleView.setVisibility(View.VISIBLE);
@@ -373,10 +413,12 @@ public abstract class AuthBiometricView extends LinearLayout {
             as.play(iconAnimator).with(opacityAnimator);
             as.start();
             // Animate the panel
-            mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth,
+                    mLayoutParams.mMediumHeight,
                     AuthDialog.ANIMATE_SMALL_TO_MEDIUM_DURATION_MS);
         } else if (newSize == AuthDialog.SIZE_MEDIUM) {
-            mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth,
+                    mLayoutParams.mMediumHeight,
                     0 /* animateDurationMs */);
             mSize = newSize;
         } else if (newSize == AuthDialog.SIZE_LARGE) {
@@ -432,7 +474,11 @@ public abstract class AuthBiometricView extends LinearLayout {
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
-    void updateState(@BiometricState int newState) {
+    protected boolean supportsManualRetry() {
+        return false;
+    }
+
+    public void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
 
         switch (newState) {
@@ -440,31 +486,32 @@ public abstract class AuthBiometricView extends LinearLayout {
             case STATE_AUTHENTICATING:
                 removePendingAnimations();
                 if (mRequireConfirmation) {
-                    mPositiveButton.setEnabled(false);
-                    mPositiveButton.setVisibility(View.VISIBLE);
+                    mConfirmButton.setEnabled(false);
+                    mConfirmButton.setVisibility(View.VISIBLE);
                 }
                 break;
 
             case STATE_AUTHENTICATED:
                 if (mSize != AuthDialog.SIZE_SMALL) {
-                    mPositiveButton.setVisibility(View.GONE);
+                    mConfirmButton.setVisibility(View.GONE);
                     mNegativeButton.setVisibility(View.GONE);
+                    mUseCredentialButton.setVisibility(View.GONE);
+                    mCancelButton.setVisibility(View.GONE);
                     mIndicatorView.setVisibility(View.INVISIBLE);
                 }
                 announceForAccessibility(getResources()
                         .getString(R.string.biometric_dialog_authenticated));
-                mHandler.postDelayed(() -> {
-                    Log.d(TAG, "Sending ACTION_AUTHENTICATED");
-                    mCallback.onAction(Callback.ACTION_AUTHENTICATED);
-                }, getDelayAfterAuthenticatedDurationMs());
+                mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
+                        getDelayAfterAuthenticatedDurationMs());
                 break;
 
             case STATE_PENDING_CONFIRMATION:
                 removePendingAnimations();
-                mNegativeButton.setText(R.string.cancel);
-                mNegativeButton.setContentDescription(getResources().getString(R.string.cancel));
-                mPositiveButton.setEnabled(true);
-                mPositiveButton.setVisibility(View.VISIBLE);
+                mNegativeButton.setVisibility(View.GONE);
+                mCancelButton.setVisibility(View.VISIBLE);
+                mUseCredentialButton.setVisibility(View.GONE);
+                mConfirmButton.setEnabled(true);
+                mConfirmButton.setVisibility(View.VISIBLE);
                 mIndicatorView.setTextColor(mTextColorHint);
                 mIndicatorView.setText(R.string.biometric_dialog_tap_confirm);
                 mIndicatorView.setVisibility(View.VISIBLE);
@@ -498,12 +545,25 @@ public abstract class AuthBiometricView extends LinearLayout {
         }
     }
 
-    public void onAuthenticationFailed(String failureReason) {
+    /**
+     * Notify the view that auth has failed.
+     *
+     * @param modality sensor modality that failed
+     * @param failureReason message
+     */
+    public void onAuthenticationFailed(
+            @Modality int modality, @Nullable String failureReason) {
         showTemporaryMessage(failureReason, mResetErrorRunnable);
         updateState(STATE_ERROR);
     }
 
-    public void onError(String error) {
+    /**
+     * Notify the view that an error occurred.
+     *
+     * @param modality sensor modality that failed
+     * @param error message
+     */
+    public void onError(@Modality int modality, String error) {
         showTemporaryMessage(error, mResetErrorRunnable);
         updateState(STATE_ERROR);
 
@@ -512,21 +572,34 @@ public abstract class AuthBiometricView extends LinearLayout {
         }, mInjector.getDelayAfterError());
     }
 
-    public void onHelp(String help) {
+    /**
+     * Show a help message to the user.
+     *
+     * @param modality sensor modality
+     * @param help message
+     */
+    public void onHelp(@Modality int modality, String help) {
         if (mSize != AuthDialog.SIZE_MEDIUM) {
             Log.w(TAG, "Help received in size: " + mSize);
             return;
         }
+        if (TextUtils.isEmpty(help)) {
+            Log.w(TAG, "Ignoring blank help message");
+            return;
+        }
+
         showTemporaryMessage(help, mResetHelpRunnable);
         updateState(STATE_HELP);
     }
 
     public void onSaveState(@NonNull Bundle outState) {
+        outState.putInt(AuthDialog.KEY_BIOMETRIC_CONFIRM_VISIBILITY,
+                mConfirmButton.getVisibility());
         outState.putInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY,
                 mTryAgainButton.getVisibility());
         outState.putInt(AuthDialog.KEY_BIOMETRIC_STATE, mState);
         outState.putString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING,
-                mIndicatorView.getText().toString());
+                mIndicatorView.getText() != null ? mIndicatorView.getText().toString() : "");
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING,
                 mHandler.hasCallbacks(mResetErrorRunnable));
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING,
@@ -542,18 +615,14 @@ public abstract class AuthBiometricView extends LinearLayout {
         mSavedState = savedState;
     }
 
-    private void setTextOrHide(TextView view, String string) {
-        if (TextUtils.isEmpty(string)) {
+    private void setTextOrHide(TextView view, CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
             view.setVisibility(View.GONE);
         } else {
-            view.setText(string);
+            view.setText(charSequence);
         }
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
-    }
-
-    private void setText(TextView view, String string) {
-        view.setText(string);
     }
 
     // Remove all pending icon and text animations
@@ -567,7 +636,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setText(message);
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
-        mHandler.postDelayed(resetMessageRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
+        mHandler.postDelayed(resetMessageRunnable, mInjector.getDelayAfterError());
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
@@ -587,24 +656,31 @@ public abstract class AuthBiometricView extends LinearLayout {
         mSubtitleView = mInjector.getSubtitleView();
         mDescriptionView = mInjector.getDescriptionView();
         mIconView = mInjector.getIconView();
+        mIconHolderView = mInjector.getIconHolderView();
         mIndicatorView = mInjector.getIndicatorView();
+
+        // Negative-side (left) buttons
         mNegativeButton = mInjector.getNegativeButton();
-        mPositiveButton = mInjector.getPositiveButton();
+        mCancelButton = mInjector.getCancelButton();
+        mUseCredentialButton = mInjector.getUseCredentialButton();
+
+        // Positive-side (right) buttons
+        mConfirmButton = mInjector.getConfirmButton();
         mTryAgainButton = mInjector.getTryAgainButton();
 
         mNegativeButton.setOnClickListener((view) -> {
-            if (mState == STATE_PENDING_CONFIRMATION) {
-                mCallback.onAction(Callback.ACTION_USER_CANCELED);
-            } else {
-                if (isDeviceCredentialAllowed()) {
-                    startTransitionToCredentialUI();
-                } else {
-                    mCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE);
-                }
-            }
+            mCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE);
         });
 
-        mPositiveButton.setOnClickListener((view) -> {
+        mCancelButton.setOnClickListener((view) -> {
+            mCallback.onAction(Callback.ACTION_USER_CANCELED);
+        });
+
+        mUseCredentialButton.setOnClickListener((view) -> {
+            startTransitionToCredentialUI();
+        });
+
+        mConfirmButton.setOnClickListener((view) -> {
             updateState(STATE_AUTHENTICATED);
         });
 
@@ -636,39 +712,42 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     @VisibleForTesting
     void onAttachedToWindowInternal() {
-        setText(mTitleView, mBiometricPromptBundle.getString(BiometricPrompt.KEY_TITLE));
+        mTitleView.setText(mPromptInfo.getTitle());
 
-        final String negativeText;
         if (isDeviceCredentialAllowed()) {
-
+            final CharSequence credentialButtonText;
             final @Utils.CredentialType int credentialType =
                     Utils.getCredentialType(mContext, mEffectiveUserId);
-
             switch (credentialType) {
                 case Utils.CREDENTIAL_PIN:
-                    negativeText = getResources().getString(R.string.biometric_dialog_use_pin);
+                    credentialButtonText =
+                            getResources().getString(R.string.biometric_dialog_use_pin);
                     break;
                 case Utils.CREDENTIAL_PATTERN:
-                    negativeText = getResources().getString(R.string.biometric_dialog_use_pattern);
+                    credentialButtonText =
+                            getResources().getString(R.string.biometric_dialog_use_pattern);
                     break;
                 case Utils.CREDENTIAL_PASSWORD:
-                    negativeText = getResources().getString(R.string.biometric_dialog_use_password);
+                    credentialButtonText =
+                            getResources().getString(R.string.biometric_dialog_use_password);
                     break;
                 default:
-                    negativeText = getResources().getString(R.string.biometric_dialog_use_password);
+                    credentialButtonText =
+                            getResources().getString(R.string.biometric_dialog_use_password);
                     break;
             }
 
+            mNegativeButton.setVisibility(View.GONE);
+
+            mUseCredentialButton.setText(credentialButtonText);
+            mUseCredentialButton.setVisibility(View.VISIBLE);
         } else {
-            negativeText = mBiometricPromptBundle.getString(BiometricPrompt.KEY_NEGATIVE_TEXT);
+            mNegativeButton.setText(mPromptInfo.getNegativeButtonText());
         }
-        setText(mNegativeButton, negativeText);
 
-        setTextOrHide(mSubtitleView,
-                mBiometricPromptBundle.getString(BiometricPrompt.KEY_SUBTITLE));
+        setTextOrHide(mSubtitleView, mPromptInfo.getSubtitle());
 
-        setTextOrHide(mDescriptionView,
-                mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
+        setTextOrHide(mDescriptionView, mPromptInfo.getDescription());
 
         if (mSavedState == null) {
             updateState(STATE_AUTHENTICATING_ANIMATING_IN);
@@ -676,9 +755,15 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Restore as much state as possible first
             updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
 
-            // Restore positive button state
+            // Restore positive button(s) state
+            mConfirmButton.setVisibility(
+                    mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_CONFIRM_VISIBILITY));
+            if (mConfirmButton.getVisibility() == View.GONE) {
+                setRequireConfirmation(false);
+            }
             mTryAgainButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
+
         }
     }
 
@@ -691,29 +776,43 @@ public abstract class AuthBiometricView extends LinearLayout {
         mHandler.removeCallbacksAndMessages(null /* all */);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
-        final int newWidth = Math.min(width, height);
-
+    /**
+     * Contains all of the testable logic that should be invoked when {@link #onMeasure(int, int)}
+     * is invoked. In addition, this allows subclasses to implement custom measuring logic while
+     * allowing the base class to have common code to apply the custom measurements.
+     *
+     * @param width Width to constrain the measurements to.
+     * @param height Height to constrain the measurements to.
+     * @return See {@link AuthDialog.LayoutParams}
+     */
+    @NonNull
+    AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         int totalHeight = 0;
         final int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
             final View child = getChildAt(i);
 
-            if (child.getId() == R.id.biometric_icon) {
+            if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_below_icon
+                    || child.getId() == R.id.button_bar) {
                 child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            } else if (child.getId() == R.id.button_bar) {
-                child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
                                 MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.biometric_icon_frame) {
+                final View iconView = findViewById(R.id.biometric_icon);
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.biometric_icon) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             } else {
                 child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
 
@@ -722,11 +821,19 @@ public abstract class AuthBiometricView extends LinearLayout {
             }
         }
 
-        // Use the new width so it's centered horizontally
-        setMeasuredDimension(newWidth, totalHeight);
+        return new AuthDialog.LayoutParams(width, totalHeight);
+    }
 
-        mMediumHeight = totalHeight;
-        mMediumWidth = getMeasuredWidth();
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        final int newWidth = Math.min(width, height);
+
+        // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
+        // width.
+        mLayoutParams = onMeasureInternal(newWidth, height);
+        setMeasuredDimension(mLayoutParams.mMediumWidth, mLayoutParams.mMediumHeight);
     }
 
     @Override
@@ -744,7 +851,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         // Start with initial size only once. Subsequent layout changes don't matter since we
         // only care about the initial icon position.
         if (mIconOriginalY == 0) {
-            mIconOriginalY = mIconView.getY();
+            mIconOriginalY = mIconHolderView.getY();
             if (mSavedState == null) {
                 updateSize(!mRequireConfirmation && supportsSmallDialog() ? AuthDialog.SIZE_SMALL
                         : AuthDialog.SIZE_MEDIUM);
@@ -755,16 +862,20 @@ public abstract class AuthBiometricView extends LinearLayout {
                 final String indicatorText =
                         mSavedState.getString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING);
                 if (mSavedState.getBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING)) {
-                    onHelp(indicatorText);
+                    onHelp(TYPE_NONE, indicatorText);
                 } else if (mSavedState.getBoolean(
                         AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING)) {
-                    onAuthenticationFailed(indicatorText);
+                    onAuthenticationFailed(TYPE_NONE, indicatorText);
                 }
             }
         }
     }
 
     private boolean isDeviceCredentialAllowed() {
-        return Utils.isDeviceCredentialAllowed(mBiometricPromptBundle);
+        return Utils.isDeviceCredentialAllowed(mPromptInfo);
+    }
+
+    @AuthDialog.DialogSize int getSize() {
+        return mSize;
     }
 }

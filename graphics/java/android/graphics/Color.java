@@ -26,7 +26,6 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.SuppressAutoDoc;
 import android.util.Half;
-import com.android.internal.util.XmlUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1475,29 +1474,6 @@ public class Color {
 
     private static native void nativeRGBToHSV(int red, int greed, int blue, float hsv[]);
     private static native int nativeHSVToColor(int alpha, float hsv[]);
-
-    /**
-     * Converts an HTML color (named or numeric) to an integer RGB value.
-     *
-     * @param color Non-null color string.
-     *
-     * @return A color value, or {@code -1} if the color string could not be interpreted.
-     *
-     * @hide
-     */
-    @ColorInt
-    public static int getHtmlColor(@NonNull String color) {
-        Integer i = sColorNameMap.get(color.toLowerCase(Locale.ROOT));
-        if (i != null) {
-            return i;
-        } else {
-            try {
-                return XmlUtils.convertValueToInt(color, -1);
-            } catch (NumberFormatException nfe) {
-                return -1;
-            }
-        }
-    }
 
     private static final HashMap<String, Integer> sColorNameMap;
     static {

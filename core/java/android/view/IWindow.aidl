@@ -26,9 +26,10 @@ import android.view.DisplayCutout;
 import android.view.DragEvent;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.IScrollCaptureController;
+import android.view.IScrollCaptureResponseListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -52,11 +53,9 @@ oneway interface IWindow {
      */
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
-    void resized(in Rect frame, in Rect contentInsets,
-            in Rect visibleInsets, in Rect stableInsets, boolean reportDraw,
-            in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
-            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-            in DisplayCutout.ParcelableWrapper displayCutout);
+    void resized(in ClientWindowFrames frames, boolean reportDraw,
+            in MergedConfiguration newMergedConfiguration,
+            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
 
     /**
      * Called when the window location in parent display has changed. The offset will only be a
@@ -66,13 +65,20 @@ oneway interface IWindow {
 
     /**
      * Called when the window insets configuration has changed.
+     *
+     * @param willMove The window frame will be moved soon.
+     * @param willResize The window frame will be resized soon.
      */
-    void insetsChanged(in InsetsState insetsState);
+    void insetsChanged(in InsetsState insetsState, in boolean willMove, in boolean willResize);
 
     /**
      * Called when this window retrieved control over a specified set of insets sources.
+     *
+     * @param willMove The window frame will be moved soon.
+     * @param willResize The window frame will be resized soon.
      */
-    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls);
+    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls,
+            in boolean willMove, in boolean willResize);
 
     /**
      * Called when a set of insets source window should be shown by policy.
@@ -121,12 +127,6 @@ oneway interface IWindow {
     void updatePointerIcon(float x, float y);
 
     /**
-     * System chrome visibility changes
-     */
-    void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
-            int localValue, int localChanges);
-
-    /**
      * Called for non-application windows when the enter animation has completed.
      */
     void dispatchWindowShown();
@@ -137,14 +137,9 @@ oneway interface IWindow {
     void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
 
     /**
-     * Tell the window that it is either gaining or losing pointer capture.
-     */
-    void dispatchPointerCaptureChanged(boolean hasCapture);
-
-    /**
      * Called when Scroll Capture support is requested for a window.
      *
-     * @param controller the controller to receive responses
+     * @param callbacks to receive responses
      */
-    void requestScrollCapture(in IScrollCaptureController controller);
+    void requestScrollCapture(in IScrollCaptureResponseListener callbacks);
 }

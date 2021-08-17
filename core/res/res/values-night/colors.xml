@@ -17,17 +17,10 @@
   NOTE: You might also want to edit: packages/SystemUI/res/values-night/colors.xml
   -->
 <resources>
-    <!-- The primary text color if the text is on top of a dark background.
-    This is also affects colorized notifications with dark backgrounds. -->
-    <color name="notification_primary_text_color_dark">#ddffffff</color>
 
-    <!-- The secondary text color if the text is on top of a dark background. -->
-    <color name="notification_secondary_text_color_dark">#b2ffffff</color>
-
-    <color name="notification_default_color_dark">#ddffffff</color>
-
-    <!-- The background color of a notification card. -->
-    <color name="notification_material_background_color">@color/black</color>
+    <color name="notification_primary_text_color_current">@color/notification_primary_text_color_dark</color>
+    <color name="notification_secondary_text_color_current">@color/notification_secondary_text_color_dark</color>
+    <color name="notification_default_color_current">@color/notification_default_color_dark</color>
 
     <color name="chooser_row_divider">@color/list_divider_color_dark</color>
     <color name="chooser_gradient_background">@color/loading_gradient_background_color_dark</color>
@@ -35,7 +28,9 @@
 
     <color name="resolver_empty_state_text">#FFFFFF</color>
     <color name="resolver_empty_state_icon">#FFFFFF</color>
-    <color name="chooser_chip_icon">#8AB4F8</color> <!-- Blue 300 -->
+
+    <color name="call_notification_decline_color">#E66A5E</color>
+    <color name="call_notification_answer_color">#5DBA80</color>
 
     <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
 </resources>

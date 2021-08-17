@@ -46,6 +46,8 @@ static const char* kPathAllowlist[] = {
         "/dev/urandom",
         "/dev/ion",
         "/dev/dri/renderD129", // Fixes b/31172436
+        "/dev/stune/foreground/tasks",
+        "/dev/blkio/tasks",
 };
 
 static const char kFdPath[] = "/proc/self/fd";

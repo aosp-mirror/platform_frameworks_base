@@ -20,18 +20,19 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.hardware.CameraInfo;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
+import android.hardware.camera2.impl.CameraInjectionSessionImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.legacy.CameraDeviceUserShim;
-import android.hardware.camera2.legacy.LegacyMetadataMapper;
+import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
 import android.hardware.display.DisplayManager;
@@ -52,6 +53,7 @@ import android.view.Display;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -160,6 +162,9 @@ public final class CameraManager {
      * <p>The set of combinations may include camera devices that may be in use by other camera API
      * clients.</p>
      *
+     * <p>Concurrent camera extension sessions {@link CameraExtensionSession} are not currently
+     * supported.</p>
+     *
      * <p>The set of combinations doesn't contain physical cameras that can only be used as
      * part of a logical multi-camera device.</p>
      *
@@ -215,7 +220,7 @@ public final class CameraManager {
             @NonNull Map<String, SessionConfiguration> cameraIdAndSessionConfig)
             throws CameraAccessException {
         return CameraManagerGlobal.get().isConcurrentSessionConfigurationSupported(
-                cameraIdAndSessionConfig);
+                cameraIdAndSessionConfig, mContext.getApplicationInfo().targetSdkVersion);
     }
 
     /**
@@ -373,6 +378,64 @@ public final class CameraManager {
     }
 
     /**
+     * Get all physical cameras' multi-resolution stream configuration map
+     *
+     * <p>For a logical multi-camera, query the map between physical camera id and
+     * the physical camera's multi-resolution stream configuration. This map is in turn
+     * combined to form the logical camera's multi-resolution stream configuration map.</p>
+     *
+     * <p>For an ultra high resolution camera, directly use
+     * android.scaler.physicalCameraMultiResolutionStreamConfigurations as the camera device's
+     * multi-resolution stream configuration map.</p>
+     */
+    private Map<String, StreamConfiguration[]> getPhysicalCameraMultiResolutionConfigs(
+            String cameraId, CameraMetadataNative info, ICameraService cameraService)
+            throws CameraAccessException {
+        HashMap<String, StreamConfiguration[]> multiResolutionStreamConfigurations =
+                new HashMap<String, StreamConfiguration[]>();
+
+        Boolean multiResolutionStreamSupported = info.get(
+                CameraCharacteristics.SCALER_MULTI_RESOLUTION_STREAM_SUPPORTED);
+        if (multiResolutionStreamSupported == null || !multiResolutionStreamSupported) {
+            return multiResolutionStreamConfigurations;
+        }
+
+        // Query the characteristics of all physical sub-cameras, and combine the multi-resolution
+        // stream configurations. Alternatively, for ultra-high resolution camera, direclty use
+        // its multi-resolution stream configurations. Note that framework derived formats such as
+        // HEIC and DEPTH_JPEG aren't supported as multi-resolution input or output formats.
+        Set<String> physicalCameraIds = info.getPhysicalCameraIds();
+        if (physicalCameraIds.size() == 0 && info.isUltraHighResolutionSensor()) {
+            StreamConfiguration[] configs = info.get(CameraCharacteristics.
+                    SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS);
+            if (configs != null) {
+                multiResolutionStreamConfigurations.put(cameraId, configs);
+            }
+            return multiResolutionStreamConfigurations;
+        }
+        try {
+            for (String physicalCameraId : physicalCameraIds) {
+                CameraMetadataNative physicalCameraInfo =
+                        cameraService.getCameraCharacteristics(physicalCameraId,
+                                mContext.getApplicationInfo().targetSdkVersion);
+                StreamConfiguration[] configs = physicalCameraInfo.get(
+                        CameraCharacteristics.
+                                SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS);
+                if (configs != null) {
+                    multiResolutionStreamConfigurations.put(physicalCameraId, configs);
+                }
+            }
+        } catch (RemoteException e) {
+            ServiceSpecificException sse = new ServiceSpecificException(
+                    ICameraService.ERROR_DISCONNECTED,
+                    "Camera service is currently unavailable");
+            throwAsPublicException(sse);
+        }
+
+        return multiResolutionStreamConfigurations;
+    }
+
+    /**
      * <p>Query the capabilities of a camera device. These capabilities are
      * immutable for a given camera.</p>
      *
@@ -405,10 +468,6 @@ public final class CameraManager {
             throw new IllegalArgumentException("No cameras available on device");
         }
         synchronized (mLock) {
-            /*
-             * Get the camera characteristics from the camera service directly if it supports it,
-             * otherwise get them from the legacy shim instead.
-             */
             ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
             if (cameraService == null) {
                 throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
@@ -417,34 +476,26 @@ public final class CameraManager {
             try {
                 Size displaySize = getDisplaySize();
 
-                // First check isHiddenPhysicalCamera to avoid supportsCamera2ApiLocked throwing
-                // exception in case cameraId is a hidden physical camera.
-                if (!isHiddenPhysicalCamera(cameraId) && !supportsCamera2ApiLocked(cameraId)) {
-                    // Legacy backwards compatibility path; build static info from the camera
-                    // parameters
-                    int id = Integer.parseInt(cameraId);
-
-                    String parameters = cameraService.getLegacyParameters(id);
-
-                    CameraInfo info = cameraService.getCameraInfo(id);
-
-                    characteristics = LegacyMetadataMapper.createCharacteristics(parameters, info,
-                            id, displaySize);
-                } else {
-                    // Normal path: Get the camera characteristics directly from the camera service
-                    CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
-                    try {
-                        info.setCameraId(Integer.parseInt(cameraId));
-                    } catch (NumberFormatException e) {
-                        // For external camera, reaching here is expected.
-                        Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
-                    }
-                    boolean hasConcurrentStreams =
-                            CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
-                    info.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
-                    info.setDisplaySize(displaySize);
-                    characteristics = new CameraCharacteristics(info);
+                CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
+                        mContext.getApplicationInfo().targetSdkVersion);
+                try {
+                    info.setCameraId(Integer.parseInt(cameraId));
+                } catch (NumberFormatException e) {
+                    Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
                 }
+
+                boolean hasConcurrentStreams =
+                        CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
+                info.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
+                info.setDisplaySize(displaySize);
+
+                Map<String, StreamConfiguration[]> multiResolutionSizeMap =
+                        getPhysicalCameraMultiResolutionConfigs(cameraId, info, cameraService);
+                if (multiResolutionSizeMap.size() > 0) {
+                    info.setMultiResolutionStreamConfigurationMap(multiResolutionSizeMap);
+                }
+
+                characteristics = new CameraCharacteristics(info);
             } catch (ServiceSpecificException e) {
                 throwAsPublicException(e);
             } catch (RemoteException e) {
@@ -454,6 +505,40 @@ public final class CameraManager {
             }
         }
         return characteristics;
+    }
+
+    /**
+     * <p>Query the camera extension capabilities of a camera device.</p>
+     *
+     * @param cameraId The id of the camera device to query. This must be a standalone
+     * camera ID which can be directly opened by {@link #openCamera}.
+     * @return The properties of the given camera
+     *
+     * @throws IllegalArgumentException if the cameraId does not match any
+     *         known camera device.
+     * @throws CameraAccessException if the camera device has been disconnected.
+     *
+     * @see CameraExtensionCharacteristics
+     * @see CameraDevice#createExtensionSession(ExtensionSessionConfiguration)
+     * @see CameraExtensionSession
+     */
+    @NonNull
+    public CameraExtensionCharacteristics getCameraExtensionCharacteristics(
+            @NonNull String cameraId) throws CameraAccessException {
+        CameraCharacteristics chars = getCameraCharacteristics(cameraId);
+        return new CameraExtensionCharacteristics(mContext, cameraId, chars);
+    }
+
+    private Map<String, CameraCharacteristics> getPhysicalIdToCharsMap(
+            CameraCharacteristics chars) throws CameraAccessException {
+        HashMap<String, CameraCharacteristics> physicalIdsToChars =
+                new HashMap<String, CameraCharacteristics>();
+        Set<String> physicalCameraIds = chars.getPhysicalCameraIds();
+        for (String physicalCameraId : physicalCameraIds) {
+            CameraCharacteristics physicalChars = getCameraCharacteristics(physicalCameraId);
+            physicalIdsToChars.put(physicalCameraId, physicalChars);
+        }
+        return physicalIdsToChars;
     }
 
     /**
@@ -480,50 +565,37 @@ public final class CameraManager {
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
-            CameraDevice.StateCallback callback, Executor executor, final int uid)
-            throws CameraAccessException {
+            CameraDevice.StateCallback callback, Executor executor, final int uid,
+            final int oomScoreOffset) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
-
+        Map<String, CameraCharacteristics> physicalIdsToChars =
+                getPhysicalIdToCharsMap(characteristics);
         synchronized (mLock) {
 
             ICameraDeviceUser cameraUser = null;
-
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
                     new android.hardware.camera2.impl.CameraDeviceImpl(
                         cameraId,
                         callback,
                         executor,
                         characteristics,
-                        mContext.getApplicationInfo().targetSdkVersion);
+                        physicalIdsToChars,
+                        mContext.getApplicationInfo().targetSdkVersion,
+                        mContext);
 
             ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
 
             try {
-                if (supportsCamera2ApiLocked(cameraId)) {
-                    // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
-                    ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
-                    if (cameraService == null) {
-                        throw new ServiceSpecificException(
-                            ICameraService.ERROR_DISCONNECTED,
-                            "Camera service is currently unavailable");
-                    }
-                    cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                            mContext.getOpPackageName(), mContext.getAttributionTag(), uid);
-                } else {
-                    // Use legacy camera implementation for HAL1 devices
-                    int id;
-                    try {
-                        id = Integer.parseInt(cameraId);
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("Expected cameraId to be numeric, but it was: "
-                                + cameraId);
-                    }
-
-                    Log.i(TAG, "Using legacy camera HAL.");
-                    cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id,
-                            getDisplaySize());
+                ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+                if (cameraService == null) {
+                    throw new ServiceSpecificException(
+                        ICameraService.ERROR_DISCONNECTED,
+                        "Camera service is currently unavailable");
                 }
+                cameraUser = cameraService.connectDevice(callbacks, cameraId,
+                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid,
+                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -694,6 +766,107 @@ public final class CameraManager {
     }
 
     /**
+     * Open a connection to a camera with the given ID. Also specify what oom score must be offset
+     * by cameraserver for this client. This api can be useful for system
+     * components which want to assume a lower priority (for camera arbitration) than other clients
+     * which it might contend for camera devices with. Increasing the oom score of a client reduces
+     * its priority when the camera framework manages camera arbitration.
+     * Considering typical use cases:
+     *
+     * 1) oom score(apps hosting activities visible to the user) - oom score(of a foreground app)
+     *    is approximately 100.
+     *
+     * 2) The oom score (process which hosts components which that are perceptible to the user /
+     *    native vendor camera clients) - oom (foreground app) is approximately 200.
+     *
+     * 3) The oom score (process which is cached hosting activities not visible) - oom (foreground
+     *    app) is approximately 999.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #openCamera(String, StateCallback, Handler)}, except that it uses
+     * {@link java.util.concurrent.Executor} as an argument instead of
+     * {@link android.os.Handler}.</p>
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param executor
+     *             The executor which will be used when invoking the callback.
+     * @param callback
+     *             The callback which is invoked once the camera is opened
+     * @param oomScoreOffset
+     *             The value by which the oom score of this client must be offset by the camera
+     *             framework in order to assist it with camera arbitration. This value must be > 0.
+     *             A positive value lowers the priority of this camera client compared to what the
+     *             camera framework would have originally seen.
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * has been disconnected, or is being used by a higher-priority camera API client.
+     *
+     * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.SYSTEM_CAMERA,
+            android.Manifest.permission.CAMERA,
+    })
+    public void openCamera(@NonNull String cameraId, int oomScoreOffset,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final CameraDevice.StateCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor was null");
+        }
+        if (oomScoreOffset < 0) {
+            throw new IllegalArgumentException(
+                    "oomScoreOffset < 0, cannot increase priority of camera client");
+        }
+        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset);
+    }
+
+    /**
+     * Open a connection to a camera with the given ID, on behalf of another application
+     * specified by clientUid. Also specify the minimum oom score and process state the application
+     * should have, as seen by the cameraserver.
+     *
+     * <p>The behavior of this method matches that of {@link #openCamera}, except that it allows
+     * the caller to specify the UID to use for permission/etc verification. This can only be
+     * done by services trusted by the camera subsystem to act on behalf of applications and
+     * to forward the real UID.</p>
+     *
+     * @param clientUid
+     *             The UID of the application on whose behalf the camera is being opened.
+     *             Must be USE_CALLING_UID unless the caller is a trusted service.
+     * @param oomScoreOffset
+     *             The minimum oom score that cameraservice must see for this client.
+     * @hide
+     */
+    public void openCameraForUid(@NonNull String cameraId,
+            @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
+            int clientUid, int oomScoreOffset) throws CameraAccessException {
+
+        if (cameraId == null) {
+            throw new IllegalArgumentException("cameraId was null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback was null");
+        }
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No cameras available on device");
+        }
+
+        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset);
+    }
+
+    /**
      * Open a connection to a camera with the given ID, on behalf of another application
      * specified by clientUid.
      *
@@ -710,19 +883,8 @@ public final class CameraManager {
      */
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
-            int clientUid)
-            throws CameraAccessException {
-
-        if (cameraId == null) {
-            throw new IllegalArgumentException("cameraId was null");
-        } else if (callback == null) {
-            throw new IllegalArgumentException("callback was null");
-        }
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new IllegalArgumentException("No cameras available on device");
-        }
-
-        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid);
+            int clientUid) throws CameraAccessException {
+            openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0);
     }
 
     /**
@@ -889,13 +1051,17 @@ public final class CameraManager {
          * A camera device has been opened by an application.
          *
          * <p>The default implementation of this method does nothing.</p>
-         *
-         * @param cameraId The unique identifier of the new camera.
+         *    android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER is required to receive this
+         *    callback
+         * @param cameraId The unique identifier of the camera opened.
          * @param packageId The package Id of the application opening the camera.
          *
          * @see #onCameraClosed
+         * @hide
          */
-        /** @hide */
+        @SystemApi
+        @TestApi
+        @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER)
         public void onCameraOpened(@NonNull String cameraId, @NonNull String packageId) {
             // default empty implementation
         }
@@ -904,10 +1070,14 @@ public final class CameraManager {
          * A previously-opened camera has been closed.
          *
          * <p>The default implementation of this method does nothing.</p>
-         *
+         *    android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER is required to receive this
+         *    callback.
          * @param cameraId The unique identifier of the closed camera.
+         * @hide
          */
-        /** @hide */
+        @SystemApi
+        @TestApi
+        @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER)
         public void onCameraClosed(@NonNull String cameraId) {
             // default empty implementation
         }
@@ -1021,44 +1191,6 @@ public final class CameraManager {
     }
 
     /**
-     * Queries the camera service if it supports the camera2 api directly, or needs a shim.
-     *
-     * @param cameraId a non-{@code null} camera identifier
-     * @return {@code false} if the legacy shim needs to be used, {@code true} otherwise.
-     */
-    private boolean supportsCamera2ApiLocked(String cameraId) {
-        return supportsCameraApiLocked(cameraId, API_VERSION_2);
-    }
-
-    /**
-     * Queries the camera service if it supports a camera api directly, or needs a shim.
-     *
-     * @param cameraId a non-{@code null} camera identifier
-     * @param apiVersion the version, i.e. {@code API_VERSION_1} or {@code API_VERSION_2}
-     * @return {@code true} if connecting will work for that device version.
-     */
-    private boolean supportsCameraApiLocked(String cameraId, int apiVersion) {
-        /*
-         * Possible return values:
-         * - NO_ERROR => CameraX API is supported
-         * - CAMERA_DEPRECATED_HAL => CameraX API is *not* supported (thrown as an exception)
-         * - Remote exception => If the camera service died
-         *
-         * Anything else is an unexpected error we don't want to recover from.
-         */
-        try {
-            ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
-            // If no camera service, no support
-            if (cameraService == null) return false;
-
-            return cameraService.supportsCameraApi(cameraId, apiVersion);
-        } catch (RemoteException e) {
-            // Camera service is now down, no support for any API level
-        }
-        return false;
-    }
-
-    /**
      * Queries the camera service if a cameraId is a hidden physical camera that belongs to a
      * logical camera device.
      *
@@ -1081,6 +1213,67 @@ public final class CameraManager {
             // Camera service is now down, no support for any API level
         }
         return false;
+    }
+
+    /**
+     * Inject the external camera to replace the internal camera session.
+     *
+     * <p>If injecting the external camera device fails, then the injection callback's
+     * {@link CameraInjectionSession.InjectionStatusCallback#onInjectionError
+     * onInjectionError} method will be called.</p>
+     *
+     * @param packageName   It scopes the injection to a particular app.
+     * @param internalCamId The id of one of the physical or logical cameras on the phone.
+     * @param externalCamId The id of one of the remote cameras that are provided by the dynamic
+     *                      camera HAL.
+     * @param executor      The executor which will be used when invoking the callback.
+     * @param callback      The callback which is invoked once the external camera is injected.
+     *
+     * @throws CameraAccessException    If the camera device has been disconnected.
+     *                                  {@link CameraAccessException#CAMERA_DISCONNECTED} will be
+     *                                  thrown if camera service is not available.
+     * @throws SecurityException        If the specific application that can cast to external
+     *                                  devices does not have permission to inject the external
+     *                                  camera.
+     * @throws IllegalArgumentException If cameraId doesn't match any currently or previously
+     *                                  available camera device or some camera functions might not
+     *                                  work properly or the injection camera runs into a fatal
+     *                                  error.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
+    public void injectCamera(@NonNull String packageName, @NonNull String internalCamId,
+            @NonNull String externalCamId, @NonNull @CallbackExecutor Executor executor,
+            @NonNull CameraInjectionSession.InjectionStatusCallback callback)
+            throws CameraAccessException, SecurityException,
+            IllegalArgumentException {
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No cameras available on device");
+        }
+        ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+        if (cameraService == null) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                    "Camera service is currently unavailable");
+        }
+        synchronized (mLock) {
+            try {
+                CameraInjectionSessionImpl injectionSessionImpl =
+                        new CameraInjectionSessionImpl(callback, executor);
+                ICameraInjectionCallback cameraInjectionCallback =
+                        injectionSessionImpl.getCallback();
+                ICameraInjectionSession injectionSession = cameraService.injectCamera(packageName,
+                        internalCamId, externalCamId, cameraInjectionCallback);
+                injectionSessionImpl.setRemoteInjectionSession(injectionSession);
+            } catch (ServiceSpecificException e) {
+                throwAsPublicException(e);
+            } catch (RemoteException e) {
+                // Camera service died - act as if it's a CAMERA_DISCONNECTED case
+                ServiceSpecificException sse = new ServiceSpecificException(
+                        ICameraService.ERROR_DISCONNECTED,
+                        "Camera service is currently unavailable");
+                throwAsPublicException(sse);
+            }
+        }
     }
 
     /**
@@ -1425,8 +1618,8 @@ public final class CameraManager {
         }
 
         public boolean isConcurrentSessionConfigurationSupported(
-                @NonNull Map<String, SessionConfiguration> cameraIdsAndSessionConfigurations)
-                throws CameraAccessException {
+                @NonNull Map<String, SessionConfiguration> cameraIdsAndSessionConfigurations,
+                int targetSdkVersion) throws CameraAccessException {
 
             if (cameraIdsAndSessionConfigurations == null) {
                 throw new IllegalArgumentException("cameraIdsAndSessionConfigurations was null");
@@ -1462,7 +1655,7 @@ public final class CameraManager {
                 }
                 try {
                     return mCameraService.isConcurrentSessionConfigurationSupported(
-                            cameraIdsAndConfigs);
+                            cameraIdsAndConfigs, targetSdkVersion);
                 } catch (ServiceSpecificException e) {
                    throwAsPublicException(e);
                 } catch (RemoteException e) {
@@ -1484,7 +1677,11 @@ public final class CameraManager {
         */
         public boolean cameraIdHasConcurrentStreamsLocked(String cameraId) {
             if (!mDeviceStatus.containsKey(cameraId)) {
-                Log.e(TAG, "cameraIdHasConcurrentStreamsLocked called on non existing camera id");
+                // physical camera ids aren't advertised in concurrent camera id combinations.
+                if (DEBUG) {
+                    Log.v(TAG, " physical camera id " + cameraId + " is hidden." +
+                            " Available logical camera ids : " + mDeviceStatus.toString());
+                }
                 return false;
             }
             for (Set<String> comb : mConcurrentCameraIdCombinations) {

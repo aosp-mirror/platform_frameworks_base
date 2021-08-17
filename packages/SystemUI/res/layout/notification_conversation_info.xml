@@ -24,8 +24,7 @@
     android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:background="@color/notification_material_background_color"
-    android:paddingStart="12dp">
+    android:paddingStart="@dimen/notification_shade_content_margin_horizontal">
 
     <!-- Package Info -->
     <LinearLayout
@@ -34,15 +33,66 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:paddingTop="11dp"
+        android:paddingTop="@dimen/notification_guts_header_top_padding"
         android:clipToPadding="true">
-        <ImageView
-            android:id="@+id/conversation_icon"
-            android:layout_width="@dimen/notification_guts_conversation_icon_size"
-            android:layout_height="@dimen/notification_guts_conversation_icon_size"
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:layout_centerVertical="false"
             android:layout_alignParentStart="true"
-            android:layout_marginEnd="12dp" />
+            android:layout_marginEnd="12dp"
+        >
+
+            <!-- Big icon: 48x48, 12dp padding top, 16dp padding sides -->
+            <ImageView
+                android:id="@+id/conversation_icon"
+                android:layout_width="@*android:dimen/conversation_avatar_size"
+                android:layout_height="@*android:dimen/conversation_avatar_size"
+                android:layout_marginLeft="@*android:dimen/conversation_badge_protrusion"
+                android:layout_marginRight="@*android:dimen/conversation_badge_protrusion"
+                android:layout_marginBottom="@*android:dimen/conversation_badge_protrusion"
+                android:scaleType="centerCrop"
+                android:importantForAccessibility="no"
+            />
+
+            <FrameLayout
+                android:id="@+id/conversation_icon_badge"
+                android:layout_width="@*android:dimen/conversation_icon_size_badged"
+                android:layout_height="@*android:dimen/conversation_icon_size_badged"
+                android:layout_gravity="end|bottom"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+            >
+                <ImageView
+                    android:id="@+id/conversation_icon_badge_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:src="@*android:drawable/conversation_badge_background"
+                    android:forceHasOverlappingRendering="false"
+                />
+                <ImageView
+                    android:id="@+id/conversation_icon_badge_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_gravity="center"
+                    android:forceHasOverlappingRendering="false"
+                />
+                <ImageView
+                    android:id="@+id/conversation_icon_badge_ring"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@*android:drawable/conversation_badge_ring"
+                    android:forceHasOverlappingRendering="false"
+                    android:clipToPadding="false"
+                    android:scaleType="center"
+                />
+            </FrameLayout>
+        </FrameLayout>
         <LinearLayout
             android:id="@+id/names"
             android:layout_weight="1"
@@ -206,11 +256,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/notification_importance_button_description_top_margin"
                     android:visibility="gone"
-                    android:text="@string/notification_channel_summary_priority"
                     android:clickable="false"
                     android:focusable="false"
                     android:ellipsize="end"
-                    android:maxLines="3"
+                    android:maxLines="4"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
             </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 

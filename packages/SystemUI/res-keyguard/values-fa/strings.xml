@@ -85,7 +85,7 @@
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"پین خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. \n\nلطفاً پس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"الگوی باز کردن قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"کد پین سیم‌کارت اشتباه است، اکنون برای باز کردن قفل دستگاهتان باید با شرکت مخابراتی تماس بگیرید."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">کد پین سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید.</item>

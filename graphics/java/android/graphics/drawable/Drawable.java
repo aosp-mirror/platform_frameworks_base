@@ -21,7 +21,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -809,10 +808,7 @@ public abstract class Drawable {
      *
      * @return {@code true} if {@link android.R.attr#state_focused} is specified
      * for this drawable.
-     *
-     * @hide
      */
-    @TestApi
     public boolean hasFocusStateSpecified() {
         return false;
     }

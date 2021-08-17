@@ -45,7 +45,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"/>
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT"/>
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS"/>
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
@@ -70,10 +70,15 @@
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD"/>
     <uses-permission android:name="android.permission.MANAGE_BIND_INSTANT_SERVICE"/>
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS"/>
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.DUMP"/>
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
@@ -82,6 +87,14 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
     <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.ACCESS_VIBRATOR_STATE"/>
+    <uses-permission android:name="android.permission.VIBRATE_ALWAYS_ON"/>
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PROJECTION_STATE"/>
+    <uses-permission android:name="android.permission.KILL_UID"/>
+    <uses-permission
+        android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
@@ -109,7 +122,8 @@
         </service>
 
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
-             android:permission="android.permission.BIND_DEVICE_ADMIN">
+             android:permission="android.permission.BIND_DEVICE_ADMIN"
+             android:exported="true">
             <meta-data android:name="android.app.device_admin"
                  android:resource="@xml/device_admin_sample"/>
             <intent-filter>
@@ -118,7 +132,8 @@
         </receiver>
 
         <receiver android:name="com.android.server.devicepolicy.DummyDeviceAdmins$Admin1"
-             android:permission="android.permission.BIND_DEVICE_ADMIN">
+             android:permission="android.permission.BIND_DEVICE_ADMIN"
+             android:exported="true">
             <meta-data android:name="android.app.device_admin"
                  android:resource="@xml/device_admin_sample"/>
             <intent-filter>
@@ -127,7 +142,8 @@
         </receiver>
 
         <receiver android:name="com.android.server.devicepolicy.DummyDeviceAdmins$Admin2"
-             android:permission="android.permission.BIND_DEVICE_ADMIN">
+             android:permission="android.permission.BIND_DEVICE_ADMIN"
+             android:exported="true">
             <meta-data android:name="android.app.device_admin"
                  android:resource="@xml/device_admin_sample"/>
             <intent-filter>
@@ -136,7 +152,8 @@
         </receiver>
 
         <receiver android:name="com.android.server.devicepolicy.DummyDeviceAdmins$Admin3"
-             android:permission="android.permission.BIND_DEVICE_ADMIN">
+             android:permission="android.permission.BIND_DEVICE_ADMIN"
+             android:exported="true">
             <meta-data android:name="android.app.device_admin"
                  android:resource="@xml/device_admin_sample"/>
             <intent-filter>
@@ -144,7 +161,8 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.devicepolicy.DummyDeviceAdmins$AdminNoPerm">
+        <receiver android:name="com.android.server.devicepolicy.DummyDeviceAdmins$AdminNoPerm"
+             android:exported="true">
             <meta-data android:name="android.app.device_admin"
                  android:resource="@xml/device_admin_sample"/>
             <intent-filter>
@@ -165,7 +183,8 @@
 
         <activity android:name="com.android.server.pm.SuspendedDetailsActivity"
              android:enabled="true"
-             android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS">
+             android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -230,7 +249,8 @@
             </intent-filter>
         </activity-alias>
 
-        <receiver android:name="com.android.server.appwidget.DummyAppWidget">
+        <receiver android:name="com.android.server.appwidget.DummyAppWidget"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>

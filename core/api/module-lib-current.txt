@@ -1,13 +1,46 @@
 // Signature format: 2.0
+package android {
+
+  public static final class Manifest.permission {
+    field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
+  }
+
+}
+
 package android.app {
+
+  public class ActivityManager {
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
+  }
+
+  public class AppOpsManager {
+    field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
+  }
 
   public class BroadcastOptions {
     method public int getMaxManifestReceiverApiLevel();
     method public void setMaxManifestReceiverApiLevel(int);
   }
 
+  public abstract class HomeVisibilityListener {
+    ctor public HomeVisibilityListener();
+    method public abstract void onHomeVisibilityChanged(boolean);
+  }
+
+  public class NotificationManager {
+    method public boolean hasEnabledNotificationListener(@NonNull String, @NonNull android.os.UserHandle);
+    field public static final String ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED = "android.app.action.NOTIFICATION_LISTENER_ENABLED_CHANGED";
+  }
+
   public final class PendingIntent implements android.os.Parcelable {
-    method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
+  }
+
+  public class StatusBarManager {
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
 }
@@ -22,9 +55,110 @@ package android.app.usage {
 
 package android.content {
 
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method @NonNull public static android.net.Uri createContentUriForUser(@NonNull android.net.Uri, @NonNull android.os.UserHandle);
+  }
+
   public abstract class Context {
+    method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
+  }
+
+}
+
+package android.content.pm {
+
+  public abstract class PackageManager {
+    method @NonNull public String getPermissionControllerPackageName();
+  }
+
+}
+
+package android.hardware.usb {
+
+  public class UsbManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getGadgetHalVersion();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbHalVersion();
+    field public static final int GADGET_HAL_NOT_SUPPORTED = -1; // 0xffffffff
+    field public static final int GADGET_HAL_V1_0 = 10; // 0xa
+    field public static final int GADGET_HAL_V1_1 = 11; // 0xb
+    field public static final int GADGET_HAL_V1_2 = 12; // 0xc
+    field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
+    field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
+    field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
+    field public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
+    field public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
+    field public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
+    field public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
+    field public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
+    field public static final int USB_HAL_NOT_SUPPORTED = -1; // 0xffffffff
+    field public static final int USB_HAL_V1_0 = 10; // 0xa
+    field public static final int USB_HAL_V1_1 = 11; // 0xb
+    field public static final int USB_HAL_V1_2 = 12; // 0xc
+    field public static final int USB_HAL_V1_3 = 13; // 0xd
+  }
+
+}
+
+package android.media {
+
+  public class AudioManager {
+    method public void adjustStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    field public static final int FLAG_FROM_KEY = 4096; // 0x1000
+  }
+
+  public class MediaMetadataRetriever implements java.lang.AutoCloseable {
+    field public static final int METADATA_KEY_VIDEO_CODEC_MIME_TYPE = 40; // 0x28
+  }
+
+  public class MediaServiceManager {
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaCommunicationServiceRegisterer();
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaSessionServiceRegisterer();
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaTranscodingServiceRegisterer();
+  }
+
+  public static final class MediaServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+  }
+
+}
+
+package android.media.session {
+
+  public static final class MediaController.PlaybackInfo implements android.os.Parcelable {
+    ctor public MediaController.PlaybackInfo(int, int, @IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.media.AudioAttributes, @Nullable String);
+  }
+
+  public final class MediaSession {
+    field public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 65536; // 0x10000
+  }
+
+  public static final class MediaSession.Token implements android.os.Parcelable {
+    method public int getUid();
+  }
+
+  public final class MediaSessionManager {
+    method public void addOnActiveSessionsChangedListener(@Nullable android.content.ComponentName, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener);
+    method public void dispatchMediaKeyEvent(@NonNull android.view.KeyEvent, boolean);
+    method public void dispatchMediaKeyEventAsSystemService(@NonNull android.view.KeyEvent);
+    method public boolean dispatchMediaKeyEventToSessionAsSystemService(@NonNull android.view.KeyEvent, @NonNull android.media.session.MediaSession.Token);
+    method public void dispatchVolumeKeyEvent(@NonNull android.view.KeyEvent, int, boolean);
+    method public void dispatchVolumeKeyEventAsSystemService(@NonNull android.view.KeyEvent, int);
+    method public void dispatchVolumeKeyEventToSessionAsSystemService(@NonNull android.view.KeyEvent, @NonNull android.media.session.MediaSession.Token);
+    method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessionsForUser(@Nullable android.content.ComponentName, @NonNull android.os.UserHandle);
+    method public void registerRemoteSessionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.session.MediaSessionManager.RemoteSessionCallback);
+    method public void unregisterRemoteSessionCallback(@NonNull android.media.session.MediaSessionManager.RemoteSessionCallback);
+    field public static final int RESULT_MEDIA_KEY_HANDLED = 1; // 0x1
+    field public static final int RESULT_MEDIA_KEY_NOT_HANDLED = 0; // 0x0
+  }
+
+  public static interface MediaSessionManager.RemoteSessionCallback {
+    method public void onDefaultRemoteSessionChanged(@Nullable android.media.session.MediaSession.Token);
+    method public void onVolumeChanged(@NonNull android.media.session.MediaSession.Token, int);
   }
 
 }
@@ -149,6 +283,31 @@ package android.os {
 
 }
 
+package android.os.storage {
+
+  public class StorageManager {
+    method public void notifyAppIoBlocked(@NonNull java.util.UUID, int, int, int);
+    method public void notifyAppIoResumed(@NonNull java.util.UUID, int, int, int);
+    field public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 1; // 0x1
+    field public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0; // 0x0
+  }
+
+  public final class StorageVolume implements android.os.Parcelable {
+    method @NonNull public android.os.UserHandle getOwner();
+  }
+
+}
+
+package android.provider {
+
+  public final class DeviceConfig {
+    field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
+    field public static final String NAMESPACE_APP_STANDBY = "app_standby";
+    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+  }
+
+}
+
 package android.telephony {
 
   public abstract class CellSignalStrength {
@@ -163,8 +322,17 @@ package android.telephony {
 
 package android.util {
 
+  public class AtomicFile {
+    ctor public AtomicFile(@NonNull java.io.File, @Nullable android.util.SystemConfigFileCommitEventLogger);
+  }
+
   public final class Log {
     method public static int logToRadioBuffer(int, @Nullable String, @Nullable String);
+  }
+
+  public class SystemConfigFileCommitEventLogger {
+    ctor public SystemConfigFileCommitEventLogger(@NonNull String);
+    method public void setStartTime(long);
   }
 
 }

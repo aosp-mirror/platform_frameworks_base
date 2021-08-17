@@ -52,6 +52,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
@@ -71,7 +72,6 @@ public class TimeControllerTest {
     private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
     private static final int SOURCE_USER_ID = 0;
 
-    private TimeController.TcConstants mConstants;
     private TimeController mTimeController;
 
     private MockitoSession mMockingSession;
@@ -111,7 +111,6 @@ public class TimeControllerTest {
 
         // Initialize real objects.
         mTimeController = new TimeController(mJobSchedulerService);
-        mConstants = mTimeController.getTcConstants();
         spyOn(mTimeController);
     }
 
@@ -530,46 +529,6 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testJobDelayWakeupAlarmToggling() {
-        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-
-        JobStatus job = createJobStatus(
-                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
-                createJob().setMinimumLatency(HOUR_IN_MILLIS));
-
-        doReturn(true).when(mTimeController)
-                .wouldBeReadyWithConstraintLocked(eq(job), anyInt());
-
-        // Starting off with using a wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
-        InOrder inOrder = inOrder(mAlarmManager);
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(),
-                        eq(TAG_DELAY), any(), any(), any());
-
-        // Use a non wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(), eq(TAG_DELAY),
-                        any(), any(), any());
-
-        // Back off, use a wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(),
-                        eq(TAG_DELAY), any(), any(), any());
-    }
-
-    @Test
     public void testCheckExpiredDeadlinesAndResetAlarm_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
@@ -674,6 +633,50 @@ public class TimeControllerTest {
     }
 
     @Test
+    public void testDelayAlarmSchedulingCoalescedIntervals() {
+        doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+
+        JobStatus jobLatest = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(HOUR_IN_MILLIS));
+        JobStatus jobMiddle = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(TimeController.DELAY_COALESCE_TIME_MS / 2));
+        JobStatus jobEarliest = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(TimeController.DELAY_COALESCE_TIME_MS / 10));
+
+        ArgumentCaptor<AlarmManager.OnAlarmListener> listenerCaptor =
+                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        mTimeController.maybeStartTrackingJobLocked(jobEarliest, null);
+        mTimeController.maybeStartTrackingJobLocked(jobMiddle, null);
+        mTimeController.maybeStartTrackingJobLocked(jobLatest, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + TimeController.DELAY_COALESCE_TIME_MS / 10), anyLong(),
+                        anyLong(), eq(TAG_DELAY),
+                        listenerCaptor.capture(), any(), any());
+        final AlarmManager.OnAlarmListener delayListener = listenerCaptor.getValue();
+
+        advanceElapsedClock(TimeController.DELAY_COALESCE_TIME_MS / 10);
+        delayListener.onAlarm();
+        // The next delay alarm time should be TimeController.DELAY_COALESCE_TIME_MS after the last
+        // time the delay alarm fired.
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + TimeController.DELAY_COALESCE_TIME_MS / 10
+                                + TimeController.DELAY_COALESCE_TIME_MS), anyLong(),
+                        anyLong(), eq(TAG_DELAY), any(), any(), any());
+
+        advanceElapsedClock(TimeController.DELAY_COALESCE_TIME_MS);
+        delayListener.onAlarm();
+        // The last job is significantly after the coalesce time, so the 3rd scheduling shouldn't be
+        // affected by the first two jobs' alarms.
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(), eq(TAG_DELAY), any(), any(), any());
+    }
+
+    @Test
     public void testEvaluateStateLocked_Delay() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -708,25 +711,31 @@ public class TimeControllerTest {
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
 
         // Test evaluating something before the current deadline.
+        doReturn(false).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
+        mTimeController.evaluateStateLocked(jobEarliest);
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(), eq(TAG_DELAY), any(), any(), any());
         doReturn(true).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(), eq(TAG_DELAY),
                         any(), any(), any());
-        // Job goes back to not being ready. Middle is still true, so use that alarm.
+        // Job goes back to not being ready. Middle is still true, but we don't check and actively
+        // defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 30 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DELAY), any(), any(), any());
-        // Turn middle off. Latest is true, so use that alarm.
+        // Turn middle off. Latest is true, but we don't check and actively defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobMiddle), anyInt());
         mTimeController.evaluateStateLocked(jobMiddle);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DELAY), any(), any(), any());
     }
 
@@ -765,25 +774,32 @@ public class TimeControllerTest {
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
 
         // Test evaluating something before the current deadline.
+        doReturn(false).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
+        mTimeController.evaluateStateLocked(jobEarliest);
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
+                        eq(TAG_DEADLINE), any(), any(), any());
         doReturn(true).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
-        // Job goes back to not being ready. Middle is still true, so use that alarm.
+        // Job goes back to not being ready. Middle is still true, but we don't check and actively
+        // defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 30 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
-        // Turn middle off. Latest is true, so use that alarm.
+        // Turn middle off. Latest is true, but we don't check and actively defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobMiddle), anyInt());
         mTimeController.evaluateStateLocked(jobMiddle);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
     }
 }

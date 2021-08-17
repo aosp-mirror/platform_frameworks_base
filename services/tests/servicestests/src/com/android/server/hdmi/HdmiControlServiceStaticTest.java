@@ -17,6 +17,8 @@ package com.android.server.hdmi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -29,6 +31,7 @@ import java.util.Locale;
  * Tests for static methods of {@link HdmiControlService} class.
  */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class HdmiControlServiceStaticTest {
 

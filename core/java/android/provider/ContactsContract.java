@@ -19,6 +19,7 @@ package android.provider;
 import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -47,6 +48,9 @@ import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
@@ -54,11 +58,15 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
 
+import com.google.android.collect.Sets;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * <p>
@@ -6162,7 +6170,7 @@ public final class ContactsContract {
              * to display names as well as phone numbers. The filter argument should be passed
              * as an additional path segment after this URI.
              *
-             * <p class="caution"><b>Caution: </b>This field deosn't sort results based on contacts
+             * <p class="caution"><b>Caution: </b>This field doesn't sort results based on contacts
              * frequency. For more information, see the
              * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
              * page.
@@ -6779,20 +6787,8 @@ public final class ContactsContract {
          * <td>{@link #DATA5}</td>
          * <td>
          * <p>
-         * Allowed values:
-         * <ul>
-         * <li>{@link #PROTOCOL_CUSTOM}. Also provide the actual protocol name
-         * as {@link #CUSTOM_PROTOCOL}.</li>
-         * <li>{@link #PROTOCOL_AIM}</li>
-         * <li>{@link #PROTOCOL_MSN}</li>
-         * <li>{@link #PROTOCOL_YAHOO}</li>
-         * <li>{@link #PROTOCOL_SKYPE}</li>
-         * <li>{@link #PROTOCOL_QQ}</li>
-         * <li>{@link #PROTOCOL_GOOGLE_TALK}</li>
-         * <li>{@link #PROTOCOL_ICQ}</li>
-         * <li>{@link #PROTOCOL_JABBER}</li>
-         * <li>{@link #PROTOCOL_NETMEETING}</li>
-         * </ul>
+         * Allowed value: {@link #PROTOCOL_CUSTOM}. Also provide the actual protocol name
+         * as {@link #CUSTOM_PROTOCOL}.
          * </p>
          * </td>
          * </tr>
@@ -6818,10 +6814,9 @@ public final class ContactsContract {
             public static final int TYPE_OTHER = 3;
 
             /**
-             * This column should be populated with one of the defined
-             * constants, e.g. {@link #PROTOCOL_YAHOO}. If the value of this
-             * column is {@link #PROTOCOL_CUSTOM}, the {@link #CUSTOM_PROTOCOL}
-             * should contain the name of the custom protocol.
+             * This column should always be set to {@link #PROTOCOL_CUSTOM} and
+             * the {@link #CUSTOM_PROTOCOL} should contain the name of the custom protocol.
+             * The other predefined protocols are deprecated and should not be used.
              */
             public static final String PROTOCOL = DATA5;
 
@@ -6831,14 +6826,50 @@ public final class ContactsContract {
              * The predefined IM protocol types.
              */
             public static final int PROTOCOL_CUSTOM = -1;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_AIM = 0;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_MSN = 1;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_YAHOO = 2;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_SKYPE = 3;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_QQ = 4;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_GOOGLE_TALK = 5;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_ICQ = 6;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_JABBER = 7;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_NETMEETING = 8;
 
             /**
@@ -8173,6 +8204,321 @@ public final class ContactsContract {
          * applies to.
          */
         public static final String RAW_CONTACT_ID2 = "raw_contact_id2";
+    }
+
+
+    /**
+     * Class containing utility methods around determine what accounts in the ContactsProvider are
+     * related to the SIM cards in the device.
+     * <p>
+     * Apps interested in managing contacts from SIM cards can query the ContactsProvider using
+     * {@link #getSimAccounts(ContentResolver)} to get all accounts that relate to SIM cards. They
+     * can also register a receiver for the {@link #ACTION_SIM_ACCOUNTS_CHANGED} broadcast to be
+     * notified when these accounts change.
+     */
+    public static final class SimContacts {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private SimContacts() {
+        }
+
+        /**
+         * The method to invoke in order to add a new SIM account for a newly inserted SIM card.
+         *
+         * @hide
+         */
+        public static final String ADD_SIM_ACCOUNT_METHOD = "addSimAccount";
+
+        /**
+         * The method to invoke in order to remove a SIM account once the corresponding SIM card is
+         * ejected.
+         *
+         * @hide
+         */
+        public static final String REMOVE_SIM_ACCOUNT_METHOD = "removeSimAccount";
+
+        /**
+         * The method to invoke in order to query all SIM accounts.
+         *
+         * @hide
+         */
+        public static final String QUERY_SIM_ACCOUNTS_METHOD = "querySimAccounts";
+
+        /**
+         * Key to add in the outgoing Bundle for the SIM slot.
+         *
+         * @hide
+         */
+        public static final String KEY_SIM_SLOT_INDEX = "key_sim_slot_index";
+
+        /**
+         * Key to add in the outgoing Bundle for the SIM account's EF type.
+         * See {@link SimAccount#mEfType} for more information.
+         *
+         * @hide
+         */
+        public static final String KEY_SIM_EF_TYPE = "key_sim_ef_type";
+
+        /**
+         * Key to add in the outgoing Bundle for the account name.
+         *
+         * @hide
+         */
+        public static final String KEY_ACCOUNT_NAME = "key_sim_account_name";
+
+        /**
+         * Key to add in the outgoing Bundle for the account type.
+         *
+         * @hide
+         */
+        public static final String KEY_ACCOUNT_TYPE = "key_sim_account_type";
+
+        /**
+         * Key in the incoming Bundle for the all the SIM accounts.
+         *
+         * @hide
+         */
+        public static final String KEY_SIM_ACCOUNTS = "key_sim_accounts";
+
+        /**
+         * Broadcast Action: SIM accounts have changed, call
+         * {@link #getSimAccounts(ContentResolver)} to get the latest.
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String ACTION_SIM_ACCOUNTS_CHANGED =
+                "android.provider.action.SIM_ACCOUNTS_CHANGED";
+
+        /**
+         * Adds a new SIM account that maps to the corresponding SIM slot.
+         *
+         * @param accountName     accountName value for the account
+         * @param accountType     accountType value for the account
+         * @param contentResolver to perform the operation on.
+         * @param simSlotIndex    the SIM slot index of this new account.
+         * @param efType          the EF type of this new account.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission("android.contacts.permission.MANAGE_SIM_ACCOUNTS")
+        public static void addSimAccount(@NonNull ContentResolver contentResolver,
+                @NonNull String accountName,
+                @NonNull String accountType,
+                int simSlotIndex,
+                int efType) {
+            if (simSlotIndex < 0) {
+                throw new IllegalArgumentException("Sim slot is negative");
+            }
+            if (!SimAccount.getValidEfTypes().contains(efType)) {
+                throw new IllegalArgumentException("Invalid EF type");
+            }
+            if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(accountType)) {
+                throw new IllegalArgumentException("Account name or type is empty");
+            }
+
+            Bundle extras = new Bundle();
+            extras.putInt(KEY_SIM_SLOT_INDEX, simSlotIndex);
+            extras.putInt(KEY_SIM_EF_TYPE, efType);
+            extras.putString(KEY_ACCOUNT_NAME, accountName);
+            extras.putString(KEY_ACCOUNT_TYPE, accountType);
+
+            contentResolver.call(ContactsContract.AUTHORITY_URI,
+                    ContactsContract.SimContacts.ADD_SIM_ACCOUNT_METHOD,
+                    null, extras);
+        }
+
+        /**
+         * Removes all SIM accounts that map to the corresponding SIM slot.
+         *
+         * @param contentResolver to perform the operation on.
+         * @param simSlotIndex    the SIM slot index of the accounts to remove.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission("android.contacts.permission.MANAGE_SIM_ACCOUNTS")
+        public static void removeSimAccounts(@NonNull ContentResolver contentResolver,
+                int simSlotIndex) {
+            if (simSlotIndex < 0) {
+                throw new IllegalArgumentException("Sim slot is negative");
+            }
+
+            Bundle extras = new Bundle();
+            extras.putInt(KEY_SIM_SLOT_INDEX, simSlotIndex);
+
+            contentResolver.call(ContactsContract.AUTHORITY_URI,
+                    ContactsContract.SimContacts.REMOVE_SIM_ACCOUNT_METHOD,
+                    null, extras);
+        }
+
+        /**
+         * Returns all known SIM accounts. May be empty but never null.
+         *
+         * @param contentResolver content resolver to query.
+         */
+        public static @NonNull List<SimAccount> getSimAccounts(
+                @NonNull ContentResolver contentResolver) {
+            Bundle response = contentResolver.call(ContactsContract.AUTHORITY_URI,
+                    ContactsContract.SimContacts.QUERY_SIM_ACCOUNTS_METHOD,
+                    null, null);
+            List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS);
+
+            if (result == null) {
+                result = new ArrayList<>();
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * A parcelable class encapsulating account data for contacts that originate from a SIM card.
+     */
+    public static final class SimAccount implements Parcelable {
+        /** An invalid EF type identifier. */
+        public static final int UNKNOWN_EF_TYPE = 0;
+        /** EF type identifier for the ADN partition. */
+        public static final int ADN_EF_TYPE = 1;
+        /** EF type identifier for the FDN partition. */
+        public static final int FDN_EF_TYPE = 2;
+        /** EF type identifier for the SDN partition. */
+        public static final int SDN_EF_TYPE = 3;
+
+        /**
+         * The account_name of this SIM account. See {@link RawContacts#ACCOUNT_NAME}.
+         */
+        private final String mAccountName;
+
+        /**
+         * The account_type of this SIM account. See {@link RawContacts#ACCOUNT_TYPE}.
+         */
+        private final String mAccountType;
+
+        /**
+         * The slot index of the SIM card this account maps to. See {@link
+         * android.telephony.SubscriptionInfo#getSimSlotIndex()}.
+         */
+        private final int mSimSlotIndex;
+
+        /**
+         * The EF type of the contacts stored in this account. One of
+         * {@link #ADN_EF_TYPE}, {@link #SDN_EF_TYPE} or {@link #FDN_EF_TYPE}.
+         *
+         * EF type is the Elementary File type of the partition these contacts come from within the
+         * SIM card.
+         *
+         * ADN is the "abbreviated dialing numbers" or the user managed SIM contacts.
+         *
+         * SDN is the "service dialing numbers" which are usually preloaded onto the SIM by the
+         * carrier.
+         *
+         * FDN is the "fixed dialing numbers" which are contacts which can only be dialed from that
+         * SIM, used in cases such as parental control.
+         */
+        private final int mEfType;
+
+        /**
+         * @return A set containing all known EF type values
+         * @hide
+         */
+        public static @NonNull Set<Integer> getValidEfTypes() {
+            return Sets.newArraySet(ADN_EF_TYPE, SDN_EF_TYPE, FDN_EF_TYPE);
+        }
+
+        /**
+         * @hide
+         */
+        public SimAccount(@NonNull String accountName, @NonNull String accountType,
+                int simSlotIndex,
+                int efType) {
+            this.mAccountName = accountName;
+            this.mAccountType = accountType;
+            this.mSimSlotIndex = simSlotIndex;
+            this.mEfType = efType;
+        }
+
+        /**
+         * @return The account_name of this SIM account. See {@link RawContacts#ACCOUNT_NAME}.
+         */
+        public @NonNull String getAccountName() {
+            return mAccountName;
+        }
+
+        /**
+         * @return The account_type of this SIM account. See {@link RawContacts#ACCOUNT_TYPE}.
+         */
+        public @NonNull String getAccountType() {
+            return mAccountType;
+        }
+
+        /**
+         * @return The slot index of the SIM card this account maps to. See
+         * {@link android.telephony.SubscriptionInfo#getSimSlotIndex()}.
+         */
+        public int getSimSlotIndex() {
+            return mSimSlotIndex;
+        }
+
+        /**
+         * @return The EF type of the contacts stored in this account.
+         */
+        public int getEfType() {
+            return mEfType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mAccountName, mAccountType, mSimSlotIndex, mEfType);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) return false;
+            if (obj == this) return true;
+
+            SimAccount toCompare;
+            try {
+                toCompare = (SimAccount) obj;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+
+            return mSimSlotIndex == toCompare.mSimSlotIndex
+                    && mEfType == toCompare.mEfType
+                    && Objects.equals(mAccountName, toCompare.mAccountName)
+                    && Objects.equals(mAccountType, toCompare.mAccountType);
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(mAccountName);
+            dest.writeString(mAccountType);
+            dest.writeInt(mSimSlotIndex);
+            dest.writeInt(mEfType);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final @NonNull Parcelable.Creator<SimAccount> CREATOR =
+                new Parcelable.Creator<SimAccount>() {
+                    @Override
+                    public SimAccount createFromParcel(Parcel source) {
+                        String accountName = source.readString();
+                        String accountType = source.readString();
+                        int simSlot = source.readInt();
+                        int efType = source.readInt();
+                        SimAccount simAccount = new SimAccount(accountName, accountType, simSlot,
+                                efType);
+                        return simAccount;
+                    }
+
+                    @Override
+                    public SimAccount[] newArray(int size) {
+                        return new SimAccount[size];
+                    }
+                };
     }
 
     /**

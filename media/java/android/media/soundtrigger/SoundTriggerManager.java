@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,15 +34,21 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.Identity;
+import android.media.permission.SafeCloseable;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.app.ISoundTriggerService;
+import com.android.internal.app.ISoundTriggerSession;
 import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
@@ -62,7 +69,8 @@ public final class SoundTriggerManager {
     private static final String TAG = "SoundTriggerManager";
 
     private final Context mContext;
-    private final ISoundTriggerService mSoundTriggerService;
+    private final ISoundTriggerSession mSoundTriggerSession;
+    private final IBinder mBinderToken = new Binder();
 
     // Stores a mapping from the sound model UUID to the SoundTriggerInstance created by
     // the createSoundTriggerDetector() call.
@@ -75,7 +83,21 @@ public final class SoundTriggerManager {
         if (DBG) {
             Slog.i(TAG, "SoundTriggerManager created.");
         }
-        mSoundTriggerService = soundTriggerService;
+        try {
+            // This assumes that whoever is calling this ctor is the originator of the operations,
+            // as opposed to a service acting on behalf of a separate identity.
+            // Services acting on behalf of some other identity should not be using this class at
+            // all, but rather directly connect to the server and attach with explicit credentials.
+            Identity originatorIdentity = new Identity();
+            originatorIdentity.packageName = ActivityThread.currentOpPackageName();
+
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                mSoundTriggerSession = soundTriggerService.attachAsOriginator(originatorIdentity,
+                        mBinderToken);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
         mContext = context;
         mReceiverInstanceMap = new HashMap<UUID, SoundTriggerDetector>();
     }
@@ -86,7 +108,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public void updateModel(Model model) {
         try {
-            mSoundTriggerService.updateSoundModel(model.getGenericSoundModel());
+            mSoundTriggerSession.updateSoundModel(model.getGenericSoundModel());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -103,7 +125,7 @@ public final class SoundTriggerManager {
     public Model getModel(UUID soundModelId) {
         try {
             GenericSoundModel model =
-                    mSoundTriggerService.getSoundModel(new ParcelUuid(soundModelId));
+                    mSoundTriggerSession.getSoundModel(new ParcelUuid(soundModelId));
             if (model == null) {
                 return null;
             }
@@ -120,7 +142,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public void deleteModel(UUID soundModelId) {
         try {
-            mSoundTriggerService.deleteSoundModel(new ParcelUuid(soundModelId));
+            mSoundTriggerSession.deleteSoundModel(new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -150,7 +172,7 @@ public final class SoundTriggerManager {
         if (oldInstance != null) {
             // Shutdown old instance.
         }
-        SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerService,
+        SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerSession,
                 soundModelId, callback, handler);
         mReceiverInstanceMap.put(soundModelId, newInstance);
         return newInstance;
@@ -310,10 +332,10 @@ public final class SoundTriggerManager {
         try {
             switch (soundModel.getType()) {
                 case SoundModel.TYPE_GENERIC_SOUND:
-                    return mSoundTriggerService.loadGenericSoundModel(
+                    return mSoundTriggerSession.loadGenericSoundModel(
                             (GenericSoundModel) soundModel);
                 case SoundModel.TYPE_KEYPHRASE:
-                    return mSoundTriggerService.loadKeyphraseSoundModel(
+                    return mSoundTriggerSession.loadKeyphraseSoundModel(
                             (KeyphraseSoundModel) soundModel);
                 default:
                     Slog.e(TAG, "Unkown model type");
@@ -352,7 +374,7 @@ public final class SoundTriggerManager {
         Preconditions.checkNotNull(config);
 
         try {
-            return mSoundTriggerService.startRecognitionForService(new ParcelUuid(soundModelId),
+            return mSoundTriggerSession.startRecognitionForService(new ParcelUuid(soundModelId),
                 params, detectionService, config);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -370,7 +392,7 @@ public final class SoundTriggerManager {
             return STATUS_ERROR;
         }
         try {
-            return mSoundTriggerService.stopRecognitionForService(new ParcelUuid(soundModelId));
+            return mSoundTriggerSession.stopRecognitionForService(new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -387,7 +409,7 @@ public final class SoundTriggerManager {
             return STATUS_ERROR;
         }
         try {
-            return mSoundTriggerService.unloadSoundModel(
+            return mSoundTriggerSession.unloadSoundModel(
                     new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -405,7 +427,7 @@ public final class SoundTriggerManager {
             return false;
         }
         try {
-            return mSoundTriggerService.isRecognitionActive(
+            return mSoundTriggerSession.isRecognitionActive(
                     new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -440,7 +462,7 @@ public final class SoundTriggerManager {
             return STATUS_ERROR;
         }
         try {
-            return mSoundTriggerService.getModelState(new ParcelUuid(soundModelId));
+            return mSoundTriggerSession.getModelState(new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -456,7 +478,7 @@ public final class SoundTriggerManager {
     public SoundTrigger.ModuleProperties getModuleProperties() {
 
         try {
-            return mSoundTriggerService.getModuleProperties();
+            return mSoundTriggerSession.getModuleProperties();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -482,7 +504,7 @@ public final class SoundTriggerManager {
     public int setParameter(@Nullable UUID soundModelId,
             @ModelParams int modelParam, int value) {
         try {
-            return mSoundTriggerService.setParameter(new ParcelUuid(soundModelId), modelParam,
+            return mSoundTriggerSession.setParameter(new ParcelUuid(soundModelId), modelParam,
                     value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -505,7 +527,7 @@ public final class SoundTriggerManager {
     public int getParameter(@NonNull UUID soundModelId,
             @ModelParams int modelParam) {
         try {
-            return mSoundTriggerService.getParameter(new ParcelUuid(soundModelId), modelParam);
+            return mSoundTriggerSession.getParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -525,7 +547,7 @@ public final class SoundTriggerManager {
     public ModelParamRange queryParameter(@Nullable UUID soundModelId,
             @ModelParams int modelParam) {
         try {
-            return mSoundTriggerService.queryParameter(new ParcelUuid(soundModelId), modelParam);
+            return mSoundTriggerSession.queryParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

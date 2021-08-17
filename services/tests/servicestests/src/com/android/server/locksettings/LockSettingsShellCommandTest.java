@@ -16,6 +16,9 @@
 
 package com.android.server.locksettings;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
@@ -277,6 +280,94 @@ public class LockSettingsShellCommandTest {
                 new String[] { "clear", "--old", "1234" },
                 mShellCallback, mResultReceiver));
         verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testSetPin_nonCompliantWithComplexity() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
+                PASSWORD_QUALITY_NUMERIC);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPin("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_UNSPECIFIED));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(mUserId))
+                .thenReturn(PASSWORD_COMPLEXITY_MEDIUM);
+
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pin", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testSetPin_compliantWithComplexity() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
+                PASSWORD_QUALITY_NUMERIC);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPin("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_UNSPECIFIED));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(mUserId))
+                .thenReturn(PASSWORD_COMPLEXITY_MEDIUM);
+
+        assertEquals(0, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pin", "--old", "1234", "4231" },
+                mShellCallback, mResultReceiver));
+
+        verify(mLockPatternUtils).setLockCredential(
+                LockscreenCredential.createPin("4231"),
+                LockscreenCredential.createPin("1234"),
+                mUserId);
+    }
+
+    @Test
+    public void testSetPattern_nonCompliantWithComplexity() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPattern(stringToPattern("1234")),
+                mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_UNSPECIFIED));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(mUserId))
+                .thenReturn(PASSWORD_COMPLEXITY_HIGH);
+
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pattern", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testSetPattern_compliantWithComplexity() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPattern(stringToPattern("1234")),
+                mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_UNSPECIFIED));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(mUserId))
+                .thenReturn(PASSWORD_COMPLEXITY_LOW);
+
+        assertEquals(0, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pattern", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+
+        verify(mLockPatternUtils).setLockCredential(
+                LockscreenCredential.createPattern(stringToPattern("4321")),
+                LockscreenCredential.createPattern(stringToPattern("1234")),
+                mUserId);
     }
 
     private List<LockPatternView.Cell> stringToPattern(String str) {

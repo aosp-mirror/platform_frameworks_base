@@ -114,6 +114,7 @@ data class ControlStatusWrapper(
     val controlStatus: ControlStatus
 ) : ElementWrapper(), ControlInterface by controlStatus
 
+@Suppress("UNUSED_PARAMETER") // Use function instead of lambda for compile time alloc
 private fun nullIconGetter(_a: ComponentName, _b: String): Icon? = null
 
 data class ControlInfoWrapper(

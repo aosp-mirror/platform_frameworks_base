@@ -245,11 +245,19 @@ public final class UiccAccessRule implements Parcelable {
      *     {@link TelephonyManager#CARRIER_PRIVILEGE_STATUS_NO_ACCESS}.
      */
     public int getCarrierPrivilegeStatus(Signature signature, String packageName) {
-        // SHA-1 is for backward compatible support only, strongly discouraged for new use.
-        byte[] certHash = getCertHash(signature, "SHA-1");
         byte[] certHash256 = getCertHash(signature, "SHA-256");
-        if (matches(certHash, packageName) || matches(certHash256, packageName)) {
+        // Check SHA-256 first as it's the new standard.
+        if (matches(certHash256, packageName)) {
             return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        }
+
+        // Then check SHA-1 for backward compatibility. This should be removed
+        // in the near future when GPD_SPE_068 fully replaces GPD_SPE_013.
+        if (this.mCertificateHash.length == 20) {
+            byte[] certHash = getCertHash(signature, "SHA-1");
+            if (matches(certHash, packageName)) {
+                return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+            }
         }
 
         return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;

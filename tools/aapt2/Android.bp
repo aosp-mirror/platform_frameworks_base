@@ -162,6 +162,7 @@ cc_library_host_static {
         "Configuration.proto",
         "Resources.proto",
         "ResourcesInternal.proto",
+        "ValueTransformer.cpp",
     ],
     proto: {
         export_proto_headers: true,
@@ -196,9 +197,9 @@ cc_test_host {
     ],
     defaults: ["aapt2_defaults"],
     data: [
-         "integration-tests/CompileTest/**/*",
-         "integration-tests/CommandTests/**/*",
-         "integration-tests/ConvertTest/**/*"
+        "integration-tests/CompileTest/**/*",
+        "integration-tests/CommandTests/**/*",
+        "integration-tests/ConvertTest/**/*",
     ],
 }
 
@@ -211,6 +212,9 @@ cc_binary_host {
     use_version_lib: true,
     static_libs: ["libaapt2"],
     defaults: ["aapt2_defaults"],
+    dist: {
+        targets: ["aapt2_artifacts"],
+    },
 }
 
 // ==========================================================
@@ -229,6 +233,9 @@ genrule {
         "cp $(in) $(genDir)/protos && " +
         "$(location :soong_zip) -o $(out) -C $(genDir)/protos -D $(genDir)/protos",
     dist: {
-        targets: ["sdk_repo"],
+        targets: [
+            "sdk_repo",
+            "aapt2_artifacts",
+        ],
     },
 }

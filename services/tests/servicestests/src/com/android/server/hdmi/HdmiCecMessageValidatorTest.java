@@ -91,8 +91,8 @@ public class HdmiCecMessageValidatorTest {
     public void isValid_reportPowerStatus() {
         assertMessageValidity("04:90:00").isEqualTo(OK);
         assertMessageValidity("04:90:03:05").isEqualTo(OK);
+        assertMessageValidity("0F:90:00").isEqualTo(OK);
 
-        assertMessageValidity("0F:90:00").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:90").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("04:90").isEqualTo(ERROR_PARAMETER_SHORT);
         assertMessageValidity("04:90:04").isEqualTo(ERROR_PARAMETER);
@@ -390,6 +390,24 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_giveFeatures() {
+        assertMessageValidity("40:A5").isEqualTo(OK);
+        assertMessageValidity("F0:A5").isEqualTo(OK);
+
+        assertMessageValidity("4F:A5").isEqualTo(ERROR_DESTINATION);
+    }
+
+    @Test
+    public void isValid_reportFeatures() {
+        assertMessageValidity("0F:A6:05:80:00:00").isEqualTo(OK);
+
+        assertMessageValidity("04:A6:05:80:00:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("FF:A6:05:80:00:00").isEqualTo(ERROR_SOURCE);
+
+        assertMessageValidity("0F:A6").isEqualTo(ERROR_PARAMETER_SHORT);
+    }
+
+    @Test
     public void isValid_deckControl() {
         assertMessageValidity("40:42:01:6E").isEqualTo(OK);
         assertMessageValidity("40:42:04").isEqualTo(OK);
@@ -629,23 +647,6 @@ public class HdmiCecMessageValidatorTest {
     }
 
     private IntegerSubject assertMessageValidity(String message) {
-        return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
-    }
-
-    /**
-     * Build a CEC message from a hex byte string with bytes separated by {@code :}.
-     *
-     * <p>This format is used by both cec-client and www.cec-o-matic.com
-     */
-    private static HdmiCecMessage buildMessage(String message) {
-        String[] parts = message.split(":");
-        int src = Integer.parseInt(parts[0].substring(0, 1), 16);
-        int dest = Integer.parseInt(parts[0].substring(1, 2), 16);
-        int opcode = Integer.parseInt(parts[1], 16);
-        byte[] params = new byte[parts.length - 2];
-        for (int i = 0; i < params.length; i++) {
-            params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
-        }
-        return new HdmiCecMessage(src, dest, opcode, params);
+        return assertThat(mHdmiCecMessageValidator.isValid(HdmiUtils.buildMessage(message)));
     }
 }

@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -250,7 +251,7 @@ public final class NfcFServiceInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (!(o instanceof NfcFServiceInfo)) return false;
         NfcFServiceInfo thatService = (NfcFServiceInfo) o;

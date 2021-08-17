@@ -57,6 +57,12 @@ public final class QosBearerFilter implements Parcelable {
     public static final int QOS_PROTOCOL_UDP = android.hardware.radio.V1_6.QosProtocol.UDP;
     public static final int QOS_PROTOCOL_ESP = android.hardware.radio.V1_6.QosProtocol.ESP;
     public static final int QOS_PROTOCOL_AH = android.hardware.radio.V1_6.QosProtocol.AH;
+    public static final int QOS_MIN_PORT = android.hardware.radio.V1_6.QosPortRange.MIN;
+    /**
+     * Hardcoded inplace of android.hardware.radio.V1_6.QosPortRange.MAX as it
+     * returns -1 due to uint16_t to int conversion in java. (TODO: Fix the HAL)
+     */
+    public static final int QOS_MAX_PORT = 65535; // android.hardware.radio.V1_6.QosPortRange.MIN;
 
     @QosProtocol
     private int protocol;
@@ -227,6 +233,12 @@ public final class QosBearerFilter implements Parcelable {
 
         public int getEnd() {
             return end;
+        }
+
+        public boolean isValid() {
+            return start >= QOS_MIN_PORT && start <= QOS_MAX_PORT
+                    && end >= QOS_MIN_PORT && end <= QOS_MAX_PORT
+                    && start <= end;
         }
 
         @Override

@@ -88,11 +88,6 @@ activity. It provides this cached data to RecentsActivity when it is started.
 Registers all the callbacks/listeners required to show the Volume dialog when
 it should be shown.
 
-### [com.android.systemui.stackdivider.Divider](/packages/SystemUI/src/com/android/systemui/stackdivider/Divider.java)
-
-Shows the drag handle for the divider between two apps when in split screen
-mode.
-
 ### [com.android.systemui.status.phone.StatusBar](/packages/SystemUI/src/com/android/systemui/status/phone/StatusBar.java)
 
 This shows the UI for the status bar and the notification shade it contains.
@@ -115,10 +110,6 @@ Plays ringtones.
 ### [com.android.systemui.keyboard.KeyboardUI](/packages/SystemUI/src/com/android/systemui/keyboard/KeyboardUI.java)
 
 Shows UI for keyboard shortcuts (triggered by keyboard shortcut).
-
-### [com.android.systemui.pip.PipUI](/packages/SystemUI/src/com/android/systemui/pip/PipUI.java)
-
-Shows the overlay controls when Pip is showing.
 
 ### [com.android.systemui.shortcut.ShortcutKeyDispatcher](/packages/SystemUI/src/com/android/systemui/shortcut/ShortcutKeyDispatcher.java)
 
@@ -148,6 +139,10 @@ Draws decorations about the screen in software (e.g. rounded corners, cutouts).
 ### [com.android.systemui.biometrics.BiometricDialogImpl](/packages/SystemUI/src/com/android/systemui/biometrics/BiometricDialogImpl.java)
 
 Biometric UI.
+
+### [com.android.systemui.wmshell.WMShell](/packages/SystemUI/src/com/android/systemui/wmshell/WMShell.java)
+
+Delegates SysUI events to WM Shell controllers.
 
 ---
 

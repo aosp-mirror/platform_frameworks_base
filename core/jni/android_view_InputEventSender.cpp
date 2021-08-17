@@ -18,39 +18,42 @@
 
 //#define LOG_NDEBUG 0
 
-#include <nativehelper/JNIHelp.h>
-
 #include <android_runtime/AndroidRuntime.h>
-#include <log/log.h>
-#include <utils/Looper.h>
 #include <input/InputTransport.h>
+#include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <utils/Looper.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
+#include "core_jni_helpers.h"
 
-#include <nativehelper/ScopedLocalRef.h>
+#include <inttypes.h>
 #include <unordered_map>
 
-#include "core_jni_helpers.h"
+
+using android::base::Result;
 
 namespace android {
 
 // Log debug messages about the dispatch cycle.
-static const bool kDebugDispatchCycle = false;
+static constexpr bool kDebugDispatchCycle = false;
 
 static struct {
     jclass clazz;
 
     jmethodID dispatchInputEventFinished;
+    jmethodID dispatchTimelineReported;
 } gInputEventSenderClassInfo;
 
 
 class NativeInputEventSender : public LooperCallback {
 public:
-    NativeInputEventSender(JNIEnv* env,
-            jobject senderWeak, const sp<InputChannel>& inputChannel,
-            const sp<MessageQueue>& messageQueue);
+    NativeInputEventSender(JNIEnv* env, jobject senderWeak,
+                           const std::shared_ptr<InputChannel>& inputChannel,
+                           const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
     void dispose();
@@ -72,16 +75,19 @@ private:
         return mInputPublisher.getChannel()->getName();
     }
 
-    virtual int handleEvent(int receiveFd, int events, void* data);
-    status_t receiveFinishedSignals(JNIEnv* env);
+    int handleEvent(int receiveFd, int events, void* data) override;
+    status_t processConsumerResponse(JNIEnv* env);
+    bool notifyConsumerResponse(JNIEnv* env, jobject sender,
+                                const InputPublisher::ConsumerResponse& response,
+                                bool skipCallbacks);
 };
 
-
-NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
-        jobject senderWeak, const sp<InputChannel>& inputChannel,
-        const sp<MessageQueue>& messageQueue) :
-        mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
-        mInputPublisher(inputChannel), mMessageQueue(messageQueue),
+NativeInputEventSender::NativeInputEventSender(JNIEnv* env, jobject senderWeak,
+                                               const std::shared_ptr<InputChannel>& inputChannel,
+                                               const sp<MessageQueue>& messageQueue)
+      : mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
+        mInputPublisher(inputChannel),
+        mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName().c_str());
@@ -144,13 +150,13 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                                                    event->getAction(), event->getActionButton(),
                                                    event->getFlags(), event->getEdgeFlags(),
                                                    event->getMetaState(), event->getButtonState(),
-                                                   event->getClassification(), event->getXScale(),
-                                                   event->getYScale(), event->getXOffset(),
-                                                   event->getYOffset(), event->getXPrecision(),
+                                                   event->getClassification(),
+                                                   event->getTransform(), event->getXPrecision(),
                                                    event->getYPrecision(),
                                                    event->getRawXCursorPosition(),
                                                    event->getRawYCursorPosition(),
-                                                   event->getDownTime(),
+                                                   event->getDisplaySize().x,
+                                                   event->getDisplaySize().y, event->getDownTime(),
                                                    event->getHistoricalEventTime(i),
                                                    event->getPointerCount(),
                                                    event->getPointerProperties(),
@@ -171,86 +177,132 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
         // as part of finishing an IME session, in which case the publisher will
         // soon be disposed as well.
         if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
-                    "events=0x%x", getInputChannelName().c_str(), events);
+            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  events=0x%x",
+                  getInputChannelName().c_str(), events);
         }
 
         return 0; // remove the callback
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
-        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
-                "events=0x%x", getInputChannelName().c_str(), events);
+        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  events=0x%x",
+              getInputChannelName().c_str(), events);
         return 1;
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    status_t status = receiveFinishedSignals(env);
+    status_t status = processConsumerResponse(env);
     mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
     return status == OK || status == NO_MEMORY ? 1 : 0;
 }
 
-status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
+status_t NativeInputEventSender::processConsumerResponse(JNIEnv* env) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
     }
 
-    ScopedLocalRef<jobject> senderObj(env, NULL);
-    bool skipCallbacks = false;
+    ScopedLocalRef<jobject> senderObj(env, jniGetReferent(env, mSenderWeakGlobal));
+    if (!senderObj.get()) {
+        ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
+              getInputChannelName().c_str());
+        return DEAD_OBJECT;
+    }
+    bool skipCallbacks = false; // stop calling Java functions after an exception occurs
     for (;;) {
-        uint32_t publishedSeq;
-        bool handled;
-        status_t status = mInputPublisher.receiveFinishedSignal(&publishedSeq, &handled);
-        if (status) {
+        Result<InputPublisher::ConsumerResponse> result = mInputPublisher.receiveConsumerResponse();
+        if (!result.ok()) {
+            const status_t status = result.error().code();
             if (status == WOULD_BLOCK) {
                 return OK;
             }
-            ALOGE("channel '%s' ~ Failed to consume finished signals.  status=%d",
-                    getInputChannelName().c_str(), status);
+            ALOGE("channel '%s' ~ Failed to process consumer response.  status=%d",
+                  getInputChannelName().c_str(), status);
             return status;
         }
 
-        auto it = mPublishedSeqMap.find(publishedSeq);
-        if (it == mPublishedSeqMap.end()) {
-            continue;
-        }
-
-        uint32_t seq = it->second;
-        mPublishedSeqMap.erase(it);
-
-        if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                    "pendingEvents=%zu.",
-                    getInputChannelName().c_str(), seq, handled ? "true" : "false",
-                    mPublishedSeqMap.size());
-        }
-
-        if (!skipCallbacks) {
-            if (!senderObj.get()) {
-                senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
-                if (!senderObj.get()) {
-                    ALOGW("channel '%s' ~ Sender object was finalized "
-                            "without being disposed.", getInputChannelName().c_str());
-                    return DEAD_OBJECT;
-                }
-            }
-
-            env->CallVoidMethod(senderObj.get(),
-                    gInputEventSenderClassInfo.dispatchInputEventFinished,
-                    jint(seq), jboolean(handled));
-            if (env->ExceptionCheck()) {
-                ALOGE("Exception dispatching finished signal.");
-                skipCallbacks = true;
-            }
+        const bool notified = notifyConsumerResponse(env, senderObj.get(), *result, skipCallbacks);
+        if (!notified) {
+            skipCallbacks = true;
         }
     }
 }
 
+/**
+ * Invoke the corresponding Java function for the different variants of response.
+ * If the response is a Finished object, invoke dispatchInputEventFinished.
+ * If the response is a Timeline object, invoke dispatchTimelineReported.
+ * Set 'skipCallbacks' to 'true' if a Java exception occurred.
+ * Java function will only be called if 'skipCallbacks' is originally 'false'.
+ *
+ * Return "false" if an exception occurred while calling the Java function
+ *        "true" otherwise
+ */
+bool NativeInputEventSender::notifyConsumerResponse(
+        JNIEnv* env, jobject sender, const InputPublisher::ConsumerResponse& response,
+        bool skipCallbacks) {
+    if (std::holds_alternative<InputPublisher::Timeline>(response)) {
+        const InputPublisher::Timeline& timeline = std::get<InputPublisher::Timeline>(response);
+
+        if (kDebugDispatchCycle) {
+            ALOGD("channel '%s' ~ Received timeline, inputEventId=%" PRId32
+                  ", gpuCompletedTime=%" PRId64 ", presentTime=%" PRId64,
+                  getInputChannelName().c_str(), timeline.inputEventId,
+                  timeline.graphicsTimeline[GraphicsTimeline::GPU_COMPLETED_TIME],
+                  timeline.graphicsTimeline[GraphicsTimeline::PRESENT_TIME]);
+        }
+
+        if (skipCallbacks) {
+            ALOGW("Java exception occurred. Skipping dispatchTimelineReported for "
+                  "inputEventId=%" PRId32,
+                  timeline.inputEventId);
+            return true;
+        }
+
+        env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchTimelineReported,
+                            timeline.inputEventId, timeline.graphicsTimeline);
+        if (env->ExceptionCheck()) {
+            ALOGE("Exception dispatching timeline, inputEventId=%" PRId32, timeline.inputEventId);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Must be a Finished event
+    const InputPublisher::Finished& finished = std::get<InputPublisher::Finished>(response);
+
+    auto it = mPublishedSeqMap.find(finished.seq);
+    if (it == mPublishedSeqMap.end()) {
+        ALOGW("Received 'finished' signal for unknown seq number = %" PRIu32, finished.seq);
+        // Since this is coming from the receiver (typically app), it's possible that an app
+        // does something wrong and sends bad data. Just ignore and process other events.
+        return true;
+    }
+    const uint32_t seq = it->second;
+    mPublishedSeqMap.erase(it);
+
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",
+              getInputChannelName().c_str(), seq, finished.handled ? "true" : "false",
+              mPublishedSeqMap.size());
+    }
+    if (skipCallbacks) {
+        return true;
+    }
+
+    env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchInputEventFinished,
+                        static_cast<jint>(seq), static_cast<jboolean>(finished.handled));
+    if (env->ExceptionCheck()) {
+        ALOGE("Exception dispatching finished signal for seq=%" PRIu32, seq);
+        return false;
+    }
+    return true;
+}
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
-    sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
-            inputChannelObj);
+    std::shared_ptr<InputChannel> inputChannel =
+            android_view_InputChannel_getInputChannel(env, inputChannelObj);
     if (inputChannel == NULL) {
         jniThrowRuntimeException(env, "InputChannel is not initialized.");
         return 0;
@@ -324,6 +376,9 @@ int register_android_view_InputEventSender(JNIEnv* env) {
 
     gInputEventSenderClassInfo.dispatchInputEventFinished = GetMethodIDOrDie(
             env, gInputEventSenderClassInfo.clazz, "dispatchInputEventFinished", "(IZ)V");
+    gInputEventSenderClassInfo.dispatchTimelineReported =
+            GetMethodIDOrDie(env, gInputEventSenderClassInfo.clazz, "dispatchTimelineReported",
+                             "(IJJ)V");
 
     return res;
 }

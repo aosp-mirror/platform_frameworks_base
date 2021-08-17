@@ -435,7 +435,9 @@ public final class PdfRenderer implements AutoCloseable {
                 transform.postTranslate(contentLeft, contentTop);
             }
 
-            final long transformPtr = transform.native_instance;
+            // FIXME: This code is planned to be outside the UI rendering module, so it should not
+            // be able to access native instances from Bitmap, Matrix, etc.
+            final long transformPtr = transform.ni();
 
             synchronized (sPdfiumLock) {
                 nativeRenderPage(mNativeDocument, mNativePage, destination.getNativeInstance(),

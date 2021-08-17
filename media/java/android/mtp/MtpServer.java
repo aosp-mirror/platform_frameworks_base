@@ -144,11 +144,6 @@ public class MtpServer implements Runnable {
         native_remove_storage(storage.getStorageId());
     }
 
-    public static void configure(boolean usePtp) {
-        native_configure(usePtp);
-    }
-
-    public static native final void native_configure(boolean usePtp);
     private native final void native_setup(
             MtpDatabase database,
             FileDescriptor controlFd,

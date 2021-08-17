@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -27,28 +28,27 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
-import java.util.function.Supplier;
-
 class StrictModeFlash {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "StrictModeFlash" : TAG_WM;
+    private static final String TITLE = "StrictModeFlash";
 
     private final SurfaceControl mSurfaceControl;
     private final Surface mSurface;
+    private final BLASTBufferQueue mBlastBufferQueue;
+
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
     private final int mThickness = 20;
 
-    StrictModeFlash(Supplier<Surface> surfaceFactory, DisplayContent dc,
-            SurfaceControl.Transaction t) {
-        mSurface = surfaceFactory.get();
+    StrictModeFlash(DisplayContent dc, SurfaceControl.Transaction t) {
         SurfaceControl ctrl = null;
         try {
             ctrl = dc.makeOverlay()
-                    .setName("StrictModeFlash")
-                    .setBufferSize(1, 1)
+                    .setName(TITLE)
+                    .setBLASTLayer()
                     .setFormat(PixelFormat.TRANSLUCENT)
-                    .setCallsite("StrictModeFlash")
+                    .setCallsite(TITLE)
                     .build();
 
             // one more than Watermark? arbitrary.
@@ -56,14 +56,15 @@ class StrictModeFlash {
             t.setPosition(ctrl, 0, 0);
             t.show(ctrl);
             // Ensure we aren't considered as obscuring for Input purposes.
-            InputMonitor.setTrustedOverlayInputInfo(ctrl, t, dc.getDisplayId(),
-                    "StrictModeFlash");
-
-            mSurface.copyFrom(ctrl);
+            InputMonitor.setTrustedOverlayInputInfo(ctrl, t, dc.getDisplayId(), TITLE);
         } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
         mDrawNeeded = true;
+
+        mBlastBufferQueue = new BLASTBufferQueue(TITLE, mSurfaceControl, 1 /* width */,
+                1 /* height */, PixelFormat.RGBA_8888);
+        mSurface = mBlastBufferQueue.createSurface();
     }
 
     private void drawIfNeeded() {
@@ -73,13 +74,12 @@ class StrictModeFlash {
         mDrawNeeded = false;
         final int dw = mLastDW;
         final int dh = mLastDH;
+        mBlastBufferQueue.update(mSurfaceControl, dw, dh, PixelFormat.RGBA_8888);
 
-        Rect dirty = new Rect(0, 0, dw, dh);
         Canvas c = null;
         try {
-            c = mSurface.lockCanvas(dirty);
-        } catch (IllegalArgumentException e) {
-        } catch (Surface.OutOfResourcesException e) {
+            c = mSurface.lockCanvas(null);
+        } catch (IllegalArgumentException | OutOfResourcesException e) {
         }
         if (c == null) {
             return;

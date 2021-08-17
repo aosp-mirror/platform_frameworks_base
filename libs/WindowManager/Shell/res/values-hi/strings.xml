@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"बंद करें"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तार करें"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"मेन्यू"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"पिक्चर में पिक्चर\" के अंदर है"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने के लिए टैप करें और उसे बंद करें ."</string>
+    <string name="pip_play" msgid="3496151081459417097">"चलाएं"</string>
+    <string name="pip_pause" msgid="690688849510295232">"रोकें"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"अगले पर जाएं"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"पिछले पर जाएं"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदलें"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"ऐप्लिकेशन शायद स्प्लिट स्क्रीन मोड में काम न करे."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"विभाजित स्क्रीन विभाजक"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"बाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"बाईं स्क्रीन को 70% बनाएं"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"बाईं स्क्रीन को 50% बनाएं"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"बाईं स्क्रीन को 30% बनाएं"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"दाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ऊपर की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"ऊपर की स्क्रीन को 70% बनाएं"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ऊपर की स्क्रीन को 50% बनाएं"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ऊपर की स्क्रीन को 30% बनाएं"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"नीचे की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"वन-हैंडेड मोड का इस्तेमाल करना"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"इस मोड से बाहर निकलने के लिए, स्क्रीन के सबसे निचले हिस्से से ऊपर की ओर स्वाइप करें या ऐप्लिकेशन के बाहर कहीं भी टैप करें"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"वन-हैंडेड मोड चालू करें"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"वन-हैंडेड मोड से बाहर निकलें"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ओवरफ़्लो"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"स्टैक में वापस जोड़ें"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> और <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> अन्य ऐप्लिकेशन से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"सबसे ऊपर बाईं ओर ले जाएं"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"सबसे ऊपर दाईं ओर ले जाएं"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"बाईं ओर सबसे नीचे ले जाएं"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"सबसे नीचे दाईं ओर ले जाएं"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> की सेटिंग"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल खारिज करें"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"बातचीत को बबल न करें"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"बबल्स का इस्तेमाल करके चैट करें"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"नई बातचीत फ़्लोटिंग आइकॉन या बबल्स की तरह दिखेंगी. बबल को खोलने के लिए टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए खींचें और छोड़ें."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"जब चाहें, बबल्स को कंट्रोल करें"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ठीक है"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन पर देखने के लिए टैप करें."</string>
+    <string name="got_it" msgid="4428750913636945527">"ठीक है"</string>
+</resources>

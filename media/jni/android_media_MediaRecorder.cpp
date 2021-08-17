@@ -45,6 +45,8 @@
 
 #include <system/audio.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android/content/AttributionSourceState.h>
+#include <android_os_Parcel.h>
 
 // ----------------------------------------------------------------------------
 
@@ -617,13 +619,15 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
 static void
 android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                         jstring packageName, jstring opPackageName)
+                                         jstring packageName, jobject jAttributionSource)
 {
     ALOGV("setup");
 
-    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
+    android::content::AttributionSourceState attributionSource;
+    attributionSource.readFromParcel(parcel);
+    sp<MediaRecorder> mr = new MediaRecorder(attributionSource);
 
-    sp<MediaRecorder> mr = new MediaRecorder(String16(opPackageNameStr.c_str()));
     if (mr == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -869,7 +873,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
     {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Landroid/os/Parcel;)V",
                                                                 (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },

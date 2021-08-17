@@ -16,5 +16,14 @@
   -->
 
 <resources>
-    <string name="activity_title">New Insets Chat</string>
+    <string name="application_title">Window Insets Tests</string>
+    <string name="chat_activity_title">New Insets Chat</string>
+    <string name="controller_activity_title">Window Insets Controller</string>
+
+    <!-- The item positions should match the flag values respectively. -->
+    <string-array name="behaviors">
+        <item>BEHAVIOR_SHOW_BARS_BY_TOUCH</item>
+        <item>BEHAVIOR_DEFAULT</item>
+        <item>BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE</item>
+    </string-array>
 </resources>

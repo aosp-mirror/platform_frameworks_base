@@ -49,7 +49,7 @@ public class IconDrawableFactory {
     }
 
     protected boolean needsBadging(ApplicationInfo appInfo, @UserIdInt int userId) {
-        return appInfo.isInstantApp() || mUm.isManagedProfile(userId);
+        return appInfo.isInstantApp() || mUm.hasBadge(userId);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

@@ -37,7 +37,7 @@ import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.widget.RemoteViews;
-import android.widget.RemoteViews.OnClickHandler;
+import android.widget.RemoteViews.InteractionHandler;
 
 import com.android.internal.R;
 import com.android.internal.appwidget.IAppWidgetHost;
@@ -71,7 +71,7 @@ public class AppWidgetHost {
     private final int mHostId;
     private final Callbacks mCallbacks;
     private final SparseArray<AppWidgetHostView> mViews = new SparseArray<>();
-    private OnClickHandler mOnClickHandler;
+    private InteractionHandler mInteractionHandler;
 
     static class Callbacks extends IAppWidgetHost.Stub {
         private final WeakReference<Handler> mWeakHandler;
@@ -175,10 +175,10 @@ public class AppWidgetHost {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public AppWidgetHost(Context context, int hostId, OnClickHandler handler, Looper looper) {
+    public AppWidgetHost(Context context, int hostId, InteractionHandler handler, Looper looper) {
         mContextOpPackageName = context.getOpPackageName();
         mHostId = hostId;
-        mOnClickHandler = handler;
+        mInteractionHandler = handler;
         mHandler = new UpdateHandler(looper);
         mCallbacks = new Callbacks(mHandler);
         mDisplayMetrics = context.getResources().getDisplayMetrics();
@@ -320,6 +320,15 @@ public class AppWidgetHost {
     }
 
     /**
+     * Set the host's interaction handler.
+     *
+     * @hide
+     */
+    public void setInteractionHandler(InteractionHandler interactionHandler) {
+        mInteractionHandler = interactionHandler;
+    }
+
+    /**
      * Gets a list of all the appWidgetIds that are bound to the current host
      */
     public int[] getAppWidgetIds() {
@@ -401,7 +410,7 @@ public class AppWidgetHost {
             return null;
         }
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
-        view.setOnClickHandler(mOnClickHandler);
+        view.setInteractionHandler(mInteractionHandler);
         view.setAppWidget(appWidgetId, appWidget);
         synchronized (mViews) {
             mViews.put(appWidgetId, view);
@@ -423,7 +432,7 @@ public class AppWidgetHost {
      */
     protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
-        return new AppWidgetHostView(context, mOnClickHandler);
+        return new AppWidgetHostView(context, mInteractionHandler);
     }
 
     /**

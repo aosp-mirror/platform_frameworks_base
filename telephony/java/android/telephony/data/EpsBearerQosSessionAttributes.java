@@ -206,6 +206,26 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EpsBearerQosSessionAttributes epsBearerAttr = (EpsBearerQosSessionAttributes) o;
+        return mQci == epsBearerAttr.mQci
+                && mMaxUplinkBitRate == epsBearerAttr.mMaxUplinkBitRate
+                && mMaxDownlinkBitRate == epsBearerAttr.mMaxDownlinkBitRate
+                && mGuaranteedUplinkBitRate == epsBearerAttr.mGuaranteedUplinkBitRate
+                && mGuaranteedDownlinkBitRate == epsBearerAttr.mGuaranteedDownlinkBitRate
+                && mRemoteAddresses.size() == epsBearerAttr.mRemoteAddresses.size()
+                && mRemoteAddresses.containsAll(epsBearerAttr.mRemoteAddresses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mQci, mMaxUplinkBitRate, mMaxDownlinkBitRate,
+                mGuaranteedUplinkBitRate, mGuaranteedDownlinkBitRate, mRemoteAddresses);
+    }
+
     @NonNull
     public static final Creator<EpsBearerQosSessionAttributes> CREATOR =
             new Creator<EpsBearerQosSessionAttributes>() {

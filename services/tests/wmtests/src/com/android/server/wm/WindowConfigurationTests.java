@@ -27,6 +27,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_MAX_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -78,11 +79,14 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final WindowConfiguration winConfig3 = config3.windowConfiguration;
         final Configuration config4 = new Configuration();
         final WindowConfiguration winConfig4 = config4.windowConfiguration;
+        final Configuration config5 = new Configuration();
+        final WindowConfiguration winConfig5 = config5.windowConfiguration;
 
         winConfig1.setAppBounds(0, 1, 1, 0);
         winConfig2.setAppBounds(1, 2, 2, 1);
         winConfig3.setAppBounds(winConfig1.getAppBounds());
         winConfig4.setRotation(Surface.ROTATION_90);
+        winConfig5.setAppBounds(winConfig1.getAppBounds());
 
         assertEquals(CONFIG_WINDOW_CONFIGURATION, config1.diff(config2));
         assertEquals(0, config1.diffPublicOnly(config2));
@@ -104,6 +108,13 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(0, config1.diff(config3));
         assertEquals(0, config1.diffPublicOnly(config3));
         assertEquals(0, winConfig1.diff(winConfig3, false /* compareUndefined */));
+
+        winConfig1.setMaxBounds(1, 1, 1, 1);
+        winConfig5.setMaxBounds(2, 2, 2, 2);
+        assertEquals(WINDOW_CONFIG_MAX_BOUNDS,
+                winConfig1.diff(winConfig5, false /* compareUndefined */));
+        assertEquals(CONFIG_WINDOW_CONFIGURATION, config1.diff(config5));
+        assertEquals(0, config1.diffPublicOnly(config5));
     }
 
     /** Tests {@link android.app.WindowConfiguration#compareTo(WindowConfiguration)}. */
@@ -115,6 +126,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final Configuration config1 = new Configuration();
         final WindowConfiguration winConfig1 = config1.windowConfiguration;
         winConfig1.setAppBounds(1, 2, 3, 4);
+        winConfig1.setMaxBounds(1, 2, 3, 4);
 
         final Configuration config2 = new Configuration(config1);
         final WindowConfiguration winConfig2 = config2.windowConfiguration;
@@ -149,6 +161,12 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertNotEquals(0, config1.compareTo(config2));
         assertNotEquals(0, winConfig1.compareTo(winConfig2));
         winConfig2.setRotation(winConfig1.getRotation());
+
+        // Different max bounds
+        winConfig2.setMaxBounds(0, 2, 3, 4);
+        assertNotEquals(0, config1.compareTo(config2));
+        assertNotEquals(0, winConfig1.compareTo(winConfig2));
+        winConfig2.setMaxBounds(winConfig1.getMaxBounds());
 
         assertEquals(1, blankConfig.compareTo(config1));
         assertEquals(1, blankWinConfig.compareTo(winConfig1));

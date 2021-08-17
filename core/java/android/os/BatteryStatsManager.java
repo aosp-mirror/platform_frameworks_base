@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.net.NetworkStack;
 import android.os.connectivity.CellularBatteryStats;
@@ -33,6 +34,7 @@ import com.android.internal.app.IBatteryStats;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * This class provides an API surface for internal system components to report events that are
@@ -87,7 +89,7 @@ public final class BatteryStatsManager {
     public static final int NUM_WIFI_STATES = WIFI_STATE_SOFT_AP + 1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_STATE_" }, value = {
+    @IntDef(prefix = { "WIFI_STATE_" }, value = {
             WIFI_STATE_OFF,
             WIFI_STATE_OFF_SCANNING,
             WIFI_STATE_ON_NO_NETWORKS,
@@ -137,7 +139,7 @@ public final class BatteryStatsManager {
     public static final int NUM_WIFI_SUPPL_STATES = WIFI_SUPPL_STATE_UNINITIALIZED + 1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_SUPPL_STATE_" }, value = {
+    @IntDef(prefix = { "WIFI_SUPPL_STATE_" }, value = {
             WIFI_SUPPL_STATE_INVALID,
             WIFI_SUPPL_STATE_DISCONNECTED,
             WIFI_SUPPL_STATE_INTERFACE_DISABLED,
@@ -160,6 +162,47 @@ public final class BatteryStatsManager {
     /** @hide */
     public BatteryStatsManager(IBatteryStats batteryStats) {
         mBatteryStats = batteryStats;
+    }
+
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BatteryUsageStats getBatteryUsageStats() {
+        return getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT);
+    }
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
+        return getBatteryUsageStats(List.of(query)).get(0);
+    }
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
+        try {
+            return mBatteryStats.getBatteryUsageStats(queries);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -499,5 +542,75 @@ public final class BatteryStatsManager {
         // generic class or move it to generic package.
         return isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
                 : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    }
+
+    /**
+     * Sets battery AC charger to enabled/disabled, and freezes the battery state.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void setChargerAcOnline(boolean online, boolean forceUpdate) {
+        try {
+            mBatteryStats.setChargerAcOnline(online, forceUpdate);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets battery level, and freezes the battery state.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void setBatteryLevel(int level, boolean forceUpdate) {
+        try {
+            mBatteryStats.setBatteryLevel(level, forceUpdate);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unplugs battery, and freezes the battery state.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void unplugBattery(boolean forceUpdate) {
+        try {
+            mBatteryStats.unplugBattery(forceUpdate);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unfreezes battery state, returning to current hardware values.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void resetBattery(boolean forceUpdate) {
+        try {
+            mBatteryStats.resetBattery(forceUpdate);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Suspend charging even if plugged in.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void suspendBatteryInput() {
+        try {
+            mBatteryStats.suspendBatteryInput();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 }

@@ -34,18 +34,20 @@ import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class UserInfoControllerImpl implements UserInfoController {
 
     private static final String TAG = "UserInfoController";
@@ -75,12 +77,14 @@ public class UserInfoControllerImpl implements UserInfoController {
                 null, null);
     }
 
-    public void addCallback(OnUserInfoChangedListener callback) {
+    @Override
+    public void addCallback(@NonNull OnUserInfoChangedListener callback) {
         mCallbacks.add(callback);
         callback.onUserInfoChanged(mUserName, mUserDrawable, mUserAccount);
     }
 
-    public void removeCallback(OnUserInfoChangedListener callback) {
+    @Override
+    public void removeCallback(@NonNull OnUserInfoChangedListener callback) {
         mCallbacks.remove(callback);
     }
 
@@ -139,7 +143,7 @@ public class UserInfoControllerImpl implements UserInfoController {
         final int userId = userInfo.id;
         final boolean isGuest = userInfo.isGuest();
         final String userName = userInfo.name;
-        final boolean lightIcon = mContext.getThemeResId() != R.style.Theme_SystemUI_Light;
+        final boolean lightIcon = mContext.getThemeResId() != R.style.Theme_SystemUI_LightWallpaper;
 
         final Resources res = mContext.getResources();
         final int avatarSize = Math.max(

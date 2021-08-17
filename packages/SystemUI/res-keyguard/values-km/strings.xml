@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"បញ្ចូល​ពាក្យ​សម្ងាត់​របស់អ្នក"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"បាន​សាក​ថ្មពេញ"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"បាន​សាក​ថ្ម"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងសាកថ្ម​ឥតខ្សែ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>

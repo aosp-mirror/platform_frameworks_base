@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"Sulje"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Laajenna"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"Asetukset"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"Valikko"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> on kuva kuvassa ‑tilassa"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Jos et halua, että <xliff:g id="NAME">%s</xliff:g> voi käyttää tätä ominaisuutta, avaa asetukset napauttamalla ja poista se käytöstä."</string>
+    <string name="pip_play" msgid="3496151081459417097">"Toista"</string>
+    <string name="pip_pause" msgid="690688849510295232">"Keskeytä"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"Siirry seuraavaan"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Siirry edelliseen"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Muuta kokoa"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Sovellus ei ehkä toimi jaetulla näytöllä."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Sovellus ei tue jaetun näytön tilaa."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Sovellus ei ehkä toimi toissijaisella näytöllä."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Sovellus ei tue käynnistämistä toissijaisilla näytöillä."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Näytön jakaja"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Vasen koko näytölle"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Vasen 70 %"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Vasen 50 %"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"Vasen 30 %"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Oikea koko näytölle"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Yläosa koko näytölle"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"Yläosa 70 %"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Yläosa 50 %"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Yläosa 30 %"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Alaosa koko näytölle"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Yhden käden moodin käyttö"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Poistu pyyhkäisemällä ylös näytön alareunasta tai napauttamalla sovelluksen yllä"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Käynnistä yhden käden moodi"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Poistu yhden käden moodista"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Kuplien asetukset: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Ylivuoto"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Lisää takaisin pinoon"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g>: <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> (<xliff:g id="APP_NAME">%2$s</xliff:g>) ja <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> muuta"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Siirrä vasempaan yläreunaan"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Siirrä oikeaan yläreunaan"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Siirrä vasempaan alareunaan"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Siirrä oikeaan alareunaan"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>: asetukset"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ohita kupla"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Älä näytä kuplia keskusteluista"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chattaile kuplien avulla"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Uudet keskustelut näkyvät kelluvina kuvakkeina tai kuplina. Avaa kupla napauttamalla. Siirrä sitä vetämällä."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Muuta kuplien asetuksia milloin tahansa"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Valitse Ylläpidä, jos haluat poistaa kuplat käytöstä tästä sovelluksesta"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Okei"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ei viimeaikaisia kuplia"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Viimeaikaiset ja äskettäin ohitetut kuplat näkyvät täällä"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"Kupla"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Ylläpidä"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Kupla ohitettu."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Napauta, niin sovellus käynnistyy uudelleen ja siirtyy koko näytön tilaan."</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
+</resources>

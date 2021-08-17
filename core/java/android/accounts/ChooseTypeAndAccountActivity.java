@@ -16,12 +16,9 @@
 package android.accounts;
 
 import android.app.Activity;
-import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -145,22 +142,14 @@ public class ChooseTypeAndAccountActivity extends Activity
         getWindow().addSystemFlags(
                 android.view.WindowManager.LayoutParams
                         .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-        String message = null;
 
-        try {
-            IBinder activityToken = getActivityToken();
-            mCallingUid = ActivityTaskManager.getService().getLaunchedFromUid(activityToken);
-            mCallingPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                    activityToken);
-            if (mCallingUid != 0 && mCallingPackage != null) {
-                Bundle restrictions = UserManager.get(this)
-                        .getUserRestrictions(new UserHandle(UserHandle.getUserId(mCallingUid)));
-                mDisallowAddAccounts =
-                        restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false);
-            }
-        } catch (RemoteException re) {
-            // Couldn't figure out caller details
-            Log.w(getClass().getSimpleName(), "Unable to get caller identity \n" + re);
+        mCallingUid = getLaunchedFromUid();
+        mCallingPackage = getLaunchedFromPackage();
+        if (mCallingUid != 0 && mCallingPackage != null) {
+            Bundle restrictions = UserManager.get(this)
+                    .getUserRestrictions(new UserHandle(UserHandle.getUserId(mCallingUid)));
+            mDisallowAddAccounts =
+                    restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false);
         }
 
         // save some items we use frequently

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.graphics.FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
+
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -154,7 +156,23 @@ public final class FrameMetrics {
      */
     public static final int VSYNC_TIMESTAMP = 11;
 
-    private static final int FRAME_INFO_FLAG_FIRST_DRAW = 1 << 0;
+    /**
+     * Metric identifier for GPU duration.
+     * <p>
+     * Represents the total time in nanoseconds this frame took to complete on the GPU.
+     * </p>
+     **/
+    public static final int GPU_DURATION = 12;
+
+    /**
+     * Metric identifier for the total duration that was available to the app to produce a frame.
+     * <p>
+     * Represents the total time in nanoseconds the system allocated for the app to produce its
+     * frame. If FrameMetrics.TOTAL_DURATION < FrameMetrics.DEADLINE, the app hit its intended
+     * deadline and there was no jank visible to the user.
+     * </p>
+     **/
+    public static final int DEADLINE = 13;
 
     /**
      * Identifiers for metrics available for each frame.
@@ -175,6 +193,8 @@ public final class FrameMetrics {
             FIRST_DRAW_FRAME,
             INTENDED_VSYNC_TIMESTAMP,
             VSYNC_TIMESTAMP,
+            GPU_DURATION,
+            DEADLINE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Metric {}
@@ -190,38 +210,53 @@ public final class FrameMetrics {
      */
     @IntDef ({
             Index.FLAGS,
+            Index.FRAME_TIMELINE_VSYNC_ID,
             Index.INTENDED_VSYNC,
             Index.VSYNC,
-            Index.OLDEST_INPUT_EVENT,
-            Index.NEWEST_INPUT_EVENT,
+            Index.INPUT_EVENT_ID,
             Index.HANDLE_INPUT_START,
             Index.ANIMATION_START,
             Index.PERFORM_TRAVERSALS_START,
             Index.DRAW_START,
+            Index.FRAME_DEADLINE,
             Index.SYNC_QUEUED,
             Index.SYNC_START,
             Index.ISSUE_DRAW_COMMANDS_START,
             Index.SWAP_BUFFERS,
             Index.FRAME_COMPLETED,
+            Index.DEQUEUE_BUFFER_DURATION,
+            Index.QUEUE_BUFFER_DURATION,
+            Index.GPU_COMPLETED,
+            Index.SWAP_BUFFERS_COMPLETED,
+            Index.DISPLAY_PRESENT_TIME,
     })
     @Retention(RetentionPolicy.SOURCE)
-    private @interface Index {
+    public @interface Index {
         int FLAGS = 0;
-        int INTENDED_VSYNC = 1;
-        int VSYNC = 2;
-        int OLDEST_INPUT_EVENT = 3;
-        int NEWEST_INPUT_EVENT = 4;
+        int FRAME_TIMELINE_VSYNC_ID = 1;
+        int INTENDED_VSYNC = 2;
+        int VSYNC = 3;
+        int INPUT_EVENT_ID = 4;
         int HANDLE_INPUT_START = 5;
         int ANIMATION_START = 6;
         int PERFORM_TRAVERSALS_START = 7;
         int DRAW_START = 8;
-        int SYNC_QUEUED = 9;
-        int SYNC_START = 10;
-        int ISSUE_DRAW_COMMANDS_START = 11;
-        int SWAP_BUFFERS = 12;
-        int FRAME_COMPLETED = 13;
+        int FRAME_DEADLINE = 9;
+        int FRAME_START_TIME = 10;
+        int FRAME_INTERVAL = 11;
+        int SYNC_QUEUED = 12;
+        int SYNC_START = 13;
+        int ISSUE_DRAW_COMMANDS_START = 14;
+        int SWAP_BUFFERS = 15;
+        int FRAME_COMPLETED = 16;
+        int DEQUEUE_BUFFER_DURATION = 17;
+        int QUEUE_BUFFER_DURATION = 18;
+        int GPU_COMPLETED = 19;
+        int SWAP_BUFFERS_COMPLETED = 20;
+        int DISPLAY_PRESENT_TIME = 21;
 
-        int FRAME_STATS_COUNT = 17; // must always be last
+        int FRAME_STATS_COUNT = 22; // must always be last and in sync with
+                                    // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
     }
 
     /*
@@ -246,13 +281,26 @@ public final class FrameMetrics {
         // COMMAND_ISSUE
         Index.ISSUE_DRAW_COMMANDS_START, Index.SWAP_BUFFERS,
         // SWAP_BUFFERS
-        Index.SWAP_BUFFERS, Index.FRAME_COMPLETED,
+        Index.SWAP_BUFFERS, Index.SWAP_BUFFERS_COMPLETED,
         // TOTAL_DURATION
         Index.INTENDED_VSYNC, Index.FRAME_COMPLETED,
+        // RESERVED for FIRST_DRAW_FRAME
+        0, 0,
+        // RESERVED forINTENDED_VSYNC_TIMESTAMP
+        0, 0,
+        // RESERVED VSYNC_TIMESTAMP
+        0, 0,
+        // GPU_DURATION
+        Index.SWAP_BUFFERS, Index.GPU_COMPLETED,
+        // DEADLINE
+        Index.INTENDED_VSYNC, Index.FRAME_DEADLINE,
     };
 
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    /* package */ final long[] mTimingData;
+    public final long[] mTimingData;
 
     /**
      * Constructs a FrameMetrics object as a copy.
@@ -271,7 +319,7 @@ public final class FrameMetrics {
     /**
      * @hide
      */
-    FrameMetrics() {
+    public FrameMetrics() {
         mTimingData = new long[Index.FRAME_STATS_COUNT];
     }
 
@@ -286,7 +334,7 @@ public final class FrameMetrics {
      * @return the value of the metric or -1 if it is not available.
      */
     public long getMetric(@Metric int id) {
-        if (id < UNKNOWN_DELAY_DURATION || id > VSYNC_TIMESTAMP) {
+        if (id < UNKNOWN_DELAY_DURATION || id > DEADLINE) {
             return -1;
         }
 
@@ -295,7 +343,7 @@ public final class FrameMetrics {
         }
 
         if (id == FIRST_DRAW_FRAME) {
-            return (mTimingData[Index.FLAGS] & FRAME_INFO_FLAG_FIRST_DRAW) != 0 ? 1 : 0;
+            return (mTimingData[Index.FLAGS] & FLAG_WINDOW_VISIBILITY_CHANGED) != 0 ? 1 : 0;
         } else if (id == INTENDED_VSYNC_TIMESTAMP) {
             return mTimingData[Index.INTENDED_VSYNC];
         } else if (id == VSYNC_TIMESTAMP) {

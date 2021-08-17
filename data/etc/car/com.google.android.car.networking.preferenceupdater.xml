@@ -16,12 +16,21 @@
   -->
 <permissions>
     <privapp-permissions package="com.google.android.car.networking.preferenceupdater">
-        <permission name="android.permission.ACCESS_NETWORK_STATE"/>
+        <permission name="android.permission.ACCESS_NETWORK_STATE" />
         <permission name="android.permission.ACCESS_WIFI_STATE"/>
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
+        <permission name="android.permission.CHANGE_NETWORK_STATE" />
+        <permission name="android.permission.CONNECTIVITY_INTERNAL" />
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
+        <permission name="android.permission.CONTROL_OEM_PAID_NETWORK_PREFERNCE" />
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
+        <permission name="android.permission.INTERNET" />
         <permission name="android.permission.LOCATION_HARDWARE"/>
+        <permission name="android.permission.PACKAGE_USAGE_STATS" />
+        <permission name="android.permission.RECEIVE_BOOT_COMPLETED" />
+        <permission name="android.permission.WAKE_LOCK" />
+        <permission name="android.permission.WRITE_SETTINGS" />
+        <permission name="android.car.permission.CAR_DRIVING_STATE" />
     </privapp-permissions>
 </permissions>

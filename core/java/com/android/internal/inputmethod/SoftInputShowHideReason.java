@@ -48,7 +48,12 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_DOCKED_STACK_ATTACHED,
         SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
         SoftInputShowHideReason.HIDE_BUBBLES,
-        SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR})
+        SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR,
+        SoftInputShowHideReason.HIDE_REMOVE_CLIENT,
+        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY,
+        SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -144,7 +149,7 @@ public @interface SoftInputShowHideReason {
     int HIDE_RECENTS_ANIMATION = 18;
 
     /**
-     * Hide soft input when {@link com.android.systemui.bubbles.BubbleController} is expanding,
+     * Hide soft input when {@link com.android.wm.shell.bubbles.BubbleController} is expanding,
      * switching, or collapsing Bubbles.
      */
     int HIDE_BUBBLES = 19;
@@ -161,4 +166,33 @@ public @interface SoftInputShowHideReason {
      * soft-input when the same window focused again to align with the same behavior prior to R.
      */
     int HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR = 20;
+
+    /**
+     * Hide soft input when a {@link com.android.internal.view.IInputMethodClient} is removed.
+     */
+    int HIDE_REMOVE_CLIENT = 21;
+
+    /**
+     * Show soft input when the system invoking
+     * {@link com.android.server.wm.WindowManagerInternal#shouldRestoreImeVisibility}.
+     */
+    int SHOW_RESTORE_IME_VISIBILITY = 22;
+
+    /**
+     * Show soft input by
+     * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
+     */
+    int SHOW_TOGGLE_SOFT_INPUT = 23;
+
+    /**
+     * Hide soft input by
+     * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
+     */
+    int HIDE_TOGGLE_SOFT_INPUT = 24;
+
+    /**
+     * Show soft input by
+     * {@link android.view.InsetsController#show(int)};
+     */
+    int SHOW_SOFT_INPUT_BY_INSETS_API = 25;
 }

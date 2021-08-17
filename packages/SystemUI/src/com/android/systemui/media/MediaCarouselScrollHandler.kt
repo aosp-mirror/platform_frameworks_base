@@ -28,15 +28,17 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.qs.PageIndicator
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.util.animation.PhysicsAnimator
+import com.android.systemui.qs.PageIndicator
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.wm.shell.animation.PhysicsAnimator
 
 private const val FLING_SLOP = 1000000
 private const val DISMISS_DELAY = 100L
+private const val SCROLL_DELAY = 100L
 private const val RUBBERBAND_FACTOR = 0.2f
 private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
 
@@ -57,8 +59,10 @@ class MediaCarouselScrollHandler(
     private val mainExecutor: DelayableExecutor,
     private val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
-    private val closeGuts: () -> Unit,
-    private val falsingManager: FalsingManager
+    private val closeGuts: (immediate: Boolean) -> Unit,
+    private val falsingCollector: FalsingCollector,
+    private val falsingManager: FalsingManager,
+    private val logSmartspaceImpression: (Boolean) -> Unit
 ) {
     /**
      * Is the view in RTL
@@ -98,10 +102,11 @@ class MediaCarouselScrollHandler(
     private lateinit var settingsButton: View
 
     /**
-     * What's the currently active player index?
+     * What's the currently visible player index?
      */
-    var activeMediaIndex: Int = 0
+    var visibleMediaIndex: Int = 0
         private set
+
     /**
      * How much are we scrolled into the current media?
      */
@@ -127,7 +132,7 @@ class MediaCarouselScrollHandler(
             field = value
             // The player width has changed, let's update the scroll position to make sure
             // it's still at the same place
-            var newRelativeScroll = activeMediaIndex * playerWidthPlusPadding
+            var newRelativeScroll = visibleMediaIndex * playerWidthPlusPadding
             if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
                 newRelativeScroll += playerWidthPlusPadding -
                         (scrollIntoCurrentMedia - playerWidthPlusPadding)
@@ -162,7 +167,7 @@ class MediaCarouselScrollHandler(
 
         override fun onDown(e: MotionEvent?): Boolean {
             if (falsingProtectionNeeded) {
-                falsingManager.onNotificationStartDismissing()
+                falsingCollector.onNotificationStartDismissing()
             }
             return false
         }
@@ -190,11 +195,22 @@ class MediaCarouselScrollHandler(
             if (playerWidthPlusPadding == 0) {
                 return
             }
+
             val relativeScrollX = scrollView.relativeScrollX
             onMediaScrollingChanged(relativeScrollX / playerWidthPlusPadding,
                     relativeScrollX % playerWidthPlusPadding)
         }
     }
+
+    /**
+     * Whether the media card is visible to user if any
+     */
+    var visibleToUser: Boolean = false
+
+    /**
+     * Whether the quick setting is expanded or not
+     */
+    var qsExpanded: Boolean = false
 
     init {
         gestureDetector = GestureDetectorCompat(scrollView.context, gestureListener)
@@ -220,7 +236,7 @@ class MediaCarouselScrollHandler(
     }
 
     private fun updateSettingsPresentation() {
-        if (showsSettingsButton) {
+        if (showsSettingsButton && settingsButton.width > 0) {
             val settingsOffset = MathUtils.map(
                     0.0f,
                     getMaxTranslation().toFloat(),
@@ -258,7 +274,7 @@ class MediaCarouselScrollHandler(
     private fun onTouch(motionEvent: MotionEvent): Boolean {
         val isUp = motionEvent.action == MotionEvent.ACTION_UP
         if (isUp && falsingProtectionNeeded) {
-            falsingManager.onNotificationStopDismissing()
+            falsingCollector.onNotificationStopDismissing()
         }
         if (gestureDetector.onTouchEvent(motionEvent)) {
             if (isUp) {
@@ -282,10 +298,12 @@ class MediaCarouselScrollHandler(
                 scrollXAmount = -1 * relativePos
             }
             if (scrollXAmount != 0) {
+                val dx = if (isRtl) -scrollXAmount else scrollXAmount
+                val newScrollX = scrollView.relativeScrollX + dx
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute {
-                    scrollView.smoothScrollBy(if (isRtl) -scrollXAmount else scrollXAmount, 0)
+                    scrollView.smoothScrollTo(newScrollX, scrollView.scrollY)
                 }
             }
             val currentTranslation = scrollView.getContentTranslation()
@@ -453,12 +471,16 @@ class MediaCarouselScrollHandler(
         val wasScrolledIn = scrollIntoCurrentMedia != 0
         scrollIntoCurrentMedia = scrollInAmount
         val nowScrolledIn = scrollIntoCurrentMedia != 0
-        if (newIndex != activeMediaIndex || wasScrolledIn != nowScrolledIn) {
-            activeMediaIndex = newIndex
-            closeGuts()
+        if (newIndex != visibleMediaIndex || wasScrolledIn != nowScrolledIn) {
+            val oldIndex = visibleMediaIndex
+            visibleMediaIndex = newIndex
+            if (oldIndex != visibleMediaIndex && visibleToUser) {
+                logSmartspaceImpression(qsExpanded)
+            }
+            closeGuts(false)
             updatePlayerVisibilities()
         }
-        val relativeLocation = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
+        val relativeLocation = visibleMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
             scrollInAmount.toFloat() / playerWidthPlusPadding else 0f
         // Fix the location, because PageIndicator does not handle RTL internally
         val location = if (isRtl) {
@@ -496,7 +518,7 @@ class MediaCarouselScrollHandler(
         val scrolledIn = scrollIntoCurrentMedia != 0
         for (i in 0 until mediaContent.childCount) {
             val view = mediaContent.getChildAt(i)
-            val visible = (i == activeMediaIndex) || ((i == (activeMediaIndex + 1)) && scrolledIn)
+            val visible = (i == visibleMediaIndex) || ((i == (visibleMediaIndex + 1)) && scrolledIn)
             view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
     }
@@ -506,13 +528,13 @@ class MediaCarouselScrollHandler(
      * where it was and update our scroll position.
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
-        val removedIndex = mediaContent.indexOfChild(removed.view?.player)
-        // If the removed index is less than the activeMediaIndex, then we need to decrement it.
+        val removedIndex = mediaContent.indexOfChild(removed.playerViewHolder?.player)
+        // If the removed index is less than the visibleMediaIndex, then we need to decrement it.
         // RTL has no effect on this, because indices are always relative (start-to-end).
         // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged
-        val beforeActive = removedIndex <= activeMediaIndex
+        val beforeActive = removedIndex <= visibleMediaIndex
         if (beforeActive) {
-            activeMediaIndex = Math.max(0, activeMediaIndex - 1)
+            visibleMediaIndex = Math.max(0, visibleMediaIndex - 1)
         }
         // If the removed media item is "left of" the active one (in an absolute sense), we need to
         // scroll the view to keep that player in view.  This is because scroll position is always
@@ -539,6 +561,24 @@ class MediaCarouselScrollHandler(
      */
     fun scrollToStart() {
         scrollView.relativeScrollX = 0
+    }
+
+    /**
+     * Smooth scroll to the destination player.
+     *
+     * @param sourceIndex optional source index to indicate where the scroll should begin.
+     * @param destIndex destination index to indicate where the scroll should end.
+     */
+    fun scrollToPlayer(sourceIndex: Int = -1, destIndex: Int) {
+        if (sourceIndex >= 0 && sourceIndex < mediaContent.childCount) {
+            scrollView.relativeScrollX = sourceIndex * playerWidthPlusPadding
+        }
+        val destIndex = Math.min(mediaContent.getChildCount() - 1, destIndex)
+        val view = mediaContent.getChildAt(destIndex)
+        // We need to post this to wait for the active player becomes visible.
+        mainExecutor.executeDelayed({
+            scrollView.smoothScrollTo(view.left, scrollView.scrollY)
+        }, SCROLL_DELAY)
     }
 
     companion object {

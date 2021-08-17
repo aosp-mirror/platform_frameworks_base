@@ -45,7 +45,8 @@ public class CellBroadcastIntents {
     private static final String EXTRA_MESSAGE = "message";
 
     /**
-     * Broadcast intent action for notifying area information has been updated. The information
+     * Broadcast intent action for notifying area information has been updated. broadcast is also
+     * sent when the user turns off area info alerts. The information
      * can be retrieved by {@link CellBroadcastService#getCellBroadcastAreaInfo(int)}. The
      * associated SIM slot index of updated area information can be retrieved through the extra
      * {@link SubscriptionManager#EXTRA_SLOT_INDEX}.

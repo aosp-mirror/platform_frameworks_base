@@ -27,7 +27,7 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -98,7 +98,7 @@ public final class ContentSuggestionsPerUserService extends
     }
 
     @GuardedBy("mLock")
-    void provideContextImageLocked(int taskId, @Nullable GraphicBuffer snapshot,
+    void provideContextImageLocked(int taskId, @Nullable HardwareBuffer snapshot,
             int colorSpaceIdForSnapshot, @NonNull Bundle imageContextRequestExtras) {
         RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {

@@ -159,7 +159,9 @@ public class RestoreUtils {
                             Signature[] sigs = manifestSignatures.get(info.packageName);
                             PackageManagerInternal pmi = LocalServices.getService(
                                     PackageManagerInternal.class);
-                            if (AppBackupUtils.signaturesMatch(sigs, pkg, pmi)) {
+                            BackupEligibilityRules eligibilityRules =
+                                    BackupEligibilityRules.forBackup(packageManager, pmi, userId);
+                            if (eligibilityRules.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if (UserHandle.isCore(pkg.applicationInfo.uid)

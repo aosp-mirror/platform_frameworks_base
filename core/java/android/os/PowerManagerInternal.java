@@ -197,12 +197,6 @@ public abstract class PowerManagerInternal {
     public abstract void uidIdle(int uid);
 
     /**
-     * The hintId sent through this method should be in-line with the
-     * PowerHint defined in android/hardware/power/<version 1.0 & up>/IPower.h
-     */
-    public abstract void powerHint(int hintId, int data);
-
-    /**
      * Boost: It is sent when user interacting with the device, for example,
      * touchscreen events are incoming.
      * Defined in hardware/interfaces/power/aidl/android/hardware/power/Boost.aidl

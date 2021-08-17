@@ -15,10 +15,10 @@
  */
 package com.android.server.devicepolicy;
 
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
-import android.util.Slog;
 
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.utils.Slogf;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +48,11 @@ public class DevicePolicyConstants {
 
     private static final String BATTERY_THRESHOLD_CHARGING_KEY =
             "battery_threshold_charging";
+
+    // TODO(b/182994391): Replace with more generic solution to override the supervision
+    // component.
+    private static final String USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT_KEY =
+            "use_test_admin_as_supervision_component";
 
     /**
      * The back-off before re-connecting, when a service binding died, due to the owner
@@ -80,6 +85,12 @@ public class DevicePolicyConstants {
      */
     public final int BATTERY_THRESHOLD_CHARGING;
 
+    /**
+     * Whether to default to considering the current DO/PO as the supervision component
+     * if they are a testOnly admin.
+     */
+    public final boolean USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT;
+
 
     private DevicePolicyConstants(String settings) {
 
@@ -89,7 +100,7 @@ public class DevicePolicyConstants {
         } catch (IllegalArgumentException e) {
             // Failed to parse the settings string, log this and move on
             // with defaults.
-            Slog.e(TAG, "Bad device policy settings: " + settings);
+            Slogf.e(TAG, "Bad device policy settings: %s", settings);
         }
 
         long dasDiedServiceReconnectBackoffSec = parser.getLong(
@@ -111,6 +122,9 @@ public class DevicePolicyConstants {
         int batteryThresholdCharging = parser.getInt(
                 BATTERY_THRESHOLD_CHARGING_KEY, 20);
 
+        boolean useTestAdminAsSupervisionComponent = parser.getBoolean(
+                USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT_KEY, false);
+
         // Set minimum: 5 seconds.
         dasDiedServiceReconnectBackoffSec = Math.max(5, dasDiedServiceReconnectBackoffSec);
 
@@ -129,6 +143,7 @@ public class DevicePolicyConstants {
                 dasDiedServiceStableConnectionThresholdSec;
         BATTERY_THRESHOLD_NOT_CHARGING = batteryThresholdNotCharging;
         BATTERY_THRESHOLD_CHARGING = batteryThresholdCharging;
+        USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT = useTestAdminAsSupervisionComponent;
     }
 
     public static DevicePolicyConstants loadFromString(String settings) {

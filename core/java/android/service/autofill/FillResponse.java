@@ -23,6 +23,7 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.content.IntentSender;
@@ -76,6 +77,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable Bundle mClientState;
     private final @Nullable RemoteViews mPresentation;
     private final @Nullable InlinePresentation mInlinePresentation;
+    private final @Nullable InlinePresentation mInlineTooltipPresentation;
     private final @Nullable RemoteViews mHeader;
     private final @Nullable RemoteViews mFooter;
     private final @Nullable IntentSender mAuthentication;
@@ -95,6 +97,7 @@ public final class FillResponse implements Parcelable {
         mClientState = builder.mClientState;
         mPresentation = builder.mPresentation;
         mInlinePresentation = builder.mInlinePresentation;
+        mInlineTooltipPresentation = builder.mInlineTooltipPresentation;
         mHeader = builder.mHeader;
         mFooter = builder.mFooter;
         mAuthentication = builder.mAuthentication;
@@ -132,6 +135,11 @@ public final class FillResponse implements Parcelable {
     /** @hide */
     public @Nullable InlinePresentation getInlinePresentation() {
         return mInlinePresentation;
+    }
+
+    /** @hide */
+    public @Nullable InlinePresentation getInlineTooltipPresentation() {
+        return mInlineTooltipPresentation;
     }
 
     /** @hide */
@@ -219,6 +227,7 @@ public final class FillResponse implements Parcelable {
         private Bundle mClientState;
         private RemoteViews mPresentation;
         private InlinePresentation mInlinePresentation;
+        private InlinePresentation mInlineTooltipPresentation;
         private RemoteViews mHeader;
         private RemoteViews mFooter;
         private IntentSender mAuthentication;
@@ -360,6 +369,22 @@ public final class FillResponse implements Parcelable {
         public Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation,
                 @Nullable InlinePresentation inlinePresentation) {
+            return setAuthentication(ids, authentication, presentation, inlinePresentation, null);
+        }
+
+        /**
+         * Triggers a custom UI before before autofilling the screen with any data set in this
+         * response.
+         *
+         * <p>This method like
+         * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews, InlinePresentation)}
+         * but allows setting an {@link InlinePresentation} for the inline suggestion tooltip.
+         */
+        @NonNull
+        public Builder setAuthentication(@SuppressLint("ArrayReturn") @NonNull AutofillId[] ids,
+                @Nullable IntentSender authentication, @Nullable RemoteViews presentation,
+                @Nullable InlinePresentation inlinePresentation,
+                @Nullable InlinePresentation inlineTooltipPresentation) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
             if (mHeader != null || mFooter != null) {
@@ -373,6 +398,7 @@ public final class FillResponse implements Parcelable {
             mAuthentication = authentication;
             mPresentation = presentation;
             mInlinePresentation = inlinePresentation;
+            mInlineTooltipPresentation = inlineTooltipPresentation;
             mAuthenticationIds = assertValid(ids);
             return this;
         }
@@ -737,6 +763,9 @@ public final class FillResponse implements Parcelable {
         if (mInlinePresentation != null) {
             builder.append(", hasInlinePresentation");
         }
+        if (mInlineTooltipPresentation != null) {
+            builder.append(", hasInlineTooltipPresentation");
+        }
         if (mHeader != null) {
             builder.append(", hasHeader");
         }
@@ -784,6 +813,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelable(mInlinePresentation, flags);
+        parcel.writeParcelable(mInlineTooltipPresentation, flags);
         parcel.writeParcelable(mHeader, flags);
         parcel.writeParcelable(mFooter, flags);
         parcel.writeParcelable(mUserData, flags);
@@ -818,9 +848,10 @@ public final class FillResponse implements Parcelable {
             final IntentSender authentication = parcel.readParcelable(null);
             final RemoteViews presentation = parcel.readParcelable(null);
             final InlinePresentation inlinePresentation = parcel.readParcelable(null);
+            final InlinePresentation inlineTooltipPresentation = parcel.readParcelable(null);
             if (authenticationIds != null) {
                 builder.setAuthentication(authenticationIds, authentication, presentation,
-                        inlinePresentation);
+                        inlinePresentation, inlineTooltipPresentation);
             }
             final RemoteViews header = parcel.readParcelable(null);
             if (header != null) {

@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
@@ -86,6 +87,11 @@ public interface RegistrationManager {
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
                         AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+                /* As the cross sim will be using ePDG tunnel over internet, it behaves
+                   like IWLAN in most cases. Hence setting the access type as IWLAN
+                 */
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
             }};
 
     /** @hide */
@@ -129,6 +135,7 @@ public interface RegistrationManager {
 
             private final RegistrationCallback mLocalCallback;
             private Executor mExecutor;
+            private Bundle mBundle = new Bundle();
 
             RegistrationBinder(RegistrationCallback localCallback) {
                 mLocalCallback = localCallback;
@@ -138,7 +145,7 @@ public interface RegistrationManager {
             public void onRegistered(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onRegistered(attr));
                 } finally {
@@ -150,7 +157,7 @@ public interface RegistrationManager {
             public void onRegistering(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onRegistering(attr));
                 } finally {
@@ -162,7 +169,7 @@ public interface RegistrationManager {
             public void onDeregistered(ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
                 } finally {
@@ -174,7 +181,7 @@ public interface RegistrationManager {
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
                             getAccessType(imsRadioTech), info));
@@ -186,7 +193,7 @@ public interface RegistrationManager {
             public void onSubscriberAssociatedUriChanged(Uri[] uris) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onSubscriberAssociatedUriChanged(uris));
                 } finally {
@@ -207,6 +214,7 @@ public interface RegistrationManager {
          * @param imsTransportType the radio access technology.
          * @deprecated Use {@link #onRegistered(ImsRegistrationAttributes)} instead.
          */
+        @Deprecated
         public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
 
@@ -326,10 +334,10 @@ public interface RegistrationManager {
      * @param executor The {@link Executor} that will be used to call the IMS registration state
      *                 callback.
      * @param stateCallback A callback called on the supplied {@link Executor} that will contain the
-     *                      registration state of the IMS service, which will be one of the
-     *                      following: {@link #REGISTRATION_STATE_NOT_REGISTERED},
-     *                      {@link #REGISTRATION_STATE_REGISTERING}, or
-     *                      {@link #REGISTRATION_STATE_REGISTERED}.
+ *                      registration state of the IMS service, which will be one of the
+ *                      following: {@link #REGISTRATION_STATE_NOT_REGISTERED},
+ *                      {@link #REGISTRATION_STATE_REGISTERING}, or
+ *                      {@link #REGISTRATION_STATE_REGISTERED}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     void getRegistrationState(@NonNull @CallbackExecutor Executor executor,

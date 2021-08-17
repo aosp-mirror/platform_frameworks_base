@@ -27,7 +27,6 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
@@ -35,6 +34,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.ServiceThread;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileNotFoundException;
 

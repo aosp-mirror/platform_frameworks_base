@@ -47,7 +47,7 @@ public class PackagePartitions {
     public static final int PARTITION_PRODUCT = 4;
     public static final int PARTITION_SYSTEM_EXT = 5;
 
-    @IntDef(flag = true, prefix = { "PARTITION_" }, value = {
+    @IntDef(prefix = { "PARTITION_" }, value = {
         PARTITION_SYSTEM,
         PARTITION_VENDOR,
         PARTITION_ODM,

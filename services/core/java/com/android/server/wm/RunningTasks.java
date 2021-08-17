@@ -36,6 +36,11 @@ import java.util.TreeSet;
  */
 class RunningTasks {
 
+    static final int FLAG_FILTER_ONLY_VISIBLE_RECENTS = 1;
+    static final int FLAG_ALLOWED = 1 << 1;
+    static final int FLAG_CROSS_USERS = 1 << 2;
+    static final int FLAG_KEEP_INTENT_EXTRA = 1 << 3;
+
     // Comparator to sort by last active time (descending)
     private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
@@ -48,12 +53,12 @@ class RunningTasks {
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
     private boolean mFilterOnlyVisibleRecents;
-    private ActivityStack mTopDisplayFocusStack;
+    private Task mTopDisplayFocusRootTask;
     private RecentTasks mRecentTasks;
+    private boolean mKeepIntentExtra;
 
-    void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
-            RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
-            ArraySet<Integer> profileIds) {
+    void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
+            RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -63,12 +68,14 @@ class RunningTasks {
         mTmpSortedSet.clear();
         mCallingUid = callingUid;
         mUserId = UserHandle.getUserId(callingUid);
-        mCrossUser = crossUser;
+        mCrossUser = (flags & FLAG_CROSS_USERS) == FLAG_CROSS_USERS;
         mProfileIds = profileIds;
-        mAllowed = allowed;
-        mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
-        mTopDisplayFocusStack = root.getTopDisplayFocusedStack();
+        mAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
+        mFilterOnlyVisibleRecents =
+                (flags & FLAG_FILTER_ONLY_VISIBLE_RECENTS) == FLAG_FILTER_ONLY_VISIBLE_RECENTS;
+        mTopDisplayFocusRootTask = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
+        mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
@@ -99,9 +106,8 @@ class RunningTasks {
                 // the task's profile
                 return;
             }
-            if (!mAllowed && !task.isActivityTypeHome()) {
-                // Skip if the caller isn't allowed to fetch this task, except for the home
-                // task which we always return.
+            if (!mAllowed) {
+                // Skip if the caller isn't allowed to fetch this task
                 return;
             }
         }
@@ -114,10 +120,11 @@ class RunningTasks {
             return;
         }
 
-        final ActivityStack stack = task.getStack();
-        if (stack == mTopDisplayFocusStack && stack.getTopMostTask() == task) {
-            // For the focused stack top task, update the last stack active time so that it can be
-            // used to determine the order of the tasks (it may not be set for newly created tasks)
+        final Task rootTask = task.getRootTask();
+        if (rootTask == mTopDisplayFocusRootTask && rootTask.getTopMostTask() == task) {
+            // For the focused top root task, update the last root task active time so that it
+            // can be used to determine the order of the tasks (it may not be set for newly
+            // created tasks)
             task.touchActiveTime();
         }
 
@@ -126,7 +133,8 @@ class RunningTasks {
 
     /** Constructs a {@link RunningTaskInfo} from a given {@param task}. */
     private RunningTaskInfo createRunningTaskInfo(Task task) {
-        final RunningTaskInfo rti = task.getTaskInfo();
+        final RunningTaskInfo rti = new RunningTaskInfo();
+        task.fillTaskInfo(rti, !mKeepIntentExtra);
         // Fill in some deprecated values
         rti.id = rti.taskId;
         return rti;

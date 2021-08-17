@@ -30,7 +30,8 @@
                  android:allowBackup="false">
 
         <activity android:name=".ConfirmDialog"
-                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight">
+                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
