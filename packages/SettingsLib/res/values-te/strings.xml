@@ -26,7 +26,7 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"డిజేబుల్ చేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"తక్కువ నాణ్యతా నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"తక్కువ క్వాలిటీ నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>
