@@ -675,24 +675,43 @@ public abstract class WindowManagerInternal {
     public abstract String getWindowName(@NonNull IBinder binder);
 
     /**
-     * Return the window name of IME Insets control target.
+     * The callback after the request of show/hide input method is sent.
      *
+     * @param show Whether to show or hide input method.
+     * @param focusedToken The token of focused window.
+     * @param requestToken The token of window who requests the change.
      * @param displayId The ID of the display which input method is currently focused.
-     * @return The corresponding {@link WindowState#getName()}
+     * @return The information of the input method target.
      */
-    public abstract @Nullable String getImeControlTargetNameForLogging(int displayId);
+    public abstract ImeTargetInfo onToggleImeRequested(boolean show,
+            @NonNull IBinder focusedToken, @NonNull IBinder requestToken, int displayId);
 
-    /**
-     * Return the current window name of the input method is on top of.
-     *
-     * Note that the concept of this window is only reparent the target window behind the input
-     * method window, it may different with the window which reported by
-     * {@code InputMethodManagerService#reportStartInput} which has input connection.
-     *
-     * @param displayId The ID of the display which input method is currently focused.
-     * @return The corresponding {@link WindowState#getName()}
-     */
-    public abstract @Nullable String getImeTargetNameForLogging(int displayId);
+    /** The information of input method target when IME is requested to show or hide. */
+    public static class ImeTargetInfo {
+        public final String focusedWindowName;
+        public final String requestWindowName;
+
+        /** The window name of IME Insets control target. */
+        public final String imeControlTargetName;
+
+        /**
+         * The current window name of the input method is on top of.
+         * <p>
+         * Note that the concept of this window is only used to reparent the target window behind
+         * the input method window, it may be different from the window reported by
+         * {@link com.android.server.inputmethod.InputMethodManagerService#reportStartInput} which
+         * has input connection.
+         */
+        public final String imeLayerTargetName;
+
+        public ImeTargetInfo(String focusedWindowName, String requestWindowName,
+                String imeControlTargetName, String imeLayerTargetName) {
+            this.focusedWindowName = focusedWindowName;
+            this.requestWindowName = requestWindowName;
+            this.imeControlTargetName = imeControlTargetName;
+            this.imeLayerTargetName = imeLayerTargetName;
+        }
+    }
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

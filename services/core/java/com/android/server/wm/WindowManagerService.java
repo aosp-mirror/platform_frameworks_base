@@ -7908,30 +7908,37 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public String getImeControlTargetNameForLogging(int displayId) {
+        public ImeTargetInfo onToggleImeRequested(boolean show, IBinder focusedToken,
+                IBinder requestToken, int displayId) {
+            final String focusedWindowName;
+            final String requestWindowName;
+            final String imeControlTargetName;
+            final String imeLayerTargetName;
             synchronized (mGlobalLock) {
+                final WindowState focusedWin = mWindowMap.get(focusedToken);
+                focusedWindowName = focusedWin != null ? focusedWin.getName() : "null";
+                final WindowState requestWin = mWindowMap.get(requestToken);
+                requestWindowName = requestWin != null ? requestWin.getName() : "null";
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
-                    return null;
+                if (dc != null) {
+                    final InsetsControlTarget controlTarget = dc.getImeTarget(IME_TARGET_CONTROL);
+                    if (controlTarget != null) {
+                        final WindowState w = InsetsControlTarget.asWindowOrNull(controlTarget);
+                        imeControlTargetName = w != null ? w.getName() : controlTarget.toString();
+                    } else {
+                        imeControlTargetName = "null";
+                    }
+                    final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_LAYERING);
+                    imeLayerTargetName = target != null ? target.getWindow().getName() : "null";
+                    if (show) {
+                        dc.onShowImeRequested();
+                    }
+                } else {
+                    imeControlTargetName = imeLayerTargetName = "no-display";
                 }
-                final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_CONTROL);
-                if (target == null) {
-                    return null;
-                }
-                final WindowState win = target.getWindow();
-                return win != null ? win.getName() : target.toString();
             }
-        }
-
-        @Override
-        public String getImeTargetNameForLogging(int displayId) {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
-                    return null;
-                }
-                return dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getName();
-            }
+            return new ImeTargetInfo(focusedWindowName, requestWindowName, imeControlTargetName,
+                    imeLayerTargetName);
         }
 
         @Override
