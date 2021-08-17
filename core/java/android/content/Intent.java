@@ -6993,6 +6993,7 @@ public class Intent implements Parcelable, Cloneable {
     private int mContentUserHint = UserHandle.USER_CURRENT;
     /** Token to track instant app launches. Local only; do not copy cross-process. */
     private String mLaunchToken;
+    private Intent mOriginalIntent; // Used for the experimental "component alias" feature.
 
     // ---------------------------------------------------------------------
 
@@ -7029,6 +7030,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mIdentifier = o.mIdentifier;
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
+        this.mOriginalIntent = o.mOriginalIntent;
 
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
@@ -8191,6 +8193,22 @@ public class Intent implements Parcelable, Cloneable {
      */
     public @Nullable String getType() {
         return mType;
+    }
+
+
+    /**
+     * @hide For the experimental component alias feature. Do not use, unless you know what it is.
+     */
+    @Nullable
+    public Intent getOriginalIntent() {
+        return mOriginalIntent;
+    }
+
+    /**
+     * @hide For the experimental component alias feature. Do not use, unless you know what it is.
+     */
+    public void setOriginalIntent(@Nullable Intent originalIntent) {
+        mOriginalIntent = originalIntent;
     }
 
     /**
@@ -10838,6 +10856,11 @@ public class Intent implements Parcelable, Cloneable {
             mSelector.toShortString(b, secure, comp, extras, clip);
             b.append("}");
         }
+        if (mOriginalIntent != null) {
+            b.append(" org={");
+            mOriginalIntent.toShortString(b, secure, comp, extras, clip);
+            b.append("}");
+        }
     }
 
     /** @hide */
@@ -11133,6 +11156,13 @@ public class Intent implements Parcelable, Cloneable {
         }
         out.writeInt(mContentUserHint);
         out.writeBundle(mExtras);
+
+        if (mOriginalIntent != null) {
+            out.writeInt(1);
+            mOriginalIntent.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Intent> CREATOR
@@ -11186,6 +11216,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         mContentUserHint = in.readInt();
         mExtras = in.readBundle();
+        if (in.readInt() != 0) {
+            mOriginalIntent = new Intent(in);
+        }
     }
 
     /**
@@ -11410,6 +11443,9 @@ public class Intent implements Parcelable, Cloneable {
         if (mClipData != null) {
             mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
         }
+        if (mOriginalIntent != null) {
+            mOriginalIntent.prepareToLeaveProcess(leavingPackage);
+        }
 
         if (mExtras != null && !mExtras.isParcelled()) {
             final Object intent = mExtras.get(Intent.EXTRA_INTENT);
@@ -11504,6 +11540,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mClipData != null) {
             mClipData.prepareToEnterProcess(source);
+        }
+        if (mOriginalIntent != null) {
+            mOriginalIntent.prepareToEnterProcess(false, source);
         }
 
         if (mContentUserHint != UserHandle.USER_CURRENT) {
