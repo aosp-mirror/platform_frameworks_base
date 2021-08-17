@@ -19,6 +19,7 @@ package com.android.keyguard.dagger;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -36,8 +37,8 @@ public interface KeyguardStatusBarViewComponent {
     interface Factory {
         KeyguardStatusBarViewComponent build(
                 @BindsInstance KeyguardStatusBarView view,
-                @BindsInstance KeyguardStatusBarViewController.ViewStateProvider
-                        viewStateProvider);
+                @BindsInstance NotificationPanelViewController.NotificationPanelViewStateProvider
+                        notificationPanelViewStateProvider);
     }
 
     /** Builds a {@link KeyguardStatusViewController}. */
