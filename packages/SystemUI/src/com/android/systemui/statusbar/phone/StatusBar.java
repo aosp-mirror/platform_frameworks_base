@@ -224,8 +224,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.unfold.config.UnfoldTransitionConfig;
@@ -2656,7 +2656,7 @@ public class StatusBar extends SystemUI implements
                             options.setRotationAnimationHint(
                                     WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                         }
-                        if (intent.getAction().equals(Settings.Panel.ACTION_VOLUME)) {
+                        if (Settings.Panel.ACTION_VOLUME.equals(intent.getAction())) {
                             // Settings Panel is implemented as activity(not a dialog), so
                             // underlying app is paused and may enter picture-in-picture mode
                             // as a result.
