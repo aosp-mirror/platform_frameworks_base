@@ -1370,9 +1370,9 @@
     <string name="sms_control_message" msgid="6574313876316388239">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;odesílá velký počet SMS zpráv. Chcete aplikaci povolit, aby zprávy odesílala i nadále?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Povolit"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Odmítnout"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"Tato akce "<b>"může vést k naúčtování poplatků"</b>" na váš účet u mobilního operátora."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tato akce povede k naúčtování poplatku na váš účet u mobilního operátora."</b></string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tato akce může vést k naúčtování ceny služby třetí strany na vrub vašeho účtu u mobilního operátora."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Odeslat"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Zrušit"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Zapamatovat moji volbu"</string>

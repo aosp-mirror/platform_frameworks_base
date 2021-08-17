@@ -246,7 +246,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"關機"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"電源"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"重新啟動"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"緊急電話"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"緊急撥號"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"錯誤報告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"結束"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"螢幕截圖"</string>

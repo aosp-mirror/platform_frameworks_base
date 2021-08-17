@@ -105,7 +105,7 @@
     <string name="serviceClassFAX" msgid="2561653371698904118">"ఫ్యాక్స్"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="2029856900898545984">"నిరర్థకం"</string>
-    <string name="serviceClassDataSync" msgid="7895071363569133704">"సమకాలీకరణ"</string>
+    <string name="serviceClassDataSync" msgid="7895071363569133704">"సింక్‌"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"ప్యాకెట్"</string>
     <string name="serviceClassPAD" msgid="6850244583416306321">"PAD"</string>
     <string name="roamingText0" msgid="7793257871609854208">"రోమింగ్ సూచిక ఆన్‌లో ఉంది"</string>
@@ -171,9 +171,9 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL చెల్లనిది అయినందువలన పేజీని తెరవడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"ఫైల్‌ను యాక్సెస్ చేయడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"అభ్యర్థించిన ఫైల్‌ను కనుగొనడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ అభ్యర్థనలు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g>కు సైన్‌ఇన్ ఎర్రర్"</string>
-    <string name="contentServiceSync" msgid="2341041749565687871">"సమకాలీకరణ"</string>
+    <string name="contentServiceSync" msgid="2341041749565687871">"సింక్‌"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"సమకాలీకరించడం సాధ్యపడదు"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"చాలా ఎక్కువ <xliff:g id="CONTENT_TYPE">%s</xliff:g> తొలగించడానికి ప్రయత్నించారు."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"టాబ్లెట్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైళ్లను తొలగించండి."</string>
@@ -315,7 +315,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ఫిజికల్ యాక్టివిటీ"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"భౌతిక కార్యకలాపాన్ని యాక్సెస్ చేయండి"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"భౌతిక యాక్టివిటీని యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"సమీపంలోని పరికరాలు"</string>
@@ -349,9 +349,9 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేస్తుంది"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"సత్వరమార్గాలను అన్ఇన్‌స్టాల్ చేయడం"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ షార్ట్‌కట్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"షార్ట్‌కట్‌లను అన్ఇన్‌స్టాల్ చేయడం"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ షార్ట్‌కట్‌లను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"అవుట్‌గోయింగ్ కాల్స్‌ను దారి మళ్లించడం"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"కాల్‌ను వేరే నంబర్‌కు దారి మళ్లించే లేదా మొత్తంగా కాల్‌ను ఆపివేసే ఎంపిక సహాయంతో అవుట్‌గోయింగ్ కాల్ సమయంలో డయల్ చేయబడుతున్న నంబర్‌ను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"ఫోన్ కాల్స్‌కు సమాధానమివ్వు"</string>
@@ -500,9 +500,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"మీ Android TV పరికరం సమయ మండలిని మార్చడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"ఫోన్ యొక్క సమయ మండలిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"పరికరంలో ఖాతాలను కనుగొనడం"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"టాబ్లెట్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"మీ Android TV పరికరానికి తెలిసిన ఖాతాల జాబితాను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ఫోన్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"టాబ్లెట్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"మీ Android TV పరికరానికి తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ఫోన్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"నెట్‌వర్క్ కనెక్షన్‌లను వీక్షించడం"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"నెట్‌వర్క్‌ను పూర్తిగా యాక్సెస్ చేయగలగడం"</string>
@@ -516,9 +516,9 @@
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fiకి కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi యాక్సెస్ స్థానాలకు కనెక్ట్ చేయడానికి మరియు వాటి నుండి డిస్‌కనెక్ట్ చేయడానికి మరియు Wi-Fi నెట్‌వర్క్‌ల కోసం పరికర కాన్ఫిగరేషన్‌కు మార్పులు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fi Multicast స్వీకరణను అనుమతించడం"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ టాబ్లెట్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ Android TV పరికరానికి మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ని అనుమతిస్తుంది. ఇది మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఎక్కువ పవర్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ ఫోన్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"మల్టీక్యాస్ట్ అడ్రస్‌లను ఉపయోగించి మీ టాబ్లెట్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"మల్టీక్యాస్ట్ అడ్రస్‌లను ఉపయోగించి మీ Android TV పరికరానికి మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ని అనుమతిస్తుంది. ఇది మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఎక్కువ పవర్‌ను ఉపయోగిస్తుంది."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"మల్టీక్యాస్ట్ అడ్రస్‌లను ఉపయోగించి మీ ఫోన్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"బ్లూటూత్ సెట్టింగ్‌లను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"స్థానిక బ్లూటూత్ టాబ్లెట్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"మీ Android TV పరికరంలో బ్లూటూత్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొని, జత చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -547,7 +547,7 @@
     <string name="permdesc_nfc" msgid="8352737680695296741">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
-    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత అభ్యర్థన"</string>
+    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత రిక్వెస్ట్‌"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ సంక్లిష్టత స్థాయి (తీవ్రంగా ఉండాలా, ఓ మోస్తరుగా ఉండాలా, తక్కువ తీవ్రంగా ఉండాలా లేదా అస్సలు తీవ్రత ఉండకూడదా) తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది, అంటే పొడుగు ఎంత ఉండాలి, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. అలాగే, స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ సంక్లిష్టతను ఏ స్థాయికి సెట్ చేసుకుంటే బాగుంటుందో కూడా వినియోగదారులకు యాప్ సూచించగలదు, కానీ వినియోగదారులు నిరభ్యంతరంగా ఆ సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. ఇంకో ముఖ్య విషయం, స్క్రీన్ లాక్‌ అన్నది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక ఖచ్చితమైన పాస్‌వర్డ్‌ ఏమిటనేది యాప్‌కు తెలియదు."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
@@ -555,11 +555,11 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"వినియోగం కోసం వేలిముద్ర టెంప్లేట్‌లను జోడించే, తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"వేలిముద్ర హార్డ్‌వేర్‌ని ఉపయోగించడానికి అనుమతి"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"ప్రామాణీకరణ కోసం వేలిముద్ర హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"మీ సంగీత సేకరణను సవరించండి"</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"మీ సంగీత సేకరణను ఎడిట్ చేయండి"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"మీ సంగీత సేకరణని సవరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"మీ వీడియో సేకరణను సవరించండి"</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"మీ వీడియో సేకరణను ఎడిట్ చేయండి"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"మీ వీడియో సేకరణను సవరించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
-    <string name="permlab_imagesWrite" msgid="1774555086984985578">"మీ ఫోటో సేకరణను సవరించండి"</string>
+    <string name="permlab_imagesWrite" msgid="1774555086984985578">"మీ ఫోటో సేకరణను ఎడిట్ చేయండి"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"మీ ఫోటో సేకరణను సవరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"మీ మీడియా సేకరణ నుండి స్థానాలను చదవండి"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"మీ మీడియా సేకరణ నుండి స్థానాలను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -593,7 +593,7 @@
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"వేలిముద్రను సెటప్ చేయడం సాధ్యం కాదు"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర కార్యకలాపం రద్దయింది."</string>
+    <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"అనేకసార్లు ప్రయత్నించారు. వేలిముద్ర సెన్సార్ నిలిపివేయబడింది."</string>
@@ -645,7 +645,7 @@
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"ఫేస్ అన్‌లాక్‌ను మళ్లీ ట్రై చేయండి"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
-    <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ కార్యకలాపం రద్దయింది."</string>
+    <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ యాక్టివిటీ రద్దయింది."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ఫేస్ అన్‌లాక్‌ను యూజర్ రద్దు చేశారు"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
@@ -663,14 +663,14 @@
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ముఖ చిహ్నం"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"సింక్ సెట్టింగ్‌లను చదవగలగడం"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల యాప్‌ ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ఖాతా యొక్క సింక్‌ సెట్టింగ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల యాప్‌ ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"\'సింక్\'ను ఆన్, ఆఫ్‌ల మధ్య టోగుల్ చేయడం"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇది ఒక ఖాతాతో వ్యక్తుల యాప్ యొక్క సమకాలీకరణను ప్రారంభించడానికి ఉపయోగించబడవచ్చు."</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ఖాతా యొక్క సింక్‌ సెట్టింగ్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇది ఒక ఖాతాతో వ్యక్తుల యాప్ యొక్క సింక్‌ను ప్రారంభించడానికి ఉపయోగించబడవచ్చు."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"సింక్ గణాంకాలను చదవగలగడం"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ఖాతా యొక్క సమకాలీకరణ గణాంకాలను అలాగే సమకాలీకరణ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ఖాతా యొక్క సింక్‌ గణాంకాలను అలాగే సింక్‌ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదువుతుంది"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను సవరించండి లేదా తొలగించండి"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను ఎడిట్ చేయండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్స్‌ను చేయడానికి/స్వీకరించడానికి"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP కాల్స్‌ను చేయడానికి మరియు స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1041,7 +1041,7 @@
     <string name="search_go" msgid="2141477624421347086">"సెర్చ్"</string>
     <string name="search_hint" msgid="455364685740251925">"వెతుకు..."</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"సెర్చ్"</string>
-    <string name="searchview_description_query" msgid="7430242366971716338">"ప్రశ్నను శోధించండి"</string>
+    <string name="searchview_description_query" msgid="7430242366971716338">"ప్రశ్నను వెతకండి"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయి"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ప్రశ్నని సమర్పించండి"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"వాయిస్ శోధన"</string>
@@ -1475,10 +1475,10 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"మునుపటి"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"అమలు చేయి"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nనంబర్ డయల్ చేయండి"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nపరిచయాన్ని సృష్టించండి"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nపరిచయాన్ని క్రియేట్ చేయండి"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"క్రింది ఒకటి లేదా అంతకంటే ఎక్కువ యాప్‌లు మీ ఖాతాను యాక్సెస్ చేయడానికి ఇప్పుడు మరియు భవిష్యత్తులో అనుమతిని అభ్యర్థించవచ్చు."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"మీరు ఈ అభ్యర్థనను అనుమతించాలనుకుంటున్నారా?"</string>
-    <string name="grant_permissions_header_text" msgid="3420736827804657201">"యాక్సెస్ అభ్యర్థన"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"మీరు ఈ రిక్వెస్ట్‌ను అనుమతించాలనుకుంటున్నారా?"</string>
+    <string name="grant_permissions_header_text" msgid="3420736827804657201">"యాక్సెస్ రిక్వెస్ట్‌"</string>
     <string name="allow" msgid="6195617008611933762">"అనుమతించండి"</string>
     <string name="deny" msgid="6632259981847676572">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి అభ్యర్థించబడింది"</string>
@@ -1487,7 +1487,7 @@
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ఇన్‌పుట్ పద్ధతి"</string>
-    <string name="sync_binding_label" msgid="469249309424662147">"సమకాలీకరణ"</string>
+    <string name="sync_binding_label" msgid="469249309424662147">"సింక్‌"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"యాక్సెసిబిలిటీ"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"వాల్‌పేపర్"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"వాల్‌పేపర్‌ను మార్చండి"</string>
@@ -1526,8 +1526,8 @@
     <string name="websearch" msgid="5624340204512793290">"వెబ్ శోధన"</string>
     <string name="find_next" msgid="5341217051549648153">"తదుపరిదాన్ని కనుగొను"</string>
     <string name="find_previous" msgid="4405898398141275532">"మునుపటిదాన్ని కనుగొను"</string>
-    <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g> నుండి స్థాన అభ్యర్థన"</string>
-    <string name="gpsNotifTitle" msgid="1590033371665669570">"స్థాన అభ్యర్థన"</string>
+    <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g> నుండి స్థాన రిక్వెస్ట్‌"</string>
+    <string name="gpsNotifTitle" msgid="1590033371665669570">"స్థాన రిక్వెస్ట్‌"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ద్వారా అభ్యర్థించబడింది"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"అవును"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"కాదు"</string>
@@ -1714,8 +1714,8 @@
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
-    <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
+    <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"షార్ట్‌కట్‌ను ఆఫ్ చేయి"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించు"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"కలర్ సరిచేయడం"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
@@ -1927,14 +1927,14 @@
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD అభ్యర్థన సాధారణ కాల్‌కు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD అభ్యర్థన SS అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"కొత్త USSD అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD అభ్యర్థన వీడియో కాల్‌కు మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"SS అభ్యర్థన సాధారణ కాల్‌కి మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS అభ్యర్థన వీడియో కాల్‌కి మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS అభ్యర్థన USSD అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"కొత్త SS అభ్యర్థనకు మార్చబడింది"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD రిక్వెస్ట్‌ సాధారణ కాల్‌కు మార్చబడింది"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD రిక్వెస్ట్‌ SS రిక్వెస్ట్‌కు మార్చబడింది"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"కొత్త USSD రిక్వెస్ట్‌కు మార్చబడింది"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD రిక్వెస్ట్‌ వీడియో కాల్‌కు మార్చబడింది"</string>
+    <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"SS రిక్వెస్ట్‌ సాధారణ కాల్‌కి మార్చబడింది"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS రిక్వెస్ట్‌ వీడియో కాల్‌కి మార్చబడింది"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS రిక్వెస్ట్‌ USSD రిక్వెస్ట్‌కు మార్చబడింది"</string>
+    <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"కొత్త SS రిక్వెస్ట్‌కు మార్చబడింది"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ఫిషింగ్ అలర్ట్"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"హెచ్చరించబడింది"</string>
@@ -2042,15 +2042,15 @@
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ఇప్పుడు కాదు"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"ఎప్పుడూ వద్దు"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"అప్‌డేట్ చేయి"</string>
-    <string name="autofill_continue_yes" msgid="7914985605534510385">"కొనసాగించు"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"కొనసాగించండి"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"పాస్‌వర్డ్"</string>
-    <string name="autofill_save_type_address" msgid="3111006395818252885">"చిరునామా"</string>
+    <string name="autofill_save_type_address" msgid="3111006395818252885">"అడ్రస్‌"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"క్రెడిట్ కార్డ్"</string>
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"డెబిట్ కార్డ్"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"చెల్లింపు కార్డ్"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"కార్డ్"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"వినియోగదారు పేరు"</string>
-    <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ఇమెయిల్ చిరునామా"</string>
+    <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ఇమెయిల్ అడ్రస్‌"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"వెంటనే తీర ప్రాంతాలు మరియు నదీ పరీవాహక ప్రాంతాలను ఖాళీ చేసి మెట్ట ప్రాంతాలకు తరలి వెళ్లండి."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
@@ -2067,10 +2067,10 @@
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> అనుమతించబడదు"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"పాప్అప్ విండో"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"యాప్ వెర్షన్ డౌన్‌గ్రేడ్ చేయబడింది లేదా ఈ సత్వరమార్గంతో అనుకూలంగా లేదు"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"బ్యాకప్ మరియు పునరుద్ధరణకు యాప్ మద్దతు ఇవ్వని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
-    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"యాప్ సంతకం సరిపోలని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
-    <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"యాప్ వెర్షన్ డౌన్‌గ్రేడ్ చేయబడింది లేదా ఈ షార్ట్‌కట్‌తో అనుకూలంగా లేదు"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"బ్యాకప్ మరియు పునరుద్ధరణకు యాప్ మద్దతు ఇవ్వని కారణంగా షార్ట్‌కట్‌ను పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"యాప్ సంతకం సరిపోలని కారణంగా షార్ట్‌కట్‌ను పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"షార్ట్‌కట్‌ను పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"షార్ట్‌కట్ నిలిపివేయబడింది"</string>
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"అన్ఇన్‌స్టాల్ చేయండి"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ఏదేమైనా తెరువు"</string>
@@ -2134,7 +2134,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ఎవరికి షేర్ చేయాలనే దానికి సంబంధించి సిఫార్సులేవీ లేవు"</string>
-    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల జాబితా"</string>
+    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల లిస్ట్‌"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"హోమ్"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"వెనుకకు"</string>
@@ -2226,17 +2226,17 @@
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK అన్‌లాక్‌ను అభ్యర్థిస్తోంది…"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK అన్‌లాక్‌ను అభ్యర్థిస్తోంది…"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK అన్‌లాక్‌ను అభ్యర్థిస్తోంది…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM నెట్‌వర్క్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM కార్పొరేట్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM అన్‌లాక్‌ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM నెట్‌వర్క్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM నెట్‌వర్క్2 అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM Hrpd అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM కార్పొరేట్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM నెట్‌వర్క్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM కార్పొరేట్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM అన్‌లాక్‌ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM నెట్‌వర్క్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM నెట్‌వర్క్2 అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM Hrpd అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM కార్పొరేట్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
@@ -2248,11 +2248,11 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK అన్‌లాక్ విజయవంతం కాలేదు."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP Equivalent Home PLMN అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI నెట్‌వర్క్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"నెట్‌వర్క్ సబ్‌సెట్ సర్వీస్ ప్రొవైడర్ అన్‌లాక్ అభ్యర్థన విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP Equivalent Home PLMN అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI నెట్‌వర్క్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"నెట్‌వర్క్ సబ్‌సెట్ సర్వీస్ ప్రొవైడర్ అన్‌లాక్ రిక్వెస్ట్‌ విఫలమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM నెట్‌వర్క్ అన్‌లాక్ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ విజయవంతమైంది."</string>
@@ -2260,9 +2260,9 @@
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM అన్‌లాక్‌ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM నెట్‌వర్క్1 అన్‌లాక్ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM నెట్‌వర్క్2 అన్‌లాక్ విజయవంతమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd అన్‌లాక్ అభ్యర్థన విజయవంతమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM Hrpd అన్‌లాక్ రిక్వెస్ట్‌ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM సర్వీస్ ప్రొవైడర్ అన్‌లాక్ విజయవంతమైంది."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM కార్పొరేట్ అన్‌లాక్ అభ్యర్థన విజయవంతమైంది."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM కార్పొరేట్ అన్‌లాక్ రిక్వెస్ట్‌ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM అన్‌లాక్ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK అన్‌లాక్ విజయవంతమైంది."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK అన్‌లాక్ విజయవంతమైంది."</string>
