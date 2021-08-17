@@ -504,7 +504,7 @@ public class BatteryStatsNoteTest extends TestCase {
     public void testUpdateDisplayMeasuredEnergyStatsLocked() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        bi.initMeasuredEnergyStats();
+        bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
         clocks.realtime = 0;
         int screen = Display.STATE_OFF;
@@ -589,7 +589,7 @@ public class BatteryStatsNoteTest extends TestCase {
     public void testUpdateCustomMeasuredEnergyStatsLocked_neverCalled() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        bi.initMeasuredEnergyStats();
+        bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
         bi.setOnBatteryInternal(true);
 
         final int uid1 = 11500;
@@ -603,7 +603,7 @@ public class BatteryStatsNoteTest extends TestCase {
     public void testUpdateCustomMeasuredEnergyStatsLocked() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        bi.initMeasuredEnergyStats();
+        bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
         final int bucketA = 0; // Custom bucket 0
         final int bucketB = 1; // Custom bucket 1
