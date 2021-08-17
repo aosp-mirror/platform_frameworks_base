@@ -21,7 +21,61 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Non se poden explorar redes"</string>
+    <!-- no translation found for wifi_security_short_wep (7939809393561636237) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa (6998160832497442533) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa2 (7697856994856831026) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa_wpa2 (2399839645955520093) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap (5029688687205212985) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_wpa (8510772177310043426) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_wpa2_wpa3 (6455656470422244501) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_sae (78353562671556266) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_psk_sae (4965830739185952958) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_none_owe (8827409046261759703) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_owe (5073524307942025369) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_suiteb (4174071135081556115) -->
+    <skip />
     <string name="wifi_security_none" msgid="7392696451280611452">"Ningunha"</string>
+    <!-- no translation found for wifi_security_wep (1413627788581122366) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa (1072450904799930636) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa2 (4038267581230425543) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa_wpa2 (946853615482465986) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap (6179633834446852269) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa (6189023812330549957) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa_wpa2 (1089879674896108216) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa2_wpa3 (2952912020876252266) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa3 (7961135182909018796) -->
+    <skip />
+    <!-- no translation found for wifi_security_passpoint (2209078477216565387) -->
+    <skip />
+    <!-- no translation found for wifi_security_sae (3644520541721422843) -->
+    <skip />
+    <!-- no translation found for wifi_security_psk_sae (8135104122179904684) -->
+    <skip />
+    <!-- no translation found for wifi_security_none_owe (5241745828327404101) -->
+    <skip />
+    <!-- no translation found for wifi_security_owe (3343421403561657809) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_suiteb (415842785991698142) -->
+    <skip />
     <string name="wifi_remembered" msgid="3266709779723179188">"Gardada"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Rede desconectada"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Desactivadas"</string>
