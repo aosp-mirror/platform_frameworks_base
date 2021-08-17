@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_GRAPHICS_MATRIX_H_
-#define _ANDROID_GRAPHICS_MATRIX_H_
+package android.media;
 
-#include "jni.h"
-#include "SkMatrix.h"
+/**
+ * AIDL for the AudioService to signal Spatializer state changes.
+ *
+ * {@hide}
+ */
+oneway interface ISpatializerCallback {
 
-namespace android {
+    void dispatchSpatializerStateChanged(boolean enabled);
 
-/* Gets the underlying SkMatrix from a Matrix object. */
-SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj);
-
-/* Creates a new Matrix java object. */
-jobject android_graphics_Matrix_newInstance(JNIEnv* env);
-
-} // namespace android
-
-#endif // _ANDROID_GRAPHICS_MATRIX_H_
+}

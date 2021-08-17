@@ -18,20 +18,25 @@ package com.android.systemui.plugins;
 
 import static com.android.systemui.util.concurrency.GlobalConcurrencyModule.PRE_HANDLER;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Looper;
 
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.plugins.PluginPrefs;
+import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -46,7 +51,7 @@ import dagger.Provides;
  * Covers code both in com.android.systemui.plugins and code in
  * com.android.systemui.shared.plugins.
  */
-@Module
+@Module(includes = {GlobalConcurrencyModule.class})
 public abstract class PluginsModule {
     public static final String PLUGIN_THREAD = "plugin_thread";
     public static final String PLUGIN_DEBUG = "plugin_debug";
@@ -67,17 +72,20 @@ public abstract class PluginsModule {
     @Provides
     @Singleton
     static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
-            PackageManager packageManager, @Named(PLUGIN_THREAD) Looper pluginLooper,
-            PluginInitializer initializer) {
+            PackageManager packageManager, @Main Executor mainExecutor,
+            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer,
+            NotificationManager notificationManager, PluginEnabler pluginEnabler,
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
         return new PluginInstanceManager.Factory(
-                context, packageManager, pluginLooper, initializer);
+                context, packageManager, mainExecutor, pluginExecutor, initializer,
+                notificationManager, pluginEnabler, privilegedPlugins);
     }
 
     @Provides
     @Singleton
     @Named(PLUGIN_THREAD)
-    static Looper providesPluginLooper(ThreadFactory threadFactory) {
-        return threadFactory.buildLooperOnNewThread("plugin");
+    static Executor providesPluginExecutor(ThreadFactory threadFactory) {
+        return threadFactory.buildExecutorOnNewThread("plugin");
     }
 
     @Provides
@@ -89,7 +97,7 @@ public abstract class PluginsModule {
                     Optional<Thread.UncaughtExceptionHandler> uncaughtExceptionHandlerOptional,
             PluginEnabler pluginEnabler,
             PluginPrefs pluginPrefs,
-            @Named(PLUGIN_PRIVILEGED) String[] privilegedPlugins) {
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
         return new PluginManagerImpl(context, instanceManagerFactory, debug,
                 uncaughtExceptionHandlerOptional, pluginEnabler, pluginPrefs,
                 privilegedPlugins);
@@ -102,7 +110,7 @@ public abstract class PluginsModule {
 
     @Provides
     @Named(PLUGIN_PRIVILEGED)
-    static String[] providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
-        return initializer.getPrivilegedPlugins(context);
+    static List<String> providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
+        return Arrays.asList(initializer.getPrivilegedPlugins(context));
     }
 }

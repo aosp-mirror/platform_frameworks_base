@@ -29,6 +29,7 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +48,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -82,6 +84,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
     DozeParameters mDozeParameters;
+    @Mock
+    DockManager mDockManager;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeThreadFactory mFakeThreadFactory = new FakeThreadFactory(mFakeExecutor);
 
@@ -109,7 +113,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor = fakeSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 Optional.of(mSensor.getSensor()), mDozeHost, null /* handler */,
-                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters);
+                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters, mDockManager);
 
         mScreen.onScreenState(Display.STATE_ON);
     }
@@ -157,6 +161,67 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAodDocked_doNotSelectivelyUseProx_usesLightSensor() {
+        // GIVEN the device doesn't need to selectively register for prox sensors and
+        // brightness sensor uses prox
+        when(mDozeParameters.getSelectivelyRegisterSensorsUsingProx()).thenReturn(false);
+        when(mDozeParameters.brightnessUsesProx()).thenReturn(true);
+
+        // GIVEN the device is docked and the display state changes to ON
+        when(mDockManager.isDocked()).thenReturn(true);
+        mScreen.onScreenState(Display.STATE_ON);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is updated
+        assertEquals(3, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAodDocked_brightnessDoesNotUseProx_usesLightSensor() {
+        // GIVEN the device doesn't need to selectively register for prox sensors but
+        // the brightness sensor doesn't use prox
+        when(mDozeParameters.getSelectivelyRegisterSensorsUsingProx()).thenReturn(true);
+        when(mDozeParameters.brightnessUsesProx()).thenReturn(false);
+
+        // GIVEN the device is docked and the display state changes to ON
+        when(mDockManager.isDocked()).thenReturn(true);
+        mScreen.onScreenState(Display.STATE_ON);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is updated
+        assertEquals(3, mServiceFake.screenBrightness);
+    }
+
+
+    @Test
+    public void testAodDocked_noProx_brightnessUsesProx_doNotUseLightSensor() {
+        final int startBrightness = mServiceFake.screenBrightness;
+
+        // GIVEN the device needs to selectively register for prox sensors and
+        // the brightness sensor uses prox
+        when(mDozeParameters.getSelectivelyRegisterSensorsUsingProx()).thenReturn(true);
+        when(mDozeParameters.brightnessUsesProx()).thenReturn(true);
+
+        // GIVEN the device is docked and the display state is on
+        when(mDockManager.isDocked()).thenReturn(true);
+        mScreen.onScreenState(Display.STATE_ON);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is NOT changed
+        assertNotSame(3, mServiceFake.screenBrightness);
+        assertEquals(startBrightness, mServiceFake.screenBrightness);
+    }
+
+    @Test
     public void testPausingAod_doesNotResetBrightness() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
@@ -175,7 +240,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     public void testPulsing_withoutLightSensor_setsAoDDimmingScrimTransparent() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 Optional.empty() /* sensor */, mDozeHost, null /* handler */,
-                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters);
+                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters, mDockManager);
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
         reset(mDozeHost);
@@ -216,7 +281,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 Optional.empty() /* sensor */, mDozeHost, null /* handler */,
-                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters);
+                mAlwaysOnDisplayPolicy, mWakefulnessLifecycle, mDozeParameters, mDockManager);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);

@@ -117,11 +117,16 @@ class TransitionController {
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
         try {
+            // Note: asBinder() can be null if player is same process (likely in a test).
             if (mTransitionPlayer != null) {
-                mTransitionPlayer.asBinder().unlinkToDeath(mTransitionPlayerDeath, 0);
+                if (mTransitionPlayer.asBinder() != null) {
+                    mTransitionPlayer.asBinder().unlinkToDeath(mTransitionPlayerDeath, 0);
+                }
                 mTransitionPlayer = null;
             }
-            player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
+            if (player.asBinder() != null) {
+                player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
+            }
             mTransitionPlayer = player;
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to set transition player");

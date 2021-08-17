@@ -940,6 +940,34 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the brightness configuration for the specified display.
+     * If the specified display doesn't exist, then this will return and do nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public void setBrightnessConfigurationForDisplay(@NonNull BrightnessConfiguration c,
+            @NonNull String uniqueId) {
+        mGlobal.setBrightnessConfigurationForDisplay(c, uniqueId, mContext.getUserId(),
+                mContext.getPackageName());
+    }
+
+    /**
+     * Gets the brightness configuration for the specified display and default user.
+     * Returns the default configuration if unset or display is invalid.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public BrightnessConfiguration getBrightnessConfigurationForDisplay(
+            @NonNull String uniqueId) {
+        return mGlobal.getBrightnessConfigurationForDisplay(uniqueId, mContext.getUserId());
+    }
+
+    /**
      * Sets the global display brightness configuration for a specific user.
      *
      * Note this requires the INTERACT_ACROSS_USERS permission if setting the configuration for a
