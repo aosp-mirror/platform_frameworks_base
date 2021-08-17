@@ -47,9 +47,6 @@ public final class SetSchemaStats {
 
     private final int mTotalLatencyMillis;
 
-    /** Overall time used for the native function call. */
-    private final int mNativeLatencyMillis;
-
     /** Number of newly added schema types. */
     private final int mNewTypeCount;
 
@@ -72,7 +69,6 @@ public final class SetSchemaStats {
         mStatusCode = builder.mStatusCode;
         mSchemaMigrationStats = builder.mSchemaMigrationStats;
         mTotalLatencyMillis = builder.mTotalLatencyMillis;
-        mNativeLatencyMillis = builder.mNativeLatencyMillis;
         mNewTypeCount = builder.mNewTypeCount;
         mDeletedTypeCount = builder.mDeletedTypeCount;
         mCompatibleTypeChangeCount = builder.mCompatibleTypeChangeCount;
@@ -110,11 +106,6 @@ public final class SetSchemaStats {
     /** Returns the total latency of the SetSchema action. */
     public int getTotalLatencyMillis() {
         return mTotalLatencyMillis;
-    }
-
-    /** Returns overall time used for the native function call. */
-    public int getNativeLatencyMillis() {
-        return mNativeLatencyMillis;
     }
 
     /** Returns number of newly added schema types. */
@@ -159,7 +150,6 @@ public final class SetSchemaStats {
         @AppSearchResult.ResultCode int mStatusCode;
         @Nullable SchemaMigrationStats mSchemaMigrationStats;
         int mTotalLatencyMillis;
-        int mNativeLatencyMillis;
         int mNewTypeCount;
         int mDeletedTypeCount;
         int mCompatibleTypeChangeCount;
@@ -190,13 +180,6 @@ public final class SetSchemaStats {
         @NonNull
         public Builder setTotalLatencyMillis(int totalLatencyMillis) {
             mTotalLatencyMillis = totalLatencyMillis;
-            return this;
-        }
-
-        /** Sets native latency in milliseconds. */
-        @NonNull
-        public Builder setNativeLatencyMillis(int nativeLatencyMillis) {
-            mNativeLatencyMillis = nativeLatencyMillis;
             return this;
         }
 

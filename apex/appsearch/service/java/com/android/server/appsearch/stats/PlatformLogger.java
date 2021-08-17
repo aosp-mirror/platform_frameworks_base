@@ -36,6 +36,7 @@ import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.external.localstorage.stats.SetSchemaStats;
 import com.android.server.appsearch.util.PackageUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -178,6 +179,11 @@ public final class PlatformLogger implements AppSearchLogger {
                 logStatsImplLocked(stats);
             }
         }
+    }
+
+    @Override
+    public void logStats(@NonNull SetSchemaStats stats) {
+        // TODO(b/173532925): Log stats
     }
 
     /**

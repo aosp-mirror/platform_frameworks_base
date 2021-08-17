@@ -96,6 +96,17 @@ public final class AppSearchBatchResult<KeyType, ValueType> {
         return Collections.unmodifiableMap(mAll);
     }
 
+    /**
+     * Asserts that this {@link AppSearchBatchResult} has no failures.
+     *
+     * @hide
+     */
+    public void checkSuccess() {
+        if (!isSuccess()) {
+            throw new IllegalStateException("AppSearchBatchResult has failures: " + this);
+        }
+    }
+
     @Override
     @NonNull
     public String toString() {

@@ -59,6 +59,7 @@ import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.external.localstorage.stats.SetSchemaStats;
 import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 
 import com.google.android.icing.IcingSearchEngine;
@@ -393,6 +394,7 @@ public final class AppSearchImpl implements Closeable {
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
      *     which do not comply with the new schema will be deleted.
      * @param version The overall version number of the request.
+     * @param setSchemaStatsBuilder Builder for {@link SetSchemaStats} to hold stats for setSchema
      * @return The response contains deleted schema types and incompatible schema types of this
      *     call.
      * @throws AppSearchException On IcingSearchEngine error. If the status code is
@@ -408,7 +410,8 @@ public final class AppSearchImpl implements Closeable {
             @NonNull List<String> schemasNotDisplayedBySystem,
             @NonNull Map<String, List<PackageIdentifier>> schemasVisibleToPackages,
             boolean forceOverride,
-            int version)
+            int version,
+            @Nullable SetSchemaStats.Builder setSchemaStatsBuilder)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
@@ -437,6 +440,12 @@ public final class AppSearchImpl implements Closeable {
                     mIcingSearchEngineLocked.setSchema(finalSchema, forceOverride);
             mLogUtil.piiTrace(
                     "setSchema, response", setSchemaResultProto.getStatus(), setSchemaResultProto);
+
+            if (setSchemaStatsBuilder != null) {
+                setSchemaStatsBuilder.setStatusCode(
+                        statusProtoToResultCode(setSchemaResultProto.getStatus()));
+                AppSearchLoggerHelper.copyNativeStats(setSchemaResultProto, setSchemaStatsBuilder);
+            }
 
             // Determine whether it succeeded.
             try {
@@ -1127,8 +1136,13 @@ public final class AppSearchImpl implements Closeable {
      * @throws AppSearchException on IcingSearchEngine error or if can't advance on nextPageToken.
      */
     @NonNull
-    public SearchResultPage getNextPage(@NonNull String packageName, long nextPageToken)
+    public SearchResultPage getNextPage(
+            @NonNull String packageName,
+            long nextPageToken,
+            @Nullable SearchStats.Builder statsBuilder)
             throws AppSearchException {
+        long totalLatencyStartMillis = SystemClock.elapsedRealtime();
+
         mReadWriteLock.readLock().lock();
         try {
             throwIfClosedLocked();
@@ -1137,6 +1151,13 @@ public final class AppSearchImpl implements Closeable {
             checkNextPageToken(packageName, nextPageToken);
             SearchResultProto searchResultProto =
                     mIcingSearchEngineLocked.getNextPage(nextPageToken);
+
+            if (statsBuilder != null) {
+                statsBuilder.setStatusCode(statusProtoToResultCode(searchResultProto.getStatus()));
+                AppSearchLoggerHelper.copyNativeStats(
+                        searchResultProto.getQueryStats(), statsBuilder);
+            }
+
             mLogUtil.piiTrace(
                     "getNextPage, response",
                     searchResultProto.getResultsCount(),
@@ -1152,9 +1173,22 @@ public final class AppSearchImpl implements Closeable {
                     mNextPageTokensLocked.get(packageName).remove(nextPageToken);
                 }
             }
-            return rewriteSearchResultProto(searchResultProto, mSchemaMapLocked);
+            long rewriteSearchResultLatencyStartMillis = SystemClock.elapsedRealtime();
+            SearchResultPage resultPage =
+                    rewriteSearchResultProto(searchResultProto, mSchemaMapLocked);
+            if (statsBuilder != null) {
+                statsBuilder.setRewriteSearchResultLatencyMillis(
+                        (int)
+                                (SystemClock.elapsedRealtime()
+                                        - rewriteSearchResultLatencyStartMillis));
+            }
+            return resultPage;
         } finally {
             mReadWriteLock.readLock().unlock();
+            if (statsBuilder != null) {
+                statsBuilder.setTotalLatencyMillis(
+                        (int) (SystemClock.elapsedRealtime() - totalLatencyStartMillis));
+            }
         }
     }
 
@@ -1334,7 +1368,7 @@ public final class AppSearchImpl implements Closeable {
                         statusProtoToResultCode(deleteResultProto.getStatus()));
                 // TODO(b/187206766) also log query stats here once IcingLib returns it
                 AppSearchLoggerHelper.copyNativeStats(
-                        deleteResultProto.getDeleteStats(), removeStatsBuilder);
+                        deleteResultProto.getDeleteByQueryStats(), removeStatsBuilder);
             }
 
             // It seems that the caller wants to get success if the data matching the query is
@@ -1343,7 +1377,8 @@ public final class AppSearchImpl implements Closeable {
                     deleteResultProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
 
             // Update derived maps
-            int numDocumentsDeleted = deleteResultProto.getDeleteStats().getNumDocumentsDeleted();
+            int numDocumentsDeleted =
+                    deleteResultProto.getDeleteByQueryStats().getNumDocumentsDeleted();
             updateDocumentCountAfterRemovalLocked(packageName, numDocumentsDeleted);
         } finally {
             mReadWriteLock.writeLock().unlock();

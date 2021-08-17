@@ -33,6 +33,7 @@ import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.external.localstorage.stats.SetSchemaStats;
 import com.android.server.appsearch.icing.proto.DeleteStatsProto;
 import com.android.server.appsearch.icing.proto.DocumentProto;
 import com.android.server.appsearch.icing.proto.InitializeStatsProto;
@@ -41,6 +42,7 @@ import com.android.server.appsearch.icing.proto.PutDocumentStatsProto;
 import com.android.server.appsearch.icing.proto.PutResultProto;
 import com.android.server.appsearch.icing.proto.QueryStatsProto;
 import com.android.server.appsearch.icing.proto.ScoringSpecProto;
+import com.android.server.appsearch.icing.proto.SetSchemaResultProto;
 import com.android.server.appsearch.icing.proto.StatusProto;
 import com.android.server.appsearch.icing.proto.TermMatchType;
 
@@ -57,13 +59,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class AppSearchLoggerTest {
-    @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-    private AppSearchImpl mAppSearchImpl;
-    private TestLogger mLogger;
+    private static final String PACKAGE_NAME = "packageName";
+    private static final String DATABASE = "database";
     /**
      * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
      */
     private static final OptimizeStrategy ALWAYS_OPTIMIZE = optimizeInfo -> true;
+
+    @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
+    private AppSearchImpl mAppSearchImpl;
+    private TestLogger mLogger;
 
     @Before
     public void setUp() throws Exception {
@@ -84,6 +89,7 @@ public class AppSearchLoggerTest {
         @Nullable SearchStats mSearchStats;
         @Nullable RemoveStats mRemoveStats;
         @Nullable OptimizeStats mOptimizeStats;
+        @Nullable SetSchemaStats mSetSchemaStats;
 
         @Override
         public void logStats(@NonNull CallStats stats) {
@@ -113,6 +119,11 @@ public class AppSearchLoggerTest {
         @Override
         public void logStats(@NonNull OptimizeStats stats) {
             mOptimizeStats = stats;
+        }
+
+        @Override
+        public void logStats(@NonNull SetSchemaStats stats) {
+            mSetSchemaStats = stats;
         }
     }
 
@@ -194,7 +205,7 @@ public class AppSearchLoggerTest {
                                         .setExceededMaxTokenNum(nativeExceededMaxNumTokens)
                                         .build())
                         .build();
-        PutDocumentStats.Builder pBuilder = new PutDocumentStats.Builder("packageName", "database");
+        PutDocumentStats.Builder pBuilder = new PutDocumentStats.Builder(PACKAGE_NAME, DATABASE);
 
         AppSearchLoggerHelper.copyNativeStats(nativePutDocumentStats, pBuilder);
 
@@ -248,8 +259,8 @@ public class AppSearchLoggerTest {
                         .setDocumentRetrievalLatencyMs(nativeDocumentRetrievingLatencyMillis)
                         .build();
         SearchStats.Builder qBuilder =
-                new SearchStats.Builder(SearchStats.VISIBILITY_SCOPE_LOCAL, "packageName")
-                        .setDatabase("database");
+                new SearchStats.Builder(SearchStats.VISIBILITY_SCOPE_LOCAL, PACKAGE_NAME)
+                        .setDatabase(DATABASE);
 
         AppSearchLoggerHelper.copyNativeStats(nativeQueryStats, qBuilder);
 
@@ -336,6 +347,35 @@ public class AppSearchLoggerTest {
                 .isEqualTo(nativeTimeSinceLastOptimizeMillis);
     }
 
+    @Test
+    public void testAppSearchLoggerHelper_testCopyNativeStats_setSchema() {
+        ImmutableList<String> newSchemaTypeChangeList = ImmutableList.of("new1");
+        ImmutableList<String> deletedSchemaTypesList = ImmutableList.of("deleted1", "deleted2");
+        ImmutableList<String> compatibleTypesList = ImmutableList.of("compatible1", "compatible2");
+        ImmutableList<String> indexIncompatibleTypeChangeList = ImmutableList.of("index1");
+        ImmutableList<String> backwardsIncompatibleTypeChangeList = ImmutableList.of("backwards1");
+        SetSchemaResultProto setSchemaResultProto =
+                SetSchemaResultProto.newBuilder()
+                        .addAllNewSchemaTypes(newSchemaTypeChangeList)
+                        .addAllDeletedSchemaTypes(deletedSchemaTypesList)
+                        .addAllFullyCompatibleChangedSchemaTypes(compatibleTypesList)
+                        .addAllIndexIncompatibleChangedSchemaTypes(indexIncompatibleTypeChangeList)
+                        .addAllIncompatibleSchemaTypes(backwardsIncompatibleTypeChangeList)
+                        .build();
+        SetSchemaStats.Builder sBuilder = new SetSchemaStats.Builder(PACKAGE_NAME, DATABASE);
+
+        AppSearchLoggerHelper.copyNativeStats(setSchemaResultProto, sBuilder);
+
+        SetSchemaStats sStats = sBuilder.build();
+        assertThat(sStats.getNewTypeCount()).isEqualTo(newSchemaTypeChangeList.size());
+        assertThat(sStats.getDeletedTypeCount()).isEqualTo(deletedSchemaTypesList.size());
+        assertThat(sStats.getCompatibleTypeChangeCount()).isEqualTo(compatibleTypesList.size());
+        assertThat(sStats.getIndexIncompatibleTypeChangeCount())
+                .isEqualTo(indexIncompatibleTypeChangeList.size());
+        assertThat(sStats.getBackwardsIncompatibleTypeChangeCount())
+                .isEqualTo(backwardsIncompatibleTypeChangeList.size());
+    }
+
     //
     // Testing actual logging
     //
@@ -388,7 +428,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
         GenericDocument doc1 = new GenericDocument.Builder<>("namespace", "id1", "Type1").build();
         GenericDocument doc2 = new GenericDocument.Builder<>("namespace", "id2", "Type1").build();
         appSearchImpl.putDocument(testPackageName, testDatabase, doc1, mLogger);
@@ -439,7 +480,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
 
         // Insert a valid doc
         GenericDocument doc1 = new GenericDocument.Builder<>("namespace", "id1", "Type1").build();
@@ -495,7 +537,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
 
         GenericDocument document =
                 new GenericDocument.Builder<>("namespace", "id", "type")
@@ -542,7 +585,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
 
         GenericDocument document =
                 new GenericDocument.Builder<>("namespace", "id", "type")
@@ -592,7 +636,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
         GenericDocument document1 =
                 new GenericDocument.Builder<>("namespace", "id1", "type")
                         .setPropertyString("subject", "testPut example1")
@@ -661,7 +706,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
 
         SearchSpec searchSpec =
                 new SearchSpec.Builder()
@@ -701,7 +747,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
         GenericDocument document =
                 new GenericDocument.Builder<>(testNamespace, testId, "type").build();
         mAppSearchImpl.putDocument(testPackageName, testDatabase, document, /*logger=*/ null);
@@ -735,7 +782,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
 
         GenericDocument document =
                 new GenericDocument.Builder<>(testNamespace, testId, "type").build();
@@ -780,7 +828,8 @@ public class AppSearchLoggerTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*version=*/ 0);
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
         GenericDocument document1 =
                 new GenericDocument.Builder<>(testNamespace, "id1", "type").build();
         GenericDocument document2 =
@@ -800,7 +849,58 @@ public class AppSearchLoggerTest {
         assertThat(rStats.getDatabase()).isEqualTo(testDatabase);
         assertThat(rStats.getStatusCode()).isEqualTo(AppSearchResult.RESULT_OK);
         // delete by query
-        assertThat(rStats.getDeleteType()).isEqualTo(DeleteStatsProto.DeleteType.Code.QUERY_VALUE);
+        assertThat(rStats.getDeleteType())
+                .isEqualTo(DeleteStatsProto.DeleteType.Code.DEPRECATED_QUERY_VALUE);
         assertThat(rStats.getDeletedDocumentCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void testLoggingStats_setSchema() throws Exception {
+        AppSearchSchema schema1 =
+                new AppSearchSchema.Builder("testSchema")
+                        .addProperty(
+                                new AppSearchSchema.StringPropertyConfig.Builder("subject")
+                                        .setCardinality(
+                                                AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
+                                        .setIndexingType(
+                                                AppSearchSchema.StringPropertyConfig
+                                                        .INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(
+                                                AppSearchSchema.StringPropertyConfig
+                                                        .TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        mAppSearchImpl.setSchema(
+                PACKAGE_NAME,
+                DATABASE,
+                Collections.singletonList(schema1),
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ null);
+
+        // create a backwards incompatible schema
+        SetSchemaStats.Builder sStatsBuilder = new SetSchemaStats.Builder(PACKAGE_NAME, DATABASE);
+        AppSearchSchema schema2 = new AppSearchSchema.Builder("testSchema").build();
+        mAppSearchImpl.setSchema(
+                PACKAGE_NAME,
+                DATABASE,
+                Collections.singletonList(schema2),
+                /*visibilityStore=*/ null,
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0,
+                /* setSchemaStatsBuilder= */ sStatsBuilder);
+
+        SetSchemaStats sStats = sStatsBuilder.build();
+        assertThat(sStats.getPackageName()).isEqualTo(PACKAGE_NAME);
+        assertThat(sStats.getDatabase()).isEqualTo(DATABASE);
+        assertThat(sStats.getNewTypeCount()).isEqualTo(0);
+        assertThat(sStats.getCompatibleTypeChangeCount()).isEqualTo(0);
+        assertThat(sStats.getIndexIncompatibleTypeChangeCount()).isEqualTo(1);
+        assertThat(sStats.getBackwardsIncompatibleTypeChangeCount()).isEqualTo(1);
     }
 }
