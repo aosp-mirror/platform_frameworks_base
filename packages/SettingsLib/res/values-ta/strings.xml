@@ -84,7 +84,7 @@
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"செயலில் உள்ளது"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"மீடியா ஆடியோ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ஃபோன் அழைப்புகள்"</string>
-    <string name="bluetooth_profile_opp" msgid="6692618568149493430">"கோப்பு இடமாற்றம்"</string>
+    <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ஃபைல் இடமாற்றம்"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"உள்ளீட்டுச் சாதனம்"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"இணைய அணுகல்"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"தொடர்புப் பகிர்தல்"</string>
@@ -98,10 +98,10 @@
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"செவித்துணை கருவிகளுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"மொபைல் ஆடியோவுடன் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"கோப்பைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ஃபைலைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"வரைபடத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP உடன் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"கோப்பு இடமாற்றும் சேவையகத்துடன் இணைக்கப்படவில்லை"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"ஃபைல் இடமாற்றும் சேவையகத்துடன் இணைக்கப்படவில்லை"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"உள்ளீட்டுச் சாதனத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"சாதனத்துடன் இணைந்தது"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"சாதனத்துடன் உள்ளூர் இண்டர்நெட்டைப் பகிர்தல்"</string>
@@ -110,7 +110,7 @@
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"சிம் அணுகலுக்குப் பயன்படுத்தும்"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"மீடியாவின் ஆடியோவிற்குப் பயன்படுத்து"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"மொபைல் ஆடியோவைப் பயன்படுத்து"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"கோப்பு பரிமாற்றத்திற்காகப் பயன்படுத்து"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ஃபைல் பரிமாற்றத்திற்காகப் பயன்படுத்து"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"உள்ளீட்டுக்குப் பயன்படுத்து"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"செவித்துணை கருவிகளுக்குப் பயன்படுத்தவும்"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"இணை"</string>
@@ -412,11 +412,11 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView செயல்படுத்தலை அமை"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"இனி இந்தத் தேர்வைப் பயன்படுத்த முடியாது. மீண்டும் முயலவும்."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"கோப்பு முறைமையாக்கத்திற்கு மாற்று"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ஃபைல் முறைமையாக்கத்திற்கு மாற்று"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"மாற்று…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ஏற்கனவே கோப்பு என்க்ரிப்ட் செய்யப்பட்டது"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"கோப்பு சார்ந்த முறைமையாக்கத்திற்கு மாற்றுதல்"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"தரவுப் பகிர்வை, கோப்பு சார்ந்த முறைமையாக்கத்திற்கு மாற்றவும்.\n !!எச்சரிக்கை!! இது எல்லா தரவையும் அழிக்கும்.\n இது ஆல்பா நிலை அம்சமாக இருப்பதால் சரியாகச் செயல்படாமல் போகக்கூடும்.\n தொடர, \'அழித்து, மாற்று…\' என்பதை அழுத்தவும்."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ஏற்கனவே ஃபைல் என்க்ரிப்ட் செய்யப்பட்டது"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"ஃபைல் சார்ந்த முறைமையாக்கத்திற்கு மாற்றுதல்"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"தரவுப் பகிர்வை, ஃபைல் சார்ந்த முறைமையாக்கத்திற்கு மாற்றவும்.\n !!எச்சரிக்கை!! இது எல்லா தரவையும் அழிக்கும்.\n இது ஆல்பா நிலை அம்சமாக இருப்பதால் சரியாகச் செயல்படாமல் போகக்கூடும்.\n தொடர, \'அழித்து, மாற்று…\' என்பதை அழுத்தவும்."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"அழித்து மாற்று…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"படத்தின் வண்ணப் பயன்முறை"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGBஐப் பயன்படுத்தும்"</string>
@@ -426,7 +426,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
