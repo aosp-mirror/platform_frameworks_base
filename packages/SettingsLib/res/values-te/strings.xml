@@ -21,12 +21,66 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"నెట్‌వర్క్‌ల కోసం స్కాన్ చేయడం సాధ్యపడదు"</string>
+    <!-- no translation found for wifi_security_short_wep (7939809393561636237) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa (6998160832497442533) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa2 (7697856994856831026) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_wpa_wpa2 (2399839645955520093) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap (5029688687205212985) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_wpa (8510772177310043426) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_wpa2_wpa3 (6455656470422244501) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_sae (78353562671556266) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_psk_sae (4965830739185952958) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_none_owe (8827409046261759703) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_owe (5073524307942025369) -->
+    <skip />
+    <!-- no translation found for wifi_security_short_eap_suiteb (4174071135081556115) -->
+    <skip />
     <string name="wifi_security_none" msgid="7392696451280611452">"ఏదీ లేదు"</string>
+    <!-- no translation found for wifi_security_wep (1413627788581122366) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa (1072450904799930636) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa2 (4038267581230425543) -->
+    <skip />
+    <!-- no translation found for wifi_security_wpa_wpa2 (946853615482465986) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap (6179633834446852269) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa (6189023812330549957) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa_wpa2 (1089879674896108216) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa2_wpa3 (2952912020876252266) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_wpa3 (7961135182909018796) -->
+    <skip />
+    <!-- no translation found for wifi_security_passpoint (2209078477216565387) -->
+    <skip />
+    <!-- no translation found for wifi_security_sae (3644520541721422843) -->
+    <skip />
+    <!-- no translation found for wifi_security_psk_sae (8135104122179904684) -->
+    <skip />
+    <!-- no translation found for wifi_security_none_owe (5241745828327404101) -->
+    <skip />
+    <!-- no translation found for wifi_security_owe (3343421403561657809) -->
+    <skip />
+    <!-- no translation found for wifi_security_eap_suiteb (415842785991698142) -->
+    <skip />
     <string name="wifi_remembered" msgid="3266709779723179188">"సేవ్ చేయబడింది"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"డిజేబుల్ చేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"తక్కువ నాణ్యతా నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"తక్కువ క్వాలిటీ నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>

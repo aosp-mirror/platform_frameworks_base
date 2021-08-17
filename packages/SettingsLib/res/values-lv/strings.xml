@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Nevar skenēt tīklus"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Nav/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Nav"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Nav/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise, 192 bitu"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Saglabāts"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Savienojums pārtraukts"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Atspējots"</string>
