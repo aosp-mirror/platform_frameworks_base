@@ -25,6 +25,7 @@ oneway interface IMbmsGroupCallSessionCallback
 {
     void onError(int errorCode, String message);
 
+    @SuppressWarnings(value={"untyped-collection"})
     void onAvailableSaisUpdated(in List currentSai, in List availableSais);
 
     void onServiceInterfaceAvailable(String interfaceName, int index);
