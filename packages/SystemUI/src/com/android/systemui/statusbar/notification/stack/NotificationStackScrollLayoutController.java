@@ -1157,6 +1157,10 @@ public class NotificationStackScrollLayoutController {
                 mZenModeController.areNotificationsHiddenInShade());
     }
 
+    public boolean areNotificationsHiddenInShade() {
+        return mZenModeController.areNotificationsHiddenInShade();
+    }
+
     public boolean isShowingEmptyShadeView() {
         return mShowEmptyShadeView;
     }
@@ -1205,6 +1209,10 @@ public class NotificationStackScrollLayoutController {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        return hasNotifications(selection, true /* clearable */);
+    }
+
+    public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
         if (mDynamicPrivacyController.isInLockedDownShade()) {
             return false;
         }
@@ -1215,8 +1223,11 @@ public class NotificationStackScrollLayoutController {
                 continue;
             }
             final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (row.canViewBeDismissed() &&
-                    NotificationStackScrollLayout.matchesSelection(row, selection)) {
+            final boolean matchClearable =
+                    isClearable ? row.canViewBeDismissed() : !row.canViewBeDismissed();
+            final boolean inSection =
+                    NotificationStackScrollLayout.matchesSelection(row, selection);
+            if (matchClearable && inSection) {
                 return true;
             }
         }
