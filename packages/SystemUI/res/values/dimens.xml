@@ -1604,15 +1604,16 @@
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
     <dimen name="internet_dialog_list_max_height">646dp</dimen>
-    <dimen name="internet_dialog_list_max_width">412dp</dimen>
+    <dimen name="internet_dialog_list_max_width">@dimen/match_parent</dimen>
 
     <!-- Signal icon in internet dialog -->
     <dimen name="signal_strength_icon_size">24dp</dimen>
 
     <!-- Internet dialog related dimensions -->
     <dimen name="internet_dialog_corner_radius">24dp</dimen>
-
-    <!-- Size of internet dialog -->
+    <!-- End margin of network layout -->
+    <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
+    <!-- Size of switch bar in internet dialog -->
     <dimen name="settingslib_switchbar_margin">16dp</dimen>
     <!-- Minimum width of switch -->
     <dimen name="settingslib_min_switch_width">52dp</dimen>
