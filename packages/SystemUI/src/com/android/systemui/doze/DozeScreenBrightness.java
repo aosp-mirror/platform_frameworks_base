@@ -31,6 +31,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
 
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.dagger.BrightnessSensor;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
@@ -63,6 +64,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private final Optional<Sensor> mLightSensorOptional;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final DozeParameters mDozeParameters;
+    private final DockManager mDockManager;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
     private final int mScreenBrightnessDim;
@@ -87,7 +89,8 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             @BrightnessSensor Optional<Sensor> lightSensorOptional, DozeHost host, Handler handler,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             WakefulnessLifecycle wakefulnessLifecycle,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            DockManager dockManager) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -96,6 +99,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDozeParameters = dozeParameters;
         mDozeHost = host;
         mHandler = handler;
+        mDockManager = dockManager;
 
         mDefaultDozeBrightness = alwaysOnDisplayPolicy.defaultDozeBrightness;
         mScreenBrightnessDim = alwaysOnDisplayPolicy.dimBrightness;
@@ -122,11 +126,18 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Override
     public void onScreenState(int state) {
-        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
+        boolean isDockedScreenOn = state == Display.STATE_ON && mDockManager.isDocked();
+        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND
+                || (isDockedScreenOn && shouldRegisterLightSensorWhenScreenOnDocked())) {
             setLightSensorEnabled(true);
         } else {
             setLightSensorEnabled(false);
         }
+    }
+
+    private boolean shouldRegisterLightSensorWhenScreenOnDocked() {
+        return !mDozeParameters.brightnessUsesProx()
+                || !mDozeParameters.getSelectivelyRegisterSensorsUsingProx();
     }
 
     private void onDestroy() {
