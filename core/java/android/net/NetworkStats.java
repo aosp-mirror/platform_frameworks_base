@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1581,32 +1583,37 @@ public final class NetworkStats implements Parcelable {
                 // processes this every time device has transmitted/received amount equivalent to
                 // global threshold alert (~ 2MB) across all interfaces.
                 final long rxBytesAcrossUnderlyingIfaces =
-                        underlyingIfacesTotal.rxBytes * rxBytes[i] / tunIfaceTotal.rxBytes;
+                        multiplySafeByRational(underlyingIfacesTotal.rxBytes,
+                                rxBytes[i], tunIfaceTotal.rxBytes);
                 // app must not be blamed for more than it consumed on tunIface
                 totalRxBytes = Math.min(rxBytes[i], rxBytesAcrossUnderlyingIfaces);
             }
             long totalRxPackets = 0;
             if (tunIfaceTotal.rxPackets > 0) {
                 final long rxPacketsAcrossUnderlyingIfaces =
-                        underlyingIfacesTotal.rxPackets * rxPackets[i] / tunIfaceTotal.rxPackets;
+                        multiplySafeByRational(underlyingIfacesTotal.rxPackets,
+                                rxPackets[i], tunIfaceTotal.rxPackets);
                 totalRxPackets = Math.min(rxPackets[i], rxPacketsAcrossUnderlyingIfaces);
             }
             long totalTxBytes = 0;
             if (tunIfaceTotal.txBytes > 0) {
                 final long txBytesAcrossUnderlyingIfaces =
-                        underlyingIfacesTotal.txBytes * txBytes[i] / tunIfaceTotal.txBytes;
+                        multiplySafeByRational(underlyingIfacesTotal.txBytes,
+                                txBytes[i], tunIfaceTotal.txBytes);
                 totalTxBytes = Math.min(txBytes[i], txBytesAcrossUnderlyingIfaces);
             }
             long totalTxPackets = 0;
             if (tunIfaceTotal.txPackets > 0) {
                 final long txPacketsAcrossUnderlyingIfaces =
-                        underlyingIfacesTotal.txPackets * txPackets[i] / tunIfaceTotal.txPackets;
+                        multiplySafeByRational(underlyingIfacesTotal.txPackets,
+                                txPackets[i], tunIfaceTotal.txPackets);
                 totalTxPackets = Math.min(txPackets[i], txPacketsAcrossUnderlyingIfaces);
             }
             long totalOperations = 0;
             if (tunIfaceTotal.operations > 0) {
                 final long operationsAcrossUnderlyingIfaces =
-                        underlyingIfacesTotal.operations * operations[i] / tunIfaceTotal.operations;
+                        multiplySafeByRational(underlyingIfacesTotal.operations,
+                                operations[i], tunIfaceTotal.operations);
                 totalOperations = Math.min(operations[i], operationsAcrossUnderlyingIfaces);
             }
             // In a second pass, distribute these values across interfaces in the proportion that
@@ -1618,37 +1625,37 @@ public final class NetworkStats implements Parcelable {
                 tmpEntry.set = set[i];
                 if (underlyingIfacesTotal.rxBytes > 0) {
                     tmpEntry.rxBytes =
-                            totalRxBytes
-                                    * perInterfaceTotal[j].rxBytes
-                                    / underlyingIfacesTotal.rxBytes;
+                            multiplySafeByRational(totalRxBytes,
+                                    perInterfaceTotal[j].rxBytes,
+                                    underlyingIfacesTotal.rxBytes);
                 }
                 tmpEntry.rxPackets = 0;
                 if (underlyingIfacesTotal.rxPackets > 0) {
                     tmpEntry.rxPackets =
-                            totalRxPackets
-                                    * perInterfaceTotal[j].rxPackets
-                                    / underlyingIfacesTotal.rxPackets;
+                            multiplySafeByRational(totalRxPackets,
+                                    perInterfaceTotal[j].rxPackets,
+                                    underlyingIfacesTotal.rxPackets);
                 }
                 tmpEntry.txBytes = 0;
                 if (underlyingIfacesTotal.txBytes > 0) {
                     tmpEntry.txBytes =
-                            totalTxBytes
-                                    * perInterfaceTotal[j].txBytes
-                                    / underlyingIfacesTotal.txBytes;
+                            multiplySafeByRational(totalTxBytes,
+                                    perInterfaceTotal[j].txBytes,
+                                    underlyingIfacesTotal.txBytes);
                 }
                 tmpEntry.txPackets = 0;
                 if (underlyingIfacesTotal.txPackets > 0) {
                     tmpEntry.txPackets =
-                            totalTxPackets
-                                    * perInterfaceTotal[j].txPackets
-                                    / underlyingIfacesTotal.txPackets;
+                            multiplySafeByRational(totalTxPackets,
+                                    perInterfaceTotal[j].txPackets,
+                                    underlyingIfacesTotal.txPackets);
                 }
                 tmpEntry.operations = 0;
                 if (underlyingIfacesTotal.operations > 0) {
                     tmpEntry.operations =
-                            totalOperations
-                                    * perInterfaceTotal[j].operations
-                                    / underlyingIfacesTotal.operations;
+                            multiplySafeByRational(totalOperations,
+                                    perInterfaceTotal[j].operations,
+                                    underlyingIfacesTotal.operations);
                 }
                 // tmpEntry now contains the migrated data of the i-th entry for the j-th underlying
                 // interface. Add that data usage to this object.

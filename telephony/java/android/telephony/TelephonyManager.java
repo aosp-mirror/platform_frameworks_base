@@ -13425,7 +13425,12 @@ public class TelephonyManager {
         IBooleanConsumer aidlConsumer = callback == null ? null : new IBooleanConsumer.Stub() {
             @Override
             public void accept(boolean result) {
-                executor.execute(() -> callback.accept(result));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> callback.accept(result));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
 
@@ -15059,5 +15064,33 @@ public class TelephonyManager {
             e.rethrowFromSystemServer();
         }
         return PREPARE_UNATTENDED_REBOOT_ERROR;
+    }
+
+    /**
+     * Gets the current phone capability.
+     *
+     * @return the PhoneCapability which describes the data connection capability of modem.
+     * It's used to evaluate possible phone config change, for example from single
+     * SIM device to multi-SIM device.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull PhoneCapability getPhoneCapability() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getPhoneCapability();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        if (getActiveModemCount() > 1) {
+            return PhoneCapability.DEFAULT_DSDS_CAPABILITY;
+        } else {
+            return PhoneCapability.DEFAULT_SSSS_CAPABILITY;
+        }
     }
 }

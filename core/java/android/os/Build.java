@@ -333,7 +333,7 @@ public class Build {
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @TestApi
-        public static final int FIRST_SDK_INT = SystemProperties
+        public static final int DEVICE_INITIAL_SDK_INT = SystemProperties
                 .getInt("ro.product.first_api_level", 0);
 
         /**

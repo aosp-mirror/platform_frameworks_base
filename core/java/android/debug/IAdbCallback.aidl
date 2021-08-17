@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-// Manages the interaction between threads and the Android Runtime. If these symbols do not exist
-// at runtime, it means the current process does not link to libandroid_runtime.
+package android.debug;
 
-#pragma once
+import android.debug.AdbTransportType;
 
-extern "C" {
-
-// Attach current thread to JVM. Return true if successful, false otherwise.
-bool androidJavaAttachThread(const char* threadName);
-
-// Detach current thread to JVM. Return true if successful, false otherwise.
-bool androidJavaDetachThread();
-
-} // extern "C"
+/**
+ * Callback interface of {@link android.debug.IAdbCallbackManager}.
+ *
+ * @hide
+ */
+oneway interface IAdbCallback {
+    /**
+     * On debugging enabled, service providing IAdbManager calls this function.
+     */
+    void onDebuggingChanged(boolean enabled, AdbTransportType type);
+}
