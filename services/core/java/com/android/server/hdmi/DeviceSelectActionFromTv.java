@@ -33,7 +33,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
  * for a new active source. It does its best to wake up the target in standby mode
  * before issuing the command &gt;Set Stream path&lt;.
  */
-final class DeviceSelectAction extends HdmiCecFeatureAction {
+final class DeviceSelectActionFromTv extends HdmiCecFeatureAction {
     private static final String TAG = "DeviceSelect";
 
     // Time in milliseconds we wait for the device power status to switch to 'Standby'
@@ -74,7 +74,7 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
      * @param target target logical device that will be a new active source
      * @param callback callback object
      */
-    DeviceSelectAction(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
+    DeviceSelectActionFromTv(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
                               IHdmiControlCallback callback) {
         this(source, target, callback,
              source.getDeviceInfo().getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0
@@ -82,7 +82,7 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     }
 
     @VisibleForTesting
-    DeviceSelectAction(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
+    DeviceSelectActionFromTv(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
                        IHdmiControlCallback callback, boolean isCec20) {
         super(source, callback);
         mTarget = target;

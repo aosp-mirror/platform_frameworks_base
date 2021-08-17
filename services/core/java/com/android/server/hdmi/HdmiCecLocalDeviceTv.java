@@ -263,8 +263,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        removeAction(DeviceSelectAction.class);
-        addAndStartAction(new DeviceSelectAction(this, targetDevice, callback));
+        removeAction(DeviceSelectActionFromTv.class);
+        addAndStartAction(new DeviceSelectActionFromTv(this, targetDevice, callback));
     }
 
     @ServiceThreadOnly

@@ -23,8 +23,8 @@ import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_TRANSIENT_TO
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_TV;
-import static com.android.server.hdmi.DeviceSelectAction.STATE_WAIT_FOR_DEVICE_POWER_ON;
-import static com.android.server.hdmi.DeviceSelectAction.STATE_WAIT_FOR_REPORT_POWER_STATUS;
+import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_DEVICE_POWER_ON;
+import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_REPORT_POWER_STATUS;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -58,7 +58,7 @@ import java.util.Collections;
 
 @SmallTest
 @RunWith(JUnit4.class)
-public class DeviceSelectActionTest {
+public class DeviceSelectActionFromTvTest {
 
     private static final int PORT_1 = 1;
     private static final int PORT_2 = 1;
@@ -193,12 +193,12 @@ public class DeviceSelectActionTest {
         }
     }
 
-    private DeviceSelectAction createDeviceSelectAction(TestActionTimer actionTimer,
+    private DeviceSelectActionFromTv createDeviceSelectAction(TestActionTimer actionTimer,
                                                         TestCallback callback,
                                                         boolean isCec20) {
         HdmiDeviceInfo hdmiDeviceInfo =
                 mHdmiControlService.getHdmiCecNetwork().getCecDeviceInfo(ADDR_PLAYBACK_1);
-        DeviceSelectAction action = new DeviceSelectAction(mHdmiCecLocalDeviceTv,
+        DeviceSelectActionFromTv action = new DeviceSelectActionFromTv(mHdmiCecLocalDeviceTv,
                                                            hdmiDeviceInfo, callback, isCec20);
         action.setActionTimer(actionTimer);
         return action;
@@ -210,7 +210,7 @@ public class DeviceSelectActionTest {
         // playback1.
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/false);
         mHdmiCecLocalDeviceTv.updateActiveSource(ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2,
                                                  "testDeviceSelect");
@@ -231,7 +231,7 @@ public class DeviceSelectActionTest {
                                                  "testDeviceSelect");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
@@ -257,7 +257,7 @@ public class DeviceSelectActionTest {
                                                  "testDeviceSelect");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
@@ -284,7 +284,7 @@ public class DeviceSelectActionTest {
                                                  "testDeviceSelect");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
@@ -312,7 +312,7 @@ public class DeviceSelectActionTest {
                 HdmiControlManager.POWER_STATUS_ON);
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/true);
         mHdmiCecLocalDeviceTv.updateActiveSource(ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2,
                                                  "testDeviceSelect");
@@ -328,7 +328,7 @@ public class DeviceSelectActionTest {
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/true);
         mHdmiCecLocalDeviceTv.updateActiveSource(ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2,
                                                  "testDeviceSelect");
@@ -351,7 +351,7 @@ public class DeviceSelectActionTest {
                                                  "testDeviceSelect");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
-        DeviceSelectAction action = createDeviceSelectAction(actionTimer, callback,
+        DeviceSelectActionFromTv action = createDeviceSelectAction(actionTimer, callback,
                                         /*isCec20=*/true);
         action.start();
         mTestLooper.dispatchAll();

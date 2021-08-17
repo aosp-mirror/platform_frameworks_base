@@ -237,15 +237,15 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void mayCancelDeviceSelect(int address) {
-        List<DeviceSelectAction> actions = getActions(DeviceSelectAction.class);
+        List<DeviceSelectActionFromTv> actions = getActions(DeviceSelectActionFromTv.class);
         if (actions.isEmpty()) {
             return;
         }
 
         // Should have only one Device Select Action
-        DeviceSelectAction action = actions.get(0);
+        DeviceSelectActionFromTv action = actions.get(0);
         if (action.getTargetAddress() == address) {
-            removeAction(DeviceSelectAction.class);
+            removeAction(DeviceSelectActionFromTv.class);
         }
     }
 
