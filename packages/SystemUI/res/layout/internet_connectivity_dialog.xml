@@ -30,7 +30,7 @@
         style="@style/Widget.SliceView.Panel"
         android:gravity="center_vertical|center_horizontal"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
         android:orientation="vertical">
 
         <TextView
@@ -57,7 +57,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
         android:orientation="vertical">
 
         <View
@@ -101,8 +101,8 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:layout_gravity="center_vertical|start"
                     android:orientation="horizontal"
-                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
 
@@ -130,24 +130,24 @@
                         <TextView
                             android:id="@+id/mobile_title"
                             android:textDirection="locale"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
+                            android:layout_marginEnd="7dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
-                            android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp"
                             android:fontFamily="google-sans"/>
                         <TextView
                             android:id="@+id/mobile_summary"
                             android:textDirection="locale"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
+                            android:layout_marginEnd="34dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
-                            android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
                             android:textSize="14sp"
                             android:fontFamily="google-sans"/>
@@ -179,8 +179,8 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
 
@@ -230,10 +230,10 @@
                     android:visibility="gone"
                     android:background="?android:attr/selectableItemBackground"
                     android:orientation="horizontal"
-                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
-                    android:paddingStart="22dp"
-                    android:paddingEnd="22dp">
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
+                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="24dp">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -248,12 +248,13 @@
                     </FrameLayout>
 
                     <LinearLayout
-                        android:layout_weight="3"
                         android:id="@+id/wifi_connected_list"
                         android:orientation="vertical"
                         android:clickable="false"
                         android:layout_width="wrap_content"
                         android:layout_height="72dp"
+                        android:layout_marginEnd="30dp"
+                        android:layout_weight="1"
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/wifi_connected_title"
@@ -261,9 +262,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|start"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
                             android:ellipsize="end"
-                            android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
                             android:textSize="14sp"
                             android:fontFamily="google-sans"/>
@@ -273,9 +273,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|start"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
                             android:ellipsize="end"
-                            android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
                             android:textSize="14sp"
                             android:fontFamily="google-sans"/>
@@ -284,14 +283,14 @@
                     <FrameLayout
                         android:layout_width="24dp"
                         android:layout_height="match_parent"
-                        android:layout_marginEnd="5dp"
                         android:clickable="false"
+                        android:layout_gravity="end|center_vertical"
                         android:gravity="center">
                         <ImageView
                             android:id="@+id/wifi_settings_icon"
                             android:src="@drawable/ic_settings_24dp"
                             android:layout_width="24dp"
-                            android:layout_gravity="center"
+                            android:layout_gravity="end|center_vertical"
                             android:layout_height="wrap_content"/>
                     </FrameLayout>
 
@@ -324,7 +323,7 @@
                     android:layout_height="24dp"
                     android:clickable="false"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
                     <ImageView
                         android:id="@+id/arrow_forward"
                         android:src="@drawable/ic_arrow_forward"
@@ -338,7 +337,7 @@
                     android:clickable="false"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
                     <TextView
                         android:text="@string/see_all_networks"
                         android:textDirection="locale"
