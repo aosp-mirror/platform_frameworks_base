@@ -2414,6 +2414,10 @@ public class NotificationPanelViewController extends PanelViewController {
         setQSClippingBounds();
         mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
+
+        if (mCommunalViewController != null) {
+            mCommunalViewController.updateQsExpansion(qsExpansionFraction);
+        }
     }
 
     private void onStackYChanged(boolean shouldAnimate) {
@@ -2752,6 +2756,10 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
+
+        if (mCommunalViewController != null) {
+            mCommunalViewController.updateShadeExpansion(mTransitioningToFullShadeProgress);
+        }
     }
 
     /**

@@ -34,6 +34,7 @@ import javax.inject.Inject;
 public class CommunalStateController implements
         CallbackController<CommunalStateController.Callback> {
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private boolean mCommunalViewOccluded;
     private boolean mCommunalViewShowing;
 
     /**
@@ -44,6 +45,12 @@ public class CommunalStateController implements
          * Called when the visibility of the communal view changes.
          */
         default void onCommunalViewShowingChanged() {
+        }
+
+        /**
+         * Called when the occlusion of the communal view changes.
+         */
+        default void onCommunalViewOccludedChanged() {
         }
     }
 
@@ -57,13 +64,32 @@ public class CommunalStateController implements
      * @param communalViewShowing {@code true} if the view is showing, {@code false} otherwise.
      */
     public void setCommunalViewShowing(boolean communalViewShowing) {
-        if (mCommunalViewShowing != communalViewShowing) {
-            mCommunalViewShowing = communalViewShowing;
+        if (mCommunalViewShowing == communalViewShowing) {
+            return;
+        }
 
-            final ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
-            for (Callback callback : callbacks) {
-                callback.onCommunalViewShowingChanged();
-            }
+        mCommunalViewShowing = communalViewShowing;
+
+        final ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
+        for (Callback callback : callbacks) {
+            callback.onCommunalViewShowingChanged();
+        }
+    }
+
+    /**
+     * Sets whether the communal view is occluded (but otherwise still showing).
+     * @param communalViewOccluded {@code true} if the view is occluded, {@code false} otherwise.
+     */
+    public void setCommunalViewOccluded(boolean communalViewOccluded) {
+        if (mCommunalViewOccluded == communalViewOccluded) {
+            return;
+        }
+
+        mCommunalViewOccluded = communalViewOccluded;
+
+        ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
+        for (int i = 0; i < callbacks.size(); i++) {
+            callbacks.get(i).onCommunalViewOccludedChanged();
         }
     }
 
@@ -73,6 +99,14 @@ public class CommunalStateController implements
      */
     public boolean getCommunalViewShowing() {
         return mCommunalViewShowing;
+    }
+
+    /**
+     * Returns whether the communal view is occluded.
+     * @return {@code true} if the view is occluded, {@code false} otherwise.
+     */
+    public boolean getCommunalViewOccluded() {
+        return mCommunalViewOccluded;
     }
 
     @Override
