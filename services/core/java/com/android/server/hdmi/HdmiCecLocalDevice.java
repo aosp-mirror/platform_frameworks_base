@@ -261,6 +261,20 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
+    @VisibleForTesting
+    protected boolean isAlreadyActiveSource(HdmiDeviceInfo targetDevice, int targetAddress,
+            IHdmiControlCallback callback) {
+        ActiveSource active = getActiveSource();
+        if (targetDevice.getDevicePowerStatus() == HdmiControlManager.POWER_STATUS_ON
+                && active.isValid()
+                && targetAddress == active.logicalAddress) {
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+            return true;
+        }
+        return false;
+    }
+
+    @ServiceThreadOnly
     @Constants.HandleMessageResult
     protected final int onMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
