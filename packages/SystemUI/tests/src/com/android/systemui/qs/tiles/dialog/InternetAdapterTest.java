@@ -2,8 +2,11 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -34,6 +38,8 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     @Mock
     private WifiEntry mInternetWifiEntry;
+    @Mock
+    private List<WifiEntry> mWifiEntries;
     @Mock
     private WifiEntry mWifiEntry;
     @Mock
@@ -56,43 +62,17 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         mInternetAdapter = new InternetAdapter(mInternetDialogController);
         mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mContext), 0);
-        when(mInternetDialogController.getInternetWifiEntry()).thenReturn(mInternetWifiEntry);
-        when(mInternetDialogController.getWifiEntryList()).thenReturn(Arrays.asList(mWifiEntry));
+        mInternetAdapter.setWifiEntries(Arrays.asList(mWifiEntry), 1 /* wifiEntriesCount */);
         mViewHolder.mWifiIconInjector = mWifiIconInjector;
     }
 
     @Test
-    public void getItemCount_withApmOnWifiOnNoInternetWifi_returnFour() {
-        // The preconditions WiFi ON is already in setUp()
-        when(mInternetDialogController.getInternetWifiEntry()).thenReturn(null);
-        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+    public void getItemCount_returnWifiEntriesCount() {
+        for (int i = 0; i < InternetDialogController.MAX_WIFI_ENTRY_COUNT; i++) {
+            mInternetAdapter.setWifiEntries(mWifiEntries, i /* wifiEntriesCount */);
 
-        assertThat(mInternetAdapter.getItemCount()).isEqualTo(4);
-    }
-
-    @Test
-    public void getItemCount_withApmOnWifiOnHasInternetWifi_returnThree() {
-        // The preconditions WiFi ON and Internet WiFi are already in setUp()
-        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
-
-        assertThat(mInternetAdapter.getItemCount()).isEqualTo(3);
-    }
-
-    @Test
-    public void getItemCount_withApmOffWifiOnNoInternetWifi_returnThree() {
-        // The preconditions WiFi ON is already in setUp()
-        when(mInternetDialogController.getInternetWifiEntry()).thenReturn(null);
-        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
-
-        assertThat(mInternetAdapter.getItemCount()).isEqualTo(3);
-    }
-
-    @Test
-    public void getItemCount_withApmOffWifiOnHasInternetWifi_returnTwo() {
-        // The preconditions WiFi ON and Internet WiFi are already in setUp()
-        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
-
-        assertThat(mInternetAdapter.getItemCount()).isEqualTo(2);
+            assertThat(mInternetAdapter.getItemCount()).isEqualTo(i);
+        }
     }
 
     @Test
@@ -118,7 +98,17 @@ public class InternetAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBindViewHolder_bindDefaultWifiNetwork_getIconWithInternet() {
+    public void onBindViewHolder_wifiLevelUnreachable_shouldNotGetWifiIcon() {
+        reset(mWifiIconInjector);
+        when(mWifiEntry.getLevel()).thenReturn(WifiEntry.WIFI_LEVEL_UNREACHABLE);
+
+        mInternetAdapter.onBindViewHolder(mViewHolder, 0);
+
+        verify(mWifiIconInjector, never()).getIcon(anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void onBindViewHolder_shouldNotShowXLevelIcon_getIconWithInternet() {
         when(mWifiEntry.shouldShowXLevelIcon()).thenReturn(false);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
@@ -127,7 +117,7 @@ public class InternetAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBindViewHolder_bindNoDefaultWifiNetwork_getIconWithNoInternet() {
+    public void onBindViewHolder_shouldShowXLevelIcon_getIconWithNoInternet() {
         when(mWifiEntry.shouldShowXLevelIcon()).thenReturn(true);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
