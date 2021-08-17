@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gesicht wurde nicht erkannt. Verwende stattdessen den Fingerabdruck."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Mithilfe deines Fingerabdrucks fortfahren"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingerabdruck wurde nicht erkannt. Verwende stattdessen die Displaysperre."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Wir suchen nach dir…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Gesichtssymbol"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Schaltfläche für Kompatibilitätszoom"</string>
@@ -1083,7 +1085,7 @@
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
     <string name="controls_media_close_session" msgid="1193000643003066508">"Diese Mediensitzung ausblenden?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>

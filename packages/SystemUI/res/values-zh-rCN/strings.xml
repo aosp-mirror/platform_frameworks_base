@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"无法识别人脸。请改用指纹。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"使用指纹验证身份后才能继续"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"无法识别指纹。请改用屏幕锁定功能。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在查找您的面孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"面孔图标"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"兼容性缩放按钮。"</string>
