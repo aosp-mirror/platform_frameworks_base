@@ -894,6 +894,61 @@ public class DisplayManagerServiceTest {
         assertFalse(callback.mDisplayAddedCalled);
     }
 
+
+
+    @Test
+    public void testSettingTwoBrightnessConfigurationsOnMultiDisplay() {
+        Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+
+        // get the first two internal displays
+        Display[] displays = displayManager.getDisplays();
+        Display internalDisplayOne = null;
+        Display internalDisplayTwo = null;
+        for (Display display : displays) {
+            if (display.getType() == Display.TYPE_INTERNAL) {
+                if (internalDisplayOne == null) {
+                    internalDisplayOne = display;
+                } else {
+                    internalDisplayTwo = display;
+                    break;
+                }
+            }
+        }
+
+        // return if there are fewer than 2 displays on this device
+        if (internalDisplayOne == null || internalDisplayTwo == null) {
+            return;
+        }
+
+        final String uniqueDisplayIdOne = internalDisplayOne.getUniqueId();
+        final String uniqueDisplayIdTwo = internalDisplayTwo.getUniqueId();
+
+        BrightnessConfiguration configOne =
+                new BrightnessConfiguration.Builder(
+                        new float[]{0.0f, 12345.0f}, new float[]{15.0f, 400.0f})
+                        .setDescription("model:1").build();
+        BrightnessConfiguration configTwo =
+                new BrightnessConfiguration.Builder(
+                        new float[]{0.0f, 6789.0f}, new float[]{12.0f, 300.0f})
+                        .setDescription("model:2").build();
+
+        displayManager.setBrightnessConfigurationForDisplay(configOne,
+                uniqueDisplayIdOne);
+        displayManager.setBrightnessConfigurationForDisplay(configTwo,
+                uniqueDisplayIdTwo);
+
+        BrightnessConfiguration configFromOne =
+                displayManager.getBrightnessConfigurationForDisplay(uniqueDisplayIdOne);
+        BrightnessConfiguration configFromTwo =
+                displayManager.getBrightnessConfigurationForDisplay(uniqueDisplayIdTwo);
+
+        assertNotNull(configFromOne);
+        assertEquals(configOne, configFromOne);
+        assertEquals(configTwo, configFromTwo);
+
+    }
+
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled)
             throws Exception {
         DisplayManagerService displayManager =
