@@ -869,6 +869,35 @@ public class BubbleDataTest extends ShellTestCase {
         assertNotNull(mBubbleData.getOverflowBubbleWithKey(mBubbleA2.getKey()));
     }
 
+    /**
+     * Verifies that after the stack is collapsed with the overflow selected, it will select
+     * the top bubble upon next expansion.
+     */
+    @Test
+    public void test_collapseWithOverflowSelected_nextExpansion() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setExpanded(true);
+
+        mBubbleData.setListener(mListener);
+
+        // Select the overflow
+        mBubbleData.setShowingOverflow(true);
+        mBubbleData.setSelectedBubble(mBubbleData.getOverflow());
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleData.getOverflow());
+
+        // Collapse
+        mBubbleData.setExpanded(false);
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
+
+        // Expand (here we should select the new bubble)
+        mBubbleData.setExpanded(true);
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA2);
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);
@@ -902,7 +931,7 @@ public class BubbleDataTest extends ShellTestCase {
         assertWithMessage("selectionChanged").that(update.selectionChanged).isFalse();
     }
 
-    private void assertSelectionChangedTo(Bubble bubble) {
+    private void assertSelectionChangedTo(BubbleViewProvider bubble) {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
         assertWithMessage("selectedBubble").that(update.selectedBubble).isEqualTo(bubble);
@@ -924,7 +953,6 @@ public class BubbleDataTest extends ShellTestCase {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.overflowBubbles).isEqualTo(bubbles);
     }
-
 
     private BubbleEntry createBubbleEntry(int userId, String notifKey, String packageName,
             NotificationListenerService.Ranking ranking) {

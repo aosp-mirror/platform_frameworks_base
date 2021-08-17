@@ -1767,7 +1767,7 @@ public class StatusBar extends SystemUI implements
     }
 
     protected ViewGroup getBouncerContainer() {
-        return mNotificationShadeWindowView;
+        return mNotificationShadeWindowView.findViewById(R.id.keyboard_bouncer_container);
     }
 
     public int getStatusBarHeight() {

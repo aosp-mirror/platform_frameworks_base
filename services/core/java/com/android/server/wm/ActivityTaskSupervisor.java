@@ -2596,7 +2596,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         boolean matches(ActivityRecord r) {
-            return mTargetComponent.equals(r.mActivityComponent) || mLaunchingState.contains(r);
+            if (!mLaunchingState.hasActiveTransitionInfo()) {
+                return mTargetComponent.equals(r.mActivityComponent);
+            }
+            return mLaunchingState.contains(r);
         }
 
         void dump(PrintWriter pw, String prefix) {

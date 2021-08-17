@@ -15,7 +15,6 @@ package com.android.systemui.shared.plugins;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,7 +36,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,16 +88,6 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockListener = mock(PluginListener.class);
     }
 
-    @RunWithLooper(setAsMainLooper = true)
-    @Test
-    public void testOneShot() {
-        Plugin mockPlugin = mock(Plugin.class);
-        when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
-                null, null));
-        Plugin result = mPluginManager.getOneShotPlugin("myAction", TestPlugin.class);
-        assertSame(mockPlugin, result);
-    }
-
     @Test
     public void testAddListener() {
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
@@ -129,7 +117,6 @@ public class PluginManagerTest extends SysuiTestCase {
         applicationInfo.sourceDir = sourceDir;
         applicationInfo.packageName = WHITELISTED_PACKAGE;
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNull(mPluginManager.getOneShotPlugin(sourceDir, TestPlugin.class));
         assertNull(mPluginManager.getClassLoader(applicationInfo));
     }
 
@@ -206,8 +193,8 @@ public class PluginManagerTest extends SysuiTestCase {
     }
 
     @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)
-    public static interface TestPlugin extends Plugin {
-        public static final String ACTION = "testAction";
-        public static final int VERSION = 1;
+    public interface TestPlugin extends Plugin {
+        String ACTION = "testAction";
+        int VERSION = 1;
     }
 }
