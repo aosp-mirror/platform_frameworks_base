@@ -5410,6 +5410,12 @@ package android.media {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
+  public class Spatializer {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+  }
+
 }
 
 package android.media.audiofx {
