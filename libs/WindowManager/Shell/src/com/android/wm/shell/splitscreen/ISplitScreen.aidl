@@ -95,6 +95,8 @@ interface ISplitScreen {
      * Blocking call that notifies and gets additional split-screen targets when entering
      * recents (for example: the dividerBar).
      * @param cancel is true if leaving recents back to split (eg. the gesture was cancelled).
+     * @param appTargets apps that will be re-parented to display area
      */
-    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) = 12;
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
+                                                   in RemoteAnimationTarget[] appTargets) = 12;
 }

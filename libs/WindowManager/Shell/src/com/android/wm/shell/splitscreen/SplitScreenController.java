@@ -43,6 +43,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.SurfaceSession;
 import android.window.IRemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -281,8 +282,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
-    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) {
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
         if (!isSplitScreenVisible()) return null;
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+                .setContainerLayer()
+                .setName("RecentsAnimationSplitTasks")
+                .setHidden(false)
+                .setCallsite("SplitScreenController#onGoingtoRecentsLegacy");
+        mRootTDAOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, builder);
+        SurfaceControl sc = builder.build();
+        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        for (RemoteAnimationTarget appTarget : apps) {
+            // TODO(b/195958376) set the correct layer/z-order in transaction for the new surface
+            transaction.reparent(appTarget.leash, sc);
+            transaction.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
+                    appTarget.screenSpaceBounds.top);
+        }
+        transaction.apply();
+        transaction.close();
         return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
     }
 
@@ -554,10 +571,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel) {
+        public RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
+                RemoteAnimationTarget[] apps) {
             final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
             executeRemoteCallWithTaskPermission(mController, "onGoingToRecentsLegacy",
-                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(cancel),
+                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(cancel, apps),
                     true /* blocking */);
             return out[0];
         }
