@@ -55,6 +55,19 @@ public abstract class WindowProviderService extends Service implements WindowPro
     private WindowManager mWindowManager;
     private boolean mInitialized;
 
+    /**
+     * Returns {@code true} if the {@code windowContextOptions} declares that it is a
+     * {@link WindowProviderService}.
+     *
+     * @hide
+     */
+    public static boolean isWindowProviderService(@Nullable Bundle windowContextOptions) {
+        if (windowContextOptions == null) {
+            return false;
+        }
+        return (windowContextOptions.getBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, false));
+    }
+
     public WindowProviderService() {
         mOptions = new Bundle();
         mOptions.putBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, true);
