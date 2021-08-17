@@ -77,7 +77,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -204,7 +203,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         final int stroke = colorized ? mContext.getResources().getDimensionPixelSize(
                 R.dimen.remote_input_view_text_stroke) : 0;
         if (colorized) {
-            final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
+            final boolean dark = Notification.Builder.isColorDark(backgroundColor);
             final int foregroundColor = dark ? Color.WHITE : Color.BLACK;
             final int inverseColor = dark ? Color.BLACK : Color.WHITE;
             editBgColor = backgroundColor;
