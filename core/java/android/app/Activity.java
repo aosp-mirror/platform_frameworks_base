@@ -8410,7 +8410,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide
      */
-    public final boolean isStopped() {
+    public final boolean isVisibleForAutofill() {
         return mStopped;
     }
 

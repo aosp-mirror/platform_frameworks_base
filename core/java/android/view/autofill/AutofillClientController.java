@@ -324,7 +324,7 @@ public final class AutofillClientController implements AutofillManager.AutofillC
 
     @Override
     public boolean autofillClientIsVisibleForAutofill() {
-        return !mActivity.isStopped();
+        return !mActivity.isVisibleForAutofill();
     }
 
     @Override
