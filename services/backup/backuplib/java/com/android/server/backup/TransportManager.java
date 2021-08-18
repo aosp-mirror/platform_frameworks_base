@@ -16,6 +16,9 @@
 
 package com.android.server.backup;
 
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
@@ -57,6 +60,7 @@ import java.util.function.Predicate;
 /** Handles in-memory bookkeeping of all BackupTransport objects. */
 public class TransportManager {
     private static final String TAG = "BackupTransportManager";
+    private static final boolean MORE_DEBUG = false;
 
     @VisibleForTesting
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
@@ -128,13 +132,51 @@ public class TransportManager {
         }
     }
 
+    void onPackageEnabled(String packageName) {
+        onPackageAdded(packageName);
+    }
+
+    void onPackageDisabled(String packageName) {
+        onPackageRemoved(packageName);
+    }
+
     @WorkerThread
     void onPackageChanged(String packageName, String... components) {
+        // Determine if the overall package has changed and not just its
+        // components - see {@link EXTRA_CHANGED_COMPONENT_NAME_LIST}.  When we
+        // know a package was enabled/disabled we'll handle that directly and
+        // not continue with onPackageChanged.
+        if (components.length == 1 && components[0].equals(packageName)) {
+            final int enabled = mPackageManager.getApplicationEnabledSetting(packageName);
+            switch (enabled) {
+                case COMPONENT_ENABLED_STATE_ENABLED: {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName + " was enabled.");
+                    }
+                    onPackageEnabled(packageName);
+                    return;
+                }
+                case COMPONENT_ENABLED_STATE_DISABLED: {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName + " was disabled.");
+                    }
+                    onPackageDisabled(packageName);
+                    return;
+                }
+                default: {
+                    Slog.w(TAG, "Package " + packageName + " enabled setting: " + enabled);
+                    return;
+                }
+            }
+        }
         // Unfortunately this can't be atomic because we risk a deadlock if
         // registerTransportsFromPackage() is put inside the synchronized block
         Set<ComponentName> transportComponents = new ArraySet<>(components.length);
         for (String componentName : components) {
             transportComponents.add(new ComponentName(packageName, componentName));
+        }
+        if (transportComponents.isEmpty()) {
+            return;
         }
         synchronized (mTransportLock) {
             mRegisteredTransportsDescriptionMap.keySet().removeIf(transportComponents::contains);
