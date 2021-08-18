@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -82,12 +83,14 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mCommunalView.isAttachedToWindow()).thenReturn(true);
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
         mController = new CommunalHostViewController(mFakeExecutor, mCommunalStateController,
                 mKeyguardUpdateMonitor, mKeyguardStateController, mDozeParameters,
                 mUnlockedScreenOffAnimationController, mStatusBarStateController, mCommunalView);
         mController.init();
         mFakeExecutor.runAllReady();
+
         Mockito.clearInvocations(mCommunalView);
     }
 
@@ -170,6 +173,7 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     public void testReportOcclusion() {
         // Ensure CommunalHostViewController reports view occluded when either the QS or Shade is
         // expanded.
+        clearInvocations(mCommunalStateController);
         mController.updateShadeExpansion(0);
         verify(mCommunalStateController).setCommunalViewOccluded(false);
         clearInvocations(mCommunalStateController);

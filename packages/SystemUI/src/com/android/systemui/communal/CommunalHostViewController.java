@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -121,6 +122,11 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
 
                     setState(STATE_DOZING, isDozing);
                 }
+
+                @Override
+                public void onStateChanged(int newState) {
+                    updateCommunalViewOccluded();
+                }
             };
 
     @Inject
@@ -195,6 +201,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
         if (existingState != mState) {
             showSource();
         }
+
+        updateCommunalViewOccluded();
     }
 
     private String describeState(@State int stateFlag) {
@@ -308,7 +316,12 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     }
 
     private void updateCommunalViewOccluded() {
+        final boolean bouncerShowing = (mState & STATE_BOUNCER_SHOWING) == STATE_BOUNCER_SHOWING;
+        final int statusBarState = mStatusBarStateController.getState();
+        final boolean shadeExpanded = statusBarState == StatusBarState.SHADE
+                || statusBarState == StatusBarState.SHADE_LOCKED;
+
         mCommunalStateController.setCommunalViewOccluded(
-                mQsExpansion > 0.0f || mShadeExpansion > 0.0f);
+                bouncerShowing || shadeExpanded || mQsExpansion > 0.0f || mShadeExpansion > 0.0f);
     }
 }
