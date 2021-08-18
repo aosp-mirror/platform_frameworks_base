@@ -103,17 +103,17 @@ private:
 };
 
 struct MediaEvent : public RefBase {
-    MediaEvent(sp<FilterClient> filterClient, native_handle_t* avHandle, uint64_t dataId,
-               uint64_t dataSize, jobject obj);
+    MediaEvent(sp<FilterClient> filterClient, native_handle_t* avHandle, int64_t dataId,
+               int64_t dataSize, jobject obj);
     ~MediaEvent();
     jobject getLinearBlock();
-    uint64_t getAudioHandle();
+    int64_t getAudioHandle();
     void finalize();
 
     sp<FilterClient> mFilterClient;
     native_handle_t* mAvHandle;
-    uint64_t mDataId;
-    uint64_t mDataSize;
+    int64_t mDataId;
+    int64_t mDataSize;
     uint8_t* mBuffer;
     android::Mutex mLock;
     int mDataIdRefCnt;
