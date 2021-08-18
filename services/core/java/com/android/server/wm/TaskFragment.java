@@ -1262,6 +1262,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return getVisibility(starting) != TASK_FRAGMENT_VISIBILITY_INVISIBLE;
     }
 
+    boolean isFocusableAndVisible() {
+        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
+    }
+
     final boolean startPausing(boolean uiSleeping, ActivityRecord resuming, String reason) {
         return startPausing(mTaskSupervisor.mUserLeaving, uiSleeping, resuming, reason);
     }
