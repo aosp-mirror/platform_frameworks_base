@@ -347,6 +347,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         changeTileSpecs(tileSpecs-> tileSpecs.remove(spec));
     }
 
+    /**
+     * Remove many tiles at once.
+     *
+     * It will only save to settings once (as opposed to {@link QSTileHost#removeTile} called
+     * multiple times).
+     */
+    @Override
+    public void removeTiles(Collection<String> specs) {
+        changeTileSpecs(tileSpecs -> tileSpecs.removeAll(specs));
+    }
+
     @Override
     public void unmarkTileAsAutoAdded(String spec) {
         if (mAutoTiles != null) mAutoTiles.unmarkTileAsAutoAdded(spec);
@@ -368,6 +379,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
      * @param requestPosition -1 for end, 0 for beginning, or X for insertion at position X
      */
     public void addTile(String spec, int requestPosition) {
+        if (spec.equals("work")) Log.wtfStack(TAG, "Adding work tile");
         changeTileSpecs(tileSpecs -> {
             if (tileSpecs.contains(spec)) return false;
 
@@ -382,6 +394,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     void saveTilesToSettings(List<String> tileSpecs) {
+        if (tileSpecs.contains("work")) Log.wtfStack(TAG, "Saving work tile");
         mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
                 null /* tag */, false /* default */, mCurrentUser,
                 true /* overrideable by restore */);
