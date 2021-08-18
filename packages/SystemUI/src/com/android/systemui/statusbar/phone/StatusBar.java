@@ -189,6 +189,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -523,6 +524,7 @@ public class StatusBar extends SystemUI implements
     // settings
     private QSPanelController mQSPanelController;
 
+    private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     KeyguardIndicationController mKeyguardIndicationController;
 
     private View mReportRejectedTouch;
@@ -862,6 +864,7 @@ public class StatusBar extends SystemUI implements
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            OperatorNameViewController.Factory operatorNameViewControllerFactory,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
@@ -892,6 +895,7 @@ public class StatusBar extends SystemUI implements
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
+        mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
@@ -1282,7 +1286,8 @@ public class StatusBar extends SystemUI implements
                                 mKeyguardStateController,
                                 mNetworkController,
                                 mStatusBarStateController,
-                                mCommandQueue
+                                mCommandQueue,
+                                mOperatorNameViewControllerFactory
                         ),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
