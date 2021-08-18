@@ -41,13 +41,13 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SystemConfigFileCommitEventLogger;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
@@ -57,13 +57,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -469,11 +468,9 @@ public final class JobStore {
             int numJobs = 0;
             int numSystemJobs = 0;
             int numSyncJobs = 0;
-            try {
-                mEventLogger.setStartTime(SystemClock.uptimeMillis());
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(baos, StandardCharsets.UTF_8.name());
+            mEventLogger.setStartTime(SystemClock.uptimeMillis());
+            try (FileOutputStream fos = mJobsFile.startWrite()) {
+                TypedXmlSerializer out = Xml.resolveSerializer(fos);
                 out.startDocument(null, true);
                 out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -502,9 +499,6 @@ public final class JobStore {
                 out.endTag(null, "job-info");
                 out.endDocument();
 
-                // Write out to disk in one fell swoop.
-                FileOutputStream fos = mJobsFile.startWrite();
-                fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
             } catch (IOException e) {
                 if (DEBUG) {
@@ -703,9 +697,8 @@ public final class JobStore {
             int numJobs = 0;
             int numSystemJobs = 0;
             int numSyncJobs = 0;
-            try {
-                List<JobStatus> jobs;
-                FileInputStream fis = mJobsFile.openRead();
+            List<JobStatus> jobs;
+            try (FileInputStream fis = mJobsFile.openRead()) {
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis, rtcGood);
                     if (jobs != null) {
@@ -726,7 +719,6 @@ public final class JobStore {
                         }
                     }
                 }
-                fis.close();
             } catch (FileNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
@@ -743,10 +735,9 @@ public final class JobStore {
             Slog.i(TAG, "Read " + numJobs + " jobs");
         }
 
-        private List<JobStatus> readJobMapImpl(FileInputStream fis, boolean rtcIsGood)
+        private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood)
                 throws XmlPullParserException, IOException {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            XmlPullParser parser = Xml.resolvePullParser(fis);
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
