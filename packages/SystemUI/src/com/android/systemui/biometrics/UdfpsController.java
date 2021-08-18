@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -71,6 +72,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
@@ -122,6 +124,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
     @NonNull private final KeyguardBypassController mKeyguardBypassController;
+    @NonNull private final ConfigurationController mConfigurationController;
     @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -519,7 +522,10 @@ public class UdfpsController implements DozeReceiver {
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
             @NonNull KeyguardStateController keyguardStateController,
-            @NonNull KeyguardBypassController keyguardBypassController) {
+            @NonNull KeyguardBypassController keyguardBypassController,
+            @NonNull DisplayManager displayManager,
+            @Main Handler mainHandler,
+            @NonNull ConfigurationController configurationController) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
@@ -545,11 +551,16 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
-        mOrientationListener = new BiometricOrientationEventListener(context, () -> {
-            onOrientationChanged();
-            return Unit.INSTANCE;
-        });
+        mOrientationListener = new BiometricOrientationEventListener(
+                context,
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                },
+                displayManager,
+                mainHandler);
         mKeyguardBypassController = keyguardBypassController;
+        mConfigurationController = configurationController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -662,7 +673,8 @@ public class UdfpsController implements DozeReceiver {
         // Transform dimensions if the device is in landscape mode
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
-                if (animation instanceof UdfpsKeyguardViewController) {
+                if (animation instanceof UdfpsKeyguardViewController
+                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
                 mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
@@ -672,7 +684,8 @@ public class UdfpsController implements DozeReceiver {
                 break;
 
             case Surface.ROTATION_270:
-                if (animation instanceof UdfpsKeyguardViewController) {
+                if (animation instanceof UdfpsKeyguardViewController
+                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
                 mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
@@ -767,6 +780,7 @@ public class UdfpsController implements DozeReceiver {
                         mDumpManager,
                         mKeyguardViewMediator,
                         mLockscreenShadeTransitionController,
+                        mConfigurationController,
                         this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
@@ -874,11 +888,16 @@ public class UdfpsController implements DozeReceiver {
 
     private void onFingerDown(int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
-        mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
+
+        if (mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && !mStatusBarStateController.isDozing()) {
+            mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
+        }
+
         if (!mOnFingerDown) {
             playStartHaptic();
 

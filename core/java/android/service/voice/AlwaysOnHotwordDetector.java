@@ -783,6 +783,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    // TODO: Remove this RequiresPermission since it isn't actually enforced. Also fix the javadoc
+    // about permissions enforcement (when it throws vs when it just returns false) for other
+    // methods in this class.
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Override
     public boolean stopRecognition() {

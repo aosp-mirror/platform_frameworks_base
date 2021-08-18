@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager.AttributionFlags;
 import android.content.AttributionSource;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -215,4 +216,11 @@ public abstract class AppOpsManagerInternal {
      * Sets a global restriction on an op code.
      */
     public abstract void setGlobalRestriction(int code, boolean restricted, IBinder token);
+
+    /**
+     * Gets the number of tokens restricting the given appop for a user, package, and
+     * attributionTag.
+     */
+    public abstract int getOpRestrictionCount(int code, UserHandle user, String pkg,
+            String attributionTag);
 }

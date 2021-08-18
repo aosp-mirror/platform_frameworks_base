@@ -66,7 +66,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         mDisplayLayout = new DisplayLayout(mContext, mDisplay);
         mSpiedTransitionState = spy(new OneHandedState());
         mSpiedTutorialHandler = spy(
-                new OneHandedTutorialHandler(mContext, mMockWindowManager));
+                new OneHandedTutorialHandler(mContext, mMockSettingsUtil, mMockWindowManager));
         mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
     }
 

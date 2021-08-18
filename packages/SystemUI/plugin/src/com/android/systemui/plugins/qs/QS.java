@@ -52,13 +52,6 @@ public interface QS extends FragmentBase {
     void setListening(boolean listening);
     boolean isShowingDetail();
     void closeDetail();
-
-    /**
-     * Set that we're currently pulse expanding
-     *
-     * @param pulseExpanding if we're currently expanding during pulsing
-     */
-    default void setPulseExpanding(boolean pulseExpanding) {}
     void animateHeaderSlidingOut();
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);

@@ -158,21 +158,21 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Slutför genom att trycka på Bekräfta"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentiserad"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Använd pinkod"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd grafiskt lösenord"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd mönster"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Använd lösenord"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Fel pinkod"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel grafiskt lösenord"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel mönster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Fortsätt med hjälp av ditt fingeravtryck"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingeravtrycket kändes inte igen. Använd låsskärmen i stället."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Håller utkik efter dig …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ansiktsikon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Knapp för kompatibilitetszoom."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran eller mikrofonen."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Enhet"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Byt appar genom att svepa uppåt"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktivera och inaktivera översikten"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Laddar"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryck igen för att öppna"</string>
     <string name="tap_again" msgid="1315420114387908655">"Tryck igen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Tryck för att öppna"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>

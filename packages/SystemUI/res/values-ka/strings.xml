@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"სახის ამოცნობა ვერ ხერხდება. სანაცვლოდ თითის ანაბეჭდი გამოიყენეთ."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"გასაგრძელებლად გამოიყენეთ თქვენი თითის ანაბეჭდი"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"თითის ანაბეჭდის ამოცნობა ვერ ხერხდება. სანაცვლოდ, გამოიყენეთ ეკრანის დაბლოკვა."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"მიმდინარეობს თქვენი ძიება…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"სახის ხატულა"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"თავსებადი მასშტაბირების ღილაკი."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ამ მოქმედების მეშვეობით განიბლოკება ყველა აპსა და მომსახურებაზე წვდომა, რომელთაც აქვთ თქვენი კამერის გამოყენების უფლება."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ამ მოქმედების მეშვეობით განიბლოკება ყველა აპსა და მომსახურებაზე წვდომა, რომელთაც აქვთ თქვენი კამერის ან მიკროფონის გამოყენების უფლება."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"მოწყობილობა"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"გადაფურცლეთ ზემოთ აპების გადასართავად"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"აპების სწრაფად გადასართავად ჩავლებით გადაიტანეთ მარჯვნივ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"მიმოხილვის გადართვა"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"დატენილია"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"მიმდინარეობს დატენვა"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"შეეხეთ ისევ გასახსნელად"</string>
     <string name="tap_again" msgid="1315420114387908655">"შეეხეთ ხელახლა"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"გასახსნელად გადაფურცლეთ ზემოთ"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"დააჭირეთ გასახსნელად"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ხელახლა საცდელად გადაფურცლეთ ზემოთ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"განბლოკეთ NFC-ის გამოსაყენებლად"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია"</string>

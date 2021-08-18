@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.DelegateRequest;
 import android.telephony.ims.DelegateStateCallback;
@@ -33,6 +34,7 @@ import android.telephony.ims.aidl.SipDelegateAidlWrapper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -49,10 +51,15 @@ import java.util.concurrent.Executor;
 public class SipTransportImplBase {
     private static final String LOG_TAG = "SipTransportIB";
 
-    private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+    private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            mBinderExecutor.execute(() -> binderDiedInternal());
+            // Clean up all binders in this case.
+            mBinderExecutor.execute(() -> binderDiedInternal(null));
+        }
+        @Override
+        public void binderDied(IBinder who) {
+            mBinderExecutor.execute(() -> binderDiedInternal(who));
         }
     };
 
@@ -142,6 +149,7 @@ public class SipTransportImplBase {
             ISipDelegateStateCallback cb, ISipDelegateMessageCallback mc) {
         SipDelegateAidlWrapper wrapper = new SipDelegateAidlWrapper(mBinderExecutor, cb, mc);
         mDelegates.add(wrapper);
+        linkDeathRecipient(wrapper);
         createSipDelegate(subId, r, wrapper, wrapper);
     }
 
@@ -155,6 +163,7 @@ public class SipTransportImplBase {
         }
 
         if (result != null) {
+            unlinkDeathRecipient(result);
             mDelegates.remove(result);
             destroySipDelegate(result.getDelegate(), reason);
         } else {
@@ -163,12 +172,37 @@ public class SipTransportImplBase {
         }
     }
 
-    private void binderDiedInternal() {
-        for (SipDelegateAidlWrapper w : mDelegates) {
-            destroySipDelegate(w.getDelegate(),
-                    SipDelegateManager.SIP_DELEGATE_DESTROY_REASON_SERVICE_DEAD);
+    private void linkDeathRecipient(SipDelegateAidlWrapper w) {
+        try {
+            w.getStateCallbackBinder().asBinder().linkToDeath(mDeathRecipient, 0);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "linkDeathRecipient, remote process already died, cleaning up.");
+            mDeathRecipient.binderDied(w.getStateCallbackBinder().asBinder());
         }
-        mDelegates.clear();
+    }
+
+    private void unlinkDeathRecipient(SipDelegateAidlWrapper w) {
+        try {
+            w.getStateCallbackBinder().asBinder().unlinkToDeath(mDeathRecipient, 0);
+        } catch (NoSuchElementException e) {
+            // Ignore this case.
+        }
+    }
+
+    private void binderDiedInternal(IBinder who) {
+        for (SipDelegateAidlWrapper w : mDelegates) {
+            // If the binder itself was not given from the platform, just clean up all binders.
+            if (who == null || w.getStateCallbackBinder().asBinder().equals(who))  {
+                Log.w(LOG_TAG, "Binder death detected for " + w + ", calling destroy and "
+                        + "removing.");
+                mDelegates.remove(w);
+                destroySipDelegate(w.getDelegate(),
+                        SipDelegateManager.SIP_DELEGATE_DESTROY_REASON_SERVICE_DEAD);
+                return;
+            }
+        }
+        Log.w(LOG_TAG, "Binder death detected for IBinder " + who + ", but couldn't find matching "
+                + "SipDelegate");
     }
 
     /**

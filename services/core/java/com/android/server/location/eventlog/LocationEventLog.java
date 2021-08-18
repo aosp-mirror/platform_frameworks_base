@@ -192,9 +192,7 @@ public class LocationEventLog extends LocalEventLog {
 
     /** Logs a new incoming location for a location provider. */
     public void logProviderReceivedLocations(String provider, int numLocations) {
-        if (D) {
-            addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
-        }
+        addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
     }
 
     /** Logs a location deliver for a client of a location provider. */

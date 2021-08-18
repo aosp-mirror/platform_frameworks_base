@@ -1437,7 +1437,7 @@ class Task extends WindowContainer<WindowContainer> {
                     && (newParent == null || !newParent.inPinnedWindowingMode())) {
                 // Notify if a task from the root pinned task is being removed
                 // (or moved depending on the mode).
-                mRootWindowContainer.notifyActivityPipModeChanged(null);
+                mRootWindowContainer.notifyActivityPipModeChanged(this, null);
             }
         }
 
@@ -4105,7 +4105,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
-        info.displayCutoutInsets = getDisplayCutoutInsets(top);
+        info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
@@ -4140,16 +4140,15 @@ class Task extends WindowContainer<WindowContainer> {
                 ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
     }
 
-    private Rect getDisplayCutoutInsets(Task top) {
-        if (top == null || top.mDisplayContent == null
-                || top.getDisplayInfo().displayCutout == null) return null;
-        final WindowState w = top.getTopVisibleAppMainWindow();
+    Rect getDisplayCutoutInsets() {
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+        final WindowState w = getTopVisibleAppMainWindow();
         final int displayCutoutMode = w == null
                 ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                 : w.getAttrs().layoutInDisplayCutoutMode;
         return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                 || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
-                ? null : top.getDisplayInfo().displayCutout.getSafeInsets();
+                ? null : getDisplayInfo().displayCutout.getSafeInsets();
     }
 
     /**
@@ -4168,7 +4167,9 @@ class Task extends WindowContainer<WindowContainer> {
     StartingWindowInfo getStartingWindowInfo(ActivityRecord activity) {
         final StartingWindowInfo info = new StartingWindowInfo();
         info.taskInfo = getTaskInfo();
-
+        info.targetActivityInfo = info.taskInfo.topActivityInfo != null
+                && activity.info != info.taskInfo.topActivityInfo
+                ? activity.info : null;
         info.isKeyguardOccluded =
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
 
@@ -5395,7 +5396,7 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
-            mRootWindowContainer.notifyActivityPipModeChanged(null);
+            mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
             // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
@@ -7626,7 +7627,10 @@ class Task extends WindowContainer<WindowContainer> {
         mLastRecentsAnimationOverlay = overlay;
     }
 
-    void clearLastRecentsAnimationTransaction() {
+    void clearLastRecentsAnimationTransaction(boolean forceRemoveOverlay) {
+        if (forceRemoveOverlay && mLastRecentsAnimationOverlay != null) {
+            getPendingTransaction().remove(mLastRecentsAnimationOverlay);
+        }
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
         // reset also the crop and transform introduced by mLastRecentsAnimationTransaction

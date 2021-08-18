@@ -312,6 +312,13 @@ LIBANDROID {
 
 LIBANDROID_PLATFORM {
   global:
+    APerformanceHint_getManager;
+    APerformanceHint_createSession;
+    APerformanceHint_getPreferredUpdateRateNanos;
+    APerformanceHint_updateTargetWorkDuration;
+    APerformanceHint_reportActualWorkDuration;
+    APerformanceHint_closeSession;
+    APerformanceHint_setIHintManagerForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

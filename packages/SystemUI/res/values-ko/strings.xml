@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"계속하려면 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"지문을 인식할 수 없습니다. 화면 잠금을 대신 사용하세요."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"찾는 중..."</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"얼굴 아이콘"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"호환성 확대/축소 버튼입니다."</string>
@@ -353,7 +355,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"위치 사용 중지"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"카메라 액세스"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"마이크 액세스"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"허용됨"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"사용 가능"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"차단됨"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"미디어 기기"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"카메라를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"카메라 또는 마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"기기"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"위로 스와이프하여 앱 전환"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"앱을 빠르게 전환하려면 오른쪽으로 드래그"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"최근 사용 버튼 전환"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"충전 중"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"다시 탭하여 열기"</string>
     <string name="tap_again" msgid="1315420114387908655">"다시 탭하세요."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"위로 스와이프하여 열기"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"열려면 누르세요"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>

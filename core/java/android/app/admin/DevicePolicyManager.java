@@ -10997,6 +10997,16 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
      * In that case the device owner's control will be limited do denying these permissions.
      * <p>
+     * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
+     * the following permissions are restricted for managed profile owners:
+     * <ul>
+     *    <li>Manifest.permission.READ_SMS</li>
+     * </ul>
+     * <p>
+     * A managed profile owner may not grant these permissions (i.e. call this method with any of
+     * the permissions listed above and {@code grantState} of
+     * {@code #PERMISSION_GRANT_STATE_GRANTED}), but may deny them.
+     * <p>
      * Attempts by the admin to grant these permissions, when the admin is restricted from doing
      * so, will be silently ignored (no exception will be thrown).
      *

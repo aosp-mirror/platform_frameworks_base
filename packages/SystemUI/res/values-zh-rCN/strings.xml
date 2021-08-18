@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"无法识别人脸。请改用指纹。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"使用指纹验证身份后才能继续"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"无法识别指纹。请改用屏幕锁定功能。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在查找您的面孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"面孔图标"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"兼容性缩放按钮。"</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"这将会为所有获准使用您摄像头的应用和服务启用这项权限。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您的摄像头或麦克风的应用和服务启用这项权限。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"设备"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑动可切换应用"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖动可快速切换应用"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切换概览"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"已充满"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"正在充电"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="tap_again" msgid="1315420114387908655">"请再点按一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"按一下即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>

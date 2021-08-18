@@ -32,6 +32,7 @@ import com.android.server.appsearch.AppSearchConfig;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
@@ -145,7 +146,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull InitializeStats stats) throws AppSearchException {
+    public void logStats(@NonNull InitializeStats stats) {
         Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_INITIALIZE)) {
@@ -155,7 +156,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull SearchStats stats) throws AppSearchException {
+    public void logStats(@NonNull SearchStats stats) {
         Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_SEARCH)) {
@@ -165,8 +166,18 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull RemoveStats stats) throws AppSearchException {
+    public void logStats(@NonNull RemoveStats stats) {
         // TODO(b/173532925): Log stats
+    }
+
+    @Override
+    public void logStats(@NonNull OptimizeStats stats) {
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_OPTIMIZE)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     /**
@@ -326,6 +337,27 @@ public final class PlatformLogger implements AppSearchLogger {
                 stats.getResetStatusCode());
     }
 
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull OptimizeStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
+                CallStats.CALL_TYPE_OPTIMIZE);
+        AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_OPTIMIZE_STATS_REPORTED,
+                extraStats.mSamplingInterval,
+                extraStats.mSkippedSampleCount,
+                stats.getStatusCode(),
+                stats.getTotalLatencyMillis(),
+                stats.getNativeLatencyMillis(),
+                stats.getDocumentStoreOptimizeLatencyMillis(),
+                stats.getIndexRestorationLatencyMillis(),
+                stats.getOriginalDocumentCount(),
+                stats.getDeletedDocumentCount(),
+                stats.getExpiredDocumentCount(),
+                stats.getStorageSizeBeforeBytes(),
+                stats.getStorageSizeAfterBytes(),
+                stats.getTimeSinceLastOptimizeMillis());
+    }
+
     /**
      * Calculate the hash code as an integer by returning the last four bytes of its MD5.
      *
@@ -464,15 +496,19 @@ public final class PlatformLogger implements AppSearchLogger {
                 return mConfig.getCachedSamplingIntervalForBatchCallStats();
             case CallStats.CALL_TYPE_PUT_DOCUMENT:
                 return mConfig.getCachedSamplingIntervalForPutDocumentStats();
-            case CallStats.CALL_TYPE_UNKNOWN:
             case CallStats.CALL_TYPE_INITIALIZE:
+                return mConfig.getCachedSamplingIntervalForInitializeStats();
+            case CallStats.CALL_TYPE_SEARCH:
+                return mConfig.getCachedSamplingIntervalForSearchStats();
+            case CallStats.CALL_TYPE_GLOBAL_SEARCH:
+                return mConfig.getCachedSamplingIntervalForGlobalSearchStats();
+            case CallStats.CALL_TYPE_OPTIMIZE:
+                return mConfig.getCachedSamplingIntervalForOptimizeStats();
+            case CallStats.CALL_TYPE_UNKNOWN:
             case CallStats.CALL_TYPE_SET_SCHEMA:
             case CallStats.CALL_TYPE_GET_DOCUMENT:
             case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_ID:
-            case CallStats.CALL_TYPE_SEARCH:
-            case CallStats.CALL_TYPE_OPTIMIZE:
             case CallStats.CALL_TYPE_FLUSH:
-            case CallStats.CALL_TYPE_GLOBAL_SEARCH:
             case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_SEARCH:
                 // TODO(b/173532925) Some of them above will have dedicated sampling ratio config
             default:

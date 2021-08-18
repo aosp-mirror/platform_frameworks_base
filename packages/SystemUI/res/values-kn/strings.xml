@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ ಬದಲಿಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಬದಲಾಗಿ ಪರದೆಲಾಕ್ ಬಳಸಿ."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"ಮುಖದ ಐಕಾನ್‌"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ಹೊಂದಾಣಿಕೆಯ ಝೂಮ್ ಬಟನ್."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ಇದು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳಿಗೆ ಹಾಗೂ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುವುದಕ್ಕಾಗಿ ಇರುವ ಪ್ರವೇಶದ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ಇದು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳಿಗೆ ಹಾಗೂ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಕ್ಯಾಮರಾ ಅಥವಾ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವುದಕ್ಕಾಗಿ ಇರುವ ಪ್ರವೇಶದ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ಸಾಧನ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಿಸಲು ತ್ವರಿತವಾಗಿ ಬಲಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ಪುನಃ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ತೆರೆಯಲು ಒತ್ತಿ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>

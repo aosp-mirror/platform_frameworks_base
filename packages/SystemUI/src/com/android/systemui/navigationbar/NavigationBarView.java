@@ -18,7 +18,6 @@ package com.android.systemui.navigationbar;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
-import static com.android.systemui.Dependency.EDGE_BACK_GESTURE_HANDLER_PROVIDER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
@@ -340,7 +339,8 @@ public class NavigationBarView extends FrameLayout implements
 
         mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-        mEdgeBackGestureHandler = Dependency.get(EDGE_BACK_GESTURE_HANDLER_PROVIDER).get();
+        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
+                .create(mContext);
         mEdgeBackGestureHandler.setStateChangeCallback(this::updateStates);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {

@@ -16,25 +16,24 @@
 
 package com.android.systemui;
 
-import android.app.ActivityManager;
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSUserSwitcherEvent;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.util.settings.SecureSettings;
 
 /**
  * Manages notification when a guest session is resumed.
@@ -43,16 +42,23 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
     private static final String TAG = "GuestResumeSessionReceiver";
 
-    private static final String SETTING_GUEST_HAS_LOGGED_IN = "systemui.guest_has_logged_in";
+    @VisibleForTesting
+    public static final String SETTING_GUEST_HAS_LOGGED_IN = "systemui.guest_has_logged_in";
 
-    private Dialog mNewSessionDialog;
+    @VisibleForTesting
+    public AlertDialog mNewSessionDialog;
+    private final UserTracker mUserTracker;
     private final UserSwitcherController mUserSwitcherController;
     private final UiEventLogger mUiEventLogger;
+    private final SecureSettings mSecureSettings;
 
     public GuestResumeSessionReceiver(UserSwitcherController userSwitcherController,
-            UiEventLogger uiEventLogger) {
+            UserTracker userTracker, UiEventLogger uiEventLogger,
+            SecureSettings secureSettings) {
         mUserSwitcherController = userSwitcherController;
+        mUserTracker = userTracker;
         mUiEventLogger = uiEventLogger;
+        mSecureSettings = secureSettings;
     }
 
     /**
@@ -78,26 +84,19 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
                 return;
             }
 
-            UserInfo currentUser;
-            try {
-                currentUser = ActivityManager.getService().getCurrentUser();
-            } catch (RemoteException e) {
-                return;
-            }
+            UserInfo currentUser = mUserTracker.getUserInfo();
             if (!currentUser.isGuest()) {
                 return;
             }
 
-            ContentResolver cr = context.getContentResolver();
-            int notFirstLogin = Settings.System.getIntForUser(
-                    cr, SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
+            int notFirstLogin = mSecureSettings.getIntForUser(
+                    SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
             if (notFirstLogin != 0) {
                 mNewSessionDialog = new ResetSessionDialog(context, mUserSwitcherController,
                         mUiEventLogger, userId);
                 mNewSessionDialog.show();
             } else {
-                Settings.System.putIntForUser(
-                        cr, SETTING_GUEST_HAS_LOGGED_IN, 1, userId);
+                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, 1, userId);
             }
         }
     }
@@ -109,18 +108,26 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
         }
     }
 
-    private static class ResetSessionDialog extends SystemUIDialog implements
+    /**
+     * Dialog shown when user when asking for confirmation before deleting guest user.
+     */
+    @VisibleForTesting
+    public static class ResetSessionDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
 
-        private static final int BUTTON_WIPE = BUTTON_NEGATIVE;
-        private static final int BUTTON_DONTWIPE = BUTTON_POSITIVE;
+        @VisibleForTesting
+        public static final int BUTTON_WIPE = BUTTON_NEGATIVE;
+        @VisibleForTesting
+        public static final int BUTTON_DONTWIPE = BUTTON_POSITIVE;
 
         private final UserSwitcherController mUserSwitcherController;
         private final UiEventLogger mUiEventLogger;
         private final int mUserId;
 
-        ResetSessionDialog(Context context, UserSwitcherController userSwitcherController,
-                UiEventLogger uiEventLogger, int userId) {
+        ResetSessionDialog(Context context,
+                UserSwitcherController userSwitcherController,
+                UiEventLogger uiEventLogger,
+                int userId) {
             super(context);
 
             setTitle(context.getString(R.string.guest_wipe_session_title));

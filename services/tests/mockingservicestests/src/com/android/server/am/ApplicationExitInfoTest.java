@@ -1003,7 +1003,7 @@ public class ApplicationExitInfoTest {
                     dummyPackageName, dummyClassName), "", definingUid));
         }
         app.mServices.setConnectionGroup(connectionGroup);
-        app.mState.setSetProcState(procState);
+        app.mState.setReportedProcState(procState);
         app.mProfile.setLastMemInfo(spy(new Debug.MemoryInfo()));
         app.mProfile.setLastPss(pss);
         app.mProfile.setLastRss(rss);

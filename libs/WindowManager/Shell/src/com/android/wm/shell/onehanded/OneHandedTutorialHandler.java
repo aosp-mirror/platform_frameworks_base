@@ -25,19 +25,26 @@ import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_EXITING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
 
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
@@ -51,10 +58,9 @@ import java.io.PrintWriter;
  * detach TargetViewContainer from window after exiting one handed mode.
  */
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
-        OneHandedState.OnStateChangedListener {
+        OneHandedState.OnStateChangedListener, OneHandedAnimationCallback {
     private static final String TAG = "OneHandedTutorialHandler";
-    private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
-            "persist.debug.one_handed_offset_percentage";
+    private static final float START_TRANSITION_FRACTION = 0.6f;
 
     private final float mTutorialHeightRatio;
     private final WindowManager mWindowManager;
@@ -64,28 +70,42 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     private Context mContext;
     private Rect mDisplayBounds;
+    private ValueAnimator mAlphaAnimator;
     private @Nullable View mTutorialView;
     private @Nullable ViewGroup mTargetViewContainer;
 
-    private final OneHandedAnimationCallback mAnimationCallback;
+    private float mAlphaTransitionStart;
+    private int mAlphaAnimationDurationMs;
 
-    public OneHandedTutorialHandler(Context context, WindowManager windowManager) {
+    public OneHandedTutorialHandler(Context context, OneHandedSettingsUtil settingsUtil,
+            WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        final float offsetPercentageConfig = context.getResources().getFraction(
-                R.fraction.config_one_handed_offset, 1, 1);
-        final int sysPropPercentageConfig = SystemProperties.getInt(
-                ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
-        mTutorialHeightRatio = sysPropPercentageConfig / 100.0f;
-        mAnimationCallback = new OneHandedAnimationCallback() {
-            @Override
-            public void onAnimationUpdate(float xPos, float yPos) {
-                if (!isAttached()) {
-                    return;
-                }
-                mTargetViewContainer.setTranslationY(yPos - mTutorialAreaHeight);
-            }
-        };
+        mTutorialHeightRatio = settingsUtil.getTranslationFraction(context);
+        mAlphaAnimationDurationMs = settingsUtil.getTransitionDuration(context);
+    }
+
+    @Override
+    public void onOneHandedAnimationCancel(
+            OneHandedAnimationController.OneHandedTransitionAnimator animator) {
+        if (mAlphaAnimator != null) {
+            mAlphaAnimator.cancel();
+        }
+    }
+
+    @Override
+    public void onAnimationUpdate(SurfaceControl.Transaction tx, float xPos, float yPos) {
+        if (!isAttached()) {
+            return;
+        }
+        if (yPos < mAlphaTransitionStart) {
+            checkTransitionEnd();
+            return;
+        }
+        if (mAlphaAnimator == null || mAlphaAnimator.isStarted() || mAlphaAnimator.isRunning()) {
+            return;
+        }
+        mAlphaAnimator.start();
     }
 
     @Override
@@ -94,12 +114,16 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         switch (newState) {
             case STATE_ENTERING:
                 createViewAndAttachToWindow(mContext);
+                updateThemeColor();
+                setupAlphaTransition(true /* isEntering */);
                 break;
             case STATE_ACTIVE:
-            case STATE_EXITING:
-                // no - op
+                checkTransitionEnd();
+                setupAlphaTransition(false /* isEntering */);
                 break;
+            case STATE_EXITING:
             case STATE_NONE:
+                checkTransitionEnd();
                 removeTutorialFromWindowManager();
                 break;
             default:
@@ -109,6 +133,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     /**
      * Called when onDisplayAdded() or onDisplayRemoved() callback.
+     *
      * @param displayLayout The latest {@link DisplayLayout} representing current displayId
      */
     public void onDisplayChanged(DisplayLayout displayLayout) {
@@ -119,6 +144,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
             mDisplayBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
         }
         mTutorialAreaHeight = Math.round(mDisplayBounds.height() * mTutorialHeightRatio);
+        mAlphaTransitionStart = mTutorialAreaHeight * START_TRANSITION_FRACTION;
     }
 
     @VisibleForTesting
@@ -129,6 +155,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
         mTargetViewContainer = new FrameLayout(context);
         mTargetViewContainer.setClipChildren(false);
+        mTargetViewContainer.setAlpha(mCurrentState == STATE_ACTIVE ? 1.0f : 0.0f);
         mTargetViewContainer.addView(mTutorialView);
         mTargetViewContainer.setLayerType(LAYER_TYPE_HARDWARE, null);
 
@@ -156,10 +183,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         mTargetViewContainer.setLayerType(LAYER_TYPE_NONE, null);
         mWindowManager.removeViewImmediate(mTargetViewContainer);
         mTargetViewContainer = null;
-    }
-
-    @Nullable OneHandedAnimationCallback getAnimationCallback() {
-        return mAnimationCallback;
     }
 
     /**
@@ -192,6 +215,54 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         removeTutorialFromWindowManager();
         if (mCurrentState == STATE_ENTERING || mCurrentState == STATE_ACTIVE) {
             createViewAndAttachToWindow(mContext);
+            updateThemeColor();
+            checkTransitionEnd();
+        }
+    }
+
+    private void updateThemeColor() {
+        if (mTutorialView == null) {
+            return;
+        }
+
+        final Context themedContext = new ContextThemeWrapper(mTutorialView.getContext(),
+                com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+        final int textColorPrimary;
+        final int themedTextColorSecondary;
+        TypedArray ta = themedContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.textColorPrimary,
+                com.android.internal.R.attr.textColorSecondary});
+        textColorPrimary = ta.getColor(0, 0);
+        themedTextColorSecondary = ta.getColor(1, 0);
+        ta.recycle();
+
+        final ImageView iconView = mTutorialView.findViewById(R.id.one_handed_tutorial_image);
+        iconView.setImageTintList(ColorStateList.valueOf(textColorPrimary));
+
+        final TextView tutorialTitle = mTutorialView.findViewById(R.id.one_handed_tutorial_title);
+        final TextView tutorialDesc = mTutorialView.findViewById(
+                R.id.one_handed_tutorial_description);
+        tutorialTitle.setTextColor(textColorPrimary);
+        tutorialDesc.setTextColor(themedTextColorSecondary);
+    }
+
+    private void setupAlphaTransition(boolean isEntering) {
+        final float start = isEntering ? 0.0f : 1.0f;
+        final float end = isEntering ? 1.0f : 0.0f;
+        final int duration = isEntering ? mAlphaAnimationDurationMs : Math.round(
+                mAlphaAnimationDurationMs * (1.0f - mTutorialHeightRatio));
+        mAlphaAnimator = ValueAnimator.ofFloat(start, end);
+        mAlphaAnimator.setInterpolator(new LinearInterpolator());
+        mAlphaAnimator.setDuration(duration);
+        mAlphaAnimator.addUpdateListener(
+                animator -> mTargetViewContainer.setAlpha((float) animator.getAnimatedValue()));
+    }
+
+    private void checkTransitionEnd() {
+        if (mAlphaAnimator != null && (mAlphaAnimator.isRunning() || mAlphaAnimator.isStarted())) {
+            mAlphaAnimator.end();
+            mAlphaAnimator.removeAllUpdateListeners();
+            mAlphaAnimator = null;
         }
     }
 
@@ -206,5 +277,9 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         pw.println(mDisplayBounds);
         pw.print(innerPrefix + "mTutorialAreaHeight=");
         pw.println(mTutorialAreaHeight);
+        pw.print(innerPrefix + "mAlphaTransitionStart=");
+        pw.println(mAlphaTransitionStart);
+        pw.print(innerPrefix + "mAlphaAnimationDurationMs=");
+        pw.println(mAlphaAnimationDurationMs);
     }
 }
