@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.unfold.updates
+package com.android.systemui.unfold.updates
 
 import android.annotation.FloatRange
 import android.annotation.IntDef
-import com.android.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.statusbar.policy.CallbackController
 
 /**
