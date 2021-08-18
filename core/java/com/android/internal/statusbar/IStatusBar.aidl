@@ -18,6 +18,7 @@ package com.android.internal.statusbar;
 
 import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
+import android.graphics.drawable.Icon;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
@@ -27,6 +28,7 @@ import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
 import android.view.InsetsVisibilities;
 
+import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 
@@ -286,4 +288,6 @@ oneway interface IStatusBar
      * Triggers a GC in the system and status bar.
      */
     void runGcForTest();
+
+    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
 }
