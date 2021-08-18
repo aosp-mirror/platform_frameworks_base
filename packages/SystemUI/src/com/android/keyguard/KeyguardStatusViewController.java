@@ -80,7 +80,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
                 keyguardStateController, dozeParameters, unlockedScreenOffAnimationController,
-                /* animateYPos= */ true);
+                /* animateYPos= */ true, /* visibleOnCommunal= */ false);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
     }

@@ -56,7 +56,7 @@ public class KeyguardVisibilityHelperTest extends SysuiTestCase {
         when(mTargetView.animate()).thenReturn(mViewPropertyAnimator);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mTargetView,
                 mCommunalStateController, mKeyguardStateController, mDozeParameters,
-                mUnlockedScreenOffAnimationController, false);
+                mUnlockedScreenOffAnimationController, false, false);
     }
 
     @Test
@@ -70,6 +70,21 @@ public class KeyguardVisibilityHelperTest extends SysuiTestCase {
 
         // Verify view is shown when communal is not visible.
         when(mCommunalStateController.getCommunalViewShowing()).thenReturn(false);
+        mKeyguardVisibilityHelper.setViewVisibility(StatusBarState.KEYGUARD, false,
+                false, StatusBarState.KEYGUARD);
+        verify(mTargetView).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testVisibleOnCommunal() {
+        when(mCommunalStateController.getCommunalViewShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+
+        // Verify that helpers constructed with visibility on communal are not hidden when communal
+        // is present.
+        mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mTargetView,
+                mCommunalStateController, mKeyguardStateController, mDozeParameters,
+                mUnlockedScreenOffAnimationController, false, true);
         mKeyguardVisibilityHelper.setViewVisibility(StatusBarState.KEYGUARD, false,
                 false, StatusBarState.KEYGUARD);
         verify(mTargetView).setVisibility(View.VISIBLE);
