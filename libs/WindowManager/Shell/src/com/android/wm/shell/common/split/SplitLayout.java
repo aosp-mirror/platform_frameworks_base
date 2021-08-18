@@ -158,6 +158,15 @@ public final class SplitLayout {
         return mDividePosition;
     }
 
+    /**
+     * Returns the divider position as a fraction from 0 to 1.
+     */
+    public float getDividerPositionAsFraction() {
+        return Math.min(1f, Math.max(0f, isLandscape()
+                ? (float) ((mBounds1.right + mBounds2.left) / 2f) / mBounds2.right
+                : (float) ((mBounds1.bottom + mBounds2.top) / 2f) / mBounds2.bottom));
+    }
+
     /** Applies new configuration, returns {@code false} if there's no effect to the layout. */
     public boolean updateConfiguration(Configuration configuration) {
         boolean affectsLayout = false;
@@ -340,6 +349,13 @@ public final class SplitLayout {
 
     private static boolean isLandscape(Rect bounds) {
         return bounds.width() > bounds.height();
+    }
+
+    /**
+     * Return if this layout is landscape.
+     */
+    public boolean isLandscape() {
+        return isLandscape(mRootBounds);
     }
 
     /** Apply recorded surface layout to the {@link SurfaceControl.Transaction}. */
