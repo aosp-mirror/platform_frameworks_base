@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -111,19 +112,19 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 

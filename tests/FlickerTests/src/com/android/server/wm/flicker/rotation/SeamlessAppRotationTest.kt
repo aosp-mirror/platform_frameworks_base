@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
@@ -99,7 +98,7 @@ class SeamlessAppRotationTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
@@ -123,24 +122,6 @@ class SeamlessAppRotationTest(
         testSpec.assertLayers {
             this.isInvisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
         }
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsVisible() {
-        super.navBarWindowIsVisible()
-    }
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() {
-        super.navBarLayerIsVisible()
     }
 
     @FlakyTest
