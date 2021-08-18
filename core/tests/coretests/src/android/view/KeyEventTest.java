@@ -36,7 +36,6 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class KeyEventTest {
 
-    private static final int ID = 0xabcdef;
     private static final int DOWN_TIME = 50;
     private static final long EVENT_TIME = 100;
     private static final int ACTION = KeyEvent.ACTION_DOWN;
@@ -47,7 +46,6 @@ public class KeyEventTest {
     private static final int SCAN_CODE = 0;
     private static final int FLAGS = 0;
     private static final int SOURCE = InputDevice.SOURCE_KEYBOARD;
-    private static final byte[] HMAC = null;
     private static final String CHARACTERS = null;
 
     private static final int ID_SOURCE_MASK = 0x3 << 30;
@@ -164,8 +162,8 @@ public class KeyEventTest {
     }
 
     private static KeyEvent createKey() {
-        return KeyEvent.obtain(ID, DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT, METASTATE,
-                DEVICE_ID, SCAN_CODE, FLAGS, SOURCE, INVALID_DISPLAY, HMAC, CHARACTERS);
+        return KeyEvent.obtain(DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT, METASTATE,
+                DEVICE_ID, SCAN_CODE, FLAGS, SOURCE, INVALID_DISPLAY, CHARACTERS);
     }
 
     private static void compareKeys(KeyEvent key1, KeyEvent key2) {
