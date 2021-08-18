@@ -289,6 +289,7 @@ final class InputMonitor {
         inputWindowHandle.setInputFeatures(w.mAttrs.inputFeatures);
         inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
         inputWindowHandle.setVisible(w.isVisible());
+        inputWindowHandle.setWindowToken(w.mClient);
 
         final boolean focusable = w.canReceiveKeys()
                 && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());

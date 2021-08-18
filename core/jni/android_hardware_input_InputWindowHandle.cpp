@@ -76,6 +76,7 @@ static struct {
     jfieldID replaceTouchableRegionWithCrop;
     WeakRefHandleField touchableRegionSurfaceControl;
     jfieldID transform;
+    jfieldID windowToken;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -215,6 +216,14 @@ bool NativeInputWindowHandle::updateInfo() {
         mInfo.touchableRegionCropHandle.clear();
     }
 
+    jobject windowTokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.windowToken);
+    if (windowTokenObj) {
+        mInfo.windowToken = ibinderForJavaObject(env, windowTokenObj);
+        env->DeleteLocalRef(windowTokenObj);
+    } else {
+        mInfo.windowToken.clear();
+    }
+
     env->DeleteLocalRef(obj);
     return true;
 }
@@ -313,6 +322,9 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     }
     ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformVals));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.transform, matrixObj.get());
+
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
+                        javaObjectForIBinder(env, windowInfo.windowToken));
 
     return inputWindowHandle;
 }
@@ -440,6 +452,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.transform, clazz, "transform",
                  "Landroid/graphics/Matrix;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.windowToken, clazz, "windowToken",
+                 "Landroid/os/IBinder;");
 
     jclass weakRefClazz;
     FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");

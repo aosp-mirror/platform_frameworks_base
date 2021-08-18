@@ -8264,7 +8264,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags, privateFlags, type, null /* region */);
+                name, applicationHandle, flags, privateFlags, type, null /* region */, window);
 
         clientChannel.copyTo(outInputChannel);
     }
@@ -8272,9 +8272,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
                                     int displayId, SurfaceControl surface, String name,
                                     InputApplicationHandle applicationHandle, int flags,
-                                    int privateFlags, int type, Region region) {
+                                    int privateFlags, int type, Region region, IWindow window) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
+        h.setWindowToken(window);
         h.name = name;
 
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
@@ -8330,7 +8331,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags, privateFlags, win.mWindowType, region);
+                applicationHandle, flags, privateFlags, win.mWindowType, region, win.mClient);
     }
 
     /** Return whether layer tracing is enabled */
