@@ -25,6 +25,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
+
+    <include layout="@layout/communal_host_view"
+             android:visibility="gone"/>
+
     <FrameLayout
         android:id="@+id/big_clock_container"
         android:layout_width="match_parent"
@@ -124,9 +128,6 @@
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
         />
-
-        <include layout="@layout/communal_host_view"
-                 android:visibility="gone"/>
 
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
