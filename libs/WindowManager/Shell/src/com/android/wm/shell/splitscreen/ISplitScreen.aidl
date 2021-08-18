@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
 
@@ -82,7 +82,7 @@ interface ISplitScreen {
      * Starts tasks simultaneously in one transition.
      */
     oneway void startTasks(int mainTaskId, in Bundle mainOptions, int sideTaskId,
-            in Bundle sideOptions, int sidePosition, in IRemoteTransition remoteTransition) = 10;
+            in Bundle sideOptions, int sidePosition, in RemoteTransition remoteTransition) = 10;
 
     /**
      * Version of startTasks using legacy transition system.

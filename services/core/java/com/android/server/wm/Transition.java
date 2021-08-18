@@ -70,7 +70,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -123,7 +123,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
-    private IRemoteTransition mRemoteTransition = null;
+    private RemoteTransition mRemoteTransition = null;
 
     /** Only use for clean-up after binder death! */
     private SurfaceControl.Transaction mStartTransaction = null;
@@ -436,11 +436,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mSyncEngine.abort(mSyncId);
     }
 
-    void setRemoteTransition(IRemoteTransition remoteTransition) {
+    void setRemoteTransition(RemoteTransition remoteTransition) {
         mRemoteTransition = remoteTransition;
     }
 
-    IRemoteTransition getRemoteTransition() {
+    RemoteTransition getRemoteTransition() {
         return mRemoteTransition;
     }
 
@@ -565,7 +565,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
         }
-        finishTransition();
+        mController.finishTransition(this);
     }
 
     /** @see RecentsAnimationController#attachNavigationBarToApp */

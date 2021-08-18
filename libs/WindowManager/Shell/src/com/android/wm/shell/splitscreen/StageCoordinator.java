@@ -72,7 +72,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -263,7 +263,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts 2 tasks in one transition. */
     void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
             @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
-            @Nullable IRemoteTransition remoteTransition) {
+            @Nullable RemoteTransition remoteTransition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mainOptions = mainOptions != null ? mainOptions : new Bundle();
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
@@ -358,7 +358,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void startIntent(PendingIntent intent, Intent fillInIntent,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @androidx.annotation.Nullable Bundle options,
-            @Nullable IRemoteTransition remoteTransition) {
+            @Nullable RemoteTransition remoteTransition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = resolveStartStage(stage, position, options, wct);
         wct.sendPendingIntent(intent, fillInIntent, options);
