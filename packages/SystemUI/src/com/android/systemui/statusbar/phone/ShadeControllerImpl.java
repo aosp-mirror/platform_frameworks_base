@@ -118,10 +118,6 @@ public class ShadeControllerImpl implements ShadeController {
                     + " flags=" + flags);
         }
 
-        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-            getStatusBar().postHideRecentApps();
-        }
-
         // TODO(b/62444020): remove when this bug is fixed
         Log.v(TAG, "NotificationShadeWindow: " + getNotificationShadeWindowView()
                 + " canPanelBeCollapsed(): "

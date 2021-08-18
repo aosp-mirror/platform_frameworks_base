@@ -696,8 +696,10 @@ public class BubbleExpandedView extends LinearLayout {
                 ? mPointerHeight - mPointerOverlap
                 : 0;
         final float paddingRight = (showVertically && !onLeft)
-                ? mPointerHeight - mPointerOverlap : 0;
-        final float paddingTop = showVertically ? 0
+                ? mPointerHeight - mPointerOverlap
+                : 0;
+        final float paddingTop = showVertically
+                ? 0
                 : mPointerHeight - mPointerOverlap;
         setPadding((int) paddingLeft, (int) paddingTop, (int) paddingRight, 0);
 

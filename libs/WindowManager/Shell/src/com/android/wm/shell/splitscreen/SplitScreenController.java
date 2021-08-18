@@ -51,6 +51,8 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.logging.InstanceId;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
@@ -61,7 +63,6 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
-import com.android.wm.shell.splitscreen.ISplitScreenListener;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -86,6 +87,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final DisplayImeController mDisplayImeController;
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
+    private final SplitscreenEventLogger mLogger;
 
     private StageCoordinator mStageCoordinator;
 
@@ -102,6 +104,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayImeController = displayImeController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
+        mLogger = new SplitscreenEventLogger();
     }
 
     public SplitScreen asSplitScreen() {
@@ -123,7 +126,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController, mTransitions,
-                    mTransactionPool);
+                    mTransactionPool, mLogger);
         }
     }
 
@@ -165,8 +168,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
     }
 
-    public void exitSplitScreen() {
-        mStageCoordinator.exitSplitScreen();
+    public void exitSplitScreen(int exitReason) {
+        mStageCoordinator.exitSplitScreen(exitReason);
     }
 
     public void onKeyguardOccludedChanged(boolean occluded) {
@@ -301,6 +304,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         transaction.apply();
         transaction.close();
         return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
+    }
+
+    /**
+     * Sets drag info to be logged when splitscreen is entered.
+     */
+    public void logOnDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
+        mStageCoordinator.logOnDroppedToSplit(position, dragSessionId);
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
@@ -495,7 +505,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void exitSplitScreen() {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreen",
                     (controller) -> {
-                        controller.exitSplitScreen();
+                        controller.exitSplitScreen(
+                                FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
                     });
         }
 

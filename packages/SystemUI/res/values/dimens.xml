@@ -608,7 +608,7 @@
     <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
     <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
     <dimen name="qs_detail_empty_text_size">14sp</dimen>
-    <dimen name="qs_detail_margin_top">28dp</dimen>
+    <dimen name="qs_detail_header_margin_top">28dp</dimen>
     <dimen name="qs_detail_back_margin_end">16dp</dimen>
     <dimen name="qs_detail_header_text_padding">16dp</dimen>
     <dimen name="qs_data_usage_text_size">14sp</dimen>
@@ -658,6 +658,8 @@
     <dimen name="qs_footer_dialog_icon_margin">8sp</dimen>
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
+
+    <dimen name="qs_detail_margin_top">@*android:dimen/quick_qs_offset_height</dimen>
 
     <dimen name="seek_bar_height">3dp</dimen>
     <dimen name="seek_bar_corner_radius">3dp</dimen>

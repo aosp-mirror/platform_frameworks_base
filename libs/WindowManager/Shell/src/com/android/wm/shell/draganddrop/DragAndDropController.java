@@ -49,6 +49,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
@@ -180,11 +181,11 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                     Slog.w(TAG, "Unexpected drag start during an active drag");
                     return false;
                 }
+                InstanceId loggerSessionId = mLogger.logStart(event);
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
-                        event.getClipData());
+                        event.getClipData(), loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
-                mLogger.logStart(event);
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
