@@ -18,15 +18,12 @@ package com.android.systemui.qs;
 
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertFalse;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -69,12 +66,12 @@ import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -122,7 +119,6 @@ public class QSTileHostTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
-    @Mock
     private SecureSettings mSecureSettings;
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
@@ -140,18 +136,17 @@ public class QSTileHostTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
-
         when(mTileServiceRequestControllerBuilder.create(any()))
                 .thenReturn(mTileServiceRequestController);
 
+        mSecureSettings = new FakeSettings();
+        mSecureSettings.putStringForUser(
+                QSTileHost.TILES_SETTING, "", "", false, mUserTracker.getUserId(), false);
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
                 mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
                 mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder);
         setUpTileFactory();
-
-        when(mSecureSettings.getStringForUser(eq(QSTileHost.TILES_SETTING), anyInt()))
-                .thenReturn("");
     }
 
     private void setUpTileFactory() {
@@ -374,6 +369,16 @@ public class QSTileHostTest extends SysuiTestCase {
                 .removeState(new TileServiceKey(CUSTOM_TILE, mQSTileHost.getUserId()));
     }
 
+    @Test
+    public void testRemoveTiles() {
+        List<String> tiles = List.of("spec1", "spec2", "spec3");
+        mQSTileHost.saveTilesToSettings(tiles);
+
+        mQSTileHost.removeTiles(List.of("spec1", "spec2"));
+
+        assertEquals(List.of("spec3"), mQSTileHost.mTileSpecs);
+    }
+
     private class TestQSTileHost extends QSTileHost {
         TestQSTileHost(Context context, StatusBarIconController iconController,
                 QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
@@ -400,14 +405,11 @@ public class QSTileHostTest extends SysuiTestCase {
         @Override
         void saveTilesToSettings(List<String> tileSpecs) {
             super.saveTilesToSettings(tileSpecs);
-
-            ArgumentCaptor<String> specs = ArgumentCaptor.forClass(String.class);
-            verify(mSecureSettings, atLeastOnce()).putStringForUser(eq(QSTileHost.TILES_SETTING),
-                    specs.capture(), isNull(), eq(false), anyInt(), eq(true));
-
             // After tiles are changed, make sure to call onTuningChanged with the new setting if it
             // changed
-            onTuningChanged(TILES_SETTING, specs.getValue());
+            String specs = mSecureSettings.getStringForUser(
+                    QSTileHost.TILES_SETTING, mUserTracker.getUserId());
+            onTuningChanged(TILES_SETTING, specs);
         }
     }
 
