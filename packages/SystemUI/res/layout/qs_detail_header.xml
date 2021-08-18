@@ -28,7 +28,7 @@
 
     <com.android.systemui.ResizingSpace
         android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_detail_margin_top" />
+        android:layout_height="@dimen/qs_detail_header_margin_top" />
 
     <LinearLayout
         android:layout_width="match_parent"
