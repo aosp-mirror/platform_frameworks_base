@@ -19,7 +19,9 @@ package androidx.window.extensions.organizer;
 import android.annotation.NonNull;
 import android.app.Activity;
 
-import androidx.window.extensions.ExtensionSplitPairRule;
+import androidx.window.extensions.embedding.SplitPairRule;
+import androidx.window.extensions.embedding.SplitPlaceholderRule;
+import androidx.window.extensions.embedding.SplitRule;
 
 /**
  * Client-side descriptor of a split that holds two containers.
@@ -27,20 +29,26 @@ import androidx.window.extensions.ExtensionSplitPairRule;
 class SplitContainer {
     private final TaskFragmentContainer mPrimaryContainer;
     private final TaskFragmentContainer mSecondaryContainer;
-    private final ExtensionSplitPairRule mSplitPairRule;
+    private final SplitRule mSplitRule;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
-            @NonNull ExtensionSplitPairRule splitPairRule) {
+            @NonNull SplitRule splitRule) {
         mPrimaryContainer = primaryContainer;
         mSecondaryContainer = secondaryContainer;
-        mSplitPairRule = splitPairRule;
+        mSplitRule = splitRule;
 
-        if (mSplitPairRule.finishPrimaryWithSecondary || mSplitPairRule.useAsPlaceholder) {
+        final boolean isPlaceholderContainer = isPlaceholderContainer();
+        final boolean shouldFinishPrimaryWithSecondary = (mSplitRule instanceof SplitPairRule)
+                && ((SplitPairRule) mSplitRule).shouldFinishPrimaryWithSecondary();
+        final boolean shouldFinishSecondaryWithPrimary = (mSplitRule instanceof SplitPairRule)
+                && ((SplitPairRule) mSplitRule).shouldFinishSecondaryWithPrimary();
+
+        if (shouldFinishPrimaryWithSecondary || isPlaceholderContainer) {
             mSecondaryContainer.addActivityToFinishOnExit(primaryActivity);
         }
-        if (mSplitPairRule.finishSecondaryWithPrimary || mSplitPairRule.useAsPlaceholder) {
+        if (shouldFinishSecondaryWithPrimary || isPlaceholderContainer) {
             mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
         }
     }
@@ -56,7 +64,11 @@ class SplitContainer {
     }
 
     @NonNull
-    ExtensionSplitPairRule getSplitPairRule() {
-        return mSplitPairRule;
+    SplitRule getSplitRule() {
+        return mSplitRule;
+    }
+
+    boolean isPlaceholderContainer() {
+        return (mSplitRule instanceof SplitPlaceholderRule);
     }
 }
