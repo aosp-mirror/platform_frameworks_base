@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.location;
+package com.android.settingslib.applications;
+
 
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -39,14 +40,24 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Retrieves the information of applications which accessed location recently.
+ * Retrieval of app ops information for the specified ops.
  */
-public class RecentLocationAccesses {
-    private static final String TAG = RecentLocationAccesses.class.getSimpleName();
+public class RecentAppOpsAccess {
     @VisibleForTesting
-    static final String ANDROID_SYSTEM_PACKAGE_NAME = "android";
+    static final int[] LOCATION_OPS = new int[]{
+            AppOpsManager.OP_FINE_LOCATION,
+            AppOpsManager.OP_COARSE_LOCATION,
+    };
+    private static final int[] MICROPHONE_OPS = new int[]{
+            AppOpsManager.OP_RECORD_AUDIO,
+    };
 
-    // Keep last 24 hours of location app information.
+
+    private static final String TAG = RecentAppOpsAccess.class.getSimpleName();
+    @VisibleForTesting
+    public static final String ANDROID_SYSTEM_PACKAGE_NAME = "android";
+
+    // Keep last 24 hours of access app information.
     private static final long RECENT_TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
     /** The flags for querying ops that are trusted for showing in the UI. */
@@ -54,47 +65,55 @@ public class RecentLocationAccesses {
             | AppOpsManager.OP_FLAG_UNTRUSTED_PROXY
             | AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 
-    @VisibleForTesting
-    static final int[] LOCATION_OPS = new int[]{
-            AppOpsManager.OP_FINE_LOCATION,
-            AppOpsManager.OP_COARSE_LOCATION,
-    };
-
     private final PackageManager mPackageManager;
     private final Context mContext;
+    private final int[] mOps;
     private final IconDrawableFactory mDrawableFactory;
     private final Clock mClock;
 
-    public RecentLocationAccesses(Context context) {
-        this(context, Clock.systemDefaultZone());
+    public RecentAppOpsAccess(Context context, int[] ops) {
+        this(context, Clock.systemDefaultZone(), ops);
     }
 
     @VisibleForTesting
-    RecentLocationAccesses(Context context, Clock clock) {
+    RecentAppOpsAccess(Context context, Clock clock, int[] ops) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+        mOps = ops;
         mDrawableFactory = IconDrawableFactory.newInstance(context);
         mClock = clock;
     }
 
     /**
-     * Fills a list of applications which queried location recently within specified time.
-     * Apps are sorted by recency. Apps with more recent location accesses are in the front.
+     * Creates an instance of {@link RecentAppOpsAccess} for location (coarse and fine) access.
+     */
+    public static RecentAppOpsAccess createForLocation(Context context) {
+        return new RecentAppOpsAccess(context, LOCATION_OPS);
+    }
+
+    /**
+     * Creates an instance of {@link RecentAppOpsAccess} for microphone access.
+     */
+    public static RecentAppOpsAccess createForMicrophone(Context context) {
+        return new RecentAppOpsAccess(context, MICROPHONE_OPS);
+    }
+
+    /**
+     * Fills a list of applications which queried for access recently within specified time.
+     * Apps are sorted by recency. Apps with more recent accesses are in the front.
      */
     @VisibleForTesting
-    List<Access> getAppList(boolean showSystemApps) {
-        // Retrieve a location usage list from AppOps
-        PackageManager pm = mContext.getPackageManager();
-        AppOpsManager aoManager =
-                (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(LOCATION_OPS);
+    public List<Access> getAppList(boolean showSystemApps) {
+        // Retrieve a access usage list from AppOps
+        AppOpsManager aoManager = mContext.getSystemService(AppOpsManager.class);
+        List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(mOps);
 
         final int appOpsCount = appOps != null ? appOps.size() : 0;
 
         // Process the AppOps list and generate a preference list.
         ArrayList<Access> accesses = new ArrayList<>(appOpsCount);
         final long now = mClock.millis();
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        final UserManager um = mContext.getSystemService(UserManager.class);
         final List<UserHandle> profiles = um.getUserProfiles();
 
         for (int i = 0; i < appOpsCount; ++i) {
@@ -111,9 +130,10 @@ public class RecentLocationAccesses {
             // Don't show apps that do not have user sensitive location permissions
             boolean showApp = true;
             if (!showSystemApps) {
-                for (int op : LOCATION_OPS) {
+                for (int op : mOps) {
                     final String permission = AppOpsManager.opToPermission(op);
-                    final int permissionFlags = pm.getPermissionFlags(permission, packageName,
+                    final int permissionFlags = mPackageManager.getPermissionFlags(permission,
+                            packageName,
                             user);
                     if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
                             PermissionChecker.PID_UNKNOWN, uid, packageName)
@@ -144,12 +164,11 @@ public class RecentLocationAccesses {
         return accesses;
     }
 
-
     /**
-     * Gets a list of apps that accessed location recently, sorting by recency.
+     * Gets a list of apps that accessed the app op recently, sorting by recency.
      *
      * @param showSystemApps whether includes system apps in the list.
-     * @return the list of apps that recently accessed location.
+     * @return the list of apps that recently accessed the app op.
      */
     public List<Access> getAppListSorted(boolean showSystemApps) {
         List<Access> accesses = getAppList(showSystemApps);
@@ -174,18 +193,18 @@ public class RecentLocationAccesses {
             AppOpsManager.PackageOps ops) {
         String packageName = ops.getPackageName();
         List<AppOpsManager.OpEntry> entries = ops.getOps();
-        long locationAccessFinishTime = 0L;
-        // Earliest time for a location access to end and still be shown in list.
-        long recentLocationCutoffTime = now - RECENT_TIME_INTERVAL_MILLIS;
+        long accessFinishTime = 0L;
+        // Earliest time for a access to end and still be shown in list.
+        long recentAccessCutoffTime = now - RECENT_TIME_INTERVAL_MILLIS;
         // Compute the most recent access time from all op entries.
         for (AppOpsManager.OpEntry entry : entries) {
             long lastAccessTime = entry.getLastAccessTime(TRUSTED_STATE_FLAGS);
-            if (lastAccessTime > locationAccessFinishTime) {
-                locationAccessFinishTime = lastAccessTime;
+            if (lastAccessTime > accessFinishTime) {
+                accessFinishTime = lastAccessTime;
             }
         }
         // Bail out if the entry is out of date.
-        if (locationAccessFinishTime < recentLocationCutoffTime) {
+        if (accessFinishTime < recentAccessCutoffTime) {
             return null;
         }
 
@@ -213,13 +232,16 @@ public class RecentLocationAccesses {
                 badgedAppLabel = null;
             }
             access = new Access(packageName, userHandle, icon, appLabel, badgedAppLabel,
-                    locationAccessFinishTime);
+                    accessFinishTime);
         } catch (NameNotFoundException e) {
             Log.w(TAG, "package name not found for " + packageName + ", userId " + userId);
         }
         return access;
     }
 
+    /**
+     * Information about when an app last accessed a particular app op.
+     */
     public static class Access {
         public final String packageName;
         public final UserHandle userHandle;
