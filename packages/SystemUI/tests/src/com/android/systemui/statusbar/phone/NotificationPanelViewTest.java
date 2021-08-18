@@ -29,6 +29,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -899,6 +900,14 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 anyBoolean(), anyBoolean(), anyInt());
         verify(mKeyguardUserSwitcherController).setKeyguardUserSwitcherVisibility(anyInt(),
                 anyBoolean(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testCommunalAlphaUpdate() {
+        // Verify keyguard content alpha changes are propagate. Note the actual value set is not
+        // checked since an interpolation is applied to the incoming value.
+        mNotificationPanelViewController.setKeyguardOnlyContentAlpha(0.8f);
+        verify(mCommunalHostViewController).setAlpha(anyFloat());
     }
 
     private void triggerPositionClockAndNotifications() {

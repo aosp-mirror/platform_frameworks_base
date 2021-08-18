@@ -209,6 +209,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
                     if (surfacePackage != null) {
                         mView.setChildSurfacePackage(surfacePackage);
                         mView.setZOrderOnTop(true);
+                        mView.setUseAlpha();
                         mView.postInvalidate();
                         mCommunalStateController.setCommunalViewShowing(true);
                     } else {

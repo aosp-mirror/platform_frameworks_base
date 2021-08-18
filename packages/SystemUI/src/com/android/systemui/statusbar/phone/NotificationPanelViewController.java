@@ -1574,6 +1574,12 @@ public class NotificationPanelViewController extends PanelViewController {
         return true;
     }
 
+    private void updateCommunal() {
+        if (mCommunalViewController != null) {
+            mCommunalViewController.setAlpha(mKeyguardOnlyContentAlpha);
+        }
+    }
+
     private void updateClock() {
         float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
         mKeyguardStatusViewController.setAlpha(alpha);
@@ -2675,6 +2681,7 @@ public class NotificationPanelViewController extends PanelViewController {
             updateKeyguardBottomAreaAlpha();
         }
         updateClock();
+        updateCommunal();
     }
 
     private void trackMovement(MotionEvent event) {
