@@ -116,9 +116,13 @@ class Ledger {
         }
     }
 
-    void dump(IndentingPrintWriter pw) {
+    void dump(IndentingPrintWriter pw, int numRecentTransactions) {
         pw.print("Current balance", narcToString(getCurrentBalance())).println();
-        mTransactions.forEach((transaction) -> {
+
+        final int size = mTransactions.size();
+        for (int i = Math.max(0, size - numRecentTransactions); i < size; ++i) {
+            final Transaction transaction = mTransactions.get(i);
+
             dumpTime(pw, transaction.startTimeMs);
             pw.print("--");
             dumpTime(pw, transaction.endTimeMs);
@@ -126,6 +130,6 @@ class Ledger {
             pw.print(EconomicPolicy.eventToString(transaction.eventId));
             pw.print(" --> ");
             pw.println(narcToString(transaction.delta));
-        });
+        }
     }
 }

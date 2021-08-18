@@ -21,6 +21,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -601,6 +602,10 @@ public class InternalResourceService extends SystemService {
                 if ("-h".equals(arg) || "--help".equals(arg)) {
                     dumpHelp(pw);
                     return;
+                } else if ("-a".equals(arg)) {
+                    // -a is passed when dumping a bug report so we have to acknowledge the
+                    // argument. However, we currently don't do anything differently for bug
+                    // reports.
                 } else if (arg.length() > 0 && arg.charAt(0) == '-') {
                     pw.println("Unknown option: " + arg);
                     return;
@@ -787,9 +792,23 @@ public class InternalResourceService extends SystemService {
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
 
-            mCompleteEconomicPolicy.dump(pw);
-            pw.println();
+            final long maxCircluation = getMaxCirculationLocked();
+            pw.print("Max circulation (current/satiated): ");
+            pw.print(narcToString(maxCircluation));
+            pw.print("/");
+            pw.println(narcToString(mCompleteEconomicPolicy.getMaxSatiatedCirculation()));
 
+            final long currentCirculation = mAgent.getCurrentCirculationLocked();
+            pw.print("Current GDP: ");
+            pw.print(narcToString(currentCirculation));
+            pw.print(" (");
+            pw.print(String.format("%.2f", 100f * currentCirculation / maxCircluation));
+            pw.println("% of current max)");
+
+            pw.println();
+            mCompleteEconomicPolicy.dump(pw);
+
+            pw.println();
             mAgent.dumpLocked(pw);
         }
     }
