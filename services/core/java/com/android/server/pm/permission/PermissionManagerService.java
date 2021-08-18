@@ -1643,7 +1643,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             isRolePermission = permission.isRole();
         }
         final boolean mayRevokeRolePermission = isRolePermission
-                && mayManageRolePermission(callingUid);
+                // Allow ourselves to revoke role permissions due to definition changes.
+                && (callingUid == Process.myUid() || mayManageRolePermission(callingUid));
 
         final boolean isRuntimePermission;
         synchronized (mLock) {
@@ -2321,11 +2322,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         for (int permNum = 0; permNum < numPermissions; permNum++) {
             final String permName = permissionsToRevoke.get(permNum);
+            final boolean isInternalPermission;
             synchronized (mLock) {
                 final Permission bp = mRegistry.getPermission(permName);
-                if (bp == null || !bp.isRuntime()) {
+                if (bp == null || !(bp.isInternal() || bp.isRuntime())) {
                     continue;
                 }
+                isInternalPermission = bp.isInternal();
             }
             mPackageManagerInt.forEachPackage(pkg -> {
                 final String packageName = pkg.getPackageName();
@@ -2345,12 +2348,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     if (permissionState == PackageManager.PERMISSION_GRANTED
                             && (flags & flagMask) == 0) {
                         final int uid = UserHandle.getUid(userId, appId);
-                        EventLog.writeEvent(0x534e4554, "154505240", uid,
-                                "Revoking permission " + permName + " from package "
-                                        + packageName + " due to definition change");
-                        EventLog.writeEvent(0x534e4554, "168319670", uid,
-                                "Revoking permission " + permName + " from package "
-                                        + packageName + " due to definition change");
+                        if (isInternalPermission) {
+                            EventLog.writeEvent(0x534e4554, "195338390", uid,
+                                    "Revoking permission " + permName + " from package "
+                                            + packageName + " due to definition change");
+                        } else {
+                            EventLog.writeEvent(0x534e4554, "154505240", uid,
+                                    "Revoking permission " + permName + " from package "
+                                            + packageName + " due to definition change");
+                            EventLog.writeEvent(0x534e4554, "168319670", uid,
+                                    "Revoking permission " + permName + " from package "
+                                            + packageName + " due to definition change");
+                        }
                         Slog.e(TAG, "Revoking permission " + permName + " from package "
                                 + packageName + " due to definition change");
                         try {
