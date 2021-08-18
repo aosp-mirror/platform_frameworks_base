@@ -50,12 +50,20 @@ message StateValue {
   }
 }
 
+message AggregatedAtomInfo {
+    optional Atom atom = 1;
+
+    repeated int64 elapsed_timestamp_nanos = 2;
+}
+
 message EventMetricData {
   optional int64 elapsed_timestamp_nanos = 1;
 
   optional Atom atom = 2;
 
   optional int64 wall_clock_timestamp_nanos = 3 [deprecated = true];
+
+  optional AggregatedAtomInfo aggregated_atom_info = 4;
 }
 
 message CountBucketInfo {
@@ -176,6 +184,8 @@ message GaugeBucketInfo {
   optional int64 start_bucket_elapsed_millis = 7;
 
   optional int64 end_bucket_elapsed_millis = 8;
+
+  repeated AggregatedAtomInfo aggregated_atom_info = 9;
 }
 
 message GaugeMetricData {
