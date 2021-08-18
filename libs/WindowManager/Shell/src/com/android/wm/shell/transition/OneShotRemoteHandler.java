@@ -18,9 +18,11 @@ package com.android.wm.shell.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -88,6 +90,13 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         try {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
+            }
+            try {
+                ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
+                        mRemote.getAppThread());
+            } catch (SecurityException e) {
+                Slog.e(Transitions.TAG, "Unable to boost animation thread. This should only happen"
+                        + " during unit tests");
             }
             mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
         } catch (RemoteException e) {
