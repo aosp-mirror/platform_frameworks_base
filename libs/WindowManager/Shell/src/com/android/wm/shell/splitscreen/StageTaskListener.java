@@ -97,6 +97,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         return mChildrenTaskInfo.contains(taskId);
     }
 
+    /**
+     * Returns the top activity uid for the top child task.
+     */
+    int getTopChildTaskUid() {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            final ActivityManager.RunningTaskInfo info = mChildrenTaskInfo.valueAt(i);
+            if (info.topActivityInfo == null) {
+                continue;
+            }
+            return info.topActivityInfo.applicationInfo.uid;
+        }
+        return 0;
+    }
+
     /** @return {@code true} if this listener contains the currently focused task. */
     boolean isFocused() {
         if (mRootTaskInfo.isFocused) return true;

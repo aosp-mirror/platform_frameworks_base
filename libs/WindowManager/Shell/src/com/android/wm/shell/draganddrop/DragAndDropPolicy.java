@@ -63,6 +63,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.InstanceId;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
@@ -86,6 +87,7 @@ public class DragAndDropPolicy {
     private final SplitScreenController mSplitScreen;
     private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
 
+    private InstanceId mLoggerSessionId;
     private DragSession mSession;
 
     public DragAndDropPolicy(Context context, SplitScreenController splitScreen) {
@@ -104,7 +106,8 @@ public class DragAndDropPolicy {
     /**
      * Starts a new drag session with the given initial drag data.
      */
-    void start(DisplayLayout displayLayout, ClipData data) {
+    void start(DisplayLayout displayLayout, ClipData data, InstanceId loggerSessionId) {
+        mLoggerSessionId = loggerSessionId;
         mSession = new DragSession(mContext, mActivityTaskManager, displayLayout, data);
         // TODO(b/169894807): Also update the session data with task stack changes
         mSession.update();
@@ -207,6 +210,8 @@ public class DragAndDropPolicy {
                 // Launch in the side stage if we are not in split-screen already.
                 stage = STAGE_TYPE_SIDE;
             }
+            // Add some data for logging splitscreen once it is invoked
+            mSplitScreen.logOnDroppedToSplit(position, mLoggerSessionId);
         }
 
         final ClipDescription description = data.getDescription();
@@ -294,7 +299,12 @@ public class DragAndDropPolicy {
                 @StageType int stage, @SplitPosition int position,
                 @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
-        void exitSplitScreen();
+
+        /**
+         * Exits splitscreen, with an associated exit trigger from the SplitscreenUIChanged proto
+         * for logging.
+         */
+        void exitSplitScreen(int exitTrigger);
     }
 
     /**
@@ -347,7 +357,7 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void exitSplitScreen() {
+        public void exitSplitScreen(int exitTrigger) {
             throw new UnsupportedOperationException("exitSplitScreen not implemented by starter");
         }
     }
