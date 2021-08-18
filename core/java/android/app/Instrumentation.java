@@ -749,7 +749,8 @@ public class Instrumentation {
          * @see #onStartActivity(Intent)
          * @hide
          */
-        public ActivityResult onStartActivity(Context who, Intent intent, Bundle options) {
+        public ActivityResult onStartActivity(@NonNull Context who, @NonNull Intent intent,
+                @NonNull Bundle options) {
             return onStartActivity(intent);
         }
 
