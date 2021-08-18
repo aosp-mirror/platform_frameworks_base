@@ -54,22 +54,22 @@ open class BlurUtils @Inject constructor(
     /**
      * Translates a ratio from 0 to 1 to a blur radius in pixels.
      */
-    fun blurRadiusOfRatio(ratio: Float): Int {
+    fun blurRadiusOfRatio(ratio: Float): Float {
         if (ratio == 0f) {
-            return 0
+            return 0f
         }
-        return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio).toInt()
+        return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio)
     }
 
     /**
      * Translates a blur radius in pixels to a ratio between 0 to 1.
      */
-    fun ratioOfBlurRadius(blur: Int): Float {
-        if (blur == 0) {
+    fun ratioOfBlurRadius(blur: Float): Float {
+        if (blur == 0f) {
             return 0f
         }
         return MathUtils.map(minBlurRadius.toFloat(), maxBlurRadius.toFloat(),
-                0f /* maxStart */, 1f /* maxStop */, blur.toFloat())
+                0f /* maxStart */, 1f /* maxStop */, blur)
     }
 
     /**
