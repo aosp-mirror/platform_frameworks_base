@@ -65,6 +65,7 @@ import android.view.DisplayInfo;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceId;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy.Target;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -95,6 +96,9 @@ public class DragAndDropPolicyTest {
     // Both the split-screen and start interface.
     @Mock
     private SplitScreenController mSplitScreenStarter;
+
+    @Mock
+    private InstanceId mLoggerSessionId;
 
     private DisplayLayout mLandscapeDisplayLayout;
     private DisplayLayout mPortraitDisplayLayout;
@@ -201,7 +205,7 @@ public class DragAndDropPolicyTest {
     @Test
     public void testDragAppOverFullscreenHome_expectOnlyFullscreenTarget() {
         setRunningTask(mHomeTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
 
@@ -213,7 +217,7 @@ public class DragAndDropPolicyTest {
     @Test
     public void testDragAppOverFullscreenApp_expectSplitScreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
@@ -230,7 +234,7 @@ public class DragAndDropPolicyTest {
     @Test
     public void testDragAppOverFullscreenAppPhone_expectVerticalSplitScreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mPortraitDisplayLayout, mActivityClipData);
+        mPolicy.start(mPortraitDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
@@ -248,7 +252,7 @@ public class DragAndDropPolicyTest {
     public void testDragAppOverSplitApp_expectSplitTargets_DropLeft() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
@@ -261,7 +265,7 @@ public class DragAndDropPolicyTest {
     public void testDragAppOverSplitApp_expectSplitTargets_DropRight() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
@@ -274,7 +278,7 @@ public class DragAndDropPolicyTest {
     public void testDragAppOverSplitAppPhone_expectVerticalSplitTargets_DropTop() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mPortraitDisplayLayout, mActivityClipData);
+        mPolicy.start(mPortraitDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
@@ -287,7 +291,7 @@ public class DragAndDropPolicyTest {
     public void testDragAppOverSplitAppPhone_expectVerticalSplitTargets_DropBottom() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mPortraitDisplayLayout, mActivityClipData);
+        mPolicy.start(mPortraitDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
@@ -299,7 +303,7 @@ public class DragAndDropPolicyTest {
     @Test
     public void testTargetHitRects() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
         ArrayList<Target> targets = mPolicy.getTargets(mInsets);
         for (Target t : targets) {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.top) == t);
