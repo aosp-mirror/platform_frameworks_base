@@ -170,9 +170,12 @@ public class PipTransition extends PipTransitionController {
         if (request.getType() == TRANSIT_PIP) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
-            final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
-            wct.setActivityWindowingMode(request.getTriggerTask().token, WINDOWING_MODE_UNDEFINED);
-            wct.setBounds(request.getTriggerTask().token, destinationBounds);
+            if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+                wct.setActivityWindowingMode(request.getTriggerTask().token,
+                        WINDOWING_MODE_UNDEFINED);
+                final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+                wct.setBounds(request.getTriggerTask().token, destinationBounds);
+            }
             return wct;
         } else {
             return null;
@@ -243,6 +246,7 @@ public class PipTransition extends PipTransitionController {
             onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, tx);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
             mFinishCallback = null;
+            mPipTransitionState.setInSwipePipToHomeTransition(false);
             return true;
         }
 
