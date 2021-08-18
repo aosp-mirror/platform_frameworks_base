@@ -81,7 +81,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     // Only show communal view when keyguard is showing and not dozing.
     private static final int SHOW_COMMUNAL_VIEW_REQUIRED_STATES = STATE_KEYGUARD_SHOWING;
     private static final int SHOW_COMMUNAL_VIEW_INVALID_STATES =
-            STATE_DOZING | STATE_BOUNCER_SHOWING | STATE_KEYGUARD_OCCLUDED;
+            STATE_DOZING | STATE_KEYGUARD_OCCLUDED;
 
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
 
@@ -216,9 +216,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
         }
     }
     @Override
-    public void init() {
-        super.init();
-
+    public void onInit() {
         setState(STATE_KEYGUARD_SHOWING, mKeyguardStateController.isShowing());
         setState(STATE_DOZING, mStatusBarStateController.isDozing());
     }

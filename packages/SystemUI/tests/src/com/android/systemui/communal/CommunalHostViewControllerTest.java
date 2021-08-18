@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -121,33 +122,6 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHideOnBouncer() {
-        ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
-                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
-
-        // Capture callback value for later use.
-        verify(mKeyguardUpdateMonitor).registerCallback(callbackCapture.capture());
-
-        // Establish a visible communal view.
-        mController.show(new WeakReference<>(mCommunalSource));
-        mFakeExecutor.runAllReady();
-        verify(mCommunalView).setVisibility(View.VISIBLE);
-        Mockito.clearInvocations(mCommunalView);
-
-        // Trigger bouncer.
-        Mockito.clearInvocations(mCommunalView);
-        callbackCapture.getValue().onKeyguardBouncerChanged(true);
-        mFakeExecutor.runAllReady();
-        verify(mCommunalView).setVisibility(View.INVISIBLE);
-
-        // Hide bouncer
-        Mockito.clearInvocations(mCommunalView);
-        callbackCapture.getValue().onKeyguardBouncerChanged(false);
-        mFakeExecutor.runAllReady();
-        verify(mCommunalView).setVisibility(View.VISIBLE);
-    }
-
-    @Test
     public void testHideOnOcclude() {
         ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
                 ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
@@ -241,5 +215,28 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         mController.show(new WeakReference<>(mCommunalSource));
         mFakeExecutor.runAllReady();
         verify(mCommunalSource, never()).requestCommunalView(any());
+    }
+
+    @Test
+    public void testNoShowInvocationOnBouncer() {
+        ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+
+        // Capture callback value for later use.
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCapture.capture());
+
+        // Set source so it will be cleared if in invalid state.
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+        clearInvocations(mCommunalStateController, mCommunalView);
+
+        // Change bouncer to showing.
+        callbackCapture.getValue().onKeyguardBouncerChanged(true);
+        mFakeExecutor.runAllReady();
+
+        // Verify that there were no requests to remove all child views or set the communal
+        // state to not showing.
+        verify(mCommunalStateController, never()).setCommunalViewShowing(eq(false));
+        verify(mCommunalView, never()).removeAllViews();
     }
 }

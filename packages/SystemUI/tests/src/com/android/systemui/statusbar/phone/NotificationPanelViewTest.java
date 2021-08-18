@@ -851,9 +851,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testCommunalhostViewControllerInit() {
+        verify(mCommunalHostViewController, times(1)).init();
         clearInvocations(mCommunalHostViewController);
         givenViewAttached();
-        verify(mCommunalHostViewController).init();
+        verify(mCommunalHostViewController, never()).init();
     }
 
     @Test
