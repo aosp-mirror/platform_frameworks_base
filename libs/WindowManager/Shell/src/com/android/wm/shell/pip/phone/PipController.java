@@ -27,6 +27,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SNAP_AFTER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
@@ -84,6 +85,7 @@ import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -455,11 +457,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             return;
         }
         Runnable updateDisplayLayout = () -> {
+            final boolean fromRotation = Transitions.ENABLE_SHELL_TRANSITIONS
+                    && mPipBoundsState.getDisplayLayout().rotation() != layout.rotation();
             mPipBoundsState.setDisplayLayout(layout);
+            final WindowContainerTransaction wct =
+                    fromRotation ? new WindowContainerTransaction() : null;
             updateMovementBounds(null /* toBounds */,
-                    false /* fromRotation */, false /* fromImeAdjustment */,
+                    fromRotation, false /* fromImeAdjustment */,
                     false /* fromShelfAdjustment */,
-                    null /* windowContainerTransaction */);
+                    wct /* windowContainerTransaction */);
+            if (wct != null) {
+                mPipTaskOrganizer.applyFinishBoundsResize(wct, TRANSITION_DIRECTION_SAME);
+            }
         };
 
         if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
