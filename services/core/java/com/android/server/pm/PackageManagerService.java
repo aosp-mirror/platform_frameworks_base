@@ -178,6 +178,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ComponentEnabledSetting;
 import android.content.pm.PackageManager.ComponentType;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
@@ -19902,7 +19903,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (callingPackage == null) {
             callingPackage = Integer.toString(Binder.getCallingUid());
         }
-        setEnabledSetting(appPackageName, null, newState, flags, userId, callingPackage);
+
+        setEnabledSettings(List.of(new ComponentEnabledSetting(appPackageName, newState, flags)),
+                userId, callingPackage);
     }
 
     @Override
@@ -19999,216 +20002,270 @@ public class PackageManagerService extends IPackageManager.Stub
     public void setComponentEnabledSetting(ComponentName componentName,
             int newState, int flags, int userId) {
         if (!mUserManager.exists(userId)) return;
-        setEnabledSetting(componentName.getPackageName(),
-                componentName.getClassName(), newState, flags, userId, null);
+
+        setEnabledSettings(List.of(new ComponentEnabledSetting(componentName, newState, flags)),
+                userId, null /* callingPackage */);
     }
 
-    private void setEnabledSetting(final String packageName, String className, int newState,
-            final int flags, int userId, String callingPackage) {
-        if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
-              || newState == COMPONENT_ENABLED_STATE_ENABLED
-              || newState == COMPONENT_ENABLED_STATE_DISABLED
-              || newState == COMPONENT_ENABLED_STATE_DISABLED_USER
-              || newState == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
-            throw new IllegalArgumentException("Invalid new component state: "
-                    + newState);
+    @Override
+    public void setComponentEnabledSettings(List<ComponentEnabledSetting> settings, int userId) {
+        if (!mUserManager.exists(userId)) return;
+        if (settings == null || settings.isEmpty()) {
+            throw new IllegalArgumentException("The list of enabled settings is empty");
         }
+
+        setEnabledSettings(settings, userId, null /* callingPackage */);
+    }
+
+    private void setEnabledSettings(List<ComponentEnabledSetting> settings, int userId,
+            String callingPackage) {
         final int callingUid = Binder.getCallingUid();
-        final int permission;
-        if (callingUid == Process.SYSTEM_UID) {
-            permission = PackageManager.PERMISSION_GRANTED;
-        } else {
-            permission = mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
-        }
         enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
                 true /* checkShell */, "set enabled");
-        final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
-        boolean sendNow = false;
-        boolean isApp = (className == null);
-        String componentName = isApp ? packageName : className;
-        ArrayList<String> components;
 
-        final boolean isCallerTargetApp = ArrayUtils.contains(
-                getPackagesForUid(callingUid), packageName);
-        final PackageSetting pkgSetting;
+        final int targetSize = settings.size();
+        for (int i = 0; i < targetSize; i++) {
+            final int newState = settings.get(i).getEnabledState();
+            if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
+                    || newState == COMPONENT_ENABLED_STATE_ENABLED
+                    || newState == COMPONENT_ENABLED_STATE_DISABLED
+                    || newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                    || newState == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
+                throw new IllegalArgumentException("Invalid new component state: " + newState);
+            }
+        }
+        if (targetSize > 1) {
+            final ArraySet<String> checkDuplicatedPackage = new ArraySet<>();
+            final ArraySet<ComponentName> checkDuplicatedComponent = new ArraySet<>();
+            final ArrayMap<String, Integer> checkConflictFlag = new ArrayMap<>();
+            for (int i = 0; i < targetSize; i++) {
+                final ComponentEnabledSetting setting = settings.get(i);
+                final String packageName = setting.getPackageName();
+                if (setting.isComponent()) {
+                    final ComponentName componentName = setting.getComponentName();
+                    if (checkDuplicatedComponent.contains(componentName)) {
+                        throw new IllegalArgumentException("The component " + componentName
+                                + " is duplicated");
+                    }
+                    checkDuplicatedComponent.add(componentName);
+
+                    // check if there is a conflict of the DONT_KILL_APP flag between components
+                    // in the package
+                    final Integer enabledFlags = checkConflictFlag.get(packageName);
+                    if (enabledFlags == null) {
+                        checkConflictFlag.put(packageName, setting.getEnabledFlags());
+                    } else if ((enabledFlags & PackageManager.DONT_KILL_APP)
+                            != (setting.getEnabledFlags() & PackageManager.DONT_KILL_APP)) {
+                        throw new IllegalArgumentException("A conflict of the DONT_KILL_APP flag "
+                                + "between components in the package " + packageName);
+                    }
+                } else {
+                    if (checkDuplicatedPackage.contains(packageName)) {
+                        throw new IllegalArgumentException("The package " + packageName
+                                + " is duplicated");
+                    }
+                    checkDuplicatedPackage.add(packageName);
+                }
+            }
+        }
+
+        final boolean allowedByPermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE) == PERMISSION_GRANTED;
+        final boolean[] updateAllowed = new boolean[targetSize];
+        Arrays.fill(updateAllowed, true);
+
+        final Map<String, PackageSetting> pkgSettings = new ArrayMap<>(targetSize);
         // reader
         synchronized (mLock) {
-            pkgSetting = mSettings.getPackageLPr(packageName);
-            // Limit who can change which apps
-            if (!isCallerTargetApp) {
-                // Don't allow apps that don't have permission to modify other apps
+            // Checks for target packages
+            for (int i = 0; i < targetSize; i++) {
+                final ComponentEnabledSetting setting = settings.get(i);
+                final String packageName = setting.getPackageName();
+                if (pkgSettings.containsKey(packageName)) {
+                    // this package has verified
+                    continue;
+                }
+                final boolean isCallerTargetApp = ArrayUtils.contains(
+                        getPackagesForUid(callingUid), packageName);
+                final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+                // Limit who can change which apps
+                if (!isCallerTargetApp) {
+                    // Don't allow apps that don't have permission to modify other apps
+                    if (!allowedByPermission
+                            || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
+                        throw new SecurityException("Attempt to change component state; "
+                                + "pid=" + Binder.getCallingPid()
+                                + ", uid=" + callingUid
+                                + (!setting.isComponent() ? ", package=" + packageName
+                                        : ", component=" + setting.getComponentName()));
+                    }
+                    // Don't allow changing protected packages.
+                    if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                        throw new SecurityException(
+                                "Cannot disable a protected package: " + packageName);
+                    }
+                }
+                if (pkgSetting == null) {
+                    throw new IllegalArgumentException(setting.isComponent()
+                            ? "Unknown component: " + setting.getComponentName()
+                            : "Unknown package: " + packageName);
+                }
+                if (callingUid == Process.SHELL_UID
+                        && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
+                    // Shell can only change whole packages between ENABLED and DISABLED_USER states
+                    // unless it is a test package.
+                    final int oldState = pkgSetting.getEnabled(userId);
+                    final int newState = setting.getEnabledState();
+                    if (!setting.isComponent()
+                            &&
+                            (oldState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                                    || oldState == COMPONENT_ENABLED_STATE_DEFAULT
+                                    || oldState == COMPONENT_ENABLED_STATE_ENABLED)
+                            &&
+                            (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                                    || newState == COMPONENT_ENABLED_STATE_DEFAULT
+                                    || newState == COMPONENT_ENABLED_STATE_ENABLED)) {
+                        // ok
+                    } else {
+                        throw new SecurityException(
+                                "Shell cannot change component state for "
+                                        + setting.getComponentName() + " to " + newState);
+                    }
+                }
+                pkgSettings.put(packageName, pkgSetting);
+            }
+            // Checks for target components
+            for (int i = 0; i < targetSize; i++) {
+                final ComponentEnabledSetting setting = settings.get(i);
+                // skip if it's application
+                if (!setting.isComponent()) continue;
+
+                // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
+                // app details activity
+                final String packageName = setting.getPackageName();
+                final String className = setting.getClassName();
                 if (!allowedByPermission
-                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
-                    throw new SecurityException(
-                            "Attempt to change component state; "
-                                    + "pid=" + Binder.getCallingPid()
-                                    + ", uid=" + callingUid
-                                    + (className == null
-                                            ? ", package=" + packageName
-                                            : ", component=" + packageName + "/" + className));
+                        && PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
+                    throw new SecurityException("Cannot disable a system-generated component");
                 }
-                // Don't allow changing protected packages.
-                if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-                    throw new SecurityException(
-                            "Cannot disable a protected package: " + packageName);
-                }
-            }
-            if (pkgSetting == null) {
-                if (className == null) {
-                    throw new IllegalArgumentException("Unknown package: " + packageName);
-                }
-                throw new IllegalArgumentException(
-                        "Unknown component: " + packageName + "/" + className);
-            }
-        }
-
-        // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
-        // app details activity
-        if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)
-                && !allowedByPermission) {
-            throw new SecurityException("Cannot disable a system-generated component");
-        }
-
-        synchronized (mLock) {
-            if (callingUid == Process.SHELL_UID
-                    && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
-                // Shell can only change whole packages between ENABLED and DISABLED_USER states
-                // unless it is a test package.
-                int oldState = pkgSetting.getEnabled(userId);
-                if (className == null
-                        &&
-                        (oldState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                                || oldState == COMPONENT_ENABLED_STATE_DEFAULT
-                                || oldState == COMPONENT_ENABLED_STATE_ENABLED)
-                        &&
-                        (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                                || newState == COMPONENT_ENABLED_STATE_DEFAULT
-                                || newState == COMPONENT_ENABLED_STATE_ENABLED)) {
-                    // ok
-                } else {
-                    throw new SecurityException(
-                            "Shell cannot change component state for " + packageName + "/"
-                                    + className + " to " + newState);
-                }
-            }
-        }
-        if (className == null) {
-            // We're dealing with an application/package level state change
-            synchronized (mLock) {
-                if (pkgSetting.getEnabled(userId) == newState) {
-                    // Nothing to do
-                    return;
-                }
-            }
-            // If we're enabling a system stub, there's a little more work to do.
-            // Prior to enabling the package, we need to decompress the APK(s) to the
-            // data partition and then replace the version on the system partition.
-            final AndroidPackage deletedPkg = pkgSetting.pkg;
-            final boolean isSystemStub = (deletedPkg != null)
-                    && deletedPkg.isStub()
-                    && deletedPkg.isSystem();
-            if (isSystemStub
-                    && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                            || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!enableCompressedPackage(deletedPkg, pkgSetting)) {
-                    return;
-                }
-            }
-            if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                // Don't care about who enables an app.
-                callingPackage = null;
-            }
-            synchronized (mLock) {
-                pkgSetting.setEnabled(newState, userId, callingPackage);
-                if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                        || newState == COMPONENT_ENABLED_STATE_DISABLED)
-                        && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
-                        == PERMISSION_GRANTED) {
-                    // This app should not generally be allowed to get disabled by the UI, but if it
-                    // ever does, we don't want to end up with some of the user's apps permanently
-                    // suspended.
-                    unsuspendForSuspendingPackage(packageName, userId);
-                    removeAllDistractingPackageRestrictions(userId);
-                }
-            }
-        } else {
-            synchronized (mLock) {
-                // We're dealing with a component level state change
-                // First, verify that this is a valid class name.
-                AndroidPackage pkg = pkgSetting.pkg;
+                // Verify that this is a valid class name.
+                final AndroidPackage pkg = pkgSettings.get(packageName).getPkg();
                 if (pkg == null || !AndroidPackageUtils.hasComponentClassName(pkg, className)) {
-                    if (pkg != null &&
-                            pkg.getTargetSdkVersion() >=
-                                    Build.VERSION_CODES.JELLY_BEAN) {
+                    if (pkg != null
+                            && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.JELLY_BEAN) {
                         throw new IllegalArgumentException("Component class " + className
                                 + " does not exist in " + packageName);
                     } else {
                         Slog.w(TAG, "Failed setComponentEnabledSetting: component class "
                                 + className + " does not exist in " + packageName);
+                        updateAllowed[i] = false;
                     }
-                }
-                switch (newState) {
-                    case COMPONENT_ENABLED_STATE_ENABLED:
-                        if (!pkgSetting.enableComponentLPw(className, userId)) {
-                            return;
-                        }
-                        break;
-                    case COMPONENT_ENABLED_STATE_DISABLED:
-                        if (!pkgSetting.disableComponentLPw(className, userId)) {
-                            return;
-                        }
-                        break;
-                    case COMPONENT_ENABLED_STATE_DEFAULT:
-                        if (!pkgSetting.restoreComponentLPw(className, userId)) {
-                            return;
-                        }
-                        break;
-                    default:
-                        Slog.e(TAG, "Invalid new component state: " + newState);
-                        return;
                 }
             }
         }
+
+        // More work for application enabled setting updates
+        for (int i = 0; i < targetSize; i++) {
+            final ComponentEnabledSetting setting = settings.get(i);
+            // skip if it's component
+            if (setting.isComponent()) continue;
+
+            final PackageSetting pkgSetting = pkgSettings.get(setting.getPackageName());
+            final int newState = setting.getEnabledState();
+            synchronized (mLock) {
+                if (pkgSetting.getEnabled(userId) == newState) {
+                    // Nothing to do
+                    updateAllowed[i] = false;
+                    continue;
+                }
+            }
+            // If we're enabling a system stub, there's a little more work to do.
+            // Prior to enabling the package, we need to decompress the APK(s) to the
+            // data partition and then replace the version on the system partition.
+            final AndroidPackage deletedPkg = pkgSetting.getPkg();
+            final boolean isSystemStub = (deletedPkg != null)
+                    && deletedPkg.isStub()
+                    && deletedPkg.isSystem();
+            if (isSystemStub
+                    && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
+                if (!enableCompressedPackage(deletedPkg, pkgSetting)) {
+                    Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
+                            + "commpressed package " + setting.getPackageName());
+                    updateAllowed[i] = false;
+                    continue;
+                }
+            }
+        }
+
+        // packageName -> list of components to send broadcasts now
+        final ArrayMap<String, ArrayList<String>> sendNowBroadcasts = new ArrayMap<>(targetSize);
         synchronized (mLock) {
-            if ((flags & PackageManager.SYNCHRONOUS) != 0) {
+            boolean scheduleBroadcastMessage = false;
+            boolean isSynchronous = false;
+            boolean anyChanged = false;
+
+            for (int i = 0; i < targetSize; i++) {
+                if (!updateAllowed[i]) {
+                    continue;
+                }
+                // update enabled settings
+                final ComponentEnabledSetting setting = settings.get(i);
+                final String packageName = setting.getPackageName();
+                if (!setEnabledSettingInternalLocked(pkgSettings.get(packageName), setting,
+                        userId, callingPackage)) {
+                    continue;
+                }
+                anyChanged = true;
+
+                if ((setting.getEnabledFlags() & PackageManager.SYNCHRONOUS) != 0) {
+                    isSynchronous = true;
+                }
+                // collect broadcast list for the package
+                final String componentName = setting.isComponent()
+                        ? setting.getClassName() : packageName;
+                ArrayList<String> componentList = sendNowBroadcasts.get(packageName);
+                if (componentList == null) {
+                    componentList = mPendingBroadcasts.get(userId, packageName);
+                }
+                final boolean newPackage = componentList == null;
+                if (newPackage) {
+                    componentList = new ArrayList<>();
+                }
+                if (!componentList.contains(componentName)) {
+                    componentList.add(componentName);
+                }
+                if ((setting.getEnabledFlags() & PackageManager.DONT_KILL_APP) == 0) {
+                    sendNowBroadcasts.put(packageName, componentList);
+                    // Purge entry from pending broadcast list if another one exists already
+                    // since we are sending one right away.
+                    mPendingBroadcasts.remove(userId, packageName);
+                } else {
+                    if (newPackage) {
+                        mPendingBroadcasts.put(userId, packageName, componentList);
+                    }
+                    scheduleBroadcastMessage = true;
+                }
+            }
+            if (!anyChanged) {
+                // nothing changed, return immediately
+                return;
+            }
+
+            if (isSynchronous) {
                 flushPackageRestrictionsAsUserInternalLocked(userId);
             } else {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
-            updateSequenceNumberLP(pkgSetting, new int[] { userId });
-            final long callingId = Binder.clearCallingIdentity();
-            try {
-                updateInstantAppInstallerLocked(packageName);
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
-            }
-            components = mPendingBroadcasts.get(userId, packageName);
-            final boolean newPackage = components == null;
-            if (newPackage) {
-                components = new ArrayList<>();
-            }
-            if (!components.contains(componentName)) {
-                components.add(componentName);
-            }
-            if ((flags&PackageManager.DONT_KILL_APP) == 0) {
-                sendNow = true;
-                // Purge entry from pending broadcast list if another one exists already
-                // since we are sending one right away.
-                mPendingBroadcasts.remove(userId, packageName);
-            } else {
-                if (newPackage) {
-                    mPendingBroadcasts.put(userId, packageName, components);
-                }
+            if (scheduleBroadcastMessage) {
                 if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
                     // Schedule a message - if it has been a "reasonably long time" since the
                     // service started, send the broadcast with a delay of one second to avoid
                     // delayed reactions from the receiver, else keep the default ten second delay
                     // to avoid extreme thrashing on service startup.
                     final long broadcastDelay = SystemClock.uptimeMillis() > mServiceStartWithDelay
-                                                ? BROADCAST_DELAY
-                                                : BROADCAST_DELAY_DURING_STARTUP;
+                            ? BROADCAST_DELAY
+                            : BROADCAST_DELAY_DURING_STARTUP;
                     mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, broadcastDelay);
                 }
             }
@@ -20216,14 +20273,76 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (sendNow) {
-                int packageUid = UserHandle.getUid(userId, pkgSetting.appId);
-                sendPackageChangedBroadcast(packageName,
-                        (flags & PackageManager.DONT_KILL_APP) != 0, components, packageUid, null);
+            for (int i = 0; i < sendNowBroadcasts.size(); i++) {
+                final String packageName = sendNowBroadcasts.keyAt(i);
+                final ArrayList<String> components = sendNowBroadcasts.valueAt(i);
+                final int packageUid = UserHandle.getUid(
+                        userId, pkgSettings.get(packageName).appId);
+                sendPackageChangedBroadcast(packageName, false /* dontKillApp */,
+                        components, packageUid, null /* reason */);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    private boolean setEnabledSettingInternalLocked(PackageSetting pkgSetting,
+            ComponentEnabledSetting setting, int userId, String callingPackage) {
+        final int newState = setting.getEnabledState();
+        final String packageName = setting.getPackageName();
+        boolean success = false;
+        if (!setting.isComponent()) {
+            // We're dealing with an application/package level state change
+            if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                // Don't care about who enables an app.
+                callingPackage = null;
+            }
+            pkgSetting.setEnabled(newState, userId, callingPackage);
+            if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                    || newState == COMPONENT_ENABLED_STATE_DISABLED)
+                    && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                    == PERMISSION_GRANTED) {
+                // This app should not generally be allowed to get disabled by the UI, but
+                // if it ever does, we don't want to end up with some of the user's apps
+                // permanently suspended.
+                unsuspendForSuspendingPackage(packageName, userId);
+                removeAllDistractingPackageRestrictions(userId);
+            }
+            success = true;
+        } else {
+            // We're dealing with a component level state change
+            final String className = setting.getClassName();
+            switch (newState) {
+                case COMPONENT_ENABLED_STATE_ENABLED:
+                    success = pkgSetting.enableComponentLPw(className, userId);
+                    break;
+                case COMPONENT_ENABLED_STATE_DISABLED:
+                    success = pkgSetting.disableComponentLPw(className, userId);
+                    break;
+                case COMPONENT_ENABLED_STATE_DEFAULT:
+                    success = pkgSetting.restoreComponentLPw(className, userId);
+                    break;
+                default:
+                    Slog.e(TAG, "Failed setComponentEnabledSetting: component "
+                            + packageName + "/" + className
+                            + " requested an invalid new component state: " + newState);
+                    break;
+            }
+        }
+        if (!success) {
+            return false;
+        }
+
+        updateSequenceNumberLP(pkgSetting, new int[] { userId });
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            updateInstantAppInstallerLocked(packageName);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+
+        return true;
     }
 
     @WorkerThread

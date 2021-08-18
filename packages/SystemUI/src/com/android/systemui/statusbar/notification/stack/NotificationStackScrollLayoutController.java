@@ -698,6 +698,11 @@ public class NotificationStackScrollLayoutController {
         });
         mView.setShadeController(mShadeController);
 
+        mKeyguardBypassController.registerOnBypassStateChangedListener(
+                isEnabled -> mNotificationRoundnessManager.setShouldRoundPulsingViews(!isEnabled));
+        mNotificationRoundnessManager.setShouldRoundPulsingViews(
+                !mKeyguardBypassController.getBypassEnabled());
+
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
             mView.initializeForegroundServiceSection(
                     (ForegroundServiceDungeonView) mFgServicesSectionController.createView(

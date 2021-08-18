@@ -817,7 +817,7 @@ public class AudioManager {
     }
 
     @UnsupportedAppUsage
-    private static IAudioService getService()
+    static IAudioService getService()
     {
         if (sService != null) {
             return sService;
@@ -2451,6 +2451,149 @@ public class AudioManager {
         }
         return AudioSystem.getOffloadSupport(format, attributes);
     }
+
+    //====================================================================
+    // Immersive audio
+
+    /**
+     * @hide
+     * Returns the level of support for immersive audio from the {@link Spatializer} if
+     * available.
+     * @return the level of immersive audio support through spatialization
+     * @see Spatializer#getImmersiveAudioLevel()
+     */
+    @Spatializer.ImmersiveAudioLevel int getSpatializerImmersiveAudioLevel() {
+        final IAudioService service = getService();
+        try {
+            return service.getSpatializerImmersiveAudioLevel();
+        } catch (RemoteException e) {
+            return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+        }
+    }
+
+    /**
+     * Return a handle to the optional platform's {@link Spatializer}
+     * @return {@code null} if spatialization is not supported, the {@code Spatializer} instance
+     *         otherwise.
+     */
+    public @Nullable Spatializer getSpatializer() {
+        if (getSpatializerImmersiveAudioLevel() == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE) {
+            return null;
+        }
+        return new Spatializer(this);
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#isEnabled()
+     * @return {@code true} if spatialization is enabled
+     */
+    boolean isSpatializerEnabled() {
+        final IAudioService service = getService();
+        try {
+            return service.isSpatializerEnabled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying isSpatializerEnabled, returning false", e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#setEnabled(boolean)
+     * Enable/disable the spatialization wherever supported.
+     * @param enabled {@code true} to enable
+     */
+    void setSpatializerFeatureEnabled(boolean enabled) {
+        final IAudioService service = getService();
+        try {
+            service.setSpatializerFeatureEnabled(enabled);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setSpatializerFeatureEnabled", e);
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#setEnabledForDevice(boolean, AudioDeviceAttributes)
+     * @see Spatializer#setEnabled(boolean)
+     * @param enabled enable/disable for a specific device.
+     * @param device the device concerned with spatializer functionality.
+     */
+    void setSpatializerEnabledForDevice(boolean enabled,
+            @NonNull AudioDeviceAttributes device) {
+        final IAudioService service = getService();
+        try {
+            service.setSpatializerEnabledForDevice(enabled, device);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setSpatializerEnabledForDevice", e);
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#canBeSpatialized(AudioAttributes, AudioFormat)
+     * @param attributes the {@code AudioAttributes} of the content as used for playback
+     * @param format the {@code AudioFormat} of the content as used for playback
+     * @return true if the device is capable of spatializing the combination of audio
+     *         format and attributes.
+     */
+    boolean canBeSpatialized(
+            @NonNull AudioAttributes attributes, @NonNull AudioFormat format) {
+        final IAudioService service = getService();
+        try {
+            return service.canBeSpatialized(attributes, format);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying canBeSpatialized for attr:" + attributes
+                    + " format:" + format + " returning false", e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#getCompatibleAudioDevices()
+     * @return a non-null list of the spatialization-compatible audio devices
+     */
+    @NonNull List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices() {
+        final IAudioService service = getService();
+        try {
+            return service.getSpatializerCompatibleAudioDevices();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying getSpatializerCompatibleAudioDevices(), "
+                    + " returning empty list", e);
+            return new ArrayList<AudioDeviceAttributes>(0);
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#addCompatibleAudioDevice(AudioDeviceAttributes)
+     * @param ada the audio device compatible with spatialization
+     */
+    void addSpatializerCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
+        final IAudioService service = getService();
+        try {
+            service.addSpatializerCompatibleAudioDevice(ada);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling addSpatializerCompatibleAudioDevice()", e);
+        }
+    }
+
+    /**
+     * @hide
+     * @see Spatializer#removeCompatibleAudioDevice(AudioDeviceAttributes)
+     * @param ada the audio device incompatible with spatialization
+     */
+    void removeSpatializerCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
+        final IAudioService service = getService();
+        try {
+            service.removeSpatializerCompatibleAudioDevice(ada);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling removeSpatializerCompatibleAudioDevice()", e);
+        }
+    }
+
 
     //====================================================================
     // Bluetooth SCO control

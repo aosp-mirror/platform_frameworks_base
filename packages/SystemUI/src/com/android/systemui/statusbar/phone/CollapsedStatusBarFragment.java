@@ -42,6 +42,8 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.OperatorNameView;
+import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
@@ -90,8 +92,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private int mDisabled2;
     private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private DarkIconManager mDarkIconManager;
-    private View mOperatorNameFrame;
     private final CommandQueue mCommandQueue;
+    private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
@@ -114,6 +116,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
         }
     };
+    private OperatorNameViewController mOperatorNameViewController;
 
     @Inject
     public CollapsedStatusBarFragment(
@@ -127,7 +130,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
-            CommandQueue commandQueue
+            CommandQueue commandQueue,
+            OperatorNameViewController.Factory operatorNameViewControllerFactory
     ) {
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
@@ -140,6 +144,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarStateController = statusBarStateController;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mCommandQueue = commandQueue;
+        mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
     }
 
     @Override
@@ -411,14 +416,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     public void hideOperatorName(boolean animate) {
-        if (mOperatorNameFrame != null) {
-            animateHide(mOperatorNameFrame, animate);
+        if (mOperatorNameViewController != null) {
+            animateHide(mOperatorNameViewController.getView(), animate);
         }
     }
 
     public void showOperatorName(boolean animate) {
-        if (mOperatorNameFrame != null) {
-            animateShow(mOperatorNameFrame, animate);
+        if (mOperatorNameViewController != null) {
+            animateShow(mOperatorNameViewController.getView(), animate);
         }
     }
 
@@ -495,7 +500,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private void initOperatorName() {
         if (getResources().getBoolean(R.bool.config_showOperatorNameInStatusBar)) {
             ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
-            mOperatorNameFrame = stub.inflate();
+            mOperatorNameViewController =
+                    mOperatorNameViewControllerFactory.create((OperatorNameView) stub.inflate());
+            mOperatorNameViewController.init();
         }
     }
 

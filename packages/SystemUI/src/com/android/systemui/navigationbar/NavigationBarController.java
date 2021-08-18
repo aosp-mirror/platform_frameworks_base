@@ -251,8 +251,7 @@ public class NavigationBarController implements Callbacks,
 
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
-        boolean isShowingTaskbar = mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON;
-        if (isShowingTaskbar) {
+        if (mIsTablet) {
             // Remove navigation bar when taskbar is showing, currently only for 3 button mode
             removeNavigationBar(mContext.getDisplayId());
             mCommandQueue.addCallback(mTaskbarDelegate);
@@ -261,7 +260,7 @@ public class NavigationBarController implements Callbacks,
             mCommandQueue.removeCallback(mTaskbarDelegate);
             mTaskbarDelegate.destroy();
         }
-        return isShowingTaskbar;
+        return mIsTablet;
     }
 
     @Override
@@ -332,7 +331,7 @@ public class NavigationBarController implements Callbacks,
             return;
         }
 
-        if (mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON) {
+        if (mIsTablet) {
             return;
         }
 

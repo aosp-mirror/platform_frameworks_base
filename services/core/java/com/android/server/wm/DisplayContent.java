@@ -3824,6 +3824,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mWmService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay && !isPrivate();
     }
 
+    /** @see WindowManagerInternal#onToggleImeRequested */
+    void onShowImeRequested() {
+        if (mImeLayeringTarget == null || mInputMethodWindow == null) {
+            return;
+        }
+        // If IME window will be shown on the rotated activity, share the transformed state to
+        // IME window so it can compute rotated frame with rotated configuration.
+        if (mImeLayeringTarget.mToken.isFixedRotationTransforming()) {
+            mInputMethodWindow.mToken.linkFixedRotationTransform(mImeLayeringTarget.mToken);
+            // Hide the window until the rotation is done to avoid intermediate artifacts if the
+            // parent surface of IME container is changed.
+            if (mFadeRotationAnimationController != null) {
+                mFadeRotationAnimationController.hideImmediately(mInputMethodWindow.mToken);
+            }
+        }
+    }
+
     @VisibleForTesting
     void setImeLayeringTarget(WindowState target) {
         mImeLayeringTarget = target;

@@ -1192,6 +1192,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
+                GlobalSettingsProto.POWER_BUTTON_LONG_PRESS_DURATION_MS);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
