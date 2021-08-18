@@ -15,31 +15,17 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.telephony.ServiceState;
-import android.telephony.SubscriptionInfo;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
-import com.android.systemui.Dependency;
 
 import java.util.List;
 
 /** Shows the operator name */
 public class OperatorNameView extends TextView {
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private boolean mDemoMode;
-
-    private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
-        @Override
-        public void onRefreshCarrierInfo() {
-            updateText();
-        }
-    };
 
     public OperatorNameView(Context context) {
         this(context, null);
@@ -53,24 +39,12 @@ public class OperatorNameView extends TextView {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mKeyguardUpdateMonitor.removeCallback(mCallback);
-    }
-
-
     void setDemoMode(boolean demoMode) {
         mDemoMode = demoMode;
     }
 
-    void update(boolean showOperatorName, boolean hasMobile) {
+    void update(boolean showOperatorName, boolean hasMobile,
+            List<OperatorNameViewController.SubInfo> subs) {
         setVisibility(showOperatorName ? VISIBLE : GONE);
 
         boolean airplaneMode = WirelessUtils.isAirplaneModeOn(mContext);
@@ -81,22 +55,19 @@ public class OperatorNameView extends TextView {
         }
 
         if (!mDemoMode) {
-            updateText();
+            updateText(subs);
         }
     }
 
-    private void updateText() {
+    void updateText(List<OperatorNameViewController.SubInfo> subs) {
         CharSequence displayText = null;
-        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
         final int N = subs.size();
         for (int i = 0; i < N; i++) {
-            int subId = subs.get(i).getSubscriptionId();
-            int simState = mKeyguardUpdateMonitor.getSimState(subId);
+            OperatorNameViewController.SubInfo subInfo = subs.get(i);
             CharSequence carrierName = subs.get(i).getCarrierName();
-            if (!TextUtils.isEmpty(carrierName) && simState == TelephonyManager.SIM_STATE_READY) {
-                ServiceState ss = mKeyguardUpdateMonitor.getServiceState(subId);
-                if (ss != null && ss.getState() == ServiceState.STATE_IN_SERVICE) {
-                    displayText = carrierName;
+            if (!TextUtils.isEmpty(carrierName) && subInfo.simReady()) {
+                if (subInfo.stateInService()) {
+                    displayText = subInfo.getCarrierName();
                     break;
                 }
             }
