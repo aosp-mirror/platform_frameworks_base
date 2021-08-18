@@ -167,12 +167,13 @@ void DeferredLayerUpdater::apply() {
                 // (invoked by createIfNeeded) will add a ref to the AHardwareBuffer.
                 AHardwareBuffer_release(hardwareBuffer);
                 if (layerImage.get()) {
-                    SkMatrix textureTransform;
-                    mat4(transformMatrix).copyTo(textureTransform);
                     // force filtration if buffer size != layer size
                     bool forceFilter =
                             mWidth != layerImage->width() || mHeight != layerImage->height();
-                    updateLayer(forceFilter, textureTransform, layerImage);
+                    SkRect currentCropRect =
+                            SkRect::MakeLTRB(currentCrop.left, currentCrop.top, currentCrop.right,
+                                             currentCrop.bottom);
+                    updateLayer(forceFilter, layerImage, outTransform, currentCropRect);
                 }
             }
         }
@@ -184,12 +185,13 @@ void DeferredLayerUpdater::apply() {
     }
 }
 
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-                                       const sk_sp<SkImage>& layerImage) {
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const sk_sp<SkImage>& layerImage,
+                                       const uint32_t transform, SkRect currentCrop) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
-    mLayer->getTexTransform() = textureTransform;
+    mLayer->setCurrentCropRect(currentCrop);
+    mLayer->setWindowTransform(transform);
     mLayer->setImage(layerImage);
 }
 
