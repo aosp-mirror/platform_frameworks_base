@@ -15,17 +15,12 @@
   ~ limitations under the License
   -->
 
-<!-- Separator applied as background -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:text="@string/chooser_all_apps_button_label"
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
           android:contentDescription="@string/chooser_all_apps_button_label"
-          android:background="@drawable/chooser_row_layer_list"
-          android:textAppearance="?attr/textAppearanceSmall"
-          android:textColor="?attr/textColorSecondary"
-          android:textSize="14sp"
-          android:singleLine="true"
+          android:src="@drawable/chooser_row_layer_list"
           android:paddingTop="16dp"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:scaleType="center"
           android:gravity="center"/>
 

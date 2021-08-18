@@ -1952,7 +1952,7 @@
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ಉತ್ತರಿಸಿ"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ವೀಡಿಯೊ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ನಿರಾಕರಿಸಿ"</string>
-    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ಹ್ಯಾಂಗ್ ಅಪ್"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ಕರೆ ಕೊನೆಗೊಳಿಸಿ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ಒಳಬರುವ ಕರೆ"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಕರೆ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ಕ್ರೀನ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
@@ -2287,7 +2287,7 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ನೀವು ಇದೀಗ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಭಾಗವನ್ನು ಹಿಗ್ಗಿಸಬಹುದು"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಆನ್ ಮಾಡಿ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ವಜಾಗೊಳಿಸಿ"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ಅನ್‍ಬ್ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ಮತ್ತು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಹಾಗೂ ಸೇವೆಗಳಿಗಾಗಿ"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಿ"</string>

@@ -286,6 +286,21 @@ public class CarrierConfigManager {
             "call_barring_default_service_class_int";
 
     /**
+     * This carrier supports dialing USSD codes to enable/disable supplementary services such as
+     * call forwarding and call waiting over CDMA.
+     * <p>
+     * The supplementary service menu will still need to be set as visible, see
+     * {@link #KEY_CALL_FORWARDING_VISIBILITY_BOOL} and
+     * {@link #KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL}.
+     * <p>
+     * If this is set as false and the supplementary service menu is visible, the associated setting
+     * will be enabled and disabled based on the availability of supplementary services over UT. See
+     * {@link #KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_SS_OVER_CDMA_BOOL = "support_ss_over_cdma_bool";
+
+    /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
      * events from the Sim.
      * If true, this will prevent the IccNetworkDepersonalizationPanel from being shown, and
@@ -3523,7 +3538,7 @@ public class CarrierConfigManager {
             "nr_advanced_capable_pco_id_int";
 
     /**
-     * This configuration allows the framework to use user data communication to detect RRC state,
+     * This configuration allows the framework to use user data communication to detect Idle state,
      * and this is used on the 5G icon.
      *
      * There is a new way for for RRC state detection at Android 12. If
@@ -3531,16 +3546,23 @@ public class CarrierConfigManager {
      * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
      * then framework can use PHYSICAL_CHANNEL_CONFIG for RRC state detection. Based on this
      * condition, some carriers want to use the legacy behavior that way is using user data
-     * communication to detect the RRC state. Therefore, this configuration allows the framework
-     * to use user data communication to detect RRC state.
+     * communication to detect the Idle state. Therefore, this configuration allows the framework
+     * to use user data communication to detect Idle state.
      *
-     * The precondition is
+     * There are 3 situations reflects the carrier define Idle state.
+     * 1. using PHYSICAL_CHANNEL_CONFIG to detect RRC Idle
+     * 2. using all of data connections to detect RRC Idle.
+     * 3. using data communication(consider internet data connection only) to detect data Idle.
+     *
+     * How to setup for above 3 cases?
+     * For below part, we call the condition#1 is device support
      * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}(
-     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
-     * otherwise this config is not working.
-     * If this is true, framework uses the user data communication for RRC state detection.
-     * If this is false, framework uses the PHYSICAL_CHANNEL_CONFIG for RRC state detection.
+     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}).
+     * The condition#2 is carrier enable the KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL.
      *
+     * For case#1, the condition#1 is true and the condition#2 is false.
+     * For case#2, the condition#1 is false and the condition#2 is false.
+     * For case#3, the condition#2 is true.
      * @hide
      */
     public static final String KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL =
@@ -5120,6 +5142,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
         sDefaults.putInt(KEY_CALL_BARRING_DEFAULT_SERVICE_CLASS_INT, SERVICE_CLASS_VOICE);
+        sDefaults.putBoolean(KEY_SUPPORT_SS_OVER_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNANSWERED_SUPPORTED_BOOL, true);

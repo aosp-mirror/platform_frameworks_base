@@ -265,4 +265,10 @@ public class StubTransaction extends SurfaceControl.Transaction {
     public SurfaceControl.Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
         return this;
     }
+
+    @Override
+    public SurfaceControl.Transaction setTrustedOverlay(SurfaceControl sc,
+            boolean isTrustedOverlay) {
+        return this;
+    }
 }

@@ -49,8 +49,6 @@ import android.media.ImageWriter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.annotation.NonNull;
@@ -253,6 +251,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT);
             mPreviewImageProcessor.onResolutionUpdate(new Size(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight));
+            mPreviewImageProcessor.onOutputSurface(null, -1);
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
                     CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT, PREVIEW_QUEUE_SIZE,
@@ -264,13 +263,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mPreviewRequestUpdateProcessor = mPreviewExtender.getRequestUpdateProcessor();
             } catch (ClassCastException e) {
                 throw new UnsupportedOperationException("Failed casting preview processor!");
-            }
-            if (mClientRepeatingRequestSurface != null) {
-                mPreviewRequestUpdateProcessor.onOutputSurface(mClientRepeatingRequestSurface,
-                        nativeGetSurfaceFormat(mClientRepeatingRequestSurface));
-                mRepeatingRequestImageWriter = ImageWriter.newInstance(
-                        mClientRepeatingRequestSurface, PREVIEW_QUEUE_SIZE,
-                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
             }
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
@@ -285,11 +277,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mPreviewRequestUpdateProcessor.onImageFormatUpdate(
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
         } else {
-            if (mClientRepeatingRequestSurface != null) {
-                mRepeatingRequestImageWriter = ImageWriter.newInstance(
-                        mClientRepeatingRequestSurface, PREVIEW_QUEUE_SIZE,
-                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
-            }
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT,
@@ -320,7 +307,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());
-                mImageProcessor.onOutputSurface(mClientCaptureSurface, surfaceInfo.mFormat);
             } else {
                 // The client doesn't intend to trigger multi-frame capture, however the
                 // image extender still needs to get initialized and the camera still capture
@@ -364,6 +350,29 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         ImageFormat.JPEG, 1);
                 mCameraBurstSurface = mBurstCaptureImageReader.getSurface();
             }
+        }
+    }
+
+    private void finishPipelineInitialization() throws RemoteException {
+        if (mClientRepeatingRequestSurface != null) {
+            if (mPreviewProcessorType == IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY) {
+                mPreviewRequestUpdateProcessor.onOutputSurface(mClientRepeatingRequestSurface,
+                        nativeGetSurfaceFormat(mClientRepeatingRequestSurface));
+                mRepeatingRequestImageWriter = ImageWriter.newInstance(
+                        mClientRepeatingRequestSurface,
+                        PREVIEW_QUEUE_SIZE,
+                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
+            } else if (mPreviewProcessorType == IPreviewExtenderImpl.PROCESSOR_TYPE_NONE) {
+                mRepeatingRequestImageWriter = ImageWriter.newInstance(
+                        mClientRepeatingRequestSurface,
+                        PREVIEW_QUEUE_SIZE,
+                        CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT);
+            }
+        }
+        if ((mImageProcessor != null) && (mClientCaptureSurface != null)) {
+            CameraExtensionUtils.SurfaceInfo surfaceInfo = CameraExtensionUtils.querySurface(
+                    mClientCaptureSurface);
+            mImageProcessor.onOutputSurface(mClientCaptureSurface, surfaceInfo.mFormat);
         }
     }
 
@@ -623,7 +632,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     /** @hide */
-    public void release() {
+    public void release(boolean skipCloseNotification) {
+        boolean notifyClose = false;
+
         synchronized (mInterfaceLock) {
             mInternalRepeatingRequestEnabled = false;
             mHandlerThread.quitSafely();
@@ -639,6 +650,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
                 if (mInitialized) {
+                    notifyClose = true;
                     CameraExtensionCharacteristics.releaseSession();
                 }
             }
@@ -689,6 +701,15 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mCameraRepeatingSurface = mClientRepeatingRequestSurface = null;
             mCameraBurstSurface = mClientCaptureSurface = null;
         }
+
+        if (notifyClose && !skipCloseNotification) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallbacks.onClosed(CameraExtensionSessionImpl.this));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     private void notifyConfigurationFailure() {
@@ -698,7 +719,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
         }
 
-        release();
+        release(true /*skipCloseNotification*/);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -730,14 +751,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             android.hardware.camera2.CameraCaptureSession.StateCallback {
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
-            release();
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallbacks.onClosed(CameraExtensionSessionImpl.this));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            release(false /*skipCloseNotification*/);
         }
 
         @Override
@@ -750,6 +764,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
                 try {
+                    finishPipelineInitialization();
                     CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to initialize session! Extension service does"
@@ -1640,6 +1655,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 Log.e(TAG,"Failed to parcel buffer fence!");
             }
         }
+        parcelImage.width = img.getWidth();
+        parcelImage.height = img.getHeight();
         parcelImage.format = img.getFormat();
         parcelImage.timestamp = img.getTimestamp();
         parcelImage.transform = img.getTransform();

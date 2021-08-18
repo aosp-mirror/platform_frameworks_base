@@ -172,6 +172,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -180,6 +181,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
@@ -215,9 +217,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     /** All storage permissions */
     private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
+    /** All nearby devices permissions */
+    private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
+
+    /** Map of IBinder -> Running AttributionSource */
+    private static final ConcurrentHashMap<IBinder, RegisteredAttribution>
+            sRunningAttributionSources = new ConcurrentHashMap<>();
 
     static {
         FULLER_PERMISSION_MAP.put(Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -227,6 +235,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
     }
 
     /** Set of source package names for Privileged Permission Allowlist */
@@ -3070,13 +3081,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Permission bp = mRegistry.getPermission(permission);
                 if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
-
                     if ((flags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
-
                         int flagsToRemove = FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 
+                        // We're willing to preserve an implicit "Nearby devices"
+                        // permission grant if this app was already able to interact
+                        // with nearby devices via background location access
+                        boolean preserveGrant = false;
+                        if (ArrayUtils.contains(NEARBY_DEVICES_PERMISSIONS, permission)
+                                && ps.isPermissionGranted(
+                                        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                && (ps.getPermissionFlags(
+                                        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                        & (FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
+                                                | FLAG_PERMISSION_REVOKED_COMPAT)) == 0) {
+                            preserveGrant = true;
+                        }
+
                         if ((flags & BLOCKING_PERMISSION_FLAGS) == 0
-                                && supportsRuntimePermissions) {
+                                && supportsRuntimePermissions
+                                && !preserveGrant) {
                             if (ps.revokePermission(bp)) {
                                 if (DEBUG_PERMISSIONS) {
                                     Slog.i(TAG, "Revoking runtime permission "
@@ -3341,13 +3365,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void registerAttributionSource(@NonNull AttributionSource source) {
-        mAttributionSourceRegistry.registerAttributionSource(source);
+    public void registerAttributionSource(@NonNull AttributionSourceState source) {
+        mAttributionSourceRegistry
+                .registerAttributionSource(new AttributionSource(source));
     }
 
     @Override
-    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
-        return mAttributionSourceRegistry.isRegisteredAttributionSource(source);
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSourceState source) {
+        return mAttributionSourceRegistry
+                .isRegisteredAttributionSource(new AttributionSource(source));
     }
 
     @Override
@@ -5555,8 +5581,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void finishDataDelivery(int op,
+                @NonNull AttributionSourceState attributionSourceState, boolean fromDataSource) {
+            finishDataDelivery(mContext, op, attributionSourceState,
+                    fromDataSource);
+        }
+
+        private static void finishDataDelivery(Context context, int op,
                 @NonNull AttributionSourceState attributionSourceState, boolean fromDatasource) {
             Objects.requireNonNull(attributionSourceState);
+            AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
 
             if (op == AppOpsManager.OP_NONE) {
                 return;
@@ -5573,7 +5606,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // If the call is from a datasource we need to vet only the chain before it. This
                 // way we can avoid the datasource creating an attribution context for every call.
                 if (!(fromDatasource && current.asState() == attributionSourceState)
-                        && next != null && !current.isTrusted(mContext)) {
+                        && next != null && !current.isTrusted(context)) {
                     return;
                 }
 
@@ -5589,20 +5622,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         ? current : next;
 
                 if (selfAccess) {
-                    final String resolvedPackageName = resolvePackageName(mContext, accessorSource);
+                    final String resolvedPackageName = resolvePackageName(context, accessorSource);
                     if (resolvedPackageName == null) {
                         return;
                     }
-                    mAppOpsManager.finishOp(accessorSource.getToken(), op,
+                    appOpsManager.finishOp(accessorSource.getToken(), op,
                             accessorSource.getUid(), resolvedPackageName,
                             accessorSource.getAttributionTag());
                 } else {
                     final AttributionSource resolvedAttributionSource =
-                            resolveAttributionSource(mContext, accessorSource);
+                            resolveAttributionSource(context, accessorSource);
                     if (resolvedAttributionSource.getPackageName() == null) {
                         return;
                     }
-                    mAppOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
+                    appOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
                             resolvedAttributionSource, skipCurrentFinish);
                 }
 
@@ -5610,6 +5643,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     return;
                 }
 
+                RegisteredAttribution registered =
+                        sRunningAttributionSources.remove(current.getToken());
+                if (registered != null) {
+                    registered.unregister();
+                }
                 current = next;
             }
         }
@@ -5825,6 +5863,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     case AppOpsManager.MODE_IGNORED: {
                         return PermissionChecker.PERMISSION_SOFT_DENIED;
                     }
+                }
+
+                if (startDataDelivery) {
+                    RegisteredAttribution registered = new RegisteredAttribution(context, op,
+                            current, fromDatasource);
+                    sRunningAttributionSources.put(current.getToken(), registered);
                 }
 
                 if (next == null || next.getNext() == null) {
@@ -6151,6 +6195,45 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             return attributionSource.withPackageName(resolvePackageName(context,
                     attributionSource));
+        }
+    }
+
+    private static final class RegisteredAttribution {
+        private final DeathRecipient mDeathRecipient;
+        private final IBinder mToken;
+        private final AtomicBoolean mFinished;
+
+        RegisteredAttribution(Context context, int op, AttributionSource source,
+                boolean fromDatasource) {
+            mFinished = new AtomicBoolean(false);
+            mDeathRecipient = () -> {
+                if (unregister()) {
+                    PermissionCheckerService
+                            .finishDataDelivery(context, op, source.asState(), fromDatasource);
+                }
+            };
+            mToken = source.getToken();
+            if (mToken != null) {
+                try {
+                    mToken.linkToDeath(mDeathRecipient, 0);
+                } catch (RemoteException e) {
+                    mDeathRecipient.binderDied();
+                }
+            }
+        }
+
+        public boolean unregister() {
+            if (mFinished.compareAndSet(false, true)) {
+                try {
+                    if (mToken != null) {
+                        mToken.unlinkToDeath(mDeathRecipient, 0);
+                    }
+                } catch (NoSuchElementException e) {
+                    // do nothing
+                }
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -107,7 +107,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,wifi,cell,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -538,6 +538,11 @@
         <item>@*android:string/status_bar_rotate</item>
         <item>@*android:string/status_bar_headset</item>
     </string-array>
+
+
+    <!-- Whether to show estimate in QS header. Default to false in case there's not enough
+     space -->
+    <bool name="config_showBatteryEstimateQSBH">false</bool>
 
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display

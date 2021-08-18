@@ -42,6 +42,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.appsearch.external.localstorage.converter.GenericDocumentToProtoConverter;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
 import com.android.server.appsearch.icing.proto.DocumentProto;
 import com.android.server.appsearch.icing.proto.GetOptimizeInfoResultProto;
@@ -451,19 +452,26 @@ public class AppSearchImplTest {
         assertThat(optimizeInfo.getOptimizableDocs()).isEqualTo(1);
 
         // Increase mutation counter and stop before reach the threshold
-        mAppSearchImpl.checkForOptimize(AppSearchImpl.CHECK_OPTIMIZE_INTERVAL - 1);
+        mAppSearchImpl.checkForOptimize(
+                AppSearchImpl.CHECK_OPTIMIZE_INTERVAL - 1, /*builder=*/ null);
 
         // Verify the optimize() isn't triggered.
         optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs()).isEqualTo(1);
 
         // Increase the counter and reach the threshold, optimize() should be triggered.
-        mAppSearchImpl.checkForOptimize(/*mutateBatchSize=*/ 1);
+        OptimizeStats.Builder builder = new OptimizeStats.Builder();
+        mAppSearchImpl.checkForOptimize(/*mutateBatchSize=*/ 1, builder);
 
         // Verify optimize() is triggered.
         optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs()).isEqualTo(0);
         assertThat(optimizeInfo.getEstimatedOptimizableBytes()).isEqualTo(0);
+
+        // Verify the stats have been set.
+        OptimizeStats oStats = builder.build();
+        assertThat(oStats.getOriginalDocumentCount()).isEqualTo(1);
+        assertThat(oStats.getDeletedDocumentCount()).isEqualTo(1);
     }
 
     @Test

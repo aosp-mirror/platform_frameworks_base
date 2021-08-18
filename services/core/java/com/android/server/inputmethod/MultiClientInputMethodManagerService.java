@@ -225,7 +225,8 @@ public final class MultiClientInputMethodManagerService {
                         }
 
                         @Override
-                        public void reportImeControl(@Nullable IBinder windowToken) {
+                        public void reportImeControl(@Nullable IBinder windowToken,
+                                boolean imeParentChanged) {
                         }
 
                         @Override

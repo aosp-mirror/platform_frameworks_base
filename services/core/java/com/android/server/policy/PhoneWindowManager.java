@@ -3844,9 +3844,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mCameraGestureTriggered = false;
         final MutableBoolean outLaunched = new MutableBoolean(false);
-        mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
+        final boolean intercept =
+                mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
         if (!outLaunched.value) {
-            return false;
+            // If GestureLauncherService intercepted the power key, but didn't launch camera app,
+            // we should still return the intercept result. This prevents the single key gesture
+            // detector from processing the power key later on.
+            return intercept;
         }
         mCameraGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {

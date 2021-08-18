@@ -471,7 +471,7 @@
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अ‍ॅक्सेस करण्यास ॲपला अनुमती देते. ही परवानगी कॉल ॲक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कॉल करण्याचा अनुभव सुधारण्यासाठी ॲपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
-    <string name="permlab_callCompanionApp" msgid="3654373653014126884">"सिस्टम वापरून कॉल पाहा आणि नियंत्रण ठेवा."</string>
+    <string name="permlab_callCompanionApp" msgid="3654373653014126884">"सिस्टम वापरून कॉल पहा आणि नियंत्रण ठेवा."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"डिव्हाइसवर येणार कॉल पाहण्यासाठी आणि नियंत्रित करण्यासाठी ॲपला अनुमती देते. यामध्ये कॉल करण्यासाठी कॉलचा नंबर आणि कॉलची स्थिती यासारख्या माहितीचा समावेश असतो."</string>
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ऑडिओ रेकॉर्ड प्रतिबंधांपासून मुक्त"</string>
     <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ऑडिओ रेकॉर्ड करण्यासाठी प्रतिबंधांपासून ॲपला मुक्त करा."</string>
@@ -581,7 +581,7 @@
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर साफ करा"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"जरा जास्त वेळ धरून ठेवा"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पाहा"</string>
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"अ‍ॅडजस्ट करण्याचा प्रयत्न करा"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"तुमच्या बोटाची स्थिती प्रत्येक वेळी थोडीशी बदला"</string>
@@ -629,7 +629,7 @@
     <string name="face_acquired_too_low" msgid="1512237819632165945">"फोन आणखी खाली हलवा."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"फोन डावीकडे हलवा."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"फोन उजवीकडे हलवा."</string>
-    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"कृपया तुमच्या डिव्हाइसकडे थेट पाहा"</string>
+    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"कृपया तुमच्या डिव्हाइसकडे थेट पहा"</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"तुमचा चेहरा थेट फोन समोर आणा."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"खूप हलत आहे. फोन स्थिर धरून ठेवा."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा."</string>
@@ -1701,9 +1701,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ला तुमचे डिव्हाइसच संपूर्णपणे नियंत्रित करायची अनुमती द्यायची का?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तुम्ही <xliff:g id="SERVICE">%1$s</xliff:g> सुरू केल्‍यास, तुमचे डिव्हाइस डेटा एंक्रिप्शनमध्ये सुधारणा करण्‍यासाठी स्क्रीन लॉक वापरणार नाही."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"जी ॲप्स तुमच्या ॲक्सेसिबिलिटी गरजा पूर्ण करतात अशा ॲप्ससाठी संपूर्ण नियंत्रण योग्य आहे. पण ते सर्व ॲप्सना लागू होईल असे नाही."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पाहा आणि नियंत्रित करा"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पहा आणि नियंत्रित करा"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ते स्क्रीनवरील सर्व आशय वाचू शकते आणि इतर ॲप्सवर आशय प्रदर्शित करू शकते."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पाहा आणि क्रिया करा"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पहा आणि क्रिया करा"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता याचा हे मागोवा घेऊ शकते आणि इतर ॲप्ससोबत तुमच्या वतीने काम करू शकते."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
@@ -1982,7 +1982,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"सुरू करा"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"हे अ‍ॅप Android च्या जुन्या आवृत्ती साठी तयार करण्यात आले होते आणि योग्यरितीने कार्य करू शकणार नाही. अपडेट आहेत का ते तपासून पाहा, किंवा डेव्हलपरशी संपर्क साधण्याचा प्रयत्न करा."</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"हे अ‍ॅप Android च्या जुन्या आवृत्ती साठी तयार करण्यात आले होते आणि योग्यरितीने कार्य करू शकणार नाही. अपडेट आहेत का ते तपासून पहा, किंवा डेव्हलपरशी संपर्क साधण्याचा प्रयत्न करा."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेटसाठी तपासा"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपल्याकडे नवीन मेसेज आहेत"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"पाहण्‍यासाठी SMS अ‍ॅप उघडा"</string>

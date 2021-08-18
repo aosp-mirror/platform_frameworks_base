@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Lice nije prepoznato. Koristite otisak prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Nastavite pomoću otiska prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Prepoznavanje otiska prsta nije uspelo. Koristite zaključavanje ekrana umesto toga."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Tražimo vas…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona lica"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Dugme Zum kompatibilnosti."</string>
@@ -435,8 +437,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ovim će se odblokirati pristup za sve aplikacije i usluge koje imaju dozvolu za korišćenje kamere."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ovim će se odblokirati pristup za sve aplikacije i usluge koje imaju dozvolu za korišćenje kamere ili mikrofona."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prevucite nagore da biste menjali aplikacije"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Prevucite udesno da biste brzo promenili aplikacije"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Uključi/isključi pregled"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Napunjena je"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Puni se"</string>
@@ -456,6 +456,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da biste otvorili"</string>
     <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite nagore da biste otvorili"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pritisnite da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite nagore da biste probali ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste koristili NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada organizaciji"</string>

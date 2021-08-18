@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"මුහුණ හැඳිනිය නොහැක. ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත ක."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ඉදිරියට යාමට ඔබගේ ඇඟිලි සලකුණ භාවිත කරන්න"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ඇඟිලි සලකුණ හඳුනා ගත නොහැකිය. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ඔබව සොයමින්…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"මුහුණ නිරූපකය"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ගැළපෙන විශාලන බොත්තම."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"මෙය ඔබගේ කැමරාව භාවිතා කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"මෙය ඔබගේ කැමරාව හෝ මයික්‍රෆෝනය භාවිත කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"උපාංගය"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"යෙදුම් මාරු කිරීමට ස්වයිප් කරන්න"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ඉක්මනින් යෙදුම් මාරු කිරීමට දකුණට අදින්න"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"දළ විශ්ලේෂණය ටොගල කරන්න"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"අරෝපිතයි"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ආරෝපණය වෙමින්"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="tap_again" msgid="1315420114387908655">"නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"විවෘත කිරීමට ඔබන්න"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"නැවත උත්සාහ කිරීමට ඉහළට ස්වයිප් කරන්න"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC භාවිත කිරීමට අගුලු හරින්න"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය"</string>

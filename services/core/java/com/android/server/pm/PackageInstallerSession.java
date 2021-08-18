@@ -2252,10 +2252,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     (params.installFlags & PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK)
                         == 0;
             synchronized (mLock) {
-                if (checkApexUpdateAllowed && !isApexUpdateAllowed(mPackageName)) {
+                if (checkApexUpdateAllowed && !isApexUpdateAllowed(mPackageName,
+                          mInstallSource.installerPackageName)) {
                     onSessionValidationFailure(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                            "Update of APEX package " + mPackageName + " is not allowed");
+                            "Update of APEX package " + mPackageName + " is not allowed for "
+                                    + mInstallSource.installerPackageName);
                     return;
+                }
+            }
+
+            if (!params.isStaged) {
+                // For non-staged APEX installs also check if there is a staged session that
+                // contains the same APEX. If that's the case, we should fail this session.
+                synchronized (mLock) {
+                    int sessionId = mStagingManager.getSessionIdByPackageName(mPackageName);
+                    if (sessionId != -1) {
+                        onSessionValidationFailure(
+                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                                "Staged session " + sessionId + " already contains "
+                                        + mPackageName);
+                        return;
+                    }
                 }
             }
         }
@@ -2798,9 +2815,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return sessionContains((s) -> !s.isApexSession());
     }
 
-    private boolean isApexUpdateAllowed(String apexPackageName) {
-        return mPm.getModuleInfo(apexPackageName, 0) != null
-                || SystemConfig.getInstance().getAllowedVendorApexes().contains(apexPackageName);
+    private boolean isApexUpdateAllowed(String apexPackageName, String installerPackageName) {
+        if (mPm.getModuleInfo(apexPackageName, 0) != null) {
+            final String modulesInstaller =
+                    SystemConfig.getInstance().getModulesInstallerPackageName();
+            if (modulesInstaller == null) {
+                Slog.w(TAG, "No modules installer defined");
+                return false;
+            }
+            return modulesInstaller.equals(installerPackageName);
+        }
+        final String vendorApexInstaller =
+                SystemConfig.getInstance().getAllowedVendorApexes().get(apexPackageName);
+        if (vendorApexInstaller == null) {
+            Slog.w(TAG, apexPackageName + " is not allowed to be updated");
+            return false;
+        }
+        return vendorApexInstaller.equals(installerPackageName);
     }
 
     /**
