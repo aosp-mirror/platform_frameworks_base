@@ -26,6 +26,7 @@ import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -74,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -243,6 +245,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
     private static native int nativeGetLayerId(long nativeObject);
+    private static native void nativeAddTransactionCommittedListener(long nativeObject,
+            TransactionCommittedListener listener);
 
     @Nullable
     @GuardedBy("mLock")
@@ -3505,6 +3509,31 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction setFrameTimelineVsync(long frameTimelineVsyncId) {
             nativeSetFrameTimelineVsync(mNativeObject, frameTimelineVsyncId);
+            return this;
+        }
+
+        /**
+         * Request to add a {@link TransactionCommittedListener}.
+         *
+         * The callback is invoked when transaction is applied and the updates are ready to be
+         * presented. This callback does not mean buffers have been released! It simply means that
+         * any new transactions applied will not overwrite the transaction for which we are
+         * receiving a callback and instead will be included in the next frame. If you are trying
+         * to avoid dropping frames (overwriting transactions), and unable to use timestamps (Which
+         * provide a more efficient solution), then this method provides a method to pace your
+         * transaction application.
+         *
+         * @param executor The executor that the callback should be invoked on.
+         * @param listener The callback that will be invoked when the transaction has been
+         *                 committed.
+         */
+        @NonNull
+        public Transaction addTransactionCommittedListener(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull TransactionCommittedListener listener) {
+            TransactionCommittedListener listenerInner =
+                    () -> executor.execute(listener::onTransactionCommitted);
+            nativeAddTransactionCommittedListener(mNativeObject, listenerInner);
             return this;
         }
 
