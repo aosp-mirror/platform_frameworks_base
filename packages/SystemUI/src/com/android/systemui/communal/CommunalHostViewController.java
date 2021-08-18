@@ -28,6 +28,10 @@ import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -51,6 +55,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private static final String TAG = "CommunalController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String STATE_LIST_FORMAT = "[%s]";
+    private static final AnimationProperties COMMUNAL_ANIMATION_PROPERTIES =
+            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
     private final Executor mMainExecutor;
     private final CommunalStateController mCommunalStateController;
@@ -352,6 +358,14 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     public void show(WeakReference<CommunalSource> source) {
         mCurrentSource = source;
         showSource();
+    }
+
+    /**
+     * Update position of the view with an optional animation
+     */
+    public void updatePosition(int y, boolean animate) {
+        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, COMMUNAL_ANIMATION_PROPERTIES,
+                animate);
     }
 
     /**

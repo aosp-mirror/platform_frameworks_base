@@ -908,6 +908,20 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         verify(mCommunalHostViewController).setAlpha(anyFloat());
     }
 
+    @Test
+    public void testCommunalPositionUpdate() {
+        // Verify that the communal position is updated on interaction with the
+        // NotificationPanelViewController. Note that there a number of paths where the position
+        // might be updated and therefore the check isn't strictly on a single invocation.
+        clearInvocations(mCommunalHostViewController);
+        final View.OnLayoutChangeListener layoutChangeListener =
+                mNotificationPanelViewController.createLayoutChangeListener();
+        mNotificationPanelViewController.mStatusBarStateController.setState(KEYGUARD);
+        layoutChangeListener.onLayoutChange(mView, 0, 0, 200, 200, 0, 0, 200, 200);
+        verify(mCommunalHostViewController, atLeast(1))
+                .updatePosition(anyInt(), anyBoolean());
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }

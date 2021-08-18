@@ -108,6 +108,7 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.communal.CommunalHostView;
 import com.android.systemui.communal.CommunalHostViewController;
+import com.android.systemui.communal.CommunalHostViewPositionAlgorithm;
 import com.android.systemui.communal.CommunalSource;
 import com.android.systemui.communal.CommunalSourceMonitor;
 import com.android.systemui.communal.CommunalStateController;
@@ -381,6 +382,12 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardClockPositionAlgorithm.Result
             mClockPositionResult =
             new KeyguardClockPositionAlgorithm.Result();
+    private final CommunalHostViewPositionAlgorithm
+            mCommunalPositionAlgorithm =
+            new CommunalHostViewPositionAlgorithm();
+    private final CommunalHostViewPositionAlgorithm.Result
+            mCommunalPositionResult =
+            new CommunalHostViewPositionAlgorithm.Result();
     private boolean mIsExpanding;
 
     private boolean mBlockTouches;
@@ -1307,6 +1314,11 @@ public class NotificationPanelViewController extends PanelViewController {
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         int stackScrollerPadding;
         boolean onKeyguard = isOnKeyguard();
+
+        if (onKeyguard) {
+            updateCommunalViewAppearance();
+        }
+
         if (onKeyguard || forceClockUpdate) {
             updateClockAppearance();
         }
@@ -1330,6 +1342,22 @@ public class NotificationPanelViewController extends PanelViewController {
         requestScrollerTopPaddingUpdate(animate);
         mStackScrollerMeasuringPass = 0;
         mAnimateNextPositionUpdate = false;
+    }
+
+    private void updateCommunalViewAppearance() {
+        if (mCommunalViewController == null) {
+            return;
+        }
+
+        float expandedFraction =
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        ? 1.0f : getExpandedFraction();
+        mCommunalPositionAlgorithm.setup(expandedFraction, mCommunalView.getHeight());
+        mCommunalPositionAlgorithm.run(mCommunalPositionResult);
+        boolean animate =
+                mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending()
+                        || mAnimateNextPositionUpdate;
+        mCommunalViewController.updatePosition(mCommunalPositionResult.communalY, animate);
     }
 
     private void updateClockAppearance() {
