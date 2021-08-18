@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -59,6 +60,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileServiceKey;
+import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
@@ -124,6 +126,10 @@ public class QSTileHostTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
+    @Mock
+    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock
+    private TileServiceRequestController mTileServiceRequestController;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -134,10 +140,14 @@ public class QSTileHostTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
+
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
+
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
                 mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
-                mSecureSettings, mCustomTileStatePersister);
+                mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder);
         setUpTileFactory();
 
         when(mSecureSettings.getStringForUser(eq(QSTileHost.TILES_SETTING), anyInt()))
@@ -371,11 +381,12 @@ public class QSTileHostTest extends SysuiTestCase {
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
                 UiEventLogger uiEventLogger, UserTracker userTracker,
-                SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister) {
+                SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
+                TileServiceRequestController.Builder tileServiceRequestControllerBuilder) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
                     Optional.of(statusBar), qsLogger, uiEventLogger, userTracker, secureSettings,
-                    customTileStatePersister);
+                    customTileStatePersister, tileServiceRequestControllerBuilder);
         }
 
         @Override
