@@ -889,11 +889,11 @@ public class StatusBar extends SystemUI implements
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
 
-        mMessageRouter.subscribeTo(KeyboardShortcutsData.class,
+        mMessageRouter.subscribeTo(KeyboardShortcutsMessage.class,
                 data -> toggleKeyboardShortcuts(data.mDeviceId));
         mMessageRouter.subscribeTo(MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU,
                 id -> dismissKeyboardShortcuts());
-        mMessageRouter.subscribeTo(AnimateExpandSettingsPanelData.class,
+        mMessageRouter.subscribeTo(AnimateExpandSettingsPanelMessage.class,
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
@@ -1921,18 +1921,18 @@ public class StatusBar extends SystemUI implements
         mState = state;
     }
 
-    static class KeyboardShortcutsData {
+    static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
-        KeyboardShortcutsData(int deviceId) {
+        KeyboardShortcutsMessage(int deviceId) {
             mDeviceId = deviceId;
         }
     }
 
-    static class AnimateExpandSettingsPanelData {
+    static class AnimateExpandSettingsPanelMessage {
         final String mSubpanel;
 
-        AnimateExpandSettingsPanelData(String subpanel) {
+        AnimateExpandSettingsPanelMessage(String subpanel) {
             mSubpanel = subpanel;
         }
     }
