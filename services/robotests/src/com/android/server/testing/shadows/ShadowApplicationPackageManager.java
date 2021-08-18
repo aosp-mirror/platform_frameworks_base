@@ -16,7 +16,6 @@
 
 package com.android.server.testing.shadows;
 
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.NameNotFoundException;
 
 import android.app.ApplicationPackageManager;
@@ -45,7 +44,6 @@ public class ShadowApplicationPackageManager
     private static final List<PackageInfo> sInstalledPackages = new ArrayList<>();
     private static final Map<String, Integer> sPackageUids = new ArrayMap<>();
     private static final Map<Integer, Map<String, Integer>> sUserPackageUids = new ArrayMap<>();
-    private static final Map<String, Integer> sPackageAppEnabledStates = new ArrayMap<>();
 
     /**
      * Registers the package {@code packageName} to be returned when invoking {@link
@@ -55,7 +53,6 @@ public class ShadowApplicationPackageManager
     public static void addInstalledPackage(String packageName, PackageInfo packageInfo) {
         sPackageInfos.put(packageName, packageInfo);
         sInstalledPackages.add(packageInfo);
-        sPackageAppEnabledStates.put(packageName, Integer.valueOf(COMPONENT_ENABLED_STATE_DEFAULT));
     }
 
     /**
@@ -77,19 +74,6 @@ public class ShadowApplicationPackageManager
                         : new HashMap<>();
         userPackageUids.put(packageName, packageUid);
         sUserPackageUids.put(userId, userPackageUids);
-    }
-
-    @Override
-    protected int getApplicationEnabledSetting(String packageName) {
-        if (!sPackageAppEnabledStates.containsKey(packageName)) {
-            return COMPONENT_ENABLED_STATE_DEFAULT;
-        }
-        return sPackageAppEnabledStates.get(packageName);
-    }
-
-    @Override
-    protected void setApplicationEnabledSetting(String packageName, int newState, int flags) {
-        sPackageAppEnabledStates.put(packageName, Integer.valueOf(newState));  // flags unused here.
     }
 
     @Override
@@ -131,7 +115,6 @@ public class ShadowApplicationPackageManager
     public static void reset() {
         sPackageInfos.clear();
         sInstalledPackages.clear();
-        sPackageAppEnabledStates.clear();
         org.robolectric.shadows.ShadowApplicationPackageManager.reset();
     }
 }
