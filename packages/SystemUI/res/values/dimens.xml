@@ -1135,6 +1135,7 @@
     <dimen name="global_actions_button_padding">38dp</dimen>
     <dimen name="global_actions_corner_radius">28dp</dimen>
     <dimen name="global_actions_lite_padding">24dp</dimen>
+    <dimen name="global_actions_info_margin">32dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->

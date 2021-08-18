@@ -62,6 +62,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -173,7 +174,8 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             SysUiState sysUiState,
             @Main Handler handler,
             PackageManager packageManager,
-            Optional<StatusBar> statusBarOptional) {
+            Optional<StatusBar> statusBarOptional,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
 
         super(context,
                 windowManagerFuncs,
@@ -204,7 +206,8 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 sysUiState,
                 handler,
                 packageManager,
-                statusBarOptional);
+                statusBarOptional,
+                keyguardUpdateMonitor);
 
         mLockPatternUtils = lockPatternUtils;
         mKeyguardStateController = keyguardStateController;
@@ -266,7 +269,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 this::getWalletViewController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 mSysUiState, this::onRotate, isKeyguardShowing(), mPowerAdapter, getEventLogger(),
-                getStatusBar());
+                getStatusBar(), getKeyguardUpdateMonitor(), mLockPatternUtils);
 
         if (shouldShowLockMessage(dialog)) {
             dialog.showLockMessage();
@@ -334,11 +337,13 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
-                Optional<StatusBar> statusBarOptional) {
+                Optional<StatusBar> statusBarOptional, KeyguardUpdateMonitor keyguardUpdateMonitor,
+                LockPatternUtils lockPatternUtils) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions,
                     adapter, overflowAdapter, sysuiColorExtractor, statusBarService,
                     notificationShadeWindowController, sysuiState, onRotateCallback,
-                    keyguardShowing, powerAdapter, uiEventLogger, statusBarOptional);
+                    keyguardShowing, powerAdapter, uiEventLogger, statusBarOptional,
+                    keyguardUpdateMonitor, lockPatternUtils);
             mWalletFactory = walletFactory;
 
             // Update window attributes
