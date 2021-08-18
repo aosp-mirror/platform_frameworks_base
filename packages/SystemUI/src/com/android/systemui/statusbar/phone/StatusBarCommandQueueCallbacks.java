@@ -256,18 +256,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     }
 
     @Override
-    public void preloadRecentApps() {
-        mStatusBar.resetHandlerMsg(StatusBar.MSG_PRELOAD_RECENT_APPS);
-    }
-
-    @Override
-    public void cancelPreloadRecentApps() {
-        mStatusBar.resetHandlerMsg(StatusBar.MSG_CANCEL_PRELOAD_RECENT_APPS);
-    }
-
-    @Override
     public void dismissKeyboardShortcutsMenu() {
-        mStatusBar.resetHandlerMsg(StatusBar.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
+        mStatusBar.resendMessage(StatusBar.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
     }
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
@@ -327,13 +317,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
                 mShadeController.animateCollapsePanels();
-            }
-        }
-
-        if ((diff1 & StatusBarManager.DISABLE_RECENT) != 0) {
-            if ((state1 & StatusBarManager.DISABLE_RECENT) != 0) {
-                // close recents if it's visible
-                mStatusBar.resetHandlerMsg(StatusBar.MSG_HIDE_RECENT_APPS);
             }
         }
 
@@ -544,9 +527,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
-        int msg = StatusBar.MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU;
-        mStatusBar.getHandler().removeMessages(msg);
-        mStatusBar.getHandler().obtainMessage(msg, deviceId, 0).sendToTarget();
+        mStatusBar.resendMessage(new StatusBar.KeyboardShortcutsData(deviceId));
     }
 
     @Override
