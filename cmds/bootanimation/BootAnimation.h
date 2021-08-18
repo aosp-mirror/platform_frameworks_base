@@ -204,6 +204,7 @@ private:
     void checkExit();
 
     void handleViewport(nsecs_t timestep);
+    void initDynamicColors();
 
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
