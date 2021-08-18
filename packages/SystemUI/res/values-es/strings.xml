@@ -654,8 +654,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avión"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Añadir icono"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Icono de emisión"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Añadir recuadro"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Recuadro de emisión"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -854,10 +854,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Código de teclado a la derecha"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icono a la izquierda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icono a la derecha"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pulsa y arrastra para añadir funciones"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén pulsado un icono y arrástralo para reubicarlo"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pulsa y arrastra para añadir recuadros"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén pulsado un recuadro y arrástralo para reubicarlo"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar una función"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> iconos"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> recuadros"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Hora"</string>
   <string-array name="clock_options">
@@ -883,10 +883,10 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Superior 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Superior 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Pantalla inferior completa"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar icono"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"añadir icono al final"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover icono"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Añadir icono"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar recuadro"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"añadir recuadro al final"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover recuadro"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Añadir recuadro"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Añadir a la posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
