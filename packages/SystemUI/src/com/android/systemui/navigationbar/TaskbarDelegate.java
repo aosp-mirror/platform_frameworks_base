@@ -21,12 +21,16 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISABLED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.InsetsVisibilities;
+import android.view.View;
 
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.model.SysUiState;
@@ -47,6 +51,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
     private int mNavigationIconHints;
     private final NavigationBarA11yHelper.NavA11yEventListener mNavA11yEventListener =
             this::updateSysuiFlags;
+    private int mDisabledFlags;
+
     @Inject
     public TaskbarDelegate() { /* no-op */ }
 
@@ -81,6 +87,12 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
                         (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_SHOWING,
                         (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
+                .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
+                .setFlag(SYSUI_STATE_HOME_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0)
+                .setFlag(SYSUI_STATE_BACK_DISABLED,
+                        (mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 .commitUpdate(mDisplayId);
     }
 
@@ -103,6 +115,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
 
     @Override
     public void disable(int displayId, int state1, int state2, boolean animate) {
+        mDisabledFlags = state1;
+        updateSysuiFlags();
         mOverviewProxyService.disable(displayId, state1, state2, animate);
     }
 

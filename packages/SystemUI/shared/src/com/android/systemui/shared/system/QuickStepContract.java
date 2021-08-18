@@ -116,6 +116,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IME_SWITCHER_SHOWING = 1 << 20;
     // Device dozing/AOD state
     public static final int SYSUI_STATE_DEVICE_DOZING = 1 << 21;
+    // The home feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -139,7 +141,8 @@ public class QuickStepContract {
             SYSUI_STATE_IME_SHOWING,
             SYSUI_STATE_MAGNIFICATION_OVERLAP,
             SYSUI_STATE_IME_SWITCHER_SHOWING,
-            SYSUI_STATE_DEVICE_DOZING
+            SYSUI_STATE_DEVICE_DOZING,
+            SYSUI_STATE_BACK_DISABLED
     })
     public @interface SystemUiStateFlags {}
 
@@ -170,6 +173,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
         str.add((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0 ? "ime_switcher_showing" : "");
         str.add((flags & SYSUI_STATE_DEVICE_DOZING) != 0 ? "device_dozing" : "");
+        str.add((flags & SYSUI_STATE_BACK_DISABLED) != 0 ? "back_disabled" : "");
         return str.toString();
     }
 
