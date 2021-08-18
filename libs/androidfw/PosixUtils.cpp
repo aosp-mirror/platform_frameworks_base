@@ -114,10 +114,10 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
       std::unique_ptr<ProcResult> result(new ProcResult());
       result->status = status;
       const auto out = ReadFile(stdout[0]);
-      result->stdout = out ? *out : "";
+      result->stdout_str = out ? *out : "";
       close(stdout[0]);
       const auto err = ReadFile(stderr[0]);
-      result->stderr = err ? *err : "";
+      result->stderr_str = err ? *err : "";
       close(stderr[0]);
       return result;
   }
