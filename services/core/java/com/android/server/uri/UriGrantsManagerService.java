@@ -706,10 +706,10 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                                         sourcePkg, targetPkg, targetUid, grantUri);
                                 perm.initPersistedModes(modeFlags, createdTime);
                                 mPmInternal.grantImplicitAccess(
-                                        targetUserId, null,
+                                        targetUserId, null /* intent */,
                                         UserHandle.getAppId(targetUid),
                                         pi.applicationInfo.uid,
-                                        false /* direct */);
+                                        false /* direct */, true /* retainOnUpdate */);
                             }
                         } else {
                             Slog.w(TAG, "Persisted grant for " + uri + " had source " + sourcePkg
@@ -773,8 +773,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             perm = findOrCreateUriPermissionLocked(pi.packageName, targetPkg, targetUid, grantUri);
         }
         perm.grantModes(modeFlags, owner);
-        mPmInternal.grantImplicitAccess(UserHandle.getUserId(targetUid), null,
-                UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/);
+        mPmInternal.grantImplicitAccess(UserHandle.getUserId(targetUid), null /*intent*/,
+                UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/,
+                (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0);
     }
 
     /** Like grantUriPermissionUnchecked, but takes an Intent. */
@@ -1187,7 +1188,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             // provider supports granting permissions
             mPmInternal.grantImplicitAccess(
                     UserHandle.getUserId(targetUid), null,
-                    UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false);
+                    UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/);
             return -1;
         }
 

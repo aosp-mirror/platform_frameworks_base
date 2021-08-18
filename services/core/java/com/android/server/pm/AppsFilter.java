@@ -97,6 +97,13 @@ public class AppsFilter implements Watchable, Snappable {
     private final SparseSetArray<Integer> mImplicitlyQueryable = new SparseSetArray<>();
 
     /**
+     * This contains a list of app UIDs that are implicitly queryable because another app explicitly
+     * interacted with it, but could keep across package updates. For example, if application A
+     * grants persistable uri permission to application B; regardless of any manifest entries.
+     */
+    private final SparseSetArray<Integer> mRetainedImplicitlyQueryable = new SparseSetArray<>();
+
+    /**
      * A mapping from the set of App IDs that query other App IDs via package name to the
      * list of packages that they can see.
      */
@@ -256,6 +263,7 @@ public class AppsFilter implements Watchable, Snappable {
      */
     private AppsFilter(AppsFilter orig) {
         Snapshots.copy(mImplicitlyQueryable, orig.mImplicitlyQueryable);
+        Snapshots.copy(mRetainedImplicitlyQueryable, orig.mRetainedImplicitlyQueryable);
         Snapshots.copy(mQueriesViaPackage, orig.mQueriesViaPackage);
         Snapshots.copy(mQueriesViaComponent, orig.mQueriesViaComponent);
         Snapshots.copy(mQueryableViaUsesLibrary, orig.mQueryableViaUsesLibrary);
@@ -633,15 +641,19 @@ public class AppsFilter implements Watchable, Snappable {
      *
      * @param recipientUid the uid gaining visibility of the {@code visibleUid}.
      * @param visibleUid   the uid becoming visible to the {@recipientUid}
+     * @param retainOnUpdate  if the implicit access retained across package updates.
      * @return {@code true} if implicit access was not already granted.
      */
-    public boolean grantImplicitAccess(int recipientUid, int visibleUid) {
+    public boolean grantImplicitAccess(int recipientUid, int visibleUid, boolean retainOnUpdate) {
         if (recipientUid == visibleUid) {
             return false;
         }
-        final boolean changed = mImplicitlyQueryable.add(recipientUid, visibleUid);
+        final boolean changed = retainOnUpdate
+                ? mRetainedImplicitlyQueryable.add(recipientUid, visibleUid)
+                : mImplicitlyQueryable.add(recipientUid, visibleUid);
         if (changed && DEBUG_LOGGING) {
-            Slog.i(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
+            Slog.i(TAG, (retainOnUpdate ? "retained " : "") + "implicit access granted: "
+                    + recipientUid + " -> " + visibleUid);
         }
         synchronized (mCacheLock) {
             if (mShouldFilterCache != null) {
@@ -677,7 +689,7 @@ public class AppsFilter implements Watchable, Snappable {
         try {
             if (isReplace) {
                 // let's first remove any prior rules for this package
-                removePackage(newPkgSetting);
+                removePackage(newPkgSetting, true /*isReplace*/);
             }
             mStateProvider.runWithState((settings, users) -> {
                 ArraySet<String> additionalChangedPackages =
@@ -1078,8 +1090,9 @@ public class AppsFilter implements Watchable, Snappable {
      * Removes a package for consideration when filtering visibility between apps.
      *
      * @param setting the setting of the package being removed.
+     * @param isReplace if the package is being replaced.
      */
-    public void removePackage(PackageSetting setting) {
+    public void removePackage(PackageSetting setting, boolean isReplace) {
         mStateProvider.runWithState((settings, users) -> {
             final int userCount = users.length;
             for (int u = 0; u < userCount; u++) {
@@ -1088,6 +1101,16 @@ public class AppsFilter implements Watchable, Snappable {
                 mImplicitlyQueryable.remove(removingUid);
                 for (int i = mImplicitlyQueryable.size() - 1; i >= 0; i--) {
                     mImplicitlyQueryable.remove(mImplicitlyQueryable.keyAt(i), removingUid);
+                }
+
+                if (isReplace) {
+                    continue;
+                }
+
+                mRetainedImplicitlyQueryable.remove(removingUid);
+                for (int i = mRetainedImplicitlyQueryable.size() - 1; i >= 0; i--) {
+                    mRetainedImplicitlyQueryable.remove(
+                            mRetainedImplicitlyQueryable.keyAt(i), removingUid);
                 }
             }
 
@@ -1414,6 +1437,24 @@ public class AppsFilter implements Watchable, Snappable {
 
             try {
                 if (DEBUG_TRACING) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mRetainedImplicitlyQueryable");
+                }
+                final int targetUid = UserHandle.getUid(targetUserId, targetAppId);
+                if (mRetainedImplicitlyQueryable.contains(callingUid, targetUid)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting,
+                                "retained implicitly queryable for user");
+                    }
+                    return false;
+                }
+            } finally {
+                if (DEBUG_TRACING) {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+            }
+
+            try {
+                if (DEBUG_TRACING) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mOverlayReferenceMapper");
                 }
                 final String targetName = targetPkg.getPackageName();
@@ -1550,6 +1591,9 @@ public class AppsFilter implements Watchable, Snappable {
             dumpQueriesMap(pw,
                     filteringAppId == null ? null : UserHandle.getUid(user, filteringAppId),
                     mImplicitlyQueryable, "      ", expandPackages);
+            dumpQueriesMap(pw,
+                    filteringAppId == null ? null : UserHandle.getUid(user, filteringAppId),
+                    mRetainedImplicitlyQueryable, "      ", expandPackages);
         }
         pw.println("  queryable via uses-library:");
         dumpQueriesMap(pw, filteringAppId, mQueryableViaUsesLibrary, "    ", expandPackages);

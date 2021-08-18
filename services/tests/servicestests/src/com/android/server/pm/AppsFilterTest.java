@@ -829,7 +829,7 @@ public class AppsFilterTest {
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_APPID, overlaySetting,
                 actorSetting, SYSTEM_USER));
 
-        appsFilter.removePackage(targetSetting);
+        appsFilter.removePackage(targetSetting, false /* isReplace */);
 
         // Actor loses visibility to the overlay via removal of the target
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
@@ -1074,7 +1074,8 @@ public class AppsFilterTest {
         watcher.verifyNoChangeReported("getVisibility");
 
         // provider read
-        appsFilter.grantImplicitAccess(hasProviderAppId, queriesProviderAppId);
+        appsFilter.grantImplicitAccess(hasProviderAppId, queriesProviderAppId,
+                false /* retainOnUpdate */);
         watcher.verifyChangeReported("grantImplicitAccess");
 
         // ensure implicit access is included in the filter
@@ -1143,7 +1144,8 @@ public class AppsFilterTest {
         watcher.verifyNoChangeReported("get");
 
         // provider read
-        appsFilter.grantImplicitAccess(hasProviderAppId, queriesProviderAppId);
+        appsFilter.grantImplicitAccess(
+                hasProviderAppId, queriesProviderAppId, false /* retainOnUpdate */);
         watcher.verifyChangeReported("grantImplicitAccess");
 
         // ensure implicit access is included in the filter
@@ -1154,7 +1156,7 @@ public class AppsFilterTest {
         watcher.verifyNoChangeReported("get");
 
         // remove a package
-        appsFilter.removePackage(seesNothing);
+        appsFilter.removePackage(seesNothing, false /* isReplace */);
         watcher.verifyChangeReported("removePackage");
     }
 

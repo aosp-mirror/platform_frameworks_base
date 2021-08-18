@@ -73,8 +73,8 @@ public class UriGrantsManagerServiceTest {
 
     // we expect the following only during grant if a grant is expected
     private void verifyNoVisibilityGrant() {
-        verify(mContext.mPmInternal, never())
-                .grantImplicitAccess(anyInt(), any(), anyInt(), anyInt(), anyBoolean());
+        verify(mContext.mPmInternal, never()).grantImplicitAccess(
+                anyInt(), any(), anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Before
