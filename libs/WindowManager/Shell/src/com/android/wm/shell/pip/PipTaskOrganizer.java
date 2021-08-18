@@ -613,7 +613,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionState.setInSwipePipToHomeTransition(false);
             mSwipePipToHomeOverlay = null;
             return;
         }

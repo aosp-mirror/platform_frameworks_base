@@ -105,6 +105,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -137,9 +138,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
@@ -267,8 +269,12 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private TunerService mTunerService;
     @Mock private StartingSurface mStartingSurface;
+    @Mock private OperatorNameViewController mOperatorNameViewController;
+    @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private ShadeController mShadeController;
-    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
     private InitController mInitController = new InitController();
 
     @Before
@@ -345,6 +351,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
                 () -> Optional.of(mStatusBar), () -> mAssistManager, Optional.of(mBubbles));
 
+        when(mOperatorNameViewControllerFactory.create(any()))
+                .thenReturn(mOperatorNameViewController);
+
         mStatusBar = new StatusBar(
                 mContext,
                 mNotificationsController,
@@ -413,6 +422,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
+                mOperatorNameViewControllerFactory,
                 mPhoneStatusBarPolicy,
                 mKeyguardIndicationController,
                 mDemoModeController,
@@ -429,6 +439,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
+                new Handler(TestableLooper.get(this).getLooper()),
+                mMainExecutor,
+                new MessageRouterImpl(mMainExecutor),
                 mWallpaperManager,
                 mUnlockedScreenOffAnimationController,
                 Optional.of(mStartingSurface),
@@ -695,7 +708,7 @@ public class StatusBarTest extends SysuiTestCase {
         } catch (RemoteException e) {
             fail();
         }
-        TestableLooper.get(this).processAllMessages();
+        mMainExecutor.runAllReady();
     }
 
     @Test
@@ -714,7 +727,7 @@ public class StatusBarTest extends SysuiTestCase {
         } catch (RemoteException e) {
             fail();
         }
-        TestableLooper.get(this).processAllMessages();
+        mMainExecutor.runAllReady();
     }
 
     @Test
@@ -732,7 +745,7 @@ public class StatusBarTest extends SysuiTestCase {
         } catch (RemoteException e) {
             fail();
         }
-        TestableLooper.get(this).processAllMessages();
+        mMainExecutor.runAllReady();
     }
 
     @Test
@@ -744,15 +757,6 @@ public class StatusBarTest extends SysuiTestCase {
     public void testDumpBarTransitions_DoesNotCrash() {
         StatusBar.dumpBarTransitions(
                 new PrintWriter(new ByteArrayOutputStream()), "var", /* transitions= */ null);
-    }
-
-    @Test
-    @RunWithLooper(setAsMainLooper = true)
-    public void testUpdateKeyguardState_DoesNotCrash() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(
-                new SparseArray<>());
-        mStatusBar.onStateChanged(StatusBarState.SHADE);
     }
 
     @Test

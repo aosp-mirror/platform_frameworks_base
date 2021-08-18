@@ -38,6 +38,7 @@ import android.view.WindowInsets.Type;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
@@ -98,8 +99,9 @@ public class DragLayout extends View {
         return mHasDropped;
     }
 
-    public void prepare(DisplayLayout displayLayout, ClipData initialData) {
-        mPolicy.start(displayLayout, initialData);
+    public void prepare(DisplayLayout displayLayout, ClipData initialData,
+            InstanceId loggerSessionId) {
+        mPolicy.start(displayLayout, initialData, loggerSessionId);
         mHasDropped = false;
         mCurrentTarget = null;
     }

@@ -51,7 +51,7 @@ public class DragAndDropEventLogger {
     /**
      * Logs the start of a drag.
      */
-    public void logStart(DragEvent event) {
+    public InstanceId logStart(DragEvent event) {
         final ClipDescription description = event.getClipDescription();
         final ClipData data = event.getClipData();
         final ClipData.Item item = data.getItemAt(0);
@@ -64,6 +64,7 @@ public class DragAndDropEventLogger {
         mUiEventLogger.logWithInstanceId(getStartEnum(description),
                 mActivityInfo.applicationInfo.uid,
                 mActivityInfo.applicationInfo.packageName, mInstanceId);
+        return mInstanceId;
     }
 
     /**

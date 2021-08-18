@@ -59,6 +59,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock private DisplayImeController mDisplayImeController;
     @Mock private Transitions mTransitions;
     @Mock private TransactionPool mTransactionPool;
+    @Mock private SplitscreenEventLogger mLogger;
     private StageCoordinator mStageCoordinator;
 
     @Before
@@ -66,7 +67,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                mDisplayImeController, null /* splitLayout */, mTransitions, mTransactionPool);
+                mDisplayImeController, null /* splitLayout */, mTransitions, mTransactionPool,
+                mLogger);
     }
 
     @Test

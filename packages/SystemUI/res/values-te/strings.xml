@@ -113,7 +113,7 @@
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"ఆపడానికి ట్యాప్ చేయండి"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ఆపివేయి"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"పాజ్ చేయి"</string>
-    <string name="screenrecord_resume_label" msgid="4972223043729555575">"కొనసాగించు"</string>
+    <string name="screenrecord_resume_label" msgid="4972223043729555575">"కొనసాగించండి"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"రద్దు చేయి"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయి"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"స్క్రీన్ రికార్డ్ రద్దు చేయబడింది"</string>
@@ -308,7 +308,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"పునఃప్రారంభించు"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS కోసం శోధిస్తోంది"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"స్థానం GPS ద్వారా సెట్ చేయబడింది"</string>
-    <string name="accessibility_location_active" msgid="2845747916764660369">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
+    <string name="accessibility_location_active" msgid="2845747916764660369">"స్థాన రిక్వెస్ట్‌లు సక్రియంగా ఉన్నాయి"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"సెన్సార్‌లు ఆఫ్ యాక్టివ్‌లో ఉంది"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -577,7 +577,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"విశ్వసనీయ ఆధారాలను తెరువు"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేశారు.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక యాప్‌నకు అనుమతి ఇచ్చారు.\n\nఈ యాప్ ఇమెయిల్‌లు,యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ డివైజ్ మరియు నెట్‌వర్క్ కార్యకలాపాన్ని పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక యాప్‌నకు అనుమతి ఇచ్చారు.\n\nఈ యాప్ ఇమెయిల్‌లు,యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ డివైజ్ మరియు నెట్‌వర్క్ యాక్టివిటీని పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ద్వారా మీ కార్యాలయ ప్రొఫైల్ నిర్వహించబడుతోంది.\n\nఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల సామర్థ్యం మీ నిర్వాహకులకు ఉంది.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ అయ్యారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు. మీ తల్లి/తండ్రి, మీరు ఉపయోగించే యాప్‌లు, మీ లొకేషన్, అలాగే మీ పరికర వినియోగ వ్యవధి వంటి సమాచారాన్ని చూడగలరు, మేనేజ్ చేయగలరు."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
@@ -709,7 +709,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ఆన్‌లో ఉన్నాయి"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ఆఫ్‌లో ఉన్నాయి"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ జాబితా పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ జాబితా దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ఇకపై మీకు ఈ నోటిఫికేషన్‌లు కనిపించవు"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"ఈ నోటిఫికేషన్‌లు కుదించబడ్డాయి"</string>
@@ -931,7 +931,7 @@
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> కారణంగా అందుబాటులో లేదు"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
+    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని ఎడిట్ చేయండి."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"పవర్ మెనూ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
@@ -978,9 +978,9 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"స్వయంచాలక నియమం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ఆటోమేటిక్‌ నియమం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"యాప్ (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"స్వయంచాలక నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ఆటోమేటిక్‌ నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> వరకు"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"భర్తీ చేయి"</string>
@@ -989,7 +989,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"మొబైల్ డేటాను ఆఫ్ చేయాలా?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"\"<xliff:g id="CARRIER">%s</xliff:g>\" ద్వారా మీకు డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"మీ క్యారియర్"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"అనుమతి అభ్యర్థనకు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"అనుమతి రిక్వెస్ట్‌కు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించడానికి <xliff:g id="APP_0">%1$s</xliff:g>ని అనుమతించండి?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- ఇది <xliff:g id="APP">%1$s</xliff:g> నుండి సమాచారాన్ని చదువుతుంది"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ఇది <xliff:g id="APP">%1$s</xliff:g> లోపల చర్యలు తీసుకుంటుంది"</string>
