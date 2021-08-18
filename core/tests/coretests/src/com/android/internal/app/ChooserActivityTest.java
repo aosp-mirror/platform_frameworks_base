@@ -269,7 +269,7 @@ public class ChooserActivityTest {
         onView(withId(R.id.content_preview_thumbnail)).check(matches(isDisplayed()));
     }
 
-    @Test
+    @Test @Ignore
     public void twoOptionsAndUserSelectsOne() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -298,7 +298,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void fourOptionsStackedIntoOneTarget() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
 
@@ -351,7 +351,7 @@ public class ChooserActivityTest {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void updateChooserCountsAndModelAfterUserSelection() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -424,7 +424,7 @@ public class ChooserActivityTest {
         assertThat(activity.isFinishing(), is(true));
     }
 
-    @Test
+    @Test @Ignore
     public void hasOtherProfileOneOption() throws Exception {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -461,7 +461,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void hasOtherProfileTwoOptionsAndUserSelectsOne() throws Exception {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -500,7 +500,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void hasLastChosenActivityAndOtherProfile() throws Exception {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -564,7 +564,7 @@ public class ChooserActivityTest {
         assertEquals(mActivityRule.getActivityResult().getResultCode(), RESULT_OK);
     }
 
-    @Test
+    @Test @Ignore
     public void copyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -595,7 +595,7 @@ public class ChooserActivityTest {
     }
 
 
-    @Test
+    @Test @Ignore
     public void testNearbyShareLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -643,7 +643,7 @@ public class ChooserActivityTest {
 
 
 
-    @Test
+    @Test @Ignore
     public void testEditImageLogs() throws Exception {
         Intent sendIntent = createSendImageIntent(
                 Uri.parse("android.resource://com.android.frameworks.coretests/"
@@ -1129,7 +1129,7 @@ public class ChooserActivityTest {
     }
 
     // This test is too long and too slow and should not be taken as an example for future tests.
-    @Test
+    @Test @Ignore
     public void testDirectTargetSelectionLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -1200,7 +1200,7 @@ public class ChooserActivityTest {
     }
 
     // This test is too long and too slow and should not be taken as an example for future tests.
-    @Test
+    @Test @Ignore
     public void testDirectTargetLoggingWithRankedAppTarget() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -1266,7 +1266,7 @@ public class ChooserActivityTest {
                 .getAllValues().get(2).getTaggedData(MetricsEvent.FIELD_RANKED_POSITION), is(0));
     }
 
-    @Test
+    @Test @Ignore
     public void testShortcutTargetWithApplyAppLimits() throws InterruptedException {
         // Set up resources
         sOverrides.resources = Mockito.spy(
@@ -1323,7 +1323,7 @@ public class ChooserActivityTest {
                 activity.getAdapter().getItem(0).getDisplayLabel(), is("testTitle0"));
     }
 
-    @Test
+    @Test @Ignore
     public void testShortcutTargetWithoutApplyAppLimits() throws InterruptedException {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.APPLY_SHARING_APP_LIMITS_IN_SYSUI,
@@ -1387,13 +1387,13 @@ public class ChooserActivityTest {
     }
 
     // This test is too long and too slow and should not be taken as an example for future tests.
-    @Test
+    @Test @Ignore
     public void testDirectTargetLoggingWithAppTargetNotRankedPortrait()
             throws InterruptedException {
         testDirectTargetLoggingWithAppTargetNotRanked(Configuration.ORIENTATION_PORTRAIT, 4);
     }
 
-    @Test
+    @Test @Ignore
     public void testDirectTargetLoggingWithAppTargetNotRankedLandscape()
             throws InterruptedException {
         testDirectTargetLoggingWithAppTargetNotRanked(Configuration.ORIENTATION_LANDSCAPE, 8);
@@ -1554,7 +1554,7 @@ public class ChooserActivityTest {
         assertThat(activity.getWorkListAdapter().getCount(), is(workProfileTargets));
     }
 
-    @Test
+    @Test @Ignore
     public void testWorkTab_selectingWorkTabAppOpensAppInWorkProfile() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -1719,7 +1719,7 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
-    @Test
+    @Test @Ignore
     public void testAppTargetLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -1775,7 +1775,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_APP_TARGET_SELECTED.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testDirectTargetLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -1856,7 +1856,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_SERVICE_TARGET_SELECTED.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testEmptyDirectRowLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
@@ -1907,7 +1907,7 @@ public class ChooserActivityTest {
                         .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testCopyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -1953,7 +1953,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_COPY_TARGET_SELECTED.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testSwitchProfileLogging() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
