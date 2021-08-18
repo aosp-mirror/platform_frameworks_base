@@ -15,7 +15,6 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -27,17 +26,11 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.demomode.DemoModeCommandReceiver;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.List;
 
 /** Shows the operator name */
-public class OperatorNameView extends TextView implements DemoModeCommandReceiver, Tunable {
-
-    private static final String KEY_SHOW_OPERATOR_NAME = "show_operator_name";
-
+public class OperatorNameView extends TextView {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private boolean mDemoMode;
 
@@ -64,44 +57,22 @@ public class OperatorNameView extends TextView implements DemoModeCommandReceive
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        mKeyguardUpdateMonitor.registerCallback(mCallback);
-        Dependency.get(TunerService.class).addTunable(this, KEY_SHOW_OPERATOR_NAME);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mKeyguardUpdateMonitor.removeCallback(mCallback);
-        Dependency.get(TunerService.class).removeTunable(this);
     }
 
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        update();
+
+    void setDemoMode(boolean demoMode) {
+        mDemoMode = demoMode;
     }
 
-    @Override
-    public void dispatchDemoCommand(String command, Bundle args) {
-        setText(args.getString("name"));
-    }
-
-    @Override
-    public void onDemoModeStarted() {
-        mDemoMode = true;
-    }
-
-    @Override
-    public void onDemoModeFinished() {
-        mDemoMode = false;
-        update();
-    }
-
-    void update() {
-        boolean showOperatorName = Dependency.get(TunerService.class)
-                .getValue(KEY_SHOW_OPERATOR_NAME, 1) != 0;
+    void update(boolean showOperatorName, boolean hasMobile) {
         setVisibility(showOperatorName ? VISIBLE : GONE);
 
-        boolean hasMobile = mContext.getSystemService(TelephonyManager.class).isDataCapable();
         boolean airplaneMode = WirelessUtils.isAirplaneModeOn(mContext);
         if (!hasMobile || airplaneMode) {
             setText(null);
