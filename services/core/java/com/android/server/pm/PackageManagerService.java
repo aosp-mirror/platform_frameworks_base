@@ -7362,7 +7362,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
                         logCriticalInfo(Log.WARN, "System package " + ps.name
-                                + " no longer exists; it's data will be wiped");
+                                + " no longer exists; its data will be wiped");
                         removePackageDataLIF(ps, userIds, null, 0, false);
                     } else {
                         // we still have a disabled system package, but, it still might have
