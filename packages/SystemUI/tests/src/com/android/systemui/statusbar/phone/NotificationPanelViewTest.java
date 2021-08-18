@@ -874,8 +874,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         clearInvocations(mCommunalHostViewController);
         givenViewDetached();
         verify(mCommunalSourceMonitor).removeCallback(any());
-        verify(mCommunalHostViewController).show(sourceCapture.capture());
-        assertThat(sourceCapture.getValue()).isEqualTo(null);
     }
 
     @Test

@@ -38,6 +38,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -55,7 +57,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
-    private WeakReference<CommunalSource> mLastSource;
+    private WeakReference<CommunalSource> mCurrentSource;
+    private Optional<ShowRequest> mLastRequest = Optional.empty();
     private int mState;
     private float mQsExpansion;
     private float mShadeExpansion;
@@ -77,6 +80,37 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
 
     private ViewController<? extends View> mCommunalViewController;
+
+    private static class ShowRequest {
+        private boolean mShouldShow;
+        private WeakReference<CommunalSource> mSource;
+
+        ShowRequest(boolean shouldShow, WeakReference<CommunalSource> source) {
+            mShouldShow = shouldShow;
+            mSource = source;
+        }
+
+        CommunalSource getSource() {
+            return mSource != null ? mSource.get() : null;
+        }
+
+        boolean shouldShow() {
+            return mShouldShow;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ShowRequest)) return false;
+            ShowRequest that = (ShowRequest) o;
+            return mShouldShow == that.mShouldShow && Objects.equals(getSource(), that.getSource());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mShouldShow, mSource);
+        }
+    }
 
     private KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -253,18 +287,26 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     }
 
     private void showSource() {
+        final ShowRequest request = new ShowRequest(
+                (mState & SHOW_COMMUNAL_VIEW_REQUIRED_STATES) == SHOW_COMMUNAL_VIEW_REQUIRED_STATES
+                    && (mState & SHOW_COMMUNAL_VIEW_INVALID_STATES) == 0
+                    && mCurrentSource != null,
+                mCurrentSource);
+
+        if (mLastRequest.isPresent() && Objects.equals(mLastRequest.get(), request)) {
+            return;
+        }
+
+        mLastRequest = Optional.of(request);
+
         // Make sure all necessary states are present for showing communal and all invalid states
         // are absent
         mMainExecutor.execute(() -> {
-            final CommunalSource currentSource = mLastSource != null ? mLastSource.get() : null;
-
             if (DEBUG) {
-                Log.d(TAG, "showSource. currentSource:" + currentSource);
+                Log.d(TAG, "showSource. currentSource:" + request.getSource());
             }
 
-            if ((mState & SHOW_COMMUNAL_VIEW_REQUIRED_STATES) == SHOW_COMMUNAL_VIEW_REQUIRED_STATES
-                    && (mState & SHOW_COMMUNAL_VIEW_INVALID_STATES) == 0
-                    && currentSource != null) {
+            if (request.shouldShow()) {
                 mView.removeAllViews();
 
                 // Make view visible.
@@ -273,7 +315,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
                 final Context context = mView.getContext();
 
                 final ListenableFuture<CommunalSource.CommunalViewResult> listenableFuture =
-                        currentSource.requestCommunalView(context);
+                        request.getSource().requestCommunalView(context);
 
                 if (listenableFuture == null) {
                     Log.e(TAG, "could not request communal view");
@@ -308,7 +350,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
      * @param source The new {@link CommunalSource}, {@code null} if not set.
      */
     public void show(WeakReference<CommunalSource> source) {
-        mLastSource = source;
+        mCurrentSource = source;
         showSource();
     }
 

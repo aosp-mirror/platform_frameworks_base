@@ -4583,8 +4583,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mStatusBarStateController.removeCallback(mStatusBarStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
             mCommunalSourceMonitor.removeCallback(mCommunalSourceMonitorCallback);
-            // Clear source when detached.
-            setCommunalSource(null /*source*/);
             mFalsingManager.removeTapListener(mFalsingTapListener);
             mCommunalStateController.removeCallback(mCommunalStateCallback);
         }

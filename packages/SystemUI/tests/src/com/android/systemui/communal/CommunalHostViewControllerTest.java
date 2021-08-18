@@ -16,7 +16,9 @@
 
 package com.android.systemui.communal;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -225,5 +227,19 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         mController.setAlpha(alpha);
         verify(mChildView).setAlpha(alpha);
         verify(mCommunalView).setAlpha(alpha);
+    }
+
+    @Test
+    public void testMultipleShowRequestSuppression() {
+        // Ensure first request invokes source.
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+        verify(mCommunalSource).requestCommunalView(any());
+        clearInvocations(mCommunalSource);
+
+        // Ensure subsequent identical request is suppressed
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+        verify(mCommunalSource, never()).requestCommunalView(any());
     }
 }
