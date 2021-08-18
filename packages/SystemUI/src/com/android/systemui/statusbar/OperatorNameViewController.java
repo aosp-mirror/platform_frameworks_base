@@ -18,33 +18,43 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
 /** Controller for {@link OperatorNameView}. */
 public class OperatorNameViewController extends ViewController<OperatorNameView> {
-    private OperatorNameViewController(OperatorNameView view) {
+    private final DarkIconDispatcher mDarkIconDispatcher;
+
+    private OperatorNameViewController(OperatorNameView view,
+            DarkIconDispatcher darkIconDispatcher) {
         super(view);
+        mDarkIconDispatcher = darkIconDispatcher;
     }
 
     @Override
     protected void onViewAttached() {
+        mDarkIconDispatcher.addDarkReceiver(mDarkReceiver);
     }
 
     @Override
     protected void onViewDetached() {
+        mDarkIconDispatcher.removeDarkReceiver(mDarkReceiver);
     }
 
     /** Factory for constructing an {@link OperatorNameViewController}. */
     public static class Factory {
+        private final DarkIconDispatcher mDarkIconDispatcher;
+
         @Inject
-        public Factory() {
+        public Factory(DarkIconDispatcher darkIconDispatcher) {
+            mDarkIconDispatcher = darkIconDispatcher;
         }
 
         /** Create an {@link OperatorNameViewController}. */
         public OperatorNameViewController create(OperatorNameView view) {
-            return new OperatorNameViewController(view);
+            return new OperatorNameViewController(view, mDarkIconDispatcher);
         }
     }
 
@@ -56,4 +66,8 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
     public View getView() {
         return mView;
     }
+
+    private final DarkIconDispatcher.DarkReceiver mDarkReceiver =
+            (area, darkIntensity, tint) ->
+                    mView.setTextColor(DarkIconDispatcher.getTint(area, mView, tint));
 }
