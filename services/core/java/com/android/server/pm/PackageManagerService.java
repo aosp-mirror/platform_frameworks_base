@@ -7186,6 +7186,7 @@ public class PackageManagerService extends IPackageManager.Stub
             t.traceEnd();
 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
+            mPermissionManager.readLegacyPermissionStateTEMP();
 
             if (!mOnlyCore && mFirstBoot) {
                 requestCopyPreoptedFiles();
@@ -7602,7 +7603,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            mPermissionManager.readLegacyPermissionStateTEMP();
             // If the build fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
