@@ -3114,10 +3114,6 @@ class Task extends TaskFragment {
         });
     }
 
-    boolean isFocusableAndVisible() {
-        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
-    }
-
     void positionChildAtTop(ActivityRecord child) {
         positionChildAt(child, POSITION_TOP);
     }
@@ -5037,7 +5033,10 @@ class Task extends TaskFragment {
             if (topFragment == f) {
                 return;
             }
-
+            if (!f.isFocusableAndVisible()) {
+                // No need to resume activity in TaskFragment that is not visible.
+                return;
+            }
             resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
         }, true);
         return resumed[0];
