@@ -76,12 +76,13 @@ private val ART_URIS = arrayOf(
 
 private const val TAG = "MediaDataManager"
 private const val DEBUG = true
+private const val EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY = "dismiss_intent"
 
 private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
-    "INVALID", null, emptyList(), 0)
+    "INVALID", null, emptyList(), null, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     if (!sbn.notification.hasMediaSession()) {
@@ -883,12 +884,22 @@ class MediaDataManager(
         target: SmartspaceTarget,
         isActive: Boolean
     ): SmartspaceMediaData {
+        var dismissIntent: Intent? = null
+        if (target.baseAction != null && target.baseAction.extras != null) {
+            dismissIntent = target
+                .baseAction
+                .extras
+                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent
+        }
         packageName(target)?.let {
             return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
-                target.baseAction, target.iconGrid, 0)
+                target.baseAction, target.iconGrid,
+                dismissIntent, 0)
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA
-            .copy(targetId = target.smartspaceTargetId, isActive = isActive)
+            .copy(targetId = target.smartspaceTargetId,
+                isActive = isActive,
+                dismissIntent = dismissIntent)
     }
 
     private fun packageName(target: SmartspaceTarget): String? {
