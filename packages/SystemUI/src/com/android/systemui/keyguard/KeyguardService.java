@@ -67,6 +67,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 
@@ -236,7 +237,8 @@ public class KeyguardService extends Service {
                 Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
                 TransitionFilter f = new TransitionFilter();
                 f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-                shellTransitions.registerRemote(f, wrap(mExitAnimationRunner));
+                shellTransitions.registerRemote(f,
+                        new RemoteTransition(wrap(mExitAnimationRunner)));
             }
             if (sEnableRemoteKeyguardOccludeAnimation) {
                 Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
@@ -255,7 +257,7 @@ public class KeyguardService extends Service {
                 f.mRequirements[1].mMustBeIndependent = false;
                 f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
                 f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-                shellTransitions.registerRemote(f, mOccludeAnimation);
+                shellTransitions.registerRemote(f, new RemoteTransition(mOccludeAnimation));
 
                 // Now register for un-occlude.
                 f = new TransitionFilter();
@@ -275,7 +277,7 @@ public class KeyguardService extends Service {
                 f.mRequirements[0].mMustBeIndependent = false;
                 f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
                 f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-                shellTransitions.registerRemote(f, mUnoccludeAnimation);
+                shellTransitions.registerRemote(f, new RemoteTransition(mUnoccludeAnimation));
             }
         } else {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();

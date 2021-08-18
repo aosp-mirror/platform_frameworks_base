@@ -27,6 +27,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -50,10 +51,10 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     private final ShellExecutor mMainExecutor;
 
     /** Includes remotes explicitly requested by, eg, ActivityOptions */
-    private final ArrayMap<IBinder, IRemoteTransition> mRequestedRemotes = new ArrayMap<>();
+    private final ArrayMap<IBinder, RemoteTransition> mRequestedRemotes = new ArrayMap<>();
 
     /** Ordered by specificity. Last filters will be checked first */
-    private final ArrayList<Pair<TransitionFilter, IRemoteTransition>> mFilters =
+    private final ArrayList<Pair<TransitionFilter, RemoteTransition>> mFilters =
             new ArrayList<>();
 
     private final ArrayMap<IBinder, RemoteDeathHandler> mDeathHandlers = new ArrayMap<>();
@@ -62,19 +63,12 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         mMainExecutor = mainExecutor;
     }
 
-    void addFiltered(TransitionFilter filter, IRemoteTransition remote) {
-        try {
-            RemoteDeathHandler handler = new RemoteDeathHandler(remote.asBinder());
-            remote.asBinder().linkToDeath(handler, 0 /* flags */);
-            mDeathHandlers.put(remote.asBinder(), handler);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to link to death");
-            return;
-        }
+    void addFiltered(TransitionFilter filter, RemoteTransition remote) {
+        handleDeath(remote.asBinder(), null /* finishCallback */);
         mFilters.add(new Pair<>(filter, remote));
     }
 
-    void removeFiltered(IRemoteTransition remote) {
+    void removeFiltered(RemoteTransition remote) {
         boolean removed = false;
         for (int i = mFilters.size() - 1; i >= 0; --i) {
             if (mFilters.get(i).second == remote) {
@@ -83,8 +77,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             }
         }
         if (removed) {
-            RemoteDeathHandler handler = mDeathHandlers.remove(remote.asBinder());
-            remote.asBinder().unlinkToDeath(handler, 0 /* flags */);
+            unhandleDeath(remote.asBinder(), null /* finishCallback */);
         }
     }
 
@@ -98,7 +91,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        IRemoteTransition pendingRemote = mRequestedRemotes.get(transition);
+        RemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
                     + "explicit remote, search filters for match for %s", transition, info);
@@ -120,21 +113,12 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
         if (pendingRemote == null) return false;
 
-        final IRemoteTransition remote = pendingRemote;
-        final IBinder.DeathRecipient remoteDied = () -> {
-            Log.e(Transitions.TAG, "Remote transition died, finishing");
-            mMainExecutor.execute(() -> {
-                mRequestedRemotes.remove(transition);
-                finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            });
-        };
+        final RemoteTransition remote = pendingRemote;
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
-                if (remote.asBinder() != null) {
-                    remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
-                }
+                unhandleDeath(remote.asBinder(), finishCallback);
                 mMainExecutor.execute(() -> {
                     if (sct != null) {
                         finishTransaction.merge(sct);
@@ -145,15 +129,11 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             }
         };
         try {
-            if (remote.asBinder() != null) {
-                remote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
-            }
-            remote.startAnimation(transition, info, startTransaction, cb);
+            handleDeath(remote.asBinder(), finishCallback);
+            remote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
-            if (remote.asBinder() != null) {
-                remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
-            }
+            unhandleDeath(remote.asBinder(), finishCallback);
             mRequestedRemotes.remove(transition);
             mMainExecutor.execute(
                     () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
@@ -165,7 +145,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final IRemoteTransition remote = mRequestedRemotes.get(mergeTarget);
+        final IRemoteTransition remote = mRequestedRemotes.get(mergeTarget).getRemoteTransition();
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt merge %s into %s",
                 transition, remote);
         if (remote == null) return;
@@ -196,7 +176,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     @Nullable
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @Nullable TransitionRequestInfo request) {
-        IRemoteTransition remote = request.getRemoteTransition();
+        RemoteTransition remote = request.getRemoteTransition();
         if (remote == null) return null;
         mRequestedRemotes.put(transition, remote);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
@@ -204,12 +184,68 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         return new WindowContainerTransaction();
     }
 
+    private void handleDeath(@NonNull IBinder remote,
+            @Nullable Transitions.TransitionFinishCallback finishCallback) {
+        synchronized (mDeathHandlers) {
+            RemoteDeathHandler deathHandler = mDeathHandlers.get(remote);
+            if (deathHandler == null) {
+                deathHandler = new RemoteDeathHandler(remote);
+                try {
+                    remote.linkToDeath(deathHandler, 0 /* flags */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to link to death");
+                    return;
+                }
+                mDeathHandlers.put(remote, deathHandler);
+            }
+            deathHandler.addUser(finishCallback);
+        }
+    }
+
+    private void unhandleDeath(@NonNull IBinder remote,
+            @Nullable Transitions.TransitionFinishCallback finishCallback) {
+        synchronized (mDeathHandlers) {
+            RemoteDeathHandler deathHandler = mDeathHandlers.get(remote);
+            if (deathHandler == null) return;
+            deathHandler.removeUser(finishCallback);
+            if (deathHandler.getUserCount() == 0) {
+                if (!deathHandler.mPendingFinishCallbacks.isEmpty()) {
+                    throw new IllegalStateException("Unhandling death for binder that still has"
+                            + " pending finishCallback(s).");
+                }
+                remote.unlinkToDeath(deathHandler, 0 /* flags */);
+                mDeathHandlers.remove(remote);
+            }
+        }
+    }
+
     /** NOTE: binder deaths can alter the filter order */
     private class RemoteDeathHandler implements IBinder.DeathRecipient {
         private final IBinder mRemote;
+        private final ArrayList<Transitions.TransitionFinishCallback> mPendingFinishCallbacks =
+                new ArrayList<>();
+        private int mUsers = 0;
 
         RemoteDeathHandler(IBinder remote) {
             mRemote = remote;
+        }
+
+        void addUser(@Nullable Transitions.TransitionFinishCallback finishCallback) {
+            if (finishCallback != null) {
+                mPendingFinishCallbacks.add(finishCallback);
+            }
+            ++mUsers;
+        }
+
+        void removeUser(@Nullable Transitions.TransitionFinishCallback finishCallback) {
+            if (finishCallback != null) {
+                mPendingFinishCallbacks.remove(finishCallback);
+            }
+            --mUsers;
+        }
+
+        int getUserCount() {
+            return mUsers;
         }
 
         @Override
@@ -221,6 +257,16 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                         mFilters.remove(i);
                     }
                 }
+                for (int i = mRequestedRemotes.size() - 1; i >= 0; --i) {
+                    if (mRemote.equals(mRequestedRemotes.valueAt(i).asBinder())) {
+                        mRequestedRemotes.removeAt(i);
+                    }
+                }
+                for (int i = mPendingFinishCallbacks.size() - 1; i >= 0; --i) {
+                    mPendingFinishCallbacks.get(i).onTransitionFinished(
+                            null /* wct */, null /* wctCB */);
+                }
+                mPendingFinishCallbacks.clear();
             });
         }
     }
