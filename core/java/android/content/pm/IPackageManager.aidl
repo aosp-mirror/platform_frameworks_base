@@ -40,6 +40,7 @@ import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ComponentEnabledSetting;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -357,6 +358,11 @@ interface IPackageManager {
     @UnsupportedAppUsage
     void setComponentEnabledSetting(in ComponentName componentName,
             in int newState, in int flags, int userId);
+
+    /**
+     * As per {@link android.content.pm.PackageManager#setComponentEnabledSettings}.
+     */
+    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId);
 
     /**
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.

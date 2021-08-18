@@ -20,6 +20,7 @@ import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
@@ -151,6 +152,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.DEVICE_CONFIG_SYNC_DISABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.AUTOMATIC_POWER_SAVE_MODE, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.ADVANCED_BATTERY_USAGE_AMOUNT, PERCENTAGE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS_DURATION_MS, NONE_NEGATIVE_LONG_VALIDATOR);
 
         VALIDATORS.put(Global.Wearable.HAS_PAY_TOKENS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);

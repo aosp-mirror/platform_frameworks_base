@@ -1,0 +1,76 @@
+// Copyright (C) 2021 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// We build three helper APKs from the same source.
+// - The main APK (ComponentAliasAppMain), which contains both the alias and the target components.
+// - The sub APKs (ComponentAliasAppSub*), which only contains the target components.
+
+java_defaults {
+    name: "component_alias_app_defaults",
+    libs: ["android.test.base"],
+    sdk_version: "test_current",
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "compatibility-device-util-axt",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.test.rules",
+        "ComponentAliasTestsCommon",
+    ],
+}
+
+android_test_helper_app {
+    name: "ComponentAliasAppMain",
+    defaults: [
+        "component_alias_app_defaults",
+    ],
+    package_name: "android.content.componentalias.tests.app",
+    manifest: "AndroidManifest_main.xml",
+}
+
+android_test_helper_app {
+    name: "ComponentAliasAppSub1",
+    defaults: [
+        "component_alias_app_defaults",
+    ],
+    package_name: "android.content.componentalias.tests.app.sub1",
+    manifest: "AndroidManifest_sub.xml",
+}
+
+android_test_helper_app {
+    name: "ComponentAliasAppSub2",
+    defaults: [
+        "component_alias_app_defaults",
+    ],
+    package_name: "android.content.componentalias.tests.app.sub2",
+    manifest: "AndroidManifest_sub.xml",
+}

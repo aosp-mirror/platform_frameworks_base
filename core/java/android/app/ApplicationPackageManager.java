@@ -2807,6 +2807,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void setComponentEnabledSettings(List<ComponentEnabledSetting> settings) {
+        try {
+            mPM.setComponentEnabledSettings(settings, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public int getComponentEnabledSetting(ComponentName componentName) {
         try {
             return mPM.getComponentEnabledSetting(componentName, getUserId());

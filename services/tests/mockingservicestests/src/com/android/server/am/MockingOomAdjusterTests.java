@@ -2174,7 +2174,7 @@ public class MockingOomAdjusterTests {
         ConnectionRecord cr = spy(new ConnectionRecord(binding,
                 mock(ActivityServiceConnectionsHolder.class),
                 mock(IServiceConnection.class), bindFlags,
-                0, null, client.uid, client.processName, client.info.packageName));
+                0, null, client.uid, client.processName, client.info.packageName, null));
         doCallRealMethod().when(record).addConnection(any(IBinder.class),
                 any(ConnectionRecord.class));
         record.addConnection(binder, cr);

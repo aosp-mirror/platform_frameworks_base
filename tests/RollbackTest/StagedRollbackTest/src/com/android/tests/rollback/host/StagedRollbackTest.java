@@ -267,25 +267,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testRollbackAllowlistedApp_Phase2_VerifyInstall");
     }
 
-    @Test
-    public void testRollbackDataPolicy() throws Exception {
-        List<String> before = getSnapshotDirectories("/data/misc_ce/0/rollback");
-
-        runPhase("testRollbackDataPolicy_Phase1_Install");
-        getDevice().reboot();
-        runPhase("testRollbackDataPolicy_Phase2_Rollback");
-        getDevice().reboot();
-        runPhase("testRollbackDataPolicy_Phase3_VerifyRollback");
-
-        // Verify snapshots are deleted after restoration
-        List<String> after = getSnapshotDirectories("/data/misc_ce/0/rollback");
-        // Only check directories newly created during the test
-        after.removeAll(before);
-        // There should be only one /data/misc_ce/0/rollback/<rollbackId> created during test
-        assertThat(after).hasSize(1);
-        assertDirectoryIsEmpty(after.get(0));
-    }
-
     /**
      * Tests that userdata of apk-in-apex is restored when apex is rolled back.
      */

@@ -293,50 +293,6 @@ public class StagedRollbackTest {
     }
 
     @Test
-    public void testRollbackDataPolicy_Phase1_Install() throws Exception {
-        Install.multi(TestApp.A1, TestApp.B1, TestApp.C1).commit();
-        // Write user data version = 1
-        InstallUtils.processUserData(TestApp.A);
-        InstallUtils.processUserData(TestApp.B);
-        InstallUtils.processUserData(TestApp.C);
-
-        Install a2 = Install.single(TestApp.A2).setStaged()
-                .setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_WIPE);
-        Install b2 = Install.single(TestApp.B2).setStaged()
-                .setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_RESTORE);
-        // The rollback data policy of C2 is specified in the manifest
-        Install c2 = Install.single(TestApp.C2).setStaged().setEnableRollback();
-        Install.multi(a2, b2, c2).setEnableRollback().setStaged().commit();
-    }
-
-    @Test
-    public void testRollbackDataPolicy_Phase2_Rollback() throws Exception {
-        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
-        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(2);
-        // Write user data version = 2
-        InstallUtils.processUserData(TestApp.A);
-        InstallUtils.processUserData(TestApp.B);
-        InstallUtils.processUserData(TestApp.C);
-
-        RollbackInfo info = RollbackUtils.getAvailableRollback(TestApp.A);
-        RollbackUtils.rollback(info.getRollbackId());
-    }
-
-    @Test
-    public void testRollbackDataPolicy_Phase3_VerifyRollback() throws Exception {
-        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
-        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(1);
-        assertThat(InstallUtils.getInstalledVersion(TestApp.C)).isEqualTo(1);
-        // Read user data version from userdata.txt
-        // A's user data version is -1 for user data is wiped.
-        // B's user data version is 1 as rollback committed.
-        // C's user data version is -1 for user data is wiped.
-        assertThat(InstallUtils.getUserDataVersion(TestApp.A)).isEqualTo(-1);
-        assertThat(InstallUtils.getUserDataVersion(TestApp.B)).isEqualTo(1);
-        assertThat(InstallUtils.getUserDataVersion(TestApp.C)).isEqualTo(-1);
-    }
-
-    @Test
     public void expireRollbacks() throws Exception {
         // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
         // committed on a device which doesn't support checkpoint. Let's clean up all rollbacks

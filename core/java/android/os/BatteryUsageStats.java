@@ -271,6 +271,16 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     /**
+     * Returns the names of custom power components in order, so the first name in the array
+     * corresponds to the custom componentId
+     * {@link BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID}.
+     */
+    @NonNull
+    public String[] getCustomPowerComponentNames() {
+        return mCustomPowerComponentNames;
+    }
+
+    /**
      * Returns an iterator for {@link android.os.BatteryStats.HistoryItem}'s.
      */
     @NonNull

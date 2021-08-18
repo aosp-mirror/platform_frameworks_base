@@ -13,9 +13,8 @@
  */
 package com.android.systemui.shared.plugins;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +43,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 @SmallTest
@@ -51,10 +52,10 @@ import java.util.Optional;
 @RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
 
-    private static final String WHITELISTED_PACKAGE = "com.android.systemui";
+    private static final String PRIVILEGED_PACKAGE = "com.android.systemui";
 
     private PluginInstanceManager.Factory mMockFactory;
-    private PluginInstanceManager mMockPluginInstance;
+    private PluginInstanceManager<Plugin> mMockPluginInstance;
     private PluginManagerImpl mPluginManager;
     private PluginListener<?> mMockListener;
     private PackageManager mMockPackageManager;
@@ -73,16 +74,14 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockPluginInstance = mock(PluginInstanceManager.class);
         mPluginEnabler = mock(PluginEnabler.class);
         mPluginPrefs = mock(PluginPrefs.class);
-        when(mMockFactory.create(Mockito.any(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-                Mockito.any()))
+        when(mMockFactory.create(any(), any(), Mockito.anyBoolean(), any(), Mockito.anyBoolean()))
                 .thenReturn(mMockPluginInstance);
 
         mMockPackageManager = mock(PackageManager.class);
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, true,
                 Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, new String[0]);
+                mPluginPrefs, new ArrayList<>());
 
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
@@ -105,46 +104,49 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Test
     @RunWithLooper(setAsMainLooper = true)
-    public void testNonDebuggable_noWhitelist() {
+    public void testNonDebuggable_nonPrivileged() {
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, false,
                 Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, new String[0]);
+                mPluginPrefs, new ArrayList<>());
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.sourceDir = sourceDir;
-        applicationInfo.packageName = WHITELISTED_PACKAGE;
+        applicationInfo.packageName = PRIVILEGED_PACKAGE;
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNull(mPluginManager.getClassLoader(applicationInfo));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(false),
+                any(VersionInfo.class), eq(false));
+        verify(mMockPluginInstance).loadAll();
     }
 
     @Test
     @RunWithLooper(setAsMainLooper = true)
-    public void testNonDebuggable_whitelistedPkg() {
+    public void testNonDebuggable_privilegedPackage() {
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, false,
                 Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, new String[] {WHITELISTED_PACKAGE});
+                mPluginPrefs, Collections.singletonList(PRIVILEGED_PACKAGE));
         resetExceptionHandler();
 
         String sourceDir = "myPlugin";
-        ApplicationInfo whiteListedApplicationInfo = new ApplicationInfo();
-        whiteListedApplicationInfo.sourceDir = sourceDir;
-        whiteListedApplicationInfo.packageName = WHITELISTED_PACKAGE;
+        ApplicationInfo privilegedApplicationInfo = new ApplicationInfo();
+        privilegedApplicationInfo.sourceDir = sourceDir;
+        privilegedApplicationInfo.packageName = PRIVILEGED_PACKAGE;
         ApplicationInfo invalidApplicationInfo = new ApplicationInfo();
         invalidApplicationInfo.sourceDir = sourceDir;
         invalidApplicationInfo.packageName = "com.android.invalidpackage";
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        assertNotNull(mPluginManager.getClassLoader(whiteListedApplicationInfo));
-        assertNull(mPluginManager.getClassLoader(invalidApplicationInfo));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(false),
+                any(VersionInfo.class), eq(false));
+        verify(mMockPluginInstance).loadAll();
     }
 
     @Test
     public void testExceptionHandler_foundPlugin() {
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(true);
+        when(mMockPluginInstance.checkAndDisable(any())).thenReturn(true);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
 
@@ -159,7 +161,7 @@ public class PluginManagerTest extends SysuiTestCase {
     @Test
     public void testExceptionHandler_noFoundPlugin() {
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(false);
+        when(mMockPluginInstance.checkAndDisable(any())).thenReturn(false);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
 

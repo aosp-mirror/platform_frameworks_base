@@ -53,7 +53,7 @@ public:
     };
 
     struct Font {
-        FileMap* map;
+        FileMap* map = nullptr;
         Texture texture;
         int char_width;
         int char_height;
@@ -62,7 +62,7 @@ public:
     struct Animation {
         struct Frame {
             String8 name;
-            FileMap* map;
+            FileMap* map = nullptr;
             int trimX;
             int trimY;
             int trimWidth;
@@ -90,6 +90,10 @@ public:
             uint8_t* audioData;
             int audioLength;
             Animation* animation;
+            // Controls if dynamic coloring is enabled for this part.
+            bool useDynamicColoring = false;
+            // Defines if this part is played after the dynamic coloring part.
+            bool postDynamicColoring = false;
 
             bool hasFadingPhase() const {
                 return !playUntilComplete && framesToFadeCount > 0;
@@ -105,6 +109,10 @@ public:
         ZipFileRO* zip;
         Font clockFont;
         Font progressFont;
+         // Controls if dynamic coloring is enabled for the whole animation.
+        bool dynamicColoringEnabled = false;
+        float startColors[4][3]; // Start colors of dynamic color transition.
+        float endColors[4][3];   // End colors of dynamic color transition.
     };
 
     // All callbacks will be called from this class's internal thread.
@@ -163,8 +171,10 @@ private:
     int displayEventCallback(int fd, int events, void* data);
     void processDisplayEvents();
 
-    status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
-    status_t initTexture(FileMap* map, int* width, int* height);
+    status_t initTexture(Texture* texture, AssetManager& asset, const char* name,
+        bool premultiplyAlpha = true);
+    status_t initTexture(FileMap* map, int* width, int* height,
+        bool premultiplyAlpha = true);
     status_t initFont(Font* font, const char* fallback);
     void initShaders();
     bool android();
@@ -226,6 +236,7 @@ private:
     GLuint mImageTextureLocation;
     GLuint mTextCropAreaLocation;
     GLuint mTextTextureLocation;
+    GLuint mImageColorProgressLocation;
 };
 
 // ---------------------------------------------------------------------------

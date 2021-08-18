@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -72,6 +74,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private final StatusBar mStatusBar = mock(StatusBar.class);
     private final CommandQueue mCommandQueue = mock(CommandQueue.class);
+    private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
+    private OperatorNameViewController mOperatorNameViewController;
 
 
     public CollapsedStatusBarFragmentTest() {
@@ -243,6 +247,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mNetworkController = mock(NetworkController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
+        mOperatorNameViewController = mock(OperatorNameViewController.class);
+        mOperatorNameViewControllerFactory = mock(OperatorNameViewController.Factory.class);
+        when(mOperatorNameViewControllerFactory.create(any()))
+                .thenReturn(mOperatorNameViewController);
+
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
                 mOngoingCallController,
@@ -255,7 +264,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mNetworkController,
                 mStatusBarStateController,
                 () -> Optional.of(mStatusBar),
-                mCommandQueue);
+                mCommandQueue,
+                mOperatorNameViewControllerFactory);
     }
 
 

@@ -498,7 +498,12 @@ class PrivacyDotViewController @Inject constructor(
         }
 
         if (state.designatedCorner != currentViewState.designatedCorner) {
+            currentViewState.designatedCorner?.contentDescription = null
+            state.designatedCorner?.contentDescription = state.contentDescription
+
             updateDesignatedCorner(state.designatedCorner, state.shouldShowDot())
+        } else if (state.contentDescription != currentViewState.contentDescription) {
+            state.designatedCorner?.contentDescription = state.contentDescription
         }
 
         val shouldShow = state.shouldShowDot()
@@ -515,9 +520,13 @@ class PrivacyDotViewController @Inject constructor(
 
     private val systemStatusAnimationCallback: SystemStatusAnimationCallback =
             object : SystemStatusAnimationCallback {
-        override fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? {
+        override fun onSystemStatusAnimationTransitionToPersistentDot(
+            contentDescr: String?
+        ): Animator? {
             synchronized(lock) {
-                nextViewState = nextViewState.copy(systemPrivacyEventIsActive = true)
+                nextViewState = nextViewState.copy(
+                        systemPrivacyEventIsActive = true,
+                        contentDescription = contentDescr)
             }
 
             return null
@@ -621,7 +630,9 @@ private data class ViewState(
     val rotation: Int = 0,
     val height: Int = 0,
     val cornerIndex: Int = -1,
-    val designatedCorner: View? = null
+    val designatedCorner: View? = null,
+
+    val contentDescription: String? = null
 ) {
     fun shouldShowDot(): Boolean {
         return systemPrivacyEventIsActive && !shadeExpanded && !qsExpanded
