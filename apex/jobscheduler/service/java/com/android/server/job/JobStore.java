@@ -133,7 +133,7 @@ public final class JobStore {
     @VisibleForTesting
     public static JobStore initAndGetForTesting(Context context, File dataDir) {
         JobStore jobStoreUnderTest = new JobStore(context, new Object(), dataDir);
-        jobStoreUnderTest.clear();
+        jobStoreUnderTest.clearForTesting();
         return jobStoreUnderTest;
     }
 
@@ -222,6 +222,14 @@ public final class JobStore {
         return replaced;
     }
 
+    /**
+     * The same as above but does not schedule writing. This makes perf benchmarks more stable.
+     */
+    @VisibleForTesting
+    public void addForTesting(JobStatus jobStatus) {
+        mJobSet.add(jobStatus);
+    }
+
     boolean containsJob(JobStatus jobStatus) {
         return mJobSet.contains(jobStatus);
     }
@@ -270,6 +278,14 @@ public final class JobStore {
     public void clear() {
         mJobSet.clear();
         maybeWriteStatusToDiskAsync();
+    }
+
+    /**
+     * The same as above but does not schedule writing. This makes perf benchmarks more stable.
+     */
+    @VisibleForTesting
+    public void clearForTesting() {
+        mJobSet.clear();
     }
 
     /**
