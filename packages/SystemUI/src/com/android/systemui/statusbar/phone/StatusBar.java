@@ -1107,14 +1107,10 @@ public class StatusBar extends SystemUI implements
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        mStackScrollerController =
-                mNotificationPanelViewController.getNotificationStackScrollLayoutController();
-        mStackScroller = mStackScrollerController.getView();
         NotificationListContainer notifListContainer =
                 mStackScrollerController.getNotificationListContainer();
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
-        inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
         mNotificationPanelViewController.addExpansionListener(
@@ -1526,11 +1522,6 @@ public class StatusBar extends SystemUI implements
         };
     }
 
-    private void inflateShelf() {
-        mNotificationShelfController = mSuperStatusBarViewFactory
-                .getNotificationShelfController(mStackScroller);
-    }
-
     private void inflateStatusBarWindow() {
         StatusBarComponent statusBarComponent = mStatusBarComponentFactory.create();
         mNotificationShadeWindowView = statusBarComponent.getNotificationShadeWindowView();
@@ -1542,7 +1533,10 @@ public class StatusBar extends SystemUI implements
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         statusBarComponent.getLockIconViewController().init();
+        mStackScrollerController = statusBarComponent.getNotificationStackScrollLayoutController();
+        mStackScroller = mStackScrollerController.getView();
 
+        mNotificationShelfController = statusBarComponent.getNotificationShelfController();
         mAuthRippleController = statusBarComponent.getAuthRippleController();
         mAuthRippleController.init();
 

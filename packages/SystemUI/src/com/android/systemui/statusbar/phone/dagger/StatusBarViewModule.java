@@ -25,6 +25,11 @@ import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.biometrics.AuthRippleView;
+import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.TapAgainView;
@@ -56,6 +61,45 @@ public abstract class StatusBarViewModule {
         }
 
         return notificationShadeWindowView;
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
+        return notificationStackScrollLayoutController.getView();
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
+            NotificationStackScrollLayout notificationStackScrollLayout) {
+        NotificationShelf view = (NotificationShelf) layoutInflater.inflate(
+                R.layout.status_bar_notification_shelf, notificationStackScrollLayout, false);
+
+        if (view == null) {
+            throw new IllegalStateException(
+                    "R.layout.status_bar_notification_shelf could not be properly inflated");
+        }
+        return view;
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static NotificationShelfController providesStatusBarWindowView(
+            NotificationShelfComponent.Builder notificationShelfComponentBuilder,
+            NotificationShelf notificationShelf) {
+        NotificationShelfComponent component = notificationShelfComponentBuilder
+                .notificationShelf(notificationShelf)
+                .build();
+        NotificationShelfController notificationShelfController =
+                component.getNotificationShelfController();
+        notificationShelfController.init();
+
+        return notificationShelfController;
     }
 
     /** */

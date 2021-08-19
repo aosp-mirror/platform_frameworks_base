@@ -18,11 +18,9 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -37,18 +35,14 @@ public class SuperStatusBarViewFactory {
 
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
-    private final NotificationShelfComponent.Builder mNotificationShelfComponentBuilder;
 
     private StatusBarWindowView mStatusBarWindowView;
-    private NotificationShelfController mNotificationShelfController;
 
     @Inject
     public SuperStatusBarViewFactory(Context context,
-            InjectionInflationController injectionInflationController,
-            NotificationShelfComponent.Builder notificationShelfComponentBuilder) {
+            InjectionInflationController injectionInflationController) {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
-        mNotificationShelfComponentBuilder = notificationShelfComponentBuilder;
     }
 
     /**
@@ -69,37 +63,5 @@ public class SuperStatusBarViewFactory {
                     "R.layout.super_status_bar could not be properly inflated");
         }
         return mStatusBarWindowView;
-    }
-
-    /**
-     * Gets the inflated {@link NotificationShelf} from
-     * {@link R.layout#status_bar_notification_shelf}.
-     * Returns a cached instance, if it has already been inflated.
-     *
-     * @param container the expected container to hold the {@link NotificationShelf}. The view
-     *                  isn't immediately attached, but the layout params of this view is used
-     *                  during inflation.
-     */
-    public NotificationShelfController getNotificationShelfController(ViewGroup container) {
-        if (mNotificationShelfController != null) {
-            return mNotificationShelfController;
-        }
-
-        NotificationShelf view = (NotificationShelf) LayoutInflater.from(mContext)
-                .inflate(R.layout.status_bar_notification_shelf, container, /* attachToRoot= */
-                        false);
-
-        if (view == null) {
-            throw new IllegalStateException(
-                    "R.layout.status_bar_notification_shelf could not be properly inflated");
-        }
-
-        NotificationShelfComponent component = mNotificationShelfComponentBuilder
-                .notificationShelf(view)
-                .build();
-        mNotificationShelfController = component.getNotificationShelfController();
-        mNotificationShelfController.init();
-
-        return mNotificationShelfController;
     }
 }
