@@ -31,6 +31,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
@@ -42,6 +43,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
     private final ContentResolver mContentResolver;
+    private final BatteryController mBatteryController;
 
     private final String mSlotBattery;
     private final SettingObserver mSettingObserver;
@@ -66,6 +68,24 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         }
     };
 
+    private final BatteryController.BatteryStateChangeCallback mBatteryStateChangeCallback =
+            new BatteryController.BatteryStateChangeCallback() {
+                @Override
+                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                    mView.onBatteryLevelChanged(level, pluggedIn);
+                }
+
+                @Override
+                public void onPowerSaveChanged(boolean isPowerSave) {
+                    mView.onPowerSaveChanged(isPowerSave);
+                }
+
+                @Override
+                public void onBatteryUnknownStateChanged(boolean isUnknown) {
+                    mView.onBatteryUnknownStateChanged(isUnknown);
+                }
+            };
+
     // Some places may need to show the battery conditionally, and not obey the tuner
     private boolean mIgnoreTunerUpdates;
     private boolean mIsSubscribedForTunerUpdates;
@@ -77,11 +97,15 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
             TunerService tunerService,
             BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
-            ContentResolver contentResolver) {
+            ContentResolver contentResolver,
+            BatteryController batteryController) {
         super(view);
         mConfigurationController = configurationController;
         mTunerService = tunerService;
         mContentResolver = contentResolver;
+        mBatteryController = batteryController;
+
+        mView.setBatteryEstimateFetcher(mBatteryController::getEstimatedTimeRemainingString);
 
         mSlotBattery = getResources().getString(com.android.internal.R.string.status_bar_battery);
         mSettingObserver = new SettingObserver(mainHandler);
@@ -99,16 +123,21 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     protected void onViewAttached() {
         mConfigurationController.addCallback(mConfigurationListener);
         subscribeForTunerUpdates();
+        mBatteryController.addCallback(mBatteryStateChangeCallback);
 
         registerShowBatteryPercentObserver(ActivityManager.getCurrentUser());
         registerGlobalBatteryUpdateObserver();
         mCurrentUserTracker.startTracking();
+
+        mView.updateShowPercent();
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
         unsubscribeFromTunerUpdates();
+        mBatteryController.removeCallback(mBatteryStateChangeCallback);
+
         mCurrentUserTracker.stopTracking();
         mContentResolver.unregisterContentObserver(mSettingObserver);
     }
