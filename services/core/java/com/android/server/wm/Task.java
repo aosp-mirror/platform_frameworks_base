@@ -590,16 +590,6 @@ class Task extends TaskFragment {
     // false.
     private boolean mDeferTaskAppear;
 
-    /**
-     * Forces this task to be unorganized. Currently it is used for deferring the control of
-     * organizer when windowing mode is changing from PiP to fullscreen with orientation change.
-     * It is true only during Task#setWindowingMode ~ DisplayRotation#continueRotation.
-     *
-     * TODO(b/179235349): Remove this field by making surface operations from task organizer sync
-     *                    with display rotation.
-     */
-    private boolean mForceNotOrganized;
-
     // Tracking cookie for the creation of this task.
     IBinder mLaunchCookie;
 
@@ -1932,19 +1922,16 @@ class Task extends TaskFragment {
             }
         }
 
-        if (pipChanging) {
-            // If the top activity is using fixed rotation, it should be changing from PiP to
-            // fullscreen with display orientation change. Do not notify fullscreen task organizer
-            // because the restoration of task surface and the transformation of activity surface
-            // need to be done synchronously.
+        if (pipChanging && wasInPictureInPicture) {
+            // If the top activity is changing from PiP to fullscreen with fixed rotation,
+            // clear the crop and rotation matrix of task because fixed rotation will handle
+            // the transformation on activity level. This also avoids flickering caused by the
+            // latency of fullscreen task organizer configuring the surface.
             final ActivityRecord r = topRunningActivity();
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
-                mForceNotOrganized = true;
+                getSyncTransaction().setWindowCrop(mSurfaceControl, null)
+                        .setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
             }
-        } else {
-            // If the display orientation change is done, let the corresponding task organizer take
-            // back the control of this task.
-            mForceNotOrganized = false;
         }
 
         saveLaunchingStateIfNeeded();
@@ -3676,9 +3663,6 @@ class Task extends TaskFragment {
         pw.print(" isResizeable="); pw.println(isResizeable());
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
         pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
-        if (mForceNotOrganized) {
-            pw.print(prefix); pw.println("mForceNotOrganized=true");
-        }
     }
 
     @Override
@@ -4154,9 +4138,6 @@ class Task extends TaskFragment {
     }
 
     private boolean canBeOrganized() {
-        if (mForceNotOrganized) {
-            return false;
-        }
         // All root tasks can be organized
         if (isRootTask()) {
             return true;
@@ -4309,7 +4290,6 @@ class Task extends TaskFragment {
             return setTaskOrganizer(null);
         }
 
-        final int windowingMode = getWindowingMode();
         final TaskOrganizerController controller = mWmService.mAtmService.mTaskOrganizerController;
         final ITaskOrganizer organizer = controller.getTaskOrganizer();
         if (!forceUpdate && mTaskOrganizer == organizer) {
