@@ -1,4 +1,4 @@
-package com.android.unfold.updates.hinge
+package com.android.systemui.unfold.updates.hinge
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent

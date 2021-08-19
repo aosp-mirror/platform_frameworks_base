@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.unfold.updates
+package com.android.systemui.unfold.updates
 
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import androidx.core.util.Consumer
-import com.android.unfold.updates.screen.ScreenStatusProvider
-import com.android.unfold.updates.FoldStateProvider.FoldUpdate
-import com.android.unfold.updates.FoldStateProvider.FoldUpdatesListener
-import com.android.unfold.updates.hinge.FULLY_OPEN_DEGREES
-import com.android.unfold.updates.hinge.HingeAngleProvider
+import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
+import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import java.util.concurrent.Executor
 
 internal class DeviceFoldStateProvider(

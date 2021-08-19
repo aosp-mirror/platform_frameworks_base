@@ -23,8 +23,7 @@ import android.view.Surface
 import android.view.WindowManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.unfold.UnfoldTransitionProgressProvider
-import com.android.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
 import java.util.concurrent.Executor
