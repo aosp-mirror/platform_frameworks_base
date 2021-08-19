@@ -70,7 +70,6 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerIm
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
-import com.android.systemui.volume.dagger.VolumeModule;
 
 import javax.inject.Named;
 
@@ -84,8 +83,7 @@ import dagger.Provides;
  */
 @Module(includes = {
             PowerModule.class,
-            QSModule.class,
-            VolumeModule.class,
+            QSModule.class
         },
         subcomponents = {
         })
