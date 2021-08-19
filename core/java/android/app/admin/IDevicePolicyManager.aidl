@@ -236,14 +236,14 @@ interface IDevicePolicyManager {
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);
 
-    boolean setPermittedAccessibilityServices(in ComponentName admin,in List packageList);
-    List getPermittedAccessibilityServices(in ComponentName admin);
-    List getPermittedAccessibilityServicesForUser(int userId);
+    boolean setPermittedAccessibilityServices(in ComponentName admin,in List<String> packageList);
+    List<String> getPermittedAccessibilityServices(in ComponentName admin);
+    List<String> getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List packageList, boolean parent);
-    List getPermittedInputMethods(in ComponentName admin, boolean parent);
-    List getPermittedInputMethodsForCurrentUser();
+    boolean setPermittedInputMethods(in ComponentName admin,in List<String> packageList, boolean parent);
+    List<String> getPermittedInputMethods(in ComponentName admin, boolean parent);
+    List<String> getPermittedInputMethodsForCurrentUser();
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
     boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);
