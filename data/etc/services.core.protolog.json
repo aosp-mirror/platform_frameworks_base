@@ -571,6 +571,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
     },
+    "-1483435730": {
+      "message": "InsetsSource setWin %s for type %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
     "-1480772131": {
       "message": "No app or window is requesting an orientation, return %d for display id=%d",
       "level": "VERBOSE",
@@ -673,6 +679,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
+    "-1394745488": {
+      "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
     "-1391944764": {
       "message": "SURFACE DESTROY: %s. %s",
       "level": "INFO",
@@ -720,12 +732,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-1312861660": {
-      "message": "notifyInsetsControlChanged for %s ",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-1311436264": {
       "message": "Unregister task fragment organizer=%s uid=%d pid=%d",
@@ -834,6 +840,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-1185473319": {
+      "message": "ControlAdapter startAnimation mSource: %s controlTarget: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
     "-1176488860": {
       "message": "SURFACE isSecure=%b: %s",
@@ -1531,12 +1543,6 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
-    "-395922585": {
-      "message": "InsetsSource setWin %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
-    },
     "-393505149": {
       "message": "unable to update pointer icon",
       "level": "WARN",
@@ -1741,12 +1747,6 @@
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-112805366": {
-      "message": "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
-    },
     "-108977760": {
       "message": "Sandbox max bounds for uid %s to bounds %s. config to never sandbox = %s, config to always sandbox = %s, letterboxing from mismatch with parent bounds = %s, has mCompatDisplayInsets = %s, should create compatDisplayInsets = %s",
       "level": "DEBUG",
@@ -1849,12 +1849,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
-    "29780972": {
-      "message": "InsetsSource Control %s for target %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
-    },
     "35398067": {
       "message": "goodToGo(): onAnimationStart, transit=%s, apps=%d, wallpapers=%d, nonApps=%d",
       "level": "DEBUG",
@@ -1897,23 +1891,11 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
-    "73987756": {
-      "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
-    },
     "74885950": {
       "message": "Waiting for top state to be released by %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
-    },
-    "75707221": {
-      "message": "ControlAdapter startAnimation mSource: %s controlTarget: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
     "83950285": {
       "message": "removeAnimation(%d)",
@@ -2286,6 +2268,12 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "416924848": {
+      "message": "InsetsSource Control %s for target %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
     "417311568": {
       "message": "onResize: Resizing %s",
@@ -2803,6 +2791,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1030898920": {
+      "message": "notifyInsetsControlChanged for %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "1033274509": {
       "message": "moveWindowTokenToDisplay: Attempted to move non-existing token: %s",
       "level": "WARN",
@@ -2820,6 +2814,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1047505501": {
+      "message": "notifyInsetsChanged for %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "1047769218": {
       "message": "Finishing activity r=%s, result=%d, data=%s, reason=%s",
@@ -3210,12 +3210,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1533154777": {
-      "message": "notifyInsetsChanged for %s ",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "1557732761": {
       "message": "For Intent %s bringing to top: %s",
@@ -3643,6 +3637,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "2070726247": {
+      "message": "InsetsSource updateVisibility for %s, serverVisible: %s clientVisible: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_INSETS",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
     "2083556954": {
       "message": "Set mOrientationChanging of %s",
       "level": "VERBOSE",
@@ -3766,6 +3766,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_TASKS": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_WINDOW_INSETS": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_MOVEMENT": {
