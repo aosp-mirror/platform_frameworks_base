@@ -211,6 +211,8 @@
 
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
+    <!-- Message shown in power menu when smart lock has been disabled [CHAR_LIMIT=NONE] -->
+    <string name="global_action_smart_lock_disabled">Smart Lock disabled</string>
 
     <!-- text to show in place of RemoteInput images when they cannot be shown.
          [CHAR LIMIT=50] -->
