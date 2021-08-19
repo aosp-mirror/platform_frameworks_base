@@ -109,7 +109,6 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -237,7 +236,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
-    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private StatusBarWindowView mStatusBarWindowView;
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -409,7 +408,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,
-                mSuperStatusBarViewFactory,
+                mStatusBarWindowView,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,

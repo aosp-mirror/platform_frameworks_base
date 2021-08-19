@@ -43,7 +43,6 @@ import android.view.WindowManager;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 
 import javax.inject.Inject;
 
@@ -58,14 +57,13 @@ public class StatusBarWindowController {
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final IWindowManager mIWindowManager;
-    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private final Resources mResources;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
 
-    private ViewGroup mStatusBarView;
-    private ViewGroup mLaunchAnimationContainer;
+    private final ViewGroup mStatusBarView;
+    private final ViewGroup mLaunchAnimationContainer;
     private WindowManager.LayoutParams mLp;
     private final WindowManager.LayoutParams mLpChanged;
 
@@ -74,15 +72,14 @@ public class StatusBarWindowController {
             Context context,
             WindowManager windowManager,
             IWindowManager iWindowManager,
-            SuperStatusBarViewFactory superStatusBarViewFactory,
+            StatusBarWindowView statusBarWindowView,
             StatusBarContentInsetsProvider contentInsetsProvider,
             @Main Resources resources) {
         mContext = context;
         mWindowManager = windowManager;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
-        mSuperStatusBarViewFactory = superStatusBarViewFactory;
-        mStatusBarView = mSuperStatusBarViewFactory.getStatusBarWindowView();
+        mStatusBarView = statusBarWindowView;
         mLaunchAnimationContainer = mStatusBarView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();

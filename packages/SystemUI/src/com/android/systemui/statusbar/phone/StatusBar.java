@@ -194,7 +194,6 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -458,7 +457,6 @@ public class StatusBar extends SystemUI implements
     private final Point mCurrentDisplaySize = new Point();
 
     protected NotificationShadeWindowView mNotificationShadeWindowView;
-    protected StatusBarWindowView mPhoneStatusBarWindow;
     protected PhoneStatusBarView mStatusBarView;
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
     private AuthRippleController mAuthRippleController;
@@ -496,7 +494,7 @@ public class StatusBar extends SystemUI implements
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
-    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    private final StatusBarWindowView mStatusBarWindowView;
     private final LightsOutNotifController mLightsOutNotifController;
     private final InitController mInitController;
 
@@ -750,7 +748,7 @@ public class StatusBar extends SystemUI implements
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
-            SuperStatusBarViewFactory superStatusBarViewFactory,
+            StatusBarWindowView statusBarWindowView,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
@@ -845,7 +843,7 @@ public class StatusBar extends SystemUI implements
         mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
-        mSuperStatusBarViewFactory = superStatusBarViewFactory;
+        mStatusBarWindowView = statusBarWindowView;
         mLightsOutNotifController =  lightsOutNotifController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
@@ -1119,7 +1117,7 @@ public class StatusBar extends SystemUI implements
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
-        FragmentHostManager.get(mPhoneStatusBarWindow)
+        FragmentHostManager.get(mStatusBarWindowView)
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
                     CollapsedStatusBarFragment statusBarFragment =
                             (CollapsedStatusBarFragment) fragment;
@@ -1530,7 +1528,6 @@ public class StatusBar extends SystemUI implements
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
         mStatusBarWindowController = statusBarComponent.getStatusBarWindowController();
-        mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         statusBarComponent.getLockIconViewController().init();
         mStackScrollerController = statusBarComponent.getNotificationStackScrollLayoutController();
@@ -1611,7 +1608,7 @@ public class StatusBar extends SystemUI implements
     }
 
     public StatusBarWindowView getStatusBarWindow() {
-        return mPhoneStatusBarWindow;
+        return mStatusBarWindowView;
     }
 
     public NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
@@ -2564,7 +2561,7 @@ public class StatusBar extends SystemUI implements
     private ActivityLaunchAnimator.Controller wrapAnimationController(
             ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
         View rootView = animationController.getLaunchContainer().getRootView();
-        if (rootView == mSuperStatusBarViewFactory.getStatusBarWindowView()) {
+        if (rootView == mStatusBarWindowView) {
             // We are animating a view in the status bar. We have to make sure that the status bar
             // window matches the full screen during the animation and that we are expanding the
             // view below the other status bar text.
