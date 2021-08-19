@@ -771,6 +771,8 @@ message GlobalSettingsProto {
     optional SettingProto power_manager_constants = 93;
     reserved 94; // Used to be priv_app_oob_enabled
 
+    optional SettingProto power_button_long_press_duration_ms = 154 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message PrepaidSetup {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -1063,5 +1065,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 154;
+    // Next tag = 155;
 }

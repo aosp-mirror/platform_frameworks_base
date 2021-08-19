@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ไม่รู้จักใบหน้า ใช้ลายนิ้วมือแทน"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ใช้ลายนิ้วมือของคุณเพื่อดำเนินการต่อ"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ไม่รู้จักลายนิ้วมือ ใช้การล็อกหน้าจอแทน"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"กำลังหาใบหน้าคุณ…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"ไอคอนใบหน้า"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>

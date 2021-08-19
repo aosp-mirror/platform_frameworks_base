@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"अनुहार पहिचान गर्न सकिएन। बरु फिंगरप्रिन्ट प्रयोग गर्नुहोस्।"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"जारी राख्न आफ्नो फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"फिंगरप्रिन्ट पहिचान गर्न सकिएन। बरु स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"तपाईंलाई खोज्दै…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"अनुहारको आइकन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"मिलाउने जुम बटन।"</string>
