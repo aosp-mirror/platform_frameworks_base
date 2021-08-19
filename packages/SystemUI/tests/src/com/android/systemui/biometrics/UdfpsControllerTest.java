@@ -69,6 +69,7 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -147,6 +148,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private SystemClock mSystemClock;
 
     private FakeExecutor mFgExecutor;
 
@@ -229,7 +232,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mDisplayManager,
                 mHandler,
-                mConfigurationController);
+                mConfigurationController,
+                mSystemClock);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
