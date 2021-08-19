@@ -1,4 +1,4 @@
-package com.android.unfold.updates.hinge
+package com.android.systemui.unfold.updates.hinge
 
 import androidx.core.util.Consumer
 import com.android.systemui.statusbar.policy.CallbackController
