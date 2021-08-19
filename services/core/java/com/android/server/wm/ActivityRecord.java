@@ -7076,7 +7076,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        mDisplayContent.mPinnedTaskController.onCancelFixedRotationTransform(task);
+        mDisplayContent.mPinnedTaskController.onCancelFixedRotationTransform();
         // Perform rotation animation according to the rotation of this activity.
         startFreezingScreen(originalDisplayRotation);
         // This activity may relaunch or perform configuration change so once it has reported drawn,

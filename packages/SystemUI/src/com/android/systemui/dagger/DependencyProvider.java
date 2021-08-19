@@ -92,9 +92,9 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.unfold.UnfoldTransitionFactory;
-import com.android.unfold.UnfoldTransitionProgressProvider;
-import com.android.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.UnfoldTransitionFactory;
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 

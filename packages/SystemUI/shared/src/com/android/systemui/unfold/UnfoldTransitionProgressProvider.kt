@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.unfold
+package com.android.systemui.unfold
 
 import android.annotation.FloatRange
-import com.android.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.statusbar.policy.CallbackController
 
 /**

@@ -730,11 +730,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             canUpdate = true;
         }
 
-        // Compare the z-order of ActivityStacks if both activities landed on same display.
-        if (display == topDisplay
-                && mPreQTopResumedActivity.getRootTask().compareTo(
-                        activity.getRootTask()) <= 0) {
-            canUpdate = true;
+        // Update the topmost activity if the activity has higher z-order than the current
+        // top-resumed activity.
+        if (!canUpdate) {
+            final ActivityRecord ar = topDisplay.getActivity(r -> r == activity,
+                    true /* traverseTopToBottom */, mPreQTopResumedActivity);
+            if (ar != null && ar != mPreQTopResumedActivity) {
+                canUpdate = true;
+            }
         }
 
         if (canUpdate) {

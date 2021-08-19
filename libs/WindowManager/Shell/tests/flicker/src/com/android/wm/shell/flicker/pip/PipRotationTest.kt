@@ -32,6 +32,8 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.traces.common.Region
+import com.android.server.wm.traces.parser.minus
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -94,7 +96,10 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp.component).coversExactly(startingBounds)
+            val pipRegion = visibleRegion(pipApp.component).region
+            val expectedWithoutPip = Region(startingBounds.bounds.left, startingBounds.bounds.top,
+                    startingBounds.bounds.right, startingBounds.bounds.bottom).minus(pipRegion)
+            visibleRegion(fixedApp.component).coversExactly(expectedWithoutPip)
             visibleRegion(pipApp.component).coversAtMost(startingBounds)
         }
     }
@@ -103,7 +108,10 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp.component).coversExactly(endingBounds)
+            val pipRegion = visibleRegion(pipApp.component).region
+            val expectedWithoutPip = Region(endingBounds.bounds.left, endingBounds.bounds.top,
+                    endingBounds.bounds.right, endingBounds.bounds.bottom).minus(pipRegion)
+            visibleRegion(fixedApp.component).coversExactly(expectedWithoutPip)
             visibleRegion(pipApp.component).coversAtMost(endingBounds)
         }
     }
