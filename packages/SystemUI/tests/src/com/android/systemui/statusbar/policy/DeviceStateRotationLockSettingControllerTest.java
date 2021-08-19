@@ -225,6 +225,11 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
         }
 
         @Override
+        public boolean isCameraRotationEnabled() {
+            throw new AssertionError("Not implemented");
+        }
+
+        @Override
         public void registerRotationPolicyListener(RotationPolicy.RotationPolicyListener listener,
                 int userHandle) {
             throw new AssertionError("Not implemented");
