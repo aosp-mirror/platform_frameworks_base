@@ -454,6 +454,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                     mWaitForInlineRequest = inlineSuggestionsRequest != null;
                     mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
+                    mWaitForInlineRequest = inlineSuggestionsRequest != null;
                     maybeRequestFillFromServiceLocked();
                     viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
                 }
@@ -860,7 +861,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((mSessionFlags.mInlineSupportedByService || mSessionFlags.mClientSuggestionsEnabled)
                 && remoteRenderService != null
                 && isViewFocusedLocked(flags)) {
-            Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer;
+            final Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer;
             if (mSessionFlags.mClientSuggestionsEnabled) {
                 final int finalRequestId = requestId;
                 inlineSuggestionsRequestConsumer = (inlineSuggestionsRequest) -> {
