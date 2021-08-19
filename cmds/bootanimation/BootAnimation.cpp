@@ -728,6 +728,22 @@ void BootAnimation::initShaders() {
     glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, quadUVs);
     glEnableVertexAttribArray(uvLocation);
 
+    if (dynamicColoringEnabled) {
+        glUseProgram(mImageShader);
+        SLOGI("[BootAnimation] Dynamically coloring boot animation.");
+        for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
+            float *startColor = mAnimation->startColors[i];
+            float *endColor = mAnimation->endColors[i];
+            glUniform4f(glGetUniformLocation(mImageShader,
+                (U_START_COLOR_PREFIX + std::to_string(i)).c_str()),
+                startColor[0], startColor[1], startColor[2], 1 /* alpha */);
+            glUniform4f(glGetUniformLocation(mImageShader,
+                (U_END_COLOR_PREFIX + std::to_string(i)).c_str()),
+                endColor[0], endColor[1], endColor[2], 1 /* alpha */);
+        }
+        mImageColorProgressLocation = glGetUniformLocation(mImageShader, U_COLOR_PROGRESS);
+    }
+
     // Initialize text shader.
     mTextShader = linkShader(vertexShader, textFragmentShader);
     positionLocation = glGetAttribLocation(mTextShader, A_POSITION);
@@ -1161,6 +1177,12 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
                 animation.parts.add(part);
         }
         s = ++endl;
+    }
+
+    for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
+        parseColorDecimalString(
+            android::base::GetProperty("persist.bootanim.color" + std::to_string(i + 1), ""),
+            animation.endColors[i], animation.startColors[i]);
     }
 
     return true;
