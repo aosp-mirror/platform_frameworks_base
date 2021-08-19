@@ -301,7 +301,7 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public Map setParameters(Map parameters) {
+    public Map<String, String> setParameters(Map<String, String> parameters) {
         synchronized (mLock) {
             checkNotClosedLocked();
             return Convert.vendorInfoFromHal(Utils.maybeRethrow(
@@ -310,7 +310,7 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public Map getParameters(List<String> keys) {
+    public Map<String, String> getParameters(List<String> keys) {
         synchronized (mLock) {
             checkNotClosedLocked();
             return Convert.vendorInfoFromHal(Utils.maybeRethrow(
