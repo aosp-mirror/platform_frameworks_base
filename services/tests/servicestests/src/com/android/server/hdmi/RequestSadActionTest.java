@@ -22,11 +22,7 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 
 import androidx.test.InstrumentationRegistry;
@@ -38,8 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +62,7 @@ public class RequestSadActionTest {
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
@@ -80,10 +75,6 @@ public class RequestSadActionTest {
                     mSupportedSads = supportedSads;
                 }
             };
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
 
     private static byte[] concatenateSads(List<byte[]> sads) {
         byte[] concatenatedSads = new byte[sads.size() * 3];
@@ -97,8 +88,6 @@ public class RequestSadActionTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
@@ -111,10 +100,6 @@ public class RequestSadActionTest {
                     }
 
                     @Override
-                    void wakeUp() {
-                    }
-
-                    @Override
                     protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
                     }
@@ -122,12 +107,6 @@ public class RequestSadActionTest {
                     @Override
                     boolean isPowerStandbyOrTransient() {
                         return false;
-                    }
-
-                    @Override
-                    protected PowerManager getPowerManager() {
-                        return new PowerManager(context, mIPowerManagerMock,
-                                mIThermalServiceMock, new Handler(mMyLooper));
                     }
                 };
 
@@ -143,6 +122,8 @@ public class RequestSadActionTest {
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(context);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
