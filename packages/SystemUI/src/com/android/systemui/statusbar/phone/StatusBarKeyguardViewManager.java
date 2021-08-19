@@ -73,6 +73,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
+
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
  * via {@link ViewMediatorCallback} to poke the wake lock and report that the keyguard is done,
@@ -111,6 +113,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
+    private final Lazy<ShadeController> mShadeController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -243,7 +246,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             KeyguardBouncer.Factory keyguardBouncerFactory,
             WakefulnessLifecycle wakefulnessLifecycle,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            KeyguardMessageAreaController.Factory keyguardMessageAreaFactory) {
+            KeyguardMessageAreaController.Factory keyguardMessageAreaFactory,
+            Lazy<ShadeController> shadeController) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -260,6 +264,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
+        mShadeController = shadeController;
     }
 
     @Override
@@ -632,6 +637,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                                 reset(true /* hideBouncerWhenShowing */);
                             }
                         });
+                return;
+            }
+
+            if (mStatusBar.isLaunchingActivityOverLockscreen()) {
+                mOccluded = true;
+
+                // When isLaunchingActivityOverLockscreen() is true, we know for sure that the post
+                // collapse runnables will be run.
+                mShadeController.get().addPostCollapseAction(() -> {
+                    mNotificationShadeWindowController.setKeyguardOccluded(mOccluded);
+                    reset(true /* hideBouncerWhenShowing */);
+                });
                 return;
             }
         } else if (!occluded && mOccluded && mShowing) {

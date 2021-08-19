@@ -64,6 +64,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+import dagger.Lazy;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -103,6 +105,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
+    @Mock
+    private Lazy<ShadeController> mShadeController;
 
     private WakefulnessLifecycle mWakefulnessLifecycle;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -133,7 +137,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mKeyguardBouncerFactory,
                 mWakefulnessLifecycle,
                 mUnlockedScreenOffAnimationController,
-                mKeyguardMessageAreaFactory);
+                mKeyguardMessageAreaFactory,
+                mShadeController);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController,
                 mNotificationContainer, mBypassController);

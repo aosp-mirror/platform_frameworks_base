@@ -80,6 +80,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
@@ -1044,11 +1045,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
 
+        ActivityLaunchAnimator.Controller animationController = createLaunchAnimationController(v);
         if (mHasCard) {
             Intent intent = new Intent(mContext, WalletActivity.class)
                     .setAction(Intent.ACTION_VIEW)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
+            mActivityStarter.startActivity(intent, true /* dismissShade */, animationController,
+                    true /* showOverLockscreenWhenLocked */);
         } else {
             if (mQuickAccessWalletController.getWalletClient().createWalletIntent() == null) {
                 Log.w(TAG, "Could not get intent of the wallet app.");
@@ -1056,8 +1059,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             }
             mActivityStarter.postStartActivityDismissingKeyguard(
                     mQuickAccessWalletController.getWalletClient().createWalletIntent(),
-                    /* delay= */ 0);
+                    /* delay= */ 0, animationController);
         }
+    }
+
+    protected ActivityLaunchAnimator.Controller createLaunchAnimationController(View view) {
+        return ActivityLaunchAnimator.Controller.fromView(view, null);
     }
 
     private void onControlsClick(View v) {
