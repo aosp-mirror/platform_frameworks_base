@@ -125,16 +125,25 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * originator temporarily doesn't have the right permissions to use this service.
      */
     private void enforcePermissionsForPreflight(@NonNull Identity identity) {
-        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
-        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD);
+        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO,
+                /* allowSoftDenial= */ true);
+        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD,
+                /* allowSoftDenial= */ true);
     }
 
     /**
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
-        enforcePermissionForDataDelivery(mContext, identity, RECORD_AUDIO,
-                reason);
+        // SoundTrigger data is treated the same as Hotword-source audio. This should incur the
+        // HOTWORD op instead of the RECORD_AUDIO op. The RECORD_AUDIO permission is still required,
+        // and since this is a data delivery check, soft denials aren't accepted.
+        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO,
+                /* allowSoftDenial= */ false);
+        int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
+        mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp, identity.uid,
+                identity.packageName, identity.attributionTag, reason);
+
         enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
                 reason);
     }
@@ -163,20 +172,25 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     /**
      * Throws a {@link SecurityException} if originator permanently doesn't have the given
      * permission.
-     * Soft (temporary) denials are considered OK for preflight purposes.
      *
-     * @param context    A {@link Context}, used for permission checks.
-     * @param identity   The identity to check.
-     * @param permission The identifier of the permission we want to check.
+     * @param context         A {@link Context}, used for permission checks.
+     * @param identity        The identity to check.
+     * @param permission      The identifier of the permission we want to check.
+     * @param allowSoftDenial If true, the operation succeeds even for soft (temporary) denials.
      */
+    // TODO: Consider splitting up this method instead of using `allowSoftDenial`, to make it
+    // clearer when soft denials are not allowed.
     private static void enforcePermissionForPreflight(@NonNull Context context,
-            @NonNull Identity identity, @NonNull String permission) {
+            @NonNull Identity identity, @NonNull String permission, boolean allowSoftDenial) {
         final int status = PermissionUtil.checkPermissionForPreflight(context, identity,
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
                 return;
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
+                if (allowSoftDenial) {
+                    return;
+                } // else fall through
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
                         String.format("Failed to obtain permission %s for identity %s", permission,
