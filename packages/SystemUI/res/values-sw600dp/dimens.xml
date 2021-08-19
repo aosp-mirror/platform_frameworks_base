@@ -100,4 +100,7 @@
     same as phones in portrait  -->
     <dimen name="qs_security_footer_single_line_height">48dp</dimen>
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
+
+    <!-- When split shade is used, this panel should be aligned to the top -->
+    <dimen name="qs_detail_margin_top">0dp</dimen>
 </resources>

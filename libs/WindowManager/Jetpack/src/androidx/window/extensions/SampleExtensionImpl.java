@@ -23,19 +23,15 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.window.common.DeviceStateManagerPostureProducer;
 import androidx.window.common.DisplayFeature;
 import androidx.window.common.ResourceConfigDisplayFeatureProducer;
 import androidx.window.common.SettingsDevicePostureProducer;
 import androidx.window.common.SettingsDisplayFeatureProducer;
-import androidx.window.extensions.organizer.SplitController;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
 
@@ -60,8 +56,6 @@ class SampleExtensionImpl extends StubExtension {
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
 
-    private final SplitController mSplitController;
-
     SampleExtensionImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
         mDevicePostureProducer = new PriorityDataProducer<>(List.of(
@@ -77,8 +71,6 @@ class SampleExtensionImpl extends StubExtension {
 
         mDevicePostureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
         mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-
-        mSplitController = new SplitController();
     }
 
     private int getFeatureState(DisplayFeature feature) {
@@ -141,29 +133,5 @@ class SampleExtensionImpl extends StubExtension {
         }
 
         onDisplayFeaturesChanged();
-    }
-
-    @Override
-    public void setSplitRules(@NonNull List<ExtensionSplitRule> splitRules) {
-        mSplitController.setSplitRules(splitRules);
-    }
-
-    @Override
-    @NonNull
-    public List<ExtensionSplitRule> getSplitRules() {
-        return new ArrayList<>(mSplitController.getSplitRules());
-    }
-
-    @Override
-    public void setSplitOrganizerCallback(@Nullable SplitOrganizerCallback callback) {
-        mSplitController.setSplitOrganizerCallback(callback);
-    }
-
-    @Override
-    public void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent intent,
-            @Nullable Bundle options, @NonNull ExtensionSplitPairRule splitPairRule,
-            int startRequestId) {
-        mSplitController.startActivityToSide(launchingActivity, intent, options, splitPairRule,
-                startRequestId);
     }
 }

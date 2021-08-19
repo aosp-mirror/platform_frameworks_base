@@ -98,12 +98,20 @@ public class TileServicesTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private SecureSettings  mSecureSettings;
+    @Mock
+    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock
+    private TileServiceRequestController mTileServiceRequestController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
+
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
+
         QSTileHost host = new QSTileHost(mContext,
                 mStatusBarIconController,
                 mQSFactory,
@@ -119,7 +127,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mUiEventLogger,
                 mUserTracker,
                 mSecureSettings,
-                mock(CustomTileStatePersister.class));
+                mock(CustomTileStatePersister.class),
+                mTileServiceRequestControllerBuilder);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
                 mUserTracker);
     }

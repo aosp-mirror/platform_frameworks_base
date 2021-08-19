@@ -33,6 +33,7 @@ import android.util.proto.ProtoOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /** Represents a vibration request to the vibrator service. */
@@ -58,6 +59,7 @@ final class Vibration {
         IGNORED_FOR_ONGOING,
         IGNORED_FOR_POWER,
         IGNORED_FOR_SETTINGS,
+        IGNORED_SUPERSEDED,
     }
 
     /** Start time in CLOCK_BOOTTIME base. */
@@ -90,6 +92,9 @@ final class Vibration {
     private long mEndTimeDebug;
     private Status mStatus;
 
+    /** A {@link CountDownLatch} to enable waiting for completion. */
+    private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
+
     Vibration(IBinder token, int id, CombinedVibration effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
@@ -118,6 +123,12 @@ final class Vibration {
         }
         mStatus = status;
         mEndTimeDebug = System.currentTimeMillis();
+        mCompletionLatch.countDown();
+    }
+
+    /** Waits indefinitely until another thread calls {@link #end(Status)} on this vibration. */
+    public void waitForEnd() throws InterruptedException {
+        mCompletionLatch.await();
     }
 
     /**

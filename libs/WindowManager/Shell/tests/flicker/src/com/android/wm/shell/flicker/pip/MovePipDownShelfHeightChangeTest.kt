@@ -16,83 +16,80 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import com.google.common.truth.Truth
+import com.android.server.wm.flicker.traces.RegionSubject
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip movement with Launcher shelf height change.
- * To run this test: `atest WMShellFlickerTests:PipShelfHeightTest`
+ * Test Pip movement with Launcher shelf height change (decrease).
+ *
+ * To run this test: `atest WMShellFlickerTests:MovePipDownShelfHeightChangeTest`
+ *
+ * Actions:
+ *     Launch [pipApp] in pip mode
+ *     Launch [testApp]
+ *     Press home
+ *     Check if pip window moves down (visually)
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class PipShelfHeightTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    private val taplInstrumentation = LauncherInstrumentation()
-    private val testApp = FixedAppHelper(instrumentation)
-
+class MovePipDownShelfHeightChangeTest(
+    testSpec: FlickerTestParameter
+) : MovePipShelfHeightTransition(testSpec) {
+    /**
+     * Defines the transition used to run the test
+     */
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = false) {
             teardown {
                 eachRun {
-                    taplInstrumentation.pressHome()
+                    testApp.launchViaIntent(wmHelper)
                 }
                 test {
                     testApp.exit(wmHelper)
                 }
             }
             transitions {
-                testApp.launchViaIntent(wmHelper)
+                taplInstrumentation.pressHome()
             }
         }
 
-    @Presubmit
-    @Test
-    fun pipAlwaysVisible() = testSpec.assertWm { this.isAppWindowVisible(pipApp.component) }
-
-    @Presubmit
-    @Test
-    fun pipLayerInsideDisplay() {
-        testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversAtMost(displayBounds)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun pipWindowMovesUp() = testSpec.assertWmEnd {
-        val initialState = this.trace?.first()?.wmState
-            ?: error("Trace should not be empty")
-        val startPos = initialState.pinnedWindows.first().frame
-        val currPos = this.wmState.pinnedWindows.first().frame
-        val subject = Truth.assertWithMessage("Pip should have moved up")
-        subject.that(currPos.top).isGreaterThan(startPos.top)
-        subject.that(currPos.bottom).isGreaterThan(startPos.bottom)
-        subject.that(currPos.left).isEqualTo(startPos.left)
-        subject.that(currPos.right).isEqualTo(startPos.right)
+    override fun assertRegionMovement(previous: RegionSubject, current: RegionSubject) {
+        current.isHigherOrEqual(previous.region)
     }
 
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
         }
     }
 }

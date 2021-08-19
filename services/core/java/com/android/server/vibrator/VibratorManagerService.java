@@ -144,9 +144,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // them.  However it may happen that the system is currently playing
                     // haptic feedback as part of the transition.  So we don't cancel
                     // system vibrations.
+                    if (mNextVibration != null
+                            && !isSystemHapticFeedback(mNextVibration.getVibration())) {
+                        clearNextVibrationLocked(Vibration.Status.CANCELLED);
+                    }
                     if (mCurrentVibration != null
                             && !isSystemHapticFeedback(mCurrentVibration.getVibration())) {
-                        mNextVibration = null;
                         mCurrentVibration.cancel();
                     }
                 }
@@ -336,17 +339,27 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Override // Binder call
     public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attrs, String reason, IBinder token) {
+        vibrateInternal(uid, opPkg, effect, attrs, reason, token);
+    }
+
+    /**
+     * An internal-only version of vibrate that allows the caller access to the {@link Vibration}.
+     * The Vibration is only returned if it is ongoing after this method returns.
+     */
+    @Nullable
+    private Vibration vibrateInternal(int uid, String opPkg, @NonNull CombinedVibration effect,
+            @Nullable VibrationAttributes attrs, String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.VIBRATE, "vibrate");
 
             if (token == null) {
                 Slog.e(TAG, "token must not be null");
-                return;
+                return null;
             }
             enforceUpdateAppOpsStatsPermission(uid);
             if (!isEffectValid(effect)) {
-                return;
+                return null;
             }
             attrs = fixupVibrationAttributes(attrs);
             Vibration vib = new Vibration(token, mNextVibrationId.getAndIncrement(), effect, attrs,
@@ -357,13 +370,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(vib);
                 if (ignoreStatus != null) {
                     endVibrationLocked(vib, ignoreStatus);
-                    return;
+                    return vib;
                 }
 
                 ignoreStatus = shouldIgnoreVibrationForCurrentLocked(vib);
                 if (ignoreStatus != null) {
                     endVibrationLocked(vib, ignoreStatus);
-                    return;
+                    return vib;
                 }
 
                 final long ident = Binder.clearCallingIdentity();
@@ -375,6 +388,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (status != Vibration.Status.RUNNING) {
                         endVibrationLocked(vib, status);
                     }
+                    return vib;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -401,7 +415,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (mNextVibration != null
                             && shouldCancelVibration(mNextVibration.getVibration(),
                             usageFilter, token)) {
-                        mNextVibration = null;
+                        clearNextVibrationLocked(Vibration.Status.CANCELLED);
                     }
                     if (mCurrentVibration != null
                             && shouldCancelVibration(mCurrentVibration.getVibration(),
@@ -453,7 +467,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback cb, ResultReceiver resultReceiver) {
-        new VibratorManagerShellCommand(this).exec(this, in, out, err, args, cb, resultReceiver);
+        new VibratorManagerShellCommand(cb.getShellCallbackBinder())
+                .exec(this, in, out, err, args, cb, resultReceiver);
     }
 
     @VisibleForTesting
@@ -521,7 +536,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (mCurrentVibration == null) {
                 return startVibrationThreadLocked(vibThread);
             }
-
+            // If there's already a vibration queued (waiting for the previous one to finish
+            // cancelling), end it cleanly and replace it with the new one.
+            clearNextVibrationLocked(Vibration.Status.IGNORED_SUPERSEDED);
             mNextVibration = vibThread;
             return Vibration.Status.RUNNING;
         } finally {
@@ -1300,6 +1317,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
+    /** Clears mNextVibration if set, ending it cleanly */
+    private void clearNextVibrationLocked(Vibration.Status endStatus) {
+        if (mNextVibration != null) {
+            endVibrationLocked(mNextVibration.getVibration(), endStatus);
+            mNextVibration = null;
+        }
+    }
+
     /** Implementation of {@link IExternalVibratorService} to be triggered on external control. */
     @VisibleForTesting
     final class ExternalVibratorService extends IExternalVibratorService.Stub {
@@ -1347,7 +1372,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // If we're not under external control right now, then cancel any normal
                     // vibration that may be playing and ready the vibrator for external control.
                     if (mCurrentVibration != null) {
-                        mNextVibration = null;
+                        clearNextVibrationLocked(Vibration.Status.IGNORED_FOR_EXTERNAL);
                         mCurrentVibration.cancelImmediately();
                         cancelingVibration = mCurrentVibration;
                     }
@@ -1454,6 +1479,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         private final class CommonOptions {
             public boolean force = false;
             public String description = "Shell command";
+            public boolean background = false;
 
             CommonOptions() {
                 String nextArg;
@@ -1462,6 +1488,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         case "-f":
                             getNextArgRequired(); // consume "-f"
                             force = true;
+                            break;
+                        case "-B":
+                            getNextArgRequired(); // consume "-B"
+                            background = true;
                             break;
                         case "-d":
                             getNextArgRequired(); // consume "-d"
@@ -1475,10 +1505,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
-        private final IBinder mToken;
+        private final IBinder mShellCallbacksToken;
 
-        private VibratorManagerShellCommand(IBinder token) {
-            mToken = token;
+        private VibratorManagerShellCommand(IBinder shellCallbacksToken) {
+            mShellCallbacksToken = shellCallbacksToken;
         }
 
         @Override
@@ -1520,12 +1550,28 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
-        private int runMono() {
-            CommonOptions commonOptions = new CommonOptions();
-            CombinedVibration effect = CombinedVibration.createParallel(nextEffect());
+        /**
+         * Runs a CombinedVibration using the configured common options and attributes.
+         */
+        private void runVibrate(CommonOptions commonOptions, CombinedVibration combined) {
             VibrationAttributes attrs = createVibrationAttributes(commonOptions);
-            vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, effect, attrs,
-                    commonOptions.description, mToken);
+            // If running in the background, bind to death of the server binder rather than the
+            // client, and the cancel command likewise uses the server binder reference to
+            // only cancel background vibrations.
+            IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
+                    : mShellCallbacksToken;
+            Vibration vib = vibrateInternal(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combined,
+                    attrs, commonOptions.description, deathBinder);
+            if (vib != null && !commonOptions.background) {
+                try {
+                    vib.waitForEnd();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+
+        private int runMono() {
+            runVibrate(new CommonOptions(), CombinedVibration.createParallel(nextEffect()));
             return 0;
         }
 
@@ -1537,9 +1583,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
                 combination.addVibrator(vibratorId, nextEffect());
             }
-            VibrationAttributes attrs = createVibrationAttributes(commonOptions);
-            vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combination.combine(), attrs,
-                    commonOptions.description, mToken);
+            runVibrate(commonOptions, combination.combine());
             return 0;
         }
 
@@ -1551,14 +1595,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
                 combination.addNext(vibratorId, nextEffect());
             }
-            VibrationAttributes attrs = createVibrationAttributes(commonOptions);
-            vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combination.combine(), attrs,
-                    commonOptions.description, mToken);
+            runVibrate(commonOptions, combination.combine());
             return 0;
         }
 
         private int runCancel() {
-            cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, mToken);
+            // Cancel is only needed if the vibration was run in the background, otherwise it's
+            // terminated by the shell command ending. In these cases, the token was that of the
+            // service rather than the client.
+            cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, VibratorManagerService.this);
             return 0;
         }
 
@@ -1741,7 +1786,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    wait time in milliseconds.");
                 pw.println("    If -a is provided, the command accepts a second argument for ");
                 pw.println("    amplitude, in a scale of 1-255.");
-                pw.print("    waveform [-w delay] [-r index] [-a] [-f] [-c] ");
+                pw.print("  waveform [-w delay] [-r index] [-a] [-f] [-c] ");
                 pw.println("(<duration> [<amplitude>] [<frequency>])...");
                 pw.println("    Vibrates for durations and amplitudes in list; ignored when ");
                 pw.println("    device is on DND (Do Not Disturb) mode; touch feedback strength ");
@@ -1777,6 +1822,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("Common Options:");
                 pw.println("  -f");
                 pw.println("    Force. Ignore Do Not Disturb setting.");
+                pw.println("  -B");
+                pw.println("    Run in the background; without this option the shell cmd will");
+                pw.println("    block until the vibration has completed.");
                 pw.println("  -d <description>");
                 pw.println("    Add description to the vibration.");
                 pw.println("");

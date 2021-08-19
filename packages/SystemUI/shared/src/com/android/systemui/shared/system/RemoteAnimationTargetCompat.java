@@ -74,6 +74,10 @@ public class RemoteAnimationTargetCompat {
 
     private final SurfaceControl mStartLeash;
 
+    // Fields used only to unrap into RemoteAnimationTarget
+    private final WindowConfiguration windowConfiguration;
+    private final Rect startBounds;
+
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
         taskId = app.taskId;
         mode = app.mode;
@@ -94,6 +98,8 @@ public class RemoteAnimationTargetCompat {
 
         mStartLeash = app.startLeash;
         windowType = app.windowType;
+        windowConfiguration = app.windowConfiguration;
+        startBounds = app.startBounds;
     }
 
     private static int newModeToLegacyMode(int newMode) {
@@ -107,6 +113,14 @@ public class RemoteAnimationTargetCompat {
             default:
                 return 2; // MODE_CHANGING
         }
+    }
+
+    public RemoteAnimationTarget unwrap() {
+        return new RemoteAnimationTarget(
+                taskId, mode, leash.getSurfaceControl(), isTranslucent, clipRect, contentInsets,
+                prefixOrderIndex, position, localBounds, screenSpaceBounds, windowConfiguration,
+                isNotInRecents, mStartLeash, startBounds, taskInfo, allowEnterPip, windowType
+        );
     }
 
 
@@ -220,6 +234,10 @@ public class RemoteAnimationTargetCompat {
         mStartLeash = null;
         rotationChange = change.getEndRotation() - change.getStartRotation();
         windowType = INVALID_WINDOW_TYPE;
+
+        // TODO this probably isn't right but it's unused for now /shrug
+        windowConfiguration = new WindowConfiguration();
+        startBounds = change.getStartAbsBounds();
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {

@@ -18,6 +18,10 @@ package androidx.window.extensions;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
+import androidx.window.extensions.organizer.EmbeddingExtensionImpl;
+
 /**
  * Provider class that will instantiate the library implementation. It must be included in the
  * vendor library, and the vendor implementation must match the signature of this class.
@@ -29,6 +33,12 @@ public class ExtensionProvider {
      */
     public static ExtensionInterface getExtensionImpl(Context context) {
         return new SampleExtensionImpl(context);
+    }
+
+    /** Provides a reference implementation of {@link ActivityEmbeddingComponent}. */
+    public static ActivityEmbeddingComponent getActivityEmbeddingExtensionImpl(
+            @NonNull Context context) {
+        return new EmbeddingExtensionImpl();
     }
 
     /**

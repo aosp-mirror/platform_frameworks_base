@@ -542,4 +542,13 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getCecVersion()).isEqualTo(cecVersion);
     }
+
+    @Test
+    public void getSafeCecDevicesLocked_addDevice_sizeOne() {
+        HdmiDeviceInfo cecDeviceInfo = new HdmiDeviceInfo();
+
+        mHdmiCecNetwork.addCecDevice(cecDeviceInfo);
+
+        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+    }
 }

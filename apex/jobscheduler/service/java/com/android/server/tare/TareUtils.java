@@ -59,14 +59,19 @@ class TareUtils {
         final long sub = Math.abs(narcs) % NARC_IN_ARC;
         final long arcs = narcToArc(narcs);
         if (arcs == 0) {
-            return sub + " narcs";
+            return sub == 1
+                    ? sub + " narc"
+                    : sub + " narcs";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(arcs);
         if (sub > 0) {
             sb.append(".").append(sub / (NARC_IN_ARC / 1000));
         }
-        sb.append(" ARCs");
+        sb.append(" ARC");
+        if (arcs != 1 || sub > 0) {
+            sb.append("s");
+        }
         return sb.toString();
     }
 

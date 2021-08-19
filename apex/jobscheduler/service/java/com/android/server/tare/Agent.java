@@ -28,7 +28,6 @@ import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
 import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -81,6 +80,8 @@ class Agent {
      * to use older transactions or provide older transactions to apps.
      */
     private static final long MAX_TRANSACTION_AGE_MS = 24 * HOUR_IN_MILLIS;
+    /** The maximum number of transactions to dump per ledger. */
+    private static final int MAX_NUM_TRANSACTION_DUMP = 25;
 
     private static final String ALARM_TAG_AFFORDABILITY_CHECK = "*tare.affordability_check*";
     private static final String ALARM_TAG_LEDGER_CLEANUP = "*tare.ledger_cleanup*";
@@ -191,6 +192,12 @@ class Agent {
             balance += mTotalDeltaCalculator.mTotal;
         }
         return balance;
+    }
+
+    /** Returns the total amount of narcs currently allocated to apps. */
+    @GuardedBy("mLock")
+    long getCurrentCirculationLocked() {
+        return mCurrentNarcsInCirculation;
     }
 
     @GuardedBy("mLock")
@@ -1287,8 +1294,19 @@ class Agent {
 
     @GuardedBy("mLock")
     void dumpLocked(IndentingPrintWriter pw) {
-        pw.print("Current GDP: ");
-        pw.println(narcToString(mCurrentNarcsInCirculation));
+        pw.println("Ledgers:");
+        pw.increaseIndent();
+        mLedgers.forEach((userId, pkgName, ledger) -> {
+            pw.print(appToString(userId, pkgName));
+            if (mIrs.isSystem(userId, pkgName)) {
+                pw.print(" (system)");
+            }
+            pw.println();
+            pw.increaseIndent();
+            ledger.dump(pw, MAX_NUM_TRANSACTION_DUMP);
+            pw.decreaseIndent();
+        });
+        pw.decreaseIndent();
 
         pw.println();
         mBalanceThresholdAlarmListener.dumpLocked(pw);

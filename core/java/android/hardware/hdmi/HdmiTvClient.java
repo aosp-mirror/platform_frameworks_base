@@ -158,7 +158,9 @@ public final class HdmiTvClient extends HdmiClient {
      *
      * @return list of {@link HdmiDeviceInfo} for connected CEC devices.
      *         Empty list is returned if there is none.
+     * @deprecated Please use {@link HdmiControlManager#getConnectedDevices()} instead.
      */
+    @Deprecated
     public List<HdmiDeviceInfo> getDeviceList() {
         try {
             return mService.getDeviceList();

@@ -165,7 +165,9 @@ public class HdmiSwitchClient extends HdmiClient {
      *     there is none.
      *
      * @hide
+     * @deprecated Please use {@link HdmiControlManager#getConnectedDevices()} instead.
      */
+    @Deprecated
     public List<HdmiDeviceInfo> getDeviceList() {
         try {
             return mService.getDeviceList();
