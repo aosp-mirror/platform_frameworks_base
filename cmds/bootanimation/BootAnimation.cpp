@@ -107,9 +107,13 @@ static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
+static const int DYNAMIC_COLOR_COUNT = 4;
 static const char U_TEXTURE[] = "uTexture";
 static const char U_FADE[] = "uFade";
 static const char U_CROP_AREA[] = "uCropArea";
+static const char U_START_COLOR_PREFIX[] = "uStartColor";
+static const char U_END_COLOR_PREFIX[] = "uEndColor";
+static const char U_COLOR_PROGRESS[] = "uColorProgress";
 static const char A_UV[] = "aUv";
 static const char A_POSITION[] = "aPosition";
 static const char VERTEX_SHADER_SOURCE[] = R"(
@@ -121,6 +125,28 @@ static const char VERTEX_SHADER_SOURCE[] = R"(
         gl_Position = aPosition;
         vUv = aUv;
     })";
+static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
+    precision mediump float;
+    uniform sampler2D uTexture;
+    uniform float uFade;
+    uniform float uColorProgress;
+    uniform vec4 uStartColor0;
+    uniform vec4 uStartColor1;
+    uniform vec4 uStartColor2;
+    uniform vec4 uStartColor3;
+    uniform vec4 uEndColor0;
+    uniform vec4 uEndColor1;
+    uniform vec4 uEndColor2;
+    uniform vec4 uEndColor3;
+    varying highp vec2 vUv;
+    void main() {
+        vec4 mask = texture2D(uTexture, vUv);
+        vec4 color = mask.r * mix(uStartColor0, uEndColor0, uColorProgress)
+            + mask.g * mix(uStartColor1, uEndColor1, uColorProgress)
+            + mask.b * mix(uStartColor2, uEndColor2, uColorProgress)
+            + mask.a * mix(uStartColor3, uEndColor3, uColorProgress);
+        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade)) * color.a;
+    })";
 static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
     precision mediump float;
     uniform sampler2D uTexture;
@@ -128,7 +154,7 @@ static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
     varying highp vec2 vUv;
     void main() {
         vec4 color = texture2D(uTexture, vUv);
-        gl_FragColor = vec4(color.x, color.y, color.z, 1.0 - uFade);
+        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade)) * color.a;
     })";
 static const char TEXT_FRAG_SHADER_SOURCE[] = R"(
     precision mediump float;
@@ -212,7 +238,8 @@ void BootAnimation::binderDied(const wp<IBinder>&) {
     requestExit();
 }
 
-static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitmapInfo* outInfo) {
+static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitmapInfo* outInfo,
+    bool premultiplyAlpha) {
     AImageDecoder* decoder = nullptr;
     AImageDecoder_createFromBuffer(encodedData, dataLength, &decoder);
     if (!decoder) {
@@ -225,6 +252,10 @@ static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitm
     outInfo->format = AImageDecoderHeaderInfo_getAndroidBitmapFormat(info);
     outInfo->stride = AImageDecoder_getMinimumStride(decoder);
     outInfo->flags = 0;
+
+    if (!premultiplyAlpha) {
+        AImageDecoder_setUnpremultipliedRequired(decoder, true);
+    }
 
     const size_t size = outInfo->stride * outInfo->height;
     void* pixels = malloc(size);
@@ -239,13 +270,14 @@ static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitm
 }
 
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
-        const char* name) {
+        const char* name, bool premultiplyAlpha) {
     Asset* asset = assets.open(name, Asset::ACCESS_BUFFER);
     if (asset == nullptr)
         return NO_INIT;
 
     AndroidBitmapInfo bitmapInfo;
-    void* pixels = decodeImage(asset->getBuffer(false), asset->getLength(), &bitmapInfo);
+    void* pixels = decodeImage(asset->getBuffer(false), asset->getLength(), &bitmapInfo,
+        premultiplyAlpha);
     auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
 
     asset->close();
@@ -293,9 +325,11 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     return NO_ERROR;
 }
 
-status_t BootAnimation::initTexture(FileMap* map, int* width, int* height) {
+status_t BootAnimation::initTexture(FileMap* map, int* width, int* height,
+    bool premultiplyAlpha) {
     AndroidBitmapInfo bitmapInfo;
-    void* pixels = decodeImage(map->getDataPtr(), map->getDataLength(), &bitmapInfo);
+    void* pixels = decodeImage(map->getDataPtr(), map->getDataLength(), &bitmapInfo,
+        premultiplyAlpha);
     auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
 
     // FileMap memory is never released until application exit.
@@ -675,9 +709,12 @@ GLuint linkShader(GLuint vertexShader, GLuint fragmentShader) {
 }
 
 void BootAnimation::initShaders() {
+    bool dynamicColoringEnabled = mAnimation != nullptr && mAnimation->dynamicColoringEnabled;
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, (const GLchar *)VERTEX_SHADER_SOURCE);
     GLuint imageFragmentShader =
-        compileShader(GL_FRAGMENT_SHADER, (const GLchar *)IMAGE_FRAG_SHADER_SOURCE);
+        compileShader(GL_FRAGMENT_SHADER, dynamicColoringEnabled
+            ? (const GLchar *)IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE
+            : (const GLchar *)IMAGE_FRAG_SHADER_SOURCE);
     GLuint textFragmentShader =
         compileShader(GL_FRAGMENT_SHADER, (const GLchar *)TEXT_FRAG_SHADER_SOURCE);
 
@@ -691,6 +728,22 @@ void BootAnimation::initShaders() {
     glVertexAttribPointer(positionLocation, 2,  GL_FLOAT, GL_FALSE, 0, quadPositions);
     glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, quadUVs);
     glEnableVertexAttribArray(uvLocation);
+
+    if (dynamicColoringEnabled) {
+        glUseProgram(mImageShader);
+        SLOGI("[BootAnimation] Dynamically coloring boot animation.");
+        for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
+            float *startColor = mAnimation->startColors[i];
+            float *endColor = mAnimation->endColors[i];
+            glUniform4f(glGetUniformLocation(mImageShader,
+                (U_START_COLOR_PREFIX + std::to_string(i)).c_str()),
+                startColor[0], startColor[1], startColor[2], 1 /* alpha */);
+            glUniform4f(glGetUniformLocation(mImageShader,
+                (U_END_COLOR_PREFIX + std::to_string(i)).c_str()),
+                endColor[0], endColor[1], endColor[2], 1 /* alpha */);
+        }
+        mImageColorProgressLocation = glGetUniformLocation(mImageShader, U_COLOR_PROGRESS);
+    }
 
     // Initialize text shader.
     mTextShader = linkShader(vertexShader, textFragmentShader);
@@ -869,6 +922,20 @@ static bool parseColor(const char str[7], float color[3]) {
     return true;
 }
 
+// Parse a color represented as a signed decimal int string.
+// E.g. "-2757722" (whose hex 2's complement is 0xFFD5EBA6).
+// If the input color string is empty, set color with values in defaultColor.
+static void parseColorDecimalString(const std::string& colorString,
+    float color[3], float defaultColor[3]) {
+    if (colorString == "") {
+        memcpy(color, defaultColor, sizeof(float) * 3);
+        return;
+    }
+    int colorInt = atoi(colorString.c_str());
+    color[0] = ((float)((colorInt >> 16) & 0xFF)) / 0xFF; // r
+    color[1] = ((float)((colorInt >> 8) & 0xFF)) / 0xFF; // g
+    color[2] = ((float)(colorInt & 0xFF)) / 0xFF; // b
+}
 
 static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
     ZipEntryRO entry = zip->findEntryByName(name);
@@ -1010,6 +1077,8 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         return false;
     }
     char const* s = desString.string();
+    std::string dynamicColoringPartName = "";
+    bool postDynamicColoring = false;
 
     // Parse the description file
     for (;;) {
@@ -1028,7 +1097,13 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         char color[7] = "000000"; // default to black if unspecified
         char clockPos1[TEXT_POS_LEN_MAX + 1] = "";
         char clockPos2[TEXT_POS_LEN_MAX + 1] = "";
+        char dynamicColoringPartNameBuffer[ANIM_ENTRY_NAME_MAX];
         char pathType;
+        // start colors default to black if unspecified
+        char start_color_0[7] = "000000";
+        char start_color_1[7] = "000000";
+        char start_color_2[7] = "000000";
+        char start_color_3[7] = "000000";
 
         int nextReadPos;
 
@@ -1043,6 +1118,15 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
             } else {
               animation.progressEnabled = false;
             }
+        } else if (sscanf(l, "dynamic_colors %" STRTO(ANIM_PATH_MAX) "s #%6s #%6s #%6s #%6s",
+            dynamicColoringPartNameBuffer,
+            start_color_0, start_color_1, start_color_2, start_color_3)) {
+            animation.dynamicColoringEnabled = true;
+            parseColor(start_color_0, animation.startColors[0]);
+            parseColor(start_color_1, animation.startColors[1]);
+            parseColor(start_color_2, animation.startColors[2]);
+            parseColor(start_color_3, animation.startColors[3]);
+            dynamicColoringPartName = std::string(dynamicColoringPartNameBuffer);
         } else if (sscanf(l, "%c %d %d %" STRTO(ANIM_PATH_MAX) "s%n",
                           &pathType, &count, &pause, path, &nextReadPos) >= 4) {
             if (pathType == 'f') {
@@ -1055,6 +1139,16 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
             //       "clockPos1=%s, clockPos2=%s",
             //       pathType, count, pause, path, framesToFadeCount, color, clockPos1, clockPos2);
             Animation::Part part;
+            if (path == dynamicColoringPartName) {
+                // Part is specified to use dynamic coloring.
+                part.useDynamicColoring = true;
+                part.postDynamicColoring = false;
+                postDynamicColoring = true;
+            } else {
+                // Part does not use dynamic coloring.
+                part.useDynamicColoring = false;
+                part.postDynamicColoring =  postDynamicColoring;
+            }
             part.playUntilComplete = pathType == 'c';
             part.framesToFadeCount = framesToFadeCount;
             part.count = count;
@@ -1084,6 +1178,12 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
                 animation.parts.add(part);
         }
         s = ++endl;
+    }
+
+    for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
+        parseColorDecimalString(
+            android::base::GetProperty("persist.bootanim.color" + std::to_string(i + 1), ""),
+            animation.endColors[i], animation.startColors[i]);
     }
 
     return true;
@@ -1357,6 +1457,14 @@ bool BootAnimation::playAnimation(const Animation& animation) {
             for (size_t j=0 ; j<fcount ; j++) {
                 if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
+                // Color progress is
+                // - the normalized animation progress between [0, 1] for the dynamic coloring part,
+                // - 0 for parts that come before,
+                // - 1 for parts that come after.
+                float colorProgress = part.useDynamicColoring
+                    ? (float)j / fcount
+                    : (part.postDynamicColoring ? 1 : 0);
+
                 processDisplayEvents();
 
                 const int animationX = (mWidth - animation.width) / 2;
@@ -1371,24 +1479,14 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     glGenTextures(1, &frame.tid);
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                     int w, h;
-                    initTexture(frame.map, &w, &h);
+                    // Set decoding option to alpha unpremultiplied so that the R, G, B channels
+                    // of transparent pixels are preserved.
+                    initTexture(frame.map, &w, &h, false /* don't premultiply alpha */);
                 }
 
                 const int xc = animationX + frame.trimX;
                 const int yc = animationY + frame.trimY;
-                Region clearReg(Rect(mWidth, mHeight));
-                clearReg.subtractSelf(Rect(xc, yc, xc+frame.trimWidth, yc+frame.trimHeight));
-                if (!clearReg.isEmpty()) {
-                    Region::const_iterator head(clearReg.begin());
-                    Region::const_iterator tail(clearReg.end());
-                    glEnable(GL_SCISSOR_TEST);
-                    while (head != tail) {
-                        const Rect& r2(*head++);
-                        glScissor(r2.left, mHeight - r2.bottom, r2.width(), r2.height());
-                        glClear(GL_COLOR_BUFFER_BIT);
-                    }
-                    glDisable(GL_SCISSOR_TEST);
-                }
+                glClear(GL_COLOR_BUFFER_BIT);
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
                 const int frameDrawY = mHeight - (yc + frame.trimHeight);
@@ -1404,6 +1502,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 glUseProgram(mImageShader);
                 glUniform1i(mImageTextureLocation, 0);
                 glUniform1f(mImageFadeLocation, fade);
+                if (animation.dynamicColoringEnabled) {
+                    glUniform1f(mImageColorProgressLocation, colorProgress);
+                }
                 glEnable(GL_BLEND);
                 drawTexturedQuad(xc, frameDrawY, frame.trimWidth, frame.trimHeight);
                 glDisable(GL_BLEND);
