@@ -34,7 +34,6 @@ import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
 
-import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -46,11 +45,9 @@ public interface StatusBarComponent {
     /**
      * Builder for {@link StatusBarComponent}.
      */
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance Builder statusBarWindowView(
-                NotificationShadeWindowView notificationShadeWindowView);
-        StatusBarComponent build();
+    @Subcomponent.Factory
+    interface Factory {
+        StatusBarComponent create();
     }
 
     /**
@@ -60,6 +57,13 @@ public interface StatusBarComponent {
     @Retention(RUNTIME)
     @Scope
     @interface StatusBarScope {}
+
+    /**
+     * Creates a {@link NotificationShadeWindowView}/
+     * @return
+     */
+    @StatusBarScope
+    NotificationShadeWindowView getNotificationShadeWindowView();
 
     /**
      * Creates a NotificationShadeWindowViewController.

@@ -228,11 +228,11 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -248,7 +248,6 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 
 import dagger.Lazy;
 
@@ -491,7 +490,7 @@ public class StatusBar extends SystemUI implements
     protected NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
-    private final Provider<StatusBarComponent.Builder> mStatusBarComponentBuilder;
+    private final StatusBarComponent.Factory mStatusBarComponentFactory;
     private final PluginManager mPluginManager;
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
@@ -744,7 +743,7 @@ public class StatusBar extends SystemUI implements
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
-            Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
+            StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
@@ -841,7 +840,7 @@ public class StatusBar extends SystemUI implements
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
-        mStatusBarComponentBuilder = statusBarComponentBuilder;
+        mStatusBarComponentFactory = statusBarComponentFactory;
         mPluginManager = pluginManager;
         mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
@@ -1533,9 +1532,8 @@ public class StatusBar extends SystemUI implements
     }
 
     private void inflateStatusBarWindow() {
-        mNotificationShadeWindowView = mSuperStatusBarViewFactory.getNotificationShadeWindowView();
-        StatusBarComponent statusBarComponent = mStatusBarComponentBuilder.get()
-                .statusBarWindowView(mNotificationShadeWindowView).build();
+        StatusBarComponent statusBarComponent = mStatusBarComponentFactory.create();
+        mNotificationShadeWindowView = statusBarComponent.getNotificationShadeWindowView();
         mNotificationShadeWindowViewController = statusBarComponent
                 .getNotificationShadeWindowViewController();
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);

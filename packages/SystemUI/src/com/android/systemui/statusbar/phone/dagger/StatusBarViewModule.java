@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone.dagger;
 
 import android.annotation.Nullable;
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.keyguard.LockIconView;
@@ -26,6 +28,7 @@ import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.TapAgainView;
+import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Named;
 
@@ -36,6 +39,24 @@ import dagger.Provides;
 public abstract class StatusBarViewModule {
 
     public static final String SPLIT_SHADE_HEADER = "split_shade_header";
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static NotificationShadeWindowView providesNotificationShadeWindowView(
+            InjectionInflationController injectionInflationController,
+            Context context) {
+        NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
+                injectionInflationController.injectable(
+                        LayoutInflater.from(context)).inflate(R.layout.super_notification_shade,
+                        /* root= */ null);
+        if (notificationShadeWindowView == null) {
+            throw new IllegalStateException(
+                    "R.layout.super_notification_shade could not be properly inflated");
+        }
+
+        return notificationShadeWindowView;
+    }
 
     /** */
     @Provides

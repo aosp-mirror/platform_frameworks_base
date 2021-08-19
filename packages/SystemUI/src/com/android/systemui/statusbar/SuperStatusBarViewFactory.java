@@ -23,8 +23,6 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -41,7 +39,6 @@ public class SuperStatusBarViewFactory {
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationShelfComponent.Builder mNotificationShelfComponentBuilder;
 
-    private NotificationShadeWindowView mNotificationShadeWindowView;
     private StatusBarWindowView mStatusBarWindowView;
     private NotificationShelfController mNotificationShelfController;
 
@@ -52,28 +49,6 @@ public class SuperStatusBarViewFactory {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
         mNotificationShelfComponentBuilder = notificationShelfComponentBuilder;
-    }
-
-    /**
-     * Gets the inflated {@link NotificationShadeWindowView} from
-     * {@link R.layout#super_notification_shade}.
-     * Returns a cached instance, if it has already been inflated.
-     */
-    public NotificationShadeWindowView getNotificationShadeWindowView() {
-        if (mNotificationShadeWindowView != null) {
-            return mNotificationShadeWindowView;
-        }
-
-        mNotificationShadeWindowView = (NotificationShadeWindowView)
-                mInjectionInflationController.injectable(
-                LayoutInflater.from(mContext)).inflate(R.layout.super_notification_shade,
-                /* root= */ null);
-        if (mNotificationShadeWindowView == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_notification_shade could not be properly inflated");
-        }
-
-        return mNotificationShadeWindowView;
     }
 
     /**
@@ -126,14 +101,5 @@ public class SuperStatusBarViewFactory {
         mNotificationShelfController.init();
 
         return mNotificationShelfController;
-    }
-
-    public NotificationPanelView getNotificationPanelView() {
-        NotificationShadeWindowView notificationShadeWindowView = getNotificationShadeWindowView();
-        if (notificationShadeWindowView == null) {
-            return null;
-        }
-
-        return mNotificationShadeWindowView.findViewById(R.id.notification_panel);
     }
 }
