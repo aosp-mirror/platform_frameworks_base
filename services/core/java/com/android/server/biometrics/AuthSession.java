@@ -142,6 +142,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private @BiometricMultiSensorMode int mMultiSensorMode;
     private @MultiSensorState int mMultiSensorState;
     private int[] mSensors;
+    private boolean mCancelled;
     // For explicit confirmation, do not send to keystore until the user has confirmed
     // the authentication.
     private byte[] mTokenEscrow;
@@ -187,6 +188,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mPromptInfo = promptInfo;
         mDebugEnabled = debugEnabled;
         mFingerprintSensorProperties = fingerprintSensorProperties;
+        mCancelled = false;
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -270,6 +272,11 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onCookieReceived(int cookie) {
+        if (mCancelled) {
+            Slog.w(TAG, "Received cookie but already cancelled (ignoring): " + cookie);
+            return;
+        }
+
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             sensor.goToStateCookieReturnedIfCookieMatches(cookie);
         }
@@ -775,6 +782,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * @return true if this AuthSession is finished, e.g. should be set to null
      */
     boolean onCancelAuthSession(boolean force) {
+        mCancelled = true;
+
         final boolean authStarted = mState == STATE_AUTH_CALLED
                 || mState == STATE_AUTH_STARTED
                 || mState == STATE_AUTH_STARTED_UI_SHOWING;
@@ -901,6 +910,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @Override
     public String toString() {
         return "State: " + mState
+                + ", cancelled: " + mCancelled
                 + ", isCrypto: " + isCrypto()
                 + ", PreAuthInfo: " + mPreAuthInfo;
     }

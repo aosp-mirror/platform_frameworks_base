@@ -185,6 +185,32 @@ public class AuthSessionTest {
     }
 
     @Test
+    public void testCancelReducesAppetiteForCookies() throws Exception {
+        setupFace(0 /* id */, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
+        setupFingerprint(1 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                44 /* operationId */,
+                2 /* userId */);
+
+        session.goToInitialState();
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+        }
+
+        session.onCancelAuthSession(false /* force */);
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            session.onCookieReceived(sensor.getCookie());
+            assertEquals(BiometricSensor.STATE_CANCELING, sensor.getSensorState());
+        }
+    }
+
+    @Test
     public void testMultiAuth_singleSensor_fingerprintSensorStartsAfterDialogAnimationCompletes()
             throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
