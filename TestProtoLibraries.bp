@@ -30,6 +30,6 @@ java_library_host {
         type: "full",
     },
     errorprone: {
-        javacflags: ["-Xep:MissingOverride:OFF"], // b/72714520
+        enabled: false,
     },
 }
