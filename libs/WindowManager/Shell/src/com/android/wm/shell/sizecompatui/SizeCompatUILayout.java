@@ -106,6 +106,8 @@ class SizeCompatUILayout {
             mShouldShowHint = false;
             createSizeCompatHint();
         }
+
+        mCallback.onSizeCompatRestartButtonAppeared(mTaskId);
     }
 
     /** Creates the restart button hint window. */
