@@ -20,7 +20,7 @@ import android.util.MathUtils.lerp
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
-import com.android.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import java.lang.ref.WeakReference
 
 /**

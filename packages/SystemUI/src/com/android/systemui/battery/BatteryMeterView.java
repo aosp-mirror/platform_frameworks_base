@@ -41,24 +41,22 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.graph.ThemedBatteryDrawable;
-import com.android.systemui.Dependency;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.text.NumberFormat;
 
-public class BatteryMeterView extends LinearLayout implements
-        BatteryStateChangeCallback, DarkReceiver {
+public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
     @Retention(SOURCE)
     @IntDef({MODE_DEFAULT, MODE_ON, MODE_OFF, MODE_ESTIMATE})
@@ -72,7 +70,6 @@ public class BatteryMeterView extends LinearLayout implements
     private final ImageView mBatteryIconView;
     private TextView mBatteryPercentView;
 
-    private BatteryController mBatteryController;
     private final @StyleRes int mPercentageStyleId;
     private int mTextColor;
     private int mLevel;
@@ -89,6 +86,8 @@ public class BatteryMeterView extends LinearLayout implements
     private int mNonAdaptedSingleToneColor;
     private int mNonAdaptedForegroundColor;
     private int mNonAdaptedBackgroundColor;
+
+    private BatteryEstimateFetcher mBatteryEstimateFetcher;
 
     public BatteryMeterView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -178,22 +177,7 @@ public class BatteryMeterView extends LinearLayout implements
         return false;
     }
 
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mBatteryController = Dependency.get(BatteryController.class);
-        mBatteryController.addCallback(this);
-        updateShowPercent();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mBatteryController.removeCallback(this);
-    }
-
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+    void onBatteryLevelChanged(int level, boolean pluggedIn) {
         mDrawable.setCharging(pluggedIn);
         mDrawable.setBatteryLevel(level);
         mCharging = pluggedIn;
@@ -201,8 +185,7 @@ public class BatteryMeterView extends LinearLayout implements
         updatePercentText();
     }
 
-    @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
+    void onPowerSaveChanged(boolean isPowerSave) {
         mDrawable.setPowerSaveEnabled(isPowerSave);
     }
 
@@ -222,19 +205,28 @@ public class BatteryMeterView extends LinearLayout implements
         updateShowPercent();
     }
 
+    /**
+     * Sets the fetcher that should be used to get the estimated time remaining for the user's
+     * battery.
+     */
+    void setBatteryEstimateFetcher(BatteryEstimateFetcher fetcher) {
+        mBatteryEstimateFetcher = fetcher;
+    }
+
     void updatePercentText() {
         if (mBatteryStateUnknown) {
             setContentDescription(getContext().getString(R.string.accessibility_battery_unknown));
             return;
         }
 
-        if (mBatteryController == null) {
+        if (mBatteryEstimateFetcher == null) {
             return;
         }
 
         if (mBatteryPercentView != null) {
             if (mShowPercentMode == MODE_ESTIMATE && !mCharging) {
-                mBatteryController.getEstimatedTimeRemainingString((String estimate) -> {
+                mBatteryEstimateFetcher.fetchBatteryTimeRemainingEstimate(
+                        (String estimate) -> {
                     if (mBatteryPercentView == null) {
                         return;
                     }
@@ -310,8 +302,7 @@ public class BatteryMeterView extends LinearLayout implements
         return mUnknownStateDrawable;
     }
 
-    @Override
-    public void onBatteryUnknownStateChanged(boolean isUnknown) {
+    void onBatteryUnknownStateChanged(boolean isUnknown) {
         if (mBatteryStateUnknown == isUnknown) {
             return;
         }
@@ -389,6 +380,17 @@ public class BatteryMeterView extends LinearLayout implements
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
         pw.println("    mLevel: " + mLevel);
         pw.println("    mMode: " + mShowPercentMode);
+    }
+
+    @VisibleForTesting
+    CharSequence getBatteryPercentViewText() {
+        return mBatteryPercentView.getText();
+    }
+
+    /** An interface that will fetch the estimated time remaining for the user's battery. */
+    public interface BatteryEstimateFetcher {
+        void fetchBatteryTimeRemainingEstimate(
+                BatteryController.EstimateFetchCompletion completion);
     }
 }
 

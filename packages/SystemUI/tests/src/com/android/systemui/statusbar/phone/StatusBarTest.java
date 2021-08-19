@@ -145,7 +145,7 @@ import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
-import com.android.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;

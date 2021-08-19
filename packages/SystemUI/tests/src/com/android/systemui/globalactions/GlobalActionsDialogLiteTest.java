@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -51,6 +52,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -112,6 +114,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private StatusBar mStatusBar;
+    @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private TestableLooper mTestableLooper;
 
@@ -155,7 +158,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mSysUiState,
                 mHandler,
                 mPackageManager,
-                Optional.of(mStatusBar)
+                Optional.of(mStatusBar),
+                mKeyguardUpdateMonitor
         );
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
@@ -420,5 +424,32 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mGlobalActionsDialogLite.new RestartAction();
         restartAction.onLongPress();
         verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
+    }
+
+    @Test
+    public void testOnLockScreen_disableSmartLock() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        doReturn(false).when(mStatusBar).isKeyguardShowing();
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+
+        // When entering power menu from lockscreen, with smart lock enabled
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mGlobalActionsDialogLite.showOrHideDialog(true, true);
+
+        // Then smart lock will be disabled
+        verify(mLockPatternUtils).requireCredentialEntry(eq(user));
+
+        // hide dialog again
+        mGlobalActionsDialogLite.showOrHideDialog(true, true);
     }
 }

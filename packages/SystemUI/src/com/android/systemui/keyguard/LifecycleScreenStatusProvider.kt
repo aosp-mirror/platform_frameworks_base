@@ -16,8 +16,8 @@
 package com.android.systemui.keyguard
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.unfold.updates.screen.ScreenStatusProvider
-import com.android.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
+import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
 import javax.inject.Inject
 
 @SysUISingleton

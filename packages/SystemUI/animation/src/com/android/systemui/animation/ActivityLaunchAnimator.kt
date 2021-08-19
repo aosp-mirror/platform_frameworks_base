@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
-import android.app.AppGlobals
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.content.Context
@@ -44,6 +43,7 @@ class ActivityLaunchAnimator(
     context: Context
 ) {
     companion object {
+        private const val DEBUG = false
         const val ANIMATION_DURATION = 500L
         private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
         private const val ANIMATION_DURATION_FADE_IN_WINDOW = 183L
@@ -75,8 +75,6 @@ class ActivityLaunchAnimator(
         }
     }
 
-    private val packageManager = AppGlobals.getPackageManager()
-
     /** The interpolator used for the width, height, Y position and corner radius. */
     private val animationInterpolator = AnimationUtils.loadInterpolator(context,
             R.interpolator.launch_animation_interpolator_y)
@@ -100,6 +98,10 @@ class ActivityLaunchAnimator(
      * If possible, you should pass the [packageName] of the intent that will be started so that
      * trampoline activity launches will also be animated.
      *
+     * If the device is currently locked, the user will have to unlock it before the intent is
+     * started unless [showOverLockscreen] is true. In that case, the activity will be started
+     * directly over the lockscreen.
+     *
      * This method will throw any exception thrown by [intentStarter].
      */
     @JvmOverloads
@@ -107,21 +109,22 @@ class ActivityLaunchAnimator(
         controller: Controller?,
         animate: Boolean = true,
         packageName: String? = null,
+        showOverLockscreen: Boolean = false,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
         if (controller == null || !animate) {
-            Log.d(TAG, "Starting intent with no animation")
+            Log.i(TAG, "Starting intent with no animation")
             intentStarter(null)
             controller?.callOnIntentStartedOnMainThread(willAnimate = false)
             return
         }
 
-        Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
-        val isOnKeyguard = callback.isOnKeyguard()
+        val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
-        // Pass the RemoteAnimationAdapter to the intent starter only if we are not on the keyguard.
-        val animationAdapter = if (!isOnKeyguard) {
+        // Pass the RemoteAnimationAdapter to the intent starter only if we are not hiding the
+        // keyguard with the animation
+        val animationAdapter = if (!hideKeyguardWithAnimation) {
             RemoteAnimationAdapter(
                     runner,
                     ANIMATION_DURATION,
@@ -149,9 +152,11 @@ class ActivityLaunchAnimator(
         val willAnimate =
                 launchResult == ActivityManager.START_TASK_TO_FRONT ||
                         launchResult == ActivityManager.START_SUCCESS ||
-                        (launchResult == ActivityManager.START_DELIVERED_TO_TOP && isOnKeyguard)
+                        (launchResult == ActivityManager.START_DELIVERED_TO_TOP &&
+                                hideKeyguardWithAnimation)
 
-        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate isOnKeyguard=$isOnKeyguard")
+        Log.i(TAG, "launchResult=$launchResult willAnimate=$willAnimate " +
+                "hideKeyguardWithAnimation=$hideKeyguardWithAnimation")
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
@@ -160,7 +165,7 @@ class ActivityLaunchAnimator(
             runner.postTimeout()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
-            if (isOnKeyguard) {
+            if (hideKeyguardWithAnimation) {
                 callback.hideKeyguardWithAnimation(runner)
             }
         }
@@ -424,13 +429,16 @@ class ActivityLaunchAnimator(
             nonApps: Array<out RemoteAnimationTarget>?,
             iCallback: IRemoteAnimationFinishedCallback?
         ) {
-            Log.d(TAG, "Remote animation started")
+            if (DEBUG) {
+                Log.d(TAG, "Remote animation started")
+            }
+
             val window = apps?.firstOrNull {
                 it.mode == RemoteAnimationTarget.MODE_OPENING
             }
 
             if (window == null) {
-                Log.d(TAG, "Aborting the animation as no window is opening")
+                Log.i(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
                 iCallback?.invoke()
                 controller.onLaunchAnimationCancelled()
@@ -500,7 +508,10 @@ class ActivityLaunchAnimator(
             val launchContainerOverlay = launchContainer.overlay
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    Log.d(TAG, "Animation started")
+                    if (DEBUG) {
+                        Log.d(TAG, "Animation started")
+                    }
+
                     callback.setBlursDisabledForAppLaunch(true)
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
 
@@ -511,7 +522,10 @@ class ActivityLaunchAnimator(
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    Log.d(TAG, "Animation ended")
+                    if (DEBUG) {
+                        Log.d(TAG, "Animation ended")
+                    }
+
                     callback.setBlursDisabledForAppLaunch(false)
                     iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
@@ -686,7 +700,7 @@ class ActivityLaunchAnimator(
                 return
             }
 
-            Log.d(TAG, "Remote animation timed out")
+            Log.i(TAG, "Remote animation timed out")
             timedOut = true
             controller.onLaunchAnimationCancelled()
         }
@@ -696,7 +710,7 @@ class ActivityLaunchAnimator(
                 return
             }
 
-            Log.d(TAG, "Remote animation was cancelled")
+            Log.i(TAG, "Remote animation was cancelled")
             cancelled = true
             removeTimeout()
             context.mainExecutor.execute {

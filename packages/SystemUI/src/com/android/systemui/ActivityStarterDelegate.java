@@ -92,9 +92,11 @@ public class ActivityStarterDelegate implements ActivityStarter {
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked) {
         mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, dismissShade, animationController));
+                starter -> starter.startActivity(intent, dismissShade, animationController,
+                    showOverLockscreenWhenLocked));
     }
 
     @Override

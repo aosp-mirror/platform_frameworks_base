@@ -56,6 +56,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -127,6 +128,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private PackageManager mPackageManager;
     @Mock private SecureSettings mSecureSettings;
     @Mock private StatusBar mStatusBar;
+    @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private TestableLooper mTestableLooper;
 
@@ -170,7 +172,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mSysUiState,
                 mHandler,
                 mPackageManager,
-                Optional.of(mStatusBar)
+                Optional.of(mStatusBar),
+                mKeyguardUpdateMonitor
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
 

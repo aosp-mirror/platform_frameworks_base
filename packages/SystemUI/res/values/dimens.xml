@@ -918,6 +918,7 @@
 
     <dimen name="keyguard_affordance_fixed_height">48dp</dimen>
     <dimen name="keyguard_affordance_fixed_width">48dp</dimen>
+    <dimen name="keyguard_affordance_fixed_radius">24dp</dimen>
 
     <dimen name="keyguard_affordance_horizontal_offset">32dp</dimen>
     <dimen name="keyguard_affordance_vertical_offset">32dp</dimen>
@@ -1135,6 +1136,7 @@
     <dimen name="global_actions_button_padding">38dp</dimen>
     <dimen name="global_actions_corner_radius">28dp</dimen>
     <dimen name="global_actions_lite_padding">24dp</dimen>
+    <dimen name="global_actions_info_margin">32dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
