@@ -1779,6 +1779,8 @@
     <string name="tuner_full_importance_settings">Power notification controls</string>
     <string name="tuner_full_importance_settings_on">On</string>
     <string name="tuner_full_importance_settings_off">Off</string>
+    <!-- [CHAR LIMIT=NONE] Notification camera based rotation enabled description -->
+    <string name="rotation_lock_camera_rotation_on">On - Face-based</string>
     <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
         \n\n<b>Level 5</b>
         \n- Show at the top of the notification list
