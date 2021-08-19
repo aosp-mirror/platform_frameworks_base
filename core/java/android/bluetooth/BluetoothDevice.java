@@ -1326,7 +1326,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IllegalArgumentException if an invalid transport was specified
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean createBond(int transport) {
         return createBondInternal(transport, null, null);
