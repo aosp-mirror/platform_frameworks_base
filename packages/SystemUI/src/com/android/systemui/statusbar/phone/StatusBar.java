@@ -1143,7 +1143,8 @@ public class StatusBar extends SystemUI implements
                             mTunerService,
                             mBroadcastDispatcher,
                             mMainHandler,
-                            mContext.getContentResolver()
+                            mContext.getContentResolver(),
+                            mBatteryController
                     );
                     mBatteryMeterViewController.init();
 
