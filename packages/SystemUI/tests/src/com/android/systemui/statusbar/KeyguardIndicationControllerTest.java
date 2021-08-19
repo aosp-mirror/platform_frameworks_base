@@ -111,6 +111,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private static final ComponentName DEVICE_OWNER_COMPONENT = new ComponentName("com.android.foo",
             "bar");
 
+    private String mKeyguardTryFingerprintMsg;
     private String mDisclosureWithOrganization;
     private String mDisclosureGeneric;
     private String mFinancedDisclosureWithOrganization;
@@ -182,6 +183,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
+        mKeyguardTryFingerprintMsg = mContext.getString(R.string.keyguard_try_fingerprint);
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
         mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
@@ -675,6 +677,34 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.setVisible(true);
 
         verifyTransientMessage(message);
+    }
+
+    @Test
+    public void faceAuthMessageSuppressed() {
+        createController();
+        String faceHelpMsg = "Face auth help message";
+
+        // GIVEN state of showing message when keyguard screen is on
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+
+        // GIVEN fingerprint is also running (not udfps)
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsAvailable()).thenReturn(false);
+
+        mController.setVisible(true);
+
+        // WHEN a face help message comes in
+        mController.getKeyguardCallback().onBiometricHelp(
+                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
+                BiometricSourceType.FACE);
+
+        // THEN "try fingerprint" message appears (and not the face help message)
+        verifyTransientMessage(mKeyguardTryFingerprintMsg);
+
+        // THEN the face help message is still announced for a11y
+        verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
     }
 
     private void sendUpdateDisclosureBroadcast() {
