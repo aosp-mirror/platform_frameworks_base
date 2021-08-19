@@ -319,15 +319,11 @@ class PinnedTaskController {
     }
 
     /** Resets the states which were used to perform fixed rotation with PiP task. */
-    void onCancelFixedRotationTransform(Task task) {
+    void onCancelFixedRotationTransform() {
         mFreezingTaskConfig = false;
         mDeferOrientationChanging = false;
         mDestRotatedBounds = null;
         mPipTransaction = null;
-        if (!task.isOrganized()) {
-            // Force clearing Task#mForceNotOrganized because the display didn't rotate.
-            task.onConfigurationChanged(task.getParent().getConfiguration());
-        }
     }
 
     /**
