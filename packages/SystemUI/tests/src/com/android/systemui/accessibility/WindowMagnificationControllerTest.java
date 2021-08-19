@@ -188,6 +188,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     public void deleteWindowMagnification_enableAtTheBottom_overlapFlagIsFalse() {
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         final Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+        setSystemGestureInsets();
 
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
@@ -463,10 +464,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Test
     public void moveWindowMagnificationToTheBottom_enabledWithGestureInset_overlapFlagIsTrue() {
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
-        final WindowInsets testInsets = new WindowInsets.Builder()
-                .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
-                .build();
-        mWindowManager.setWindowInsets(testInsets);
+        setSystemGestureInsets();
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
@@ -491,5 +489,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     private boolean hasMagnificationOverlapFlag() {
         return (mSysUiState.getFlags() & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0;
+    }
+
+    private void setSystemGestureInsets() {
+        final WindowInsets testInsets = new WindowInsets.Builder()
+                .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
+                .build();
+        mWindowManager.setWindowInsets(testInsets);
     }
 }
