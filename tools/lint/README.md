@@ -37,15 +37,13 @@ m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/a
 
 - Lint report will not be produced if you just build the module, i.e. `m services.autofill` will not
   build the lint report.
-- If you want to build lint reports for more than 1 module and they depend on a common module, e.g.
-  `platform_service_defaults`, you can add the `lint` property to that common module instead of
-  adding it in every module.
+- If you want to build lint reports for more than 1 module and they include a common module in their
+  `defaults` field, e.g. `platform_service_defaults`, you can add the `lint` property to that common
+  module instead of adding it in every module.
 
 ## Documentation
 
-- [go/android-security-lint-checks](http://go/android-security-lint-checks) - presentation about
-  this module
-- [Android Lint Docs](http://googlesamples.github.io/android-custom-lint-rules/)
+- [Android Lint Docs](https://googlesamples.github.io/android-custom-lint-rules/)
 - [Android Lint source files](https://source.corp.google.com/studio-main/tools/base/lint/libs/lint-api/src/main/java/com/android/tools/lint/)
 - [PSI source files](https://github.com/JetBrains/intellij-community/tree/master/java/java-psi-api/src/com/intellij/psi)
 - [UAST source files](https://upsource.jetbrains.com/idea-ce/structure/idea-ce-7b9b8cc138bbd90aec26433f82cd2c6838694003/uast/uast-common/src/org/jetbrains/uast)

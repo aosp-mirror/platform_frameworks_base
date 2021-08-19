@@ -16,8 +16,17 @@
 
 package com.android.systemui.communal;
 
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.Log;
+
+import androidx.annotation.MainThread;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.android.collect.Lists;
 
@@ -31,10 +40,15 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class CommunalSourceMonitor {
+    private static final String TAG = "CommunalSourceMonitor";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     // A list of {@link Callback} that have registered to receive updates.
     private final ArrayList<WeakReference<Callback>> mCallbacks = Lists.newArrayList();
+    private final SecureSettings mSecureSettings;
 
     private CommunalSource mCurrentSource;
+    private boolean mCommunalEnabled;
 
     private CommunalSource.Callback mSourceCallback = new CommunalSource.Callback() {
         @Override
@@ -46,7 +60,22 @@ public class CommunalSourceMonitor {
 
     @VisibleForTesting
     @Inject
-    public CommunalSourceMonitor() {
+    public CommunalSourceMonitor(
+            @MainThread Handler mainThreadHandler,
+            SecureSettings secureSettings) {
+        mSecureSettings = secureSettings;
+
+        ContentObserver settingsObserver = new ContentObserver(mainThreadHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                reloadSettings();
+            }
+        };
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.COMMUNAL_MODE_ENABLED,
+                /* notifyForDescendants= */false,
+                settingsObserver, UserHandle.USER_ALL);
+        reloadSettings();
     }
 
     /**
@@ -62,18 +91,25 @@ public class CommunalSourceMonitor {
 
         mCurrentSource = source;
 
-        // If the new source is valid, inform registered Callbacks of its presence.
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            Callback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onSourceAvailable(
-                        mCurrentSource != null ? new WeakReference<>(mCurrentSource) : null);
-            }
+        if (mCommunalEnabled) {
+            executeOnSourceAvailableCallbacks();
         }
 
         // Add callback to be informed when the source disconnects.
         if (mCurrentSource != null) {
             mCurrentSource.addCallback(mSourceCallback);
+        }
+    }
+
+    private void executeOnSourceAvailableCallbacks() {
+        // If the new source is valid, inform registered Callbacks of its presence.
+        for (WeakReference<Callback> callback : mCallbacks) {
+            Callback cb = callback.get();
+            if (cb != null) {
+                cb.onSourceAvailable(
+                        (mCommunalEnabled && mCurrentSource != null) ? new WeakReference<>(
+                                mCurrentSource) : null);
+            }
         }
     }
 
@@ -86,7 +122,7 @@ public class CommunalSourceMonitor {
         mCallbacks.add(new WeakReference<>(callback));
 
         // Inform the callback of any already present CommunalSource.
-        if (mCurrentSource != null) {
+        if (mCommunalEnabled && mCurrentSource != null) {
             callback.onSourceAvailable(new WeakReference<>(mCurrentSource));
         }
     }
@@ -98,6 +134,20 @@ public class CommunalSourceMonitor {
      */
     public void removeCallback(Callback callback) {
         mCallbacks.removeIf(el -> el.get() == callback);
+    }
+
+    private void reloadSettings() {
+        boolean newCommunalEnabled = mSecureSettings.getInt(Settings.Secure.COMMUNAL_MODE_ENABLED,
+                1) == 1;
+
+        if (DEBUG) {
+            Log.d(TAG, "communal mode settings reloaded with value:" + newCommunalEnabled);
+        }
+
+        if (mCommunalEnabled != newCommunalEnabled) {
+            mCommunalEnabled = newCommunalEnabled;
+            executeOnSourceAvailableCallbacks();
+        }
     }
 
     /**

@@ -2437,6 +2437,7 @@ package android.content {
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
+    field public static final String EXTRA_SHOWING_ATTRIBUTION = "android.intent.extra.SHOWING_ATTRIBUTION";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 67108864; // 0x4000000
@@ -3640,7 +3641,7 @@ package android.hardware.hdmi {
   public final class HdmiTvClient extends android.hardware.hdmi.HdmiClient {
     method public void clearTimerRecording(int, int, android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource);
     method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
-    method public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getDeviceList();
+    method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getDeviceList();
     method public int getDeviceType();
     method public void portSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public void sendMhlVendorCommand(int, int, int, byte[]);

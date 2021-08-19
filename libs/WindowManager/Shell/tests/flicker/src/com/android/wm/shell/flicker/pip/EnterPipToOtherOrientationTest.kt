@@ -101,6 +101,8 @@ class EnterPipToOtherOrientationTest(
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
                 wmHelper.waitFor { it.wmState.hasPipWindow() }
                 wmHelper.waitForAppTransitionIdle()
+                // during rotation the status bar becomes invisible and reappears at the end
+                wmHelper.waitForNavBarStatusBarVisible()
             }
         }
 
@@ -122,7 +124,10 @@ class EnterPipToOtherOrientationTest(
     override fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_90, Surface.ROTATION_0)
 
-    @Postsubmit
+    /**
+     * Checks that all parts of the screen are covered at the start and end of the transition
+     */
+    @Presubmit
     @Test
     override fun entireScreenCovered() =
         testSpec.entireScreenCovered(Surface.ROTATION_90, Surface.ROTATION_0, allStates = false)

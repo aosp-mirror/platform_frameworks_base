@@ -48,6 +48,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.CustomTileStatePersister;
+import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
@@ -95,6 +96,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private KeyguardBypassController mBypassController;
     @Mock
     private FalsingManager mFalsingManager;
+    @Mock
+    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock
+    private TileServiceRequestController mTileServiceRequestController;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -107,6 +112,9 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         MockitoAnnotations.initMocks(this);
         when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
         when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
+
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
 
         mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
@@ -136,7 +144,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
-                mock(SecureSettings.class), mock(CustomTileStatePersister.class));
+                mock(SecureSettings.class), mock(CustomTileStatePersister.class),
+                mTileServiceRequestControllerBuilder);
         qs.setHost(host);
 
         qs.setListening(true);

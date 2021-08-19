@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.animation;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
@@ -41,7 +42,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -49,26 +49,26 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     private int mDisplayWidth = 500;
     private int mDisplayHeight = 1000;
-    private int mExpandedViewPadding = 10;
 
     private Runnable mOnBubbleAnimatedOutAction = mock(Runnable.class);
-    @Spy
     ExpandedAnimationController mExpandedController;
 
     private int mStackOffset;
     private PointF mExpansionPoint;
+    private BubblePositioner mPositioner;
 
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        BubblePositioner positioner = new BubblePositioner(getContext(), mock(WindowManager.class));
-        positioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
+        mPositioner = new BubblePositioner(getContext(), mock(WindowManager.class));
+        mPositioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));
-        mExpandedController = new ExpandedAnimationController(positioner, mExpandedViewPadding,
+        mExpandedController = new ExpandedAnimationController(mPositioner,
                 mOnBubbleAnimatedOutAction);
+        spyOn(mExpandedController);
 
         addOneMoreThanBubbleLimitBubbles();
         mLayout.setActiveController(mExpandedController);
@@ -141,13 +141,16 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     /** Check that children are in the correct positions for being expanded. */
     private void testBubblesInCorrectExpandedPositions() {
+        boolean onLeft = mPositioner.isStackOnLeft(mExpansionPoint);
         // Check all the visible bubbles to see if they're in the right place.
         for (int i = 0; i < mLayout.getChildCount(); i++) {
-            float expectedPosition = mExpandedController.getBubbleXOrYForOrientation(i);
-            assertEquals(expectedPosition,
+            PointF expectedPosition = mPositioner.getExpandedBubbleXY(i,
+                    mLayout.getChildCount(),
+                    onLeft);
+            assertEquals(expectedPosition.x,
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
-            assertEquals(expectedPosition,
+            assertEquals(expectedPosition.y,
                     mLayout.getChildAt(i).getTranslationY(), 2f);
         }
     }

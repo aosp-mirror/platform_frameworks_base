@@ -305,10 +305,7 @@ public class StackAnimationController extends
         if (mLayout == null || !isStackPositionSet()) {
             return true; // Default to left, which is where it starts by default.
         }
-
-        float stackCenter = mStackPosition.x + mBubbleSize / 2;
-        float screenCenter = mLayout.getWidth() / 2;
-        return stackCenter < screenCenter;
+        return mPositioner.isStackOnLeft(mStackPosition);
     }
 
     /**

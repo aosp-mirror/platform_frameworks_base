@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -24,8 +23,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.parser.toWindowName
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -69,12 +68,10 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
             transitions {
                 // This will bring PipApp to fullscreen
                 pipApp.launchViaIntent(wmHelper)
+                // Wait until the other app is no longer visible
+                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
             }
         }
-
-    @Postsubmit
-    @Test
-    override fun pipLayerExpands() = super.pipLayerExpands()
 
     companion object {
         /**

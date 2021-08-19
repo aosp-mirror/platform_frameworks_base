@@ -286,6 +286,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return labelContainer
     }
 
+    override fun getLabel(): View {
+        return label
+    }
+
     override fun getSecondaryLabel(): View {
         return secondaryLabel
     }
