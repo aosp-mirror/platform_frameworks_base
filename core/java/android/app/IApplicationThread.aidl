@@ -72,7 +72,7 @@ oneway interface IApplicationThread {
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
-            in CompatibilityInfo compatInfo, in Map services,
+            in CompatibilityInfo compatInfo, in Map<String, IBinder> services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
             in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
