@@ -16,7 +16,10 @@
 
 package com.android.server.accessibility;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,7 +41,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -51,6 +53,7 @@ import com.android.server.accessibility.AccessibilityManagerService.Accessibilit
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -92,6 +95,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private AccessibilityWindowManager mMockA11yWindowManager;
     @Mock private AccessibilityDisplayListener mMockA11yDisplayListener;
     @Mock private ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
+    @Mock private UserManagerInternal mMockUserManagerInternal;
     @Mock private IBinder mMockBinder;
     @Mock private IAccessibilityServiceClient mMockServiceClient;
     @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
@@ -109,16 +113,20 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(
                 WindowManagerInternal.class, mMockWindowManagerService);
         LocalServices.addService(
                 ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
+        LocalServices.addService(
+                UserManagerInternal.class, mMockUserManagerInternal);
 
         when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
                 mMockWindowMagnificationMgr);
         when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
                 mMockA11yController);
         when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);
+        when(mMockUserManagerInternal.isUserUnlockingOrUnlocked(anyInt())).thenReturn(true);
         mA11yms = new AccessibilityManagerService(
             InstrumentationRegistry.getContext(),
             mMockPackageManager,
@@ -131,16 +139,15 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         mMockResources = mock(Resources.class);
         when(mMockContext.getResources()).thenReturn(mMockResources);
 
-        final AccessibilityUserState userState = new AccessibilityUserState(
+        mUserState = new AccessibilityUserState(
                 mA11yms.getCurrentUserIdLocked(), mMockContext, mA11yms);
-        mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), userState);
+        mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), mUserState);
     }
 
     private void setupAccessibilityServiceConnection() {
         when(mMockContext.getSystemService(Context.DISPLAY_SERVICE)).thenReturn(
                 InstrumentationRegistry.getContext().getSystemService(
                         Context.DISPLAY_SERVICE));
-        mUserState = new AccessibilityUserState(UserHandle.USER_SYSTEM, mMockContext, mA11yms);
 
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
@@ -225,5 +232,28 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         assertEquals(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 userState.getMagnificationModeLocked());
+    }
+
+    @SmallTest
+    public void testOnClientChange_magnificationEnabledAndCapabilityAll_requestConnection() {
+        mUserState.mAccessibilityShortcutKeyTargets.add(MAGNIFICATION_CONTROLLER_NAME);
+        mUserState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(true);
+    }
+
+    @SmallTest
+    public void testOnClientChange_boundServiceCanControlMagnification_requestConnection() {
+        setupAccessibilityServiceConnection();
+        when(mMockSecurityPolicy.canControlMagnification(any())).thenReturn(true);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(true);
     }
 }
