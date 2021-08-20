@@ -43,7 +43,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -76,6 +75,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.Optional;
 
@@ -125,6 +125,7 @@ public class UdfpsController implements DozeReceiver {
     @Nullable private final UdfpsHbmProvider mHbmProvider;
     @NonNull private final KeyguardBypassController mKeyguardBypassController;
     @NonNull private final ConfigurationController mConfigurationController;
+    @NonNull private final SystemClock mSystemClock;
     @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -449,19 +450,19 @@ public class UdfpsController implements DozeReceiver {
                         final String touchInfo = String.format(
                                 "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
                                 minor, major, v, exceedsVelocityThreshold);
-                        final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
+                        final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isIlluminationRequested && !mGoodCaptureReceived &&
                                 !exceedsVelocityThreshold) {
                             onFingerDown((int) event.getRawX(), (int) event.getRawY(), minor,
                                     major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
-                            mTouchLogTime = SystemClock.elapsedRealtime();
-                            mPowerManager.userActivity(SystemClock.uptimeMillis(),
+                            mTouchLogTime = mSystemClock.elapsedRealtime();
+                            mPowerManager.userActivity(mSystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
-                            mTouchLogTime = SystemClock.elapsedRealtime();
+                            mTouchLogTime = mSystemClock.elapsedRealtime();
                         }
                     } else {
                         Log.v(TAG, "onTouch | finger outside");
@@ -525,7 +526,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull KeyguardBypassController keyguardBypassController,
             @NonNull DisplayManager displayManager,
             @Main Handler mainHandler,
-            @NonNull ConfigurationController configurationController) {
+            @NonNull ConfigurationController configurationController,
+            @NonNull SystemClock systemClock) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
@@ -561,6 +563,7 @@ public class UdfpsController implements DozeReceiver {
                 mainHandler);
         mKeyguardBypassController = keyguardBypassController;
         mConfigurationController = configurationController;
+        mSystemClock = systemClock;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -781,6 +784,7 @@ public class UdfpsController implements DozeReceiver {
                         mKeyguardViewMediator,
                         mLockscreenShadeTransitionController,
                         mConfigurationController,
+                        mSystemClock,
                         this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
