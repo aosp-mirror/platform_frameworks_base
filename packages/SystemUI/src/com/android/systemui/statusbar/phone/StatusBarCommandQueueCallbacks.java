@@ -527,7 +527,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
-        mStatusBar.resendMessage(new StatusBar.KeyboardShortcutsData(deviceId));
+        mStatusBar.resendMessage(new StatusBar.KeyboardShortcutsMessage(deviceId));
     }
 
     @Override

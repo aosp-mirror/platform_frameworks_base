@@ -1172,7 +1172,6 @@ JTuner::~JTuner() {
 
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
-    mTunerClient = nullptr;
     mFeClient = nullptr;
     mDemuxClient = nullptr;
     mClass = nullptr;

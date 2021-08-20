@@ -2852,6 +2852,7 @@ package android.view {
     method @Nullable public final android.os.IBinder getWindowContextToken();
     method public final void setWindowContextToken(@NonNull android.os.IBinder);
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
+    field public static final int FLAG_SLIPPERY = 536870912; // 0x20000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40
     field public CharSequence accessibilityTitle;
     field public int privateFlags;

@@ -21,6 +21,8 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -57,6 +59,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -68,6 +71,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
@@ -79,6 +83,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
 
@@ -583,18 +588,43 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public int getLaunchedFromUid(IBinder token) {
+        if (!canGetLaunchedFrom()) {
+            return INVALID_UID;
+        }
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            return r != null ? r.launchedFromUid : android.os.Process.INVALID_UID;
+            return r != null ? r.launchedFromUid : INVALID_UID;
         }
     }
 
     @Override
     public String getLaunchedFromPackage(IBinder token) {
+        if (!canGetLaunchedFrom()) {
+            return null;
+        }
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             return r != null ? r.launchedFromPackage : null;
         }
+    }
+
+    /** Whether the caller can get the package or uid that launched its activity. */
+    private boolean canGetLaunchedFrom() {
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getAppId(uid) == SYSTEM_UID) {
+            return true;
+        }
+        final PackageManagerInternal pm = mService.mWindowManager.mPmInternal;
+        final AndroidPackage callingPkg = pm.getPackage(uid);
+        if (callingPkg == null) {
+            return false;
+        }
+        if (callingPkg.isSignedWithPlatformKey()) {
+            return true;
+        }
+        final String[] installerNames = pm.getKnownPackageNames(
+                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+        return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
     @Override

@@ -20,17 +20,12 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -56,14 +51,14 @@ public class ArcInitiationActionFromAvrTest {
     private Context mContextSpy;
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private ArcInitiationActionFromAvr mAction;
 
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
-    @Mock private IPowerManager mIPowerManagerMock;
-    @Mock private IThermalService mIThermalServiceMock;
-    @Mock private AudioManager mAudioManager;
+    @Mock
+    private AudioManager mAudioManager;
 
     @Before
     public void setUp() throws Exception {
@@ -71,29 +66,11 @@ public class ArcInitiationActionFromAvrTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
-        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
-
         HdmiControlService hdmiControlService =
                 new HdmiControlService(mContextSpy, Collections.emptyList()) {
                     @Override
                     boolean isPowerStandby() {
                         return false;
-                    }
-
-                    @Override
-                    void wakeUp() {
-                    }
-
-                    @Override
-                    protected PowerManager getPowerManager() {
-                        return new PowerManager(mContextSpy, mIPowerManagerMock,
-                                mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
                     }
 
                     @Override
@@ -133,6 +110,8 @@ public class ArcInitiationActionFromAvrTest {
         hdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(hdmiControlService));
         hdmiControlService.setMessageValidator(new HdmiCecMessageValidator(hdmiControlService));
         hdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        hdmiControlService.setPowerManager(mPowerManager);
         mAction = new ArcInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
 
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);

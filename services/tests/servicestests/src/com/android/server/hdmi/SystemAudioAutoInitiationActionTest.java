@@ -24,17 +24,12 @@ import static com.android.server.hdmi.SystemAudioAutoInitiationAction.RETRIES_ON
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 
 import androidx.test.InstrumentationRegistry;
@@ -44,8 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,6 +53,7 @@ public class SystemAudioAutoInitiationActionTest {
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
 
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
 
@@ -67,25 +61,11 @@ public class SystemAudioAutoInitiationActionTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
 
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         Looper myLooper = mTestLooper.getLooper();
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
             @Override
@@ -100,18 +80,8 @@ public class SystemAudioAutoInitiationActionTest {
             }
 
             @Override
-            void wakeUp() {
-            }
-
-            @Override
             boolean isPowerStandby() {
                 return false;
-            }
-
-            @Override
-            protected PowerManager getPowerManager() {
-                return new PowerManager(mContextSpy, mIPowerManagerMock,
-                        mIThermalServiceMock, new Handler(myLooper));
             }
 
             @Override
@@ -137,6 +107,8 @@ public class SystemAudioAutoInitiationActionTest {
                 new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);

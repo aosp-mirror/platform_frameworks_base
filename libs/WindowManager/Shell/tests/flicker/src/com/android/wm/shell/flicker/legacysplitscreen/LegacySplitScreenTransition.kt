@@ -39,6 +39,7 @@ import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setDevEn
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.After
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -56,6 +57,8 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
 
     @Before
     open fun setup() {
+        // Only run legacy split tests when the system is using legacy split screen.
+        assumeTrue(SplitScreenHelper.isUsingLegacySplit())
         // Legacy split is having some issue with Shell transition, and will be deprecated soon.
         assumeFalse(isShellTransitionsEnabled())
         prevDevEnableNonResizableMultiWindow = getDevEnableNonResizableMultiWindow(context)

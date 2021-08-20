@@ -672,6 +672,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
             }
+
+            // At the end of a launch animation over the lockscreen, the state is either KEYGUARD or
+            // SHADE_LOCKED and this code is called. We have to set the notification alpha to 0
+            // otherwise there is a flicker to its previous value.
+            if (mKeyguardOccluded) {
+                mNotificationsAlpha = 0;
+            }
         }
 
         assertAlphasValid();

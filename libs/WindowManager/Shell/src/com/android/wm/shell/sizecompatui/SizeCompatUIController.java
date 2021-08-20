@@ -47,6 +47,8 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
 
     /** Callback for size compat UI interaction. */
     public interface SizeCompatUICallback {
+        /** Called when the size compat restart button appears. */
+        void onSizeCompatRestartButtonAppeared(int taskId);
         /** Called when the size compat restart button is clicked. */
         void onSizeCompatRestartButtonClicked(int taskId);
     }

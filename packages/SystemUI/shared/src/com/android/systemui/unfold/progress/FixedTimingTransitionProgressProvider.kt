@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.unfold.progress
+package com.android.systemui.unfold.progress
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
-import com.android.unfold.UnfoldTransitionProgressProvider
-import com.android.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
-import com.android.unfold.updates.FoldStateProvider
-import com.android.unfold.updates.FoldStateProvider.FoldUpdate
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
+import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
+import com.android.systemui.unfold.updates.FoldStateProvider
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 
 /**
  * Emits animation progress with fixed timing after unfolding
