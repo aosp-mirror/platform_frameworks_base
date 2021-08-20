@@ -70,13 +70,13 @@ public class ContrastColorUtilTest extends TestCase {
         assertContrastIsWithinRange(selfContrastColor, lightBg, 4.5, 4.75);
     }
 
-    private void assertContrastIsWithinRange(int foreground, int background,
+    public static void assertContrastIsWithinRange(int foreground, int background,
             double minContrast, double maxContrast) {
         assertContrastIsAtLeast(foreground, background, minContrast);
         assertContrastIsAtMost(foreground, background, maxContrast);
     }
 
-    private void assertContrastIsAtLeast(int foreground, int background, double minContrast) {
+    public static void assertContrastIsAtLeast(int foreground, int background, double minContrast) {
         try {
             assertThat(calculateContrast(foreground, background)).isAtLeast(minContrast);
         } catch (AssertionError e) {
@@ -86,7 +86,7 @@ public class ContrastColorUtilTest extends TestCase {
         }
     }
 
-    private void assertContrastIsAtMost(int foreground, int background, double maxContrast) {
+    public static void assertContrastIsAtMost(int foreground, int background, double maxContrast) {
         try {
             assertThat(calculateContrast(foreground, background)).isAtMost(maxContrast);
         } catch (AssertionError e) {
