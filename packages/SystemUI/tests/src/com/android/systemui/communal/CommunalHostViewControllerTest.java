@@ -159,6 +159,27 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testReportOcclusion() {
+        // Ensure CommunalHostViewController reports view occluded when either the QS or Shade is
+        // expanded.
+        mController.updateShadeExpansion(0);
+        verify(mCommunalStateController).setCommunalViewOccluded(false);
+        clearInvocations(mCommunalStateController);
+        mController.updateQsExpansion(.5f);
+        verify(mCommunalStateController).setCommunalViewOccluded(true);
+        clearInvocations(mCommunalStateController);
+        mController.updateShadeExpansion(.7f);
+        verify(mCommunalStateController).setCommunalViewOccluded(true);
+        clearInvocations(mCommunalStateController);
+        mController.updateShadeExpansion(0);
+        verify(mCommunalStateController).setCommunalViewOccluded(true);
+        clearInvocations(mCommunalStateController);
+        mController.updateQsExpansion(0f);
+        verify(mCommunalStateController).setCommunalViewOccluded(false);
+        clearInvocations(mCommunalStateController);
+    }
+
+    @Test
     public void testCommunalStateControllerHideNotified() {
         ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
                 ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
