@@ -23,7 +23,6 @@ import static com.android.server.hdmi.OneTouchPlayAction.STATE_WAITING_FOR_REPOR
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -31,11 +30,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 
 import androidx.test.InstrumentationRegistry;
@@ -46,8 +41,6 @@ import com.android.server.hdmi.HdmiCecFeatureAction.ActionTimer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,16 +62,12 @@ public class OneTouchPlayActionTest {
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private FakeHdmiCecConfig mHdmiCecConfig;
 
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
-
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
 
     /**
      * Manually called before tests, because some tests require HDMI control to be disabled.
@@ -86,18 +75,8 @@ public class OneTouchPlayActionTest {
      * @throws Exception
      */
     public void setUp(boolean hdmiControlEnabled) throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mHdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
-
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
-        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
             @Override
@@ -112,18 +91,8 @@ public class OneTouchPlayActionTest {
             }
 
             @Override
-            void wakeUp() {
-            }
-
-            @Override
             boolean isPowerStandby() {
                 return false;
-            }
-
-            @Override
-            protected PowerManager getPowerManager() {
-                return new PowerManager(mContextSpy, mIPowerManagerMock,
-                        mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
             }
 
             @Override
@@ -143,6 +112,8 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();

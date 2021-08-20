@@ -31,6 +31,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.LocusId;
+import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -46,6 +47,7 @@ import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
@@ -488,14 +490,40 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
+    public void onSizeCompatRestartButtonAppeared(int taskId) {
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__APPEARED);
+    }
+
+    @Override
     public void onSizeCompatRestartButtonClicked(int taskId) {
         final TaskAppearedInfo info;
         synchronized (mLock) {
             info = mTasks.get(taskId);
         }
-        if (info != null) {
-            restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
+        if (info == null) {
+            return;
         }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
+        restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
+    }
+
+    private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
+            int event) {
+        ActivityInfo topActivityInfo = info.getTaskInfo().topActivityInfo;
+        if (topActivityInfo == null) {
+            return;
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED,
+                topActivityInfo.applicationInfo.uid, event);
     }
 
     /**

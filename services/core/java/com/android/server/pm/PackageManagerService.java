@@ -7186,6 +7186,7 @@ public class PackageManagerService extends IPackageManager.Stub
             t.traceEnd();
 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
+            mPermissionManager.readLegacyPermissionStateTEMP();
 
             if (!mOnlyCore && mFirstBoot) {
                 requestCopyPreoptedFiles();
@@ -7362,7 +7363,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
                         logCriticalInfo(Log.WARN, "System package " + ps.name
-                                + " no longer exists; it's data will be wiped");
+                                + " no longer exists; its data will be wiped");
                         removePackageDataLIF(ps, userIds, null, 0, false);
                     } else {
                         // we still have a disabled system package, but, it still might have
@@ -7602,7 +7603,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            mPermissionManager.readLegacyPermissionStateTEMP();
             // If the build fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some

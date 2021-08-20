@@ -42,6 +42,12 @@ public final class InputWindowHandle {
     // channel and the server input channel will both contain this token.
     public IBinder token;
 
+    /**
+     * The {@link IWindow} handle if InputWindowHandle is associated with a window, null otherwise.
+     */
+    @Nullable
+    private IBinder windowToken;
+
     // The window name.
     public String name;
 
@@ -139,6 +145,7 @@ public final class InputWindowHandle {
                 .append(", visible=").append(visible)
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)
+                .append(", windowToken=").append(getWindow())
                 .toString();
 
     }
@@ -169,5 +176,13 @@ public final class InputWindowHandle {
      */
     public void setTouchableRegionCrop(@Nullable SurfaceControl bounds) {
         touchableRegionSurfaceControl = new WeakReference<>(bounds);
+    }
+
+    public void setWindowToken(IWindow iwindow) {
+        windowToken = iwindow.asBinder();
+    }
+
+    public IWindow getWindow() {
+        return IWindow.Stub.asInterface(windowToken);
     }
 }

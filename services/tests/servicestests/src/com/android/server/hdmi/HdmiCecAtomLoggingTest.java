@@ -31,7 +31,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -39,11 +38,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -58,8 +53,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +70,7 @@ public class HdmiCecAtomLoggingTest {
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private HdmiMhlControllerStub mHdmiMhlControllerStub;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private HdmiCecNetwork mHdmiCecNetwork;
     private Looper mLooper;
     private Context mContextSpy;
@@ -85,25 +79,14 @@ public class HdmiCecAtomLoggingTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
 
-    @Mock private IPowerManager mIPowerManagerMock;
-    @Mock private IThermalService mIThermalServiceMock;
-
     @Before
     public void setUp() throws RemoteException {
-        MockitoAnnotations.initMocks(this);
-
         mHdmiCecAtomWriterSpy = spy(new HdmiCecAtomWriter());
 
         mLooper = mTestLooper.getLooper();
 
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
-
-
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                        mIThermalServiceMock, new Handler(mLooper)));
-        doReturn(true).when(mIPowerManagerMock).isInteractive();
 
         mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList()));
         doNothing().when(mHdmiControlServiceSpy)
@@ -145,6 +128,8 @@ public class HdmiCecAtomLoggingTest {
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
 
         mHdmiControlServiceSpy.initService();
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 

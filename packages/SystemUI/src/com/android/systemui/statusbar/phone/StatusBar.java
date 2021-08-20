@@ -51,6 +51,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
+import android.app.TaskStackBuilder;
 import android.app.UiModeManager;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -231,7 +232,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
-import com.android.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -644,6 +645,7 @@ public class StatusBar extends SystemUI implements
     private boolean mIsOccluded;
     private boolean mWereIconsJustHidden;
     private boolean mBouncerWasShowingWhenHidden;
+    private boolean mIsLaunchingActivityOverLockscreen;
 
     private final UserSwitcherController mUserSwitcherController;
     private final NetworkController mNetworkController;
@@ -889,11 +891,11 @@ public class StatusBar extends SystemUI implements
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
 
-        mMessageRouter.subscribeTo(KeyboardShortcutsData.class,
+        mMessageRouter.subscribeTo(KeyboardShortcutsMessage.class,
                 data -> toggleKeyboardShortcuts(data.mDeviceId));
         mMessageRouter.subscribeTo(MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU,
                 id -> dismissKeyboardShortcuts());
-        mMessageRouter.subscribeTo(AnimateExpandSettingsPanelData.class,
+        mMessageRouter.subscribeTo(AnimateExpandSettingsPanelMessage.class,
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
@@ -1143,7 +1145,8 @@ public class StatusBar extends SystemUI implements
                             mTunerService,
                             mBroadcastDispatcher,
                             mMainHandler,
-                            mContext.getContentResolver()
+                            mContext.getContentResolver(),
+                            mBatteryController
                     );
                     mBatteryMeterViewController.init();
 
@@ -1254,8 +1257,19 @@ public class StatusBar extends SystemUI implements
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
-        mLightRevealScrim.setRevealAmountListener(
-                mNotificationShadeWindowController::setLightRevealScrimAmount);
+        mLightRevealScrim.setScrimOpaqueChangedListener((opaque) -> {
+            Runnable updateOpaqueness = () -> {
+                mNotificationShadeWindowController.setLightRevealScrimOpaque(
+                        mLightRevealScrim.isScrimOpaque());
+            };
+            if (opaque) {
+                // Delay making the view opaque for a frame, because it needs some time to render
+                // otherwise this can lead to a flicker where the scrim doesn't cover the screen
+                mLightRevealScrim.post(updateOpaqueness);
+            } else {
+                updateOpaqueness.run();
+            }
+        });
         mUnlockedScreenOffAnimationController.initialize(this, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
@@ -1727,10 +1741,77 @@ public class StatusBar extends SystemUI implements
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
-            ActivityLaunchAnimator.Controller animationController) {
-        startActivityDismissingKeyguard(intent, false, dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked) {
+        // Make sure that we dismiss the keyguard if it is directly dismissable or when we don't
+        // want to show the activity above it.
+        if (mKeyguardStateController.isUnlocked() || !showOverLockscreenWhenLocked) {
+            startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
                 0 /* flags */, animationController);
+            return;
+        }
+
+        boolean animate =
+                animationController != null && shouldAnimateLaunch(true /* isActivityIntent */,
+                        showOverLockscreenWhenLocked);
+
+        ActivityLaunchAnimator.Controller controller = null;
+        if (animate) {
+            // Wrap the animation controller to dismiss the shade and set
+            // mIsLaunchingActivityOverLockscreen during the animation.
+            ActivityLaunchAnimator.Controller delegate = wrapAnimationController(
+                    animationController, dismissShade);
+            controller = new DelegateLaunchAnimatorController(delegate) {
+                @Override
+                public void onIntentStarted(boolean willAnimate) {
+                    getDelegate().onIntentStarted(willAnimate);
+
+                    if (willAnimate) {
+                        StatusBar.this.mIsLaunchingActivityOverLockscreen = true;
+                    }
+                }
+
+                @Override
+                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
+                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
+                    // being true means that we will collapse the shade (or at least run the
+                    // post collapse runnables) later on.
+                    StatusBar.this.mIsLaunchingActivityOverLockscreen = false;
+                    getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+                }
+
+                @Override
+                public void onLaunchAnimationCancelled() {
+                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
+                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
+                    // being true means that we will collapse the shade (or at least run the
+                    // post collapse runnables) later on.
+                    StatusBar.this.mIsLaunchingActivityOverLockscreen = false;
+                    getDelegate().onLaunchAnimationCancelled();
+                }
+            };
+        } else if (dismissShade) {
+            // The animation will take care of dismissing the shade at the end of the animation. If
+            // we don't animate, collapse it directly.
+            collapseShade();
+        }
+
+        mActivityLaunchAnimator.startIntentWithAnimation(controller, animate,
+                intent.getPackage(), showOverLockscreenWhenLocked, (adapter) -> TaskStackBuilder
+                        .create(mContext)
+                        .addNextIntent(intent)
+                        .startActivities(getActivityOptions(getDisplayId(), adapter),
+                                UserHandle.CURRENT));
+    }
+
+    /**
+     * Whether we are currently animating an activity launch above the lockscreen (occluding
+     * activity).
+     */
+    public boolean isLaunchingActivityOverLockscreen() {
+        return mIsLaunchingActivityOverLockscreen;
     }
 
     @Override
@@ -1891,21 +1972,28 @@ public class StatusBar extends SystemUI implements
      *
      * Note: This method must be called *before* dismissing the keyguard.
      */
-    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+    public boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen) {
         // TODO(b/184121838): Support launch animations when occluded.
         if (isOccluded()) {
             return false;
         }
 
-        // Always animate if we are unlocked.
-        if (!mKeyguardStateController.isShowing()) {
+        // Always animate if we are not showing the keyguard or if we animate over the lockscreen
+        // (without unlocking it).
+        if (showOverLockscreen || !mKeyguardStateController.isShowing()) {
             return true;
         }
 
-        // If we are locked, only animate if remote unlock animations are enabled. We also don't
-        // animate non-activity launches as they can break the animation.
+        // If we are locked and have to dismiss the keyguard, only animate if remote unlock
+        // animations are enabled. We also don't animate non-activity launches as they can break the
+        // animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
         return isActivityIntent && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation;
+    }
+
+    /** Whether we should animate an activity launch. */
+    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+        return shouldAnimateLaunch(isActivityIntent, false /* showOverLockscreen */);
     }
 
     public boolean isDeviceInVrMode() {
@@ -1921,18 +2009,18 @@ public class StatusBar extends SystemUI implements
         mState = state;
     }
 
-    static class KeyboardShortcutsData {
+    static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
-        KeyboardShortcutsData(int deviceId) {
+        KeyboardShortcutsMessage(int deviceId) {
             mDeviceId = deviceId;
         }
     }
 
-    static class AnimateExpandSettingsPanelData {
+    static class AnimateExpandSettingsPanelMessage {
         final String mSubpanel;
 
-        AnimateExpandSettingsPanelData(String subpanel) {
+        AnimateExpandSettingsPanelMessage(String subpanel) {
             mSubpanel = subpanel;
         }
     }

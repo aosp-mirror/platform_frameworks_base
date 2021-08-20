@@ -32,6 +32,7 @@ import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -103,9 +104,12 @@ public class CommunalSourceMonitor {
 
     private void executeOnSourceAvailableCallbacks() {
         // If the new source is valid, inform registered Callbacks of its presence.
-        for (WeakReference<Callback> callback : mCallbacks) {
-            Callback cb = callback.get();
-            if (cb != null) {
+        Iterator<WeakReference<Callback>> itr = mCallbacks.iterator();
+        while (itr.hasNext()) {
+            Callback cb = itr.next().get();
+            if (cb == null) {
+                itr.remove();
+            } else {
                 cb.onSourceAvailable(
                         (mCommunalEnabled && mCurrentSource != null) ? new WeakReference<>(
                                 mCurrentSource) : null);

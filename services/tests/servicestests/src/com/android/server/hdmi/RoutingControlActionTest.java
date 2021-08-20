@@ -33,11 +33,7 @@ import android.content.Context;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 
 import androidx.test.InstrumentationRegistry;
@@ -49,8 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,9 +95,9 @@ public class RoutingControlActionTest {
     private static final int VENDOR_ID_AVR = 0x11233;
 
     private static final byte[] TUNER_PARAM =
-            new byte[] {(PHYSICAL_ADDRESS_TUNER >> 8) & 0xFF, PHYSICAL_ADDRESS_TUNER & 0xFF};
+            new byte[]{(PHYSICAL_ADDRESS_TUNER >> 8) & 0xFF, PHYSICAL_ADDRESS_TUNER & 0xFF};
     private static final byte[] PLAYER_PARAM =
-            new byte[] {(PHYSICAL_ADDRESS_PLAYER >> 8) & 0xFF, PHYSICAL_ADDRESS_PLAYER & 0xFF};
+            new byte[]{(PHYSICAL_ADDRESS_PLAYER >> 8) & 0xFF, PHYSICAL_ADDRESS_PLAYER & 0xFF};
 
     private static final HdmiDeviceInfo DEVICE_INFO_AVR =
             new HdmiDeviceInfo(ADDR_AUDIO_SYSTEM, PHYSICAL_ADDRESS_AVR, PORT_1,
@@ -124,23 +118,20 @@ public class RoutingControlActionTest {
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
+    private static RoutingControlAction createRoutingControlAction(HdmiCecLocalDeviceTv localDevice,
+            TestInputSelectCallback callback) {
+        return new RoutingControlAction(localDevice, PHYSICAL_ADDRESS_AVR, callback);
+    }
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
-        PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mMyLooper));
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
 
@@ -153,10 +144,6 @@ public class RoutingControlActionTest {
                     }
 
                     @Override
-                    void wakeUp() {
-                    }
-
-                    @Override
                     protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
                     }
@@ -164,11 +151,6 @@ public class RoutingControlActionTest {
                     @Override
                     boolean isPowerStandbyOrTransient() {
                         return false;
-                    }
-
-                    @Override
-                    protected PowerManager getPowerManager() {
-                        return powerManager;
                     }
 
                     @Override
@@ -190,14 +172,60 @@ public class RoutingControlActionTest {
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
                 new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, PHYSICAL_ADDRESS_AVR,
-                                 true, false, false);
+                        true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(context);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(DEVICE_INFO_AVR);
+    }
+
+    // Routing control succeeds against the device connected directly to the port. Action
+    // won't get any <Routing Information> in this case. It times out on <Routing Information>,
+    // regards the directly connected one as the new routing path to switch to.
+    @Test
+    public void testRoutingControl_succeedForDirectlyConnectedDevice() {
+        TestInputSelectCallback callback = new TestInputSelectCallback();
+        TestActionTimer actionTimer = new TestActionTimer();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(DEVICE_INFO_AVR);
+
+        RoutingControlAction action = createRoutingControlAction(mHdmiCecLocalDeviceTv, callback);
+        action.setActionTimer(actionTimer);
+        action.start();
+        assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_ROUTING_INFORMATION);
+
+        action.handleTimerEvent(actionTimer.getState());
+        mTestLooper.dispatchAll();
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
+                ADDR_TV, PHYSICAL_ADDRESS_AVR);
+        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
+    }
+
+    // Succeeds by receiving a couple of <Routing Information> commands, followed by
+    // <Set Stream Path> going out in the end.
+    @Test
+    public void testRoutingControl_succeedForDeviceBehindSwitch() {
+        TestInputSelectCallback callback = new TestInputSelectCallback();
+        TestActionTimer actionTimer = new TestActionTimer();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(DEVICE_INFO_PLAYER);
+        RoutingControlAction action = createRoutingControlAction(mHdmiCecLocalDeviceTv, callback);
+        action.setActionTimer(actionTimer);
+        action.start();
+
+        assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_ROUTING_INFORMATION);
+
+        action.processCommand(ROUTING_INFORMATION_TUNER);
+        action.processCommand(ROUTING_INFORMATION_PLAYER);
+
+        action.handleTimerEvent(actionTimer.getState());
+        mTestLooper.dispatchAll();
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
+                ADDR_TV, PHYSICAL_ADDRESS_PLAYER);
+        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
     }
 
     private static class TestActionTimer implements ActionTimer {
@@ -229,54 +257,5 @@ public class RoutingControlActionTest {
             assert (mCallbackResult.size() == 1);
             return mCallbackResult.get(0);
         }
-    }
-
-    private static RoutingControlAction createRoutingControlAction(HdmiCecLocalDeviceTv localDevice,
-            TestInputSelectCallback callback) {
-        return new RoutingControlAction(localDevice, PHYSICAL_ADDRESS_AVR, callback);
-    }
-
-    // Routing control succeeds against the device connected directly to the port. Action
-    // won't get any <Routing Information> in this case. It times out on <Routing Information>,
-    // regards the directly connected one as the new routing path to switch to.
-    @Test
-    public void testRoutingControl_succeedForDirectlyConnectedDevice() {
-        TestInputSelectCallback callback = new TestInputSelectCallback();
-        TestActionTimer actionTimer = new TestActionTimer();
-        mHdmiControlService.getHdmiCecNetwork().addCecDevice(DEVICE_INFO_AVR);
-
-        RoutingControlAction action = createRoutingControlAction(mHdmiCecLocalDeviceTv, callback);
-        action.setActionTimer(actionTimer);
-        action.start();
-        assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_ROUTING_INFORMATION);
-
-        action.handleTimerEvent(actionTimer.getState());
-        mTestLooper.dispatchAll();
-        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
-                        ADDR_TV, PHYSICAL_ADDRESS_AVR);
-        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
-    }
-
-    // Succeeds by receiving a couple of <Routing Information> commands, followed by
-    // <Set Stream Path> going out in the end.
-    @Test
-    public void testRoutingControl_succeedForDeviceBehindSwitch() {
-        TestInputSelectCallback callback = new TestInputSelectCallback();
-        TestActionTimer actionTimer = new TestActionTimer();
-        mHdmiControlService.getHdmiCecNetwork().addCecDevice(DEVICE_INFO_PLAYER);
-        RoutingControlAction action = createRoutingControlAction(mHdmiCecLocalDeviceTv, callback);
-        action.setActionTimer(actionTimer);
-        action.start();
-
-        assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_ROUTING_INFORMATION);
-
-        action.processCommand(ROUTING_INFORMATION_TUNER);
-        action.processCommand(ROUTING_INFORMATION_PLAYER);
-
-        action.handleTimerEvent(actionTimer.getState());
-        mTestLooper.dispatchAll();
-        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
-                        ADDR_TV, PHYSICAL_ADDRESS_PLAYER);
-        assertThat(mNativeWrapper.getResultMessages()).contains(setStreamPath);
     }
 }

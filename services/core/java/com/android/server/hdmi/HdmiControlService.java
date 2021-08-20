@@ -405,7 +405,7 @@ public class HdmiControlService extends SystemService {
     private TvInputManager mTvInputManager;
 
     @Nullable
-    private PowerManager mPowerManager;
+    private PowerManagerWrapper mPowerManager;
 
     @Nullable
     private Looper mIoLooper;
@@ -734,7 +734,7 @@ public class HdmiControlService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mTvInputManager = (TvInputManager) getContext().getSystemService(
                     Context.TV_INPUT_SERVICE);
-            mPowerManager = getContext().getSystemService(PowerManager.class);
+            mPowerManager = new PowerManagerWrapper(getContext());
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             runOnServiceThread(this::bootCompleted);
         }
@@ -755,7 +755,11 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
-    protected PowerManager getPowerManager() {
+    void setPowerManager(PowerManagerWrapper powerManager) {
+        mPowerManager = powerManager;
+    }
+
+    PowerManagerWrapper getPowerManager() {
         return mPowerManager;
     }
 
@@ -3148,7 +3152,7 @@ public class HdmiControlService extends SystemService {
         });
     }
 
-    private boolean canGoToStandby() {
+    boolean canGoToStandby() {
         for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
             if (!device.canGoToStandby()) return false;
         }

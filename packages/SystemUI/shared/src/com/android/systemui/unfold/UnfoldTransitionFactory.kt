@@ -15,21 +15,21 @@
  */
 @file:JvmName("UnfoldTransitionFactory")
 
-package com.android.unfold
+package com.android.systemui.unfold
 
 import android.content.Context
 import android.hardware.SensorManager
 import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
-import com.android.unfold.updates.screen.ScreenStatusProvider
-import com.android.unfold.config.ANIMATION_MODE_HINGE_ANGLE
-import com.android.unfold.config.ResourceUnfoldTransitionConfig
-import com.android.unfold.config.UnfoldTransitionConfig
-import com.android.unfold.progress.FixedTimingTransitionProgressProvider
-import com.android.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
-import com.android.unfold.updates.DeviceFoldStateProvider
-import com.android.unfold.updates.hinge.EmptyHingeAngleProvider
-import com.android.unfold.updates.hinge.RotationSensorHingeAngleProvider
+import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
+import com.android.systemui.unfold.config.ANIMATION_MODE_HINGE_ANGLE
+import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
+import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
+import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
+import com.android.systemui.unfold.updates.DeviceFoldStateProvider
+import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
+import com.android.systemui.unfold.updates.hinge.RotationSensorHingeAngleProvider
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 

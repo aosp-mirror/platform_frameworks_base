@@ -31,11 +31,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -49,8 +45,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +64,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
@@ -84,15 +79,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiDeviceInfo mDeviceInfo;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
-    private boolean mWokenUp;
-
-    @Mock private IPowerManager mIPowerManagerMock;
-    @Mock private IThermalService mIThermalServiceMock;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
@@ -156,11 +145,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
 
                 @Override
-                void wakeUp() {
-                    mWokenUp = true;
-                }
-
-                @Override
                 void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                     mDeviceInfo = device;
                     mInvokeDeviceEventState = status;
@@ -179,12 +163,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         default:
                             return defVal;
                     }
-                }
-
-                @Override
-                protected PowerManager getPowerManager() {
-                    return new PowerManager(context, mIPowerManagerMock,
-                            mIThermalServiceMock, new Handler(mMyLooper));
                 }
             };
 
@@ -228,6 +206,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(context);
+        mHdmiControlService.setPowerManager(mPowerManager);
         // No TV device interacts with AVR so system audio control won't be turned on here
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
@@ -675,16 +655,16 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void doNotWakeUpOnHotPlug_PlugIn() {
-        mWokenUp = false;
+        mPowerManager.setInteractive(false);
         mHdmiCecLocalDeviceAudioSystem.onHotplug(0, true);
-        assertThat(mWokenUp).isFalse();
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
     @Test
     public void doNotWakeUpOnHotPlug_PlugOut() {
-        mWokenUp = false;
+        mPowerManager.setInteractive(false);
         mHdmiCecLocalDeviceAudioSystem.onHotplug(0, false);
-        assertThat(mWokenUp).isFalse();
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
     @Test

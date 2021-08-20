@@ -24,7 +24,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.parser.toWindowName
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -53,7 +55,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-@Postsubmit
 class ExitPipViaExpandButtonClickTest(
     testSpec: FlickerTestParameter
 ) : ExitPipToAppTransition(testSpec) {
@@ -72,8 +73,22 @@ class ExitPipViaExpandButtonClickTest(
             transitions {
                 // This will bring PipApp to fullscreen
                 pipApp.expandPipWindowToApp(wmHelper)
+                // Wait until the other app is no longer visible
+                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
             }
         }
+
+    @Postsubmit
+    @Test
+    override fun pipAppCoversFullScreenAtEnd() = super.pipAppCoversFullScreenAtEnd()
+
+    @Postsubmit
+    @Test
+    override fun showBothAppLayersThenHidePip() = super.showBothAppLayersThenHidePip()
+
+    @Postsubmit
+    @Test
+    override fun showBothAppWindowsThenHidePip() = super.showBothAppWindowsThenHidePip()
 
     companion object {
         /**

@@ -633,7 +633,9 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
                                  offset, nullptr, isSecureMemory, avDataId, mpuSequenceNumber,
                                  isPesPrivateData, audioDescriptor);
 
-    if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0) {
+    uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
+    if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
+        (dataLength > 0 && (dataLength + offset) < avSharedMemSize)) {
         sp<MediaEvent> mediaEventSp =
                 new MediaEvent(mFilterClient, dupFromAidl(mediaEvent.avMemory),
                                mediaEvent.avDataId, dataLength + offset, obj);
@@ -1172,7 +1174,6 @@ JTuner::~JTuner() {
 
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
-    mTunerClient = nullptr;
     mFeClient = nullptr;
     mDemuxClient = nullptr;
     mClass = nullptr;
@@ -1757,15 +1758,16 @@ jobject JTuner::openTimeFilter() {
 }
 
 jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
-    ALOGD("JTuner::openDvr");
+    ALOGV("JTuner::openDvr");
     if (mDemuxClient == nullptr) {
         return nullptr;
     }
+
     sp<DvrClient> dvrClient;
     sp<DvrClientCallbackImpl> callback = new DvrClientCallbackImpl();
     dvrClient = mDemuxClient->openDvr(type, (int) bufferSize, callback);
-
     if (dvrClient == nullptr) {
+        ALOGD("Failed to open Dvr");
         return nullptr;
     }
 
@@ -4061,7 +4063,7 @@ static void android_media_tv_Tuner_dvr_set_fd(JNIEnv *env, jobject dvr, jint fd)
         ALOGD("Failed to set FD for dvr: dvr client not found");
         return;
     }
-    dvrClient->setFd((int)fd);
+    dvrClient->setFd(fd);
     ALOGV("set fd = %d", fd);
 }
 

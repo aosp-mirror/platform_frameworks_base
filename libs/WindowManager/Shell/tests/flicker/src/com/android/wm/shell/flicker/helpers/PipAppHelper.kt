@@ -162,6 +162,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         val expandButtonBounds = expandPipObject.visibleBounds
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
         wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+        wmHelper.waitForAppTransitionIdle()
     }
 
     /**

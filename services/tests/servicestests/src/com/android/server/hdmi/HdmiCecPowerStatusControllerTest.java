@@ -20,17 +20,12 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -43,8 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,28 +54,16 @@ public class HdmiCecPowerStatusControllerTest {
             HdmiControlManager.POWER_STATUS_STANDBY};
     private HdmiCecPowerStatusController mHdmiCecPowerStatusController;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
     private HdmiControlService mHdmiControlService;
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         Context contextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         Looper myLooper = mTestLooper.getLooper();
-        when(contextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(contextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(contextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(contextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(contextSpy, Collections.emptyList()) {
             @Override
@@ -125,6 +106,8 @@ public class HdmiCecPowerStatusControllerTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(contextSpy);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.getHdmiCecNetwork().initPortInfo();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x2000);

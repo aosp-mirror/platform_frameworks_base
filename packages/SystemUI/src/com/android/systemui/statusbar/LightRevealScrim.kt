@@ -178,7 +178,10 @@ class PowerButtonReveal(
  */
 class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    lateinit var revealAmountListener: Consumer<Float>
+    /**
+     * Listener that is called if the scrim's opaqueness changes
+     */
+    lateinit var isScrimOpaqueChangedListener: Consumer<Boolean>
 
     /**
      * How much of the underlying views are revealed, in percent. 0 means they will be completely
@@ -190,7 +193,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
                 field = value
 
                 revealEffect.setRevealAmountOnScrim(value, this)
-                revealAmountListener.accept(value)
+                updateScrimOpaque()
                 invalidate()
             }
         }
@@ -228,6 +231,31 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
                 setPaintColorFilter()
             }
         }
+
+    /**
+     * Is the scrim currently fully opaque
+     */
+    var isScrimOpaque = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                isScrimOpaqueChangedListener.accept(field)
+            }
+        }
+
+    private fun updateScrimOpaque() {
+        isScrimOpaque = revealAmount == 0.0f && alpha == 1.0f && visibility == VISIBLE
+    }
+
+    override fun setAlpha(alpha: Float) {
+        super.setAlpha(alpha)
+        updateScrimOpaque()
+    }
+
+    override fun setVisibility(visibility: Int) {
+        super.setVisibility(visibility)
+        updateScrimOpaque()
+    }
 
     /**
      * Paint used to draw a transparent-to-white radial gradient. This will be scaled and translated

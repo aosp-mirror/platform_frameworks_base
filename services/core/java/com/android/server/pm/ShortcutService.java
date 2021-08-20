@@ -1674,6 +1674,19 @@ public class ShortcutService extends IShortcutService.Stub {
         mContext.enforceCallingPermission(permission, message);
     }
 
+    private void verifyCallerUserId(@UserIdInt int userId) {
+        if (isCallerSystem()) {
+            return; // no check
+        }
+
+        final int callingUid = injectBinderCallingUid();
+
+        // Otherwise, make sure the arguments are valid.
+        if (UserHandle.getUserId(callingUid) != userId) {
+            throw new SecurityException("Invalid user-ID");
+        }
+    }
+
     private void verifyCaller(@NonNull String packageName, @UserIdInt int userId) {
         Preconditions.checkStringNotEmpty(packageName, "packageName");
 
@@ -2857,6 +2870,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public boolean isRequestPinItemSupported(int callingUserId, int requestType) {
+        verifyCallerUserId(callingUserId);
+
         final long token = injectClearCallingIdentity();
         try {
             return mShortcutRequestPinProcessor
