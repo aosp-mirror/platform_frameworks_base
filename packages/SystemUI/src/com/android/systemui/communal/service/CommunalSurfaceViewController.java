@@ -24,6 +24,7 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.util.ViewController;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -38,6 +39,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
     private static final String TAG = "CommunalSurfaceViewCtlr";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final Executor mMainExecutor;
+    private final CommunalStateController mCommunalStateController;
     private final CommunalSourceImpl mSource;
 
     @IntDef({STATE_SURFACE_CREATED, STATE_SURFACE_VIEW_ATTACHED})
@@ -72,8 +74,9 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
     };
 
     protected CommunalSurfaceViewController(SurfaceView view, Executor executor,
-            CommunalSourceImpl source) {
+            CommunalStateController communalStateController, CommunalSourceImpl source) {
         super(view);
+        mCommunalStateController = communalStateController;
         mSource = source;
         mMainExecutor = executor;
     }
@@ -146,6 +149,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
                         mView.setChildSurfacePackage(surfacePackage);
                         mView.setZOrderOnTop(true);
                         mView.postInvalidate();
+                        mCommunalStateController.setCommunalViewShowing(true);
                     } else {
                         Log.e(TAG, "couldn't get the surface package");
                     }

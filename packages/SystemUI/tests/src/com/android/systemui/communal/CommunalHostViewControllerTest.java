@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal;
 
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +47,9 @@ import java.lang.ref.WeakReference;
 @RunWith(AndroidTestingRunner.class)
 public class CommunalHostViewControllerTest extends SysuiTestCase {
     @Mock
+    private CommunalStateController mCommunalStateController;
+
+    @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Mock
@@ -71,8 +75,9 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mCommunalView.isAttachedToWindow()).thenReturn(true);
 
-        mController = new CommunalHostViewController(mFakeExecutor, mKeyguardUpdateMonitor,
-                mKeyguardStateController, mStatusBarStateController, mCommunalView);
+        mController = new CommunalHostViewController(mFakeExecutor, mCommunalStateController,
+                mKeyguardUpdateMonitor, mKeyguardStateController, mStatusBarStateController,
+                mCommunalView);
         mController.init();
         mFakeExecutor.runAllReady();
         Mockito.clearInvocations(mCommunalView);
@@ -151,5 +156,26 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onKeyguardOccludedChanged(false);
         mFakeExecutor.runAllReady();
         verify(mCommunalView).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testCommunalStateControllerHideNotified() {
+        ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCapture =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+
+        // Capture callback value for later use.
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCapture.capture());
+
+        // Establish a visible communal view.
+        mController.show(new WeakReference<>(mCommunalSource));
+        mFakeExecutor.runAllReady();
+
+        // Occlude
+        clearInvocations(mCommunalStateController);
+        callbackCapture.getValue().onKeyguardOccludedChanged(true);
+        mFakeExecutor.runAllReady();
+
+        // Verify state controller is notified communal view is hidden.
+        verify(mCommunalStateController).setCommunalViewShowing(false);
     }
 }
