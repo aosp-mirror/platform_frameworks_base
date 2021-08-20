@@ -58,6 +58,10 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         }
 
         override fun onTransitionStarted() {
+            // When unfolding the view is added earlier, add view for folding case
+            if (scrimView == null) {
+                addOverlayView()
+            }
         }
     }
 
