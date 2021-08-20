@@ -189,7 +189,7 @@ public class ComponentAliasResolver {
     @GuardedBy("mLock")
     private void loadOverridesLocked() {
         if (DEBUG) Slog.d(TAG, "Loading aliases overrides ...");
-        for (String line : mOverrideString.split("\\+")) {
+        for (String line : mOverrideString.split("\\,+")) {
             final String[] fields = line.split("\\:+", 2);
             final ComponentName from = ComponentName.unflattenFromString(fields[0]);
             if (!validateComponentName(from)) {
@@ -247,50 +247,45 @@ public class ComponentAliasResolver {
     /**
      * Contains alias resolution information.
      */
-    public static class Resolution {
-        @NonNull
-        public final Intent sourceIntent;
-
+    public static class Resolution<T> {
         /** "From" component. Null if component alias is disabled. */
         @Nullable
-        public final ComponentName sourceComponent;
+        public final T source;
 
         /** "To" component. Null if component alias is disabled, or the source isn't an alias. */
         @Nullable
-        public final ComponentName resolvedComponent;
+        public final T resolved;
 
-        public Resolution(Intent sourceIntent,
-                ComponentName sourceComponent, ComponentName resolvedComponent) {
-            this.sourceIntent = sourceIntent;
-            this.sourceComponent = sourceComponent;
-            this.resolvedComponent = resolvedComponent;
+        public Resolution(T source, T resolved) {
+            this.source = source;
+            this.resolved = resolved;
         }
 
         @Nullable
         public boolean isAlias() {
-            return this.resolvedComponent != null;
+            return this.resolved != null;
         }
 
         @Nullable
-        public ComponentName getAliasComponent() {
-            return isAlias() ? sourceComponent : null;
+        public T getAlias() {
+            return isAlias() ? source : null;
         }
 
         @Nullable
-        public ComponentName getTargetComponent() {
-            return isAlias() ? resolvedComponent : null;
+        public T getTarget() {
+            return isAlias() ? resolved : null;
         }
     }
 
     @Nullable
-    public Resolution resolveService(
+    public Resolution<ComponentName> resolveService(
             @NonNull Intent service, @Nullable String resolvedType,
             int packageFlags, int userId, int callingUid) {
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 if (!mEnabled) {
-                    return new Resolution(service, null, null);
+                    return new Resolution<>(null, null);
                 }
 
                 PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
@@ -317,7 +312,7 @@ public class ComponentAliasResolver {
                                 + " -> " + target.flattenToShortString());
                     }
                 }
-                return new Resolution(service, alias, target);
+                return new Resolution<>(alias, target);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
