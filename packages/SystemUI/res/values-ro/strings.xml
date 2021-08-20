@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom pt. a umple ecranul"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Înt. pt. a umple ecranul"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captură de ecran"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock dezactivat"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a trimis o imagine"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Se salv. captura de ecran..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Se salvează captura de ecran..."</string>
@@ -1182,4 +1183,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Se caută rețele…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Nu s-a realizat conexiunea la rețea"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Afișează-le pe toate"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vrea să adauge următorul card la Setări rapide"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adăugați un card"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nu adăugați un card"</string>
 </resources>

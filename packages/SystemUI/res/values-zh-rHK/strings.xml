@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock 已停用"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"已傳送圖片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕擷取畫面..."</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜尋網絡…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"無法連接網絡"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"顯示全部"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"「<xliff:g id="APPNAME">%1$s</xliff:g>」想在「快速設定」選單新增以下圖塊"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"新增圖塊"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增圖塊"</string>
 </resources>

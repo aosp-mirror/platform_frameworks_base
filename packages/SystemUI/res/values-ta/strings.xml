@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ஸ்கிரீன்ஷாட்"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock முடக்கப்பட்டது"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"அனைத்தையும் காட்டு"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"விரைவு அமைப்புகளில் பின்வரும் கட்டத்தைச் சேர்க்க <xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸ் விரும்புகிறது"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"கட்டத்தைச் சேர்"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"கட்டத்தை சேர்க்காதே"</string>
 </resources>

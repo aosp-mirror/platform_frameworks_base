@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Павял. на ўвесь экран"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Расцягн. на ўвесь экран"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Здымак экрана"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Функцыя \"Smart Lock\" адключана"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"адпраўлены відарыс"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Захаванне скрыншота..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Захаванне скрыншота..."</string>
@@ -1188,4 +1189,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Выконваецца пошук сетак…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не ўдалося падключыцца да сеткі"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Паказаць усе"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> запытвае дазвол на дадаванне ў Хуткія налады наступнай пліткі"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Дадаць плітку"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не дадаваць плітку"</string>
 </resources>
