@@ -77,6 +77,8 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्क्रीन भरण्यासाठी झूम करा"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्क्रीन भरण्यासाठी ताणा"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रीनशॉट"</string>
+    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"इमेज पाठवली आहे"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रीनशॉट सेव्ह करत आहे…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सेव्ह करत आहे…"</string>
