@@ -1389,6 +1389,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return parent != null ? parent.asTaskFragment() : null;
     }
 
+    /** Whether we should prepare a transition for this {@link ActivityRecord} parent change. */
+    private boolean shouldStartChangeTransition(
+            @Nullable TaskFragment newParent, @Nullable TaskFragment oldParent) {
+        if (mWmService.mDisableTransitionAnimation
+                || mDisplayContent == null || newParent == null || oldParent == null
+                || getSurfaceControl() == null || !isVisible() || !isVisibleRequested()) {
+            return false;
+        }
+
+        // Transition change for the activity moving into a TaskFragment of different bounds.
+        return newParent.isOrganizedTaskFragment()
+                && !newParent.getBounds().equals(oldParent.getBounds());
+    }
+
     @Override
     void onParentChanged(ConfigurationContainer rawNewParent, ConfigurationContainer rawOldParent) {
         final TaskFragment oldParent = (TaskFragment) rawOldParent;
@@ -1396,6 +1410,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Task oldTask = oldParent != null ? oldParent.getTask() : null;
         final Task newTask = newParent != null ? newParent.getTask() : null;
         this.task = newTask;
+
+        if (shouldStartChangeTransition(newParent, oldParent)) {
+            initializeChangeTransition(getBounds());
+        }
 
         super.onParentChanged(newParent, oldParent);
 
@@ -2607,6 +2625,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return parent != null ? parent.getOrganizedTaskFragment() : null;
     }
 
+    @Override
     boolean isEmbedded() {
         final TaskFragment parent = getTaskFragment();
         return parent != null && parent.isEmbedded();
