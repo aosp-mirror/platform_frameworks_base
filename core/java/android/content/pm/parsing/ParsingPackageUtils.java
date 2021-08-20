@@ -996,6 +996,11 @@ public class ParsingPackageUtils {
 
     private static ParseResult<ParsingPackage> parseSharedUser(ParseInput input,
             ParsingPackage pkg, TypedArray sa) {
+        int maxSdkVersion = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
+        if ((maxSdkVersion != 0) && maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT) {
+            return input.success(pkg);
+        }
+
         String str = nonConfigString(0, R.styleable.AndroidManifest_sharedUserId, sa);
         if (TextUtils.isEmpty(str)) {
             return input.success(pkg);
