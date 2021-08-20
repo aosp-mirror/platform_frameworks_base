@@ -3780,7 +3780,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS)
+                ? getCallerIdentity() : getCallerIdentity(adminReceiver);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REMOVE_ACTIVE_ADMIN);
         enforceUserUnlocked(userHandle);
@@ -3797,8 +3798,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + adminReceiver);
                 return;
             }
-            Preconditions.checkCallAuthorization(admin.getUid() == caller.getUid()
-                    || hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+
             mInjector.binderWithCleanCallingIdentity(() ->
                     removeActiveAdminLocked(adminReceiver, userHandle));
         }
