@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
@@ -2045,7 +2046,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    private boolean hasCrossUserPermission() {
+        final int interactPermission =
+                mContext.checkCallingPermission(INTERACT_ACROSS_USERS_FULL);
+        return interactPermission == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
     public boolean hasNamedWallpaper(String name) {
+        final int callingUser = UserHandle.getCallingUserId();
+        final boolean allowCrossUser = hasCrossUserPermission();
+        if (DEBUG) {
+            Slog.d(TAG, "hasNamedWallpaper() caller " + Binder.getCallingUid()
+                    + " cross-user?: " + allowCrossUser);
+        }
+
         synchronized (mLock) {
             List<UserInfo> users;
             final long ident = Binder.clearCallingIdentity();
@@ -2055,6 +2070,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
             for (UserInfo user: users) {
+                if (!allowCrossUser && callingUser != user.id) {
+                    // No cross-user information for callers without permission
+                    continue;
+                }
+
                 // ignore managed profiles
                 if (user.isManagedProfile()) {
                     continue;
