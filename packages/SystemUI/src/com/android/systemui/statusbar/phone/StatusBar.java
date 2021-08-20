@@ -3579,6 +3579,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void animateKeyguardUnoccluding() {
         mNotificationPanelViewController.setExpandedFraction(0f);
         animateExpandNotificationsPanel();
+        mScrimController.setUnocclusionAnimationRunning(true);
     }
 
     /**
@@ -4465,10 +4466,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
-        } else if (isInLaunchTransition()
-                || mLaunchCameraWhenFinishedWaking
-                || launchingAffordanceWithPreview) {
-            // TODO(b/170133395) Investigate whether Emergency Gesture flag should be included here.
+        } else if (launchingAffordanceWithPreview) {
+            // We want to avoid animating when launching with a preview.
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
