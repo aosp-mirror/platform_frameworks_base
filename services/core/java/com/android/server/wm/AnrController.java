@@ -31,6 +31,7 @@ import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.CriticalEventLog;
 import com.android.server.wm.EmbeddedWindowController.EmbeddedWindow;
 
 import java.io.File;
@@ -222,9 +223,10 @@ class AnrController {
             }
         }
 
+        String criticalEvents = CriticalEventLog.getInstance().logLinesForAnrFile();
         final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 null /* processCpuTracker */, null /* lastPids */, nativePids,
-                null /* logExceptionCreatingFile */);
+                null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents);
         if (tracesFile != null) {
             tracesFile.renameTo(new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
         }

@@ -53,6 +53,7 @@ android_test {
         "testng",
         "ub-uiautomator",
         "platformprotosnano",
+        "framework-protos",
         "hamcrest-library",
         "servicestests-utils",
         "service-appsearch",
