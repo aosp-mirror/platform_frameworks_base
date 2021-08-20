@@ -18,6 +18,7 @@ package com.android.systemui.communal.service;
 
 import android.annotation.IntDef;
 import android.content.res.Resources;
+import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.util.Log;
 import android.view.IWindow;
@@ -125,6 +126,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
     @Override
     protected void onInit() {
+        mView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         mView.getHolder().addCallback(mSurfaceHolderCallback);
         mView.addOnLayoutChangeListener(mOnLayoutChangeListener);
     }

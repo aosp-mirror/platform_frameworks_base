@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
+import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.view.Display;
@@ -125,6 +126,7 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         final ArgumentCaptor<SurfaceHolder.Callback> callbackCapture =
                 ArgumentCaptor.forClass(SurfaceHolder.Callback.class);
         verify(mSurfaceHolder).addCallback(callbackCapture.capture());
+        verify(mSurfaceHolder).setFormat(PixelFormat.TRANSPARENT);
         mCallback = callbackCapture.getValue();
 
         final ArgumentCaptor<View.OnLayoutChangeListener> listenerCapture =
