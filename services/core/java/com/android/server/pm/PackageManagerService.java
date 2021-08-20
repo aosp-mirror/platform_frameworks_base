@@ -12172,8 +12172,8 @@ public class PackageManagerService extends IPackageManager.Stub
             parsedPackage.hideAsFinal();
             throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
-                    + pkgSetting.versionCode + " better than this "
-                    + parsedPackage.getLongVersionCode());
+                    + (pkgAlreadyExists ? String.valueOf(pkgSetting.versionCode) : "unknown")
+                    + " better than this " + parsedPackage.getLongVersionCode());
         }
 
         // Verify certificates against what was last scanned. Force re-collecting certificate in two
