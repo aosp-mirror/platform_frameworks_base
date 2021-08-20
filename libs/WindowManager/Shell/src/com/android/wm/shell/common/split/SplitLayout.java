@@ -23,6 +23,7 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
@@ -365,7 +366,7 @@ public final class SplitLayout {
         if (dividerLeash != null) {
             t.setPosition(dividerLeash, mDividerBounds.left, mDividerBounds.top);
             // Resets layer of divider bar to make sure it is always on top.
-            t.setLayer(dividerLeash, Integer.MAX_VALUE);
+            t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER);
         }
         t.setPosition(leash1, mBounds1.left, mBounds1.top)
                 .setWindowCrop(leash1, mBounds1.width(), mBounds1.height());

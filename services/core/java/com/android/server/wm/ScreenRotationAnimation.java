@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
@@ -30,8 +31,6 @@ import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -90,13 +89,6 @@ import java.io.PrintWriter;
  */
 class ScreenRotationAnimation {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ScreenRotationAnimation" : TAG_WM;
-
-    /*
-     * Layers for screen rotation animation. We put these layers above
-     * WINDOW_FREEZE_LAYER so that screen freeze will cover all windows.
-     */
-    private static final int SCREEN_FREEZE_LAYER_BASE = WINDOW_FREEZE_LAYER + TYPE_LAYER_MULTIPLIER;
-    private static final int SCREEN_FREEZE_LAYER_ENTER = SCREEN_FREEZE_LAYER_BASE;
 
     private final Context mContext;
     private final DisplayContent mDisplayContent;
@@ -423,7 +415,7 @@ class ScreenRotationAnimation {
                         finalWidth * 2, finalHeight * 2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
                 mEnteringBlackFrame = new BlackFrame(mService.mTransactionFactory, t, outer, inner,
-                        SCREEN_FREEZE_LAYER_ENTER, mDisplayContent, false, mEnterBlackFrameLayer);
+                        SCREEN_FREEZE_LAYER_BASE, mDisplayContent, false, mEnterBlackFrameLayer);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             }
