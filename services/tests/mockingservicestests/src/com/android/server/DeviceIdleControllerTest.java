@@ -323,6 +323,7 @@ public class DeviceIdleControllerTest {
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         doNothing().when(mWakeLock).acquire();
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), anyString(), any(), any());
+        doNothing().when(mAlarmManager).setExact(anyInt(), anyLong(), anyString(), any(), any());
         doNothing().when(mAlarmManager)
                 .setWindow(anyInt(), anyLong(), anyLong(), anyString(), any(), any());
         doReturn(mock(Sensor.class)).when(mSensorManager)
