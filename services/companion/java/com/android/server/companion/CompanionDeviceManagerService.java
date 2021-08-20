@@ -566,7 +566,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
-                                userId, component, packageTitle),
+                                getContext(), userId, component, packageTitle),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,

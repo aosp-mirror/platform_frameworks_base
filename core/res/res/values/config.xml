@@ -5135,6 +5135,12 @@
         <item>@array/config_secondaryBuiltInDisplayWaterfallCutout</item>
     </array>
 
+    <!-- The component name of the activity for the companion-device-manager notification access
+     confirmation. -->
+    <string name="config_notificationAccessConfirmationActivity" translatable="false">
+        com.android.settings/com.android.settings.notification.NotificationAccessConfirmationActivity
+    </string>
+
     <!-- Whether the airplane mode should be reset when device boots in non-safemode after exiting
          from safemode.
          This flag should be enabled only when the product does not have any UI to toggle airplane
