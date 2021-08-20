@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"拉伸以填满屏幕"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"屏幕截图"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock 已停用"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"发送了一张图片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在保存屏幕截图..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在保存屏幕截图..."</string>
@@ -1058,7 +1059,7 @@
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"收藏"</string>
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜索网络…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"未能连接到网络"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下图块添加到“快捷设置”"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
 </resources>

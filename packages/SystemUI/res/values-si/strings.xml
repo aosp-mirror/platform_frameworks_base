@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"තිරය පිරවීමට විශාලනය කරන්න"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"තිරය පිරවීමට අදින්න"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"තිර රුව"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock අබලයි"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"රූපයක් එවන ලදී"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"තිර රුව සුරකිමින්…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"තිර රුව සුරැකෙමින් පවතී…"</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ජාල සඳහා සොයමින්…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ජාලය වෙත සම්බන්ධ වීම අසාර්ථක විය"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"සියල්ල බලන්න"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> හට ක්ෂණික සැකසීම් වෙත පහත ටයිල් එක් කිරීමට අවශ්‍යයි"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ටයිල් එක් කරන්න"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ටයිල් එක් නොකරන්න"</string>
 </resources>
