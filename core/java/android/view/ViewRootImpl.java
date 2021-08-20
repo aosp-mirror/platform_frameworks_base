@@ -759,6 +759,12 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mWaitForBlastSyncComplete = false;
 
     /**
+     * Keeps track of the last frame number that was attempted to draw. Should only be accessed on
+     * the RenderThread.
+     */
+    private long mRtLastAttemptedDrawFrameNum = 0;
+
+    /**
      * Keeps track of whether a traverse was triggered while the UI thread was paused. This can
      * occur when the client is waiting on another process to submit the transaction that
      * contains the buffer. The UI thread needs to wait on the callback before it can submit
@@ -3974,35 +3980,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * The callback will run on the render thread.
+     * Only call this on the UI Thread.
      */
-    private HardwareRenderer.FrameCompleteCallback createFrameCompleteCallback(Handler handler,
-            boolean reportNextDraw, ArrayList<Runnable> commitCallbacks) {
-        return frameNr -> {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Received frameCompleteCallback frameNum=" + frameNr);
-            }
-
-            handler.postAtFrontOfQueue(() -> {
-                if (mNextDrawUseBlastSync) {
-                    // We don't need to synchronize mRtBLASTSyncTransaction here since we're
-                    // guaranteed that this is called after onFrameDraw and mNextDrawUseBlastSync
-                    // is only true when the UI thread is paused. Therefore, no one should be
-                    // modifying this object until the next vsync.
-                    mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
-                }
-
-                if (reportNextDraw) {
-                    // TODO: Use the frame number
-                    pendingDrawFinished();
-                }
-                if (commitCallbacks != null) {
-                    for (int i = 0; i < commitCallbacks.size(); i++) {
-                        commitCallbacks.get(i).run();
-                    }
-                }
-            });
-        };
+    void clearBlastSync() {
+        mNextDrawUseBlastSync = false;
+        mWaitForBlastSyncComplete = false;
+        if (DEBUG_BLAST) {
+            Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
+                    + " due to a previous skipped traversal.");
+        }
+        if (mRequestedTraverseWhilePaused) {
+            mRequestedTraverseWhilePaused = false;
+            scheduleTraversals();
+        }
     }
 
     /**
@@ -4012,30 +4002,86 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    private boolean addFrameCompleteCallbackIfNeeded() {
+    private boolean addFrameCompleteCallbackIfNeeded(boolean reportNextDraw) {
         if (!isHardwareEnabled()) {
             return false;
         }
 
+        if (!mNextDrawUseBlastSync && !reportNextDraw) {
+            return false;
+        }
+
+        if (DEBUG_BLAST) {
+            Log.d(mTag, "Creating frameCompleteCallback");
+        }
+
+        mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(() -> {
+            long frameNr = mBlastBufferQueue.getLastAcquiredFrameNum();
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Received frameCompleteCallback "
+                        + " lastAcquiredFrameNum=" + frameNr
+                        + " lastAttemptedDrawFrameNum=" + mRtLastAttemptedDrawFrameNum);
+            }
+
+            boolean frameWasNotDrawn = frameNr != mRtLastAttemptedDrawFrameNum;
+            // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
+            // draw attempt. The next transaction and transaction complete callback were only set
+            // for the current draw attempt.
+            if (frameWasNotDrawn) {
+                mBlastBufferQueue.setNextTransaction(null);
+                mBlastBufferQueue.setTransactionCompleteCallback(mRtLastAttemptedDrawFrameNum,
+                        null);
+            }
+
+            mHandler.postAtFrontOfQueue(() -> {
+                if (mNextDrawUseBlastSync) {
+                    // We don't need to synchronize mRtBLASTSyncTransaction here since we're
+                    // guaranteed that this is called after onFrameDraw and mNextDrawUseBlastSync
+                    // is only true when the UI thread is paused. Therefore, no one should be
+                    // modifying this object until the next vsync.
+                    mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
+                }
+
+                if (reportNextDraw) {
+                    pendingDrawFinished();
+                }
+
+                if (frameWasNotDrawn) {
+                    clearBlastSync();
+                }
+            });
+        });
+        return true;
+    }
+
+    private void addFrameCommitCallbackIfNeeded() {
+        if (!isHardwareEnabled()) {
+            return;
+        }
+
         ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
                 .captureFrameCommitCallbacks();
-        final boolean needFrameCompleteCallback =
-                mNextDrawUseBlastSync || mReportNextDraw
-                        || (commitCallbacks != null && commitCallbacks.size() > 0);
-        if (needFrameCompleteCallback) {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Creating frameCompleteCallback"
-                        + " mNextDrawUseBlastSync=" + mNextDrawUseBlastSync
-                        + " mReportNextDraw=" + mReportNextDraw
-                        + " commitCallbacks size="
-                        + (commitCallbacks == null ? 0 : commitCallbacks.size()));
-            }
-            mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(
-                    createFrameCompleteCallback(mAttachInfo.mHandler, mReportNextDraw,
-                            commitCallbacks));
-            return true;
+        final boolean needFrameCommitCallback =
+                (commitCallbacks != null && commitCallbacks.size() > 0);
+        if (!needFrameCommitCallback) {
+            return;
         }
-        return false;
+
+        if (DEBUG_DRAW) {
+            Log.d(mTag, "Creating frameCommitCallback"
+                    + " commitCallbacks size=" + commitCallbacks.size());
+        }
+        mAttachInfo.mThreadedRenderer.setFrameCommitCallback(didProduceBuffer -> {
+            if (DEBUG_DRAW) {
+                Log.d(mTag, "Received frameCommitCallback didProduceBuffer=" + didProduceBuffer);
+            }
+
+            mHandler.postAtFrontOfQueue(() -> {
+                for (int i = 0; i < commitCallbacks.size(); i++) {
+                    commitCallbacks.get(i).run();
+                }
+            });
+        });
     }
 
     private void addFrameCallbackIfNeeded() {
@@ -4065,6 +4111,8 @@ public final class ViewRootImpl implements ViewParent,
                         + " Creating transactionCompleteCallback=" + nextDrawUseBlastSync);
             }
 
+            mRtLastAttemptedDrawFrameNum = frame;
+
             if (needsCallbackForBlur) {
                 mBlurRegionAggregator
                     .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates);
@@ -4087,18 +4135,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_BLAST) {
                         Log.d(mTag, "Received transactionCompleteCallback frameNum=" + frame);
                     }
-                    mHandler.postAtFrontOfQueue(() -> {
-                        mNextDrawUseBlastSync = false;
-                        mWaitForBlastSyncComplete = false;
-                        if (DEBUG_BLAST) {
-                            Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
-                                    + " due to a previous skipped traversal.");
-                        }
-                        if (mRequestedTraverseWhilePaused) {
-                            mRequestedTraverseWhilePaused = false;
-                            scheduleTraversals();
-                        }
-                    });
+                    mHandler.postAtFrontOfQueue(this::clearBlastSync);
                 });
             } else if (reportNextDraw) {
                 // If we need to report next draw, wait for adapter to flush its shadow queue
@@ -4124,8 +4161,9 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded();
         addFrameCallbackIfNeeded();
+        addFrameCommitCallbackIfNeeded();
+        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded(mReportNextDraw);
 
         try {
             boolean canUseAsync = draw(fullRedrawNeeded);

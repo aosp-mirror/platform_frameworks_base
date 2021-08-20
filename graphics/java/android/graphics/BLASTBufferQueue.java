@@ -39,6 +39,7 @@ public final class BLASTBufferQueue {
                                                               long frameNumber);
     private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
             TransactionCompleteCallback callback);
+    private static native long nativeGetLastAcquiredFrameNum(long ptr);
 
     /**
      * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
@@ -145,4 +146,7 @@ public final class BLASTBufferQueue {
         nativeMergeWithNextTransaction(mNativeObject, nativeTransaction, frameNumber);
     }
 
+    public long getLastAcquiredFrameNum() {
+        return nativeGetLastAcquiredFrameNum(mNativeObject);
+    }
 }

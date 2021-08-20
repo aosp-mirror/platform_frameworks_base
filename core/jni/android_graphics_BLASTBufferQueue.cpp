@@ -139,6 +139,11 @@ static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlon
     }
 }
 
+static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    return queue->getLastAcquiredFrameNum();
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
@@ -151,7 +156,8 @@ static const JNINativeMethod gMethods[] = {
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",
                 "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
-                (void*)nativeSetTransactionCompleteCallback}
+                (void*)nativeSetTransactionCompleteCallback},
+        {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         // clang-format on
 };
 

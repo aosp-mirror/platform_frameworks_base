@@ -388,7 +388,8 @@ public class HardwareRenderer {
          */
         public @NonNull FrameRenderRequest setFrameCommitCallback(@NonNull Executor executor,
                 @NonNull Runnable frameCommitCallback) {
-            setFrameCompleteCallback(frameNr -> executor.execute(frameCommitCallback));
+            nSetFrameCommitCallback(mNativeProxy,
+                    didProduceBuffer -> executor.execute(frameCommitCallback));
             return this;
         }
 
@@ -606,6 +607,11 @@ public class HardwareRenderer {
      */
     public boolean isOpaque() {
         return mOpaque;
+    }
+
+    /** @hide */
+    public void setFrameCommitCallback(FrameCommitCallback callback) {
+        nSetFrameCommitCallback(mNativeProxy, callback);
     }
 
     /** @hide */
@@ -896,13 +902,27 @@ public class HardwareRenderer {
      *
      * @hide
      */
+    public interface FrameCommitCallback {
+        /**
+         * Invoked after a new frame was drawn
+         *
+         * @param didProduceBuffer The draw successfully produced a new buffer.
+         */
+        void onFrameCommit(boolean didProduceBuffer);
+    }
+
+    /**
+     * Interface used to be notified when RenderThread has finished an attempt to draw. This doesn't
+     * mean a new frame has drawn, specifically if there's nothing new to draw, but only that
+     * RenderThread had a chance to draw a frame.
+     *
+     * @hide
+     */
     public interface FrameCompleteCallback {
         /**
-         * Invoked after a frame draw
-         *
-         * @param frameNr The id of the frame that was drawn.
+         * Invoked after a frame draw was attempted.
          */
-        void onFrameComplete(long frameNr);
+        void onFrameComplete();
     }
 
     /**
@@ -1390,6 +1410,9 @@ public class HardwareRenderer {
             PrepareSurfaceControlForWebviewCallback callback);
 
     private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
+
+    private static native void nSetFrameCommitCallback(long nativeProxy,
+            FrameCommitCallback callback);
 
     private static native void nSetFrameCompleteCallback(long nativeProxy,
             FrameCompleteCallback callback);
