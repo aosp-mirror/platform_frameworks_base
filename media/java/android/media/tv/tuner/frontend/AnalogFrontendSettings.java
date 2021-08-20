@@ -229,7 +229,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
         return new Builder();
     }
 
-    private AnalogFrontendSettings(int frequency, int signalType, int sifStandard, int aftFlag) {
+    private AnalogFrontendSettings(long frequency, int signalType, int sifStandard, int aftFlag) {
         super(frequency);
         mSignalType = signalType;
         mSifStandard = sifStandard;
@@ -240,7 +240,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
      * Builder for {@link AnalogFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mSignalType = SIGNAL_TYPE_UNDEFINED;
         private int mSifStandard = SIF_UNDEFINED;
         private int mAftFlag = AFT_FLAG_UNDEFINED;
@@ -251,10 +251,23 @@ public class AnalogFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

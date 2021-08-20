@@ -134,7 +134,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     private final int mGuardInterval;
     private final int mServiceAreaId;
 
-    private IsdbtFrontendSettings(int frequency, int modulation, int bandwidth, int mode,
+    private IsdbtFrontendSettings(long frequency, int modulation, int bandwidth, int mode,
             int codeRate, int guardInterval, int serviceAreaId) {
         super(frequency);
         mModulation = modulation;
@@ -199,7 +199,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
      * Builder for {@link IsdbtFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
         private int mBandwidth = BANDWIDTH_UNDEFINED;
         private int mMode = MODE_UNDEFINED;
@@ -214,10 +214,23 @@ public class IsdbtFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

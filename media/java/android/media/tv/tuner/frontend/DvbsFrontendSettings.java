@@ -263,7 +263,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
     // isDiseqcRxMessage is only supported in Tuner 1.1 or higher.
     private final boolean mIsDiseqcRxMessage;
 
-    private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate codeRate,
+    private DvbsFrontendSettings(long frequency, int modulation, DvbsCodeRate codeRate,
             int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm,
             int scanType, boolean isDiseqcRxMessage) {
         super(frequency);
@@ -363,7 +363,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
      * Builder for {@link DvbsFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
         private DvbsCodeRate mCodeRate = null;
         private int mSymbolRate = 0;
@@ -382,10 +382,23 @@ public class DvbsFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

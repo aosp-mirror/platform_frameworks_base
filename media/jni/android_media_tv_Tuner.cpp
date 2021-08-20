@@ -978,24 +978,16 @@ void FrontendClientCallbackImpl::onScanMessage(
         }
         case FrontendScanMessageType::FREQUENCY: {
             std::vector<int64_t> v = message.get<FrontendScanMessage::Tag::frequencies>();
-            std::vector<uint32_t> jintV;
-            for (int i = 0; i < v.size(); i++) {
-                jintV.push_back(static_cast<uint32_t>(v[i]));
-            }
-            jintArray freqs = env->NewIntArray(jintV.size());
-            env->SetIntArrayRegion(freqs, 0, v.size(), reinterpret_cast<jint *>(&jintV[0]));
-
-            env->CallVoidMethod(
-                    frontend,
-                    env->GetMethodID(clazz, "onFrequenciesReport", "([I)V"),
-                    freqs);
+            jlongArray freqs = env->NewLongArray(v.size());
+            env->SetLongArrayRegion(freqs, 0, v.size(), reinterpret_cast<jlong *>(&v[0]));
+            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onFrequenciesReport", "([J)V"),
+                                freqs);
             break;
         }
         case FrontendScanMessageType::SYMBOL_RATE: {
             std::vector<int32_t> v = message.get<FrontendScanMessage::Tag::symbolRates>();
             jintArray symbolRates = env->NewIntArray(v.size());
             env->SetIntArrayRegion(symbolRates, 0, v.size(), reinterpret_cast<jint *>(&v[0]));
-
             env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onSymbolRates", "([I)V"),
                                 symbolRates);
             break;
@@ -1384,15 +1376,16 @@ jobject JTuner::getFrontendInfo(int id) {
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendInfo");
-    jmethodID infoInit = env->GetMethodID(clazz, "<init>",
-            "(IIIIIIII[ILandroid/media/tv/tuner/frontend/FrontendCapabilities;)V");
+    jmethodID infoInit =
+            env->GetMethodID(clazz, "<init>",
+                             "(IIJJIIJI[ILandroid/media/tv/tuner/frontend/FrontendCapabilities;)V");
 
     jint type = (jint)feInfo->type;
-    jint minFrequency = static_cast<uint32_t>(feInfo->minFrequency);
-    jint maxFrequency = static_cast<uint32_t>(feInfo->maxFrequency);
+    jlong minFrequency = feInfo->minFrequency;
+    jlong maxFrequency = feInfo->maxFrequency;
     jint minSymbolRate = feInfo->minSymbolRate;
     jint maxSymbolRate = feInfo->maxSymbolRate;
-    jint acquireRange = feInfo->acquireRange;
+    jlong acquireRange = feInfo->acquireRange;
     jint exclusiveGroupId = feInfo->exclusiveGroupId;
     jintArray statusCaps = env->NewIntArray(feInfo->statusCaps.size());
     env->SetIntArrayRegion(
@@ -1854,6 +1847,8 @@ jobject JTuner::getFrontendStatus(jintArray types) {
     jmethodID initInt = env->GetMethodID(intClazz, "<init>", "(I)V");
     jclass booleanClazz = env->FindClass("java/lang/Boolean");
     jmethodID initBoolean = env->GetMethodID(booleanClazz, "<init>", "(Z)V");
+    jclass longClazz = env->FindClass("java/lang/Long");
+    jmethodID initLong = env->GetMethodID(longClazz, "<init>", "(J)V");
 
     for (int i = 0; i < status.size(); i++) {
         const FrontendStatus &s = status[i];
@@ -2033,12 +2028,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 break;
             }
             case FrontendStatus::Tag::freqOffset: {
-                jfieldID field = env->GetFieldID(clazz, "mFreqOffset", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt,
-                                       static_cast<uint32_t>(
-                                               s.get<FrontendStatus::Tag::freqOffset>()));
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                jfieldID field = env->GetFieldID(clazz, "mFreqOffset", "Ljava/lang/Long;");
+                jobject newLongObj = env->NewObject(longClazz, initLong,
+                                                    s.get<FrontendStatus::Tag::freqOffset>());
+                env->SetObjectField(statusObj, field, newLongObj);
                 break;
             }
             case FrontendStatus::Tag::hierarchy: {
@@ -2480,14 +2473,14 @@ static DemuxPid getDemuxPid(int pidType, int pid) {
 
 static int64_t getFrontendSettingsFreq(JNIEnv *env, const jobject &settings) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendSettings");
-    jfieldID freqField = env->GetFieldID(clazz, "mFrequency", "I");
-    return static_cast<uint32_t>(env->GetIntField(settings, freqField));
+    jfieldID freqField = env->GetFieldID(clazz, "mFrequency", "J");
+    return env->GetLongField(settings, freqField);
 }
 
 static int64_t getFrontendSettingsEndFreq(JNIEnv *env, const jobject &settings) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendSettings");
-    jfieldID endFreqField = env->GetFieldID(clazz, "mEndFrequency", "I");
-    return static_cast<uint32_t>(env->GetIntField(settings, endFreqField));
+    jfieldID endFreqField = env->GetFieldID(clazz, "mEndFrequency", "J");
+    return env->GetLongField(settings, endFreqField);
 }
 
 static FrontendSpectralInversion getFrontendSettingsSpectralInversion(

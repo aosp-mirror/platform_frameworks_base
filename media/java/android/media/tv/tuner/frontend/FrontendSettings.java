@@ -271,17 +271,13 @@ public abstract class FrontendSettings {
     public static final int FRONTEND_SPECTRAL_INVERSION_INVERTED =
             android.hardware.tv.tuner.FrontendSpectralInversion.INVERTED;
 
-
-
-    private final int mFrequency;
+    private final long mFrequency;
     // End frequency is only supported in Tuner 1.1 or higher.
-    private int mEndFrequency = Tuner.INVALID_FRONTEND_SETTING_FREQUENCY;
+    private long mEndFrequency = Tuner.INVALID_FRONTEND_SETTING_FREQUENCY;
     // General spectral inversion is only supported in Tuner 1.1 or higher.
     private int mSpectralInversion = FRONTEND_SPECTRAL_INVERSION_UNDEFINED;
 
-    FrontendSettings(int frequency) {
-        mFrequency = frequency;
-    }
+    FrontendSettings(long frequency) { mFrequency = frequency; }
 
     /**
      * Returns the frontend type.
@@ -293,9 +289,32 @@ public abstract class FrontendSettings {
      * Gets the frequency.
      *
      * @return the frequency in Hz.
+     * @deprecated Use {@link #getFrequencyLong()}
      */
+    @Deprecated
     public int getFrequency() {
+        return (int) getFrequencyLong();
+    }
+
+    /**
+     * Gets the frequency.
+     *
+     * @return the frequency in Hz.
+     */
+    public long getFrequencyLong() {
         return mFrequency;
+    }
+
+    /**
+     * Get the end frequency.
+     *
+     * @return the end frequency in Hz.
+     * @deprecated Use {@link #getEndFrequencyLong()}
+     */
+    @Deprecated
+    @IntRange(from = 1)
+    public int getEndFrequency() {
+        return (int) getEndFrequencyLong();
     }
 
     /**
@@ -304,7 +323,7 @@ public abstract class FrontendSettings {
      * @return the end frequency in Hz.
      */
     @IntRange(from = 1)
-    public int getEndFrequency() {
+    public long getEndFrequencyLong() {
         return mEndFrequency;
     }
 
@@ -344,9 +363,27 @@ public abstract class FrontendSettings {
      * @param endFrequency the end frequency used during blind scan. The default value is
      * {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_SETTING_FREQUENCY}.
      * @throws IllegalArgumentException if the {@code endFrequency} is not greater than 0.
+     * @deprecated Use {@link #setFrequencyLong(long)}
      */
     @IntRange(from = 1)
-    public void setEndFrequency(int endFrequency) {
+    @Deprecated
+    public void setEndFrequency(int frequency) {
+        setEndFrequencyLong((long) frequency);
+    }
+
+    /**
+     * Set End Frequency. This API is only supported with Tuner HAL 1.1 or higher. Otherwise it
+     * would be no-op.
+     *
+     * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @param endFrequency the end frequency used during blind scan. The default value is
+     * {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_SETTING_FREQUENCY}.
+     * @throws IllegalArgumentException if the {@code endFrequency} is not greater than 0.
+     */
+    @IntRange(from = 1)
+    public void setEndFrequencyLong(long endFrequency) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "setEndFrequency")) {
             if (endFrequency < 1) {
