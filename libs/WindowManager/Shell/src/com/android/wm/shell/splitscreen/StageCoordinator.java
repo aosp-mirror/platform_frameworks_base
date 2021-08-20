@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
+import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
@@ -88,7 +89,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
-import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -696,7 +696,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mDividerVisible) {
             t.show(dividerLeash)
-                    .setLayer(dividerLeash, Integer.MAX_VALUE)
+                    .setLayer(dividerLeash, SPLIT_DIVIDER_LAYER)
                     .setPosition(dividerLeash,
                             mSplitLayout.getDividerBounds().left,
                             mSplitLayout.getDividerBounds().top);
@@ -1133,7 +1133,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Be default, make it visible. The remote animator can adjust alpha if it plans to animate.
         if (show) {
             t.setAlpha(leash, 1.f);
-            t.setLayer(leash, Integer.MAX_VALUE);
+            t.setLayer(leash, SPLIT_DIVIDER_LAYER);
             t.setPosition(leash, bounds.left, bounds.top);
             t.show(leash);
         }

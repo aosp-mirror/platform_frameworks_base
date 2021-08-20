@@ -90,6 +90,7 @@ import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -1114,7 +1115,7 @@ final class AccessibilityController {
                     final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
                     final int layer =
                             mService.mPolicy.getWindowLayerFromTypeLw(TYPE_MAGNIFICATION_OVERLAY) *
-                                    WindowManagerService.TYPE_LAYER_MULTIPLIER;
+                                    WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
                     t.setLayer(mSurfaceControl, layer).setPosition(mSurfaceControl, 0, 0);
                     InputMonitor.setTrustedOverlayInputInfo(mSurfaceControl, t,
                             mDisplayContent.getDisplayId(), "Magnification Overlay");
