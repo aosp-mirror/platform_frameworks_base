@@ -76,6 +76,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
@@ -1181,6 +1182,15 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    void requestSavedPasswordCount(IResultReceiver receiver) {
+        RemoteFillService remoteService =
+                new RemoteFillService(
+                        getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+        remoteService.onSavedPasswordCountRequest(receiver);
+    }
+
+    @GuardedBy("mLock")
     @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceLocked() {
         if (mRemoteAugmentedAutofillService == null) {
             final String serviceName = mMaster.mAugmentedAutofillResolver.getServiceName(mUserId);
@@ -1505,16 +1515,10 @@ final class AutofillManagerServiceImpl
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
-            // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
-            // of package name
-            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
-                    .setComponentName(componentName)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
-            if (compatMode) {
-                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
-            }
+
+            final LogMaker log = Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY,
+                    componentName, getServicePackageName(), sessionId, compatMode)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration);
             mMetricsLogger.write(log);
         }
     }

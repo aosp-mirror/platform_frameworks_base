@@ -476,5 +476,16 @@ public class UnderlyingNetworkTrackerTest {
         verifyNoMoreInteractions(mNetworkTrackerCb);
     }
 
+    @Test
+    public void testRecordTrackerCallbackNotifiedAfterTeardown() {
+        UnderlyingNetworkListener cb = verifyRegistrationOnAvailableAndGetCallback();
+        mUnderlyingNetworkTracker.teardown();
+
+        cb.onCapabilitiesChanged(mNetwork, UPDATED_NETWORK_CAPABILITIES);
+
+        // Verify that the only call was during onAvailable()
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(any());
+    }
+
     // TODO (b/187991063): Add tests for network prioritization
 }

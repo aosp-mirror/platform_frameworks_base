@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS পরিষেবা"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"সেন্সর বিজ্ঞপ্তি পরিষেবা"</string>
     <string name="twilight_service" msgid="8964898045693187224">"গোধূলি পরিষেবা"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"টাইম জোন ডিটেক্টর (কানেকশন নেই)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS সময় আপডেট পরিষেবা"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"সঙ্গীত স্বীকৃতি পরিচালনার পরিষেবা"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য আঙ্গুলের ছাপ দিয়ে চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"অ্যাডজাস্ট করার চেষ্টা করুন"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আঙ্গুলের ছাপ সেটআপ করার সময় আপনার আঙ্গুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"আঙ্গুলের ছাপের সেন্সর ব্যবহার করা যাচ্ছে না। একজন মেরামতি মিস্ত্রির কাছে যান"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"আঙ্গুলের ছাপ ব্যবহার করুন"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"আঙ্গুলের ছাপ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
@@ -611,13 +610,16 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"আঙ্গুলের ছাপ আইকন"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"\'ফেস আনলক\'"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপনার ফেস আবার এনরোল করুন"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেস আনলক"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"\'ফেস আনলক\' ফিচার ব্যবহার করার ক্ষেত্রে হওয়া সমস্যা"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপনার ফেস মডেল মুছে দেওয়ার জন্য ট্যাপ করুন এবং তারপরে আবার ফেস যোগ করুন"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট আপ করুন"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"একটি আঙ্গুলের ছাপ যোগ করতে ট্যাপ করুন"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিঙ্গারপ্রিন্ট আনলক"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"আঙ্গুলের ছাপের সেন্সর ব্যবহার করা যাচ্ছে না"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"খুব অন্ধকার। আরও উজ্জ্বল আলো ব্যবহার করে দেখুন।"</string>
@@ -813,7 +815,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"অফিসের মোবাইল"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"কার্যক্ষেত্রের পেজার"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"অ্যাসিস্ট্যান্ট"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"কাস্টম"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"জন্মদিন"</string>
@@ -956,7 +958,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক এলাকা প্রসারিত করুন৷"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"স্লাইড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"প্যাটার্ন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"\'ফেস আনলক\'।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ফেস আনলক।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিন দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"সিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"সিম পিইউকে আনলক।"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"অস্বীকার করুন"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"অনুমতির অনুরোধ করা হয়েছে"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g>অ্যাকাউন্টের জন্য\nঅনুমতির অনুরোধ করা হয়েছে৷"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> অ্যাকাউন্টের জন্য <xliff:g id="APP">%1$s</xliff:g>\n থেকে অনুমতি চাওয়া হয়েছে।"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"আপনি এই অ্যাপ্লিকেশানটি আপনার কর্মস্থলের প্রোফাইলের বাইরে ব্যবহার করছেন"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"আপনি এই অ্যাপ্লিকেশানটি আপনার কর্মস্থলের প্রোফাইলে ব্যবহার করছেন"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ইনপুট পদ্ধতি"</string>
@@ -1946,10 +1949,10 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"বড় করুন"</string>
     <string name="close_button_text" msgid="10603510034455258">"বন্ধ করুন"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"উত্তর"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"উত্তর দিন"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ভিডিও"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"বাতিল করুন"</string>
-    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"কল কেটে দেওয়া"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"কল কেটে দিন"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ইনকামিং কল"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"চালু থাকা কল"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ইনকামিং কল স্ক্রিনিং করা হচ্ছে"</string>

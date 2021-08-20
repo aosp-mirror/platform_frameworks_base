@@ -18,6 +18,7 @@ package android.inputmethod;
 
 import static android.perftests.utils.ManualBenchmarkState.StatsReport;
 import static android.perftests.utils.PerfTestActivity.ID_EDITOR;
+import static android.perftests.utils.TestUtils.getOnMainSync;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
@@ -25,6 +26,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.UiThread;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,6 +66,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -72,6 +75,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ImePerfTest extends ImePerfTestBase
         implements ManualBenchmarkState.CustomizedIterationListener {
     private static final String TAG = ImePerfTest.class.getSimpleName();
+    private static final long ANIMATION_NOT_STARTED = -1;
 
     @Rule
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
@@ -300,16 +304,22 @@ public class ImePerfTest extends ImePerfTestBase
 
             while (state.keepRunning(measuredTimeNs)) {
                 setImeListener(activity, latchStart, latchEnd);
-                latchStart.set(new CountDownLatch(show ? 1 : 2));
-                latchEnd.set(new CountDownLatch(2));
                 // For measuring hide, lets show IME first.
                 if (!show) {
-                    activity.runOnUiThread(() -> {
-                        controller.show(WindowInsets.Type.ime());
+                    initLatch(latchStart, latchEnd);
+                    AtomicBoolean showCalled = new AtomicBoolean();
+                    getInstrumentation().runOnMainSync(() -> {
+                        if (!isImeVisible(activity)) {
+                            controller.show(WindowInsets.Type.ime());
+                            showCalled.set(true);
+                        }
                     });
-                    PollingCheck.check("IME show animation should finish ", TIMEOUT_1_S_IN_MS,
-                            () -> latchStart.get().getCount() == 1
-                                    && latchEnd.get().getCount() == 1);
+                    if (showCalled.get()) {
+                        PollingCheck.check("IME show animation should finish ",
+                                TIMEOUT_1_S_IN_MS * 3,
+                                () -> latchStart.get().getCount() == 0
+                                        && latchEnd.get().getCount() == 0);
+                    }
                 }
                 if (!mIsTraceStarted && !state.isWarmingUp()) {
                     startAsyncAtrace();
@@ -317,23 +327,40 @@ public class ImePerfTest extends ImePerfTestBase
                 }
 
                 AtomicLong startTime = new AtomicLong();
-                activity.runOnUiThread(() -> {
+                AtomicBoolean unexpectedVisibility = new AtomicBoolean();
+                initLatch(latchStart, latchEnd);
+                getInstrumentation().runOnMainSync(() -> {
+                    boolean isVisible = isImeVisible(activity);
                     startTime.set(SystemClock.elapsedRealtimeNanos());
-                    if (show) {
+
+                    if (show && !isVisible) {
                         controller.show(WindowInsets.Type.ime());
-                    } else {
+                    } else if (!show && isVisible) {
                         controller.hide(WindowInsets.Type.ime());
+                    } else {
+                        // ignore this iteration as unexpected IME visibility was encountered.
+                        unexpectedVisibility.set(true);
                     }
                 });
 
-                measuredTimeNs = waitForAnimationStart(latchStart, startTime);
+                if (!unexpectedVisibility.get()) {
+                    long timeElapsed = waitForAnimationStart(latchStart, startTime);
+                    if (timeElapsed != ANIMATION_NOT_STARTED) {
+                        measuredTimeNs = timeElapsed;
+                        // wait for animation to end or we may start two animations and timing
+                        // will not be measured accurately.
+                        waitForAnimationEnd(latchEnd);
+                    }
+                }
 
                 // hide IME before next iteration.
                 if (show) {
+                    initLatch(latchStart, latchEnd);
                     activity.runOnUiThread(() -> controller.hide(WindowInsets.Type.ime()));
                     try {
                         latchEnd.get().await(TIMEOUT_1_S_IN_MS * 5, TimeUnit.MILLISECONDS);
-                        if (latchEnd.get().getCount() != 0) {
+                        if (latchEnd.get().getCount() != 0
+                                && getOnMainSync(() -> isImeVisible(activity))) {
                             Assert.fail("IME hide animation should finish.");
                         }
                     } catch (InterruptedException e) {
@@ -350,16 +377,34 @@ public class ImePerfTest extends ImePerfTestBase
         addResultToState(state);
     }
 
+    private void initLatch(AtomicReference<CountDownLatch> latchStart,
+            AtomicReference<CountDownLatch> latchEnd) {
+        latchStart.set(new CountDownLatch(1));
+        latchEnd.set(new CountDownLatch(1));
+    }
+
+    @UiThread
+    private boolean isImeVisible(@NonNull final Activity activity) {
+        return activity.getWindow().getDecorView().getRootWindowInsets().isVisible(
+                WindowInsets.Type.ime());
+    }
+
     private long waitForAnimationStart(
             AtomicReference<CountDownLatch> latchStart, AtomicLong startTime) {
         try {
-            latchStart.get().await(TIMEOUT_1_S_IN_MS * 5, TimeUnit.MILLISECONDS);
+            latchStart.get().await(5, TimeUnit.SECONDS);
             if (latchStart.get().getCount() != 0) {
-                Assert.fail("IME animation should start " + latchStart.get().getCount());
+                return ANIMATION_NOT_STARTED;
             }
         } catch (InterruptedException e) { }
 
         return SystemClock.elapsedRealtimeNanos() - startTime.get();
+    }
+
+    private void waitForAnimationEnd(AtomicReference<CountDownLatch> latchEnd) {
+        try {
+            latchEnd.get().await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) { }
     }
 
     private void addResultToState(ManualBenchmarkState state) {

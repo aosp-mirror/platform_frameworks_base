@@ -175,7 +175,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
 
     private final static String TAG = "KeyguardViewMediator";
@@ -399,6 +399,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private boolean mPendingLock;
 
     /**
+     * When starting to go away, flag a need to show the PIN lock so the keyguard can be brought
+     * back.
+     */
+    private boolean mPendingPinLock = false;
+
+    /**
      * Whether a power button gesture (such as double tap for camera) has been detected. This is
      * delivered directly from {@link KeyguardService}, immediately upon the gesture being detected.
      * This is used in {@link #onStartedWakingUp} to decide whether to execute the pending lock, or
@@ -470,6 +476,19 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     };
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            synchronized (KeyguardViewMediator.this) {
+                if (!showing && mPendingPinLock) {
+                    Log.i(TAG, "PIN lock requested, starting keyguard");
+
+                    // Bring the keyguard back in order to show the PIN lock
+                    mPendingPinLock = false;
+                    doKeyguardLocked(null);
+                }
+            }
+        }
 
         @Override
         public void onUserSwitching(int userId) {
@@ -591,6 +610,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                                     + "showing; need to show keyguard so user can enter sim pin");
                             doKeyguardLocked(null);
                         } else {
+                            mPendingPinLock = true;
                             resetStateLocked();
                         }
                     }
@@ -739,6 +759,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         @Override
         public void onBouncerVisiblityChanged(boolean shown) {
             synchronized (KeyguardViewMediator.this) {
+                if (shown) {
+                    mPendingPinLock = false;
+                }
                 adjustStatusBarLocked(shown, false);
             }
         }
@@ -975,12 +998,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mPowerGestureIntercepted = false;
             mGoingToSleep = true;
 
-            // Reset keyguard going away state so we can start listening for fingerprint. We
-            // explicitly DO NOT want to call
-            // mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false)
-            // here, since that will mess with the device lock state.
-            mUpdateMonitor.dispatchKeyguardGoingAway(false);
-
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
             // camera while preventing unwanted input.
@@ -1018,7 +1035,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(true);
             }
         }
+
         mUpdateMonitor.dispatchStartedGoingToSleep(offReason);
+
+        // Reset keyguard going away state so we can start listening for fingerprint. We
+        // explicitly DO NOT want to call
+        // mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false)
+        // here, since that will mess with the device lock state.
+        mUpdateMonitor.dispatchKeyguardGoingAway(false);
+
         notifyStartedGoingToSleep();
     }
 
@@ -1504,8 +1529,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             return;
         }
 
-        // if the keyguard is already showing, don't bother
-        if (mKeyguardViewControllerLazy.get().isShowing()) {
+        // if the keyguard is already showing, don't bother. check flags in both files
+        // to account for the hiding animation which results in a delay and discrepancy
+        // between flags
+        if (mShowing && mKeyguardViewControllerLazy.get().isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
             resetStateLocked();
             return;
@@ -1677,8 +1704,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Disable notification shade background blurs until the keyguard is dismissed.
      * (Used during app launch animations)
      */
-    public void disableBlursUntilHidden() {
-        mNotificationShadeDepthController.get().setIgnoreShadeBlurUntilHidden(true);
+    public void setBlursDisabledForAppLaunch(boolean disabled) {
+        mNotificationShadeDepthController.get().setBlursDisabledForAppLaunch(disabled);
     }
 
     public boolean isSecure() {
@@ -2161,6 +2188,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             if (!mHiding
                     && !mSurfaceBehindRemoteAnimationRequested
                     && !mKeyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture()) {
+                if (finishedCallback != null) {
+                    // There will not execute animation, send a finish callback to ensure the remote
+                    // animation won't hanging there.
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                    }
+                }
                 setShowingLocked(mShowing, true /* force */);
                 return;
             }
@@ -2176,12 +2212,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
                 notifyDrawn(mDrawnCallback);
                 mDrawnCallback = null;
-            }
-
-            // only play "unlock" noises if not on a call (since the incall UI
-            // disables the keyguard)
-            if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
-                playSounds(false);
             }
 
             LatencyTracker.getInstance(mContext)
@@ -2301,6 +2331,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     private void onKeyguardExitFinished() {
+        // only play "unlock" noises if not on a call (since the incall UI
+        // disables the keyguard)
+        if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
+            playSounds(false);
+        }
+
         setShowingLocked(false);
         mWakeAndUnlocking = false;
         mDismissCallbackRegistry.notifyDismissSucceeded();
@@ -2567,7 +2603,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             if (mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_guestUserAutoCreated)) {
                 // TODO(b/191067027): Move post-boot guest creation to system_server
-                mUserSwitcherController.guaranteeGuestPresent();
+                mUserSwitcherController.schedulePostBootGuestCreation();
             }
             mBootCompleted = true;
             adjustStatusBarLocked(false, true);
@@ -2723,7 +2759,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         // Don't hide the keyguard due to a doze change if there's a lock pending, because we're
         // just going to show it again.
-        if (mShowing || !mPendingLock) {
+        // If the device is not capable of controlling the screen off animation, SysUI needs to
+        // update lock screen state in ATMS here, otherwise ATMS tries to resume activities when
+        // enabling doze state.
+        if (mShowing || !mPendingLock || !mDozeParameters.canControlUnlockedScreenOff()) {
             setShowingLocked(mShowing);
         }
     }
@@ -2770,7 +2809,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         }
     }
 
-    private void setShowingLocked(boolean showing) {
+    void setShowingLocked(boolean showing) {
         setShowingLocked(showing, false /* forceCallbacks */);
     }
 

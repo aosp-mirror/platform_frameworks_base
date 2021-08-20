@@ -317,12 +317,19 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testDismissMedia_listenerCalled() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = mock(MediaData::class.java))
-        mediaDataManager.dismissMediaData(KEY, 0L)
+        val removed = mediaDataManager.dismissMediaData(KEY, 0L)
+        assertThat(removed).isTrue()
 
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
 
         verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testDismissMedia_keyDoesNotExist_returnsFalse() {
+        val removed = mediaDataManager.dismissMediaData(KEY, 0L)
+        assertThat(removed).isFalse()
     }
 
     @Test

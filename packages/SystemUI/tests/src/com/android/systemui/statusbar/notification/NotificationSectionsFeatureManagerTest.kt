@@ -44,15 +44,16 @@ class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     public fun setup() {
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
         manager!!.clearCache()
-        originalQsMediaPlayer = Settings.System.getInt(context.getContentResolver(),
-                "qs_media_player", 1)
-        Settings.Global.putInt(context.getContentResolver(), "qs_media_player", 0)
+        originalQsMediaPlayer = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1)
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 0)
     }
 
     @After
     public fun teardown() {
-        Settings.Global.putInt(context.getContentResolver(), "qs_media_player",
-                originalQsMediaPlayer)
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, originalQsMediaPlayer)
     }
 
     @Test

@@ -61,4 +61,9 @@ interface ITaskOrganizerController {
      */
     void setInterceptBackPressedOnTaskRoot(in WindowContainerToken task,
             boolean interceptBackPressed);
+
+    /**
+     * Restarts the top activity in the given task by killing its process if it is visible.
+     */
+    void restartTaskTopActivityProcessIfVisible(in WindowContainerToken task);
 }

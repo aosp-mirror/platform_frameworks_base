@@ -251,7 +251,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         // 2. The session never begun.
         if (mBeginVsyncId == INVALID_ID) {
             cancel(REASON_CANCEL_NOT_BEGUN);
-        } else if (mEndVsyncId == mBeginVsyncId) {
+        } else if (mEndVsyncId <= mBeginVsyncId) {
             cancel(REASON_CANCEL_SAME_VSYNC);
         } else {
             if (DEBUG) {

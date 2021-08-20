@@ -253,6 +253,13 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
+     * Whether or not to report end-to-end input latency. Disabled temporarily as a
+     * risk mitigation against potential jank caused by acquiring a weak reference
+     * per frame
+     */
+    private static final boolean ENABLE_INPUT_LATENCY_TRACKING = false;
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -1207,7 +1214,7 @@ public final class ViewRootImpl implements ViewParent,
                     mInputEventReceiver = new WindowInputEventReceiver(inputChannel,
                             Looper.myLooper());
 
-                    if (mAttachInfo.mThreadedRenderer != null) {
+                    if (ENABLE_INPUT_LATENCY_TRACKING && mAttachInfo.mThreadedRenderer != null) {
                         InputMetricsListener listener = new InputMetricsListener();
                         mHardwareRendererObserver = new HardwareRendererObserver(
                                 listener, listener.data, mHandler, true /*waitForPresentTime*/);
@@ -1371,8 +1378,12 @@ public final class ViewRootImpl implements ViewParent,
         HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
                                                                  nativeSurfaceControlObj,
                                                                  frameNr) -> {
-            Transaction t = new Transaction(nativeTransactionObj);
-            mergeWithNextTransaction(t, frameNr);
+            if (mBlastBufferQueue == null) {
+                return false;
+            } else {
+                mBlastBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
+                return true;
+            }
         };
         mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
     }
@@ -1438,8 +1449,10 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
-                    addPrepareSurfaceControlForWebviewCallback();
-                    addASurfaceTransactionCallback();
+                    if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                        addPrepareSurfaceControlForWebviewCallback();
+                        addASurfaceTransactionCallback();
+                    }
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
             }
@@ -1942,22 +1955,23 @@ public final class ViewRootImpl implements ViewParent,
        return mBoundsLayer;
     }
 
-    Surface getOrCreateBLASTSurface(int width, int height,
-            @Nullable WindowManager.LayoutParams params) {
+    Surface getOrCreateBLASTSurface() {
         if (!mSurfaceControl.isValid()) {
             return null;
         }
 
-        int format = params == null ? PixelFormat.TRANSLUCENT : params.format;
         Surface ret = null;
         if (mBlastBufferQueue == null) {
-            mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
-                    format);
+            mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
+                mSurfaceSize.x, mSurfaceSize.y,
+                mWindowAttributes.format);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
         } else {
-            mBlastBufferQueue.update(mSurfaceControl, width, height, format);
+            mBlastBufferQueue.update(mSurfaceControl,
+                mSurfaceSize.x, mSurfaceSize.y,
+                mWindowAttributes.format);
         }
 
         return ret;
@@ -2765,6 +2779,7 @@ public final class ViewRootImpl implements ViewParent,
                 mView.onSystemBarAppearanceChanged(mDispatchedSystemBarAppearance);
             }
         }
+        final boolean wasReportNextDraw = mReportNextDraw;
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
@@ -2811,6 +2826,16 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dockedResizing = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
                 final boolean dragResizing = freeformResizing || dockedResizing;
+                if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
+                    if (DEBUG_BLAST) {
+                        Log.d(mTag, "Relayout called with blastSync");
+                    }
+                    reportNextDraw();
+                    if (isHardwareEnabled()) {
+                        mNextDrawUseBlastSync = true;
+                    }
+                }
+
                 if (mSurfaceControl.isValid()) {
                     updateOpacity(mWindowAttributes, dragResizing);
                 }
@@ -3029,7 +3054,16 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            if (!mStopped || mReportNextDraw) {
+            // TODO: In the CL "ViewRootImpl: Fix issue with early draw report in
+            // seamless rotation". We moved processing of RELAYOUT_RES_BLAST_SYNC
+            // earlier in the function, potentially triggering a call to
+            // reportNextDraw(). That same CL changed this and the next reference
+            // to wasReportNextDraw, such that this logic would remain undisturbed
+            // (it continues to operate as if the code was never moved). This was
+            // done to achieve a more hermetic fix for S, but it's entirely
+            // possible that checking the most recent value is actually more
+            // correct here.
+            if (!mStopped || wasReportNextDraw) {
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                         (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
@@ -3099,7 +3133,7 @@ public final class ViewRootImpl implements ViewParent,
             prepareSurfaces();
         }
 
-        final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
+        final boolean didLayout = layoutRequested && (!mStopped || wasReportNextDraw);
         boolean triggerGlobalLayoutListener = didLayout
                 || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
@@ -3255,20 +3289,9 @@ public final class ViewRootImpl implements ViewParent,
 
         mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
-        final boolean wasReportNextDraw = mReportNextDraw;
-
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             reportNextDraw();
-        }
-        if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Relayout called with blastSync");
-            }
-            reportNextDraw();
-            if (isHardwareEnabled()) {
-                mNextDrawUseBlastSync = true;
-            }
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
@@ -3280,7 +3303,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-
             performDraw();
         } else {
             if (isViewVisible) {
@@ -5290,7 +5312,16 @@ public final class ViewRootImpl implements ViewParent,
                     // b) When loosing control, controller can restore server state by taking last
                     // dispatched state as truth.
                     mInsetsController.onStateChanged((InsetsState) args.arg1);
-                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
+                    InsetsSourceControl[] controls = (InsetsSourceControl[]) args.arg2;
+                    if (mAdded) {
+                        mInsetsController.onControlsChanged(controls);
+                    } else if (controls != null) {
+                        for (InsetsSourceControl control : controls) {
+                            if (control != null) {
+                                control.release(SurfaceControl::release);
+                            }
+                        }
+                    }
                     args.recycle();
                     break;
                 }
@@ -7754,8 +7785,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!useBLAST()) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                final Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x, mSurfaceSize.y,
-                        params);
+                final Surface blastSurface = getOrCreateBLASTSurface();
                 // If blastSurface == null that means it hasn't changed since the last time we
                 // called. In this situation, avoid calling transferFrom as we would then
                 // inc the generation ID and cause EGL resources to be recreated.
@@ -7764,8 +7794,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
-                addPrepareSurfaceControlForWebviewCallback();
-                addASurfaceTransactionCallback();
+                if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                    addPrepareSurfaceControlForWebviewCallback();
+                    addASurfaceTransactionCallback();
+                }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {
@@ -8135,6 +8167,10 @@ public final class ViewRootImpl implements ViewParent,
                     destroySurface();
                 }
             }
+
+            // If our window is removed, we might not get notified about losing control.
+            // Invoking this can release the leashes as soon as possible instead of relying on GC.
+            mInsetsController.onControlsChanged(null);
 
             mAdded = false;
         }

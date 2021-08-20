@@ -420,7 +420,7 @@ public final class WallpaperColors implements Parcelable {
         for (Map.Entry<Integer, Integer> colorEntry : mAllColors.entrySet()) {
             if (colorEntry.getKey() != null) {
                 dest.writeInt(colorEntry.getKey());
-                Integer population = mAllColors.get(colorEntry.getValue());
+                Integer population = colorEntry.getValue();
                 int populationInt = (population != null) ? population : 0;
                 dest.writeInt(populationInt);
             }

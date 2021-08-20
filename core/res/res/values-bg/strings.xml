@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Услуга за GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известия за сензорите"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Инструмент за установяване на часовата зона (няма връзка)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Услуга на GNSS за актуализиране на часа"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Услуга за управление на разпознаването на музика"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Данните на устройството ви ще бъдат изтрити"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Разрешава на приложението да разгъва или свива лентата на състоянието."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"показване на известия като активности на цял екран на заключено устройство"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Дава възможност на приложението да показва известия като активности на цял екран на заключено устройство"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталиране на преки пътища"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Инсталиране на преки пътища"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Разрешава на приложението да добавя към началния екран преки пътища без намеса на потребителя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталиране на преки пътища"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Разрешава на приложението да премахва преки пътища от началния екран без намеса на потребителя."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Опитайте с друг отпечатък"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Твърде светло е"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Опитайте да коригирате"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Всеки път променяйте леко позицията на пръста си"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатъкът е удостоверен"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Няма регистрирани отпечатъци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Това устройство няма сензор за отпечатъци."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензорът е временно деактивиран."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Сензорът за отпечатъци не може да се използва. Посетете оторизиран сервиз."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Пръст <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Използване на отпечатък"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Използване на отпечатък или опцията за заключване на екрана"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатък"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отключване с лице"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Регистрирайте отново лицето си"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"С цел подобряване на разпознаването регистрирайте отново лицето си"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем с отключването с лице"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Докоснете, за да изтриете модела на лицето си, след което добавете лицето си отново"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройване на отключването с лице"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Сензорът за отпечатъци не може да се използва"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Посетете оторизиран сервиз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Лицето не бе заснето точно. Опитайте отново."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Твърде светло е. Опитайте при по-слабо осветление."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Твърде тъмно е. Опитайте при по-силно осветление."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Отказване"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Иска се разрешение"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Иска се разрешение\nза профила <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Поискано е разрешение от <xliff:g id="APP">%1$s</xliff:g>\nза профила <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Използвате това приложение извън служебния си потребителски профил"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Използвате това приложение в служебния си потребителски профил"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод на въвеждане"</string>

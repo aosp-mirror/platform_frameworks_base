@@ -211,7 +211,7 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
         reset(mExecutor);
 
         // WHEN we have a transient message
-        mController.showTransient(TEST_MESSAGE_2, false);
+        mController.showTransient(TEST_MESSAGE_2);
 
         // THEN
         // - we immediately update

@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Layanan GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Layanan Notifikasi Sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Layanan Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Pendeteksi Zona Waktu (Tidak ada konektivitas)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Layanan Pembaruan Waktu GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Layanan Pengelola Pengenalan Musik"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Perangkat akan dihapus"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Coba sidik jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Coba sesuaikan"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ubah sedikit posisi jari di setiap percobaan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sidik jari diautentikasi"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tidak ada sidik jari yang terdaftar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Perangkat ini tidak memiliki sensor sidik jari."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor dinonaktifkan untuk sementara."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Tidak dapat menggunakan sensor sidik jari. Kunjungi penyedia reparasi"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gunakan sidik jari"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gunakan sidik jari atau kunci layar"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon sidik jari"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan kembali wajah Anda"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk menyempurnakan pengenalan wajah, daftarkan kembali wajah Anda"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Face Unlock"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak dapat menggunakan sensor sidik jari"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Kunjungi penyedia reparasi."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tidak bisa mengambil data wajah akurat. Coba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Coba cahaya yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Coba pencahayaan yang lebih cerah."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Tolak"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Izin dimintakan"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Izin dimintakan\nuntuk akun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> meminta izin\nuntuk akun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Anda menggunakan aplikasi ini di luar profil kerja"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Anda menggunakan aplikasi ini di profil kerja"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metode masukan"</string>
@@ -1957,7 +1960,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dipilih</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="3697928973567217330">"Belum dikategorikan"</string>
+    <string name="default_notification_channel_label" msgid="3697928973567217330">"Tidak dikategorikan"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Anda menyetel nilai penting notifikasi ini."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ini penting karena orang-orang yang terlibat."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notifikasi aplikasi kustom"</string>

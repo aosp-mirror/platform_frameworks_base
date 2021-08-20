@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -61,7 +60,6 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     private @Mock DisplayController mMockDisplayController;
     private @Mock DisplayLayout mMockDisplayLayout;
     private @Mock DisplayImeController mMockImeController;
-    private @Mock IBinder mMockActivityToken;
     private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
     private @Mock SyncTransactionQueue mMockSyncQueue;
     private @Mock SizeCompatUILayout mMockLayout;
@@ -77,8 +75,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
                 mMockImeController, mMockSyncQueue) {
             @Override
             SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
-                    Configuration taskConfig, IBinder activityToken,
-                    ShellTaskOrganizer.TaskListener taskListener) {
+                    Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
                 return mMockLayout;
             }
         };
@@ -97,21 +94,21 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
 
         // Verify that the restart button is added with non-null size compat info.
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockActivityToken, mMockTaskListener);
+                mMockTaskListener);
 
         verify(mController).createLayout(any(), eq(DISPLAY_ID), eq(TASK_ID), eq(taskConfig),
-                eq(mMockActivityToken), eq(mMockTaskListener));
+                eq(mMockTaskListener));
 
         // Verify that the restart button is updated with non-null new size compat info.
         final Configuration newTaskConfig = new Configuration();
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, newTaskConfig,
-                mMockActivityToken, mMockTaskListener);
+                mMockTaskListener);
 
-        verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockActivityToken, mMockTaskListener,
+        verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockTaskListener,
                 false /* isImeShowing */);
 
         // Verify that the restart button is removed with null size compat info.
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, null, null, mMockTaskListener);
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, null, mMockTaskListener);
 
         verify(mMockLayout).release();
     }
@@ -120,7 +117,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     public void testOnDisplayRemoved() {
         final Configuration taskConfig = new Configuration();
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockActivityToken, mMockTaskListener);
+                mMockTaskListener);
 
         mController.onDisplayRemoved(DISPLAY_ID + 1);
 
@@ -135,7 +132,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     public void testOnDisplayConfigurationChanged() {
         final Configuration taskConfig = new Configuration();
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockActivityToken, mMockTaskListener);
+                mMockTaskListener);
 
         final Configuration newTaskConfig = new Configuration();
         mController.onDisplayConfigurationChanged(DISPLAY_ID + 1, newTaskConfig);
@@ -151,7 +148,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     public void testChangeButtonVisibilityOnImeShowHide() {
         final Configuration taskConfig = new Configuration();
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockActivityToken, mMockTaskListener);
+                mMockTaskListener);
 
         mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
 

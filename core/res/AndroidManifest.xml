@@ -550,6 +550,8 @@
     <protected-broadcast android:name="com.android.server.telecom.intent.action.CALLS_ADD_ENTRY" />
     <protected-broadcast android:name="com.android.settings.location.MODE_CHANGING" />
     <protected-broadcast android:name="com.android.settings.bluetooth.ACTION_DISMISS_PAIRING" />
+    <protected-broadcast android:name="com.android.settings.network.DELETE_SUBSCRIPTION" />
+    <protected-broadcast android:name="com.android.settings.network.SWITCH_TO_SUBSCRIPTION" />
     <protected-broadcast android:name="com.android.settings.wifi.action.NETWORK_REQUEST" />
 
     <protected-broadcast android:name="NotificationManagerService.TIMEOUT" />
@@ -616,7 +618,11 @@
 
     <protected-broadcast android:name="com.android.server.fingerprint.ACTION_LOCKOUT_RESET" />
     <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
+
     <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
+    <protected-broadcast android:name="android.server.notification.action.ENABLE_NAS" />
+    <protected-broadcast android:name="android.server.notification.action.DISABLE_NAS" />
+    <protected-broadcast android:name="android.server.notification.action.LEARNMORE_NAS" />
 
     <protected-broadcast android:name="com.android.internal.location.ALARM_WAKEUP" />
     <protected-broadcast android:name="com.android.internal.location.ALARM_TIMEOUT" />
@@ -1662,11 +1668,6 @@
     -->
     <permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"
         android:protectionLevel="signature|privileged" />
-
-    <!-- The system server uses this permission to install a default secondary location time zone
-         provider.
-    -->
-    <uses-permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"/>
 
     <!-- @SystemApi @hide Allows an application to bind to a android.service.TimeZoneProviderService
          for the purpose of detecting the device's time zone. This prevents arbitrary clients
@@ -3508,7 +3509,7 @@
          use by third party apps.
          @hide -->
     <permission android:name="android.permission.UPDATE_APP_OPS_STATS"
-        android:protectionLevel="signature|privileged|installer" />
+        android:protectionLevel="signature|privileged|installer|role" />
 
     <!-- @SystemApi Allows an application to update the user app op restrictions.
          Not for use by third party apps.
@@ -4058,6 +4059,9 @@
          For more details, see <a
          href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
          Exact alarm permission</a>.
+         <p>Apps who hold this permission and target API level 31 or above, always stay in the
+         {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET WORKING_SET} or
+         lower standby bucket.
          Applications targeting API level 30 or below do not need this permission to use
          exact alarm APIs.
      -->
@@ -5809,10 +5813,6 @@
              android:label="@string/sensor_notification_service"/>
     <!-- Attribution for Twilight service. -->
     <attribution android:tag="TwilightService" android:label="@string/twilight_service"/>
-    <!-- Attribution for the Offline LocationTimeZoneProvider, used to detect time zone using
-         on-device data -->
-    <attribution android:tag="OfflineLocationTimeZoneProviderService"
-                 android:label="@string/offline_location_time_zone_detection_service_attribution"/>
     <!-- Attribution for Gnss Time Update service. -->
     <attribution android:tag="GnssTimeUpdateService"
                  android:label="@string/gnss_time_update_service"/>
@@ -5908,8 +5908,8 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.DeviceDefault.DayNight"
-                android:configChanges="orientation|keyboardHidden"
+                android:theme="@style/Theme.DeviceDefault.Wallpaper.NoTitleBar"
+                android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
                 android:icon="@drawable/platlogo"
                 android:process=":ui">
         </activity>
@@ -6290,19 +6290,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA"/>
             </intent-filter>
-        </service>
-
-        <!-- AOSP configures a default secondary LocationTimeZoneProvider that uses an on-device
-             data set from the com.android.geotz APEX. -->
-        <service android:name="com.android.timezone.location.provider.OfflineLocationTimeZoneProviderService"
-                 android:enabled="@bool/config_enableSecondaryLocationTimeZoneProvider"
-                 android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"
-                 android:exported="false">
-            <intent-filter>
-                <action android:name="android.service.timezone.SecondaryLocationTimeZoneProviderService" />
-            </intent-filter>
-            <meta-data android:name="serviceVersion" android:value="1" />
-            <meta-data android:name="serviceIsMultiuser" android:value="true" />
         </service>
 
         <provider

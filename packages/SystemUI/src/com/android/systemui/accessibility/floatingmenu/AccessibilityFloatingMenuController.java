@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import androidx.annotation.MainThread;
@@ -40,11 +41,11 @@ public class AccessibilityFloatingMenuController implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener {
 
-    private final Context mContext;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
+    private Context mContext;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -79,6 +80,7 @@ public class AccessibilityFloatingMenuController implements
 
         @Override
         public void onUserSwitchComplete(int userId) {
+            mContext = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
             mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
             mBtnTargets =
                     mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();

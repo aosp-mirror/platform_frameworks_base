@@ -45,12 +45,21 @@ public class MediaServiceManager {
      */
     public static final class ServiceRegisterer {
         private final String mServiceName;
+        private final boolean mLazyStart;
+
+        /**
+         * @hide
+         */
+        public ServiceRegisterer(String serviceName, boolean lazyStart) {
+            mServiceName = serviceName;
+            mLazyStart = lazyStart;
+        }
 
         /**
          * @hide
          */
         public ServiceRegisterer(String serviceName) {
-            mServiceName = serviceName;
+            this(serviceName, false /*lazyStart*/);
         }
 
         /**
@@ -61,6 +70,9 @@ public class MediaServiceManager {
          */
         @Nullable
         public IBinder get() {
+            if (mLazyStart) {
+                return ServiceManager.waitForService(mServiceName);
+            }
             return ServiceManager.getService(mServiceName);
         }
     }
@@ -78,7 +90,7 @@ public class MediaServiceManager {
      */
     @NonNull
     public ServiceRegisterer getMediaTranscodingServiceRegisterer() {
-        return new ServiceRegisterer(MEDIA_TRANSCODING_SERVICE);
+        return new ServiceRegisterer(MEDIA_TRANSCODING_SERVICE, true /*lazyStart*/);
     }
 
     /**

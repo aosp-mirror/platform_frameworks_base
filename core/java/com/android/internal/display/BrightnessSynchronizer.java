@@ -154,10 +154,20 @@ public class BrightnessSynchronizer {
         }
     }
 
+    /**
+     * Gets the stored screen brightness float value from the display brightness setting.
+     * @return brightness
+     */
     private float getScreenBrightnessFloat() {
         return mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY);
     }
 
+    /**
+     * Gets the stored screen brightness int from the system settings.
+     * @param context for accessing settings
+     *
+     * @return brightness
+     */
     private static int getScreenBrightnessInt(Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS, PowerManager.BRIGHTNESS_INVALID,

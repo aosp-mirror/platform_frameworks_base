@@ -352,7 +352,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
         final BiometricScheduler scheduler =
-                new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
+                new BiometricScheduler(TAG,
+                        BiometricScheduler.sensorTypeFromFingerprintProperties(sensorProps),
+                        gestureAvailabilityDispatcher);
         final HalResultController controller = new HalResultController(sensorProps.sensorId,
                 context, handler,
                 scheduler);
@@ -620,7 +622,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     opPackageName, cookie, false /* requireConfirmation */,
                     mSensorProperties.sensorId, isStrongBiometric, statsClient,
                     mTaskStackListener, mLockoutTracker, mUdfpsOverlayController,
-                    allowBackgroundAuthentication);
+                    allowBackgroundAuthentication, mSensorProperties);
             mScheduler.scheduleClientMonitor(client, fingerprintStateCallback);
         });
     }
@@ -632,6 +634,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
+        Slog.d(TAG, "cancelAuthentication, sensorId: " + sensorId);
         mHandler.post(() -> mScheduler.cancelAuthenticationOrDetection(token));
     }
 

@@ -430,7 +430,13 @@ public final class AppExitInfoTracker {
 
         final ApplicationExitInfo info = new ApplicationExitInfo(raw);
         final String[] packages = raw.getPackageList();
-        final int uid = raw.getPackageUid();
+        int uid = raw.getRealUid();
+        if (UserHandle.isIsolated(uid)) {
+            Integer k = mIsolatedUidRecords.getUidByIsolatedUid(uid);
+            if (k != null) {
+                uid = k;
+            }
+        }
         for (int i = 0; i < packages.length; i++) {
             addExitInfoInnerLocked(packages[i], uid, info);
         }
@@ -833,14 +839,14 @@ public final class AppExitInfoTracker {
         pw.println(prefix + "package: " + packageName);
         int size = array.size();
         for (int i = 0; i < size; i++) {
-            pw.println(prefix + "  Historical Process Exit for userId=" + array.keyAt(i));
+            pw.println(prefix + "  Historical Process Exit for uid=" + array.keyAt(i));
             array.valueAt(i).dumpLocked(pw, prefix + "    ", sdf);
         }
     }
 
     @GuardedBy("mLock")
-    private void addExitInfoInnerLocked(String packageName, int userId, ApplicationExitInfo info) {
-        AppExitInfoContainer container = mData.get(packageName, userId);
+    private void addExitInfoInnerLocked(String packageName, int uid, ApplicationExitInfo info) {
+        AppExitInfoContainer container = mData.get(packageName, uid);
         if (container == null) {
             container = new AppExitInfoContainer(mAppExitInfoHistoryListSize);
             if (UserHandle.isIsolated(info.getRealUid())) {
@@ -851,7 +857,7 @@ public final class AppExitInfoTracker {
             } else {
                 container.mUid = info.getRealUid();
             }
-            mData.put(packageName, userId, container);
+            mData.put(packageName, uid, container);
         }
         container.addExitInfoLocked(info);
     }
@@ -997,7 +1003,7 @@ public final class AppExitInfoTracker {
             info.setPackageList(app.getPackageList());
             info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
             info.setStatus(0);
-            info.setImportance(procStateToImportance(app.mState.getSetProcState()));
+            info.setImportance(procStateToImportance(app.mState.getReportedProcState()));
             info.setPss(app.mProfile.getLastPss());
             info.setRss(app.mProfile.getLastRss());
             info.setTimestamp(timestamp);

@@ -524,6 +524,15 @@ public class PhonePipMenuController implements PipMenuController {
             mListeners.forEach(l -> l.onPipMenuStateChangeFinish(menuState));
         }
         mMenuState = menuState;
+        switch (mMenuState) {
+            case MENU_STATE_NONE:
+                mSystemWindows.setShellRootAccessibilityWindow(0, SHELL_ROOT_LAYER_PIP, null);
+                break;
+            default:
+                mSystemWindows.setShellRootAccessibilityWindow(0, SHELL_ROOT_LAYER_PIP,
+                        mPipMenuView);
+                break;
+        }
     }
 
     /**

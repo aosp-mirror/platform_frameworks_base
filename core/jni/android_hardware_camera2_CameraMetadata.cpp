@@ -16,6 +16,7 @@
 */
 
 // #define LOG_NDEBUG 0
+#include <memory>
 #define LOG_TAG "CameraMetadata-JNI"
 #include <utils/Errors.h>
 #include <utils/Log.h>
@@ -162,6 +163,8 @@ struct Helpers {
 
 extern "C" {
 
+static void CameraMetadata_setVendorId(JNIEnv* env, jclass thiz, jlong ptr,
+        jlong vendorId);
 static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jclass thiz, jlong ptr,
         jclass keyType);
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jclass thiz, jstring keyName,
@@ -596,6 +599,9 @@ static void CameraMetadata_writeToParcel(JNIEnv *env, jclass thiz, jobject parce
 
 static const JNINativeMethod gCameraMetadataMethods[] = {
 // static methods
+  { "nativeSetVendorId",
+    "(JJ)V",
+    (void *)CameraMetadata_setVendorId },
   { "nativeGetTagFromKey",
     "(Ljava/lang/String;J)I",
     (void *)CameraMetadata_getTagFromKey },
@@ -868,6 +874,27 @@ static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jclass thiz, jlong p
     }
 
     return arrayList;
+}
+
+static void CameraMetadata_setVendorId(JNIEnv *env, jclass thiz, jlong ptr,
+        jlong vendorId) {
+    ALOGV("%s", __FUNCTION__);
+
+    CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, ptr);
+
+    if (metadata == NULL) {
+        ALOGW("%s: Returning early due to exception being thrown",
+               __FUNCTION__);
+        return;
+    }
+    if (metadata->isEmpty()) {
+        std::unique_ptr<CameraMetadata> emptyBuffer = std::make_unique<CameraMetadata>(10);
+        metadata->swap(*emptyBuffer);
+    }
+
+    camera_metadata_t *meta = const_cast<camera_metadata_t *>(metadata->getAndLock());
+    set_camera_metadata_vendor_id(meta, vendorId);
+    metadata->unlock(meta);
 }
 
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jclass thiz, jstring keyName,

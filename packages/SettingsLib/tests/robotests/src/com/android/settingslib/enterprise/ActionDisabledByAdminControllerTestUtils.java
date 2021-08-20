@@ -73,7 +73,7 @@ public final class ActionDisabledByAdminControllerTestUtils {
             }
 
             @Override
-            public void showHelpPage(Context context, String url) {
+            public void showHelpPage(Context context, String url, UserHandle userHandle) {
                 mLearnMoreButtonAction = LEARN_MORE_ACTION_LAUNCH_HELP_PAGE;
             }
 

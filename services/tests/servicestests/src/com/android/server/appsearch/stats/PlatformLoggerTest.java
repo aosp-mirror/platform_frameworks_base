@@ -65,13 +65,8 @@ public class PlatformLoggerTest {
         Context context = ApplicationProvider.getApplicationContext();
         mContext = new ContextWrapper(context) {
             @Override
-            public Context createContextAsUser(UserHandle user, int flags) {
-                return new ContextWrapper(super.createContextAsUser(user, flags)) {
-                    @Override
-                    public PackageManager getPackageManager() {
-                        return getMockPackageManager(user);
-                    }
-                };
+            public PackageManager getPackageManager() {
+                return getMockPackageManager(mContext.getUser());
             }
         };
     }
@@ -153,7 +148,6 @@ public class PlatformLoggerTest {
         final int testUid = 1234;
         PlatformLogger logger = new PlatformLogger(
                 mContext,
-                mContext.getUser(),
                 AppSearchConfig.create(DIRECT_EXECUTOR));
         PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
         when(mockPackageManager.getPackageUid(testPackageName, /*flags=*/0)).thenReturn(testUid);

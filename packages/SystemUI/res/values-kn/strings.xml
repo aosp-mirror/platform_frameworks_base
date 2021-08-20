@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ ಬದಲಿಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಬದಲಾಗಿ ಪರದೆಲಾಕ್ ಬಳಸಿ."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"ಮುಖದ ಐಕಾನ್‌"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ಹೊಂದಾಣಿಕೆಯ ಝೂಮ್ ಬಟನ್."</string>
@@ -428,13 +430,11 @@
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ಸಾಧನದ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ಸಾಧನದ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೋಫೋನ್ ಅನ್ನು ಅನ್‍ಬ್ಲಾಕ್ ಮಾಡಬೇಕೇ?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ಇದು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳಿಗೆ ಹಾಗೂ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವುದಕ್ಕಾಗಿ ಇರುವ ಪ್ರವೇಶದ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ಇದು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳಿಗೆ ಹಾಗೂ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುವುದಕ್ಕಾಗಿ ಇರುವ ಪ್ರವೇಶದ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ಇದು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳಿಗೆ ಹಾಗೂ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಕ್ಯಾಮರಾ ಅಥವಾ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವುದಕ್ಕಾಗಿ ಇರುವ ಪ್ರವೇಶದ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ಸಾಧನ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಿಸಲು ತ್ವರಿತವಾಗಿ ಬಲಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ಪುನಃ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ತೆರೆಯಲು ಒತ್ತಿ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
@@ -480,12 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ಹೊಸ ಬಳಕೆದಾರರು"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಷನ್‌ನಲ್ಲಿನ ಎಲ್ಲ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ತೆಗೆದುಹಾಕಿ"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ಮತ್ತೆ ಸುಸ್ವಾಗತ, ಅತಿಥಿ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ಪ್ರಾರಂಭಿಸಿ"</string>
@@ -673,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ವೇಗವಾದ, ಹೆಚ್ಚು ಸುರಕ್ಷಿತ ಖರೀದಿಗಳನ್ನು ಮಾಡಲು ಸೆಟಪ್ ಮಾಡಿಕೊಳ್ಳಿ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ಪಾವತಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ಇನ್ನೂ ಸೆಟಪ್‌ ಮಾಡಿಲ್ಲ"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ಕಾರ್ಡ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ಗಳನ್ನು ಪಡೆಯುವಾಗ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ, ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ಲಾಕ್ ಸ್ಕ್ರ್ರೀನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -1000,7 +998,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"ನಿರಾಕರಿಸಿ"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಅನ್ನು ನಿಗದಿಗೊಳಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ಬ್ಯಾಟರಿ ಖಾಲಿಯಾಗುವ ಸಾಧ್ಯತೆ ಇದ್ದಾಗ ಆನ್ ಮಾಡಿ"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"ಬೇಡ"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ಬ್ಯಾಟರಿ ಸೇವರ್ ನಿಗದಿಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ಗಿಂತ ಕಡಿಮೆ ಆದಾಗ ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -1047,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ಅಂಚಿಗೆ ಸರಿಸಿ ಮತ್ತು ಮರೆಮಾಡಿ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ಅಂಚನ್ನು ಸರಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ಟಾಗಲ್ ಮಾಡಿ"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"ಹೋಮ್‌ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</item>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ಸಂಭಾಷಣೆ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ಸಂಭಾಷಣೆಯನ್ನು ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಸೇರಿಸಲು ಅದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ನೀವು ಕೆಲವು ಸಂದೇಶಗಳನ್ನು ಪಡೆದ ನಂತರ ಇಲ್ಲಿ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳನ್ನು ಇಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="okay" msgid="6490552955618608554">"ಸರಿ"</string>
@@ -1148,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ಸಂಭಾಷಣೆ"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ನಿಂದ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸ್ಥಿತಿಯ ಅಪ್‌ಡೇಟ್ ಹೊಂದಿದ್ದಾರೆ: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"ಲಭ್ಯವಿದೆ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ಅಲಾರಾಂ ಸೆಟ್ ಆಗಿಲ್ಲ"</string>

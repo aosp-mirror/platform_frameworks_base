@@ -60,6 +60,13 @@ public class AlwaysOnDisplayPolicy {
     public int defaultDozeBrightness;
 
     /**
+     * Integer used to dim the screen just before the screen turns off.
+     *
+     * @see R.integer.config_screenBrightnessDim
+     */
+    public int dimBrightness;
+
+    /**
      * Integer array to map ambient brightness type to real screen brightness.
      *
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
@@ -175,6 +182,8 @@ public class AlwaysOnDisplayPolicy {
                         DEFAULT_WALLPAPER_VISIBILITY_MS);
                 defaultDozeBrightness = resources.getInteger(
                         com.android.internal.R.integer.config_screenBrightnessDoze);
+                dimBrightness = resources.getInteger(
+                        com.android.internal.R.integer.config_screenBrightnessDim);
                 screenBrightnessArray = mParser.getIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
                         resources.getIntArray(
                                 R.array.config_doze_brightness_sensor_to_brightness));

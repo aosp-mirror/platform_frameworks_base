@@ -506,6 +506,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
+     * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION}, otherwise return null.
+     *
      * @return The cell information.
      */
     @Nullable

@@ -18,7 +18,10 @@ package com.android.systemui.navigationbar;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -35,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -44,6 +46,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.function.Predicate;
 
@@ -53,6 +57,10 @@ import java.util.function.Predicate;
 @SmallTest
 public class NavigationBarButtonTest extends SysuiTestCase {
 
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
     private static final String TAG = "NavigationBarButtonTest";
     private ImageReader mReader;
     private NavigationBarView mNavBar;
@@ -60,15 +68,20 @@ public class NavigationBarButtonTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         final Display display = createVirtualDisplay();
         final SysuiTestableContext context =
                 (SysuiTestableContext) mContext.createDisplayContext(display);
+
+        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
+                .thenReturn(mEdgeBackGestureHandler);
 
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectMockDependency(EdgeBackGestureHandler.class);
+        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
+                mEdgeBackGestureHandlerFactory);
         mNavBar = new NavigationBarView(context, null);
     }
 

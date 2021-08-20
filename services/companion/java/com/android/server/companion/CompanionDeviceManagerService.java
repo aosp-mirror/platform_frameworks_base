@@ -17,6 +17,7 @@
 
 package com.android.server.companion;
 
+import static android.Manifest.permission.BIND_COMPANION_DEVICE_SERVICE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.Context.BIND_IMPORTANT;
@@ -455,7 +456,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
                 if (err == null) {
-                    addAssociation(association);
+                    addAssociation(association, userId);
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);
                     callback.onFailure("No devices found: " + err.getMessage());
@@ -646,7 +647,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 } else {
                     return association;
                 }
-            }));
+            }), userId);
 
             restartBleScan();
         }
@@ -664,7 +665,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
 
             addAssociation(new Association(
-                    userId, macAddress, packageName, null, false, System.currentTimeMillis()));
+                    userId, macAddress, packageName, null, false,
+                    System.currentTimeMillis()), userId);
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
@@ -738,9 +740,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return Binder.getCallingUid() == Process.SYSTEM_UID;
     }
 
-    void addAssociation(Association association) {
+    void addAssociation(Association association, int userId) {
         updateSpecialAccessPermissionForAssociatedPackage(association);
-        recordAssociation(association);
+        recordAssociation(association, userId);
     }
 
     void removeAssociation(int userId, String pkg, String deviceMacAddress) {
@@ -752,7 +754,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 onAssociationPreRemove(association);
             }
             return notMatch;
-        }));
+        }), userId);
         restartBleScan();
     }
 
@@ -864,7 +866,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         Set<String> sameOemPackageCerts = new HashSet<>();
 
         // Assume OEM may enter same package name in the parallel string array with
-        // multiple ADK certs corresponding to it
+        // multiple APK certs corresponding to it
         for (int i = 0; i < oemPackages.length; i++) {
             if (oemPackages[i].equals(packageName)) {
                 sameOemPackageCerts.add(sameOemCerts[i].replaceAll(":", ""));
@@ -944,13 +946,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }, getContext(), packageName, userId).recycleOnUse());
     }
 
-    private void recordAssociation(Association association) {
+    private void recordAssociation(Association association, int userId) {
         Slog.i(LOG_TAG, "recordAssociation(" + association + ")");
-        updateAssociations(associations -> CollectionUtils.add(associations, association));
-    }
-
-    private void updateAssociations(Function<Set<Association>, Set<Association>> update) {
-        updateAssociations(update, getCallingUserId());
+        updateAssociations(associations -> CollectionUtils.add(associations, association), userId);
     }
 
     private void updateAssociations(Function<Set<Association>, Set<Association>> update,
@@ -1198,6 +1196,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             Slog.w(LOG_TAG, "Device presence listener package must have exactly one "
                     + "CompanionDeviceService, but " + a.getPackageName()
                     + " has " + packageResolveInfos.size());
+            return new ServiceConnector.NoOp<>();
+        }
+        String servicePermission = packageResolveInfos.get(0).serviceInfo.permission;
+        if (!BIND_COMPANION_DEVICE_SERVICE.equals(servicePermission)) {
+            Slog.w(LOG_TAG, "Binding CompanionDeviceService must have "
+                    + BIND_COMPANION_DEVICE_SERVICE + " permission.");
             return new ServiceConnector.NoOp<>();
         }
         ComponentName componentName = packageResolveInfos.get(0).serviceInfo.getComponentName();
@@ -1515,7 +1519,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         String pkg = getNextArgRequired();
                         String address = getNextArgRequired();
                         addAssociation(new Association(userId, address, pkg, null, false,
-                                System.currentTimeMillis()));
+                                System.currentTimeMillis()), userId);
                     }
                     break;
 

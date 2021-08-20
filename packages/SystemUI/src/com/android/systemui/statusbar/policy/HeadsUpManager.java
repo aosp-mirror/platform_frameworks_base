@@ -33,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -156,7 +158,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                         NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
                         entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
             }
-            for (OnHeadsUpChangedListener listener : mListeners) {
+            for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
                 } else {
@@ -175,7 +177,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(true);
         setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpStateChanged(entry, true);
         }
     }
@@ -185,7 +188,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpStateChanged(entry, false);
         }
     }
@@ -203,7 +207,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (mHasPinnedNotification) {
             MetricsLogger.count(mContext, "note_peek", 1);
         }
-        for (OnHeadsUpChangedListener listener : mListeners) {
+        for (OnHeadsUpChangedListener listener : new ArrayList<>(mListeners)) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
         }
     }

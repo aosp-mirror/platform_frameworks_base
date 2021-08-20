@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरे की पहचान नहीं हुई. फ़िंगरप्रिंट इस्तेमाल करें."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"जारी रखने के लिए, फ़िंगरप्रिंट का इस्तेमाल करें"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"फ़िंगरप्रिंट पहचाना नहीं जा सका. इसके बजाय, स्क्रीन लॉक इस्तेमाल करके देखें."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"आपको पहचान रहा है…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"चेहरे का आइकॉन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"संगतता ज़ूम बटन."</string>
@@ -428,13 +430,11 @@
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोकें"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आप डिवाइस के माइक्रोफ़ोन को अनब्लॉक करना चाहते हैं?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आप डिवाइस के कैमरे को अनब्लॉक करना चाहते हैं?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस के कैमरे और माइक्रोफ़ोन को अनब्लॉक करना चाहते हैं?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस का कैमरा और माइक्रोफ़ोन अनब्लॉक करना चाहते हैं?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरे या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे या माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरा या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें ये इस्तेमाल करने की अनुमति है."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हो रही है"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="tap_again" msgid="1315420114387908655">"फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"अनलॉक करने के लिए दबाएं"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
@@ -480,12 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"क्या आप मेहमान को हटाना चाहते हैं?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
@@ -673,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"फ़ोन के ज़रिए तेज़ी से और सुरक्षित तरीके से खरीदारी करने के लिए सेट अप करें"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सभी दिखाएं"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे चुकाने के लिए, डिवाइस अनलॉक करें"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट अप नहीं किया गया है"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"कार्ड जोड़ें"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट हो रहा है"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"इस्तेमाल करने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"आपके कार्ड की जानकारी पाने में कोई समस्या हुई है. कृपया बाद में कोशिश करें"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन की सेटिंग"</string>
@@ -732,7 +730,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"सूचना देना जारी रखें"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"सूचनाएं बंद करें"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"आवाज़ के बिना सूचनाएं दिखाएं"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"बिना आवाज़ के सूचनाएं दिखाएं"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
@@ -1047,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"एज पर ले जाएं और छिपाएं"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"एज से निकालें और दिखाएं"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टॉगल करें"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"होम कंट्रोल"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> कंट्रोल जोड़ा गया.</item>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"नए मैसेज आने पर यहां देखें"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"हाल ही में हुई बातचीत यहां दिखेंगी"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"प्राथमिकता वाली बातचीत"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"हाल ही में की गई बातचीत"</string>
     <string name="okay" msgid="6490552955618608554">"ठीक है"</string>
@@ -1148,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"हाल के मैसेज, मिस्ड कॉल, और स्टेटस अपडेट देखें"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"बातचीत"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ने एक मैसेज भेजा है"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'परेशान न करें\' की वजह से सूचनाएं नहीं दिख रहीं"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ने एक मैसेज भेजा है: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ने एक इमेज भेजी है"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ने स्टेटस अपडेट किया है: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"ऑनलाइन है"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"कोई अलार्म सेट नहीं है"</string>

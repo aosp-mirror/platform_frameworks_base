@@ -91,7 +91,7 @@ struct Constants {
     static constexpr auto readLogsMaxInterval = 2h;
 
     // How long should we wait till dataLoader reports destroyed.
-    static constexpr auto destroyTimeout = 60s;
+    static constexpr auto destroyTimeout = 10s;
 
     static constexpr auto anyStatus = INT_MIN;
 };

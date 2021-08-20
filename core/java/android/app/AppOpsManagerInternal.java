@@ -16,11 +16,12 @@
 
 package android.app;
 
-import android.app.AppOpsManager.AttributionFlags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager.AttributionFlags;
 import android.content.AttributionSource;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -29,6 +30,7 @@ import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
@@ -155,6 +157,21 @@ public abstract class AppOpsManagerInternal {
                         SyncNotedAppOp> superImpl);
 
         /**
+         * Allows overriding finish op.
+         *
+         * @param clientId The client state.
+         * @param code The op code to finish.
+         * @param uid The UID for which the op was noted.
+         * @param packageName The package for which it was noted. {@code null} for system package.
+         * @param attributionTag the attribution tag.
+         */
+        default void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag,
+                @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+            superImpl.accept(clientId, code, uid, packageName, attributionTag);
+        }
+
+        /**
          * Allows overriding finish proxy op.
          *
          * @param code The op code to finish.
@@ -193,4 +210,17 @@ public abstract class AppOpsManagerInternal {
      */
     public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
             int mode, @Nullable IAppOpsCallback callback);
+
+
+    /**
+     * Sets a global restriction on an op code.
+     */
+    public abstract void setGlobalRestriction(int code, boolean restricted, IBinder token);
+
+    /**
+     * Gets the number of tokens restricting the given appop for a user, package, and
+     * attributionTag.
+     */
+    public abstract int getOpRestrictionCount(int code, UserHandle user, String pkg,
+            String attributionTag);
 }

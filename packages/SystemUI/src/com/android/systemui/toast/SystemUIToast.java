@@ -16,13 +16,18 @@
 
 package com.android.systemui.toast;
 
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+
 import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -53,7 +58,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
     final ToastPlugin.Toast mPluginToast;
 
     private final String mPackageName;
-    private final int mUserId;
+    @UserIdInt private final int mUserId;
     private final LayoutInflater mLayoutInflater;
 
     final int mDefaultX = 0;
@@ -74,7 +79,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
     }
 
     SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
-            ToastPlugin.Toast pluginToast, String packageName, int userId,
+            ToastPlugin.Toast pluginToast, String packageName, @UserIdInt int userId,
             int orientation) {
         mLayoutInflater = layoutInflater;
         mContext = context;
@@ -248,6 +253,15 @@ public class SystemUIToast implements ToastPlugin.Toast {
             return null;
         }
 
+        final Context userContext;
+        try {
+            userContext = context.createPackageContextAsUser("android",
+                0, new UserHandle(userId));
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Could not create user package context");
+            return null;
+        }
+
         final ApplicationsState appState =
                 ApplicationsState.getInstance((Application) context.getApplicationContext());
         if (!appState.isUserAdded(userId)) {
@@ -255,9 +269,11 @@ public class SystemUIToast implements ToastPlugin.Toast {
                     + "packageName=" + packageName);
             return null;
         }
+
+        final PackageManager packageManager = userContext.getPackageManager();
         final AppEntry appEntry = appState.getEntry(packageName, userId);
         if (appEntry == null || appEntry.info == null
-                || !ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
+                || !showApplicationIcon(appEntry.info, packageManager)) {
             return null;
         }
 
@@ -265,7 +281,20 @@ public class SystemUIToast implements ToastPlugin.Toast {
         UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
         IconFactory iconFactory = IconFactory.obtain(context);
         Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                appInfo.loadUnbadgedIcon(context.getPackageManager()), user, true).icon;
+                appInfo.loadUnbadgedIcon(packageManager), user, true).icon;
         return new BitmapDrawable(context.getResources(), iconBmp);
+    }
+
+    private static boolean showApplicationIcon(ApplicationInfo appInfo,
+            PackageManager packageManager) {
+        if (hasFlag(appInfo.flags, FLAG_UPDATED_SYSTEM_APP)) {
+            return packageManager.getLaunchIntentForPackage(appInfo.packageName)
+                != null;
+        }
+        return !hasFlag(appInfo.flags, FLAG_SYSTEM);
+    }
+
+    private static boolean hasFlag(int flags, int flag) {
+        return (flags & flag) != 0;
     }
 }

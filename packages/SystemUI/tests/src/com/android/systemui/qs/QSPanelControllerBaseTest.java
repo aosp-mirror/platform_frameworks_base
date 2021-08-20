@@ -127,7 +127,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
         when(mQSPanel.openPanelEvent()).thenReturn(QSEvent.QS_PANEL_EXPANDED);
         when(mQSPanel.closePanelEvent()).thenReturn(QSEvent.QS_PANEL_COLLAPSED);
-        when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSPanel.getOrCreateTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTile.getTileSpec()).thenReturn("dnd");
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));

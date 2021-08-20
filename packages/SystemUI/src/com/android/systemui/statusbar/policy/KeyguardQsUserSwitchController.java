@@ -21,7 +21,7 @@ import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.UserManager;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -76,7 +76,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
     private NotificationPanelViewController mNotificationPanelViewController;
-    private UserManager mUserManager;
     UserSwitcherController.UserRecord mCurrentUser;
 
     // State info for the user switch and keyguard
@@ -115,7 +114,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             UserAvatarView view,
             Context context,
             @Main Resources resources,
-            UserManager userManager,
             ScreenLifecycle screenLifecycle,
             UserSwitcherController userSwitcherController,
             KeyguardStateController keyguardStateController,
@@ -129,7 +127,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
         mResources = resources;
-        mUserManager = userManager;
         mScreenLifecycle = screenLifecycle;
         mUserSwitcherController = userSwitcherController;
         mKeyguardStateController = keyguardStateController;
@@ -227,47 +224,39 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             return;
         }
 
-        if (mCurrentUser == null) {
-            mView.setVisibility(View.GONE);
-            return;
-        }
-
-        mView.setVisibility(View.VISIBLE);
-
-        String currentUserName = mCurrentUser.info.name;
         String contentDescription = null;
-
-        if (!TextUtils.isEmpty(currentUserName)) {
+        if (mCurrentUser != null && mCurrentUser.info != null && !TextUtils.isEmpty(
+                mCurrentUser.info.name)) {
+            // If we know the current user's name, have TalkBack to announce "Signed in as [user
+            // name]" when the icon is selected
+            contentDescription = mContext.getString(R.string.accessibility_quick_settings_user,
+                    mCurrentUser.info.name);
+        } else {
+            // As a fallback, have TalkBack announce "Switch user"
             contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_user,
-                    currentUserName);
+                    R.string.accessibility_multi_user_switch_switcher);
         }
 
         if (!TextUtils.equals(mView.getContentDescription(), contentDescription)) {
             mView.setContentDescription(contentDescription);
         }
 
-        mView.setDrawableWithBadge(getCurrentUserIcon().mutate(), mCurrentUser.resolveId());
+        int userId = mCurrentUser != null ? mCurrentUser.resolveId() : UserHandle.USER_NULL;
+        mView.setDrawableWithBadge(getCurrentUserIcon().mutate(), userId);
     }
 
     Drawable getCurrentUserIcon() {
         Drawable drawable;
-        if (mCurrentUser.picture == null) {
-            if (mCurrentUser.isCurrent && mCurrentUser.isGuest) {
+        if (mCurrentUser == null || mCurrentUser.picture == null) {
+            if (mCurrentUser != null && mCurrentUser.isGuest) {
                 drawable = mContext.getDrawable(R.drawable.ic_avatar_guest_user);
             } else {
-                drawable = mAdapter.getIconDrawable(mContext, mCurrentUser);
+                drawable = mContext.getDrawable(R.drawable.ic_avatar_user);
             }
-            int iconColorRes;
-            if (mCurrentUser.isSwitchToEnabled) {
-                iconColorRes = R.color.kg_user_switcher_avatar_icon_color;
-            } else {
-                iconColorRes = R.color.kg_user_switcher_restricted_avatar_icon_color;
-            }
+            int iconColorRes = R.color.kg_user_switcher_avatar_icon_color;
             drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
         } else {
-            int avatarSize =
-                    (int) mResources.getDimension(R.dimen.kg_framed_avatar_size);
+            int avatarSize = (int) mResources.getDimension(R.dimen.kg_framed_avatar_size);
             drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
         }
 

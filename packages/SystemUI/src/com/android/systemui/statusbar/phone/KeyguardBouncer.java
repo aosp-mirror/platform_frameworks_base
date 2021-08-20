@@ -87,7 +87,7 @@ public class KeyguardBouncer {
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardViewController != null) {
             mKeyguardViewController.resetSecurityContainer();
-            for (KeyguardResetCallback callback : mResetCallbacks) {
+            for (KeyguardResetCallback callback : new ArrayList<>(mResetCallbacks)) {
                 callback.onKeyguardReset();
             }
         }
@@ -365,6 +365,10 @@ public class KeyguardBouncer {
      */
     public boolean inTransit() {
         return mShowingSoon || mExpansion != EXPANSION_HIDDEN && mExpansion != EXPANSION_VISIBLE;
+    }
+
+    public boolean getShowingSoon() {
+        return mShowingSoon;
     }
 
     /**

@@ -537,8 +537,19 @@ class MediaHierarchyManager @Inject constructor(
     ) {
         val desiredLocation = calculateLocation()
         if (desiredLocation != this.desiredLocation || forceStateUpdate) {
-            if (this.desiredLocation >= 0) {
+            if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
+                // Only update previous location when it actually changes
                 previousLocation = this.desiredLocation
+            } else if (forceStateUpdate) {
+                val onLockscreen = (!bypassController.bypassEnabled &&
+                        (statusbarState == StatusBarState.KEYGUARD ||
+                            statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
+                if (desiredLocation == LOCATION_QS && previousLocation == LOCATION_LOCKSCREEN &&
+                        !onLockscreen) {
+                    // If media active state changed and the device is now unlocked, update the
+                    // previous location so we animate between the correct hosts
+                    previousLocation = LOCATION_QQS
+                }
             }
             val isNewView = this.desiredLocation == -1
             this.desiredLocation = desiredLocation

@@ -117,7 +117,9 @@
     <!-- This should be at least the size of bubble_expanded_view_padding; it is used to include
          a slight touch slop around the expanded view. -->
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
-    <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
+    <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded.
+         If this value changes then R.dimen.bubble_expanded_view_min_height in CtsVerifier
+         should also be updated. -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- On large screens the width of the expanded view is restricted to this size. -->
     <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>

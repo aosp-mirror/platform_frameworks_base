@@ -169,13 +169,14 @@ public final class SetSchemaRequest {
 
     /** Builder for {@link SetSchemaRequest} objects. */
     public static final class Builder {
+        private static final int DEFAULT_VERSION = 1;
         private ArraySet<AppSearchSchema> mSchemas = new ArraySet<>();
         private ArraySet<String> mSchemasNotDisplayedBySystem = new ArraySet<>();
         private ArrayMap<String, Set<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>();
         private ArrayMap<String, Migrator> mMigrators = new ArrayMap<>();
         private boolean mForceOverride = false;
-        private int mVersion = 1;
+        private int mVersion = DEFAULT_VERSION;
         private boolean mBuilt = false;
 
         /**
@@ -384,6 +385,9 @@ public final class SetSchemaRequest {
          * <p>The version number can stay the same, increase, or decrease relative to the current
          * version number that is already stored in the {@link AppSearchSession} database.
          *
+         * <p>The version of an empty database will always be 0. You cannot set version to the
+         * {@link SetSchemaRequest}, if it doesn't contains any {@link AppSearchSchema}.
+         *
          * @param version A positive integer representing the version of the entire set of schemas
          *     represents the version of the whole schema in the {@link AppSearchSession} database,
          *     default version is 1.
@@ -423,7 +427,10 @@ public final class SetSchemaRequest {
                 throw new IllegalArgumentException(
                         "Schema types " + referencedSchemas + " referenced, but were not added.");
             }
-
+            if (mSchemas.isEmpty() && mVersion != DEFAULT_VERSION) {
+                throw new IllegalArgumentException(
+                        "Cannot set version to the request if schema is empty.");
+            }
             mBuilt = true;
             return new SetSchemaRequest(
                     mSchemas,

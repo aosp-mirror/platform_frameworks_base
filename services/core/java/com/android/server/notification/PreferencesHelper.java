@@ -1126,20 +1126,21 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     @Override
-    public void deleteNotificationChannel(String pkg, int uid, String channelId) {
+    public boolean deleteNotificationChannel(String pkg, int uid, String channelId) {
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
-                return;
+                return false;
             }
             NotificationChannel channel = r.channels.get(channelId);
             if (channel != null) {
-                deleteNotificationChannelLocked(channel, pkg, uid);
+                return deleteNotificationChannelLocked(channel, pkg, uid);
             }
+            return false;
         }
     }
 
-    private void deleteNotificationChannelLocked(NotificationChannel channel, String pkg, int uid) {
+    private boolean deleteNotificationChannelLocked(NotificationChannel channel, String pkg, int uid) {
         if (!channel.isDeleted()) {
             channel.setDeleted(true);
             channel.setDeletedTimeMs(System.currentTimeMillis());
@@ -1151,7 +1152,9 @@ public class PreferencesHelper implements RankingConfig {
             if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
                 updateChannelsBypassingDnd();
             }
+            return true;
         }
+        return false;
     }
 
     @Override

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
@@ -52,6 +52,7 @@ public class NumPadKey extends ViewGroup {
 
     @Nullable
     private NumPadAnimator mAnimator;
+    private int mOrientation;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -139,6 +140,11 @@ public class NumPadKey extends ViewGroup {
         }
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        mOrientation = newConfig.orientation;
+    }
+
     /**
      * Reload colors from resources.
      **/
@@ -171,7 +177,10 @@ public class NumPadKey extends ViewGroup {
         // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
         // the height to match the old pin bouncer
         int width = getMeasuredWidth();
-        int height = mAnimator == null ? (int) (width * .75f) : width;
+
+        boolean shortenHeight = mAnimator == null
+                || mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        int height = shortenHeight ? (int) (width * .66f) : width;
 
         setMeasuredDimension(getMeasuredWidth(), height);
     }

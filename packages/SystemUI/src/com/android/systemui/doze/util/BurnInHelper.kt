@@ -21,7 +21,8 @@ import android.util.MathUtils
 private const val MILLIS_PER_MINUTES = 1000 * 60f
 private const val BURN_IN_PREVENTION_PERIOD_Y = 521f
 private const val BURN_IN_PREVENTION_PERIOD_X = 83f
-private const val BURN_IN_PREVENTION_PERIOD_SCALE = 180f
+private const val BURN_IN_PREVENTION_PERIOD_SCALE = 181f
+private const val BURN_IN_PREVENTION_PERIOD_PROGRESS = 89f
 
 /**
  * Returns the translation offset that should be used to avoid burn in at
@@ -34,6 +35,15 @@ fun getBurnInOffset(amplitude: Int, xAxis: Boolean): Int {
     return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
             amplitude.toFloat(),
             if (xAxis) BURN_IN_PREVENTION_PERIOD_X else BURN_IN_PREVENTION_PERIOD_Y).toInt()
+}
+
+/**
+ * Returns a progress offset (between 0f and 1.0f) that should be used to avoid burn in at
+ * the current time.
+ */
+fun getBurnInProgressOffset(): Float {
+    return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
+        1f, BURN_IN_PREVENTION_PERIOD_PROGRESS)
 }
 
 /**

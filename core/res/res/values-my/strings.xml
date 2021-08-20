@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ဝန်ဆောင်မှု"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"အာရုံခံကိရိယာ အကြောင်းကြားချက် ဝန်ဆောင်မှု"</string>
     <string name="twilight_service" msgid="8964898045693187224">"နေဝင်ဆည်းဆာ ဝန်ဆောင်မှု"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"ဒေသစံတော်ချိန် ရှာဖွေစနစ် (ချိတ်ဆက်နိုင်မှု မလိုပါ)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS အချိန်အပ်ဒိတ် ဝန်ဆောင်မှု"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"တေးဂီတကို သိရှိမှတ်မိခြင်း စီမံခန့်ခွဲမှုစနစ် ဝန်ဆောင်မှု"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"အက်ပ်အား အခြေအနေပြ ဘားကို ချဲ့ခွင့် သို့မဟုတ် ခေါက်သိမ်းခွင့် ပြုသည်။"</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"လော့ခ်ချထားသော စက်ပစ္စည်းပေါ်တွင် အကြောင်းကြားချက်များကို ဖန်သားပြင်အပြည့် လုပ်ဆောင်ချက်များအဖြစ် ပြခြင်း"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"လော့ခ်ချထားသော စက်ပစ္စည်းပေါ်တွင် အကြောင်းကြားချက်များကို ဖန်သားပြင်အပြည့် လုပ်ဆောင်ချက်များအဖြစ် ပြရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"အတိုကောက်များအား ထည့်သွင်းခြင်း"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"ဖြတ်လမ်းလင့်ခ်များ ထည့်သွင်းခြင်း"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"အပလီကေးရှင်းအား အသုံးပြုသူ လုပ်ဆောင်ခြင်း မပါပဲ ပင်မ မြင်ကွင်းအား ပြောင်းလဲခွင့် ပေးခြင်း"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"အတိုကောက်များ ဖယ်ထုတ်ခြင်း"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"အပလီကေးရှင်းအား အသုံးပြုသူ လုပ်ဆောင်ခြင်း မပါပဲ ပင်မ မြင်ကွင်းအား ဖယ်ရှားခွင့် ပေးခြင်း"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"အခြားလက်ဗွေဖြင့် စမ်းကြည့်ပါ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏တည်နေရာကို အနည်းငယ်ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"အာရုံခံကိရိယာကို ယာယီပိတ်ထားသည်။"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ။ ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"လက်ဗွေ သုံးခြင်း"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"လက်ဗွေ (သို့) ဖန်သားပြင်လော့ခ်ချခြင်းကို သုံးခြင်း"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ဆိုင်ရာ ပြဿနာ"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"သင်၏မျက်နှာနမူနာကို ဖျက်ရန် တို့ပါ။ ထို့နောက် သင့်မျက်နှာကို ထပ်ထည့်ပါ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထည့်သွင်းပါ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"သင့်ဖုန်းကိုကြည့်၍ သော့ဖွင့်ပါ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"သော့ဖွင့်ရန် နောက်ထပ်နည်းလမ်းများကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"လက်ဗွေထည့်ရန် တို့ပါ"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ။"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"အလွန် လင်းသည်။ အလင်းလျှော့ကြည့်ပါ။"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"ငြင်းပယ်ရန်"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ခွင့်ပြုချက် တောင်းခံထားခြင်း"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"အကောင့် <xliff:g id="ACCOUNT">%s</xliff:g> အတွက် \n ခွင့်ပြုချက် တောင်းခံထားပြီး"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> အကောင့်အတွက်\n<xliff:g id="APP">%1$s</xliff:g> က ခွင့်ပြုချက် တောင်းခံထားသည်။"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"သင်သည် ဒီအက်ပ်ကို သင့်အလုပ်ပရိုဖိုင် ပြင်ပတွင် အသုံးပြုနေ၏"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"သင်သည် ဒီအက်ပ်ကို သင်၏ အလုပ် ပရိုဖိုင် ထဲမှာ အသုံးပြုနေသည်"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ထည့်သွင်းရန်နည်းလမ်း"</string>
@@ -2092,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ဤအကြောင်းကြားချက်ကို အဆင့်တိုးထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ဤအကြောင်းကြားချက်ကို အဆင့်လျှော့ထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"အဆင့်မြင့် အကြောင်းကြားချက်များ"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"အကြံပြုထားသော လုပ်ဆောင်ချက်နှင့် ပြန်စာများကို အဆင့်မြင့် အကြောင်းကြားချက်များဖြင့် ယခု ပံ့ပိုးပေးသည်။ ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို ပံ့ပိုးမထားတော့ပါ။"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"အကြံပြုထားသော လုပ်ဆောင်ချက်နှင့် ပြန်စာများကို ယခုအခါ အဆင့်မြင့် အကြောင်းကြားချက်များဖြင့် ပံ့ပိုးပေးနေပါသည်။ ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို ပံ့ပိုးမပေးတော့ပါ။"</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ပိတ်ရန်"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>

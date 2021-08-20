@@ -24,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/screenrecord_audio_label"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"/>
     <TextView
         android:id="@+id/screen_recording_dialog_source_text"

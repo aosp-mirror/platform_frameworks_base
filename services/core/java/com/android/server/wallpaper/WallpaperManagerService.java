@@ -405,20 +405,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             needsExtraction = wallpaper.primaryColors == null;
         }
 
-        // Let's notify the current values, it's fine if it's null, it just means
-        // that we don't know yet.
-        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
-
         if (needsExtraction) {
             extractColors(wallpaper);
-            synchronized (mLock) {
-                // Don't need to notify if nothing changed.
-                if (wallpaper.primaryColors == null) {
-                    return;
-                }
-            }
-            notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
         }
+        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
     }
 
     private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {

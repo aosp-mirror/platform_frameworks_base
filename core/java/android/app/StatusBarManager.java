@@ -352,6 +352,42 @@ public class StatusBarManager {
     }
 
     /**
+     * Toggles the notification panel.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public void togglePanel() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.togglePanel();
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sends system keys to the status bar.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public void handleSystemKey(int key) {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.handleSystemKey(key);
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Expand the settings panel.
      *
      * @hide

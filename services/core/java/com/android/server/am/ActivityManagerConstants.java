@@ -52,8 +52,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
-
+    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -109,10 +108,12 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
-    static final String KEY_KILL_FAS_CACHED_IDLE = "kill_fas_cached_idle";
+    static final String KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE = "fgs_start_allowed_log_sample_rate";
+    static final String KEY_FGS_START_DENIED_LOG_SAMPLE_RATE = "fgs_start_denied_log_sample_rate";
     static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -153,10 +154,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
-
-    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
-    static final boolean DEFAULT_KILL_FAS_CACHED_IDLE = true;
-
+    private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
+    private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -196,6 +195,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED =
             "default_fgs_starts_restriction_enabled";
+
+    /**
+     * Default value for mFgsStartRestrictionNotificationEnabled if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED =
+            "default_fgs_starts_restriction_notification_enabled";
 
     /**
      * Default value for mFgsStartRestrictionCheckCallerTargetSdk if not explicitly set in
@@ -432,6 +438,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // at all.
     volatile boolean mFlagFgsStartRestrictionEnabled = true;
 
+    // Whether to display a notification when a service is restricted from startForeground due to
+    // foreground service background start restriction.
+    volatile boolean mFgsStartRestrictionNotificationEnabled = false;
+
     /**
      * Indicates whether the foreground service background start restriction is enabled for
      * caller app that is targeting S+.
@@ -483,17 +493,25 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile long mFgsStartForegroundTimeoutMs = DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS;
 
     /**
-     * Sample rate for the FGS westworld atom.
+     * Sample rate for the FGS atom.
      *
      * If the value is 0.1, 10% of the installed packages would be sampled.
      */
     volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
     /**
-     * Whether or not to kill apps in force-app-standby state and it's cached, its UID state is
-     * idle.
+     * Sample rate for the allowed FGS start WTF logs.
+     *
+     * If the value is 0.1, 10% of the logs would be sampled.
      */
-    volatile boolean mKillForceAppStandByAndCachedIdle = DEFAULT_KILL_FAS_CACHED_IDLE;
+    volatile float mFgsStartAllowedLogSampleRate = DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE;
+
+    /**
+     * Sample rate for the denied FGS start WTF logs.
+     *
+     * If the value is 0.1, 10% of the logs would be sampled.
+     */
+    volatile float mFgsStartDeniedLogSampleRate = DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE;
 
     /**
      * Whether to allow "opt-out" from the foreground service restrictions.
@@ -506,6 +524,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     private int mOverrideMaxCachedProcesses = -1;
+    private final int mCustomizedMaxCachedProcesses;
 
     // The maximum number of cached processes we will keep around before killing them.
     // NOTE: this constant is *only* a control to not let us go too crazy with
@@ -515,11 +534,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // kill them.  Also note that this limit only applies to cached background processes;
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
-    // process limit.
-    public int CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+    // process limit. This will be initialized in the constructor.
+    public int CUR_MAX_CACHED_PROCESSES;
 
-    // The maximum number of empty app processes we will let sit around.
-    public int CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
+    // The maximum number of empty app processes we will let sit around.  This will be
+    // initialized in the constructor.
+    public int CUR_MAX_EMPTY_PROCESSES;
 
     // The number of empty apps at which we don't consider it necessary to do
     // memory trimming.
@@ -652,6 +672,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED:
                                 updateFgsStartsRestriction();
                                 break;
+                            case KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED:
+                                updateFgsStartsRestrictionNotification();
+                                break;
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK:
                                 updateFgsStartsRestrictionCheckCallerTargetSdk();
                                 break;
@@ -706,8 +729,11 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_FGS_ATOM_SAMPLE_RATE:
                                 updateFgsAtomSamplePercent();
                                 break;
-                            case KEY_KILL_FAS_CACHED_IDLE:
-                                updateKillFasCachedIdle();
+                            case KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE:
+                                updateFgsStartAllowedLogSamplePercent();
+                                break;
+                            case KEY_FGS_START_DENIED_LOG_SAMPLE_RATE:
+                                updateFgsStartDeniedLogSamplePercent();
                                 break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
@@ -762,6 +788,10 @@ final class ActivityManagerConstants extends ContentObserver {
                 context.getResources().getStringArray(
                         com.android.internal.R.array.config_keep_warming_services))
                 .map(ComponentName::unflattenFromString).collect(Collectors.toSet()));
+        mCustomizedMaxCachedProcesses = context.getResources().getInteger(
+                com.android.internal.R.integer.config_customizedMaxCachedProcesses);
+        CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
+        CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
     }
 
     public void start(ContentResolver resolver) {
@@ -953,6 +983,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 /*defaultValue*/ true);
     }
 
+    private void updateFgsStartsRestrictionNotification() {
+        mFgsStartRestrictionNotificationEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED,
+                /*defaultValue*/ false);
+    }
+
     private void updateFgsStartsRestrictionCheckCallerTargetSdk() {
         mFgsStartRestrictionCheckCallerTargetSdk = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1044,11 +1081,18 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
     }
 
-    private void updateKillFasCachedIdle() {
-        mKillForceAppStandByAndCachedIdle = DeviceConfig.getBoolean(
+    private void updateFgsStartAllowedLogSamplePercent() {
+        mFgsStartAllowedLogSampleRate = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_KILL_FAS_CACHED_IDLE,
-                DEFAULT_KILL_FAS_CACHED_IDLE);
+                KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE,
+                DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE);
+    }
+
+    private void updateFgsStartDeniedLogSamplePercent() {
+        mFgsStartDeniedLogSampleRate = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_START_DENIED_LOG_SAMPLE_RATE,
+                DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE);
     }
 
     private void updateFgsAllowOptOut() {
@@ -1105,13 +1149,13 @@ final class ActivityManagerConstants extends ContentObserver {
         try {
             CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
                     ? (TextUtils.isEmpty(maxCachedProcessesFlag)
-                    ? DEFAULT_MAX_CACHED_PROCESSES : Integer.parseInt(maxCachedProcessesFlag))
+                    ? mCustomizedMaxCachedProcesses : Integer.parseInt(maxCachedProcessesFlag))
                     : mOverrideMaxCachedProcesses;
         } catch (NumberFormatException e) {
             // Bad flag value from Phenotype, revert to default.
             Slog.e(TAG,
                     "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
-            CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+            CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
         }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
@@ -1272,10 +1316,17 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFlagBackgroundFgsStartRestrictionEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED); pw.print("=");
         pw.println(mFlagFgsStartRestrictionEnabled);
+        pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED);
+                pw.print("=");
+        pw.println(mFgsStartRestrictionNotificationEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
         pw.print("="); pw.println(mFgsAtomSampleRate);
+        pw.print("  "); pw.print(KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE);
+        pw.print("="); pw.println(mFgsStartAllowedLogSampleRate);
+        pw.print("  "); pw.print(KEY_FGS_START_DENIED_LOG_SAMPLE_RATE);
+        pw.print("="); pw.println(mFgsStartDeniedLogSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
         pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
@@ -1285,6 +1336,7 @@ final class ActivityManagerConstants extends ContentObserver {
         if (mOverrideMaxCachedProcesses >= 0) {
             pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
         }
+        pw.print("  mCustomizedMaxCachedProcesses="); pw.println(mCustomizedMaxCachedProcesses);
         pw.print("  CUR_MAX_CACHED_PROCESSES="); pw.println(CUR_MAX_CACHED_PROCESSES);
         pw.print("  CUR_MAX_EMPTY_PROCESSES="); pw.println(CUR_MAX_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);

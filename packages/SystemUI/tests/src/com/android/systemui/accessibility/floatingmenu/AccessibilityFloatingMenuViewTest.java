@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.testing.AndroidTestingRunner;
@@ -49,7 +48,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -87,7 +85,6 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     private final List<AccessibilityTarget> mTargets = new ArrayList<>(
             Collections.singletonList(mock(AccessibilityTarget.class)));
 
-    private final Rect mAvailableBounds = new Rect(100, 200, 300, 400);
     private final Position mPlaceholderPosition = new Position(0.0f, 0.0f);
 
     @Mock
@@ -144,6 +141,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
 
     @Test
     public void initListView_success() {
+        assertThat(mListView.getCompatAccessibilityDelegate()).isNotNull();
         assertThat(mMenuView.getChildCount()).isEqualTo(1);
     }
 
@@ -367,90 +365,6 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         listView.dispatchTouchEvent(upEvent);
 
         assertThat(menuView.mShapeType).isEqualTo(/* halfOval */ 1);
-    }
-
-    @Test
-    public void getAccessibilityActionList_matchResult() {
-        final AccessibilityNodeInfo info = new AccessibilityNodeInfo();
-
-        mMenuView.onInitializeAccessibilityNodeInfo(info);
-
-        assertThat(info.getActionList().size()).isEqualTo(5);
-    }
-
-    @Test
-    public void accessibilityActionMove_halfOval_moveTopLeft_success() {
-        doReturn(mAvailableBounds).when(mMenuView).getAvailableBounds();
-        mMenuView.setShapeType(/* halfOvalShape */ 1);
-
-        final boolean moveTopLeftAction =
-                mMenuView.performAccessibilityAction(R.id.action_move_top_left, null);
-
-        assertThat(moveTopLeftAction).isTrue();
-        assertThat(mMenuView.mShapeType).isEqualTo(/* ovalShape */ 0);
-        verify(mMenuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.top);
-    }
-
-    @Test
-    public void accessibilityActionMove_halfOval_moveTopRight_success() {
-        doReturn(mAvailableBounds).when(mMenuView).getAvailableBounds();
-        mMenuView.setShapeType(/* halfOvalShape */ 1);
-
-        final boolean moveTopRightAction =
-                mMenuView.performAccessibilityAction(R.id.action_move_top_right, null);
-
-        assertThat(moveTopRightAction).isTrue();
-        assertThat(mMenuView.mShapeType).isEqualTo(/* ovalShape */ 0);
-        verify(mMenuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.top);
-    }
-
-    @Test
-    public void accessibilityActionMove_halfOval_moveBottomLeft_success() {
-        doReturn(mAvailableBounds).when(mMenuView).getAvailableBounds();
-        mMenuView.setShapeType(/* halfOvalShape */ 1);
-
-        final boolean moveBottomLeftAction =
-                mMenuView.performAccessibilityAction(R.id.action_move_bottom_left, null);
-
-        assertThat(moveBottomLeftAction).isTrue();
-        assertThat(mMenuView.mShapeType).isEqualTo(/* ovalShape */ 0);
-        verify(mMenuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.bottom);
-    }
-
-    @Test
-    public void accessibilityActionMove_halfOval_moveBottomRight_success() {
-        doReturn(mAvailableBounds).when(mMenuView).getAvailableBounds();
-        mMenuView.setShapeType(/* halfOvalShape */ 1);
-
-        final boolean moveBottomRightAction =
-                mMenuView.performAccessibilityAction(R.id.action_move_bottom_right, null);
-
-        assertThat(moveBottomRightAction).isTrue();
-        assertThat(mMenuView.mShapeType).isEqualTo(/* ovalShape */ 0);
-        verify(mMenuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.bottom);
-    }
-
-    @Test
-    public void accessibilityActionMove_halfOval_moveOutEdgeAndShow_success() {
-        doReturn(mAvailableBounds).when(mMenuView).getAvailableBounds();
-        mMenuView.setShapeType(/* halfOvalShape */ 1);
-
-        final boolean moveOutEdgeAndShowAction =
-                mMenuView.performAccessibilityAction(R.id.action_move_out_edge_and_show, null);
-
-        assertThat(moveOutEdgeAndShowAction).isTrue();
-        assertThat(mMenuView.mShapeType).isEqualTo(/* ovalShape */ 0);
-    }
-
-    @Test
-    public void setupAccessibilityActions_oval_hasActionMoveToEdgeAndHide() {
-        final AccessibilityNodeInfo info = new AccessibilityNodeInfo();
-        mMenuView.setShapeType(/* ovalShape */ 0);
-
-        mMenuView.onInitializeAccessibilityNodeInfo(info);
-
-        assertThat(info.getActionList().stream().anyMatch(
-                action -> action.getId() == R.id.action_move_to_edge_and_hide)).isTrue();
     }
 
     @Test

@@ -223,6 +223,19 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
+     * Restarts the top activity in the given task by killing its process if it is visible.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void restartTaskTopActivityProcessIfVisible(@NonNull WindowContainerToken task) {
+        try {
+            mTaskOrganizerController.restartTaskTopActivityProcessIfVisible(task);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the executor to run callbacks on.
      * @hide
      */

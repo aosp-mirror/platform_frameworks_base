@@ -59,7 +59,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * Extra timeout added to the end of each vibration step to ensure it finishes even when
      * vibrator callbacks are lost.
      */
-    private static final long CALLBACKS_EXTRA_TIMEOUT = 100;
+    private static final long CALLBACKS_EXTRA_TIMEOUT = 1_000;
+
+    /** Threshold to prevent the ramp off steps from trying to set extremely low amplitudes. */
+    private static final float RAMP_OFF_AMPLITUDE_MIN = 1e-3f;
 
     /** Fixed large duration used to note repeating vibrations to {@link IBatteryStats}. */
     private static final long BATTERY_STATS_REPEATING_VIBRATION_DURATION = 5_000;
@@ -87,26 +90,33 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         /** Callback triggered to cancel a prepared synced vibration. */
         void cancelSyncedVibration();
 
-        /** Callback triggered when vibration thread is complete. */
-        void onVibrationEnded(long vibrationId, Vibration.Status status);
+        /** Callback triggered when the vibration is complete. */
+        void onVibrationCompleted(long vibrationId, Vibration.Status status);
+
+        /** Callback triggered when the vibrators are released after the thread is complete. */
+        void onVibratorsReleased();
     }
 
     private final Object mLock = new Object();
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
+    private final VibrationSettings mVibrationSettings;
     private final DeviceVibrationEffectAdapter mDeviceEffectAdapter;
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
     private final StepQueue mStepQueue = new StepQueue();
 
+    private volatile boolean mStop;
     private volatile boolean mForceStop;
 
-    VibrationThread(Vibration vib, DeviceVibrationEffectAdapter effectAdapter,
+    VibrationThread(Vibration vib, VibrationSettings vibrationSettings,
+            DeviceVibrationEffectAdapter effectAdapter,
             SparseArray<VibratorController> availableVibrators, PowerManager.WakeLock wakeLock,
             IBatteryStats batteryStatsService, VibrationCallbacks callbacks) {
         mVibration = vib;
+        mVibrationSettings = vibrationSettings;
         mDeviceEffectAdapter = effectAdapter;
         mCallbacks = callbacks;
         mWakeLock = wakeLock;
@@ -145,8 +155,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         mWakeLock.acquire();
         try {
             mVibration.token.linkToDeath(this, 0);
-            Vibration.Status status = playVibration();
-            mCallbacks.onVibrationEnded(mVibration.id, status);
+            playVibration();
+            mCallbacks.onVibratorsReleased();
         } catch (RemoteException e) {
             Slog.e(TAG, "Error linking vibration to token death", e);
         } finally {
@@ -155,12 +165,31 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
     }
 
-    /** Cancel current vibration and shuts down the thread gracefully. */
+    /** Cancel current vibration and ramp down the vibrators gracefully. */
     public void cancel() {
-        mForceStop = true;
+        if (mStop) {
+            // Already cancelled, running clean-up steps.
+            return;
+        }
+        mStop = true;
         synchronized (mLock) {
             if (DEBUG) {
                 Slog.d(TAG, "Vibration cancelled");
+            }
+            mLock.notify();
+        }
+    }
+
+    /** Cancel current vibration and shuts off the vibrators immediately. */
+    public void cancelImmediately() {
+        if (mForceStop) {
+            // Already forced the thread to stop, wait for it to finish.
+            return;
+        }
+        mStop = mForceStop = true;
+        synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration cancelled immediately");
             }
             mLock.notify();
         }
@@ -190,36 +219,56 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
     }
 
-    private Vibration.Status playVibration() {
+    private void playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            CombinedVibration.Sequential effect = toSequential(mVibration.getEffect());
-            mStepQueue.offer(new StartVibrateStep(effect));
+            CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffect());
+            final int sequentialEffectSize = sequentialEffect.getEffects().size();
+            mStepQueue.offer(new StartVibrateStep(sequentialEffect));
 
-            int stepsPlayed = 0;
+            Vibration.Status status = null;
             while (!mStepQueue.isEmpty()) {
-                long waitTime = mStepQueue.calculateWaitTime();
-                if (waitTime <= 0) {
-                    stepsPlayed += mStepQueue.consumeNext();
-                } else {
-                    synchronized (mLock) {
+                long waitTime;
+                synchronized (mLock) {
+                    waitTime = mStepQueue.calculateWaitTime();
+                    if (waitTime > 0) {
                         try {
                             mLock.wait(waitTime);
                         } catch (InterruptedException e) {
                         }
                     }
                 }
+                // If we waited, the queue may have changed, so let the loop run again.
+                if (waitTime <= 0) {
+                    mStepQueue.consumeNext();
+                }
+                Vibration.Status currentStatus = mStop ? Vibration.Status.CANCELLED
+                        : mStepQueue.calculateVibrationStatus(sequentialEffectSize);
+                if (status == null && currentStatus != Vibration.Status.RUNNING) {
+                    // First time vibration stopped running, start clean-up tasks and notify
+                    // callback immediately.
+                    status = currentStatus;
+                    mCallbacks.onVibrationCompleted(mVibration.id, status);
+                    if (status == Vibration.Status.CANCELLED) {
+                        mStepQueue.cancel();
+                    }
+                }
                 if (mForceStop) {
-                    mStepQueue.cancel();
-                    return Vibration.Status.CANCELLED;
+                    // Cancel every step and stop playing them right away, even clean-up steps.
+                    mStepQueue.cancelImmediately();
+                    break;
                 }
             }
 
-            // Some effects might be ignored because the specified vibrator don't exist or doesn't
-            // support the effect. We only report ignored here if nothing was played besides the
-            // StartVibrateStep (which means every attempt to turn on the vibrator was ignored).
-            return stepsPlayed > effect.getEffects().size()
-                    ? Vibration.Status.FINISHED : Vibration.Status.IGNORED_UNSUPPORTED;
+            if (status == null) {
+                status = mStepQueue.calculateVibrationStatus(sequentialEffectSize);
+                if (status == Vibration.Status.RUNNING) {
+                    Slog.w(TAG, "Something went wrong, step queue completed but vibration status"
+                            + " is still RUNNING for vibration " + mVibration.id);
+                    status = Vibration.Status.FINISHED;
+                }
+                mCallbacks.onVibrationCompleted(mVibration.id, status);
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
@@ -260,12 +309,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             segmentIndex = effect.getRepeatIndex();
         }
         if (segmentIndex < 0) {
-            if (vibratorOffTimeout > SystemClock.uptimeMillis()) {
-                // No more segments to play, last step is to wait for the vibrator to complete
-                return new OffStep(vibratorOffTimeout, controller);
-            } else {
-                return null;
-            }
+            // No more segments to play, last step is to complete the vibration on this vibrator.
+            return new CompleteStep(startTime, /* cancelled= */ false, controller,
+                    vibratorOffTimeout);
         }
 
         VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
@@ -298,9 +344,23 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
         @GuardedBy("mLock")
         private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
+        @GuardedBy("mLock")
+        private final Queue<Integer> mNotifiedVibrators = new LinkedList<>();
+
+        @GuardedBy("mLock")
+        private int mPendingVibrateSteps;
+        @GuardedBy("mLock")
+        private int mConsumedStartVibrateSteps;
+        @GuardedBy("mLock")
+        private int mSuccessfulVibratorOnSteps;
+        @GuardedBy("mLock")
+        private boolean mWaitToProcessVibratorCallbacks;
 
         public void offer(@NonNull Step step) {
             synchronized (mLock) {
+                if (!step.isCleanUp()) {
+                    mPendingVibrateSteps++;
+                }
                 mNextSteps.offer(step);
             }
         }
@@ -311,37 +371,155 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             }
         }
 
-        /** Returns the time in millis to wait before calling {@link #consumeNext()}. */
-        public long calculateWaitTime() {
-            Step nextStep;
+        /**
+         * Calculate the {@link Vibration.Status} based on the current queue state and the expected
+         * number of {@link StartVibrateStep} to be played.
+         */
+        public Vibration.Status calculateVibrationStatus(int expectedStartVibrateSteps) {
             synchronized (mLock) {
-                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
-                    // Steps anticipated by vibrator complete callback should be played right away.
-                    return 0;
+                if (mPendingVibrateSteps > 0
+                        || mConsumedStartVibrateSteps < expectedStartVibrateSteps) {
+                    return Vibration.Status.RUNNING;
                 }
-                nextStep = mNextSteps.peek();
+                if (mSuccessfulVibratorOnSteps > 0) {
+                    return Vibration.Status.FINISHED;
+                }
+                // If no step was able to turn the vibrator ON successfully.
+                return Vibration.Status.IGNORED_UNSUPPORTED;
             }
+        }
+
+        /** Returns the time in millis to wait before calling {@link #consumeNext()}. */
+        @GuardedBy("mLock")
+        public long calculateWaitTime() {
+            if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                // Steps anticipated by vibrator complete callback should be played right away.
+                return 0;
+            }
+            Step nextStep = mNextSteps.peek();
             return nextStep == null ? 0 : nextStep.calculateWaitTime();
         }
 
         /**
          * Play and remove the step at the top of this queue, and also adds the next steps generated
          * to be played next.
-         *
-         * @return the number of steps played
          */
-        public int consumeNext() {
-            Step nextStep = pollNext();
-            if (nextStep != null) {
-                // This might turn on the vibrator and have a HAL latency. Execute this outside any
-                // lock to avoid blocking other interactions with the thread.
-                List<Step> nextSteps = nextStep.play();
-                synchronized (mLock) {
-                    mNextSteps.addAll(nextSteps);
+        public void consumeNext() {
+            // Vibrator callbacks should wait until the polled step is played and the next steps are
+            // added back to the queue, so they can handle the callback.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                Step nextStep = pollNext();
+                if (nextStep != null) {
+                    // This might turn on the vibrator and have a HAL latency. Execute this outside
+                    // any lock to avoid blocking other interactions with the thread.
+                    List<Step> nextSteps = nextStep.play();
+                    synchronized (mLock) {
+                        if (nextStep.getVibratorOnDuration() > 0) {
+                            mSuccessfulVibratorOnSteps++;
+                        }
+                        if (nextStep instanceof StartVibrateStep) {
+                            mConsumedStartVibrateSteps++;
+                        }
+                        if (!nextStep.isCleanUp()) {
+                            mPendingVibrateSteps--;
+                        }
+                        for (int i = 0; i < nextSteps.size(); i++) {
+                            mPendingVibrateSteps += nextSteps.get(i).isCleanUp() ? 0 : 1;
+                        }
+                        mNextSteps.addAll(nextSteps);
+                    }
                 }
-                return 1;
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
             }
-            return 0;
+        }
+
+        /**
+         * Notify the vibrator completion.
+         *
+         * <p>This is a lightweight method that do not trigger any operation from {@link
+         * VibratorController}, so it can be called directly from a native callback.
+         */
+        @GuardedBy("mLock")
+        public void notifyVibratorComplete(int vibratorId) {
+            mNotifiedVibrators.offer(vibratorId);
+            if (!mWaitToProcessVibratorCallbacks) {
+                // No step is being played or cancelled now, process the callback right away.
+                processVibratorCallbacks();
+            }
+        }
+
+        /**
+         * Cancel the current queue, replacing all remaining steps with respective clean-up steps.
+         *
+         * <p>This will remove all steps and replace them with respective
+         * {@link Step#cancel()}.
+         */
+        public void cancel() {
+            // Vibrator callbacks should wait until all steps from the queue are properly cancelled
+            // and clean up steps are added back to the queue, so they can handle the callback.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                List<Step> cleanUpSteps = new ArrayList<>();
+                Step step;
+                while ((step = pollNext()) != null) {
+                    cleanUpSteps.addAll(step.cancel());
+                }
+                synchronized (mLock) {
+                    // All steps generated by Step.cancel() should be clean-up steps.
+                    mPendingVibrateSteps = 0;
+                    mNextSteps.addAll(cleanUpSteps);
+                }
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
+            }
+        }
+
+        /**
+         * Cancel the current queue immediately, clearing all remaining steps and skipping clean-up.
+         *
+         * <p>This will remove and trigger {@link Step#cancelImmediately()} in all steps, in order.
+         */
+        public void cancelImmediately() {
+            // Vibrator callbacks should wait until all steps from the queue are properly cancelled.
+            markWaitToProcessVibratorCallbacks();
+            try {
+                Step step;
+                while ((step = pollNext()) != null) {
+                    // This might turn off the vibrator and have a HAL latency. Execute this outside
+                    // any lock to avoid blocking other interactions with the thread.
+                    step.cancelImmediately();
+                }
+                synchronized (mLock) {
+                    mPendingVibrateSteps = 0;
+                }
+            } finally {
+                synchronized (mLock) {
+                    processVibratorCallbacks();
+                }
+            }
+        }
+
+        @Nullable
+        private Step pollNext() {
+            synchronized (mLock) {
+                // Prioritize the steps anticipated by a vibrator complete callback.
+                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                    return mPendingOnVibratorCompleteSteps.poll();
+                }
+                return mNextSteps.poll();
+            }
+        }
+
+        private void markWaitToProcessVibratorCallbacks() {
+            synchronized (mLock) {
+                mWaitToProcessVibratorCallbacks = true;
+            }
         }
 
         /**
@@ -355,40 +533,19 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
          * first step found will be anticipated by this method, in no particular order.
          */
         @GuardedBy("mLock")
-        public void notifyVibratorComplete(int vibratorId) {
-            Iterator<Step> it = mNextSteps.iterator();
-            while (it.hasNext()) {
-                Step step = it.next();
-                if (step.shouldPlayWhenVibratorComplete(vibratorId)) {
-                    it.remove();
-                    mPendingOnVibratorCompleteSteps.offer(step);
-                    break;
+        private void processVibratorCallbacks() {
+            mWaitToProcessVibratorCallbacks = false;
+            while (!mNotifiedVibrators.isEmpty()) {
+                int vibratorId = mNotifiedVibrators.poll();
+                Iterator<Step> it = mNextSteps.iterator();
+                while (it.hasNext()) {
+                    Step step = it.next();
+                    if (step.shouldPlayWhenVibratorComplete(vibratorId)) {
+                        it.remove();
+                        mPendingOnVibratorCompleteSteps.offer(step);
+                        break;
+                    }
                 }
-            }
-        }
-
-        /**
-         * Cancel the current queue, clearing all remaining steps.
-         *
-         * <p>This will remove and trigger {@link Step#cancel()} in all steps, in order.
-         */
-        public void cancel() {
-            Step step;
-            while ((step = pollNext()) != null) {
-                // This might turn off the vibrator and have a HAL latency. Execute this outside
-                // any lock to avoid blocking other interactions with the thread.
-                step.cancel();
-            }
-        }
-
-        @Nullable
-        private Step pollNext() {
-            synchronized (mLock) {
-                // Prioritize the steps anticipated by a vibrator complete callback.
-                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
-                    return mPendingOnVibratorCompleteSteps.poll();
-                }
-                return mNextSteps.poll();
             }
         }
     }
@@ -406,12 +563,37 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             this.startTime = startTime;
         }
 
+        /**
+         * Returns true if this step is a clean up step and not part of a {@link VibrationEffect} or
+         * {@link CombinedVibration}.
+         */
+        public boolean isCleanUp() {
+            return false;
+        }
+
         /** Play this step, returning a (possibly empty) list of next steps. */
         @NonNull
         public abstract List<Step> play();
 
-        /** Cancel this pending step. */
-        public void cancel() {
+        /**
+         * Cancel this pending step and return a (possibly empty) list of clean-up steps that should
+         * be played to gracefully cancel this step.
+         */
+        @NonNull
+        public abstract List<Step> cancel();
+
+        /** Cancel this pending step immediately, skipping any clean-up. */
+        public abstract void cancelImmediately();
+
+        /**
+         * Return the duration the vibrator was turned on when this step was played.
+         *
+         * @return A positive duration that the vibrator was turned on for by this step;
+         * Zero if the segment is not supported, the step was not played yet or vibrator was never
+         * turned on by this step; A negative value if the vibrator call has failed.
+         */
+        public long getVibratorOnDuration() {
+            return 0;
         }
 
         /**
@@ -422,7 +604,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             return false;
         }
 
-        /** Returns the time in millis to wait before playing this step. */
+        /**
+         * Returns the time in millis to wait before playing this step. This is performed
+         * while holding the queue lock, so should not rely on potentially slow operations.
+         */
         public long calculateWaitTime() {
             if (startTime == Long.MAX_VALUE) {
                 // This step don't have a predefined start time, it's just marked to be executed
@@ -452,6 +637,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         public final CombinedVibration.Sequential sequentialEffect;
         public final int currentIndex;
 
+        private long mVibratorsOnMaxDuration;
+
         StartVibrateStep(CombinedVibration.Sequential effect) {
             this(SystemClock.uptimeMillis() + effect.getDelays().get(0), effect, /* index= */ 0);
         }
@@ -463,10 +650,15 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         @Override
+        public long getVibratorOnDuration() {
+            return mVibratorsOnMaxDuration;
+        }
+
+        @Override
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "StartVibrateStep");
             List<Step> nextSteps = new ArrayList<>();
-            long duration = -1;
+            mVibratorsOnMaxDuration = -1;
             try {
                 if (DEBUG) {
                     Slog.d(TAG, "StartVibrateStep for effect #" + currentIndex);
@@ -478,23 +670,31 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     return nextSteps;
                 }
 
-                duration = startVibrating(effectMapping, nextSteps);
-                noteVibratorOn(duration);
+                mVibratorsOnMaxDuration = startVibrating(effectMapping, nextSteps);
+                noteVibratorOn(mVibratorsOnMaxDuration);
             } finally {
-                if (duration < 0) {
-                    // Something failed while playing this step so stop playing this sequence.
-                    return EMPTY_STEP_LIST;
-                }
-                // It least one vibrator was started then add a finish step to wait for all
-                // active vibrators to finish their individual steps before going to the next.
-                // Otherwise this step was ignored so just go to the next one.
-                Step nextStep = duration > 0 ? new FinishVibrateStep(this) : nextStep();
-                if (nextStep != null) {
-                    nextSteps.add(nextStep);
+                if (mVibratorsOnMaxDuration >= 0) {
+                    // It least one vibrator was started then add a finish step to wait for all
+                    // active vibrators to finish their individual steps before going to the next.
+                    // Otherwise this step was ignored so just go to the next one.
+                    Step nextStep =
+                            mVibratorsOnMaxDuration > 0 ? new FinishVibrateStep(this) : nextStep();
+                    if (nextStep != null) {
+                        nextSteps.add(nextStep);
+                    }
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
             return nextSteps;
+        }
+
+        @Override
+        public List<Step> cancel() {
+            return EMPTY_STEP_LIST;
+        }
+
+        @Override
+        public void cancelImmediately() {
         }
 
         /**
@@ -593,7 +793,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                         // Some vibrator failed without being prepared so other vibrators might be
                         // active. Cancel and remove every pending step from output list.
                         for (int i = nextSteps.size() - 1; i >= 0; i--) {
-                            nextSteps.remove(i).cancel();
+                            nextSteps.remove(i).cancelImmediately();
                         }
                     }
                 }
@@ -627,6 +827,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         @Override
+        public boolean isCleanUp() {
+            // This step only notes that all the vibrators has been turned off.
+            return true;
+        }
+
+        @Override
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "FinishVibrateStep");
             try {
@@ -642,7 +848,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void cancel() {
+        public List<Step> cancel() {
+            cancelImmediately();
+            return EMPTY_STEP_LIST;
+        }
+
+        @Override
+        public void cancelImmediately() {
             noteVibratorOff();
         }
     }
@@ -658,6 +870,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         public final long vibratorOffTimeout;
 
         long mVibratorOnResult;
+        boolean mVibratorCallbackReceived;
 
         /**
          * @param startTime          The time to schedule this step in the {@link StepQueue}.
@@ -678,27 +891,28 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             this.vibratorOffTimeout = vibratorOffTimeout;
         }
 
-        /**
-         * Return the duration the vibrator was turned on when this step was played.
-         *
-         * @return A positive duration that the vibrator was turned on for by this step;
-         * Zero if the segment is not supported, the step was not played yet or vibrator was never
-         * turned on by this step; A negative value if the vibrator call has failed.
-         */
+        @Override
         public long getVibratorOnDuration() {
             return mVibratorOnResult;
         }
 
         @Override
         public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
+            boolean isSameVibrator = controller.getVibratorInfo().getId() == vibratorId;
+            mVibratorCallbackReceived |= isSameVibrator;
             // Only anticipate this step if a timeout was set to wait for the vibration to complete,
             // otherwise we are waiting for the correct time to play the next step.
-            return (controller.getVibratorInfo().getId() == vibratorId)
-                    && (vibratorOffTimeout > SystemClock.uptimeMillis());
+            return isSameVibrator && (vibratorOffTimeout > SystemClock.uptimeMillis());
         }
 
         @Override
-        public void cancel() {
+        public List<Step> cancel() {
+            return Arrays.asList(new CompleteStep(SystemClock.uptimeMillis(),
+                    /* cancelled= */ true, controller, vibratorOffTimeout));
+        }
+
+        @Override
+        public void cancelImmediately() {
             if (vibratorOffTimeout > SystemClock.uptimeMillis()) {
                 // Vibrator might be running from previous steps, so turn it off while canceling.
                 stopVibrating();
@@ -710,6 +924,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 Slog.d(TAG, "Turning off vibrator " + controller.getVibratorInfo().getId());
             }
             controller.off();
+        }
+
+        void changeAmplitude(float amplitude) {
+            if (DEBUG) {
+                Slog.d(TAG, "Amplitude changed on vibrator " + controller.getVibratorInfo().getId()
+                        + " to " + amplitude);
+            }
+            controller.setAmplitude(amplitude);
         }
 
         /** Return the {@link #nextVibrateStep} with same timings, only jumping the segments. */
@@ -729,9 +951,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 // Vibration was not started, so just skip the played segments and keep timings.
                 return skipToNextSteps(segmentsPlayed);
             }
-            long nextVibratorOffTimeout =
-                    SystemClock.uptimeMillis() + mVibratorOnResult + CALLBACKS_EXTRA_TIMEOUT;
-            return nextSteps(nextVibratorOffTimeout, nextVibratorOffTimeout, segmentsPlayed);
+            long nextStartTime = SystemClock.uptimeMillis() + mVibratorOnResult;
+            long nextVibratorOffTimeout = nextStartTime + CALLBACKS_EXTRA_TIMEOUT;
+            return nextSteps(nextStartTime, nextVibratorOffTimeout, segmentsPlayed);
         }
 
         /**
@@ -938,6 +1160,140 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     }
 
     /**
+     * Represents a step to complete a {@link VibrationEffect}.
+     *
+     * <p>This runs right at the time the vibration is considered to end and will update the pending
+     * vibrators count. This can turn off the vibrator or slowly ramp it down to zero amplitude.
+     */
+    private final class CompleteStep extends SingleVibratorStep {
+        private final boolean mCancelled;
+
+        CompleteStep(long startTime, boolean cancelled, VibratorController controller,
+                long vibratorOffTimeout) {
+            super(startTime, controller, /* effect= */ null, /* index= */ -1, vibratorOffTimeout);
+            mCancelled = cancelled;
+        }
+
+        @Override
+        public boolean isCleanUp() {
+            // If the vibration was cancelled then this is just a clean up to ramp off the vibrator.
+            // Otherwise this step is part of the vibration.
+            return mCancelled;
+        }
+
+        @Override
+        public List<Step> cancel() {
+            if (mCancelled) {
+                // Double cancelling will just turn off the vibrator right away.
+                return Arrays.asList(new OffStep(SystemClock.uptimeMillis(), controller));
+            }
+            return super.cancel();
+        }
+
+        @Override
+        public List<Step> play() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "CompleteStep");
+            try {
+                if (DEBUG) {
+                    Slog.d(TAG, "Running " + (mCancelled ? "cancel" : "complete") + " vibration"
+                            + " step on vibrator " + controller.getVibratorInfo().getId());
+                }
+                if (mVibratorCallbackReceived) {
+                    // Vibration completion callback was received by this step, just turn if off
+                    // and skip any clean-up.
+                    stopVibrating();
+                    return EMPTY_STEP_LIST;
+                }
+
+                float currentAmplitude = controller.getCurrentAmplitude();
+                long remainingOnDuration =
+                        vibratorOffTimeout - CALLBACKS_EXTRA_TIMEOUT - SystemClock.uptimeMillis();
+                long rampDownDuration =
+                        Math.min(remainingOnDuration, mVibrationSettings.getRampDownDuration());
+                long stepDownDuration = mVibrationSettings.getRampStepDuration();
+                if (currentAmplitude < RAMP_OFF_AMPLITUDE_MIN
+                        || rampDownDuration <= stepDownDuration) {
+                    // No need to ramp down the amplitude, just wait to turn it off.
+                    if (mCancelled) {
+                        // Vibration is completing because it was cancelled, turn off right away.
+                        stopVibrating();
+                        return EMPTY_STEP_LIST;
+                    } else {
+                        return Arrays.asList(new OffStep(vibratorOffTimeout, controller));
+                    }
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "Ramping down vibrator " + controller.getVibratorInfo().getId()
+                            + " from amplitude " + currentAmplitude
+                            + " for " + rampDownDuration + "ms");
+                }
+                float amplitudeDelta = currentAmplitude / (rampDownDuration / stepDownDuration);
+                float amplitudeTarget = currentAmplitude - amplitudeDelta;
+                long newVibratorOffTimeout = mCancelled ? rampDownDuration : vibratorOffTimeout;
+                return Arrays.asList(new RampOffStep(startTime, amplitudeTarget, amplitudeDelta,
+                        controller, newVibratorOffTimeout));
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
+        }
+    }
+
+    /** Represents a step to ramp down the vibrator amplitude before turning it off. */
+    private final class RampOffStep extends SingleVibratorStep {
+        private final float mAmplitudeTarget;
+        private final float mAmplitudeDelta;
+
+        RampOffStep(long startTime, float amplitudeTarget, float amplitudeDelta,
+                VibratorController controller, long vibratorOffTimeout) {
+            super(startTime, controller, /* effect= */ null, /* index= */ -1, vibratorOffTimeout);
+            mAmplitudeTarget = amplitudeTarget;
+            mAmplitudeDelta = amplitudeDelta;
+        }
+
+        @Override
+        public boolean isCleanUp() {
+            return true;
+        }
+
+        @Override
+        public List<Step> cancel() {
+            return Arrays.asList(new OffStep(SystemClock.uptimeMillis(), controller));
+        }
+
+        @Override
+        public List<Step> play() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "RampOffStep");
+            try {
+                if (DEBUG) {
+                    long latency = SystemClock.uptimeMillis() - startTime;
+                    Slog.d(TAG, "Ramp down the vibrator amplitude, step with "
+                            + latency + "ms latency.");
+                }
+                if (mVibratorCallbackReceived) {
+                    // Vibration completion callback was received by this step, just turn if off
+                    // and skip the rest of the steps to ramp down the vibrator amplitude.
+                    stopVibrating();
+                    return EMPTY_STEP_LIST;
+                }
+
+                changeAmplitude(mAmplitudeTarget);
+
+                float newAmplitudeTarget = mAmplitudeTarget - mAmplitudeDelta;
+                if (newAmplitudeTarget < RAMP_OFF_AMPLITUDE_MIN) {
+                    // Vibrator amplitude cannot go further down, just turn it off.
+                    return Arrays.asList(new OffStep(vibratorOffTimeout, controller));
+                }
+                return Arrays.asList(new RampOffStep(
+                        startTime + mVibrationSettings.getRampStepDuration(), newAmplitudeTarget,
+                        mAmplitudeDelta, controller, vibratorOffTimeout));
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
+        }
+    }
+
+    /**
      * Represents a step to turn the vibrator off.
      *
      * <p>This runs after a timeout on the expected time the vibrator should have finished playing,
@@ -947,6 +1303,21 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         OffStep(long startTime, VibratorController controller) {
             super(startTime, controller, /* effect= */ null, /* index= */ -1, startTime);
+        }
+
+        @Override
+        public boolean isCleanUp() {
+            return true;
+        }
+
+        @Override
+        public List<Step> cancel() {
+            return Arrays.asList(new OffStep(SystemClock.uptimeMillis(), controller));
+        }
+
+        @Override
+        public void cancelImmediately() {
+            stopVibrating();
         }
 
         @Override
@@ -980,19 +1351,30 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         @Override
         public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
             if (controller.getVibratorInfo().getId() == vibratorId) {
+                mVibratorCallbackReceived = true;
                 mNextOffTime = SystemClock.uptimeMillis();
             }
-            // Timings are tightly controlled here, so never anticipate when vibrator is complete.
-            return false;
+            // Timings are tightly controlled here, so only anticipate if the vibrator was supposed
+            // to be ON but has completed prematurely, to turn it back on as soon as possible.
+            return mNextOffTime < startTime && controller.getCurrentAmplitude() > 0;
         }
 
         @Override
         public List<Step> play() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "AmplitudeStep");
             try {
+                long now = SystemClock.uptimeMillis();
+                long latency = now - startTime;
                 if (DEBUG) {
-                    long latency = SystemClock.uptimeMillis() - startTime;
                     Slog.d(TAG, "Running amplitude step with " + latency + "ms latency.");
+                }
+
+                if (mVibratorCallbackReceived && latency < 0) {
+                    // This step was anticipated because the vibrator turned off prematurely.
+                    // Turn it back on and return this same step to run at the exact right time.
+                    mNextOffTime = turnVibratorBackOn(/* remainingDuration= */ -latency);
+                    return Arrays.asList(new AmplitudeStep(startTime, controller, effect,
+                            segmentIndex, mNextOffTime));
                 }
 
                 VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
@@ -1007,17 +1389,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     return skipToNextSteps(/* segmentsSkipped= */ 1);
                 }
 
-                long now = SystemClock.uptimeMillis();
                 float amplitude = stepSegment.getAmplitude();
                 if (amplitude == 0) {
-                    if (mNextOffTime > now) {
+                    if (vibratorOffTimeout > now) {
                         // Amplitude cannot be set to zero, so stop the vibrator.
                         stopVibrating();
                         mNextOffTime = now;
                     }
                 } else {
                     if (startTime >= mNextOffTime) {
-                        // Vibrator has stopped. Turn vibrator back on for the duration of another
+                        // Vibrator is OFF. Turn vibrator back on for the duration of another
                         // cycle before setting the amplitude.
                         long onDuration = getVibratorOnDuration(effect, segmentIndex);
                         if (onDuration > 0) {
@@ -1036,20 +1417,28 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             }
         }
 
+        private long turnVibratorBackOn(long remainingDuration) {
+            long onDuration = getVibratorOnDuration(effect, segmentIndex);
+            if (onDuration <= 0) {
+                // Vibrator is supposed to go back off when this step starts, so just leave it off.
+                return vibratorOffTimeout;
+            }
+            onDuration += remainingDuration;
+            float expectedAmplitude = controller.getCurrentAmplitude();
+            mVibratorOnResult = startVibrating(onDuration);
+            if (mVibratorOnResult > 0) {
+                // Set the amplitude back to the value it was supposed to be playing at.
+                changeAmplitude(expectedAmplitude);
+            }
+            return SystemClock.uptimeMillis() + onDuration + CALLBACKS_EXTRA_TIMEOUT;
+        }
+
         private long startVibrating(long duration) {
             if (DEBUG) {
                 Slog.d(TAG, "Turning on vibrator " + controller.getVibratorInfo().getId() + " for "
                         + duration + "ms");
             }
             return controller.on(duration, mVibration.id);
-        }
-
-        private void changeAmplitude(float amplitude) {
-            if (DEBUG) {
-                Slog.d(TAG, "Amplitude changed on vibrator " + controller.getVibratorInfo().getId()
-                        + " to " + amplitude);
-            }
-            controller.setAmplitude(amplitude);
         }
 
         /**
@@ -1077,8 +1466,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     repeatIndex = -1;
                 }
                 if (i == startIndex) {
-                    return 1000;
+                    // The repeating waveform keeps the vibrator ON all the time. Use a minimum
+                    // of 1s duration to prevent short patterns from turning the vibrator ON too
+                    // frequently.
+                    return Math.max(timing, 1000);
                 }
+            }
+            if (i == segmentCount && effect.getRepeatIndex() < 0) {
+                // Vibration ending at non-zero amplitude, add extra timings to ramp down after
+                // vibration is complete.
+                timing += mVibrationSettings.getRampDownDuration();
             }
             return timing;
         }

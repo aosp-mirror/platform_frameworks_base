@@ -71,8 +71,6 @@ public:
     void setSwapBehavior(SwapBehavior swapBehavior);
     bool loadSystemProperties();
     void setName(const char* name);
-    void setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
-                                 std::function<void(int64_t)> reportActualWorkDuration);
 
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
     void setSurfaceControl(ASurfaceControl* surfaceControl);
@@ -123,7 +121,7 @@ public:
     void setContentDrawBounds(int left, int top, int right, int bottom);
     void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback);
     void setASurfaceTransactionCallback(
-            const std::function<void(int64_t, int64_t, int64_t)>& callback);
+            const std::function<bool(int64_t, int64_t, int64_t)>& callback);
     void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback);
     void setFrameCallback(std::function<void(int64_t)>&& callback);
     void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);

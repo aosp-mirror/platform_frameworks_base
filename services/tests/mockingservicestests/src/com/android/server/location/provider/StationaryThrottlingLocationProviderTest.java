@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationResult;
 import android.location.provider.ProviderRequest;
@@ -58,6 +59,7 @@ public class StationaryThrottlingLocationProviderTest {
     private TestInjector mInjector;
     private FakeProvider mDelegateProvider;
 
+    private @Mock Context mContext;
     private @Mock AbstractLocationProvider.Listener mListener;
     private @Mock FakeProvider.FakeProviderInterface mDelegate;
 
@@ -72,7 +74,7 @@ public class StationaryThrottlingLocationProviderTest {
 
         mRandom = new Random(seed);
 
-        mInjector = new TestInjector();
+        mInjector = new TestInjector(mContext);
         mDelegateProvider = new FakeProvider(mDelegate);
 
         mProvider = new StationaryThrottlingLocationProvider("test_provider", mInjector,

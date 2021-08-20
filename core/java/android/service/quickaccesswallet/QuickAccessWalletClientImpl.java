@@ -307,6 +307,12 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         return mServiceInfo == null ? null : mServiceInfo.getWalletLogo(mContext);
     }
 
+    @Nullable
+    @Override
+    public Drawable getTileIcon() {
+        return mServiceInfo == null ? null : mServiceInfo.getTileIcon();
+    }
+
     @Override
     @Nullable
     public CharSequence getServiceLabel() {
