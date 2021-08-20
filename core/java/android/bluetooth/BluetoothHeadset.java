@@ -1018,8 +1018,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage
     public boolean startScoUsingVirtualVoiceCall() {
         if (DBG) log("startScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
@@ -1048,8 +1048,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage
     public boolean stopScoUsingVirtualVoiceCall() {
         if (DBG) log("stopScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
@@ -1227,7 +1227,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return true if in-band ringing is enabled, false if in-band ringing is disabled
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean isInbandRingingEnabled() {
         if (DBG) {
             log("isInbandRingingEnabled()");

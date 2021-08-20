@@ -1559,7 +1559,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean connect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInbandRingingEnabled();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean startScoUsingVirtualVoiceCall();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean stopScoUsingVirtualVoiceCall();
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
