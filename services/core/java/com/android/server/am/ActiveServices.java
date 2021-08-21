@@ -3211,7 +3211,7 @@ public final class ActiveServices {
         // See if the intent refers to an alias. If so, update the intent with the target component
         // name. `resolution` will contain the alias component name, which we need to return
         // to the client.
-        final ComponentAliasResolver.Resolution resolution =
+        final ComponentAliasResolver.Resolution<ComponentName> resolution =
                 mAm.mComponentAliasResolver.resolveService(service, resolvedType,
                         /* match flags */ 0, userId, callingUid);
 
@@ -3448,7 +3448,7 @@ public final class ActiveServices {
                     return null;
                 }
             }
-            return new ServiceLookupResult(r, resolution.getAliasComponent());
+            return new ServiceLookupResult(r, resolution.getAlias());
         }
         return null;
     }
@@ -4448,6 +4448,8 @@ public final class ActiveServices {
                 // being brought down.  Mark it as dead.
                 cr.serviceDead = true;
                 cr.stopAssociation();
+                final ComponentName clientSideComponentName =
+                        cr.aliasComponent != null ? cr.aliasComponent : r.name;
                 try {
                     cr.conn.connected(r.name, null, true);
                 } catch (Exception e) {

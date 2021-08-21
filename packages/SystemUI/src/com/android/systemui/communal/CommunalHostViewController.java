@@ -47,11 +47,14 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private static final String STATE_LIST_FORMAT = "[%s]";
 
     private final Executor mMainExecutor;
+    private final CommunalStateController mCommunalStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
     private WeakReference<CommunalSource> mLastSource;
     private int mState;
+    private float mQsExpansion;
+    private float mShadeExpansion;
 
     @Retention(RetentionPolicy.RUNTIME)
     @IntDef({STATE_KEYGUARD_SHOWING, STATE_DOZING, STATE_BOUNCER_SHOWING, STATE_KEYGUARD_OCCLUDED})
@@ -117,10 +120,12 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
 
     @Inject
     protected CommunalHostViewController(@Main Executor mainExecutor,
+            CommunalStateController communalStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController, CommunalHostView view) {
         super(view);
+        mCommunalStateController = communalStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mMainExecutor = mainExecutor;
         mKeyguardStateController = keyguardStateController;
@@ -247,6 +252,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
             } else {
                 mView.removeAllViews();
                 mView.setVisibility(View.INVISIBLE);
+                mCommunalStateController.setCommunalViewShowing(false);
             }
         });
     }
@@ -259,5 +265,28 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     public void show(WeakReference<CommunalSource> source) {
         mLastSource = source;
         showSource();
+    }
+
+    /**
+     * Invoked when the quick settings is expanded.
+     * @param expansionFraction the percentage the QS shade has been expanded.
+     */
+    public void updateQsExpansion(float expansionFraction) {
+        mQsExpansion = expansionFraction;
+        updateCommunalViewOccluded();
+    }
+
+    /**
+     * Invoked when the main shade is expanded.
+     * @param shadeExpansion the percentage the main shade has expanded.
+     */
+    public void updateShadeExpansion(float shadeExpansion) {
+        mShadeExpansion = shadeExpansion;
+        updateCommunalViewOccluded();
+    }
+
+    private void updateCommunalViewOccluded() {
+        mCommunalStateController.setCommunalViewOccluded(
+                mQsExpansion > 0.0f || mShadeExpansion > 0.0f);
     }
 }

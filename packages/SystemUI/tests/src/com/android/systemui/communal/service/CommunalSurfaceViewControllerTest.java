@@ -33,6 +33,7 @@ import android.view.SurfaceView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -68,6 +69,9 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
     @Mock
     private SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
+    @Mock
+    private CommunalStateController mCommunalStateController;
+
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     private SurfaceHolder.Callback mCallback;
@@ -89,7 +93,7 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         when(mSurfaceView.getMeasuredHeight()).thenReturn(MEASURED_HEIGHT);
         when(mSurfaceView.isAttachedToWindow()).thenReturn(false);
         mController = new CommunalSurfaceViewController(mSurfaceView, mFakeExecutor,
-                mCommunalSource);
+                mCommunalStateController, mCommunalSource);
         mController.init();
         verify(mSurfaceHolder).addCallback(callbackCapture.capture());
         mCallback = callbackCapture.getValue();
@@ -129,6 +133,19 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         verify(mSurfaceView).setChildSurfacePackage(mSurfacePackage);
         verify(mSurfaceView).setZOrderOnTop(true);
         verify(mSurfaceView).setWillNotDraw(false);
+    }
+
+    @Test
+    public void testCommunalStateControllerShowNotified() {
+        // Move CommunalSurfaceView to show
+        mController.onViewAttached();
+        mCallback.surfaceCreated(mSurfaceHolder);
+        when(mSurfaceView.isAttachedToWindow()).thenReturn(true);
+        mPackageFuture.set(mSurfacePackage);
+        mFakeExecutor.runAllReady();
+
+        // Ensure state controller is informed that the communal view is showing.
+        verify(mCommunalStateController).setCommunalViewShowing(true);
     }
 
     // Invoked to setup surface view package.

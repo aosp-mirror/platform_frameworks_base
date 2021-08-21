@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"I-zoom upang punan screen"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"I-stretch upang mapuno screen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Naka-disable ang Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nagpadala ng larawan"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Sine-save ang screenshot…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Sine-save ang screenshot…"</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Naghahanap ng mga network…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Hind nakakonekta sa network"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tingnan lahat"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Gustong idagdag ng <xliff:g id="APPNAME">%1$s</xliff:g> ang sumusunod na tile sa Mga Mabilisang Setting"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Idagdag ang tile"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Huwag idagdag"</string>
 </resources>

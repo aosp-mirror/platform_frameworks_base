@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Auf Bildschirmgröße anpassen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock deaktiviert"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"Bild gesendet"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Screenshot wird gespeichert..."</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Netzwerke werden gesucht…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Netzwerkverbindung konnte nicht hergestellt werden"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> möchte die folgende Kachel den Schnelleinstellungen hinzufügen"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kachel hinzufügen"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Kachel nicht hinzu"</string>
 </resources>

@@ -19,6 +19,7 @@ package com.android.wm.shell.apppairs;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
@@ -181,7 +182,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
         // TODO: Is there more we need to do here?
         mSyncQueue.runInSync(t -> {
-            t.setLayer(dividerLeash, Integer.MAX_VALUE)
+            t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER)
                     .setPosition(mTaskLeash1, mTaskInfo1.positionInParent.x,
                             mTaskInfo1.positionInParent.y)
                     .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,

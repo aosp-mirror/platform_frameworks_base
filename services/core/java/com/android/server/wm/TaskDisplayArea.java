@@ -32,6 +32,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -112,7 +113,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     private final ArrayList<WindowContainer> mTmpNormalChildren = new ArrayList<>();
     private final ArrayList<WindowContainer> mTmpHomeChildren = new ArrayList<>();
     private final IntArray mTmpNeedsZBoostIndexes = new IntArray();
-    private int mTmpLayerForSplitScreenDividerAnchor;
     private int mTmpLayerForAnimationLayer;
 
     private ArrayList<Task> mTmpTasks = new ArrayList<>();
@@ -855,26 +855,23 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer, false /* normalRootTasks */);
         // The home animation layer is between the root home tasks and the normal root tasks.
         final int layerForHomeAnimationLayer = layer++;
-        mTmpLayerForSplitScreenDividerAnchor = layer++;
         mTmpLayerForAnimationLayer = layer++;
         layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer, true /* normalRootTasks */);
 
         // The boosted animation layer is between the normal root tasks and the always on top
         // root tasks.
         final int layerForBoostedAnimationLayer = layer++;
+        // Always on top tasks layer should higher than split divider layer so set it as start.
+        layer = SPLIT_DIVIDER_LAYER + 1;
         adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer, false /* normalRootTasks */);
 
         t.setLayer(mHomeAppAnimationLayer, layerForHomeAnimationLayer);
         t.setLayer(mAppAnimationLayer, mTmpLayerForAnimationLayer);
-        t.setLayer(mSplitScreenDividerAnchor, mTmpLayerForSplitScreenDividerAnchor);
+        t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
         t.setLayer(mBoostedAppAnimationLayer, layerForBoostedAnimationLayer);
     }
 
     private int adjustNormalRootTaskLayer(WindowContainer child, int layer) {
-        if (child.asTask() != null && child.inSplitScreenWindowingMode()) {
-            // The split screen divider anchor is located above the split screen window.
-            mTmpLayerForSplitScreenDividerAnchor = layer++;
-        }
         if ((child.asTask() != null && child.asTask().isAnimatingByRecents())
                 || child.isAppTransitioning()) {
             // The animation layer is located above the highest animating root task and no

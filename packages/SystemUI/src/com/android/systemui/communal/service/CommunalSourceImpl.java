@@ -26,6 +26,7 @@ import android.view.SurfaceView;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.systemui.communal.CommunalSource;
+import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.communal.ICommunalSource;
 import com.android.systemui.shared.communal.ICommunalSurfaceCallback;
@@ -49,17 +50,20 @@ public class CommunalSourceImpl implements CommunalSource {
     private static final boolean DEBUG = false;
     private final ICommunalSource mSourceProxy;
     private final Executor mMainExecutor;
+    private final CommunalStateController mCommunalStateController;
 
     static class Factory {
         private final Executor mExecutor;
+        private final CommunalStateController mCommunalStateController;
 
         @Inject
-        Factory(@Main Executor executor) {
+        Factory(@Main Executor executor, CommunalStateController communalStateController) {
             mExecutor = executor;
+            mCommunalStateController = communalStateController;
         }
 
         public CommunalSource create(ICommunalSource source) {
-            return new CommunalSourceImpl(mExecutor, source);
+            return new CommunalSourceImpl(mExecutor, mCommunalStateController, source);
         }
     }
 
@@ -71,8 +75,10 @@ public class CommunalSourceImpl implements CommunalSource {
     // A list of {@link Callback} that have registered to receive updates.
     private final ArrayList<WeakReference<Callback>> mCallbacks = Lists.newArrayList();
 
-    public CommunalSourceImpl(Executor mainExecutor, ICommunalSource sourceProxy) {
+    public CommunalSourceImpl(Executor mainExecutor,
+            CommunalStateController communalStateController, ICommunalSource sourceProxy) {
         mMainExecutor = mainExecutor;
+        mCommunalStateController = communalStateController;
         mSourceProxy = sourceProxy;
 
         try {
@@ -114,7 +120,8 @@ public class CommunalSourceImpl implements CommunalSource {
                 CallbackToFutureAdapter.getFuture(completer -> {
                     final SurfaceView view = new SurfaceView(context);
                     completer.set(new CommunalViewResult(view,
-                            new CommunalSurfaceViewController(view, mMainExecutor, this)));
+                            new CommunalSurfaceViewController(view, mMainExecutor,
+                                    mCommunalStateController, this)));
                     return "CommunalSourceImpl::requestCommunalSurface::getCommunalSurface";
                 });
 

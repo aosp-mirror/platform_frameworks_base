@@ -45,6 +45,7 @@ public class NotificationRoundnessManager {
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
     private boolean mRoundForPulsingViews;
+    private boolean mIsDismissAllInProgress;
 
     private ExpandableView mSwipedView = null;
     private ExpandableView mViewBeforeSwipedView = null;
@@ -158,6 +159,10 @@ public class NotificationRoundnessManager {
         }
     }
 
+    void setDismissAllInProgress(boolean isClearingAll) {
+        mIsDismissAllInProgress = isClearingAll;
+    }
+
     private float getRoundnessFraction(ExpandableView view, boolean top) {
         if (view == null) {
             return 0f;
@@ -166,6 +171,11 @@ public class NotificationRoundnessManager {
                 || view == mSwipedView
                 || view == mViewAfterSwipedView) {
             return 1f;
+        }
+        if (view instanceof ExpandableNotificationRow
+                && ((ExpandableNotificationRow) view).canViewBeDismissed()
+                && mIsDismissAllInProgress) {
+            return 1.0f;
         }
         if ((view.isPinned()
                 || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {

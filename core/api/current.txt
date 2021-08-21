@@ -1291,6 +1291,7 @@ package android {
     field public static final int shareInterpolator = 16843195; // 0x10101bb
     field @Deprecated public static final int sharedUserId = 16842763; // 0x101000b
     field @Deprecated public static final int sharedUserLabel = 16843361; // 0x1010261
+    field public static final int sharedUserMaxSdkVersion;
     field public static final int shell = 16844180; // 0x1010594
     field public static final int shortcutDisabledMessage = 16844075; // 0x101052b
     field public static final int shortcutId = 16844072; // 0x1010528
@@ -31865,6 +31866,7 @@ package android.os {
     method public void close();
     method @NonNull public static android.os.SharedMemory create(@Nullable String, int) throws android.system.ErrnoException;
     method public int describeContents();
+    method @NonNull public static android.os.SharedMemory fromFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int getSize();
     method @NonNull public java.nio.ByteBuffer map(int, int, int) throws android.system.ErrnoException;
     method @NonNull public java.nio.ByteBuffer mapReadOnly() throws android.system.ErrnoException;

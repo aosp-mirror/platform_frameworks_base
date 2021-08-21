@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Raztegnitev čez zaslon"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Posnetek zaslona"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Storitev Smart Lock je onemogočena."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslal(-a) sliko"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Shranjev. posnetka zaslona ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Shranjevanje posnetka zaslona ..."</string>
@@ -1188,4 +1189,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Iskanje omrežij …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Vzpostavljanje povezave z omrežjem ni uspelo."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaz vseh omrežij"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> želi dodati to ploščico v hitre nastavitve."</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj ploščico"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj ploščice"</string>
 </resources>
