@@ -21,7 +21,6 @@ import static android.content.componentalias.tests.common.ComponentAliasTestComm
 import static android.content.componentalias.tests.common.ComponentAliasTestCommon.SUB1_PACKAGE;
 import static android.content.componentalias.tests.common.ComponentAliasTestCommon.SUB2_PACKAGE;
 import static android.content.componentalias.tests.common.ComponentAliasTestCommon.TAG;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.TEST_PACKAGE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -34,18 +33,16 @@ import android.os.IBinder;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+
 import com.android.compatibility.common.util.BroadcastMessenger;
 import com.android.compatibility.common.util.BroadcastMessenger.Receiver;
 import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.compatibility.common.util.ShellUtils;
 import com.android.compatibility.common.util.TestUtils;
 
-import androidx.test.InstrumentationRegistry;
-
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -95,7 +92,7 @@ public class ComponentAliasServiceTest {
                     .setMethodName("onServiceConnected")
                     .setComponent(name);
 
-            BroadcastMessenger.send(sContext, TEST_PACKAGE, m);
+            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
         }
 
         @Override
@@ -107,7 +104,7 @@ public class ComponentAliasServiceTest {
                     .setMethodName("onServiceDisconnected")
                     .setComponent(name);
 
-            BroadcastMessenger.send(sContext, TEST_PACKAGE, m);
+            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
         }
 
         @Override
@@ -118,7 +115,7 @@ public class ComponentAliasServiceTest {
                     .setSenderIdentity("sServiceConnection")
                     .setMethodName("onBindingDied");
 
-            BroadcastMessenger.send(sContext, TEST_PACKAGE, m);
+            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
         }
 
         @Override
@@ -129,7 +126,7 @@ public class ComponentAliasServiceTest {
                     .setSenderIdentity("sServiceConnection")
                     .setMethodName("onNullBinding");
 
-            BroadcastMessenger.send(sContext, TEST_PACKAGE, m);
+            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
         }
     };
 
@@ -165,6 +162,8 @@ public class ComponentAliasServiceTest {
             m = receiver.waitForNextMessage();
 
             assertThat(m.getMethodName()).isEqualTo("onDestroy");
+
+            receiver.ensureNoMoreMessages();
         }
     }
 
@@ -193,24 +192,29 @@ public class ComponentAliasServiceTest {
     @Test
     public void testStartAndStopService_override() throws Exception {
         Intent i = new Intent().setPackage(APP_PACKAGE);
-        i.setAction(APP_PACKAGE + ".IS_ALIAS_02");
+        i.setAction(APP_PACKAGE + ".IS_ALIAS_01");
 
-        ComponentName alias = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
+        // Change some of the aliases from what's defined in <meta-data>.
 
-        // Note, alias02 originally points at sub*2* package, but we override it in this test.
-        ComponentName target = new ComponentName(SUB1_PACKAGE, APP_PACKAGE + ".s.Target02");
+        ComponentName aliasA = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01");
+        ComponentName targetA = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Target02");
+
+        ComponentName aliasB = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
+        ComponentName targetB = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Target01");
 
         sDeviceConfig.set("component_alias_overrides",
-                alias.flattenToShortString() + ":" + target.flattenToShortString());
+                aliasA.flattenToShortString() + ":" + targetA.flattenToShortString()
+                + ","
+                + aliasB.flattenToShortString() + ":" + targetB.flattenToShortString());
 
         TestUtils.waitUntil("Wait until component alias is actually enabled", () -> {
             return ShellUtils.runShellCommand("dumpsys activity component-alias")
-                    .indexOf(alias.flattenToShortString() + " -> " + target.flattenToShortString())
-                    > 0;
+                    .indexOf(aliasA.flattenToShortString()
+                            + " -> " + targetA.flattenToShortString()) > 0;
         });
 
 
-        testStartAndStopService_common(i, alias, target);
+        testStartAndStopService_common(i, aliasA, targetA);
     }
 
     private void testBindAndUnbindService_common(
@@ -253,6 +257,7 @@ public class ComponentAliasServiceTest {
             assertThat(m.getMethodName()).isEqualTo("onDestroy");
 
             // Note onServiceDisconnected() won't be called in this case.
+            receiver.ensureNoMoreMessages();
         }
     }
 
@@ -274,5 +279,44 @@ public class ComponentAliasServiceTest {
         testBindAndUnbindService_common(i,
                 new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02"),
                 new ComponentName(SUB2_PACKAGE, APP_PACKAGE + ".s.Target02"));
+    }
+
+    @Test
+    public void testBindService_serviceKilled() throws Exception {
+        Intent originalIntent = new Intent().setPackage(APP_PACKAGE);
+        originalIntent.setAction(APP_PACKAGE + ".IS_ALIAS_02");
+
+        final ComponentName componentNameForClient =
+                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
+        final ComponentName componentNameForTarget =
+                new ComponentName(SUB2_PACKAGE, APP_PACKAGE + ".s.Target02");
+
+        ComponentAliasMessage m;
+
+        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext)) {
+            // Bind to the service.
+            assertThat(sContext.bindService(
+                    originalIntent, sServiceConnection, BIND_AUTO_CREATE)).isTrue();
+
+            // Check the target side behavior.
+            m = receiver.waitForNextMessage();
+
+            assertThat(m.getMethodName()).isEqualTo("onBind");
+
+            m = receiver.waitForNextMessage();
+            assertThat(m.getMethodName()).isEqualTo("onServiceConnected");
+            assertThat(m.getComponent()).isEqualTo(componentNameForClient);
+
+            // Now kill the service process.
+            ShellUtils.runShellCommand("su 0 killall %s", SUB2_PACKAGE);
+
+            // Check the target side behavior.
+            m = receiver.waitForNextMessage();
+
+            assertThat(m.getMethodName()).isEqualTo("onServiceDisconnected");
+            assertThat(m.getComponent()).isEqualTo(componentNameForClient);
+
+            receiver.ensureNoMoreMessages();
+        }
     }
 }

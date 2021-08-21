@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.hardware.HardwareBuffer.RGBA_8888;
 import static android.hardware.HardwareBuffer.USAGE_PROTECTED_CONTENT;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
 import static com.android.wm.shell.transition.DefaultTransitionHandler.startSurfaceAnimation;
 import static com.android.wm.shell.transition.Transitions.TAG;
@@ -81,19 +82,6 @@ import java.util.Arrays;
  * </ul>
  */
 class ScreenRotationAnimation {
-
-    /** How much to multiply the policy's type layer, to reserve room
-     * for multiple windows of the same type and Z-ordering adjustment
-     * with TYPE_LAYER_OFFSET. */
-    static final int TYPE_LAYER_MULTIPLIER = 10000;
-    static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
-
-    /*
-     * Layers for screen rotation animation. We put these layers above
-     * WINDOW_FREEZE_LAYER so that screen freeze will cover all windows.
-     */
-    private static final int SCREEN_FREEZE_LAYER_BASE = WINDOW_FREEZE_LAYER + TYPE_LAYER_MULTIPLIER;
-
     static final int MAX_ANIMATION_DURATION = 10 * 1000;
 
     private final Context mContext;

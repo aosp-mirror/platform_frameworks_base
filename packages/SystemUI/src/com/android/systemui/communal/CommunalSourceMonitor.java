@@ -75,7 +75,7 @@ public class CommunalSourceMonitor {
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.COMMUNAL_MODE_ENABLED,
                 /* notifyForDescendants= */false,
-                settingsObserver, UserHandle.USER_ALL);
+                settingsObserver, UserHandle.USER_SYSTEM);
         reloadSettings();
     }
 
@@ -141,8 +141,10 @@ public class CommunalSourceMonitor {
     }
 
     private void reloadSettings() {
-        boolean newCommunalEnabled = mSecureSettings.getInt(Settings.Secure.COMMUNAL_MODE_ENABLED,
-                1) == 1;
+        boolean newCommunalEnabled = mSecureSettings.getIntForUser(
+                Settings.Secure.COMMUNAL_MODE_ENABLED,
+                1,
+                UserHandle.USER_SYSTEM) == 1;
 
         if (DEBUG) {
             Log.d(TAG, "communal mode settings reloaded with value:" + newCommunalEnabled);

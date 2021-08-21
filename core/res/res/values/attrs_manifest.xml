@@ -395,6 +395,12 @@
          this attribute unnecessary. -->
     <attr name="sharedUserLabel" format="reference" />
 
+    <!-- The maximum device SDK version for which the application will remain in the user ID
+         defined in sharedUserId. Used when the application wants to migrate out of using shared
+         user ID, but has to maintain backwards compatibility with the API level specified
+         and before. -->
+    <attr name="sharedUserMaxSdkVersion" format="integer" />
+
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
          that higher numbers are more recent.  You could use this number to
@@ -1650,6 +1656,7 @@
         <attr name="revisionCode" />
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
+        <attr name="sharedUserMaxSdkVersion" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />

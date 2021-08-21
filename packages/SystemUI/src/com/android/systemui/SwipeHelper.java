@@ -452,6 +452,12 @@ public class SwipeHelper implements Gefingerpoken {
             private boolean mCancelled;
 
             @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mCallback.onBeginDrag(animView);
+            }
+
+            @Override
             public void onAnimationCancel(Animator animation) {
                 mCancelled = true;
             }

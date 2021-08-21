@@ -38,18 +38,21 @@ import javax.inject.Inject;
 public class CommunalService extends Service {
     final Executor mMainExecutor;
     final CommunalSourceMonitor mMonitor;
+    private final CommunalSourceImpl.Factory mSourceFactory;
 
     private ICommunalHost.Stub mBinder = new ICommunalHost.Stub() {
         @Override
         public void setSource(ICommunalSource source) {
             mMonitor.setSource(
-                    source != null ? new CommunalSourceImpl(mMainExecutor, source) : null);
+                    source != null ? mSourceFactory.create(source) : null);
         }
     };
 
     @Inject
-    CommunalService(@Main Executor mainExecutor, CommunalSourceMonitor monitor) {
+    CommunalService(@Main Executor mainExecutor, CommunalSourceImpl.Factory sourceFactory,
+            CommunalSourceMonitor monitor) {
         mMainExecutor = mainExecutor;
+        mSourceFactory = sourceFactory;
         mMonitor = monitor;
     }
 

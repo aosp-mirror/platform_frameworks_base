@@ -209,4 +209,41 @@ public interface WindowManagerPolicyConstants {
                 return Integer.toString(why);
         }
     }
+
+    /**
+     * How much to multiply the policy's type layer, to reserve room
+     * for multiple windows of the same type and Z-ordering adjustment
+     * with TYPE_LAYER_OFFSET.
+     */
+    int TYPE_LAYER_MULTIPLIER = 10000;
+
+    /**
+     * Offset from TYPE_LAYER_MULTIPLIER for moving a group of windows above
+     * or below others in the same layer.
+     */
+    int TYPE_LAYER_OFFSET = 1000;
+
+    /**
+     * How much to increment the layer for each window, to reserve room
+     * for effect surfaces between them.
+     */
+    int WINDOW_LAYER_MULTIPLIER = 5;
+
+    /**
+     * Animation thumbnail is as far as possible below the window above
+     * the thumbnail (or in other words as far as possible above the window
+     * below it).
+     */
+    int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER - 1;
+
+    int SPLIT_DIVIDER_LAYER = TYPE_LAYER_MULTIPLIER * 3;
+    int WATERMARK_LAYER = TYPE_LAYER_MULTIPLIER * 100;
+    int STRICT_MODE_LAYER = TYPE_LAYER_MULTIPLIER * 101;
+    int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
+
+    /**
+     * Layers for screen rotation animation. We put these layers above
+     * WINDOW_FREEZE_LAYER so that screen freeze will cover all windows.
+     */
+    int SCREEN_FREEZE_LAYER_BASE = WINDOW_FREEZE_LAYER + TYPE_LAYER_MULTIPLIER;
 }

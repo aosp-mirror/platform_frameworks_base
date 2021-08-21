@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"전체화면 모드로 확대"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"스크린샷"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock 사용 중지됨"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"이미지 보냄"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"캡쳐화면 저장 중..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"캡쳐화면 저장 중..."</string>
@@ -1176,4 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"네트워크 검색 중…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"네트워크에 연결하지 못했습니다."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g>에서 빠른 설정에 다음 타일을 추가하려고 합니다."</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"타일 추가"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"타일 추가 안함"</string>
 </resources>

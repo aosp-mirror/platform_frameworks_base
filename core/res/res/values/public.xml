@@ -3295,6 +3295,7 @@
   <eat-comment />
 
   <staging-public-group type="attr" first-id="0x01df0000">
+    <public name="sharedUserMaxSdkVersion" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

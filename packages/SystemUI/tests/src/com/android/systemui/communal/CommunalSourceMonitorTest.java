@@ -25,6 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -137,7 +138,10 @@ public class CommunalSourceMonitorTest extends SysuiTestCase {
     }
 
     private void setCommunalEnabled(boolean enabled) {
-        mSecureSettings.putInt(Settings.Secure.COMMUNAL_MODE_ENABLED, enabled ? 1 : 0);
+        mSecureSettings.putIntForUser(
+                Settings.Secure.COMMUNAL_MODE_ENABLED,
+                enabled ? 1 : 0,
+                UserHandle.USER_SYSTEM);
         TestableLooper.get(this).processAllMessages();
     }
 
