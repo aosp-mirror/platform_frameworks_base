@@ -41,6 +41,7 @@ import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.devicestate.config.Conditions;
 import com.android.server.policy.devicestate.config.DeviceStateConfig;
+import com.android.server.policy.devicestate.config.Flags;
 import com.android.server.policy.devicestate.config.LidSwitchCondition;
 import com.android.server.policy.devicestate.config.NumericRange;
 import com.android.server.policy.devicestate.config.SensorCondition;
@@ -87,7 +88,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     @VisibleForTesting
     static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE,
-            "DEFAULT");
+            "DEFAULT", 0 /* flags */);
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
@@ -131,7 +132,26 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                         config.getDeviceState()) {
                     final int state = stateConfig.getIdentifier().intValue();
                     final String name = stateConfig.getName() == null ? "" : stateConfig.getName();
-                    deviceStateList.add(new DeviceState(state, name));
+
+                    int flags = 0;
+                    final Flags configFlags = stateConfig.getFlags();
+                    if (configFlags != null) {
+                        List<String> configFlagStrings = configFlags.getFlag();
+                        for (int i = 0; i < configFlagStrings.size(); i++) {
+                            final String configFlagString = configFlagStrings.get(i);
+                            switch (configFlagString) {
+                                case "FLAG_CANCEL_STICKY_REQUESTS":
+                                    flags |= DeviceState.FLAG_CANCEL_STICKY_REQUESTS;
+                                    break;
+                                default:
+                                    Slog.w(TAG, "Parsed unknown flag with name: "
+                                            + configFlagString);
+                                    break;
+                            }
+                        }
+                    }
+
+                    deviceStateList.add(new DeviceState(state, name, flags));
 
                     final Conditions condition = stateConfig.getConditions();
                     conditionsList.add(condition);
