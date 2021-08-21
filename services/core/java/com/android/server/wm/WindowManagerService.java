@@ -85,6 +85,7 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
+import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
 import static android.window.WindowProviderService.isWindowProviderService;
@@ -339,27 +340,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
-
-    /** How much to multiply the policy's type layer, to reserve room
-     * for multiple windows of the same type and Z-ordering adjustment
-     * with TYPE_LAYER_OFFSET. */
-    static final int TYPE_LAYER_MULTIPLIER = 10000;
-
-    /** Offset from TYPE_LAYER_MULTIPLIER for moving a group of windows above
-     * or below others in the same layer. */
-    static final int TYPE_LAYER_OFFSET = 1000;
-
-    /** How much to increment the layer for each window, to reserve room
-     * for effect surfaces between them.
-     */
-    static final int WINDOW_LAYER_MULTIPLIER = 5;
-
-    /**
-     * Animation thumbnail is as far as possible below the window above
-     * the thumbnail (or in other words as far as possible above the window
-     * below it).
-     */
-    static final int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER - 1;
 
     /** The maximum length we will accept for a loaded animation duration:
      * this is 10 seconds.

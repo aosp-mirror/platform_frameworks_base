@@ -821,7 +821,7 @@ public class KeyguardIndicationController {
         }
     }
 
-    private void showTryFingerprintMsg() {
+    private void showTryFingerprintMsg(String a11yString) {
         if (mKeyguardUpdateMonitor.isUdfpsAvailable()) {
             // if udfps available, there will always be a tappable affordance to unlock
             // For example, the lock icon
@@ -832,6 +832,11 @@ public class KeyguardIndicationController {
             }
         } else {
             showTransientIndication(R.string.keyguard_try_fingerprint);
+        }
+
+        // Although we suppress face auth errors visually, we still announce them for a11y
+        if (!TextUtils.isEmpty(a11yString)) {
+            mLockScreenIndicationView.announceForAccessibility(a11yString);
         }
     }
 
@@ -913,7 +918,7 @@ public class KeyguardIndicationController {
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 if (biometricSourceType == BiometricSourceType.FACE
                         && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    showTryFingerprintMsg();
+                    showTryFingerprintMsg(helpString);
                     return;
                 }
                 showTransientIndication(helpString, false /* isError */, showActionToUnlock);
@@ -933,7 +938,7 @@ public class KeyguardIndicationController {
                     && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
                     && mKeyguardUpdateMonitor.isScreenOn()) {
-                showTryFingerprintMsg();
+                showTryFingerprintMsg(errString);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -942,7 +947,7 @@ public class KeyguardIndicationController {
                 if (!mStatusBarKeyguardViewManager.isBouncerShowing()
                         && mKeyguardUpdateMonitor.isUdfpsEnrolled()
                         && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
-                    showTryFingerprintMsg();
+                    showTryFingerprintMsg(errString);
                 } else if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(
                             mContext.getResources().getString(R.string.keyguard_unlock_press),
