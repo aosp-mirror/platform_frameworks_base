@@ -48,9 +48,12 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.policy.DeviceStatePolicyImpl;
+import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.WindowProcessController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,6 +104,9 @@ public final class DeviceStateManagerService extends SystemService {
     private final BinderService mBinderService;
     @NonNull
     private final OverrideRequestController mOverrideRequestController;
+    @VisibleForTesting
+    @NonNull
+    public ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     // All supported device states keyed by identifier.
     @GuardedBy("mLock")
@@ -153,6 +159,7 @@ public final class DeviceStateManagerService extends SystemService {
         mDeviceStatePolicy = policy;
         mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
         mBinderService = new BinderService();
+        mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     @Override
@@ -778,14 +785,21 @@ public final class DeviceStateManagerService extends SystemService {
 
         @Override // Binder call
         public void requestState(IBinder token, int state, int flags) {
-            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                    "Permission required to request device state.");
+            final int callingPid = Binder.getCallingPid();
+            // Allow top processes to request a device state change
+            // If the calling process ID is not the top app, then we check if this process
+            // holds a permission to CONTROL_DEVICE_STATE
+            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+            if (topApp.getPid() != callingPid) {
+                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                        "Permission required to request device state, "
+                                + "or the call must come from the top focused app.");
+            }
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
             }
 
-            final int callingPid = Binder.getCallingPid();
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 requestStateInternal(state, flags, callingPid, token);
@@ -796,14 +810,21 @@ public final class DeviceStateManagerService extends SystemService {
 
         @Override // Binder call
         public void cancelRequest(IBinder token) {
-            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                    "Permission required to clear requested device state.");
+            final int callingPid = Binder.getCallingPid();
+            // Allow top processes to cancel a device state change
+            // If the calling process ID is not the top app, then we check if this process
+            // holds a permission to CONTROL_DEVICE_STATE
+            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+            if (topApp.getPid() != callingPid) {
+                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                        "Permission required to cancel device state, "
+                                + "or the call must come from the top focused app.");
+            }
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
             }
 
-            final int callingPid = Binder.getCallingPid();
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 cancelRequestInternal(callingPid, token);
