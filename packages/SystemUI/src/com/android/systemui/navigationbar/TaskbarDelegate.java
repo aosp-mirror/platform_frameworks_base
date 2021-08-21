@@ -27,13 +27,16 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 
+import android.content.Context;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.InsetsVisibilities;
 import android.view.View;
 
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.Dependency;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.statusbar.CommandQueue;
@@ -42,10 +45,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class TaskbarDelegate implements CommandQueue.Callbacks {
+public class TaskbarDelegate implements CommandQueue.Callbacks,
+        OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener {
 
+    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
+
+    private CommandQueue mCommandQueue;
     private OverviewProxyService mOverviewProxyService;
     private NavigationBarA11yHelper mNavigationBarA11yHelper;
+    private NavigationModeController mNavigationModeController;
     private SysUiState mSysUiState;
     private int mDisplayId;
     private int mNavigationIconHints;
@@ -54,23 +62,36 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
     private int mDisabledFlags;
 
     @Inject
-    public TaskbarDelegate() { /* no-op */ }
+    public TaskbarDelegate(Context context) {
+        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
+                .create(context);
+    }
 
-    public void setOverviewProxyService(OverviewProxyService overviewProxyService,
+    public void setOverviewProxyService(CommandQueue commandQueue,
+            OverviewProxyService overviewProxyService,
             NavigationBarA11yHelper navigationBarA11yHelper,
+            NavigationModeController navigationModeController,
             SysUiState sysUiState) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
+        mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
         mNavigationBarA11yHelper = navigationBarA11yHelper;
+        mNavigationModeController = navigationModeController;
         mSysUiState = sysUiState;
     }
 
     public void destroy() {
+        mCommandQueue.removeCallback(this);
+        mOverviewProxyService.removeCallback(this);
+        mNavigationModeController.removeListener(this);
         mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
     }
 
     public void init(int displayId) {
         mDisplayId = displayId;
+        mCommandQueue.addCallback(this);
+        mOverviewProxyService.addCallback(this);
+        mNavigationModeController.addListener(this);
         mNavigationBarA11yHelper.registerA11yEventListener(mNavA11yEventListener);
         // Set initial state for any listeners
         updateSysuiFlags();
@@ -125,5 +146,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
             InsetsVisibilities requestedVisibilities, String packageName) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
+    }
+
+    @Override
+    public void onTaskbarStatusUpdated(boolean visible, boolean stashed) {
+        if (visible) {
+            mEdgeBackGestureHandler.onNavBarAttached();
+        } else {
+            mEdgeBackGestureHandler.onNavBarDetached();
+        }
+    }
+
+    @Override
+    public void onNavigationModeChanged(int mode) {
+        mEdgeBackGestureHandler.onNavigationModeChanged(mode);
     }
 }
