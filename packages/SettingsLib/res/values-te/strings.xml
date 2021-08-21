@@ -21,61 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"నెట్‌వర్క్‌ల కోసం స్కాన్ చేయడం సాధ్యపడదు"</string>
-    <!-- no translation found for wifi_security_short_wep (7939809393561636237) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_wpa (6998160832497442533) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_wpa2 (7697856994856831026) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_wpa_wpa2 (2399839645955520093) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_eap (5029688687205212985) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_eap_wpa (8510772177310043426) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_eap_wpa2_wpa3 (6455656470422244501) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_sae (78353562671556266) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_psk_sae (4965830739185952958) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_none_owe (8827409046261759703) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_owe (5073524307942025369) -->
-    <skip />
-    <!-- no translation found for wifi_security_short_eap_suiteb (4174071135081556115) -->
-    <skip />
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"None/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"ఏదీ లేదు"</string>
-    <!-- no translation found for wifi_security_wep (1413627788581122366) -->
-    <skip />
-    <!-- no translation found for wifi_security_wpa (1072450904799930636) -->
-    <skip />
-    <!-- no translation found for wifi_security_wpa2 (4038267581230425543) -->
-    <skip />
-    <!-- no translation found for wifi_security_wpa_wpa2 (946853615482465986) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap (6179633834446852269) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap_wpa (6189023812330549957) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap_wpa_wpa2 (1089879674896108216) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap_wpa2_wpa3 (2952912020876252266) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap_wpa3 (7961135182909018796) -->
-    <skip />
-    <!-- no translation found for wifi_security_passpoint (2209078477216565387) -->
-    <skip />
-    <!-- no translation found for wifi_security_sae (3644520541721422843) -->
-    <skip />
-    <!-- no translation found for wifi_security_psk_sae (8135104122179904684) -->
-    <skip />
-    <!-- no translation found for wifi_security_none_owe (5241745828327404101) -->
-    <skip />
-    <!-- no translation found for wifi_security_owe (3343421403561657809) -->
-    <skip />
-    <!-- no translation found for wifi_security_eap_suiteb (415842785991698142) -->
-    <skip />
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"పాస్ పాయింట్"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"None/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-బిట్"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"సేవ్ చేయబడింది"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"డిజేబుల్ చేయబడింది"</string>
@@ -142,7 +115,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ఇన్‌పుట్ పరికరం"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ఇంటర్నెట్ యాక్సెస్"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"కాంటాక్ట్ షేరింగ్"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"పరిచయ భాగస్వామ్యం కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"కాంటాక్ట్ షేరింగ్ కోసం ఉపయోగించండి"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ఇంటర్నెట్ కనెక్షన్ భాగస్వామ్యం"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"వచన మెసేజ్‌లు"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM యాక్సెస్"</string>
@@ -226,7 +199,7 @@
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ఈ ప్రసంగ సమన్వయ ఇంజిన్ చదివి వినిపించబడే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ఇంజిన్‌లో అందించబడుతుంది. ఈ ప్రసంగ సమన్వయ ఇంజిన్ యొక్క వినియోగాన్ని ప్రారంభించాలా?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"వచనం నుండి ప్రసంగం అవుట్‌పుట్ కోసం ఈ భాషకు పని చేస్తున్న నెట్‌వర్క్ కనెక్షన్ కావాలి."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ఇది ప్రసంగ సమన్వయానికి ఉదాహరణ"</string>
-    <string name="tts_status_title" msgid="8190784181389278640">"డిఫాల్ట్ భాష స్థితి"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"ఆటోమేటిక్ భాష స్టేటస్"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g>కి పూర్తి మద్దతు ఉంది"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g>కి నెట్‌వర్క్ కనెక్షన్ అవసరం"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g>కు మద్దతు లేదు"</string>
@@ -236,7 +209,7 @@
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"ప్రాధాన్య ఇంజిన్"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"సాధారణం"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ప్రసంగ స్వర స్థాయిని రీసెట్ చేయండి"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"వచనాన్ని చదివి వినిపించే స్వర స్థాయిని డిఫాల్ట్‌కి రీసెట్ చేస్తుంది."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"టెక్స్ట్‌ను చదివి వినిపించే స్వర స్థాయిని ఆటోమేటిక్‌కు రీసెట్ చేస్తుంది."</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"చాలా నెమ్మది"</item>
     <item msgid="1815382991399815061">"నెమ్మది"</item>
@@ -442,7 +415,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"బ్యాకప్ పాస్‌వర్డ్‌ను సెట్ చేయడంలో వైఫల్యం"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"లోడ్ చేస్తోంది…"</string>
   <string-array name="color_mode_names">
-    <item msgid="3836559907767149216">"సచేతనం (డిఫాల్ట్)"</item>
+    <item msgid="3836559907767149216">"వైబ్రంట్ (ఆటోమేటిక్)"</item>
     <item msgid="9112200311983078311">"సహజం"</item>
     <item msgid="6564241960833766170">"స్టాండర్డ్"</item>
   </string-array>
