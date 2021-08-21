@@ -77,6 +77,8 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ସ୍କ୍ରୀନ ଭରିବା ପାଇଁ ଜୁମ୍ କରନ୍ତୁ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ସ୍କ୍ରୀନ୍‌କୁ ଭରିବା ପାଇଁ ଟାଣନ୍ତୁ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ସ୍କ୍ରିନ୍‌ସଟ୍ ନିଅନ୍ତୁ"</string>
+    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ଏକ ଛବି ପଠାଯାଇଛି"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>

@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ സൂം ചെയ്യുക"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ വലിച്ചുനീട്ടുക"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"സ്ക്രീൻഷോട്ട്"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>

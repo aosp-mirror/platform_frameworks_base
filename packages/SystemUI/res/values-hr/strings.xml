@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zumiraj i ispuni zaslon"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Rastegni i ispuni zaslon"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snimka zaslona"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock onemogućen"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"šalje sliku"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Spremanje snimke zaslona..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spremanje snimke zaslona..."</string>
