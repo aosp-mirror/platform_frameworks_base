@@ -84,8 +84,26 @@ final class OverrideRequestController {
     // List of override requests with the most recent override request at the end.
     private final ArrayList<OverrideRequest> mRequests = new ArrayList<>();
 
+    private boolean mStickyRequestsAllowed;
+    // List of override requests that have outlived their process and will only be cancelled through
+    // a call to cancelStickyRequests().
+    private final ArrayList<OverrideRequest> mStickyRequests = new ArrayList<>();
+
     OverrideRequestController(@NonNull StatusChangeListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * Sets sticky requests as either allowed or disallowed. When sticky requests are allowed a call
+     * to {@link #handleProcessDied(int)} will not result in the request being cancelled
+     * immediately. Instead, the request will be marked sticky and must be cancelled with a call
+     * to {@link #cancelStickyRequests()}.
+     */
+    void setStickyRequestsAllowed(boolean stickyRequestsAllowed) {
+        mStickyRequestsAllowed = stickyRequestsAllowed;
+        if (!mStickyRequestsAllowed) {
+            cancelStickyRequests();
+        }
     }
 
     /**
@@ -123,6 +141,18 @@ final class OverrideRequestController {
     }
 
     /**
+     * Cancels all requests that are currently marked sticky and notifies the listener of all
+     * changes to request status as a result of this operation.
+     *
+     * @see #setStickyRequestsAllowed(boolean)
+     */
+    void cancelStickyRequests() {
+        mTmpRequestsToCancel.clear();
+        mTmpRequestsToCancel.addAll(mStickyRequests);
+        cancelRequestsLocked(mTmpRequestsToCancel);
+    }
+
+    /**
      * Returns {@code true} if this controller is current managing a request with the specified
      * {@code token}, {@code false} otherwise.
      */
@@ -140,6 +170,7 @@ final class OverrideRequestController {
             return;
         }
 
+        mTmpRequestsToCancel.clear();
         OverrideRequest prevActiveRequest = getLast(mRequests);
         for (OverrideRequest request : mRequests) {
             if (request.getPid() == pid) {
@@ -147,18 +178,14 @@ final class OverrideRequestController {
             }
         }
 
-        mRequests.removeAll(mTmpRequestsToCancel);
-        if (!mRequests.isEmpty()) {
-            OverrideRequest newActiveRequest = getLast(mRequests);
-            if (newActiveRequest != prevActiveRequest) {
-                mListener.onStatusChanged(newActiveRequest, STATUS_ACTIVE);
-            }
+        if (mStickyRequestsAllowed) {
+            // Do not cancel the requests now because sticky requests are allowed. These
+            // requests will be cancelled on a call to cancelStickyRequests().
+            mStickyRequests.addAll(mTmpRequestsToCancel);
+            return;
         }
 
-        for (int i = 0; i < mTmpRequestsToCancel.size(); i++) {
-            mListener.onStatusChanged(mTmpRequestsToCancel.get(i), STATUS_CANCELED);
-        }
-        mTmpRequestsToCancel.clear();
+        cancelRequestsLocked(mTmpRequestsToCancel);
     }
 
     /**
@@ -173,6 +200,7 @@ final class OverrideRequestController {
             return false;
         }
 
+        mTmpRequestsToCancel.clear();
         OverrideRequest prevActiveRequest = getLast(mRequests);
         for (int i = 0; i < mRequests.size(); i++) {
             OverrideRequest request = mRequests.get(i);
@@ -181,21 +209,8 @@ final class OverrideRequestController {
             }
         }
 
-        mRequests.removeAll(mTmpRequestsToCancel);
-        OverrideRequest newActiveRequest = null;
-        if (!mRequests.isEmpty()) {
-            newActiveRequest = getLast(mRequests);
-            if (newActiveRequest != prevActiveRequest) {
-                mListener.onStatusChanged(newActiveRequest, STATUS_ACTIVE);
-            }
-        }
-
-        for (int i = 0; i < mTmpRequestsToCancel.size(); i++) {
-            mListener.onStatusChanged(mTmpRequestsToCancel.get(i), STATUS_CANCELED);
-        }
-        mTmpRequestsToCancel.clear();
-
-        return newActiveRequest != prevActiveRequest;
+        final boolean newActiveRequest = cancelRequestsLocked(mTmpRequestsToCancel);
+        return newActiveRequest;
     }
 
     /**
@@ -210,7 +225,7 @@ final class OverrideRequestController {
             return false;
         }
 
-        OverrideRequest prevActiveRequest = getLast(mRequests);
+        mTmpRequestsToCancel.clear();
         for (int i = 0; i < mRequests.size(); i++) {
             OverrideRequest request = mRequests.get(i);
             if (!contains(newSupportedStates, request.getRequestedState())) {
@@ -218,21 +233,8 @@ final class OverrideRequestController {
             }
         }
 
-        mRequests.removeAll(mTmpRequestsToCancel);
-        OverrideRequest newActiveRequest = null;
-        if (!mRequests.isEmpty()) {
-            newActiveRequest = getLast(mRequests);
-            if (newActiveRequest != prevActiveRequest) {
-                mListener.onStatusChanged(newActiveRequest, STATUS_ACTIVE);
-            }
-        }
-
-        for (int i = 0; i < mTmpRequestsToCancel.size(); i++) {
-            mListener.onStatusChanged(mTmpRequestsToCancel.get(i), STATUS_CANCELED);
-        }
-        mTmpRequestsToCancel.clear();
-
-        return newActiveRequest != prevActiveRequest;
+        final boolean newActiveRequest = cancelRequestsLocked(mTmpRequestsToCancel);
+        return newActiveRequest;
     }
 
     void dumpInternal(PrintWriter pw) {
@@ -247,6 +249,36 @@ final class OverrideRequestController {
                     + ", mFlags=" + overrideRequest.getFlags()
                     + ", mStatus=" + statusToString(status));
         }
+    }
+
+    /**
+     * Handles cancelling a set of requests. If the set of requests to cancel will lead to a new
+     * request becoming active this request will also be notified of its change in state.
+     *
+     * @return {@code true} if calling this method has lead to a new active request, {@code false}
+     * otherwise.
+     */
+    private boolean cancelRequestsLocked(List<OverrideRequest> requestsToCancel) {
+        if (requestsToCancel.isEmpty()) {
+            return false;
+        }
+
+        OverrideRequest prevActiveRequest = getLast(mRequests);
+        boolean causedNewRequestToBecomeActive = false;
+        mRequests.removeAll(requestsToCancel);
+        mStickyRequests.removeAll(requestsToCancel);
+        if (!mRequests.isEmpty()) {
+            OverrideRequest newActiveRequest = getLast(mRequests);
+            if (newActiveRequest != prevActiveRequest) {
+                mListener.onStatusChanged(newActiveRequest, STATUS_ACTIVE);
+                causedNewRequestToBecomeActive = true;
+            }
+        }
+
+        for (int i = 0; i < requestsToCancel.size(); i++) {
+            mListener.onStatusChanged(requestsToCancel.get(i), STATUS_CANCELED);
+        }
+        return causedNewRequestToBecomeActive;
     }
 
     private int getRequestIndex(@NonNull IBinder token) {

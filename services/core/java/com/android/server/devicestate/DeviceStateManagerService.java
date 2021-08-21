@@ -275,11 +275,20 @@ public final class DeviceStateManagerService extends SystemService {
         synchronized (mLock) {
             final int[] oldStateIdentifiers = getSupportedStateIdentifiersLocked();
 
+            // Whether or not at least one device state has the flag FLAG_CANCEL_STICKY_REQUESTS
+            // set. If set to true, the OverrideRequestController will be configured to allow sticky
+            // requests.
+            boolean hasTerminalDeviceState = false;
             mDeviceStates.clear();
             for (int i = 0; i < supportedDeviceStates.length; i++) {
                 DeviceState state = supportedDeviceStates[i];
+                if ((state.getFlags() & DeviceState.FLAG_CANCEL_STICKY_REQUESTS) != 0) {
+                    hasTerminalDeviceState = true;
+                }
                 mDeviceStates.put(state.getIdentifier(), state);
             }
+
+            mOverrideRequestController.setStickyRequestsAllowed(hasTerminalDeviceState);
 
             final int[] newStateIdentifiers = getSupportedStateIdentifiersLocked();
             if (Arrays.equals(oldStateIdentifiers, newStateIdentifiers)) {
@@ -338,6 +347,9 @@ public final class DeviceStateManagerService extends SystemService {
             }
             mBaseState = Optional.of(baseState);
 
+            if ((baseState.getFlags() & DeviceState.FLAG_CANCEL_STICKY_REQUESTS) != 0) {
+                mOverrideRequestController.cancelStickyRequests();
+            }
             mOverrideRequestController.handleBaseStateChanged();
             updatePendingStateLocked();
 
