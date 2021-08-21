@@ -1,9 +1,9 @@
 # Bug component: 1344
-
 fgoldfain@google.com
 elaurent@google.com
 lajos@google.com
-olly@google.com
-andrewlewis@google.com
 sungsoo@google.com
 jmtrivi@google.com
+
+# go/android-fwk-media-solutions for info on areas of ownership.
+include platform/frameworks/av:/media/janitors/media_solutions_OWNERS

@@ -100,7 +100,8 @@ public class NotifPipelineInitializer implements Dumpable {
         mNotifCollection.attach(mGroupCoalescer);
         mGroupCoalescer.attach(notificationService);
 
-        Log.d(TAG, "Notif pipeline initialized");
+        Log.d(TAG, "Notif pipeline initialized."
+                + " rendering=" + mFeatureFlags.isNewNotifPipelineRenderingEnabled());
     }
 
     @Override
