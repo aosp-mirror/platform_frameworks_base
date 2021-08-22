@@ -302,7 +302,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
                         new MyReadMapCallback()));
             }
         }
-        return EMPTY;
+        return new PersistableBundle();  // An empty mutable PersistableBundle
     }
 
     @Override

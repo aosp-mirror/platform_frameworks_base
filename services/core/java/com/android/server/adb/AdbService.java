@@ -27,6 +27,8 @@ import android.database.ContentObserver;
 import android.debug.AdbManager;
 import android.debug.AdbManagerInternal;
 import android.debug.AdbTransportType;
+import android.debug.FingerprintAndPairDevice;
+import android.debug.IAdbCallback;
 import android.debug.IAdbManager;
 import android.debug.IAdbTransport;
 import android.debug.PairDevice;
@@ -35,6 +37,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -87,6 +90,7 @@ public class AdbService extends IAdbManager.Stub {
     private final AdbConnectionPortListener mPortListener = new AdbConnectionPortListener();
     private AdbDebuggingManager.AdbConnectionPortPoller mConnectionPortPoller;
 
+    private final RemoteCallbackList<IAdbCallback> mCallbacks = new RemoteCallbackList<>();
     /**
      * Manages the service lifecycle for {@code AdbService} in {@code SystemServer}.
      */
@@ -348,12 +352,21 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     @Override
-    public Map<String, PairDevice> getPairedDevices() {
+    public FingerprintAndPairDevice[] getPairedDevices() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            return mDebuggingManager.getPairedDevices();
+        if (mDebuggingManager == null) {
+            return null;
         }
-        return null;
+        Map<String, PairDevice> map = mDebuggingManager.getPairedDevices();
+        FingerprintAndPairDevice[] ret = new FingerprintAndPairDevice[map.size()];
+        int i = 0;
+        for (Map.Entry<String, PairDevice> entry : map.entrySet()) {
+            ret[i] = new FingerprintAndPairDevice();
+            ret[i].keyFingerprint = entry.getKey();
+            ret[i].device = entry.getValue();
+            i++;
+        }
+        return ret;
     }
 
     @Override
@@ -401,6 +414,21 @@ public class AdbService extends IAdbManager.Stub {
         return mConnectionPort.get();
     }
 
+    @Override
+    public void registerCallback(IAdbCallback callback) throws RemoteException {
+        if (DEBUG) {
+            Slog.d(TAG, "Registering callback " + callback);
+        }
+        mCallbacks.register(callback);
+    }
+
+    @Override
+    public void unregisterCallback(IAdbCallback callback) throws RemoteException {
+        if (DEBUG) {
+            Slog.d(TAG, "Unregistering callback " + callback);
+        }
+        mCallbacks.unregister(callback);
+    }
     /**
      * This listener is only used when ro.adb.secure=0. Otherwise, AdbDebuggingManager will
      * do this.
@@ -507,6 +535,23 @@ public class AdbService extends IAdbManager.Stub {
         if (mDebuggingManager != null) {
             mDebuggingManager.setAdbEnabled(enable, transportType);
         }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Broadcasting enable = " + enable + ", type = " + transportType);
+        }
+        mCallbacks.broadcast((callback) -> {
+            if (DEBUG) {
+                Slog.d(TAG, "Sending enable = " + enable + ", type = " + transportType
+                        + " to " + callback);
+            }
+            try {
+                callback.onDebuggingChanged(enable, transportType);
+            } catch (RemoteException ex) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Unable to send onDebuggingChanged:", ex);
+                }
+            }
+        });
     }
 
     @Override

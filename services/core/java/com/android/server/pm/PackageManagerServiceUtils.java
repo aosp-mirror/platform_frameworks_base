@@ -596,7 +596,7 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
-        return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+        return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;
     }

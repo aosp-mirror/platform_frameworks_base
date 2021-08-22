@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -283,10 +284,13 @@ public final class PhoneAccount implements Parcelable {
      * number relies on presence.  Should only be set if the {@code PhoneAccount} also has
      * {@link #CAPABILITY_VIDEO_CALLING}.
      * <p>
-     * When set, the {@link ConnectionService} is responsible for toggling the
+     * Note: As of Android 12, using the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE_VT_CAPABLE} bit on the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} column to indicate whether
-     * a contact's phone number supports video calling.
+     * a contact's phone number supports video calling has been deprecated and should only be used
+     * on devices where {@link CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL} is set. On newer
+     * devices, applications must use {@link android.telephony.ims.RcsUceAdapter} instead to
+     * determine whether or not a contact's phone number supports carrier video calling.
      * <p>
      * See {@link #getCapabilities}
      */

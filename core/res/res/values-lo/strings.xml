@@ -571,7 +571,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"ຈັດການຮາດແວປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກໃບໜ້າ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າເພື່ອພິສູດຢືນຢັນ"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
@@ -1765,8 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Unknown portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Unknown landscape"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ຍົກເລີກແລ້ວ"</string>

@@ -272,6 +272,7 @@ public class NotificationHistoryManager {
 
     private void disableHistory(NotificationHistoryDatabase userHistory, @UserIdInt int userId) {
         userHistory.disableHistory();
+        userHistory.unregisterFileCleanupReceiver();
 
         mUserPendingHistoryDisables.put(userId, false);
         mHistoryEnabled.put(userId, false);

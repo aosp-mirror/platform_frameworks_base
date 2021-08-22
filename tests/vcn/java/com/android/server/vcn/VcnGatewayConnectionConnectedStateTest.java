@@ -48,6 +48,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.singletonList;
+
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -200,6 +202,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     public void testMigration() throws Exception {
         triggerChildOpened();
 
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
@@ -207,7 +212,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         verify(mIpSecSvc, times(2))
                 .setNetworkForTunnelInterface(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID),
-                        eq(TEST_UNDERLYING_NETWORK_RECORD_1.network),
+                        eq(TEST_UNDERLYING_NETWORK_RECORD_2.network),
                         any());
 
         for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
@@ -226,8 +231,12 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 MtuUtils.getMtu(
                         saProposals,
                         mConfig.getMaxMtu(),
-                        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.getMtu());
-        verify(mNetworkAgent).sendLinkProperties(argThat(lp -> expectedMtu == lp.getMtu()));
+                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu());
+        verify(mNetworkAgent).sendLinkProperties(
+                argThat(lp -> expectedMtu == lp.getMtu()
+                        && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
+        verify(mNetworkAgent)
+                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_2.network)));
     }
 
     private void triggerChildOpened() {
@@ -288,6 +297,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         any());
         verify(mNetworkAgent).register();
+        verify(mNetworkAgent)
+                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_1.network)));
         verify(mNetworkAgent).markConnected();
 
         verify(mIpSecSvc)
@@ -297,6 +308,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         final LinkProperties lp = lpCaptor.getValue();
         assertEquals(Collections.singletonList(TEST_INTERNAL_ADDR), lp.getLinkAddresses());
         assertEquals(Collections.singletonList(TEST_DNS_ADDR), lp.getDnsServers());
+        assertEquals(TEST_TCP_BUFFER_SIZES_1, lp.getTcpBufferSizes());
 
         final NetworkCapabilities nc = ncCaptor.getValue();
         assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));
@@ -564,6 +576,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testTeardown() throws Exception {
         mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());

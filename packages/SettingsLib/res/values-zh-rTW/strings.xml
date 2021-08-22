@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"連上 Wi-Fi 時啟用偵錯模式"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"錯誤"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"無線偵錯"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"如要查看並使用可用的裝置，請開啟無線偵錯"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"如要查看並使用可用的裝置，請開啟無線偵錯功能"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用 QR 圖碼配對裝置"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用 QR 圖碼掃描器配對新裝置"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配對碼配對裝置"</string>

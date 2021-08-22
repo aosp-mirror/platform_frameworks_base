@@ -20,8 +20,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * Generates the bucket thresholds (with a custom logarithmic scale) for a histogram to store
@@ -29,7 +28,7 @@ import java.util.Collections;
  */
 public class BinderLatencyBuckets {
     private static final String TAG = "BinderLatencyBuckets";
-    private ArrayList<Integer> mBuckets;
+    private final int[] mBuckets;
 
     /**
      * @param bucketCount      the number of buckets the histogram should have
@@ -37,12 +36,11 @@ public class BinderLatencyBuckets {
      * @param scaleFactor      the rate in which each consecutive bucket increases (before rounding)
      */
     public BinderLatencyBuckets(int bucketCount, int firstBucketSize, float scaleFactor) {
-        mBuckets = new ArrayList<>(bucketCount - 1);
-        mBuckets.add(firstBucketSize);
+        int[] buffer = new int[bucketCount - 1];
+        buffer[0] = firstBucketSize;
 
         // Last value and the target are disjoint as we never want to create buckets smaller than 1.
         double lastTarget = firstBucketSize;
-        int lastValue = firstBucketSize;
 
         // First bucket is already created and the last bucket is anything greater than the final
         // bucket in the list, so create 'bucketCount' - 2 buckets.
@@ -50,29 +48,29 @@ public class BinderLatencyBuckets {
             // Increase the target bucket limit value by the scale factor.
             double nextTarget = lastTarget * scaleFactor;
 
-            if (nextTarget > Integer.MAX_VALUE || lastValue == Integer.MAX_VALUE) {
+            if (nextTarget > Integer.MAX_VALUE) {
                 // Do not throw an exception here as this should not affect binder calls.
                 Slog.w(TAG, "Attempted to create a bucket larger than maxint");
+                mBuckets = Arrays.copyOfRange(buffer, 0, i);
                 return;
             }
 
-            if ((int) nextTarget > lastValue) {
+            if ((int) nextTarget > buffer[i - 1]) {
                 // Convert the target bucket limit value to an integer.
-                mBuckets.add((int) nextTarget);
-                lastValue = (int) nextTarget;
+                buffer[i] = (int) nextTarget;
             } else {
                 // Avoid creating redundant buckets, so bucket size should be 1 at a minimum.
-                mBuckets.add(lastValue + 1);
-                lastValue = lastValue + 1;
+                buffer[i] = buffer[i - 1] + 1;
             }
             lastTarget = nextTarget;
         }
+        mBuckets = buffer;
     }
 
     /** Gets the bucket index to insert the provided sample in. */
     public int sampleToBucket(int sample) {
-        if (sample > mBuckets.get(mBuckets.size() - 1)) {
-            return mBuckets.size();
+        if (sample >= mBuckets[mBuckets.length - 1]) {
+            return mBuckets.length;
         }
 
         // Binary search returns the element index if it is contained in the list - in this case the
@@ -80,12 +78,12 @@ public class BinderLatencyBuckets {
         // Otherwise, it returns (-(insertion point) - 1), where insertion point is the point where
         // to insert the element so that the array remains sorted - in this case the bucket index
         // is the insertion point.
-        int searchResult = Collections.binarySearch(mBuckets, sample);
+        int searchResult = Arrays.binarySearch(mBuckets, sample);
         return searchResult < 0 ? -(1 + searchResult) : searchResult + 1;
     }
 
     @VisibleForTesting
-    public ArrayList<Integer> getBuckets() {
+    public int[] getBuckets() {
         return mBuckets;
     }
 }

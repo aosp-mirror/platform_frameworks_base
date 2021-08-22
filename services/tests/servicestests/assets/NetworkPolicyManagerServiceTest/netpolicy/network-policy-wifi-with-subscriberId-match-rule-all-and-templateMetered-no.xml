@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policy-list version="13" restrictBackground="false">
+<network-policy networkTemplate="4" subscriberIdMatchRule="1" networkId="TEST_SSID" templateMetered="0" cycleStart="2020-01-09T00:00+08:00[Asia/Taipei]" cyclePeriod="P1M" warningBytes="2147483648" limitBytes="-1" lastWarningSnooze="-1" lastLimitSnooze="-1" metered="true" inferred="true" />
+</policy-list>
+<whitelist />

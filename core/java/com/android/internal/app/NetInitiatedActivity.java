@@ -17,18 +17,14 @@
 package com.android.internal.app;
 
 import android.app.AlertDialog;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.LocationManagerInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.location.GpsNetInitiatedHandler;
@@ -43,7 +39,6 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
     private static final String TAG = "NetInitiatedActivity";
 
     private static final boolean DEBUG = true;
-    private static final boolean VERBOSE = false;
 
     private static final int POSITIVE_BUTTON = AlertDialog.BUTTON_POSITIVE;
     private static final int NEGATIVE_BUTTON = AlertDialog.BUTTON_NEGATIVE;
@@ -54,17 +49,6 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
     private int timeout = -1;
     private int default_response = -1;
     private int default_response_timeout = 6;
-
-    /** Used to detect when NI request is received */
-    private BroadcastReceiver mNetInitiatedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Log.d(TAG, "NetInitiatedReceiver onReceive: " + intent.getAction());
-            if (intent.getAction() == GpsNetInitiatedHandler.ACTION_NI_VERIFY) {
-                handleNIVerify(intent);
-            }
-        }
-    };
 
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -109,14 +93,12 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
     protected void onResume() {
         super.onResume();
         if (DEBUG) Log.d(TAG, "onResume");
-        registerReceiver(mNetInitiatedReceiver, new IntentFilter(GpsNetInitiatedHandler.ACTION_NI_VERIFY));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (DEBUG) Log.d(TAG, "onPause");
-        unregisterReceiver(mNetInitiatedReceiver);
     }
 
     /**
@@ -140,18 +122,5 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
         if (DEBUG) Log.d(TAG, "sendUserResponse, response: " + response);
         LocationManagerInternal lm = LocalServices.getService(LocationManagerInternal.class);
         lm.sendNiResponse(notificationId, response);
-    }
-
-    @UnsupportedAppUsage
-    private void handleNIVerify(Intent intent) {
-        int notifId = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_NOTIF_ID, -1);
-        notificationId = notifId;
-
-        if (DEBUG) Log.d(TAG, "handleNIVerify action: " + intent.getAction());
-    }
-
-    private void showNIError() {
-        Toast.makeText(this, "NI error" /* com.android.internal.R.string.usb_storage_error_message */,
-                Toast.LENGTH_LONG).show();
     }
 }

@@ -61,7 +61,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -146,7 +145,6 @@ public class UnderlyingNetworkTrackerTest {
                         mVcnContext,
                         SUB_GROUP,
                         mSubscriptionSnapshot,
-                        Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
     }
 
@@ -187,7 +185,6 @@ public class UnderlyingNetworkTrackerTest {
                 vcnContext,
                 SUB_GROUP,
                 mSubscriptionSnapshot,
-                Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                 mNetworkTrackerCb);
 
         verify(cm)
@@ -477,6 +474,17 @@ public class UnderlyingNetworkTrackerTest {
         // Verify no more calls to the UnderlyingNetworkTrackerCallback when the
         // UnderlyingNetworkRecord does not actually change
         verifyNoMoreInteractions(mNetworkTrackerCb);
+    }
+
+    @Test
+    public void testRecordTrackerCallbackNotifiedAfterTeardown() {
+        UnderlyingNetworkListener cb = verifyRegistrationOnAvailableAndGetCallback();
+        mUnderlyingNetworkTracker.teardown();
+
+        cb.onCapabilitiesChanged(mNetwork, UPDATED_NETWORK_CAPABILITIES);
+
+        // Verify that the only call was during onAvailable()
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(any());
     }
 
     // TODO (b/187991063): Add tests for network prioritization

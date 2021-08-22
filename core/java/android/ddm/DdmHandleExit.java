@@ -16,18 +16,20 @@
 
 package android.ddm;
 
+import android.util.Log;
+
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
-import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 /**
  * Handle an EXIT chunk.
  */
-public class DdmHandleExit extends ChunkHandler {
+public class DdmHandleExit extends DdmHandle {
 
-    public static final int CHUNK_EXIT = type("EXIT");
+    public static final int CHUNK_EXIT = ChunkHandler.type("EXIT");
 
     private static DdmHandleExit mInstance = new DdmHandleExit();
 
@@ -46,13 +48,13 @@ public class DdmHandleExit extends ChunkHandler {
      * Called when the DDM server connects.  The handler is allowed to
      * send messages to the server.
      */
-    public void connected() {}
+    public void onConnected() {}
 
     /**
      * Called when the DDM server disconnects.  Can be used to disable
      * periodic transmissions or clean up saved state.
      */
-    public void disconnected() {}
+    public void onDisconnected() {}
 
     /**
      * Handle a chunk of data.  We're only registered for "EXIT".

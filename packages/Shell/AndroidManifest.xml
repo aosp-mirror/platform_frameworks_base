@@ -101,7 +101,6 @@
     <uses-permission android:name="android.permission.PERSISTENT_ACTIVITY" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -395,6 +394,9 @@
     <!-- Permission required for running networking unit tests -->
     <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
 
+    <!-- Permission required for CTS test - CtsHostsideNetworkTests -->
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
+
     <!-- Permissions required for CTS test - TunerTest -->
     <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
@@ -427,8 +429,9 @@
     <!-- Permission needed for CTS test - DisplayTest -->
     <uses-permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS" />
 
-    <!-- Permission needed for CTS test - TimeManagerTest -->
+    <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+    <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
 
     <!-- Permission needed for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
@@ -469,6 +472,17 @@
 
     <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
     <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
+
+    <!-- Permission required for Launcher testing - DigitalWellbeingToastTest -->
+    <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO"/>
+
+    <!-- Permission required for hotword detection service CTS tests -->
+    <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
+    <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
+
+    <!-- Permission required to run the `vm` tool which manages on-device virtual machines -->
+    <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
+    <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

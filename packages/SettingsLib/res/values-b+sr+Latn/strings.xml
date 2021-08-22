@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na WiFi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju napajanja za pravljenje izveštaja o greškama"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju dugmeta za uključivanje za pravljenje izveštaja o greškama"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući snoop evid. za Bluetooth HCI"</string>
@@ -300,9 +300,9 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobilni podaci su uvek aktivni, čak i kada je Wi‑Fi aktivan (radi brze promene mreže)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Koristi se hardversko ubrzanje privezivanja ako je dostupno"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Dozvoli otklanjanje USB grešaka?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje USB grešaka namenjeno je samo za svrhe programiranja. Koristite ga za kopiranje podataka sa računara na uređaj i obrnuto, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje USB grešaka namenjeno je samo za svrhe programiranja. Koristite ga za kopiranje podataka sa računara na uređaj i obratno, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Želite da dozvolite bežično otklanjanje grešaka?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Bežično otklanjanje grešaka namenjeno je samo programiranju. Koristite ga za kopiranje podataka sa računara na uređaj i obrnuto, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Bežično otklanjanje grešaka namenjeno je samo programiranju. Koristite ga za kopiranje podataka sa računara na uređaj i obratno, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Želite li da opozovete pristup otklanjanju USB grešaka sa svih računara koje ste prethodno odobrili?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Želite li da omogućite programerska podešavanja?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ova podešavanja su namenjena samo za programiranje. Mogu da izazovu prestanak funkcionisanja ili neočekivano ponašanje uređaja i aplikacija na njemu."</string>

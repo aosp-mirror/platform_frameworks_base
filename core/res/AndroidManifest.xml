@@ -115,6 +115,12 @@
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
 
+    <protected-broadcast android:name="android.app.action.USER_ADDED" />
+    <protected-broadcast android:name="android.app.action.USER_REMOVED" />
+    <protected-broadcast android:name="android.app.action.USER_STARTED" />
+    <protected-broadcast android:name="android.app.action.USER_STOPPED" />
+    <protected-broadcast android:name="android.app.action.USER_SWITCHED" />
+
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="android.app.action.BUGREPORT_FAILED" />
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARE" />
@@ -190,6 +196,8 @@
         android:name="android.bluetooth.hearingaid.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.hearingaid.profile.action.ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.volume-control.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
@@ -492,6 +500,8 @@
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_FAILED" />
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
     <protected-broadcast android:name="com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION" />
+    <protected-broadcast android:name="com.android.server.ACTION_PROFILE_OFF_DEADLINE" />
+    <protected-broadcast android:name="com.android.server.ACTION_TURN_PROFILE_ON_NOTIFICATION" />
 
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_ADDED" />
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
@@ -574,8 +584,6 @@
     <protected-broadcast android:name="android.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS" />
 
     <protected-broadcast android:name="android.intent.action.DYNAMIC_SENSOR_CHANGED" />
-
-    <protected-broadcast android:name="android.intent.action.ACTION_RADIO_OFF" />
 
     <protected-broadcast android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
     <protected-broadcast android:name="android.accounts.action.ACCOUNT_REMOVED" />
@@ -3216,6 +3224,13 @@
         @hide
     -->
     <permission android:name="android.permission.TRIGGER_SHELL_BUGREPORT"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to trigger profcollect report upload via shell.
+        <p>Not for use by third-party applications.
+        @hide
+    -->
+    <permission android:name="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to be the status bar.  Currently used only by SystemUI.apk

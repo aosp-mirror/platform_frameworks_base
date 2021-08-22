@@ -22,8 +22,9 @@ import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILATI
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
 
-import android.util.jar.StrictJarFile;
+import android.os.SystemClock;
 import android.util.Slog;
+import android.util.jar.StrictJarFile;
 
 import com.android.internal.art.ArtStatsLog;
 import com.android.server.pm.PackageManagerService;
@@ -59,8 +60,6 @@ public class ArtStatsLogUtils {
     private static final Map<Integer, Integer> COMPILATION_REASON_MAP = new HashMap();
 
     static {
-        COMPILATION_REASON_MAP.put(PackageManagerService.REASON_UNKNOWN, ArtStatsLog.
-                ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_UNKNOWN);
         COMPILATION_REASON_MAP.put(PackageManagerService.REASON_FIRST_BOOT, ArtStatsLog.
                 ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_FIRST_BOOT);
         COMPILATION_REASON_MAP.put(PackageManagerService.REASON_BOOT_AFTER_OTA, ArtStatsLog.
@@ -86,6 +85,8 @@ public class ArtStatsLogUtils {
         COMPILATION_REASON_MAP.put(PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE,
                 ArtStatsLog.
                         ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_INACTIVE);
+        COMPILATION_REASON_MAP.put(PackageManagerService.REASON_CMDLINE,
+                ArtStatsLog.ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_CMDLINE);
         COMPILATION_REASON_MAP.put(PackageManagerService.REASON_SHARED,
                 ArtStatsLog.ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_SHARED);
     }
@@ -286,7 +287,7 @@ public class ArtStatsLogUtils {
                             ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_UNKNOWN),
                     COMPILATION_REASON_MAP.getOrDefault(compilationReason, ArtStatsLog.
                             ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_UNKNOWN),
-                    /*timestamp_millis=*/ 0L,
+                    /*timestamp_millis=*/ SystemClock.uptimeMillis(),
                     ArtStatsLog.ART_DATUM_REPORTED__THREAD_TYPE__ART_THREAD_MAIN,
                     kind,
                     value,

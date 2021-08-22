@@ -127,6 +127,12 @@ public class ZygoteInit {
 
     private static boolean sPreloadComplete;
 
+    /**
+     * Cached classloader to use for the system server. Will only be populated in the system
+     * server process.
+     */
+    private static ClassLoader sCachedSystemServerClassLoader = null;
+
     static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
         bootTimingsTraceLog.traceBegin("BeginPreload");
@@ -543,10 +549,8 @@ public class ZygoteInit {
 
             throw new IllegalStateException("Unexpected return from WrapperInit.execApplication");
         } else {
-            ClassLoader cl = null;
-            if (systemServerClasspath != null) {
-                cl = createPathClassLoader(systemServerClasspath, parsedArgs.mTargetSdkVersion);
-
+            ClassLoader cl = getOrCreateSystemServerClassLoader();
+            if (cl != null) {
                 Thread.currentThread().setContextClassLoader(cl);
             }
 
@@ -559,6 +563,23 @@ public class ZygoteInit {
         }
 
         /* should never reach here */
+    }
+
+    /**
+     * Create the classloader for the system server and store it in
+     * {@link sCachedSystemServerClassLoader}. This function may be called through JNI in
+     * system server startup, when the runtime is in a critically low state. Do not do
+     * extended computation etc here.
+     */
+    private static ClassLoader getOrCreateSystemServerClassLoader() {
+        if (sCachedSystemServerClassLoader == null) {
+            final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
+            if (systemServerClasspath != null) {
+                sCachedSystemServerClassLoader = createPathClassLoader(systemServerClasspath,
+                        VMRuntime.SDK_VERSION_CUR_DEVELOPMENT);
+            }
+        }
+        return sCachedSystemServerClassLoader;
     }
 
     /**
@@ -586,10 +607,18 @@ public class ZygoteInit {
                 codePaths[0],
                 /*dexMetadata*/ null);
 
-        File profileDir = Environment.getDataProfilesDePackageDirectory(
+        File curProfileDir = Environment.getDataProfilesDePackageDirectory(
                 UserHandle.USER_SYSTEM, systemServerPackageName);
-        String profilePath = new File(profileDir, systemServerProfileName).getAbsolutePath();
-        VMRuntime.registerAppInfo(profilePath, codePaths);
+        String curProfilePath = new File(curProfileDir, systemServerProfileName).getAbsolutePath();
+        File refProfileDir = Environment.getDataProfilesDePackageDirectory(
+                UserHandle.USER_SYSTEM, systemServerPackageName);
+        String refProfilePath = new File(refProfileDir, systemServerProfileName).getAbsolutePath();
+        VMRuntime.registerAppInfo(
+                systemServerPackageName,
+                curProfilePath,
+                refProfilePath,
+                codePaths,
+                VMRuntime.CODE_PATH_TYPE_PRIMARY_APK);
     }
 
     /**

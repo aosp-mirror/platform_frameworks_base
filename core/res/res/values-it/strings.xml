@@ -245,9 +245,9 @@
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Segnalazione di bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
-    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapporto interattivo"</string>
+    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Report interattivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Rapporto completo"</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Report completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
       <item quantity="other">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_1">%d</xliff:g> secondi.</item>
@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedere ai contatti"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Geolocalizzazione"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedere al calendario"</string>
@@ -569,10 +569,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"gestione dell\'hardware per Sblocco con il volto"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"gestione dell\'hardware per lo sblocco con il volto"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizzo dell\'hardware per Sblocco con il volto"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Consente all\'app di utilizzare hardware per l\'autenticazione con Sblocco con il volto"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"utilizzo dell\'hardware per lo sblocco con il volto"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Consente all\'app di usare hardware per l\'autenticazione mediante lo sblocco con il volto"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Sblocco con il volto"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registra di nuovo il volto"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per migliorare il riconoscimento, registra di nuovo il tuo volto"</string>
@@ -599,14 +599,14 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Riprova Sblocco con il volto."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Riprova lo sblocco con il volto."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Imposs. salvare dati nuovi volti. Elimina un volto vecchio."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operazione associata al volto annullata."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Sblocco con il volto annullato dall\'utente."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Troppi tentativi. Sblocco con il volto disattivato"</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Troppi tentativi. Lo sblocco con il volto è disattivato."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Non hai configurato Sblocco con il volto."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Non hai configurato lo sblocco con il volto."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Sblocco con il volto non supportato su questo dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensore temporaneamente disattivato."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
@@ -837,7 +837,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Riprova"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Riprova"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Sblocca per accedere a funzioni e dati"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Numero massimo di tentativi di Sblocco con il volto superato"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Numero massimo di tentativi di sblocco con il volto superato"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nessuna SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Nessuna scheda SIM presente nel tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nessuna scheda SIM nel dispositivo Android TV."</string>
@@ -1718,28 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Carta protocollo"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Verticale sconosciuto"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Orizzontale sconosciuto"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Annullato"</string>

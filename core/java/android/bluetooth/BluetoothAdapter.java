@@ -17,6 +17,8 @@
 
 package android.bluetooth;
 
+import static java.util.Objects.requireNonNull;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -52,8 +54,6 @@ import android.os.SynchronousResultReceiver;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
-
-import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -1698,9 +1698,10 @@ public final class BluetoothAdapter {
      * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
      * not discoverable by default, and need to be entered into a special mode.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
+     * will return false. After turning on Bluetooth, wait for {@link #ACTION_STATE_CHANGED}
+     * with {@link #STATE_ON} to get the updated value.
+     * <p>If a device is currently bonding, this request will be queued and executed once that
+     * device has finished bonding. If a request is already queued, this request will be ignored.
      *
      * @return true on success, false on error
      */
@@ -2815,6 +2816,9 @@ public final class BluetoothAdapter {
                 return true;
             }
             return false;
+        } else if (profile == BluetoothProfile.VOLUME_CONTROL) {
+            BluetoothVolumeControl vcs = new BluetoothVolumeControl(context, listener, this);
+            return true;
         } else {
             return false;
         }
@@ -2899,6 +2903,11 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEARING_AID:
                 BluetoothHearingAid hearingAid = (BluetoothHearingAid) proxy;
                 hearingAid.close();
+                break;
+            case BluetoothProfile.VOLUME_CONTROL:
+                BluetoothVolumeControl vcs = (BluetoothVolumeControl) proxy;
+                vcs.close();
+                break;
         }
     }
 
@@ -3091,8 +3100,8 @@ public final class BluetoothAdapter {
          */
         WrappedOobDataCallback(@NonNull OobDataCallback callback,
                 @NonNull @CallbackExecutor Executor executor) {
-            Preconditions.checkNotNull(callback);
-            Preconditions.checkNotNull(executor);
+            requireNonNull(callback);
+            requireNonNull(executor);
             mCallback = callback;
             mExecutor = executor;
         }
@@ -3158,7 +3167,7 @@ public final class BluetoothAdapter {
                 != BluetoothDevice.TRANSPORT_LE) {
             throw new IllegalArgumentException("Invalid transport '" + transport + "'!");
         }
-        Preconditions.checkNotNull(callback);
+        requireNonNull(callback);
         if (!isEnabled()) {
             Log.w(TAG, "generateLocalOobData(): Adapter isn't enabled!");
             callback.onError(OOB_ERROR_ADAPTER_DISABLED);
@@ -3280,22 +3289,22 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Determines whether a String Bluetooth address, such as "00:43:A8:23:10:F0"
+     * Determines whether a String Bluetooth address, such as "F0:43:A8:23:10:00"
      * is a RANDOM STATIC address.
      *
-     * RANDOM STATIC: (addr & 0b11) == 0b11
-     * RANDOM RESOLVABLE: (addr & 0b11) == 0b10
-     * RANDOM non-RESOLVABLE: (addr & 0b11) == 0b00
+     * RANDOM STATIC: (addr & 0xC0) == 0xC0
+     * RANDOM RESOLVABLE: (addr &  0xC0) == 0x40
+     * RANDOM non-RESOLVABLE: (addr &  0xC0) == 0x00
      *
      * @param address Bluetooth address as string
-     * @return true if the 2 Least Significant Bits of the address equals 0b11.
+     * @return true if the 2 Most Significant Bits of the address equals 0xC0.
      *
      * @hide
      */
     public static boolean isAddressRandomStatic(@NonNull String address) {
-        Preconditions.checkNotNull(address);
+        requireNonNull(address);
         return checkBluetoothAddress(address)
-                && (Integer.parseInt(address.split(":")[5], 16) & 0b11) == 0b11;
+                && (Integer.parseInt(address.split(":")[0], 16) & 0xC0) == 0xC0;
     }
 
     @UnsupportedAppUsage

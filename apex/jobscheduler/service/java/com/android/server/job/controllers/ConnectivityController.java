@@ -54,6 +54,7 @@ import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateControllerProto;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -460,8 +461,19 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
-    private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
-        final Network network = mConnManager.getActiveNetworkForUid(jobStatus.getSourceUid());
+    private Network getActiveNetworkForUid(int uid)  {
+        try {
+            return (Network) mConnManager.getClass()
+                    .getMethod("getActiveNetworkForUid", int.class)
+                    .invoke(mConnManager, uid);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(
+                    "Unable to call getActiveNetworkForUid: ", e);
+        }
+    }
+
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus)  {
+        final Network network = getActiveNetworkForUid(jobStatus.getSourceUid());
         final NetworkCapabilities capabilities = getNetworkCapabilities(network);
         return updateConstraintsSatisfied(jobStatus, network, capabilities);
     }
@@ -522,7 +534,7 @@ public final class ConnectivityController extends RestrictingController implemen
             return false;
         }
 
-        final Network network = mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
+        final Network network = getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
         final NetworkCapabilities capabilities = getNetworkCapabilities(network);
         final boolean networkMatch = (filterNetwork == null
                 || Objects.equals(filterNetwork, network));

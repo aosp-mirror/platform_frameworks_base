@@ -187,7 +187,7 @@
     <string name="work_profile_deleted" msgid="5891181538182009328">"Profil kerja dihapus"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikasi admin profil kerja tidak ada atau rusak. Akibatnya, profil kerja dan data terkait telah dihapus. Hubungi admin untuk meminta bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profil kerja tidak tersedia lagi di perangkat ini"</string>
-    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Terlalu banyak percobaan memasukkan sandi"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Terlalu banyak kesalahan sandi"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin melepaskan perangkat untuk penggunaan pribadi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Perangkat ini ada yang mengelola"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisasi mengelola perangkat ini dan mungkin memantau traffic jaringan. Ketuk untuk melihat detailnya."</string>
@@ -385,7 +385,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan ponsel lambat."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"jalankan layanan di latar depan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Mengizinkan aplikasi menggunakan layanan di latar depan."</string>
-    <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan apl"</string>
+    <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan aplikasi"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Mengizinkan apl mengambil kode, data, dan ukuran temboloknya"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ubah setelan sistem"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Mengizinkan apl memodifikasi data setelan sistem. Apl berbahaya dapat merusak konfigurasi sistem anda."</string>
@@ -423,7 +423,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi pasti hanya saat di latar depan"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi akurat hanya saat di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
@@ -613,7 +613,7 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
-    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"baca setelan sinkron"</string>
+    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"baca setelan sinkronisasi"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Memungkinkan aplikasi membaca setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat menentukan apakah aplikasi Orang disinkronkan dengan sebuah akun."</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"nyalakan dan matikan sinkronisasi"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
@@ -1718,28 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Kuarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Folio"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Potret tidak diketahui"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Lanskap tidak diketahui"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Dibatalkan"</string>

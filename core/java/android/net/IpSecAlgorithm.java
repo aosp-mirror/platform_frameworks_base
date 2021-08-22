@@ -354,7 +354,7 @@ public final class IpSecAlgorithm implements Parcelable {
         }
 
         for (Entry<String, Integer> entry : ALGO_TO_REQUIRED_FIRST_SDK.entrySet()) {
-            if (Build.VERSION.FIRST_SDK_INT >= entry.getValue()) {
+            if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= entry.getValue()) {
                 enabledAlgos.add(entry.getKey());
             }
         }

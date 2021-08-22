@@ -103,8 +103,8 @@ filegroup {
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
+        ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
-        ":android.security.vpnprofilestore-java-source",
         ":android.system.keystore2-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
@@ -254,6 +254,14 @@ java_library {
     installable: false,
 }
 
+// NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
+// documentation. Do not remove without consulting the treble/hidl teams.
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["framework-jarjar-rules.txt"],
+    visibility: ["//visibility:public"],
+}
+
 java_library {
     name: "framework-minus-apex",
     defaults: ["framework-aidl-export-defaults"],
@@ -270,7 +278,7 @@ java_library {
         "--multi-dex",
     ],
     installable: true,
-    jarjar_rules: "framework-jarjar-rules.txt",
+    jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
         "view-inspector-annotation-processor",
@@ -283,6 +291,7 @@ java_library {
         "icu4j-platform-compat-config",
         "protolog.conf.json.gz",
         "services-platform-compat-config",
+        "TeleService-platform-compat-config",
         "documents-ui-compat-config",
     ],
     libs: [
@@ -351,6 +360,7 @@ filegroup {
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
         "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
         "telephony/java/android/telephony/Annotation.java",
     ],
@@ -408,7 +418,7 @@ java_library {
     ],
     libs: [
         "framework-annotations-lib",
-        "framework-connectivity",
+        "framework-connectivity.stubs.module_lib",
         "unsupportedappusage",
     ],
     visibility: [
@@ -473,10 +483,10 @@ stubs_defaults {
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
-            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
-            // frameworks/base
-            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
@@ -520,4 +530,5 @@ build = [
     "StubLibraries.bp",
     "ApiDocs.bp",
     "ProtoLibraries.bp",
+    "TestProtoLibraries.bp",
 ]

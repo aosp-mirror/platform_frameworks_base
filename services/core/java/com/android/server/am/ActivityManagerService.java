@@ -1267,6 +1267,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
+     * List of uids that are allowed to have while-in-use permission when FGS is started from
+     * background.
+     */
+    private final FgsWhileInUseTempAllowList mFgsWhileInUseTempAllowList =
+            new FgsWhileInUseTempAllowList();
+
+    /**
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
@@ -2129,7 +2136,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
-                app.pid = MY_PID;
+                app.pid = app.mPidForCompact = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
@@ -3068,6 +3075,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
             addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             addServiceToMap(mAppBindArgs, "mount");
+            addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -4060,13 +4068,19 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
         final long now = System.currentTimeMillis();
-        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
-        for (int i = 0; i < files.length; ++i) {
-            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
-                if (!files[i].delete()) {
-                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+        try {
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+            for (int i = 0; i < files.length; ++i) {
+                if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                    if (!files[i].delete()) {
+                        Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
+                    }
                 }
             }
+        } catch (IllegalArgumentException e) {
+            // The modification times changed while we were sorting. Bail...
+            // https://issuetracker.google.com/169836837
+            Slog.w(TAG, "tombstone modification times changed while sorting; not pruning", e);
         }
     }
 
@@ -4119,7 +4133,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // control of all writes to the file in question.
 
         // We must complete all stack dumps within 20 seconds.
-        long remainingTime = 20 * 1000;
+        long remainingTime = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
         // As applications are usually interested with the ANR stack traces, but we can't share with
         // them the stack traces other than their own stacks. So after the very first PID is
@@ -5110,6 +5124,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
+        synchronized (mOomAdjuster.mCachedAppOptimizer) {
+            app.mSetAdjForCompact = ProcessList.INVALID_ADJ;
+        }
         mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);
@@ -6005,9 +6022,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isAppBad(ApplicationInfo info) {
-        synchronized (this) {
-            return mAppErrors.isBadProcessLocked(info);
-        }
+        return mAppErrors.isBadProcess(info.processName, info.uid);
     }
 
     // NOTE: this is an internal method used by the OnShellCommand implementation only and should
@@ -10272,11 +10287,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (lines > 0) {
                     sb.append("\n");
 
-                    // Merge several logcat streams, and take the last N lines
                     InputStreamReader input = null;
                     try {
                         java.lang.Process logcat = new ProcessBuilder(
-                                "/system/bin/timeout", "-k", "15s", "10s",
+                                // Time out after 10s, but kill logcat with SEGV
+                                // so we can investigate why it didn't finish.
+                                "/system/bin/timeout", "-s", "SEGV", "10s",
+                                // Merge several logcat streams, and take the last N lines.
                                 "/system/bin/logcat", "-v", "threadtime", "-b", "events", "-b", "system",
                                 "-b", "main", "-b", "crash", "-t", String.valueOf(lines))
                                         .redirectErrorStream(true).start();
@@ -13814,9 +13831,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
@@ -14684,9 +14701,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
-            final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-            if (gpuDmaBufUsage >= 0) {
-                final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+            final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+            if (gpuPrivateUsage >= 0) {
+                final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                 memInfoBuilder.append("      GPU: ");
                 memInfoBuilder.append(stringifyKBSize(gpuUsage));
                 memInfoBuilder.append(" (");
@@ -19894,6 +19911,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public boolean hasForegroundServiceNotification(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.hasForegroundServiceNotificationLocked(pkg, userId, channelId);
+            }
+        }
+
+        @Override
+        public void stopForegroundServicesForChannel(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServicesForChannelLocked(pkg, userId, channelId);
+            }
+        }
+
+        @Override
         public void registerProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.registerProcessObserver(processObserver);
         }
@@ -19944,6 +19977,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isPendingTopUid(int uid) {
             return mPendingStartActivityUids.isPendingTopUid(uid);
+        }
+
+        @Override
+        public void tempAllowWhileInUsePermissionInFgs(int uid, long duration) {
+            mFgsWhileInUseTempAllowList.add(uid, duration);
+        }
+
+        @Override
+        public boolean isTempAllowlistedForFgsWhileInUse(int uid) {
+            return mFgsWhileInUseTempAllowList.isAllowed(uid);
+        }
+
+        @Override
+        public boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
+                @NonNull String packageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
+            }
         }
     }
 
@@ -20545,7 +20596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callerUid = Binder.getCallingUid();
 
         // Only system can toggle the freezer state
-        if (callerUid == SYSTEM_UID) {
+        if (callerUid == SYSTEM_UID || Build.IS_DEBUGGABLE) {
             return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
         } else {
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");

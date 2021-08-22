@@ -437,6 +437,8 @@
     <string name="accessibility_battery_three_bars">Battery three bars.</string>
     <!-- Content description of the battery when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_full">Battery full.</string>
+    <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_battery_unknown">Battery percentage unknown.</string>
 
     <!-- Content description of the phone signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_phone">No phone.</string>
@@ -2870,4 +2872,11 @@
     <string name="media_output_dialog_connect_failed">Couldn\'t connect. Try again.</string>
     <!-- Title for pairing item [CHAR LIMIT=60] -->
     <string name="media_output_dialog_pairing_new">Pair new device</string>
+
+    <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
+    [CHAR LIMIT=NONE] -->
+    <string name="battery_state_unknown_notification_title">Problem reading your battery meter</string>
+    <!-- Text to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
+    [CHAR LIMIT=NONE] -->
+    <string name="battery_state_unknown_notification_text">Tap for more information</string>
 </resources>

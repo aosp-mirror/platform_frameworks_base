@@ -28,10 +28,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
+import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -417,7 +420,7 @@ public class RcsUceAdapter {
      * <p>
      * After {@link CapabilitiesCallback#onComplete} or {@link CapabilitiesCallback#onError} has
      * been called, the reference to this callback will be discarded on the service side.
-     * @see #requestCapabilities(Executor, List, CapabilitiesCallback)
+     * @see #requestCapabilities(Collection, Executor, CapabilitiesCallback)
      * @hide
      */
     @SystemApi
@@ -464,10 +467,16 @@ public class RcsUceAdapter {
     }
 
     /**
-     * Request the User Capability Exchange capabilities for one or more contacts.
+     * Request the RCS capabilities for one or more contacts using RCS User Capability Exchange.
      * <p>
-     * This will return the cached capabilities of the contact and will not perform a capability
-     * poll on the network unless there are contacts being queried with stale information.
+     * This API will first check a local cache for the requested numbers and return the cached
+     * RCS capabilities of each number if the cache exists and is not stale. If the cache for a
+     * number is stale or there is no cached information about the requested number, the device will
+     * then perform a query to the carrier's network to request the RCS capabilities of the
+     * requested numbers.
+     * <p>
+     * Depending on the number of requests being sent, this API may throttled internally as the
+     * operations are queued to be executed by the carrier's network.
      * <p>
      * Be sure to check the availability of this feature using
      * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
@@ -552,13 +561,15 @@ public class RcsUceAdapter {
     }
 
     /**
-     * Ignore the device cache and perform a capability discovery for one contact, also called
-     * "availability fetch."
+     * Request the RCS capabilities for a phone number using User Capability Exchange.
      * <p>
-     * This will always perform a query to the network as long as requests are over the carrier
-     * availability fetch throttling threshold. If too many network requests are sent too quickly,
-     * #ERROR_TOO_MANY_REQUESTS will be returned.
-     *
+     * Unlike {@link #requestCapabilities(Collection, Executor, CapabilitiesCallback)}, which caches
+     * the result received from the network for a certain amount of time and uses that cached result
+     * for subsequent requests for RCS capabilities of the same phone number, this API will always
+     * request the RCS capabilities of a contact from the carrier's network.
+     * <p>
+     * Depending on the number of requests, this API may throttled internally as the operations are
+     * queued to be executed by the carrier's network.
      * <p>
      * Be sure to check the availability of this feature using
      * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
@@ -680,7 +691,8 @@ public class RcsUceAdapter {
      * state updates for the subscription specified in {@link ImsManager@getRcsManager(subid)}.
      * <p>
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to subscription
-     * changed events and call {@link #unregisterPublishStateCallback} to clean up.
+     * changed events and call
+     * {@link #removeOnPublishStateChangedListener(OnPublishStateChangedListener)} to clean up.
      * <p>
      * The registered {@link OnPublishStateChangedListener} will also receive a callback when it is
      * registered with the current publish state.
@@ -770,13 +782,23 @@ public class RcsUceAdapter {
     }
 
     /**
-     * The user’s setting for whether or not User Capability Exchange (UCE) is enabled for the
-     * associated subscription.
+     * The setting for whether or not the user has opted in to the automatic refresh of the RCS
+     * capabilities associated with the contacts in the user's contact address book. By default,
+     * this setting is disabled and must be enabled after the user has seen the opt-in dialog shown
+     * by {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN}.
+     * <p>
+     * If this feature is enabled, the device will periodically share the phone numbers of all of
+     * the contacts in the user's address book with the carrier to refresh the RCS capabilities
+     * cache associated with those contacts as the local cache becomes stale.
+     * <p>
+     * This setting will only enable this feature if
+     * {@link CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is also enabled.
      * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.
      *
-     * @return true if the user’s setting for UCE is enabled, false otherwise.
+     * @return true if the user has opted in for automatic refresh of the RCS capabilities of their
+     * contacts, false otherwise.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
@@ -802,18 +824,33 @@ public class RcsUceAdapter {
     }
 
     /**
-     * Change the user’s setting for whether or not UCE is enabled for the associated subscription.
+     * Change the user’s setting for whether or not the user has opted in to the automatic
+     * refresh of the RCS capabilities associated with the contacts in the user's contact address
+     * book. By default, this setting is disabled and must be enabled using this method after the
+     * user has seen the opt-in dialog shown by
+     * {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN}.
      * <p>
-     * If an application Requires UCE, they will launch an Activity using the Intent
-     * {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN}, which will ask the user if
-     * they wish to enable this feature. This setting should only be enabled after the user has
-     * opted-in to capability exchange.
+     * If an application wishes to request that the user enable this feature, they must launch an
+     * Activity using the Intent {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN},
+     * which will ask the user if they wish to enable this feature. This setting must only be
+     * enabled after the user has opted-in to this feature.
+     * <p>
+     * This must not affect the
+     * {@link #requestCapabilities(Collection, Executor, CapabilitiesCallback)} or
+     * {@link #requestAvailability(Uri, Executor, CapabilitiesCallback)} API,
+     * as those APIs are still required for per-contact RCS capability queries of phone numbers
+     * required for operations such as placing a Video Telephony call or starting an RCS chat
+     * session.
+     * <p>
+     * This setting will only enable this feature if
+     * {@link CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is also enabled.
      * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.
      *
-     * @param isEnabled the user's setting for whether or not they wish for User
-     *         Capability Exchange to be enabled.
+     * @param isEnabled true if the user has opted in for automatic refresh of the RCS capabilities
+     *                  of their contacts, or false if they have chosen to opt-out. By default this
+     *                  setting is disabled.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription

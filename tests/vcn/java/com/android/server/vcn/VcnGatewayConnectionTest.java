@@ -24,8 +24,12 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -64,7 +68,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
-    private static final int TEST_UID = Process.myUid();
+    private static final int TEST_UID = Process.myUid() + 1;
 
     private static final ParcelUuid TEST_PARCEL_UUID = new ParcelUuid(UUID.randomUUID());
     private static final int TEST_SIM_SLOT_INDEX = 1;
@@ -73,6 +77,9 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final int TEST_SUBSCRIPTION_ID_2 = 3;
     private static final SubscriptionInfo TEST_SUBINFO_2 = mock(SubscriptionInfo.class);
     private static final Map<Integer, ParcelUuid> TEST_SUBID_TO_GROUP_MAP;
+
+    private static final int TEST_UPSTREAM_BANDWIDTH = 1234;
+    private static final int TEST_DOWNSTREAM_BANDWIDTH = 2345;
 
     static {
         final Map<Integer, ParcelUuid> subIdToGroupMap = new HashMap<>();
@@ -106,6 +113,8 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
             capBuilder.setNetworkSpecifier(
                     new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_1));
         }
+        capBuilder.setLinkUpstreamBandwidthKbps(TEST_UPSTREAM_BANDWIDTH);
+        capBuilder.setLinkDownstreamBandwidthKbps(TEST_DOWNSTREAM_BANDWIDTH);
         capBuilder.setAdministratorUids(new int[] {TEST_UID});
         UnderlyingNetworkRecord record = new UnderlyingNetworkRecord(
                 mock(Network.class, CALLS_REAL_METHODS),
@@ -128,8 +137,10 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
             }
         }
 
-        assertArrayEquals(new int[] {TEST_UID}, vcnCaps.getAdministratorUids());
+        assertArrayEquals(new int[] {Process.myUid(), TEST_UID}, vcnCaps.getAdministratorUids());
         assertTrue(vcnCaps.getTransportInfo() instanceof VcnTransportInfo);
+        assertEquals(TEST_UPSTREAM_BANDWIDTH, vcnCaps.getLinkUpstreamBandwidthKbps());
+        assertEquals(TEST_DOWNSTREAM_BANDWIDTH, vcnCaps.getLinkDownstreamBandwidthKbps());
 
         final VcnTransportInfo info = (VcnTransportInfo) vcnCaps.getTransportInfo();
         if (transportType == TRANSPORT_WIFI) {
@@ -183,5 +194,24 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
 
         verify(mDisconnectRequestAlarm).cancel();
+    }
+
+    @Test
+    public void testQuittingCleansUpPersistentState() {
+        final VcnIkeSession vcnIkeSession = mock(VcnIkeSession.class);
+        final VcnNetworkAgent vcnNetworkAgent = mock(VcnNetworkAgent.class);
+
+        mGatewayConnection.setIkeSession(vcnIkeSession);
+        mGatewayConnection.setNetworkAgent(vcnNetworkAgent);
+
+        mGatewayConnection.quitNow();
+        mTestLooper.dispatchAll();
+
+        assertNull(mGatewayConnection.getIkeSession());
+        verify(vcnIkeSession).kill();
+        assertNull(mGatewayConnection.getNetworkAgent());
+        verify(vcnNetworkAgent).unregister();
+
+        verifyWakeLockReleased();
     }
 }

@@ -172,6 +172,16 @@ public final class BluetoothUuid {
     /** @hide */
     @NonNull
     @SystemApi
+    public static final ParcelUuid GENERIC_MEDIA_CONTROL =
+            ParcelUuid.fromString("00001849-0000-1000-8000-00805F9B34FB");
+    /** @hide */
+    @NonNull
+    @SystemApi
+    public static final ParcelUuid MEDIA_CONTROL =
+            ParcelUuid.fromString("00001848-0000-1000-8000-00805F9B34FB");
+    /** @hide */
+    @NonNull
+    @SystemApi
     public static final ParcelUuid BASE_UUID =
             ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
 

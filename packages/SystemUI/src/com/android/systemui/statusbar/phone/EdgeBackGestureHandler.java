@@ -560,20 +560,21 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         if (mVocab != null) {
             app = mVocab.getOrDefault(mPackageName, -1);
         }
-        // Check if we are within the tightest bounds beyond which
-        // we would not need to run the ML model.
-        boolean withinRange = x <= mMLEnableWidth + mLeftInset
-                || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
-        if (!withinRange) {
+
+        // Denotes whether we should proceed with the gesture. Even if it is false, we may want to
+        // log it assuming it is not invalid due to exclusion.
+        boolean withinRange = x < mEdgeWidthLeft + mLeftInset
+                || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+        if (withinRange) {
             int results = -1;
-            if (mUseMLModel && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
-                withinRange = results == 1;
-            } else {
-                // Denotes whether we should proceed with the gesture.
-                // Even if it is false, we may want to log it assuming
-                // it is not invalid due to exclusion.
-                withinRange = x <= mEdgeWidthLeft + mLeftInset
-                        || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+
+            // Check if we are within the tightest bounds beyond which we would not need to run the
+            // ML model
+            boolean withinMinRange = x < mMLEnableWidth + mLeftInset
+                    || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
+            if (!withinMinRange && mUseMLModel
+                    && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
+                withinRange = (results == 1);
             }
         }
 

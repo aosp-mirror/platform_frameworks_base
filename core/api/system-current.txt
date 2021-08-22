@@ -1124,10 +1124,10 @@ package android.app.backup {
 package android.app.compat {
 
   public final class CompatChanges {
-    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void addPackageOverrides(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
     method public static boolean isChangeEnabled(long);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void putPackageOverrides(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void removePackageOverrides(@NonNull String, @NonNull java.util.Set<java.lang.Long>);
   }
 
@@ -1630,6 +1630,7 @@ package android.bluetooth {
     field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
     field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
+    field public static final int VOLUME_CONTROL = 23; // 0x17
   }
 
   public final class BluetoothUuid {
@@ -1643,6 +1644,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid BASE_UUID;
     field @NonNull public static final android.os.ParcelUuid BNEP;
     field @NonNull public static final android.os.ParcelUuid DIP;
+    field @NonNull public static final android.os.ParcelUuid GENERIC_MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid HEARING_AID;
     field @NonNull public static final android.os.ParcelUuid HFP;
     field @NonNull public static final android.os.ParcelUuid HFP_AG;
@@ -1653,6 +1655,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid LE_AUDIO;
     field @NonNull public static final android.os.ParcelUuid MAP;
     field @NonNull public static final android.os.ParcelUuid MAS;
+    field @NonNull public static final android.os.ParcelUuid MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid MNS;
     field @NonNull public static final android.os.ParcelUuid NAP;
     field @NonNull public static final android.os.ParcelUuid OBEX_OBJECT_PUSH;
@@ -1664,6 +1667,16 @@ package android.bluetooth {
     field public static final int UUID_BYTES_16_BIT = 2; // 0x2
     field public static final int UUID_BYTES_32_BIT = 4; // 0x4
     field @NonNull public static final android.os.ParcelUuid VOLUME_CONTROL;
+  }
+
+  public final class BluetoothVolumeControl implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void close();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) protected void finalize();
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setVolume(@Nullable android.bluetooth.BluetoothDevice, @IntRange(from=0, to=255) int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.volume-control.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public final class BufferConstraint implements android.os.Parcelable {
@@ -1741,17 +1754,17 @@ package android.bluetooth.le {
   public final class BluetoothLeScanner {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADMIN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(android.os.WorkSource, android.bluetooth.le.ScanCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADMIN, android.Manifest.permission.UPDATE_DEVICE_STATS}) public void startScanFromSource(java.util.List<android.bluetooth.le.ScanFilter>, android.bluetooth.le.ScanSettings, android.os.WorkSource, android.bluetooth.le.ScanCallback);
-    method public void startTruncatedScan(java.util.List<android.bluetooth.le.TruncatedFilter>, android.bluetooth.le.ScanSettings, android.bluetooth.le.ScanCallback);
+    method @Deprecated public void startTruncatedScan(java.util.List<android.bluetooth.le.TruncatedFilter>, android.bluetooth.le.ScanSettings, android.bluetooth.le.ScanCallback);
   }
 
-  public final class ResultStorageDescriptor implements android.os.Parcelable {
-    ctor public ResultStorageDescriptor(int, int, int);
-    method public int describeContents();
-    method public int getLength();
-    method public int getOffset();
-    method public int getType();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
+  @Deprecated public final class ResultStorageDescriptor implements android.os.Parcelable {
+    ctor @Deprecated public ResultStorageDescriptor(int, int, int);
+    method @Deprecated public int describeContents();
+    method @Deprecated public int getLength();
+    method @Deprecated public int getOffset();
+    method @Deprecated public int getType();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
   }
 
   public final class ScanFilter implements android.os.Parcelable {
@@ -1775,10 +1788,10 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanSettings.Builder setScanResultType(int);
   }
 
-  public final class TruncatedFilter {
-    ctor public TruncatedFilter(android.bluetooth.le.ScanFilter, java.util.List<android.bluetooth.le.ResultStorageDescriptor>);
-    method public android.bluetooth.le.ScanFilter getFilter();
-    method public java.util.List<android.bluetooth.le.ResultStorageDescriptor> getStorageDescriptors();
+  @Deprecated public final class TruncatedFilter {
+    ctor @Deprecated public TruncatedFilter(android.bluetooth.le.ScanFilter, java.util.List<android.bluetooth.le.ResultStorageDescriptor>);
+    method @Deprecated public android.bluetooth.le.ScanFilter getFilter();
+    method @Deprecated public java.util.List<android.bluetooth.le.ResultStorageDescriptor> getStorageDescriptors();
   }
 
 }
@@ -6812,6 +6825,10 @@ package android.os {
   public final class BatteryStatsManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.CellularBatteryStats getCellularBatteryStats();
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanReset();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanResults(@NonNull android.os.WorkSource, int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStarted(@NonNull android.os.WorkSource, boolean);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStopped(@NonNull android.os.WorkSource, boolean);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportMobileRadioPowerState(boolean, int);
@@ -7258,8 +7275,10 @@ package android.os {
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
     method @WorkerThread public int cleanupAppliedPayload();
+    method public void resetShouldSwitchSlotOnReboot();
     method public void resetStatus();
     method public void resume();
+    method public void setShouldSwitchSlotOnReboot(@NonNull String);
     method public void suspend();
     method public boolean unbind();
     method public boolean verifyPayloadMetadata(String);
@@ -7749,6 +7768,7 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+    field public static final String NAMESPACE_LMKD_NATIVE = "lmkd_native";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_OTA = "ota";
@@ -9738,6 +9758,17 @@ package android.telephony {
     field public static final int REASON_UNSPECIFIED = 0; // 0x0
   }
 
+  public final class PhoneCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int[] getDeviceNrCapabilities();
+    method @IntRange(from=1) public int getMaxActiveDataSubscriptions();
+    method @IntRange(from=1) public int getMaxActiveVoiceSubscriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
+    field public static final int DEVICE_NR_CAPABILITY_NSA = 1; // 0x1
+    field public static final int DEVICE_NR_CAPABILITY_SA = 2; // 0x2
+  }
+
   public final class PhoneNumberRange implements android.os.Parcelable {
     ctor public PhoneNumberRange(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
@@ -10257,6 +10288,7 @@ package android.telephony {
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.PhoneCapability getPhoneCapability();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
@@ -11970,8 +12002,7 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
@@ -12422,8 +12453,7 @@ package android.telephony.ims.stub {
   }
 
   public interface SipDelegate {
-    method public default void cleanupSession(@NonNull String);
-    method @Deprecated public default void closeDialog(@NonNull String);
+    method public void cleanupSession(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);

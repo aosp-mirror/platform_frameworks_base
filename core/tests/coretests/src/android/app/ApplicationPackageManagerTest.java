@@ -26,7 +26,10 @@ import android.content.pm.PackageInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import junit.framework.TestCase;
 
@@ -109,6 +112,13 @@ public class ApplicationPackageManagerTest extends TestCase {
         @Override
         public boolean isAllow3rdPartyOnInternal(Context context) {
             return mAllow3rdPartyOnInternal;
+        }
+
+        @Override
+        @VisibleForTesting
+        protected @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app,
+                StorageManager storageManager, IPackageManager pm) {
+            return super.getPackageCandidateVolumes(app, storageManager, pm);
         }
     }
 
@@ -223,7 +233,7 @@ public class ApplicationPackageManagerTest extends TestCase {
             appInfo.flags = 0;
 
             appInfo.volumeUuid = sInternalVolUuid;
-            Mockito.when(pm.isPackageDeviceAdminOnAnyUser(Mockito.anyString())).thenReturn(false);
+            Mockito.when(pm.isPackageDeviceAdminOnAnyUser(appInfo.packageName)).thenReturn(false);
             appPkgMgr.setAllow3rdPartyOnInternal(true);
             List<VolumeInfo> candidates = appPkgMgr.getPackageCandidateVolumes(
                     appInfo, storageManager, pm);
@@ -231,7 +241,7 @@ public class ApplicationPackageManagerTest extends TestCase {
 
             appInfo.volumeUuid = sInternalVolUuid;
             appPkgMgr.setAllow3rdPartyOnInternal(true);
-            Mockito.when(pm.isPackageDeviceAdminOnAnyUser(Mockito.anyString())).thenReturn(true);
+            Mockito.when(pm.isPackageDeviceAdminOnAnyUser(appInfo.packageName)).thenReturn(true);
             candidates = appPkgMgr.getPackageCandidateVolumes(appInfo, storageManager, pm);
             verifyReturnedVolumes(candidates, sInternalVol);
 

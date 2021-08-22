@@ -16,19 +16,26 @@ package com.android.systemui.qs.tiles;
 
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.NetworkController;
 
 import javax.inject.Inject;
 
@@ -38,9 +45,19 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     private final DataSaverController mDataSaverController;
 
     @Inject
-    public DataSaverTile(QSHost host, NetworkController networkController) {
-        super(host);
-        mDataSaverController = networkController.getDataSaverController();
+    public DataSaverTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            DataSaverController dataSaverController
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
+        mDataSaverController = dataSaverController;
         mDataSaverController.observe(getLifecycle(), this);
     }
 

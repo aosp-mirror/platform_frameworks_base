@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Baterija z dvema črticama."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Baterija s tremi črticami."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterija je polna."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Neznan odstotek napolnjenosti baterije."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ni telefona."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon z eno črtico."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon z dvema črticama."</string>
@@ -512,7 +513,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Želite začeti snemati ali predvajati z aplikacijo <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Tega ne prikaži več"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši vse"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljanje"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljaj"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Zgodovina"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Novo"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiho"</string>
@@ -609,8 +610,8 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Če želite odpeti to aplikacijo, povlecite navzgor in pridržite."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Razumem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je pripeta"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je odpeta"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je pripeta."</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je odpeta."</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Želite skriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Znova se bo pojavila, ko jo naslednjič vklopite v nastavitvah."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Skrij"</string>
@@ -715,7 +716,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Tiho"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mehurček"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja."</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
@@ -863,8 +864,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Desna koda tipke"</string>
     <string name="left_icon" msgid="5036278531966897006">"Leva ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Desna ikona"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Držite in povlecite, da dodate ploščice"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Držite in povlecite, da prerazporedite ploščice"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Držite in povlecite, da dodate ploščice."</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Držite in povlecite, da prerazporedite ploščice."</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Če želite odstraniti, povlecite sem"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Imeti morate vsaj toliko ploščic: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Uredi"</string>
@@ -1100,8 +1101,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Za ogled novih kontrolnikov pridržite gumb za vklop"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrolnike"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrolnike"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Dodajte kontrolnike"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Uredite kontrolnike"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajanje izhodov"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Skupina"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Izbrana je ena naprava"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (povezava prekinjena)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezave ni bilo mogoče vzpostaviti. Poskusite znova."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Seznanitev nove naprave"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dotaknite se za več informacij"</string>
 </resources>

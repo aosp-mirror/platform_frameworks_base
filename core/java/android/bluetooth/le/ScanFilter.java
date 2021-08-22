@@ -16,7 +16,8 @@
 
 package android.bluetooth.le;
 
-import android.annotation.IntDef;
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -28,7 +29,6 @@ import android.os.ParcelUuid;
 import android.os.Parcelable;
 
 import com.android.internal.util.BitUtils;
-import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -168,6 +168,15 @@ public final class ScanFilter implements Parcelable {
                 dest.writeByteArray(mManufacturerDataMask);
             }
         }
+
+        // IRK
+        if (mDeviceAddress != null) {
+            dest.writeInt(mAddressType);
+            dest.writeInt(mIrk == null ? 0 : 1);
+            if (mIrk != null) {
+                dest.writeByteArray(mIrk);
+            }
+        }
     }
 
     /**
@@ -187,8 +196,10 @@ public final class ScanFilter implements Parcelable {
             if (in.readInt() == 1) {
                 builder.setDeviceName(in.readString());
             }
+            String address = null;
+            // If we have a non-null address
             if (in.readInt() == 1) {
-                builder.setDeviceAddress(in.readString());
+                address = in.readString();
             }
             if (in.readInt() == 1) {
                 ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
@@ -245,6 +256,17 @@ public final class ScanFilter implements Parcelable {
                 }
             }
 
+            // IRK
+            if (address != null) {
+                final int addressType = in.readInt();
+                if (in.readInt() == 1) {
+                    final byte[] irk = new byte[16];
+                    in.readByteArray(irk);
+                    builder.setDeviceAddress(address, addressType, irk);
+                } else {
+                    builder.setDeviceAddress(address, addressType);
+                }
+            }
             return builder.build();
         }
     };
@@ -647,7 +669,7 @@ public final class ScanFilter implements Parcelable {
         public Builder setDeviceAddress(@NonNull String deviceAddress,
                                         @AddressType int addressType,
                                         @NonNull byte[] irk) {
-            Preconditions.checkNotNull(irk);
+            requireNonNull(irk);
             if (irk.length != LEN_IRK_OCTETS) {
                 throw new IllegalArgumentException("'irk' is invalid length!");
             }
@@ -679,7 +701,7 @@ public final class ScanFilter implements Parcelable {
                                                  @Nullable byte[] irk) {
 
             // Make sure our deviceAddress is valid!
-            Preconditions.checkNotNull(deviceAddress);
+            requireNonNull(deviceAddress);
             if (!BluetoothAdapter.checkBluetoothAddress(deviceAddress)) {
                 throw new IllegalArgumentException("invalid device address " + deviceAddress);
             }
