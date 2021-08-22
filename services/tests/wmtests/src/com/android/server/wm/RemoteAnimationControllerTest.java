@@ -51,6 +51,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -271,6 +272,32 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
+    }
+
+    @Test
+    public void testOpeningTaskWithTopFinishingActivity() {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "win");
+        final Task task = win.getTask();
+        final ActivityRecord topFinishing = new ActivityBuilder(mAtm).setTask(task).build();
+        // Now the task contains:
+        //     - Activity[1] (top, finishing, no window)
+        //     - Activity[0] (has window)
+        topFinishing.finishing = true;
+        spyOn(mDisplayContent.mAppTransition);
+        doReturn(mController).when(mDisplayContent.mAppTransition).getRemoteAnimationController();
+        task.applyAnimationUnchecked(null /* lp */, true /* enter */, TRANSIT_OLD_TASK_OPEN,
+                false /* isVoiceInteraction */, null /* sources */);
+        mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        try {
+            verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
+                    appsCaptor.capture(), any(), any(), any());
+        } catch (RemoteException ignored) {
+        }
+        assertEquals(1, appsCaptor.getValue().length);
+        assertEquals(RemoteAnimationTarget.MODE_OPENING, appsCaptor.getValue()[0].mode);
     }
 
     @Test
