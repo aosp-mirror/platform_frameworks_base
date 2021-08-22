@@ -100,14 +100,14 @@ import java.util.function.Consumer;
  * An accessibility is declared as any other service in an AndroidManifest.xml, but it
  * must do two things:
  * <ul>
- *     <ol>
+ *     <li>
  *         Specify that it handles the "android.accessibilityservice.AccessibilityService"
  *         {@link android.content.Intent}.
- *     </ol>
- *     <ol>
+ *     </li>
+ *     <li>
  *         Request the {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission to
  *         ensure that only the system can bind to it.
- *     </ol>
+ *     </li>
  * </ul>
  * If either of these items is missing, the system will ignore the accessibility service.
  * Following is an example declaration:

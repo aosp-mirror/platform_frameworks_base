@@ -28,4 +28,5 @@ java_sdk_library {
     name: "com.android.future.usb.accessory",
     srcs: ["src/**/*.java"],
     api_packages: ["com.android.future.usb"],
+    dist_group: "android",
 }

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Mức pin hai vạch."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Mức pin ba vạch."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Mức pin đầy."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Tỷ lệ phần trăm pin không xác định."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Không có điện thoại nào."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Tín hiệu điện thoại một vạch."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Tín hiệu điện thoại hai vạch."</string>
@@ -409,7 +410,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Sử dụng dữ liệu"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Dữ liệu còn lại"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Vượt quá giới hạn"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã sử dụng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã dùng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Hồ sơ công việc"</string>
@@ -712,9 +713,9 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> sẽ hiện ở dạng bong bóng theo mặc định."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiển thị ảnh hồ sơ trên màn hình khóa"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiện ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiện ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
@@ -823,8 +824,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Trình tiết kiệm dữ liệu"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Trình tiết kiệm dữ liệu đang bật"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Trình tiết kiệm dữ liệu đang tắt"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Bật"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Tắt"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Đang bật"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Đang tắt"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Không có sẵn"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Thanh điều hướng"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Bố cục"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (đã ngắt kết nối)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Không thể kết nối. Hãy thử lại."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
 </resources>

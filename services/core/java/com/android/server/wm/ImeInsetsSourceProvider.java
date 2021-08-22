@@ -35,6 +35,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
     private InsetsControlTarget mImeTargetFromIme;
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
+    private boolean mImeShowing;
 
     ImeInsetsSourceProvider(InsetsSource source,
             InsetsStateController stateController, DisplayContent displayContent) {
@@ -74,6 +75,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
                 ProtoLog.i(WM_DEBUG_IME, "call showInsets(ime) on %s",
                         target.getWindow() != null ? target.getWindow().getName() : "");
+                setImeShowing(true);
                 target.showInsets(WindowInsets.Type.ime(), true /* fromIme */);
                 if (target != mImeTargetFromIme && mImeTargetFromIme != null) {
                     ProtoLog.w(WM_DEBUG_IME,
@@ -147,11 +149,29 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
     @Override
     public void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
+        pw.print(prefix);
+        pw.print("mImeShowing=");
+        pw.print(mImeShowing);
         if (mImeTargetFromIme != null) {
-            pw.print(prefix);
-            pw.print("showImePostLayout pending for mImeTargetFromIme=");
+            pw.print(" showImePostLayout pending for mImeTargetFromIme=");
             pw.print(mImeTargetFromIme);
-            pw.println();
         }
+        pw.println();
+    }
+
+    /**
+     * Sets whether the IME is currently supposed to be showing according to
+     * InputMethodManagerService.
+     */
+    public void setImeShowing(boolean imeShowing) {
+        mImeShowing = imeShowing;
+    }
+
+    /**
+     * Returns whether the IME is currently supposed to be showing according to
+     * InputMethodManagerService.
+     */
+    public boolean isImeShowing() {
+        return mImeShowing;
     }
 }

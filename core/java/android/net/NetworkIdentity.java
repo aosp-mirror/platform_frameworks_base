@@ -26,8 +26,10 @@ import android.service.NetworkIdentityProto;
 import android.telephony.Annotation.NetworkType;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -121,9 +123,35 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
         builder.append(", metered=").append(mMetered);
         builder.append(", defaultNetwork=").append(mDefaultNetwork);
-        // TODO(180557699): Print a human readable string for OEM managed state.
-        builder.append(", oemManaged=").append(mOemManaged);
+        builder.append(", oemManaged=").append(getOemManagedNames(mOemManaged));
         return builder.append("}").toString();
+    }
+
+    /**
+     * Get the human readable representation of a bitfield representing the OEM managed state of a
+     * network.
+     */
+    static String getOemManagedNames(int oemManaged) {
+        if (oemManaged == OEM_NONE) {
+            return "OEM_NONE";
+        }
+        final int[] bitPositions = NetworkCapabilitiesUtils.unpackBits(oemManaged);
+        final ArrayList<String> oemManagedNames = new ArrayList<String>();
+        for (int position : bitPositions) {
+            oemManagedNames.add(nameOfOemManaged(1 << position));
+        }
+        return String.join(",", oemManagedNames);
+    }
+
+    private static String nameOfOemManaged(int oemManagedBit) {
+        switch (oemManagedBit) {
+            case OEM_PAID:
+                return "OEM_PAID";
+            case OEM_PRIVATE:
+                return "OEM_PRIVATE";
+            default:
+                return "Invalid(" + oemManagedBit + ")";
+        }
     }
 
     public void dumpDebug(ProtoOutputStream proto, long tag) {

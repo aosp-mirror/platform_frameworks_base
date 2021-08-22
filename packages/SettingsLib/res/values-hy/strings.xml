@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Հնարավոր չեղավ զուգավորվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Հնարավոր չեղավ զուգակցվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Սխալ"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Անլար վրիպազերծում"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Հասանելի սարքերը տեսնելու և օգտագործելու համար միացրեք անլար վրիպազերծումը"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցեք սարքը՝ օգտագործելով QR կոդը"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցել սարքը QR կոդով"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Զուգակցեք նոր սարքեր՝ օգտագործելով QR կոդերի սկաները"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցեք սարքը՝ օգտագործելով զուգակցման կոդը"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցել սարքը զուգակցման կոդով"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>
@@ -244,7 +244,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Թույլ տալ սկզբնաբեռնման բեռնիչի ապակողպումը"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Թույլատրե՞լ OEM ապակողպումը:"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ԶԳՈՒՇԱՑՈՒՄ. Այս կարգավորումը միացրած ժամանակ սարքի պաշտպանության գործառույթները չեն աջակցվի այս սարքի վրա:"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Ընտրեք տեղադրությունը կեղծող հավելված"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Ընտրել կեղծ տեղադրության հավելված"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Տեղադրությունը կեղծող հավելված տեղակայված չէ"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Տեղադրությունը կեղծող հավելված՝ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Ցանց"</string>
@@ -257,8 +257,8 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Միացնել Gabeldorsche-ը"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP տարբերակը"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-ի տարբերակ"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP-ի տարբերակը"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-ի տարբերակ"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Ընտրել Bluetooth MAP-ի տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth աուդիո կոդեկ"</string>
@@ -457,7 +457,7 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Թույլատրված է"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Արգելված է"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Արգելված"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Անհայտ հավելվածների տեղադրում"</string>
     <string name="home" msgid="973834627243661438">"Կարգավորումների գլխավոր էջ"</string>
   <string-array name="battery_labels">

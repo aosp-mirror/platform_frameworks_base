@@ -116,7 +116,10 @@ public class FalsingDataProvider {
      * interactionType is defined by {@link com.android.systemui.classifier.Classifier}.
      */
     final void setInteractionType(@Classifier.InteractionType int interactionType) {
-        this.mInteractionType = interactionType;
+        if (mInteractionType != interactionType) {
+            mInteractionType = interactionType;
+            mDirty = true;
+        }
     }
 
     public boolean isDirty() {

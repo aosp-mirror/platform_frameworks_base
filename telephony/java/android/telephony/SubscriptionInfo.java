@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -113,9 +114,9 @@ public class SubscriptionInfo implements Parcelable {
     private int mDataRoaming;
 
     /**
-     * SIM Icon bitmap
+     * SIM icon bitmap cache
      */
-    private Bitmap mIconBitmap;
+    @Nullable private Bitmap mIconBitmap;
 
     /**
      * Mobile Country Code
@@ -403,6 +404,10 @@ public class SubscriptionInfo implements Parcelable {
      * @return A bitmap icon for this {@code SubscriptionInfo}.
      */
     public Bitmap createIconBitmap(Context context) {
+        if (mIconBitmap == null) {
+            mIconBitmap = BitmapFactory.decodeResource(context.getResources(),
+                    com.android.internal.R.drawable.ic_sim_card_multi_24px_clr);
+        }
         int width = mIconBitmap.getWidth();
         int height = mIconBitmap.getHeight();
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -565,6 +570,13 @@ public class SubscriptionInfo implements Parcelable {
      */
     public @Nullable ParcelUuid getGroupUuid() {
         return mGroupUUID;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearGroupUuid() {
+        this.mGroupUUID = null;
     }
 
     /**
@@ -765,7 +777,6 @@ public class SubscriptionInfo implements Parcelable {
             String mcc = source.readString();
             String mnc = source.readString();
             String countryIso = source.readString();
-            Bitmap iconBitmap = source.readParcelable(Bitmap.class.getClassLoader());
             boolean isEmbedded = source.readBoolean();
             UiccAccessRule[] nativeAccessRules = source.createTypedArray(UiccAccessRule.CREATOR);
             String cardString = source.readString();
@@ -784,10 +795,10 @@ public class SubscriptionInfo implements Parcelable {
             boolean areUiccApplicationsEnabled = source.readBoolean();
 
             SubscriptionInfo info = new SubscriptionInfo(id, iccId, simSlotIndex, displayName,
-                    carrierName, nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc,
-                    countryIso, isEmbedded, nativeAccessRules, cardString, cardId, isOpportunistic,
-                    groupUUID, isGroupDisabled, carrierid, profileClass, subType, groupOwner,
-                    carrierConfigAccessRules, areUiccApplicationsEnabled);
+                    carrierName, nameSource, iconTint, number, dataRoaming, /* icon= */ null,
+                    mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString, cardId,
+                    isOpportunistic, groupUUID, isGroupDisabled, carrierid, profileClass, subType,
+                    groupOwner, carrierConfigAccessRules, areUiccApplicationsEnabled);
             info.setAssociatedPlmns(ehplmns, hplmns);
             return info;
         }
@@ -812,7 +823,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeString(mMcc);
         dest.writeString(mMnc);
         dest.writeString(mCountryIso);
-        dest.writeParcelable(mIconBitmap, flags);
+        // Do not write mIconBitmap since it should be lazily loaded on first usage
         dest.writeBoolean(mIsEmbedded);
         dest.writeTypedArray(mNativeAccessRules, flags);
         dest.writeString(mCardString);

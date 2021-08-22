@@ -8756,6 +8756,7 @@ package android.bluetooth {
     field public static final int GATT_CONNECTION_CONGESTED = 143; // 0x8f
     field public static final int GATT_FAILURE = 257; // 0x101
     field public static final int GATT_INSUFFICIENT_AUTHENTICATION = 5; // 0x5
+    field public static final int GATT_INSUFFICIENT_AUTHORIZATION = 8; // 0x8
     field public static final int GATT_INSUFFICIENT_ENCRYPTION = 15; // 0xf
     field public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 13; // 0xd
     field public static final int GATT_INVALID_OFFSET = 7; // 0x7
@@ -9065,6 +9066,7 @@ package android.bluetooth {
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getGroupId(@NonNull android.bluetooth.BluetoothDevice);
     field public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED = "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
   }
 
@@ -9089,6 +9091,7 @@ package android.bluetooth {
     field @Deprecated public static final int HEALTH = 3; // 0x3
     field public static final int HEARING_AID = 21; // 0x15
     field public static final int HID_DEVICE = 19; // 0x13
+    field public static final int LE_AUDIO = 22; // 0x16
     field public static final int SAP = 10; // 0xa
     field public static final int STATE_CONNECTED = 2; // 0x2
     field public static final int STATE_CONNECTING = 1; // 0x1
@@ -25711,7 +25714,7 @@ package android.net.vcn {
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
-    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
+    method @IntRange(from=0x500) public int getMaxMtu();
     method @NonNull public long[] getRetryIntervalsMillis();
   }
 
@@ -25720,7 +25723,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
@@ -30326,6 +30329,7 @@ package android.os {
     method public void close();
     method @NonNull public static android.os.SharedMemory create(@Nullable String, int) throws android.system.ErrnoException;
     method public int describeContents();
+    method @NonNull public static android.os.SharedMemory fromFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int getSize();
     method @NonNull public java.nio.ByteBuffer map(int, int, int) throws android.system.ErrnoException;
     method @NonNull public java.nio.ByteBuffer mapReadOnly() throws android.system.ErrnoException;
@@ -38091,6 +38095,7 @@ package android.telecom {
     method public final void cancelCall();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onPlaceCall(@NonNull android.net.Uri, @NonNull android.telecom.PhoneAccountHandle, boolean);
+    method public void onRedirectionTimeout();
     method public final boolean onUnbind(@NonNull android.content.Intent);
     method public final void placeCallUnmodified();
     method public final void redirectCall(@NonNull android.net.Uri, @NonNull android.telecom.PhoneAccountHandle, boolean);
@@ -40285,12 +40290,6 @@ package android.telephony {
     field public static final int SCAN_TYPE_PERIODIC = 1; // 0x1
   }
 
-  public final class PhoneCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
-  }
-
   public class PhoneNumberFormattingTextWatcher implements android.text.TextWatcher {
     ctor public PhoneNumberFormattingTextWatcher();
     ctor public PhoneNumberFormattingTextWatcher(String);
@@ -40984,8 +40983,9 @@ package android.telephony {
     field public static final int OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO = 2; // 0x2
     field public static final int OVERRIDE_NETWORK_TYPE_LTE_CA = 1; // 0x1
     field public static final int OVERRIDE_NETWORK_TYPE_NONE = 0; // 0x0
+    field public static final int OVERRIDE_NETWORK_TYPE_NR_ADVANCED = 4; // 0x4
     field public static final int OVERRIDE_NETWORK_TYPE_NR_NSA = 3; // 0x3
-    field public static final int OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE = 4; // 0x4
+    field @Deprecated public static final int OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE = 4; // 0x4
   }
 
   public class TelephonyManager {

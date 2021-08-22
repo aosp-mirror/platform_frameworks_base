@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ביטול"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"לאחר החיבור, התאמה מספקת גישה לאנשי הקשר ולהיסטוריית השיחות שלך."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"לא ניתן לבצע התאמה עם <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"לא ניתן להתאים את <xliff:g id="DEVICE_NAME">%1$s</xliff:g> בשל קוד גישה או סיסמה שגויים."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"לא ניתן לבצע התאמה עם <xliff:g id="DEVICE_NAME">%1$s</xliff:g> כי קוד הגישה או הסיסמה שגויים."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"לא ניתן לתקשר עם <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ההתאמה נדחתה על ידי <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"מחשב"</string>
@@ -143,9 +143,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"אפליקציות שהוסרו"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"אפליקציות ומשתמשים שהוסרו"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"עדכוני מערכת"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"‏שיתוף אינטרנט דרך USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"‏שיתוף אינטרנט ב-USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"נקודה לשיתוף אינטרנט"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"‏שיתוף אינטרנט דרך Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"‏שיתוף אינטרנט ב-Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"שיתוף אינטרנט בין ניידים"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"נקודה לשיתוף אינטרנט"</string>
     <string name="managed_user_title" msgid="449081789742645723">"כל אפליקציות העבודה"</string>
@@ -236,7 +236,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"כדי ליצור דוח באגים, יש להציג לחצן בתפריט לניהול צריכת החשמל"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"שיישאר פועל"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ללא כניסה למצב שינה"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"‏איחוד חבילות Bluetooth. (יש להחליף מצב Bluetooth לאחר שינוי הגדרה זו)"</string>
@@ -244,11 +244,11 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"אפשר ביטול של נעילת מנהל האתחול"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"‏האם לאפשר ביטול נעילה של OEM (יצרן ציוד מקורי)?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"אזהרה: תכונות הגנת מכשיר לא יפעלו במכשיר הזה כשההגדרה הזו פועלת."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"בחירת אפליקציה של מיקום מדומה"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"לא הוגדרה אפליקציה של מיקום מדומה"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"אפליקציה של מיקום מדומה: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"בחירת אפליקציה להדמיית מיקום"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"לא הוגדרה אפליקציה להדמיית מיקום"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"אפליקציה להדמיית מיקום: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"תקשורת רשתות"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת WiFi"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת Wi-Fi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏רנדומיזציה משופרת של כתובות MAC ב-Wi‑Fi"</string>
@@ -261,17 +261,17 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏בחירת Bluetooth גרסה AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏גרסת Bluetooth MAP"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"‏יש לבחור גרסה של Bluetooth MAP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"‏Codec אודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"‏קצב דגימה של אודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: קצב דגימה"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"‏קודק אודיו ל-Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"‏הפעלת ‏קודק אודיו ל-Bluetooth\nבחירה"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"‏תדירות הדגימה של אודיו ל-Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"‏הפעלת ‏קודק אודיו ל-Bluetooth\nבחירה: קצב דגימה"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"כשזה מופיע באפור, אין לזה תמיכה בטלפון או באוזניות"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"‏מספר ביטים לדגימה באודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: ביטים לדגימה"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"‏מצב של ערוץ אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: מצב ערוץ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"‏Codec אודיו LDAC ל-Bluetooth: איכות נגינה"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"‏הפעלת Codec אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"‏קודק אודיו LDAC ל-Bluetooth: איכות נגינה"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"‏הפעלת קודק אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"‏DNS פרטי"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"‏בחירת מצב של DNS פרטי"</string>
@@ -280,7 +280,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"‏שם מארח של ספק DNS פרטי"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"‏צריך להזין את שם המארח של ספק DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"לא ניתן היה להתחבר"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"‏הצגת אפשרויות עבור אישור של תצוגת WiFi"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"‏הצגת אפשרויות עבור אישור של תצוגת Wi-Fi"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלאת רמת הרישום של Wi‑Fi ביומן, הצגה לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"אפשרות זו מפחיתה את קצב התרוקנות הסוללה ומשפרת את ביצועי הרשת"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏כשמצב זה מופעל, כתובת ה-MAC של המכשיר הזה עשויה להשתנות בכל פעם שהוא מתחבר לרשת שפועלת בה רנדומיזציה של כתובות MAC."</string>
@@ -296,7 +296,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"‏יש לבחור תצורת USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"אפשרות של מיקומים מדומים"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"אפשרות של מיקומים מדומים"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"אפשר בדיקת תכונת תצוגה"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"לאפשר בדיקת תכונת תצוגה"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏השארת חבילת הגלישה פעילה תמיד, גם כש-Wi‑Fi פעיל (למעבר מהיר בין רשתות)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"אם השירות זמין, יש להשתמש בשיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏לאפשר ניפוי באגים של USB?"</string>
@@ -342,8 +342,8 @@
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"הצגת עדכונים של שכבות חומרה"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"הצגת הבהוב ירוק לשכבות חומרה כשהן מתעדכנות"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"‏חריגה בניפוי באגים ב-GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"‏השבתת שכבות על של HW"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"‏שימוש תמיד ב-GPU להרכבת מסך"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"‏השבתת שכבות-על של HW"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"‏תמיד להשתמש ב-GPU להרכבת מסך"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"יצירת הדמיה של מרחב צבעים"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"‏הפעלת מעקבי OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"‏השבתת ניתוב אודיו ב-USB"</string>
@@ -359,7 +359,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏הפעלת שכבות לניפוי באגים ב-GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏טעינת שכבות לניפוי באגים ב-GPU לאפליקציות ניפוי באגים"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"הפעלת רישום ספקים מפורט ביומן"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הוספת רישומי יומן של יצרנים למכשירים ספציפיים בדוחות על באגים. דוחות אלה עשויים להכיל מידע פרטי, להגביר את צריכת הסוללה ולצרוך שטח אחסון גדול יותר."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הוספת רישומי יומן של יצרנים למכשירים ספציפיים בדוחות על באגים. דוחות אלה עשויים להכיל מידע פרטי, להגביר את צריכת הסוללה ולצרוך נפח אחסון גדול יותר."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"קנה מידה לאנימציה של חלון"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>
@@ -375,7 +375,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אילוץ יכולת קביעת גודל של הפעילויות"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"אפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"הפעלת תמיכה בתכונה הניסיונית של שינוי הגודל והמיקום של החלונות."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
@@ -387,7 +387,7 @@
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"בטעינה…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"דינמי (ברירת מחדל)"</item>
-    <item msgid="9112200311983078311">"טבעי"</item>
+    <item msgid="9112200311983078311">"גוון טבעי"</item>
     <item msgid="6564241960833766170">"רגיל"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -478,7 +478,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"הבא"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"דרושה סיסמה"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"שיטות קלט פעילות"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"שימוש בשפות מערכת"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"שימוש בשפות המערכת"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"פתיחת הגדרות עבור <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> נכשלה"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ייתכן ששיטת קלט זו תוכל לאסוף את כל הטקסט המוקלד, כולל נתונים אישיים כגון סיסמאות ומספרי כרטיס אשראי. היא מגיעה מהאפליקציה <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. האם להשתמש בשיטת קלט זו?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"לתשומת ליבך: לאחר הפעלה מחדש של המכשיר, ניתן להפעיל את האפליקציה רק לאחר שתבטל את נעילת הטלפון"</string>
@@ -486,7 +486,7 @@
     <string name="ims_reg_status_registered" msgid="884916398194885457">"רשום"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"לא רשום"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"לא זמין"</string>
-    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏MAC נמצא במצב אקראי"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏כתובת ה-MAC אקראית"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="two">‏%1$d מכשירים מחוברים</item>
       <item quantity="many">‏%1$d מכשירים מחוברים</item>
@@ -506,7 +506,7 @@
     <string name="zen_alarm_warning" msgid="245729928048586280">"לא תושמע ההתראה הבאה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3346777418136233330">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך זמן"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"יש לשאול בכל פעם"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
@@ -549,7 +549,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"הגדרת נעילה"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"מעבר אל <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"הוספת אורח"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח/ת"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"אורח"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ברירת המחדל של המכשיר"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"מושבת"</string>

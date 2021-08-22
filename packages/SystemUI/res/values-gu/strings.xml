@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"બૅટરી બે બાર."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"બૅટરી ત્રણ બાર."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"બૅટરી પૂર્ણ."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"કોઈ ફોન નથી."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ફોન એક બાર."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ફોન બે બાર."</string>
@@ -391,7 +392,7 @@
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"રંગ સુધારણા મોડ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલ"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલું"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"કનેક્ટ કરેલ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"કનેક્ટ કરી રહ્યું છે..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ટિથરિંગ"</string>
@@ -500,10 +501,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"બૅટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"કાર્યપ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"બૅટરી સેવર બંધ કરો"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"શું રેકૉર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> વડે રેકૉર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"શું રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> વડે રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"મેનેજ કરો"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ડિસ્કનેક્ટ થયેલું)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"કનેક્ટ કરી શકાયું નહીં. ફરી પ્રયાસ કરો."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"નવા ડિવાઇસ સાથે જોડાણ કરો"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"તમારું બૅટરી મીટર વાંચવામાં સમસ્યા આવી"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"વધુ માહિતી માટે ટૅપ કરો"</string>
 </resources>

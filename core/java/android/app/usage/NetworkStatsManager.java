@@ -48,6 +48,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DataUnit;
 import android.util.Log;
 
@@ -214,6 +215,10 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -255,6 +260,10 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -300,6 +309,10 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -388,6 +401,10 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -450,6 +467,10 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -531,6 +552,10 @@ public class NetworkStatsManager {
      *                     null} value when registering for the mobile network type to receive
      *                     notifications for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
+     *                     <p>Starting with API level 31, calling apps can provide a
+     *                     {@code subscriberId} with wifi network type to receive usage for
+     *                     wifi networks which is under the given subscription if applicable.
+     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param thresholdBytes Threshold in bytes to be notified on.
      * @param callback The {@link UsageCallback} that the system will call when data usage
      *            has exceeded the specified threshold.
@@ -644,7 +669,10 @@ public class NetworkStatsManager {
                         : NetworkTemplate.buildTemplateMobileAll(subscriberId);
                 break;
             case ConnectivityManager.TYPE_WIFI:
-                template = NetworkTemplate.buildTemplateWifiWildcard();
+                template = TextUtils.isEmpty(subscriberId)
+                        ? NetworkTemplate.buildTemplateWifiWildcard()
+                        : NetworkTemplate.buildTemplateWifi(NetworkTemplate.WIFI_NETWORKID_ALL,
+                                subscriberId);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create template for network type "
@@ -655,14 +683,14 @@ public class NetworkStatsManager {
     }
 
     /**
-     *  Notify {@code NetworkStatsService} about network status changed.
+     * Notify {@code NetworkStatsService} about network status changed.
      *
-     *  Notifies NetworkStatsService of network state changes for data usage accounting purposes.
+     * Notifies NetworkStatsService of network state changes for data usage accounting purposes.
      *
-     *  To avoid races that attribute data usage to wrong network, such as new network with
-     *  the same interface after SIM hot-swap, this function will not return until
-     *  {@code NetworkStatsService} finishes its work of retrieving traffic statistics from
-     *  all data sources.
+     * To avoid races that attribute data usage to wrong network, such as new network with
+     * the same interface after SIM hot-swap, this function will not return until
+     * {@code NetworkStatsService} finishes its work of retrieving traffic statistics from
+     * all data sources.
      *
      * @param defaultNetworks the list of all networks that could be used by network traffic that
      *                        does not explicitly select a network.
@@ -689,8 +717,7 @@ public class NetworkStatsManager {
             Objects.requireNonNull(defaultNetworks);
             Objects.requireNonNull(networkStateSnapshots);
             Objects.requireNonNull(underlyingNetworkInfos);
-            // TODO: Change internal namings after the name is decided.
-            mService.forceUpdateIfaces(defaultNetworks.toArray(new Network[0]),
+            mService.notifyNetworkStatus(defaultNetworks.toArray(new Network[0]),
                     networkStateSnapshots.toArray(new NetworkStateSnapshot[0]), activeIface,
                     underlyingNetworkInfos.toArray(new UnderlyingNetworkInfo[0]));
         } catch (RemoteException e) {

@@ -2765,7 +2765,8 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideUnmetered set if the billing relationship should be
      *            considered unmetered.
-     * @param networkTypes the network types this override applies to.
+     * @param networkTypes the network types this override applies to. If no
+     *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
      * @param timeoutMillis the timeout after which the requested override will
      *            be automatically cleared, or {@code 0} to leave in the
@@ -2829,7 +2830,8 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideCongested set if the subscription should be considered
      *            congested.
-     * @param networkTypes the network types this override applies to.
+     * @param networkTypes the network types this override applies to. If no
+     *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
      * @param timeoutMillis the timeout after which the requested override will
      *            be automatically cleared, or {@code 0} to leave in the

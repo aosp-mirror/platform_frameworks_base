@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dos barras de batería"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tres barras de batería"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batería completa"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentaje de batería desconocido."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sin teléfono"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Una barra de cobertura"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dos barras de cobertura"</string>
@@ -539,7 +540,7 @@
     <string name="monitoring_title" msgid="4063890083735924568">"Supervisión de red"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Registro de red"</string>
-    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados de CA"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados AC"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver políticas"</string>
@@ -711,8 +712,8 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbuja"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración, y se muestra más abajo en la sección de conversaciones"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Puede sonar o vibrar según los ajustes del teléfono"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Puede sonar o vibrar según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, aparece como burbuja flotante y la imagen de perfil se incluye en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
@@ -764,7 +765,7 @@
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Uso de la batería"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Uso de batería"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ahorro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce el rendimiento y los datos en segundo plano"</string>
@@ -988,7 +989,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entendido"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar pila de SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar montículo de SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1014,7 +1015,7 @@
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Cerrar burbuja"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No mostrar conversación en burbuja"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatea con burbujas"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como iconos flotantes llamadas \"burbujas\". Toca para abrir la burbuja. Arrastra para moverla."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como iconos flotantes llamadas \"burbujas\". Toca una burbuja para abrirla. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla las burbujas"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toca Gestionar para desactivar las burbujas de esta aplicación"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No se ha podido conectar. Inténtalo de nuevo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Emparejar nuevo dispositivo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"No se ha podido leer el indicador de batería"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca la pantalla para consultar más información"</string>
 </resources>

@@ -277,6 +277,27 @@ aidl_interface {
     backend: {
         rust: {
             enabled: true,
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.virt", // for virtualizationservice
+            ],
+        },
+    },
+}
+
+aidl_interface {
+    name: "android.debug_aidl",
+    unstable: true,
+    srcs: [
+        "android/debug/AdbTransportType.aidl",
+        "android/debug/FingerprintAndPairDevice.aidl",
+        "android/debug/IAdbCallback.aidl",
+        "android/debug/IAdbManager.aidl",
+        "android/debug/PairDevice.aidl",
+    ],
+    backend: {
+        cpp: {
+            enabled: true,
         },
     },
 }

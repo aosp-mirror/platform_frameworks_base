@@ -250,7 +250,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Siete"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné denníky Wi‑Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdenie vyhľadávania sietí Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdiť vyhľadávanie sietí Wi‑Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Zlepš. randomizácia adr. MAC prip. Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardvérová akcelerácia tetheringu"</string>
@@ -359,7 +359,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podr. zapis. dodáv. do denníka"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mierka animácie premeny"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mierka dĺžky animácie"</string>

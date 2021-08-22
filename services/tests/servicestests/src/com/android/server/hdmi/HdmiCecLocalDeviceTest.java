@@ -35,6 +35,8 @@ import android.os.test.TestLooper;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.google.common.testing.EqualsTester;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -128,6 +130,24 @@ public class HdmiCecLocalDeviceTest {
                     }
                 };
         mHdmiControlService.setMessageValidator(mMessageValidator);
+    }
+
+    @Test
+    public void testEqualsActiveSource() {
+        int logicalAddress = 0;
+        int physicalAddress = 0x0000;
+        new EqualsTester()
+                .addEqualityGroup(
+                        new HdmiCecLocalDevice.ActiveSource(logicalAddress, physicalAddress),
+                        new HdmiCecLocalDevice.ActiveSource(logicalAddress, physicalAddress))
+                .addEqualityGroup(
+                        new HdmiCecLocalDevice.ActiveSource(logicalAddress, physicalAddress + 1))
+                .addEqualityGroup(
+                        new HdmiCecLocalDevice.ActiveSource(logicalAddress + 1, physicalAddress))
+                .addEqualityGroup(
+                        new HdmiCecLocalDevice.ActiveSource(
+                                logicalAddress + 1, physicalAddress + 1))
+                .testEquals();
     }
 
     @Test

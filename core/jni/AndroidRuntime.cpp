@@ -22,6 +22,7 @@
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/vm.h>
 #include <assert.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -631,6 +632,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char saveResolvedClassesDelayMsOptsBuf[
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
+    char profileMinFirstSaveOptsBuf[
+            sizeof("-Xps-min-first-save-ms:")-1 + PROPERTY_VALUE_MAX];
     char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
@@ -679,6 +682,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
+    char javaZygoteForkLoopBuf[sizeof("-XX:ForceJavaZygoteForkLoop=") + PROPERTY_VALUE_MAX];
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
     char opaqueJniIds[sizeof("-Xopaque-jni-ids:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
@@ -739,6 +743,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
         /* with -Xcheck:jni, this provides a JNI function call trace */
         //addOption("-verbose:jni");
+    }
+
+    const bool odsignVerificationSuccess = GetBoolProperty("odsign.verification.success", false);
+    if (!odsignVerificationSuccess) {
+        addOption("-Xdeny-art-apex-data-files");
     }
 
     property_get("dalvik.vm.execution-mode", propBuf, "");
@@ -869,6 +878,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseRuntimeOption("dalvik.vm.ps-min-save-period-ms", profileMinSavePeriodOptsBuf,
             "-Xps-min-save-period-ms:");
 
+    parseRuntimeOption("dalvik.vm.ps-min-first-save-ms", profileMinFirstSaveOptsBuf,
+            "-Xps-min-first-save-ms:");
+
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
       addOption("-XX:LowMemoryMode");
@@ -892,6 +904,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     }
 
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
+
+    /*
+     * Enable/disable zygote native fork loop.
+     */
+    parseRuntimeOption("dalvik.vm.force-java-zygote-fork-loop",
+                       javaZygoteForkLoopBuf,
+                       "-XX:ForceJavaZygoteForkLoop=");
 
     /*
      * Enable debugging only for apps forked from zygote.
@@ -1302,6 +1321,10 @@ void AndroidRuntime::onVmCreated(JNIEnv* env)
 
 /*static*/ JavaVM* AndroidRuntime::getJavaVM() {
     return AndroidRuntime::mJavaVM;
+}
+
+extern "C" JavaVM* AndroidRuntimeGetJavaVM() {
+    return AndroidRuntime::getJavaVM();
 }
 
 /*

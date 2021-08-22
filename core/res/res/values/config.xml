@@ -4154,6 +4154,35 @@
          If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
     <integer name="config_defaultRefreshRateInZone">0</integer>
 
+    <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
+         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         flicker could be observed at switch time. The issue can be observed on the screen with
+         even full white content at the high brightness. To prevent flickering, we support fixed
+         refresh rates if the display and ambient brightness are equal to or above the provided
+         thresholds. You can define multiple threshold levels as higher brightness environments
+         may have lower display brightness requirements for the flickering is visible. And the
+         high brightness environment could have higher threshold.
+         For example, fixed refresh rate if
+             display brightness >= disp0 && ambient brightness >= amb0
+             || display brightness >= disp1 && ambient brightness >= amb1 -->
+    <integer-array translatable="false" name="config_highDisplayBrightnessThresholdsOfFixedRefreshRate">
+         <!--
+           <item>disp0</item>
+           <item>disp1</item>
+        -->
+    </integer-array>
+
+    <integer-array translatable="false" name="config_highAmbientBrightnessThresholdsOfFixedRefreshRate">
+         <!--
+           <item>amb0</item>
+           <item>amb1</item>
+        -->
+    </integer-array>
+
+    <!-- Default refresh rate in the high zone defined by brightness and ambient thresholds.
+         If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
+    <integer name="config_fixedRefreshRateInHighZone">0</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
@@ -4281,6 +4310,15 @@
     <!-- The package name for the default bug report handler app from power menu short press. This app must be allowlisted. -->
     <string name="config_defaultBugReportHandlerApp" translatable="false"></string>
 
+    <!-- When true, enables the allowlisted app to upload profcollect reports. -->
+    <bool name="config_profcollectReportUploaderEnabled">false</bool>
+
+    <!-- The package name for the default profcollect report uploader app. This app must be allowlisted. -->
+    <string name="config_defaultProfcollectReportUploaderApp" translatable="false"></string>
+
+    <!-- The action name for the default profcollect report uploader app. -->
+    <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
@@ -4397,4 +4435,9 @@
 
     <!-- Whether to allow the caching of the SIM PIN for verification after unattended reboot -->
     <bool name="config_allow_pin_storage_for_unattended_reboot">true</bool>
+
+    <!-- Whether the device enable the standalone (SA) mode of 5G NR.-->
+    <bool name="config_telephony5gStandalone">false</bool>
+    <!-- Whether the device enable the non-standalone (NSA) mode of 5G NR.-->
+    <bool name="config_telephony5gNonStandalone">false</bool>
 </resources>

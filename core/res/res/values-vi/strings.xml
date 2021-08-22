@@ -259,7 +259,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Chế độ trên máy bay"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay BẬT"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay đang bật"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Chế độ trên máy bay TẮT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Cài đặt"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Hỗ trợ"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Cho phép ứng dụng trở thành thanh trạng thái."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"mở rộng/thu gọn thanh trạng thái"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Cho phép ứng dụng mở rộng hoặc thu gọn thanh trạng thái."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"cài đặt lối tắt"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Cài đặt lối tắt"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Cho phép ứng dụng thêm lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"gỡ cài đặt lối tắt"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Cho phép ứng dụng xóa lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
@@ -569,9 +569,9 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Biểu tượng vân tay"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Mở khóa bằng khuôn mặt"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Đăng ký lại khuôn mặt của bạn"</string>
@@ -1520,7 +1520,7 @@
     <string name="storage_usb" msgid="2391213347883616886">"Bộ lưu trữ USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Chỉnh sửa"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Cảnh báo dữ liệu"</string>
-    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã sử dụng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
+    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã dùng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Đã đạt đến giới hạn dữ liệu di động"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Đã đạt tới g.hạn dữ liệu Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Đã tạm dừng dữ liệu đối với chu kỳ còn lại của bạn"</string>
@@ -1718,28 +1718,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Giấy khổ rộng"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1765,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Khổ dọc không xác định"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Khổ ngang không xác định"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Đã hủy"</string>

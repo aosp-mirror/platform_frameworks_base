@@ -1035,6 +1035,8 @@ public final class BluetoothDevice implements Parcelable {
     /** Address is either resolvable, non-resolvable or static. */
     public static final int ADDRESS_TYPE_RANDOM = 1;
 
+    private static final String NULL_MAC_ADDRESS = "00:00:00:00:00:00";
+
     /**
      * Lazy initialization. Guaranteed final after first object constructed, or
      * getService() called.
@@ -1371,6 +1373,10 @@ public final class BluetoothDevice implements Parcelable {
             Log.w(TAG, "BT not enabled, createBondOutOfBand failed");
             return false;
         }
+        if (NULL_MAC_ADDRESS.equals(mAddress)) {
+            Log.e(TAG, "Unable to create bond, invalid address " + mAddress);
+            return false;
+        }
         try {
             return service.createBond(this, transport, remoteP192Data, remoteP256Data);
         } catch (RemoteException e) {
@@ -1608,7 +1614,8 @@ public final class BluetoothDevice implements Parcelable {
      * in getting the SDP records or if the process takes a long time, or the device is bonding and
      * we have its UUIDs cached, {@link #ACTION_UUID} intent is sent with the UUIDs that is
      * currently present in the cache. Clients should use the {@link #getUuids} to get UUIDs
-     * if service discovery is not to be performed.
+     * if service discovery is not to be performed. If there is an ongoing bonding process,
+     * service discovery or device inquiry, the request will be queued.
      *
      * @return False if the check fails, True if the process of initiating an ACL connection
      * to the remote device was started or cached UUIDs will be broadcast.

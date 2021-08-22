@@ -31,6 +31,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.os.BatteryManagerInternal;
 import android.os.Environment;
+import android.os.IThermalService;
+import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -82,9 +85,14 @@ public class BackgroundDexOptService extends JobService {
     private static final int OPTIMIZE_ABORT_BY_JOB_SCHEDULER = 2;
     // Optimizations should be aborted. No space left on device.
     private static final int OPTIMIZE_ABORT_NO_SPACE_LEFT = 3;
+    // Optimizations should be aborted. Thermal throttling level too high.
+    private static final int OPTIMIZE_ABORT_THERMAL = 4;
 
     // Used for calculating space threshold for downgrading unused apps.
     private static final int LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE = 2;
+
+    // Thermal cutoff value used if one isn't defined by a system property.
+    private static final int THERMAL_CUTOFF_DEFAULT = PowerManager.THERMAL_STATUS_MODERATE;
 
     /**
      * Set of failed packages remembered across job runs.
@@ -107,7 +115,13 @@ public class BackgroundDexOptService extends JobService {
     private static final long mDowngradeUnusedAppsThresholdInMillis =
             getDowngradeUnusedAppsThresholdInMillis();
 
+    private final IThermalService mThermalService =
+            IThermalService.Stub.asInterface(
+                ServiceManager.getService(Context.THERMAL_SERVICE));
+
     private static List<PackagesUpdatedListener> sPackagesUpdatedListeners = new ArrayList<>();
+
+    private int mThermalStatusCutoff = THERMAL_CUTOFF_DEFAULT;
 
     public static void schedule(Context context) {
         if (isBackgroundDexoptDisabled()) {
@@ -251,12 +265,18 @@ public class BackgroundDexOptService extends JobService {
                     Slog.w(TAG, "Idle optimizations aborted because of space constraints.");
                 } else if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                     Slog.w(TAG, "Idle optimizations aborted by job scheduler.");
+                } else if (result == OPTIMIZE_ABORT_THERMAL) {
+                    Slog.w(TAG, "Idle optimizations aborted by thermal throttling.");
                 } else {
                     Slog.w(TAG, "Idle optimizations ended with unexpected code: " + result);
                 }
-                if (result != OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+
+                if (result == OPTIMIZE_ABORT_THERMAL) {
+                    // Abandon our timeslice and reschedule
+                    jobFinished(jobParams, /* wantsReschedule */ true);
+                } else if (result != OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                     // Abandon our timeslice and do not reschedule.
-                    jobFinished(jobParams, /* reschedule */ false);
+                    jobFinished(jobParams, /* wantsReschedule */ false);
                 }
             }
         }.start();
@@ -542,6 +562,24 @@ public class BackgroundDexOptService extends JobService {
             // JobScheduler requested an early abort.
             return OPTIMIZE_ABORT_BY_JOB_SCHEDULER;
         }
+
+        // Abort background dexopt if the device is in a moderate or stronger thermal throttling
+        // state.
+        try {
+            final int thermalStatus = mThermalService.getCurrentThermalStatus();
+
+            if (DEBUG) {
+                Log.i(TAG, "Thermal throttling status during bgdexopt: " + thermalStatus);
+            }
+
+            if (thermalStatus >= mThermalStatusCutoff) {
+                return OPTIMIZE_ABORT_THERMAL;
+            }
+        } catch (RemoteException ex) {
+            // Because this is a intra-process Binder call it is impossible for a RemoteException
+            // to be raised.
+        }
+
         long usableSpace = mDataDir.getUsableSpace();
         if (usableSpace < lowStorageThreshold) {
             // Rather bail than completely fill up the disk.
@@ -602,6 +640,9 @@ public class BackgroundDexOptService extends JobService {
             Slog.i(TAG, "No packages to optimize");
             return false;
         }
+
+        mThermalStatusCutoff =
+            SystemProperties.getInt("dalvik.vm.dexopt.thermal-cutoff", THERMAL_CUTOFF_DEFAULT);
 
         boolean result;
         if (params.getJobId() == JOB_POST_BOOT_UPDATE) {

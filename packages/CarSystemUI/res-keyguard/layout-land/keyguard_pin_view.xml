@@ -60,6 +60,7 @@
             android:layout_width="@dimen/keyguard_security_width"
             android:layout_height="@dimen/pin_entry_height"
             android:gravity="center"
+            android:focusedByDefault="true"
             app:scaledTextSize="@integer/password_text_view_scale"
             android:contentDescription="@string/keyguard_accessibility_pin_area" />
 

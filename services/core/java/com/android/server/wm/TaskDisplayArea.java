@@ -773,9 +773,10 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         onStackOrderChanged(stack);
     }
 
-    void resetPreferredTopFocusableStackIfBelow(Task task) {
+    /** Reset the mPreferredTopFocusableRootTask if it is or below the given task. */
+    void resetPreferredTopFocusableRootTaskIfNeeded(Task task) {
         if (mPreferredTopFocusableStack != null
-                && mPreferredTopFocusableStack.compareTo(task) < 0) {
+                && mPreferredTopFocusableStack.compareTo(task) <= 0) {
             mPreferredTopFocusableStack = null;
         }
     }

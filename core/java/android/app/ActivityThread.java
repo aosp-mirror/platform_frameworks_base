@@ -352,11 +352,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
+    @GuardedBy("this")
+    private boolean mUpdateHttpProxyOnBind = false;
     @UnsupportedAppUsage
     Application mInitialApplication;
     @UnsupportedAppUsage
-    final ArrayList<Application> mAllApplications
-            = new ArrayList<Application>();
+    final ArrayList<Application> mAllApplications = new ArrayList<>();
     /**
      * Bookkeeping of instantiated backup agents indexed first by user id, then by package name.
      * Indexing by user id supports parallel backups across users on system packages as they run in
@@ -1040,17 +1041,16 @@ public final class ActivityThread extends ClientTransactionHandler {
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
+                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
                 ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
-                    for (Object oname : services.keySet()) {
-                        if (services.get(oname) == null) {
+                    for (String name : services.keySet()) {
+                        if (services.get(name) == null) {
                             continue; // AM just passed in a null service.
                         }
-                        String name = (String) oname;
 
                         // See b/79378449 about the following exemption.
                         switch (name) {
@@ -1123,12 +1123,22 @@ public final class ActivityThread extends ClientTransactionHandler {
             InetAddress.clearDnsCache();
             // Allow libcore to perform the necessary actions as it sees fit upon a network
             // configuration change.
-            NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
+            NetworkEventDispatcher.getInstance().dispatchNetworkConfigurationChange();
         }
 
         public void updateHttpProxy() {
-            ActivityThread.updateHttpProxy(
-                    getApplication() != null ? getApplication() : getSystemContext());
+            final Application app;
+            synchronized (ActivityThread.this) {
+                app = getApplication();
+                if (null == app) {
+                    // The app is not bound yet. Make a note to update the HTTP proxy when the
+                    // app is bound.
+                    mUpdateHttpProxyOnBind = true;
+                    return;
+                }
+            }
+            // App is present, update the proxy inline.
+            ActivityThread.updateHttpProxy(app);
         }
 
         public void processInBackground() {
@@ -4602,6 +4612,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (r.isTopResumedActivity == onTop) {
+            if (!Build.IS_DEBUGGABLE) {
+                Slog.w(TAG, "Activity top position already set to onTop=" + onTop);
+                return;
+            }
             throw new IllegalStateException("Activity top position already set to onTop=" + onTop);
         }
 
@@ -6381,7 +6395,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             VMDebug.setAllocTrackerStackDepth(Integer.parseInt(property));
         }
         if (data.trackAllocation) {
-            DdmVmInternal.enableRecentAllocations(true);
+            DdmVmInternal.setRecentAllocationsTrackingEnabled(true);
         }
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
@@ -6693,6 +6707,15 @@ public final class ActivityThread extends ClientTransactionHandler {
             app.setContentCaptureOptions(data.contentCaptureOptions);
 
             mInitialApplication = app;
+            final boolean updateHttpProxy;
+            synchronized (this) {
+                updateHttpProxy = mUpdateHttpProxyOnBind;
+                // This synchronized block ensures that any subsequent call to updateHttpProxy()
+                // will see a non-null mInitialApplication.
+            }
+            if (updateHttpProxy) {
+                ActivityThread.updateHttpProxy(app);
+            }
 
             // don't bring up providers in restricted mode; they may depend on the
             // app's custom Application class

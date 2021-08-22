@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Beberapa setelan default"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Ouput text-to-speech"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Output text-to-speech"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>
@@ -367,9 +367,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikasi"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Jangan simpan aktivitas"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hancurkan tiap aktivitas setelah ditinggal pengguna"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses background"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR background"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses latar blkng"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR latar blkng"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang ada di latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>

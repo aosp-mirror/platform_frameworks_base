@@ -337,7 +337,8 @@ public final class PhysicalChannelConfig implements Parcelable {
     private void setUplinkFrequency() {
         switch (mNetworkType){
             case TelephonyManager.NETWORK_TYPE_NR:
-                mUplinkFrequency = mDownlinkFrequency;
+                mUplinkFrequency = AccessNetworkUtils.getFrequencyFromNrArfcn(
+                        mUplinkChannelNumber);
                 break;
             case TelephonyManager.NETWORK_TYPE_LTE:
                 mUplinkFrequency = AccessNetworkUtils.getFrequencyFromEarfcn(

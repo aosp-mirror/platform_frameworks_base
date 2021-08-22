@@ -43,6 +43,7 @@ import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
+import android.telephony.PhoneCapability;
 import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.RadioAccessSpecifier;
@@ -2032,6 +2033,11 @@ interface ITelephony {
     int setImsProvisioningString(int subId, int key, String value);
 
     /**
+     * Start emergency callback mode for testing.
+     */
+    void startEmergencyCallbackMode();
+
+    /**
      * Update Emergency Number List for Test Mode.
      */
     void updateEmergencyNumberListTestMode(int action, in EmergencyNumber num);
@@ -2404,6 +2410,12 @@ interface ITelephony {
     boolean removeUceRequestDisallowedStatus(int subId);
 
     /**
+     * Set the timeout for contact capabilities request.
+     * Note: This is designed for a SHELL command only.
+     */
+    boolean setCapabilitiesRequestTimeout(int subId, long timeoutAfterMs);
+
+    /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
      * specified thresholds.
      */
@@ -2429,4 +2441,9 @@ interface ITelephony {
      * of error.
      */
     int prepareForUnattendedReboot();
+
+    /**
+     * Gets the current phone capability.
+     */
+    PhoneCapability getPhoneCapability();
 }

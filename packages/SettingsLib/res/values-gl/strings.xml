@@ -154,8 +154,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Definíronse algúns valores predeterminados"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Non se definiu ningún valor predeterminado"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Configuración da síntese de voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída da síntese de voz"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Configuración da conversión de texto a voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída da conversión de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidade da fala"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade á que se di o texto"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
@@ -169,7 +169,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar datos de voz"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instala os datos de voz necesarios para a síntese de voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"É posible que este motor de síntese de voz poida recompilar todo o texto falado, incluídos datos persoais como contrasinais e números de tarxetas de crédito. Provén do motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Queres activar o uso deste motor de síntese de voz?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma precisa dispoñer dunha conexión de rede que funcione para a saída da síntese de voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma precisa dispoñer dunha conexión de rede que funcione para a saída da conversión de texto a voz."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Este é un exemplo da síntese de voz"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predeterminado"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é completamente compatible"</string>
@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuración de erros ao conectarse á wifi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Produciuse un erro"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración sen fíos"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular o dispositivo cun código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincula dispositivos novos mediante un escáner de códigos QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular o dispositivo co código de vinculación"</string>
@@ -456,8 +456,8 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Opción controlada polo administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivada"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Sen permiso"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Permiso concedido"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Permiso non concedido"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar aplicacións descoñecidas"</string>
     <string name="home" msgid="973834627243661438">"Inicio da configuración"</string>
   <string-array name="battery_labels">

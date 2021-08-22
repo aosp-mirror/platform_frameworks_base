@@ -26,9 +26,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 
 import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeInfo;
@@ -161,15 +159,17 @@ public final class CompatChange extends CompatibilityChangeInfo {
      *
      * @param packageName Package name to tentatively enable the change for.
      * @param override The package override to be set
+     * @param allowedState Whether the override is allowed.
+     * @param versionCode The version code of the package.
      */
     void addPackageOverride(String packageName, PackageOverride override,
-            OverrideAllowedState allowedState, Context context) {
+            OverrideAllowedState allowedState, @Nullable Long versionCode) {
         if (getLoggingOnly()) {
             throw new IllegalArgumentException(
                     "Can't add overrides for a logging only change " + toString());
         }
         mRawOverrides.put(packageName, override);
-        recheckOverride(packageName, allowedState, context);
+        recheckOverride(packageName, allowedState, versionCode);
     }
 
     /**
@@ -179,32 +179,24 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * overrides, check if they need to be demoted to deferred.</p>
      *
      * @param packageName Package name to apply deferred overrides for.
-     * @param allowed Whether the override is allowed.
+     * @param allowedState Whether the override is allowed.
+     * @param versionCode The version code of the package.
      *
      * @return {@code true} if the recheck yielded a result that requires invalidating caches
      *         (a deferred override was consolidated or a regular override was removed).
      */
     boolean recheckOverride(String packageName, OverrideAllowedState allowedState,
-            Context context) {
+            @Nullable Long versionCode) {
         boolean allowed = (allowedState.state == OverrideAllowedState.ALLOWED);
 
-        Long version = null;
-        try {
-            ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(
-                    packageName, 0);
-            version = applicationInfo.longVersionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // Do nothing
-        }
-
         // If the app is not installed or no longer has raw overrides, evaluate to false
-        if (version == null || !hasRawOverride(packageName) || !allowed) {
+        if (versionCode == null || !hasRawOverride(packageName) || !allowed) {
             removePackageOverrideInternal(packageName);
             return false;
         }
 
         // Evaluate the override based on its version
-        int overrideValue = mRawOverrides.get(packageName).evaluate(version);
+        int overrideValue = mRawOverrides.get(packageName).evaluate(versionCode);
         switch (overrideValue) {
             case VALUE_UNDEFINED:
                 removePackageOverrideInternal(packageName);
@@ -229,11 +221,13 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * <p>Note, this method is not thread safe so callers must ensure thread safety.
      *
      * @param pname Package name to reset to defaults for.
+     * @param allowedState Whether the override is allowed.
+     * @param versionCode The version code of the package.
      */
     boolean removePackageOverride(String pname, OverrideAllowedState allowedState,
-            Context context) {
+            @Nullable Long versionCode) {
         if (mRawOverrides.remove(pname) != null) {
-            recheckOverride(pname, allowedState, context);
+            recheckOverride(pname, allowedState, versionCode);
             return true;
         }
         return false;

@@ -24,6 +24,7 @@ import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
+import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
@@ -452,6 +453,10 @@ public class Vcn extends Handler {
         for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
             gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
         }
+
+        // Update the mobile data state after updating the subscription snapshot as a change in
+        // subIds for a subGroup may affect the mobile data state.
+        handleMobileDataToggled();
     }
 
     private void handleMobileDataToggled() {
@@ -513,7 +518,11 @@ public class Vcn extends Handler {
     }
 
     private String getLogPrefix() {
-        return "[" + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup) + "]: ";
+        return "["
+                + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
+                + "-"
+                + System.identityHashCode(this)
+                + "] ";
     }
 
     private void logVdbg(String msg) {
@@ -532,18 +541,22 @@ public class Vcn extends Handler {
 
     private void logErr(String msg) {
         Slog.e(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg);
     }
 
     private void logErr(String msg, Throwable tr) {
         Slog.e(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg + tr);
     }
 
     private void logWtf(String msg) {
         Slog.wtf(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg);
     }
 
     private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg + tr);
     }
 
     /**
@@ -557,11 +570,14 @@ public class Vcn extends Handler {
 
         pw.println("mCurrentStatus: " + mCurrentStatus);
         pw.println("mIsMobileDataEnabled: " + mIsMobileDataEnabled);
+        pw.println();
 
         pw.println("mVcnGatewayConnections:");
+        pw.increaseIndent();
         for (VcnGatewayConnection gw : mVcnGatewayConnections.values()) {
             gw.dump(pw);
         }
+        pw.decreaseIndent();
         pw.println();
 
         pw.decreaseIndent();
@@ -580,7 +596,12 @@ public class Vcn extends Handler {
     /** Retrieves the network score for a VCN Network */
     // Package visibility for use in VcnGatewayConnection and VcnNetworkProvider
     static NetworkScore getNetworkScore() {
-        return new NetworkScore.Builder().setLegacyInt(VCN_LEGACY_SCORE_INT).build();
+        // TODO(b/193687515): Stop setting TRANSPORT_PRIMARY, define a TRANSPORT_VCN, and set in
+        //                    NetworkOffer/NetworkAgent.
+        return new NetworkScore.Builder()
+                .setLegacyInt(VCN_LEGACY_SCORE_INT)
+                .setTransportPrimary(true)
+                .build();
     }
 
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */

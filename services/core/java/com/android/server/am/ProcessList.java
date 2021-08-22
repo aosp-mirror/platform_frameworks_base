@@ -2388,7 +2388,7 @@ public final class ProcessList {
             if ((intentFlags & Intent.FLAG_FROM_BACKGROUND) != 0) {
                 // If we are in the background, then check to see if this process
                 // is bad.  If so, we will just silently fail.
-                if (mService.mAppErrors.isBadProcessLocked(info)) {
+                if (mService.mAppErrors.isBadProcess(info.processName, info.uid)) {
                     if (DEBUG_PROCESSES) Slog.v(TAG, "Bad process: " + info.uid
                             + "/" + info.processName);
                     return null;
@@ -2401,11 +2401,11 @@ public final class ProcessList {
                 if (DEBUG_PROCESSES) Slog.v(TAG, "Clearing bad process: " + info.uid
                         + "/" + info.processName);
                 mService.mAppErrors.resetProcessCrashTimeLocked(info);
-                if (mService.mAppErrors.isBadProcessLocked(info)) {
+                if (mService.mAppErrors.isBadProcess(info.processName, info.uid)) {
                     EventLog.writeEvent(EventLogTags.AM_PROC_GOOD,
                             UserHandle.getUserId(info.uid), info.uid,
                             info.processName);
-                    mService.mAppErrors.clearBadProcessLocked(info);
+                    mService.mAppErrors.clearBadProcess(info.processName, info.uid);
                     if (app != null) {
                         app.bad = false;
                     }

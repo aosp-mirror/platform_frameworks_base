@@ -1,3 +1,0 @@
-keep android.net.NetworkCapabilitiesProto
-keep android.net.NetworkProto
-keep android.net.NetworkRequestProto
