@@ -554,7 +554,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (ar == null) {
                     return null;
                 }
-                final ActivityRecord below = ar.getTask().getActivityBelow(ar);
+                // Exclude finishing activity.
+                final ActivityRecord below = ar.getTask().getActivity((r) -> !r.finishing,
+                        ar, false /*includeBoundary*/, true /*traverseTopToBottom*/);
                 if (below != null && below.getUid() == ar.getUid()) {
                     return below.appToken.asBinder();
                 }

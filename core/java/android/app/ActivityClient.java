@@ -207,7 +207,8 @@ public class ActivityClient {
     }
 
     /**
-     * Returns the activity token below in the same task if it belongs to the same process.
+     * Returns the non-finishing activity token below in the same task if it belongs to the same
+     * process.
      */
     @Nullable
     public IBinder getActivityTokenBelow(IBinder activityToken) {
