@@ -34,7 +34,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -43,15 +42,18 @@ import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.role.RoleServicePlatformHelper;
 
+import libcore.util.HexEncoding;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -300,45 +302,88 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
     public String computePackageStateHash(@UserIdInt int userId) {
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+        final MessageDigestUtils md = new MessageDigestUtils();
+
         packageManagerInternal.forEachInstalledPackage(pkg -> {
-            try {
-                dataOutputStream.writeUTF(pkg.getPackageName());
-                dataOutputStream.writeLong(pkg.getLongVersionCode());
-                dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
-                        pkg.getPackageName(), userId));
+            md.writeString(pkg.getPackageName());
+            md.writeLong(pkg.getLongVersionCode());
+            md.writeInt(packageManagerInternal.getApplicationEnabledState(pkg.getPackageName(),
+                    userId));
 
-                final List<String> requestedPermissions = pkg.getRequestedPermissions();
-                final int requestedPermissionsSize = requestedPermissions.size();
-                dataOutputStream.writeInt(requestedPermissionsSize);
-                for (int i = 0; i < requestedPermissionsSize; i++) {
-                    dataOutputStream.writeUTF(requestedPermissions.get(i));
-                }
+            final List<String> requestedPermissions = pkg.getRequestedPermissions();
+            final int requestedPermissionsSize = requestedPermissions.size();
+            md.writeInt(requestedPermissionsSize);
+            for (int i = 0; i < requestedPermissionsSize; i++) {
+                md.writeString(requestedPermissions.get(i));
+            }
 
-                final ArraySet<String> enabledComponents =
-                        packageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);
-                final int enabledComponentsSize = CollectionUtils.size(enabledComponents);
-                dataOutputStream.writeInt(enabledComponentsSize);
-                for (int i = 0; i < enabledComponentsSize; i++) {
-                    dataOutputStream.writeUTF(enabledComponents.valueAt(i));
-                }
+            final ArraySet<String> enabledComponents = packageManagerInternal.getEnabledComponents(
+                    pkg.getPackageName(), userId);
+            final int enabledComponentsSize = CollectionUtils.size(enabledComponents);
+            md.writeInt(enabledComponentsSize);
+            for (int i = 0; i < enabledComponentsSize; i++) {
+                md.writeString(enabledComponents.valueAt(i));
+            }
 
-                final ArraySet<String> disabledComponents =
-                        packageManagerInternal.getDisabledComponents(pkg.getPackageName(), userId);
-                final int disabledComponentsSize = CollectionUtils.size(disabledComponents);
-                for (int i = 0; i < disabledComponentsSize; i++) {
-                    dataOutputStream.writeUTF(disabledComponents.valueAt(i));
-                }
+            final ArraySet<String> disabledComponents =
+                    packageManagerInternal.getDisabledComponents(pkg.getPackageName(), userId);
+            final int disabledComponentsSize = CollectionUtils.size(disabledComponents);
+            for (int i = 0; i < disabledComponentsSize; i++) {
+                md.writeString(disabledComponents.valueAt(i));
+            }
 
-                for (final Signature signature : pkg.getSigningDetails().getSignatures()) {
-                    dataOutputStream.write(signature.toByteArray());
-                }
-            } catch (IOException e) {
-                // Never happens for ByteArrayOutputStream and DataOutputStream.
-                throw new AssertionError(e);
+            for (final Signature signature : pkg.getSigningDetails().getSignatures()) {
+                md.writeBytes(signature.toByteArray());
             }
         }, userId);
-        return PackageUtils.computeSha256Digest(byteArrayOutputStream.toByteArray());
+
+        return md.getDigestAsString();
+    }
+
+    private static class MessageDigestUtils {
+        private final byte[] mBuffer = new byte[8];
+        private final MessageDigest mMessageDigest;
+
+        MessageDigestUtils() {
+            try {
+                mMessageDigest = MessageDigest.getInstance("SHA256");
+            } catch (NoSuchAlgorithmException e) {
+                /* can't happen */
+                throw new RuntimeException("Failed to create MessageDigest", e);
+            }
+        }
+
+        @NonNull
+        String getDigestAsString() {
+            return HexEncoding.encodeToString(mMessageDigest.digest(), true /* uppercase */);
+        }
+
+        void writeBytes(@NonNull byte[] bytes) {
+            mMessageDigest.update(bytes);
+        }
+
+        void writeString(@NonNull String s) {
+            mMessageDigest.update(s.getBytes(StandardCharsets.UTF_8));
+        }
+
+        void writeLong(long v) {
+            mBuffer[0] = (byte) (v >>> 56);
+            mBuffer[1] = (byte) (v >>> 48);
+            mBuffer[2] = (byte) (v >>> 40);
+            mBuffer[3] = (byte) (v >>> 32);
+            mBuffer[4] = (byte) (v >>> 24);
+            mBuffer[5] = (byte) (v >>> 16);
+            mBuffer[6] = (byte) (v >>>  8);
+            mBuffer[7] = (byte) (v >>>  0);
+            mMessageDigest.update(mBuffer, 0, 8);
+        }
+
+        void writeInt(int v) {
+            mBuffer[0] = (byte) (v >>> 24);
+            mBuffer[1] = (byte) (v >>> 16);
+            mBuffer[2] = (byte) (v >>>  8);
+            mBuffer[3] = (byte) (v >>>  0);
+            mMessageDigest.update(mBuffer, 0, 4);
+        }
     }
 }
