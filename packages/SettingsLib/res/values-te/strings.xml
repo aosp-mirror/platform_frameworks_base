@@ -88,7 +88,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ఇన్‌పుట్ పరికరం"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ఇంటర్నెట్ యాక్సెస్"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"కాంటాక్ట్ షేరింగ్"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"పరిచయ భాగస్వామ్యం కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"కాంటాక్ట్ షేరింగ్ కోసం ఉపయోగించండి"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ఇంటర్నెట్ కనెక్షన్ భాగస్వామ్యం"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"వచన మెసేజ్‌లు"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM యాక్సెస్"</string>
@@ -172,7 +172,7 @@
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ఈ ప్రసంగ సమన్వయ ఇంజిన్ చదివి వినిపించబడే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ఇంజిన్‌లో అందించబడుతుంది. ఈ ప్రసంగ సమన్వయ ఇంజిన్ యొక్క వినియోగాన్ని ప్రారంభించాలా?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"వచనం నుండి ప్రసంగం అవుట్‌పుట్ కోసం ఈ భాషకు పని చేస్తున్న నెట్‌వర్క్ కనెక్షన్ కావాలి."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ఇది ప్రసంగ సమన్వయానికి ఉదాహరణ"</string>
-    <string name="tts_status_title" msgid="8190784181389278640">"డిఫాల్ట్ భాష స్థితి"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"ఆటోమేటిక్ భాష స్టేటస్"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g>కి పూర్తి మద్దతు ఉంది"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g>కి నెట్‌వర్క్ కనెక్షన్ అవసరం"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g>కు మద్దతు లేదు"</string>
@@ -182,7 +182,7 @@
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"ప్రాధాన్య ఇంజిన్"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"సాధారణం"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ప్రసంగ స్వర స్థాయిని రీసెట్ చేయండి"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"వచనాన్ని చదివి వినిపించే స్వర స్థాయిని డిఫాల్ట్‌కి రీసెట్ చేస్తుంది."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"టెక్స్ట్‌ను చదివి వినిపించే స్వర స్థాయిని ఆటోమేటిక్‌కు రీసెట్ చేస్తుంది."</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"చాలా నెమ్మది"</item>
     <item msgid="1815382991399815061">"నెమ్మది"</item>
@@ -388,7 +388,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"బ్యాకప్ పాస్‌వర్డ్‌ను సెట్ చేయడంలో వైఫల్యం"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"లోడ్ చేస్తోంది…"</string>
   <string-array name="color_mode_names">
-    <item msgid="3836559907767149216">"సచేతనం (డిఫాల్ట్)"</item>
+    <item msgid="3836559907767149216">"వైబ్రంట్ (ఆటోమేటిక్)"</item>
     <item msgid="9112200311983078311">"సహజం"</item>
     <item msgid="6564241960833766170">"స్టాండర్డ్"</item>
   </string-array>
