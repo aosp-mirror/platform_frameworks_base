@@ -1,12 +1,14 @@
 # Remain no owner because multiple modules may touch this file.
 per-file Context.java = *
 per-file ContextWrapper.java = *
-per-file Content* = varunshah@google.com, omakoto@google.com, jsharkey@google.com
+per-file Content* = file:/services/core/java/com/android/server/am/OWNERS
 per-file IntentFilter.java = toddke@google.com
 per-file IntentFilter.java = patb@google.com
+per-file IntentFilter.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file Intent.java = toddke@google.com
 per-file Intent.java = patb@google.com
 per-file Intent.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Intent.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file AutofillOptions* = file:/core/java/android/service/autofill/OWNERS
 per-file ContentCaptureOptions* = file:/core/java/android/service/contentcapture/OWNERS
 per-file LocusId* = file:/core/java/android/service/contentcapture/OWNERS

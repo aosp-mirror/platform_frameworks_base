@@ -30329,6 +30329,7 @@ package android.os {
     method public void close();
     method @NonNull public static android.os.SharedMemory create(@Nullable String, int) throws android.system.ErrnoException;
     method public int describeContents();
+    method @NonNull public static android.os.SharedMemory fromFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int getSize();
     method @NonNull public java.nio.ByteBuffer map(int, int, int) throws android.system.ErrnoException;
     method @NonNull public java.nio.ByteBuffer mapReadOnly() throws android.system.ErrnoException;

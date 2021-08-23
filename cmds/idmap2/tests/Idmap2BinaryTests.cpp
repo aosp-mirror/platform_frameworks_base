@@ -93,7 +93,7 @@ TEST_F(Idmap2BinaryTests, Create) {
                                "--idmap-path", GetIdmapPath()});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
 
   struct stat st;
   ASSERT_EQ(stat(GetIdmapPath().c_str(), &st), 0);
@@ -119,7 +119,7 @@ TEST_F(Idmap2BinaryTests, Dump) {
                                "--idmap-path", GetIdmapPath()});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -127,14 +127,14 @@ TEST_F(Idmap2BinaryTests, Dump) {
                           "--idmap-path", GetIdmapPath()});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find(R::target::integer::literal::int1 + " -> 0x7f010000"),
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
+  ASSERT_NE(result->stdout_str.find(R::target::integer::literal::int1 + " -> 0x7f010000"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str1 + " -> 0x7f020000"),
+  ASSERT_NE(result->stdout_str.find(R::target::string::literal::str1 + " -> 0x7f020000"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str3 + " -> 0x7f020001"),
+  ASSERT_NE(result->stdout_str.find(R::target::string::literal::str3 + " -> 0x7f020001"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str4 + " -> 0x7f020002"),
+  ASSERT_NE(result->stdout_str.find(R::target::string::literal::str4 + " -> 0x7f020002"),
             std::string::npos);
 
   // clang-format off
@@ -144,8 +144,8 @@ TEST_F(Idmap2BinaryTests, Dump) {
                           "--idmap-path", GetIdmapPath()});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find("00000000: 504d4449  magic"), std::string::npos);
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
+  ASSERT_NE(result->stdout_str.find("00000000: 504d4449  magic"), std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -170,7 +170,7 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                                "--idmap-path", GetIdmapPath()});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -180,9 +180,9 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "--resid", R::target::string::literal::str1});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find("overlay-1"), std::string::npos);
-  ASSERT_EQ(result->stdout.find("overlay-1-sv"), std::string::npos);
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
+  ASSERT_NE(result->stdout_str.find("overlay-1"), std::string::npos);
+  ASSERT_EQ(result->stdout_str.find("overlay-1-sv"), std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -192,9 +192,9 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "--resid", "test.target:string/str1"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find("overlay-1"), std::string::npos);
-  ASSERT_EQ(result->stdout.find("overlay-1-sv"), std::string::npos);
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
+  ASSERT_NE(result->stdout_str.find("overlay-1"), std::string::npos);
+  ASSERT_EQ(result->stdout_str.find("overlay-1-sv"), std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -204,8 +204,8 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "--resid", "test.target:string/str1"});
   // clang-format on
   ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find("overlay-1-sv"), std::string::npos);
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
+  ASSERT_NE(result->stdout_str.find("overlay-1-sv"), std::string::npos);
 
   unlink(GetIdmapPath().c_str());
 }
