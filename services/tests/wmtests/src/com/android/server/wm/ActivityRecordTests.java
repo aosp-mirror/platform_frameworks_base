@@ -39,6 +39,7 @@ import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -2814,6 +2815,73 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.mVisibleRequested);
         assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
+    }
+
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenReparented() {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowState app = createWindow(null, TYPE_APPLICATION, activity, "app");
+        final WindowState imeWindow = createWindow(null, TYPE_APPLICATION, "imeWindow");
+        final Task newTask = new TaskBuilder(mSupervisor).build();
+        makeWindowVisible(app, imeWindow);
+        mDisplayContent.mInputMethodWindow = imeWindow;
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity is reparent to the new task.
+        activity.setState(RESUMED, "test");
+        activity.reparent(newTask, 0 /* top */, "test");
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenResized() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app, mImeWindow);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity is reparent to the new task.
+        app.mActivityRecord.onResize();
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenNoImeFocusableInActivity() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app, mImeWindow);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        app.mActivityRecord.onWindowsGone();
+
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity has no IME focusable window.
+        app.mActivityRecord.forAllWindowsUnchecked(w -> {
+            w.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+            return true;
+        }, true);
+
+        app.mActivityRecord.commitVisibility(true, false);
+        app.mActivityRecord.onWindowsVisible();
+
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {
