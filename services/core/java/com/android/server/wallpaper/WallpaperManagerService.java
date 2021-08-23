@@ -3047,12 +3047,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    private boolean packageBelongsToUid(String packageName, int uid) {
+        int userId = UserHandle.getUserId(uid);
+        int packageUid;
+        try {
+            packageUid = mContext.getPackageManager().getPackageUidAsUser(
+                    packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return packageUid == uid;
+    }
+
+    private void enforcePackageBelongsToUid(String packageName, int uid) {
+        if (!packageBelongsToUid(packageName, uid)) {
+            throw new IllegalArgumentException(
+                    "Invalid package or package does not belong to uid:"
+                            + uid);
+        }
+    }
+
     /**
      * Certain user types do not support wallpapers (e.g. managed profiles). The check is
      * implemented through through the OP_WRITE_WALLPAPER AppOp.
      */
     public boolean isWallpaperSupported(String callingPackage) {
-        return mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_WRITE_WALLPAPER, Binder.getCallingUid(),
+        final int callingUid = Binder.getCallingUid();
+        enforcePackageBelongsToUid(callingPackage, callingUid);
+
+        return mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_WRITE_WALLPAPER, callingUid,
                 callingPackage) == AppOpsManager.MODE_ALLOWED;
     }
 
