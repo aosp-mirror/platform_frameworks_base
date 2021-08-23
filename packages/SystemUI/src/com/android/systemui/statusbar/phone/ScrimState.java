@@ -244,7 +244,8 @@ public enum ScrimState {
                     ? mKeyguardFadingAwayDuration
                     : StatusBar.FADE_KEYGUARD_DURATION;
 
-            mAnimateChange = !mLaunchingAffordanceWithPreview;
+            boolean fromAod = previousState == AOD || previousState == PULSING;
+            mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
 
             mFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.BLACK;
