@@ -741,6 +741,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 tf1.setAdjacentTaskFragment(tf2);
+
+                final Bundle bundle = hop.getLaunchOptions();
+                final WindowContainerTransaction.TaskFragmentAdjacentOptions adjacentOptions =
+                        bundle != null ? new WindowContainerTransaction.TaskFragmentAdjacentOptions(
+                                bundle) : null;
+                if (adjacentOptions == null) {
+                    break;
+                }
+
+                tf1.setDelayLastActivityRemoval(
+                        adjacentOptions.isDelayPrimaryLastActivityRemoval());
+                if (tf2 != null) {
+                    tf2.setDelayLastActivityRemoval(
+                            adjacentOptions.isDelaySecondaryLastActivityRemoval());
+                }
                 break;
         }
         return effects;
