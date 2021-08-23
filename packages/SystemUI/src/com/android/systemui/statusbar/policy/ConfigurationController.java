@@ -37,6 +37,7 @@ public interface ConfigurationController extends CallbackController<Configuratio
         default void onConfigChanged(Configuration newConfig) {}
         default void onDensityOrFontScaleChanged() {}
         default void onSmallestScreenWidthChanged() {}
+        default void onMaxBoundsChanged() {}
         default void onOverlayChanged() {}
         default void onUiModeChanged() {}
         default void onThemeChanged() {}
