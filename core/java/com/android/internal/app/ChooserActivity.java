@@ -468,6 +468,7 @@ public class ChooserActivity extends ResolverActivity implements
         private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 300;
 
         private boolean mMinTimeoutPassed = false;
+        private boolean mReceivedDirectShareTargets = false;
 
         private void removeAllMessages() {
             removeMessages(LIST_VIEW_UPDATE_MESSAGE);
@@ -498,7 +499,7 @@ public class ChooserActivity extends ResolverActivity implements
             // Set a minimum timeout threshold, to ensure both apis, sharing shortcuts
             // and older-style direct share services, have had time to load, otherwise
             // just checking mServiceConnections could force us to end prematurely
-            if (mMinTimeoutPassed && mServiceConnections.isEmpty()) {
+            if (mMinTimeoutPassed && mServiceConnections.isEmpty() && mReceivedDirectShareTargets) {
                 logDirectShareTargetReceived(
                         MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
                 sendVoiceChoicesIfNeeded();
@@ -585,10 +586,14 @@ public class ChooserActivity extends ResolverActivity implements
                     break;
 
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED:
+                    mReceivedDirectShareTargets = true;
+
                     logDirectShareTargetReceived(
                             MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER);
                     sendVoiceChoicesIfNeeded();
                     getChooserActivityLogger().logSharesheetDirectLoadComplete();
+
+                    maybeStopServiceRequestTimer();
                     break;
 
                 default:
@@ -2140,7 +2145,6 @@ public class ChooserActivity extends ResolverActivity implements
         // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
-        boolean resultMessageSent = false;
         for (int i = 0; i < chooserListAdapter.getDisplayResolveInfoCount(); i++) {
             List<ShortcutManager.ShareShortcutInfo> matchingShortcuts = new ArrayList<>();
             for (int j = 0; j < resultList.size(); j++) {
@@ -2155,20 +2159,15 @@ public class ChooserActivity extends ResolverActivity implements
             List<ChooserTarget> chooserTargets = convertToChooserTarget(
                     matchingShortcuts, resultList, appTargets, shortcutType);
 
-
-
             final Message msg = Message.obtain();
             msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
             msg.obj = new ServiceResultInfo(chooserListAdapter.getDisplayResolveInfo(i),
                     chooserTargets, null, userHandle);
             msg.arg1 = shortcutType;
             mChooserHandler.sendMessage(msg);
-            resultMessageSent = true;
         }
 
-        if (resultMessageSent) {
-            sendShortcutManagerShareTargetResultCompleted();
-        }
+        sendShortcutManagerShareTargetResultCompleted();
     }
 
     private void sendShortcutManagerShareTargetResultCompleted() {
