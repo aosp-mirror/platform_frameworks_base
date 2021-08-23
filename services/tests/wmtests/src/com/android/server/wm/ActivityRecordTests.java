@@ -2509,8 +2509,10 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testTransferStartingWindow() {
         registerTestStartingWindowOrganizer();
-        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
@@ -2519,6 +2521,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1,
                 true, true, false, true, false, false);
         waitUntilHandlersIdle();
+        assertFalse(mDisplayContent.mSkipAppTransitionAnimation);
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
     }
@@ -2626,6 +2629,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
 
+        assertTrue(mDisplayContent.mSkipAppTransitionAnimation);
         assertNull(middle.mStartingWindow);
         assertHasStartingWindow(top);
         assertTrue(top.isVisible());
