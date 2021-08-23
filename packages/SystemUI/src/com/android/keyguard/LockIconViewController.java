@@ -68,7 +68,8 @@ import javax.inject.Inject;
 /**
  * Controls when to show the LockIcon affordance (lock/unlocked icon or circle) on lock screen.
  *
- * This view will only be shown if the user has UDFPS or FaceAuth enrolled
+ * For devices with UDFPS, the lock icon will show at the sensor location. Else, the lock
+ * icon will show a set distance from the bottom of the device.
  */
 @StatusBarComponent.StatusBarScope
 public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
@@ -172,15 +173,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     protected void onInit() {
+        mAuthController.addCallback(mAuthControllerCallback);
+        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
     }
 
     @Override
     protected void onViewAttached() {
-        // we check this here instead of onInit since the FingerprintManager + FaceManager may not
-        // have started up yet onInit
-        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
-
         updateConfiguration();
         updateKeyguardShowing();
         mUserUnlockedWithBiometric = false;
@@ -584,4 +584,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     public void setAlpha(float alpha) {
         mView.setAlpha(alpha);
     }
+
+    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
+        @Override
+        public void onAllAuthenticatorsRegistered() {
+            mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+            updateConfiguration();
+        }
+    };
 }
