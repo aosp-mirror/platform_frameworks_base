@@ -1903,6 +1903,10 @@ public class LauncherApps {
 
     /**
      * Register a callback to watch for session lifecycle events in this user and managed profiles.
+     * Callers need to either declare &lt;queries&gt; element with the specific package name in the
+     * app's manifest, have the android.permission.QUERY_ALL_PACKAGES, or be the session owner to
+     * watch for these events.
+     *
      * @param callback The callback to register.
      * @param executor {@link Executor} to handle the callbacks, cannot be null.
      *
@@ -1947,7 +1951,9 @@ public class LauncherApps {
 
     /**
      * Return list of all known install sessions in this user and managed profiles, regardless
-     * of the installer.
+     * of the installer. Callers need to either declare &lt;queries&gt; element with the specific
+     * package name in the app's manifest, have the android.permission.QUERY_ALL_PACKAGES, or be
+     * the session owner to retrieve these details.
      *
      * @see PackageInstaller#getAllSessions()
      */

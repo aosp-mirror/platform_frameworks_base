@@ -524,8 +524,9 @@ public class PackageInstaller {
     }
 
     /**
-     * Return details for a specific session. No special permissions are
-     * required to retrieve these details.
+     * Return details for a specific session. Callers need to either declare &lt;queries&gt;
+     * element with the specific package name in the app's manifest, have the
+     * android.permission.QUERY_ALL_PACKAGES, or be the session owner to retrieve these details.
      *
      * @return details for the requested session, or {@code null} if the session
      *         does not exist.
@@ -539,7 +540,10 @@ public class PackageInstaller {
     }
 
     /**
-     * Return list of all known install sessions, regardless of the installer.
+     * Return list of all known install sessions, regardless of the installer. Callers need to
+     * either declare &lt;queries&gt; element with the specific  package name in the app's manifest,
+     * have the android.permission.QUERY_ALL_PACKAGES, or be the session owner to retrieve these
+     * details.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
         try {
@@ -561,7 +565,9 @@ public class PackageInstaller {
     }
 
     /**
-     * Return list of all staged install sessions.
+     * Return list of all staged install sessions. Callers need to either declare &lt;queries&gt;
+     * element with the specific package name in the app's manifest, have the
+     * android.permission.QUERY_ALL_PACKAGES, or be the session owner to retrieve these details.
      */
     public @NonNull List<SessionInfo> getStagedSessions() {
         try {
@@ -870,8 +876,8 @@ public class PackageInstaller {
     }
 
     /**
-     * Register to watch for session lifecycle events. No special permissions
-     * are required to watch for these events.
+     * Register to watch for session lifecycle events. The callers need to be the session
+     * owner or have the android.permission.QUERY_ALL_PACKAGES to watch for these events.
      */
     public void registerSessionCallback(@NonNull SessionCallback callback) {
         registerSessionCallback(callback, new Handler());
@@ -2398,6 +2404,9 @@ public class PackageInstaller {
         public int requireUserAction;
 
         /** {@hide} */
+        public int installerUid;
+
+        /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public SessionInfo() {
         }
@@ -2447,6 +2456,7 @@ public class PackageInstaller {
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
+            installerUid = source.readInt();
         }
 
         /**
@@ -2962,6 +2972,15 @@ public class PackageInstaller {
             return requireUserAction;
         }
 
+        /**
+         * Returns the Uid of the owner of the session.
+         *
+         * @hide
+         */
+        public int getInstallerUid() {
+            return installerUid;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -3008,6 +3027,7 @@ public class PackageInstaller {
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
+            dest.writeInt(installerUid);
         }
 
         public static final Parcelable.Creator<SessionInfo>

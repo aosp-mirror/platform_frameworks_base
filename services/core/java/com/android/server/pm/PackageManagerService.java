@@ -19903,6 +19903,56 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * Returns whether the given UID either declares &lt;queries&gt; element with the given package
+     * name in its app's manifest, has {@link android.Manifest.permission.QUERY_ALL_PACKAGES}, or
+     * package visibility filtering is enabled on it. If the UID is part of a shared user ID,
+     * return {@code true} if any one application belongs to the shared user ID meets the criteria.
+     */
+    boolean canQueryPackage(int callingUid, @Nullable String targetPackageName) {
+        if (targetPackageName == null) {
+            return true;
+        }
+        synchronized (mLock) {
+            final Object setting = mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
+            if (setting == null) {
+                return false;
+            }
+
+            final int userId = UserHandle.getUserId(callingUid);
+            final int targetAppId = UserHandle.getAppId(
+                    getPackageUid(targetPackageName, 0 /* flags */, userId));
+            // For update or already installed case, leverage the existing visibility rule.
+            if (targetAppId != Process.INVALID_UID) {
+                final Object targetSetting = mSettings.getSettingLPr(targetAppId);
+                if (targetSetting instanceof PackageSetting) {
+                    return !shouldFilterApplicationLocked(
+                            (PackageSetting) targetSetting, callingUid, userId);
+                } else {
+                    return !shouldFilterApplicationLocked(
+                            (SharedUserSetting) targetSetting, callingUid, userId);
+                }
+            }
+
+            // For new installing case, check if caller declares <queries> element with the
+            // target package name or has proper permission.
+            if (setting instanceof PackageSetting) {
+                final AndroidPackage pkg = ((PackageSetting) setting).getPkg();
+                return pkg != null && mAppsFilter.canQueryPackage(pkg, targetPackageName);
+            } else {
+                final ArraySet<PackageSetting> callingSharedPkgSettings =
+                        ((SharedUserSetting) setting).packages;
+                for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
+                    final AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).getPkg();
+                    if (pkg != null && mAppsFilter.canQueryPackage(pkg, targetPackageName)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -19991,8 +20041,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Nullable
+        @Override
         public int[] getVisibilityAllowList(@NonNull String packageName, int userId) {
             return PackageManagerService.this.getVisibilityAllowList(packageName, userId);
+        }
+
+        @Override
+        public boolean canQueryPackage(int callingUid, @Nullable String packageName) {
+            return PackageManagerService.this.canQueryPackage(callingUid, packageName);
         }
 
         @Override

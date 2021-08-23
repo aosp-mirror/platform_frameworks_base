@@ -1189,6 +1189,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
             info.requireUserAction = params.requireUserAction;
+            info.installerUid = mInstallerUid;
         }
         return info;
     }
