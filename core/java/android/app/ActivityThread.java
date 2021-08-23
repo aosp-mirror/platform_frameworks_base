@@ -1041,16 +1041,17 @@ public final class ActivityThread extends ClientTransactionHandler {
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings,
+                CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
                 ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
-                    for (String name : services.keySet()) {
-                        if (services.get(name) == null) {
+                    for (Object oname : services.keySet()) {
+                        if (services.get(oname) == null) {
                             continue; // AM just passed in a null service.
                         }
+                        String name = (String) oname;
 
                         // See b/79378449 about the following exemption.
                         switch (name) {
