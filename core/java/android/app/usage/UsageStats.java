@@ -171,9 +171,9 @@ public final class UsageStats implements Parcelable {
         mLaunchCount = stats.mLaunchCount;
         mAppLaunchCount = stats.mAppLaunchCount;
         mLastEvent = stats.mLastEvent;
-        mActivities = stats.mActivities;
-        mForegroundServices = stats.mForegroundServices;
-        mChooserCounts = stats.mChooserCounts;
+        mActivities = stats.mActivities.clone();
+        mForegroundServices = new ArrayMap<>(stats.mForegroundServices);
+        mChooserCounts = new ArrayMap<>(stats.mChooserCounts);
     }
 
     /**
