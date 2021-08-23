@@ -93,7 +93,8 @@ public final class SplitLayout {
     private final Rect mDividerBounds = new Rect();
     private final Rect mBounds1 = new Rect();
     private final Rect mBounds2 = new Rect();
-    private final Rect mTmpBounds = new Rect();
+    private final Rect mWinBounds1 = new Rect();
+    private final Rect mWinBounds2 = new Rect();
     private final SplitLayoutHandler mSplitLayoutHandler;
     private final SplitWindowManager mSplitWindowManager;
     private final DisplayImeController mDisplayImeController;
@@ -103,6 +104,8 @@ public final class SplitLayout {
 
     private Context mContext;
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
+    private WindowContainerToken mWinToken1;
+    private WindowContainerToken mWinToken2;
     private int mDividePosition;
     private boolean mInitialized = false;
     private int mOrientation;
@@ -189,10 +192,10 @@ public final class SplitLayout {
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
         if (rotation != mRotation || !mRootBounds.equals(rootBounds)) {
-            mTmpBounds.set(mRootBounds);
+            mTempRect.set(mRootBounds);
             mRootBounds.set(rootBounds);
             mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
-            initDividerPosition(mTmpBounds);
+            initDividerPosition(mTempRect);
             affectsLayout = true;
         }
 
@@ -403,8 +406,16 @@ public final class SplitLayout {
             return;
         }
 
-        wct.setBounds(task1.token, mBounds1)
-                .setBounds(task2.token, mBounds2);
+        if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
+            wct.setBounds(task1.token, mBounds1);
+            mWinBounds1.set(mBounds1);
+            mWinToken1 = task1.token;
+        }
+        if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
+            wct.setBounds(task2.token, mBounds2);
+            mWinBounds2.set(mBounds2);
+            mWinToken2 = task2.token;
+        }
     }
 
     /**
