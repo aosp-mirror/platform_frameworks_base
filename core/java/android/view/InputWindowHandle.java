@@ -47,6 +47,11 @@ public final class InputWindowHandle {
      */
     @Nullable
     private IBinder windowToken;
+    /**
+     * Used to cache IWindow from the windowToken so we don't need to convert every time getWindow
+     * is called.
+     */
+    private IWindow window;
 
     // The window name.
     public String name;
@@ -145,7 +150,7 @@ public final class InputWindowHandle {
                 .append(", visible=").append(visible)
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)
-                .append(", windowToken=").append(getWindow())
+                .append(", windowToken=").append(windowToken)
                 .toString();
 
     }
@@ -180,9 +185,14 @@ public final class InputWindowHandle {
 
     public void setWindowToken(IWindow iwindow) {
         windowToken = iwindow.asBinder();
+        window = iwindow;
     }
 
     public IWindow getWindow() {
-        return IWindow.Stub.asInterface(windowToken);
+        if (window != null) {
+            return window;
+        }
+        window = IWindow.Stub.asInterface(windowToken);
+        return window;
     }
 }
