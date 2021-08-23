@@ -197,7 +197,7 @@ public:
 
     // Called when SurfaceStats are available.
     static void onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-            ASurfaceControlStats* stats);
+                                        int32_t surfaceControlId, ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
             const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
@@ -244,7 +244,7 @@ private:
         int32_t surfaceId;
     };
 
-    CanvasContext::FrameMetricsInfo getFrameMetricsInfoFromLast4(uint64_t frameNumber);
+    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId);
 
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
@@ -259,6 +259,7 @@ private:
     // whether reparenting is needed also used by FrameMetricsReporter to determine
     // if a frame is from an "old" surface (i.e. one that existed before the
     // observer was attched) and therefore shouldn't be reported.
+    // NOTE: It is important that this is an increasing counter.
     int32_t mSurfaceControlGenerationId = 0;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
