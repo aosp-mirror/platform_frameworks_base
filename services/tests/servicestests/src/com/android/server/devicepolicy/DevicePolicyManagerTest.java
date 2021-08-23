@@ -101,6 +101,7 @@ import android.graphics.Color;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Process;
@@ -2096,9 +2097,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
-        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID, null,
+                Build.VERSION_CODES.Q);
         dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
 
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         boolean originalCameraDisabled = dpm.getCameraDisabled(admin1);
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
                 () -> dpm.setCameraDisabled(admin1, true));
@@ -2665,8 +2669,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
 
         // Test 1. Caller doesn't have DO or DA.
-        assertExpectException(SecurityException.class, /* messageRegex= */ "No active admin",
-                () -> dpm.getWifiMacAddress(admin1));
+        assertExpectException(SecurityException.class, /* messageRegex= */
+                "does not exist or is not owned by uid", () -> dpm.getWifiMacAddress(admin1));
 
         // DO needs to be an DA.
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
