@@ -175,7 +175,7 @@ public class SparseArrayMap<K, V> {
     public void forEach(@NonNull TriConsumer<K, V> consumer) {
         for (int iIdx = numMaps() - 1; iIdx >= 0; --iIdx) {
             final int i = mData.keyAt(iIdx);
-            final ArrayMap<K, V> data = mData.valueAt(i);
+            final ArrayMap<K, V> data = mData.valueAt(iIdx);
             for (int kIdx = data.size() - 1; kIdx >= 0; --kIdx) {
                 consumer.accept(i, data.keyAt(kIdx), data.valueAt(kIdx));
             }
