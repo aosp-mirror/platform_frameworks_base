@@ -39,16 +39,10 @@ class SplitContainer {
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
 
-        final boolean isPlaceholderContainer = isPlaceholderContainer();
-        final boolean shouldFinishPrimaryWithSecondary = (mSplitRule instanceof SplitPairRule)
-                && ((SplitPairRule) mSplitRule).shouldFinishPrimaryWithSecondary();
-        final boolean shouldFinishSecondaryWithPrimary = (mSplitRule instanceof SplitPairRule)
-                && ((SplitPairRule) mSplitRule).shouldFinishSecondaryWithPrimary();
-
-        if (shouldFinishPrimaryWithSecondary || isPlaceholderContainer) {
+        if (shouldFinishPrimaryWithSecondary(splitRule)) {
             mSecondaryContainer.addActivityToFinishOnExit(primaryActivity);
         }
-        if (shouldFinishSecondaryWithPrimary || isPlaceholderContainer) {
+        if (shouldFinishSecondaryWithPrimary(splitRule)) {
             mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
         }
     }
@@ -70,5 +64,19 @@ class SplitContainer {
 
     boolean isPlaceholderContainer() {
         return (mSplitRule instanceof SplitPlaceholderRule);
+    }
+
+    static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {
+        final boolean isPlaceholderContainer = splitRule instanceof SplitPlaceholderRule;
+        final boolean shouldFinishPrimaryWithSecondary = (splitRule instanceof SplitPairRule)
+                && ((SplitPairRule) splitRule).shouldFinishPrimaryWithSecondary();
+        return shouldFinishPrimaryWithSecondary || isPlaceholderContainer;
+    }
+
+    static boolean shouldFinishSecondaryWithPrimary(@NonNull SplitRule splitRule) {
+        final boolean isPlaceholderContainer = splitRule instanceof SplitPlaceholderRule;
+        final boolean shouldFinishSecondaryWithPrimary = (splitRule instanceof SplitPairRule)
+                && ((SplitPairRule) splitRule).shouldFinishSecondaryWithPrimary();
+        return shouldFinishSecondaryWithPrimary || isPlaceholderContainer;
     }
 }

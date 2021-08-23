@@ -36,6 +36,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.embedding.SplitRule;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -100,7 +101,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @NonNull IBinder launchingFragmentToken, @NonNull Rect launchingFragmentBounds,
             @NonNull Activity launchingActivity, @NonNull IBinder secondaryFragmentToken,
             @NonNull Rect secondaryFragmentBounds, @NonNull Intent activityIntent,
-            @Nullable Bundle activityOptions) {
+            @Nullable Bundle activityOptions, @NonNull SplitRule rule) {
         final IBinder ownerToken = launchingActivity.getActivityToken();
 
         // Create or resize the launching TaskFragment.
@@ -117,7 +118,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 activityOptions);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        wct.setAdjacentTaskFragments(launchingFragmentToken, secondaryFragmentToken);
+        setAdjacentTaskFragments(wct, launchingFragmentToken, secondaryFragmentToken, rule);
     }
 
     /**
@@ -127,7 +128,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      */
     void expandTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
-        wct.setAdjacentTaskFragments(fragmentToken, null);
+        setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
     }
 
     /**
@@ -185,6 +186,21 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @Nullable Bundle activityOptions) {
         createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
         wct.startActivityInTaskFragment(fragmentToken, ownerToken, activityIntent, activityOptions);
+    }
+
+    void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder primary, @Nullable IBinder secondary, @Nullable SplitRule splitRule) {
+        WindowContainerTransaction.TaskFragmentAdjacentOptions adjacentOptions = null;
+        final boolean finishSecondaryWithPrimary =
+                splitRule != null && SplitContainer.shouldFinishSecondaryWithPrimary(splitRule);
+        final boolean finishPrimaryWithSecondary =
+                splitRule != null && SplitContainer.shouldFinishPrimaryWithSecondary(splitRule);
+        if (finishSecondaryWithPrimary || finishPrimaryWithSecondary) {
+            adjacentOptions = new WindowContainerTransaction.TaskFragmentAdjacentOptions();
+            adjacentOptions.setDelayPrimaryLastActivityRemoval(finishSecondaryWithPrimary);
+            adjacentOptions.setDelaySecondaryLastActivityRemoval(finishPrimaryWithSecondary);
+        }
+        wct.setAdjacentTaskFragments(primary, secondary, adjacentOptions);
     }
 
     TaskFragmentCreationParams createFragmentOptions(IBinder fragmentToken, IBinder ownerToken,
