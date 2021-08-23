@@ -8246,6 +8246,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(
+                who == null || isCallingFromPackage(who.getPackageName(), caller.getUid())
+                        || isSystemUid(caller));
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
