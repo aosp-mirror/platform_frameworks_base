@@ -3234,6 +3234,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/137329632): find the next activity directly underneath this one, not just anywhere
         final ActivityRecord next = getDisplayArea().topRunningActivity(
                 true /* considerKeyguardState */);
+
+        // If the finishing activity is the last activity of a organized TaskFragment and has an
+        // adjacent TaskFragment, check if the activity removal should be delayed.
+        boolean delayRemoval = false;
+        final TaskFragment taskFragment = getTaskFragment();
+        if (next != null && taskFragment != null && taskFragment.isEmbedded()) {
+            final TaskFragment organized = taskFragment.getOrganizedTaskFragment();
+            final TaskFragment adjacent =
+                    organized != null ? organized.getAdjacentTaskFragment() : null;
+            if (adjacent != null && organized.topRunningActivity() == null) {
+                delayRemoval = organized.isDelayLastActivityRemoval();
+            }
+        }
+
         // isNextNotYetVisible is to check if the next activity is invisible, or it has been
         // requested to be invisible but its windows haven't reported as invisible.  If so, it
         // implied that the current finishing activity should be added into stopping list rather
@@ -3248,7 +3262,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isCurrentVisible) {
-            if (isNextNotYetVisible) {
+            if (isNextNotYetVisible || delayRemoval) {
                 // Add this activity to the list of stopping activities. It will be processed and
                 // destroyed when the next activity reports idle.
                 addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
