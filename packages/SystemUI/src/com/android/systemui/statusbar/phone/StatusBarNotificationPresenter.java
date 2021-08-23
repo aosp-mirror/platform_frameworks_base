@@ -312,17 +312,11 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private void onNotificationRemoved(String key, StatusBarNotification old, int reason) {
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
-        if (old != null) {
-            if (CLOSE_PANEL_WHEN_EMPTIED && !hasActiveNotifications()
-                    && !mNotificationPanel.isTracking() && !mNotificationPanel.isQsExpanded()) {
-                if (mStatusBarStateController.getState() == StatusBarState.SHADE
-                        && reason != NotificationListenerService.REASON_CLICK) {
-                    mCommandQueue.animateCollapsePanels();
-                } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
+        if (old != null && CLOSE_PANEL_WHEN_EMPTIED && !hasActiveNotifications()
+                && !mNotificationPanel.isTracking() && !mNotificationPanel.isQsExpanded()
+                && mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                         && !isCollapsing()) {
-                    mStatusBarStateController.setState(StatusBarState.KEYGUARD);
-                }
-            }
+                mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
     }
 
