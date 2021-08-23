@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
+import static android.content.pm.parsing.ParsingPackageUtils.ASPECT_RATIO_NOT_SET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
 import android.annotation.NonNull;
@@ -67,11 +68,8 @@ public class ParsedActivity extends ParsedMainComponent {
     private int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     private int resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
-    @Nullable
-    private Float maxAspectRatio;
-
-    @Nullable
-    private Float minAspectRatio;
+    private float maxAspectRatio = ASPECT_RATIO_NOT_SET;
+    private float minAspectRatio = ASPECT_RATIO_NOT_SET;
 
     private boolean supportsSizeChanges;
 
@@ -234,7 +232,7 @@ public class ParsedActivity extends ParsedMainComponent {
         return this;
     }
 
-    public ParsedActivity setMaxAspectRatio(Float maxAspectRatio) {
+    public ParsedActivity setMaxAspectRatio(float maxAspectRatio) {
         this.maxAspectRatio = maxAspectRatio;
         return this;
     }
@@ -260,7 +258,7 @@ public class ParsedActivity extends ParsedMainComponent {
         return this;
     }
 
-    public ParsedActivity setMinAspectRatio(Float minAspectRatio) {
+    public ParsedActivity setMinAspectRatio(float minAspectRatio) {
         this.minAspectRatio = minAspectRatio;
         return this;
     }
@@ -375,8 +373,8 @@ public class ParsedActivity extends ParsedMainComponent {
         dest.writeInt(this.lockTaskLaunchMode);
         dest.writeInt(this.screenOrientation);
         dest.writeInt(this.resizeMode);
-        dest.writeValue(this.maxAspectRatio);
-        dest.writeValue(this.minAspectRatio);
+        dest.writeFloat(this.maxAspectRatio);
+        dest.writeFloat(this.minAspectRatio);
         dest.writeBoolean(this.supportsSizeChanges);
         dest.writeString(this.requestedVrComponent);
         dest.writeInt(this.rotationAnimation);
@@ -412,8 +410,8 @@ public class ParsedActivity extends ParsedMainComponent {
         this.lockTaskLaunchMode = in.readInt();
         this.screenOrientation = in.readInt();
         this.resizeMode = in.readInt();
-        this.maxAspectRatio = (Float) in.readValue(Float.class.getClassLoader());
-        this.minAspectRatio = (Float) in.readValue(Float.class.getClassLoader());
+        this.maxAspectRatio = in.readFloat();
+        this.minAspectRatio = in.readFloat();
         this.supportsSizeChanges = in.readBoolean();
         this.requestedVrComponent = in.readString();
         this.rotationAnimation = in.readInt();
@@ -505,13 +503,11 @@ public class ParsedActivity extends ParsedMainComponent {
         return resizeMode;
     }
 
-    @Nullable
-    public Float getMaxAspectRatio() {
+    public float getMaxAspectRatio() {
         return maxAspectRatio;
     }
 
-    @Nullable
-    public Float getMinAspectRatio() {
+    public float getMinAspectRatio() {
         return minAspectRatio;
     }
 
