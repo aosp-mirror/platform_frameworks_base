@@ -191,8 +191,8 @@ public class NavigationBarController implements Callbacks,
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
-        mTaskbarDelegate.setOverviewProxyService(overviewProxyService,
-                navigationBarA11yHelper, mSysUiFlagsContainer);
+        mTaskbarDelegate.setOverviewProxyService(commandQueue, overviewProxyService,
+                navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer);
         mIsTablet = isTablet(mContext);
         mUserTracker = userTracker;
     }
@@ -252,12 +252,10 @@ public class NavigationBarController implements Callbacks,
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         if (mIsTablet) {
-            // Remove navigation bar when taskbar is showing, currently only for 3 button mode
+            // Remove navigation bar when taskbar is showing
             removeNavigationBar(mContext.getDisplayId());
-            mCommandQueue.addCallback(mTaskbarDelegate);
             mTaskbarDelegate.init(mContext.getDisplayId());
         } else {
-            mCommandQueue.removeCallback(mTaskbarDelegate);
             mTaskbarDelegate.destroy();
         }
         return mIsTablet;

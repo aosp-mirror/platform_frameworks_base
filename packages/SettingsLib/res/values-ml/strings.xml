@@ -30,7 +30,7 @@
     <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
     <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
     <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
-    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"None/OWE"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"ഒന്നുമില്ല/OWE"</string>
     <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
     <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"ഒന്നുമില്ല"</string>
@@ -43,7 +43,7 @@
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
     <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
-    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"പാസ്പോയിന്റ്"</string>
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"ഒന്നുമില്ല/Enhanced Open"</string>
