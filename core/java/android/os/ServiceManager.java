@@ -17,6 +17,8 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -28,6 +30,7 @@ import com.android.internal.util.StatLogger;
 import java.util.Map;
 
 /** @hide */
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class ServiceManager {
     private static final String TAG = "ServiceManager";
     private static final Object sLock = new Object();
@@ -98,10 +101,12 @@ public final class ServiceManager {
         int COUNT = GET_SERVICE + 1;
     }
 
+    /** @hide */
     public static final StatLogger sStatLogger = new StatLogger(new String[] {
             "getService()",
     });
 
+    /** @hide */
     @UnsupportedAppUsage
     public ServiceManager() {
     }
@@ -123,6 +128,7 @@ public final class ServiceManager {
      *
      * @param name the name of the service to get
      * @return a reference to the service, or <code>null</code> if the service doesn't exist
+     * @hide
      */
     @UnsupportedAppUsage
     public static IBinder getService(String name) {
@@ -160,6 +166,7 @@ public final class ServiceManager {
      *
      * @param name the name of the new service
      * @param service the service object
+     * @hide
      */
     @UnsupportedAppUsage
     public static void addService(String name, IBinder service) {
@@ -174,6 +181,7 @@ public final class ServiceManager {
      * @param service the service object
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
+     * @hide
      */
     @UnsupportedAppUsage
     public static void addService(String name, IBinder service, boolean allowIsolated) {
@@ -189,6 +197,7 @@ public final class ServiceManager {
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * @param dumpPriority supported dump priority levels as a bitmask
      * to access this service
+     * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void addService(String name, IBinder service, boolean allowIsolated,
@@ -203,6 +212,7 @@ public final class ServiceManager {
     /**
      * Retrieve an existing service called @a name from the
      * service manager.  Non-blocking.
+     * @hide
      */
     @UnsupportedAppUsage
     public static IBinder checkService(String name) {
@@ -239,6 +249,7 @@ public final class ServiceManager {
      *
      * @return true if the service is declared somewhere (eg. VINTF manifest) and
      * waitForService should always be able to return the service.
+     * @hide
      */
     public static String[] getDeclaredInstances(@NonNull String iface) {
         try {
@@ -256,13 +267,13 @@ public final class ServiceManager {
      * will wait for it to be ready.
      *
      * @return {@code null} only if there are permission problems or fatal errors.
+     * @hide
      */
     public static IBinder waitForService(@NonNull String name) {
         return Binder.allowBlocking(waitForServiceNative(name));
     }
 
     private static native IBinder waitForServiceNative(@NonNull String name);
-
 
     /**
      * Returns the specified service from the service manager, if declared.
@@ -272,8 +283,10 @@ public final class ServiceManager {
      *
      * @return {@code null} if the service is not declared in the manifest, or if there are
      * permission problems, or if there are fatal errors.
+     * @hide
      */
-    public static IBinder waitForDeclaredService(@NonNull String name) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Nullable public static IBinder waitForDeclaredService(@NonNull String name) {
         return isDeclared(name) ? waitForService(name) : null;
     }
 
@@ -281,6 +294,7 @@ public final class ServiceManager {
      * Return a list of all currently running services.
      * @return an array of all currently running services, or <code>null</code> in
      * case of an exception
+     * @hide
      */
     @UnsupportedAppUsage
     public static String[] listServices() {
