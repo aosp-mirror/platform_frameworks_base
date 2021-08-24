@@ -579,7 +579,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         //
         // Note: mNamespace == KeyProperties.NAMESPACE_APPLICATION implies that the target domain
         // is Domain.APP and Domain.SELINUX is the target domain otherwise.
-        if (alias != descriptor.alias
+        if (!alias.equals(descriptor.alias)
                 || descriptor.domain != targetDomain
                 || (descriptor.domain == Domain.SELINUX && descriptor.nspace != targetNamespace)) {
             throw new KeyStoreException("Can only replace keys with same alias: " + alias
