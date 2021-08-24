@@ -221,6 +221,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private IBinder mFragmentToken;
 
     /**
+     * Whether to delay the last activity of TaskFragment being immediately removed while finishing.
+     * This should only be set on a embedded TaskFragment, where the organizer can have the
+     * opportunity to perform other actions or animations.
+     */
+    private boolean mDelayLastActivityRemoval;
+
+    /**
      * The PID of the organizer that created this TaskFragment. It should be the same as the PID
      * of {@link android.window.TaskFragmentCreationParams#getOwnerToken()}.
      * {@link ActivityRecord#INVALID_PID} if this is not an organizer-created TaskFragment.
@@ -319,6 +326,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             mAdjacentTaskFragment.mAdjacentTaskFragment = null;
         }
         mAdjacentTaskFragment = null;
+        mDelayLastActivityRemoval = false;
     }
 
     void setTaskFragmentOrganizer(TaskFragmentOrganizerToken organizer, int pid) {
@@ -419,6 +427,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return taskFragment != null && taskFragment.isEmbedded();
         }
         return false;
+    }
+
+    /**
+     * Returns the TaskFragment that is being organized, which could be this or the ascendant
+     * TaskFragment.
+     */
+    @Nullable
+    TaskFragment getOrganizedTaskFragment() {
+        if (mTaskFragmentOrganizer != null) {
+            return this;
+        }
+
+        TaskFragment parentTaskFragment = getParent().asTaskFragment();
+        return parentTaskFragment != null ? parentTaskFragment.getOrganizedTaskFragment() : null;
     }
 
     /**
@@ -2084,6 +2106,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 r.destroyIfPossible(reason);
             }
         });
+    }
+
+    void setDelayLastActivityRemoval(boolean delay) {
+        if (!mIsEmbedded) {
+            Slog.w(TAG, "Set delaying last activity removal on a non-embedded TF.");
+        }
+        mDelayLastActivityRemoval = delay;
+    }
+
+    boolean isDelayLastActivityRemoval() {
+        return mDelayLastActivityRemoval;
     }
 
     boolean shouldDeferRemoval() {

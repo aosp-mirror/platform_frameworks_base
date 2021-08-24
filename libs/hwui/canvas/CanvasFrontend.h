@@ -21,7 +21,6 @@
 #include "CanvasOpBuffer.h"
 #include <SaveFlags.h>
 
-#include <SkRasterClip.h>
 #include <ui/FatVector.h>
 
 #include <optional>
@@ -38,6 +37,26 @@ protected:
         bool clip : 1 = false;
         bool matrix : 1 = false;
         bool layer : 1 = false;
+    };
+
+    template <typename T>
+    struct DeferredEntry {
+        T entry;
+        int deferredSaveCount = 0;
+
+        DeferredEntry() = default;
+        DeferredEntry(const T& t) : entry(t) {}
+    };
+
+    struct ConservativeClip {
+        SkIRect bounds = SkIRect::MakeEmpty();
+        bool rect = true;
+        bool aa = false;
+
+        bool quickReject(const SkMatrix& matrix, const SkRect& bounds) const;
+
+        void apply(SkClipOp op, const SkMatrix& matrix, const SkRect& bounds, bool aa,
+                   bool fillsBounds);
     };
 
     constexpr SaveEntry saveEntryForLayer() {
@@ -72,23 +91,47 @@ protected:
     void internalClipRect(const SkRect& rect, SkClipOp op);
     void internalClipPath(const SkPath& path, SkClipOp op);
 
+    // The canvas' clip will never expand beyond these bounds since intersect
+    // and difference operations only subtract pixels.
     SkIRect mInitialBounds;
+    // Every save() gets a SaveEntry to track what needs to be restored.
     FatVector<SaveEntry, 6> mSaveStack;
-    FatVector<SkMatrix, 6> mTransformStack;
-    FatVector<SkConservativeClip, 6> mClipStack;
+    // Transform and clip entries record a deferred save count and do not
+    // make a new entry until that particular state is modified.
+    FatVector<DeferredEntry<SkMatrix>, 6> mTransformStack;
+    FatVector<DeferredEntry<ConservativeClip>, 6> mClipStack;
 
-    size_t mCurrentTransformIndex;
-    size_t mCurrentClipIndex;
+    const ConservativeClip& clip() const { return mClipStack.back().entry; }
 
-    const SkConservativeClip& clip() const {
-        return mClipStack[mCurrentClipIndex];
-    }
-
-    SkConservativeClip& clip() {
-        return mClipStack[mCurrentClipIndex];
-    }
+    ConservativeClip& clip();
 
     void resetState(int width, int height);
+
+    // Stack manipulation for transform and clip stacks
+    template <typename T, size_t N>
+    void pushEntry(FatVector<DeferredEntry<T>, N>* stack) {
+        stack->back().deferredSaveCount += 1;
+    }
+
+    template <typename T, size_t N>
+    void popEntry(FatVector<DeferredEntry<T>, N>* stack) {
+        if (!(stack->back().deferredSaveCount--)) {
+            stack->pop_back();
+        }
+    }
+
+    template <typename T, size_t N>
+    T& writableEntry(FatVector<DeferredEntry<T>, N>* stack) {
+        DeferredEntry<T>& back = stack->back();
+        if (back.deferredSaveCount == 0) {
+            return back.entry;
+        } else {
+            back.deferredSaveCount -= 1;
+            // saved in case references move when re-allocating vector storage
+            T state = back.entry;
+            return stack->emplace_back(state).entry;
+        }
+    }
 
 public:
     int saveCount() const { return mSaveStack.size(); }
@@ -97,13 +140,14 @@ public:
     bool quickRejectRect(float left, float top, float right, float bottom) const;
     bool quickRejectPath(const SkPath& path) const;
 
-    const SkMatrix& transform() const {
-        return mTransformStack[mCurrentTransformIndex];
-    }
+    bool isClipAA() const { return clip().aa; }
+    bool isClipEmpty() const { return clip().bounds.isEmpty(); }
+    bool isClipRect() const { return clip().rect; }
+    bool isClipComplex() const { return !isClipEmpty() && (isClipAA() || !isClipRect()); }
 
-    SkMatrix& transform() {
-        return mTransformStack[mCurrentTransformIndex];
-    }
+    const SkMatrix& transform() const { return mTransformStack.back().entry; }
+
+    SkMatrix& transform();
 
     // For compat with existing HWUI Canvas interface
     void getMatrix(SkMatrix* outMatrix) const {
