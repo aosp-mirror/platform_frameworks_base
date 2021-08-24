@@ -23,6 +23,9 @@ yamasani@google.com #{LAST_RESORT_SUGGESTION}
 # via https://android.git.corp.google.com/All-Projects/+/refs/meta/config/rules.pl.
 per-file */api/*current.txt = *
 
+# Test mapping changes can be made by anyone
+per-file */TEST_MAPPING = *
+
 # Support bulk translation updates
 per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
