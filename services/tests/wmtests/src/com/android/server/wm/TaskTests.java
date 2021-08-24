@@ -427,7 +427,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -757,7 +757,7 @@ public class TaskTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -1375,7 +1375,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
 
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

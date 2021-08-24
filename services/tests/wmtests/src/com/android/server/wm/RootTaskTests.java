@@ -329,7 +329,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         // Create primary splitscreen root task.
         final Task primarySplitScreen = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTaskFragment(organizer.mPrimary)
+                .setParentTask(organizer.mPrimary)
                 .setOnTop(true)
                 .build();
 
@@ -505,8 +505,8 @@ public class RootTaskTests extends WindowTestsBase {
                 targetActivity);
         final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
                 aliasActivity);
-        final Task parentTask = new TaskBuilder(mSupervisor).build();
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(parentTask).build();
+        final Task parentTask = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(parentTask).build();
         task.origActivity = alias;
         task.realActivity = target;
         new ActivityBuilder(mAtm).setComponent(target).setTask(task).setTargetActivity(
