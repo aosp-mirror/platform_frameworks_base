@@ -1600,4 +1600,7 @@
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
+
+    <!-- Signal icon in internet dialog -->
+    <dimen name="signal_strength_icon_size">24dp</dimen>
 </resources>
