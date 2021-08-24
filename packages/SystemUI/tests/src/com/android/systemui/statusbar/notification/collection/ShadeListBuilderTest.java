@@ -802,13 +802,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 .onBeforeTransformGroups(anyList());
         inOrder.verify(promoter, atLeastOnce())
                 .shouldPromoteToTopLevel(any(NotificationEntry.class));
+        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
+        inOrder.verify(preRenderFilter, atLeastOnce())
+                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeSortListener).onBeforeSort(anyList());
         inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
-        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
-        inOrder.verify(preRenderFilter, atLeastOnce())
-                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeRenderListListener).onBeforeRenderList(anyList());
         inOrder.verify(mOnRenderListListener).onRenderList(anyList());
     }
@@ -1045,12 +1045,32 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
+                notif(2),
                 group(
                         summary(3),
                         child(4),
                         child(5)
-                ),
-                notif(2)
+                )
+        );
+    }
+
+    @Test
+    public void testBrokenGroupNotificationOrdering() {
+        // GIVEN two group children with different sections & without a summary yet
+
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addNotif(1, PACKAGE_1);
+        addGroupChild(2, PACKAGE_2, GROUP_1);
+        addGroupChild(3, PACKAGE_2, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all notifications are not grouped and posted in order by index
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3)
         );
     }
 
