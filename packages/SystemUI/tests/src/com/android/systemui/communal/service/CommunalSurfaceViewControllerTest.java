@@ -18,9 +18,9 @@ package com.android.systemui.communal.service;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -136,7 +136,7 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
 
         mPackageFuture = SettableFuture.create();
 
-        when(mCommunalSource.requestCommunalSurface(any(), anyInt(), anyInt(), anyInt()))
+        when(mCommunalSource.requestCommunalSurface(any()))
                 .thenReturn(mPackageFuture);
     }
 
@@ -144,19 +144,20 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
     public void testSetSurfacePackage() {
         // There should be no requests without the proper state.
         verify(mCommunalSource, times(0))
-                .requestCommunalSurface(any(), anyInt(), anyInt(), anyInt());
+                .requestCommunalSurface(any());
 
         // The full state must be present to make a request.
         mController.onViewAttached();
         verify(mCommunalSource, times(0))
-                .requestCommunalSurface(any(), anyInt(), anyInt(), anyInt());
+                .requestCommunalSurface(any());
 
         clearInvocations(mSurfaceView);
 
         // Request surface view once all conditions are met.
         mCallback.surfaceCreated(mSurfaceHolder);
-        verify(mCommunalSource)
-                .requestCommunalSurface(mHostToken, DISPLAY_ID, MEASURED_WIDTH, MEASURED_HEIGHT);
+        final CommunalSourceImpl.Request expectedRequest = new CommunalSourceImpl.Request(
+                MEASURED_WIDTH, MEASURED_HEIGHT, DISPLAY_ID, mHostToken);
+        verify(mCommunalSource).requestCommunalSurface(eq(expectedRequest));
 
         when(mSurfaceView.isAttachedToWindow()).thenReturn(true);
 
@@ -216,8 +217,9 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
         clearInvocations(mSurfaceView);
 
-        verify(mCommunalSource, times(1))
-                .requestCommunalSurface(mHostToken, DISPLAY_ID, MEASURED_WIDTH, MEASURED_HEIGHT);
+        final CommunalSourceImpl.Request expectedRequest = new CommunalSourceImpl.Request(
+                MEASURED_WIDTH, MEASURED_HEIGHT, DISPLAY_ID, mHostToken);
+        verify(mCommunalSource, times(1)).requestCommunalSurface(eq(expectedRequest));
 
         mController.onViewDetached();
         assertTrue(mPackageFuture.isCancelled());
@@ -269,5 +271,32 @@ public class CommunalSurfaceViewControllerTest extends SysuiTestCase {
         mLayoutChangeListener.onLayoutChange(mSurfaceView, left, top, right, bottom, 0, 0, 0, 0);
         verify(mNotificationShadeWindowController)
                 .setTouchExclusionRegion(eq(new Region()));
+    }
+
+    @Test
+    public void testLayoutChange() {
+        final int left = 0;
+        final int top = 0;
+        final int right = 200;
+        final int bottom = 100;
+
+        givenSurfacePresent();
+
+        // Layout change should trigger a request to get new communal surface.
+        mLayoutChangeListener.onLayoutChange(mSurfaceView, left, top, right, bottom, 0, 0, 0,
+                0);
+        // Note that the measured are preset and different than the layout input.
+        final CommunalSourceImpl.Request expectedRequest =
+                new CommunalSourceImpl.Request(MEASURED_WIDTH, MEASURED_HEIGHT, DISPLAY_ID,
+                        mHostToken);
+        verify(mCommunalSource)
+                .requestCommunalSurface(eq(expectedRequest));
+
+        clearInvocations(mCommunalSource);
+
+        // Subsequent matching layout change should not trigger any request.
+        mLayoutChangeListener.onLayoutChange(mSurfaceView, left, top, right, bottom, 0, 0, 0,
+                0);
+        verify(mCommunalSource, never()).requestCommunalSurface(any());
     }
 }
