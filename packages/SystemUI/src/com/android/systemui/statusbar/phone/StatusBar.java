@@ -1044,7 +1044,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationShadeWindowViewController,
                 mNotificationPanelViewController,
                 mAmbientIndicationContainer);
-        mDozeParameters.addCallback(this::updateLightRevealScrimVisibility);
+        updateLightRevealScrimVisibility();
 
         mConfigurationController.addCallback(this);
 
@@ -4956,11 +4956,5 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
-        if (mFeatureFlags.useNewLockscreenAnimations()
-                && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
-            mLightRevealScrim.setVisibility(View.VISIBLE);
-        } else {
-            mLightRevealScrim.setVisibility(View.GONE);
-        }
     }
 }
