@@ -3224,6 +3224,9 @@
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01fe0000">
+    <public name="accessibilityActionDragStart" />
+    <public name="accessibilityActionDragDrop" />
+    <public name="accessibilityActionDragCancel" />
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01fd0000">

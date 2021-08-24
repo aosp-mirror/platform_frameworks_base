@@ -2012,6 +2012,9 @@ package android {
   public static final class R.id {
     ctor public R.id();
     field public static final int accessibilityActionContextClick = 16908348; // 0x102003c
+    field public static final int accessibilityActionDragCancel;
+    field public static final int accessibilityActionDragDrop;
+    field public static final int accessibilityActionDragStart;
     field public static final int accessibilityActionHideTooltip = 16908357; // 0x1020045
     field public static final int accessibilityActionImeEnter = 16908372; // 0x1020054
     field public static final int accessibilityActionMoveWindow = 16908354; // 0x1020042
@@ -50655,6 +50658,9 @@ package android.view.accessibility {
     method public void setPackageName(CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 256; // 0x100
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 128; // 0x80
     field public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 16; // 0x10
     field public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 32; // 0x20
     field public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 8; // 0x8
@@ -50953,6 +50959,9 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COPY;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CUT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DISMISS;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_CANCEL;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_DROP;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_START;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_EXPAND;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_FOCUS;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_HIDE_TOOLTIP;
