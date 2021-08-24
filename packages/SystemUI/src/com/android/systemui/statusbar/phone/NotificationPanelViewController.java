@@ -4497,8 +4497,9 @@ public class NotificationPanelViewController extends PanelViewController {
                     }
                 }
             } else {
-                mKeyguardStatusBar.setAlpha(1f);
-                mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+                mKeyguardStatusBarViewController.updateViewState(
+                        /* alpha= */ 1f,
+                        keyguardShowing ? View.VISIBLE : View.INVISIBLE);
                 if (keyguardShowing && oldState != mBarState) {
                     if (mQs != null) {
                         mQs.hideImmediately();
