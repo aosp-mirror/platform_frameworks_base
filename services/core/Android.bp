@@ -207,10 +207,3 @@ prebuilt_etc {
     name: "protolog.conf.json.gz",
     src: ":services.core.json.gz",
 }
-
-filegroup {
-    name: "services.core-sources-deviceconfig-interface",
-    srcs: [
-        "java/com/android/server/utils/DeviceConfigInterface.java",
-    ],
-}

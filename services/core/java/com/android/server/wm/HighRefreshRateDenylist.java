@@ -22,12 +22,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 

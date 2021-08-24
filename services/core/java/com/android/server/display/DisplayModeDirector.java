@@ -41,6 +41,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
@@ -61,7 +62,6 @@ import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
