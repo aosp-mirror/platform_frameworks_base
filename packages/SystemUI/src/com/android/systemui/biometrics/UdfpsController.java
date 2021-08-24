@@ -781,6 +781,7 @@ public class UdfpsController implements DozeReceiver {
                         mKeyguardViewMediator,
                         mLockscreenShadeTransitionController,
                         mConfigurationController,
+                        mKeyguardStateController,
                         this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
