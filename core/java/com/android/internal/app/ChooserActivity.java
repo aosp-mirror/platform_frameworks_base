@@ -458,54 +458,17 @@ public class ChooserActivity extends ResolverActivity implements
 
     private class ChooserHandler extends Handler {
         private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
-        private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT = 2;
-        private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT = 3;
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 4;
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
         private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
 
-        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 1000;
-        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 300;
-
-        private boolean mMinTimeoutPassed = false;
         private boolean mReceivedDirectShareTargets = false;
 
         private void removeAllMessages() {
             removeMessages(LIST_VIEW_UPDATE_MESSAGE);
-            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT);
-            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT);
             removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
             removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
             removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
-        }
-
-        private void restartServiceRequestTimer() {
-            mMinTimeoutPassed = false;
-            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT);
-            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT);
-
-            if (DEBUG) {
-                Log.d(TAG, "queryTargets setting watchdog timer for "
-                        + WATCHDOG_TIMEOUT_MAX_MILLIS + "ms");
-            }
-
-            sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT,
-                    WATCHDOG_TIMEOUT_MIN_MILLIS);
-            sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT,
-                    WATCHDOG_TIMEOUT_MAX_MILLIS);
-        }
-
-        private void maybeStopServiceRequestTimer() {
-            // Set a minimum timeout threshold, to ensure both apis, sharing shortcuts
-            // and older-style direct share services, have had time to load, otherwise
-            // just checking mServiceConnections could force us to end prematurely
-            if (mMinTimeoutPassed && mServiceConnections.isEmpty() && mReceivedDirectShareTargets) {
-                logDirectShareTargetReceived(
-                        MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
-                sendVoiceChoicesIfNeeded();
-                mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                        .completeServiceTargetLoading();
-            }
         }
 
         @Override
@@ -543,21 +506,6 @@ public class ChooserActivity extends ResolverActivity implements
                     unbindService(sri.connection);
                     sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
-                    maybeStopServiceRequestTimer();
-                    break;
-
-                case CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT:
-                    mMinTimeoutPassed = true;
-                    maybeStopServiceRequestTimer();
-                    break;
-
-                case CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT:
-                    mMinTimeoutPassed = true;
-                    if (!mServiceConnections.isEmpty()) {
-                        getChooserActivityLogger().logSharesheetDirectLoadTimeout();
-                    }
-                    unbindRemainingServices();
-                    maybeStopServiceRequestTimer();
                     break;
 
                 case LIST_VIEW_UPDATE_MESSAGE:
@@ -586,14 +534,13 @@ public class ChooserActivity extends ResolverActivity implements
                     break;
 
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED:
-                    mReceivedDirectShareTargets = true;
-
                     logDirectShareTargetReceived(
                             MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER);
                     sendVoiceChoicesIfNeeded();
                     getChooserActivityLogger().logSharesheetDirectLoadComplete();
 
-                    maybeStopServiceRequestTimer();
+                    mChooserMultiProfilePagerAdapter.getActiveListAdapter()
+                            .completeServiceTargetLoading();
                     break;
 
                 default:
@@ -2028,8 +1975,6 @@ public class ChooserActivity extends ResolverActivity implements
                 break;
             }
         }
-
-        mChooserHandler.restartServiceRequestTimer();
     }
 
     private IntentFilter getTargetIntentFilter() {
