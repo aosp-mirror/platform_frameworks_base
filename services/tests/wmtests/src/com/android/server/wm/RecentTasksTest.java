@@ -331,7 +331,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // other task
         Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask()).build();
+                .setParentTask(mTaskContainer.getRootHomeTask()).build();
         Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .build();
@@ -471,8 +471,8 @@ public class RecentTasksTest extends WindowTestsBase {
         final Task root = createTaskBuilder(".CreatedByOrganizerRoot").build();
         root.mCreatedByOrganizer = true;
         // Add organized and non-organized child.
-        final Task child1 = createTaskBuilder(".Task1").setParentTaskFragment(root).build();
-        final Task child2 = createTaskBuilder(".Task2").setParentTaskFragment(root).build();
+        final Task child1 = createTaskBuilder(".Task1").setParentTask(root).build();
+        final Task child2 = createTaskBuilder(".Task2").setParentTask(root).build();
         doReturn(true).when(child1).isOrganized();
         doReturn(false).when(child2).isOrganized();
         mRecentTasks.add(root);
@@ -508,8 +508,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // tasks because their intents are identical.
         mRecentTasks.add(task1);
         // Go home to trigger the removal of untracked tasks.
-        mRecentTasks.add(createTaskBuilder(".Home")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+        mRecentTasks.add(createTaskBuilder(".Home").setParentTask(mTaskContainer.getRootHomeTask())
                 .build());
         triggerIdleToTrim();
 
@@ -676,7 +675,7 @@ public class RecentTasksTest extends WindowTestsBase {
     public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible() {
         // Create some set of tasks, some of which are visible and some are not
         Task homeTask = createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+                .setParentTask(mTaskContainer.getRootHomeTask())
                 .build();
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
@@ -697,7 +696,7 @@ public class RecentTasksTest extends WindowTestsBase {
         t1.mUserSetupComplete = true;
         mRecentTasks.add(t1);
         Task homeTask = createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+                .setParentTask(mTaskContainer.getRootHomeTask())
                 .build();
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
@@ -950,10 +949,10 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
         // the tasks belong in stacks above the home stack
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task1").setParentTaskFragment(aboveHomeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(aboveHomeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task3").setParentTaskFragment(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task3").setParentTask(aboveHomeStack).build());
 
         triggerTrimAndAssertNoTasksTrimmed();
     }
@@ -971,11 +970,11 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
         // the home stack is trimmed once a new task is added
         final Task behindHomeTask = createTaskBuilder(".Task1")
-                .setParentTaskFragment(behindHomeStack)
+                .setParentTask(behindHomeStack)
                 .build();
         mRecentTasks.add(behindHomeTask);
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(aboveHomeStack).build());
 
         triggerTrimAndAssertTrimmed(behindHomeTask);
     }
@@ -991,12 +990,10 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeTask).build());
-        mRecentTasks.add(createTaskBuilder(".Task1").setParentTaskFragment(otherDisplayRootTask)
-                .build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(otherDisplayRootTask)
-                .build());
-        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTaskFragment(homeTask).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeTask).build());
+        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(otherDisplayRootTask).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(otherDisplayRootTask).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTask(homeTask).build());
 
         triggerTrimAndAssertNoTasksTrimmed();
     }
@@ -1026,7 +1023,7 @@ public class RecentTasksTest extends WindowTestsBase {
         Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
         mRecentTasks.add(t1);
         mRecentTasks.add(createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask()).build());
+                .setParentTask(mTaskContainer.getRootHomeTask()).build());
         Task t2 = createTaskBuilder("com.android.pkg2", ".Task2").build();
         mRecentTasks.add(t2);
         mRecentTasks.add(createTaskBuilder("com.android.pkg1", ".PipTask")

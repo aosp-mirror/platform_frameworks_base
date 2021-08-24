@@ -219,7 +219,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testNoCleanupMovingActivityInSameStack() {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task rootTask = activity.getRootTask();
-        final Task newTask = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task newTask = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask).build();
         activity.reparent(newTask, 0, null /*reason*/);
         verify(rootTask, times(0)).cleanUpActivityReferences(any());
     }

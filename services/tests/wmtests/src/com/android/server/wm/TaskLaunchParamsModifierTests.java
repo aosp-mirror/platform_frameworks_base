@@ -1716,7 +1716,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         final Task rootTask = display.getDefaultTaskDisplayArea()
                 .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         // Just work around the unnecessary adjustments for bounds.
         task.getWindowConfiguration().setBounds(bounds);
     }
