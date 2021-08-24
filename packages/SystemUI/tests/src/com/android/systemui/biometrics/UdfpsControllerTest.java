@@ -417,6 +417,21 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void hideUdfpsOverlay_resetsAltAuthBouncerWhenShowing() throws RemoteException {
+        // GIVEN overlay was showing and the udfps bouncer is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
+
+        // WHEN the overlay is hidden
+        mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mFgExecutor.runAllReady();
+
+        // THEN the udfps bouncer is reset
+        verify(mStatusBarKeyguardViewManager).resetAlternateAuth(eq(true));
+    }
+
+    @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);

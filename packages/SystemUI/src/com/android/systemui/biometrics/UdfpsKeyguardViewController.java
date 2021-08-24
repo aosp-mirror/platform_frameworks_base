@@ -108,6 +108,12 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     }
 
     @Override
+    public void onInit() {
+        super.onInit();
+        mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+    }
+
+    @Override
     protected void onViewAttached() {
         super.onViewAttached();
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
