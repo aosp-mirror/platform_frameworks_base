@@ -88,8 +88,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
      */
     @Presubmit
     @Test
-    override fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation,
-        testSpec.config.endRotation, allStates = false)
+    override fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     /**
      * Checks the position of the navigation bar at the start and end of the transition

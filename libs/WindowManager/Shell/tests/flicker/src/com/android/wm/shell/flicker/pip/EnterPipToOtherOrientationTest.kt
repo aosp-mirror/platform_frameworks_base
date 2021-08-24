@@ -126,11 +126,12 @@ class EnterPipToOtherOrientationTest(
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
+     *
+     * TODO b/197726599 Prevents all states from being checked
      */
     @Presubmit
     @Test
-    override fun entireScreenCovered() =
-        testSpec.entireScreenCovered(Surface.ROTATION_90, Surface.ROTATION_0, allStates = false)
+    override fun entireScreenCovered() = testSpec.entireScreenCovered(allStates = false)
 
     /**
      * Checks [pipApp] window remains visible and on top throughout the transition

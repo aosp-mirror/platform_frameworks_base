@@ -138,7 +138,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

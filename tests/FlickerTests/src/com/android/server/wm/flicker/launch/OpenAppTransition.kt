@@ -124,9 +124,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     // During testing the launcher is always in portrait mode
-    open fun entireScreenCovered() {
-        testSpec.entireScreenCovered(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test

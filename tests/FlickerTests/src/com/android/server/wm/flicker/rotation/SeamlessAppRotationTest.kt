@@ -102,9 +102,11 @@ class SeamlessAppRotationTest(
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
-            this.coversExactly(startingPos, testApp.component)
-                .then()
-                .coversExactly(endingPos, testApp.component)
+            this.invoke("entireScreenCovered") { entry ->
+                entry.entry.displays.map { display ->
+                    entry.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+                }
+            }
         }
     }
 
