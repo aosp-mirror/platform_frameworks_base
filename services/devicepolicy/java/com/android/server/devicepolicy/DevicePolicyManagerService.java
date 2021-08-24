@@ -10113,7 +10113,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean setPermittedAccessibilityServices(ComponentName who, List packageList) {
+    public boolean setPermittedAccessibilityServices(ComponentName who, List<String> packageList) {
         if (!mHasFeature) {
             return false;
         }
@@ -10165,7 +10165,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List getPermittedAccessibilityServices(ComponentName who) {
+    public List<String> getPermittedAccessibilityServices(ComponentName who) {
         if (!mHasFeature) {
             return null;
         }
@@ -10180,7 +10180,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List getPermittedAccessibilityServicesForUser(int userId) {
+    public List<String> getPermittedAccessibilityServicesForUser(int userId) {
         if (!mHasFeature) {
             return null;
         }
@@ -10266,7 +10266,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean setPermittedInputMethods(ComponentName who, List packageList,
+    public boolean setPermittedInputMethods(ComponentName who, List<String> packageList,
             boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return false;
@@ -10330,7 +10330,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List getPermittedInputMethods(ComponentName who, boolean calledOnParentInstance) {
+    public List<String> getPermittedInputMethods(ComponentName who,
+            boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return null;
         }
@@ -10351,7 +10352,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List getPermittedInputMethodsForCurrentUser() {
+    public List<String> getPermittedInputMethodsForCurrentUser() {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(canManageUsers(caller));
 
