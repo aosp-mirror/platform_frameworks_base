@@ -474,6 +474,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
+        mOverrideTaskTransition = false;
         mNextAppTransitionIsSync = false;
     }
 
