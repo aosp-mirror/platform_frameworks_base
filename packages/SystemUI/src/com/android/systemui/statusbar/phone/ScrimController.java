@@ -111,6 +111,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      */
     private boolean mTransitioningToFullShade;
 
+    /**
+     * Is there currently an unocclusion animation running. Used to avoid bright flickers
+     * of the notification scrim.
+     */
+    private boolean mUnOcclusionAnimationRunning;
+
+    /**
+     * Set whether an unocclusion animation is currently running on the notification panel. Used
+     * to avoid bright flickers of the notification scrim.
+     */
+    public void setUnocclusionAnimationRunning(boolean unocclusionAnimationRunning) {
+        mUnOcclusionAnimationRunning = unocclusionAnimationRunning;
+    }
+
     @IntDef(prefix = {"VISIBILITY_"}, value = {
             TRANSPARENT,
             SEMI_TRANSPARENT,
@@ -466,6 +480,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void onExpandingFinished() {
         mTracking = false;
+        setUnocclusionAnimationRunning(false);
     }
 
     @VisibleForTesting
@@ -693,6 +708,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 }
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
+            }
+            if (mUnOcclusionAnimationRunning && mState == ScrimState.KEYGUARD) {
+                // We're unoccluding the keyguard and don't want to have a bright flash.
+                mNotificationsAlpha = 0f;
             }
         }
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha) || isNaN(mNotificationsAlpha)) {

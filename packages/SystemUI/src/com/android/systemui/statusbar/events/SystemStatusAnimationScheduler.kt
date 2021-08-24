@@ -114,6 +114,10 @@ class SystemStatusAnimationScheduler @Inject constructor(
                 Log.d(TAG, "updating current event from: $event")
             }
             scheduledEvent?.updateFromEvent(event)
+            if (event.forceVisible) {
+                hasPersistentDot = true
+                notifyTransitionToPersistentDot()
+            }
         } else {
             if (DEBUG) {
                 Log.d(TAG, "ignoring event $event")
@@ -154,6 +158,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
         // If animations are turned off, we'll transition directly to the dot
         if (!event.showAnimation && event.forceVisible) {
             notifyTransitionToPersistentDot()
+            scheduledEvent = null
             return
         }
 

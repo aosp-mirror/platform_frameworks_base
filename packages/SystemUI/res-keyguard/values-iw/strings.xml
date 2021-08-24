@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה מהירה"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה איטית"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • הטעינה מוגבלת זמנית"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • הטעינה מוגבלת באופן זמני"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"כדאי לחבר את המטען."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"יש ללחוץ על \'תפריט\' כדי לבטל את הנעילה."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"הרשת נעולה"</string>

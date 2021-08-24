@@ -1138,6 +1138,19 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNotificationTransparency_unnocclusion() {
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setUnocclusionAnimationRunning(true);
+
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.0f, /* expansion */ 0.0f);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.0f, /* expansion */ 1.0f);
+
+        // Verify normal behavior after
+        mScrimController.setUnocclusionAnimationRunning(false);
+        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0.2f, /* expansion */ 0.4f);
+    }
+
+    @Test
     public void testNotificationTransparency_inKeyguardState() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
