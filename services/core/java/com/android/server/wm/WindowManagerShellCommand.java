@@ -24,6 +24,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -606,7 +607,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or aspect ratio should be provided as an argument " + e);
+                    "Error: aspect ratio should be provided as an argument " + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
@@ -625,7 +626,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or corners radius should be provided as an argument " + e);
+                    "Error: corners radius should be provided as an argument " + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
@@ -653,18 +654,36 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 default:
                     getErrPrintWriter().println(
-                            "Error: 'reset', 'solid_color', 'app_color_background' or "
+                            "Error: 'solid_color', 'app_color_background' or "
                             + "'wallpaper' should be provided as an argument");
                     return -1;
             }
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset', 'solid_color', 'app_color_background' or "
+                    "Error: 'solid_color', 'app_color_background' or "
                         + "'wallpaper' should be provided as an argument" + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
             mLetterboxConfiguration.setLetterboxBackgroundType(backgroundType);
+        }
+        return 0;
+    }
+
+    private int runSetLetterboxBackgroundColorResource(PrintWriter pw) throws RemoteException {
+        final int colorId;
+        try {
+            String arg = getNextArgRequired();
+            colorId = mInternal.mContext.getResources()
+                    .getIdentifier(arg, "color", "com.android.internal");
+        } catch (NotFoundException e) {
+            getErrPrintWriter().println(
+                    "Error: color in '@android:color/resource_name' format should be provided as "
+                            + "an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setLetterboxBackgroundColorResourceId(colorId);
         }
         return 0;
     }
@@ -676,7 +695,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             color = Color.valueOf(Color.parseColor(arg));
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or color in #RRGGBB format should be provided as "
+                    "Error: color in #RRGGBB format should be provided as "
                             + "an argument " + e);
             return -1;
         }
@@ -697,7 +716,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or blur radius should be provided as an argument " + e);
+                    "Error: blur radius should be provided as an argument " + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
@@ -717,7 +736,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or alpha should be provided as an argument " + e);
+                    "Error: alpha should be provided as an argument " + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
@@ -736,7 +755,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: 'reset' or multiplier should be provided as an argument " + e);
+                    "Error: multiplier should be provided as an argument " + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
@@ -763,6 +782,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 case "--backgroundColor":
                     runSetLetterboxBackgroundColor(pw);
+                    break;
+                case "--backgroundColorResource":
+                    runSetLetterboxBackgroundColorResource(pw);
                     break;
                 case "--wallpaperBlurRadius":
                     runSetLetterboxBackgroundWallpaperBlurRadius(pw);
@@ -1031,6 +1053,11 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        is 'solid-color'. Use (set)get-letterbox-style to check and control");
         pw.println("        letterbox background type. See Color#parseColor for allowed color");
         pw.println("        formats (#RRGGBB and some colors by name, e.g. magenta or olive).");
+        pw.println("      --backgroundColorResource resource_name");
+        pw.println("        Color resource name of letterbox background which is used when");
+        pw.println("        background type is 'solid-color'. Use (set)get-letterbox-style to");
+        pw.println("        check and control background type. Parameter is a color resource");
+        pw.println("        name, for example, @android:color/system_accent2_50.");
         pw.println("      --wallpaperBlurRadius radius");
         pw.println("        Blur radius for 'wallpaper' letterbox background. If radius <= 0");
         pw.println("        both it and R.dimen.config_letterboxBackgroundWallpaperBlurRadius");
