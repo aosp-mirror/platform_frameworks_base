@@ -516,11 +516,13 @@ public final class WindowContainerTransaction implements Parcelable {
      */
     @NonNull
     public WindowContainerTransaction setAdjacentTaskFragments(
-            @NonNull IBinder fragmentToken1, @Nullable IBinder fragmentToken2) {
+            @NonNull IBinder fragmentToken1, @Nullable IBinder fragmentToken2,
+            @Nullable TaskFragmentAdjacentOptions options) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS)
                         .setContainer(fragmentToken1)
                         .setReparentContainer(fragmentToken2)
+                        .setLaunchOptions(options != null ? options.toBundle() : null)
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
@@ -1296,6 +1298,54 @@ public final class WindowContainerTransaction implements Parcelable {
 
                 return hierarchyOp;
             }
+        }
+    }
+
+    /**
+     * Helper class for building an options Bundle that can be used to set adjacent rules of
+     * TaskFragments.
+     * @hide
+     */
+    public static class TaskFragmentAdjacentOptions {
+        private static final String DELAY_PRIMARY_LAST_ACTIVITY_REMOVAL =
+                "android:transaction.adjacent.option.delay_primary_removal";
+        private static final String DELAY_SECONDARY_LAST_ACTIVITY_REMOVAL =
+                "android:transaction.adjacent.option.delay_secondary_removal";
+
+        private boolean mDelayPrimaryLastActivityRemoval;
+        private boolean mDelaySecondaryLastActivityRemoval;
+
+        public TaskFragmentAdjacentOptions() {
+        }
+
+        public TaskFragmentAdjacentOptions(@NonNull Bundle bundle) {
+            mDelayPrimaryLastActivityRemoval = bundle.getBoolean(
+                    DELAY_PRIMARY_LAST_ACTIVITY_REMOVAL);
+            mDelaySecondaryLastActivityRemoval = bundle.getBoolean(
+                    DELAY_SECONDARY_LAST_ACTIVITY_REMOVAL);
+        }
+
+        public void setDelayPrimaryLastActivityRemoval(boolean delay) {
+            mDelayPrimaryLastActivityRemoval = delay;
+        }
+
+        public void setDelaySecondaryLastActivityRemoval(boolean delay) {
+            mDelaySecondaryLastActivityRemoval = delay;
+        }
+
+        public boolean isDelayPrimaryLastActivityRemoval() {
+            return mDelayPrimaryLastActivityRemoval;
+        }
+
+        public boolean isDelaySecondaryLastActivityRemoval() {
+            return mDelaySecondaryLastActivityRemoval;
+        }
+
+        Bundle toBundle() {
+            final Bundle b = new Bundle();
+            b.putBoolean(DELAY_PRIMARY_LAST_ACTIVITY_REMOVAL, mDelayPrimaryLastActivityRemoval);
+            b.putBoolean(DELAY_SECONDARY_LAST_ACTIVITY_REMOVAL, mDelaySecondaryLastActivityRemoval);
+            return b;
         }
     }
 }

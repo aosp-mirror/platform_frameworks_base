@@ -676,6 +676,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mLastImeShown;
 
     /**
+     * When set to true, the IME insets will be frozen until the next app becomes IME input target.
+     * @see InsetsPolicy#adjustVisibilityForIme
+     */
+    boolean mImeInsetsFrozenUntilStartInput;
+
+    /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
      * to help AR know that the app is in the process of closing but hasn't yet started closing on
      * the WM side.
@@ -1460,6 +1466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 associateStartingDataWithTask();
                 overrideConfigurationPropagation(mStartingWindow, task);
             }
+            mImeInsetsFrozenUntilStartInput = false;
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -3234,6 +3241,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/137329632): find the next activity directly underneath this one, not just anywhere
         final ActivityRecord next = getDisplayArea().topRunningActivity(
                 true /* considerKeyguardState */);
+
+        // If the finishing activity is the last activity of a organized TaskFragment and has an
+        // adjacent TaskFragment, check if the activity removal should be delayed.
+        boolean delayRemoval = false;
+        final TaskFragment taskFragment = getTaskFragment();
+        if (next != null && taskFragment != null && taskFragment.isEmbedded()) {
+            final TaskFragment organized = taskFragment.getOrganizedTaskFragment();
+            final TaskFragment adjacent =
+                    organized != null ? organized.getAdjacentTaskFragment() : null;
+            if (adjacent != null && organized.topRunningActivity() == null) {
+                delayRemoval = organized.isDelayLastActivityRemoval();
+            }
+        }
+
         // isNextNotYetVisible is to check if the next activity is invisible, or it has been
         // requested to be invisible but its windows haven't reported as invisible.  If so, it
         // implied that the current finishing activity should be added into stopping list rather
@@ -3248,7 +3269,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isCurrentVisible) {
-            if (isNextNotYetVisible) {
+            if (isNextNotYetVisible || delayRemoval) {
                 // Add this activity to the list of stopping activities. It will be processed and
                 // destroyed when the next activity reports idle.
                 addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -4926,6 +4947,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     && imeInputTarget.getWindow().mActivityRecord == this
                     && mDisplayContent.mInputMethodWindow != null
                     && mDisplayContent.mInputMethodWindow.isVisible();
+            mImeInsetsFrozenUntilStartInput = true;
         }
 
         final DisplayContent displayContent = getDisplayContent();
@@ -6057,6 +6079,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // closing activity having to wait until idle timeout to be stopped or destroyed if the
             // next activity won't report idle (e.g. repeated view animation).
             mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
+
+            // If the activity is visible, but no windows are eligible to start input, unfreeze
+            // to avoid permanently frozen IME insets.
+            if (mImeInsetsFrozenUntilStartInput && getWindow(
+                    win -> WindowManager.LayoutParams.mayUseInputMethod(win.mAttrs.flags))
+                    == null) {
+                mImeInsetsFrozenUntilStartInput = false;
+            }
         }
     }
 
@@ -8039,6 +8069,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 restartProcessIfVisible();
             }
         }
+    }
+
+    @Override
+    void onResize() {
+        // Reset freezing IME insets flag when the activity resized.
+        mImeInsetsFrozenUntilStartInput = false;
+        super.onResize();
     }
 
     /** Returns true if the configuration is compatible with this activity. */

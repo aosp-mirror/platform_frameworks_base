@@ -938,7 +938,7 @@ public class UsageStatsService extends SystemService implements
                             FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
                             uid,
                             event.mPackage,
-                            event.mClass,
+                            "",
                             FrameworkStatsLog
                                     .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
@@ -972,7 +972,7 @@ public class UsageStatsService extends SystemService implements
                                 FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
                                 uid,
                                 event.mPackage,
-                                event.mClass,
+                                "",
                                 FrameworkStatsLog
                                         .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     }
@@ -1003,7 +1003,7 @@ public class UsageStatsService extends SystemService implements
                                 FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
                                 uid,
                                 event.mPackage,
-                                event.mClass,
+                                "",
                                 FrameworkStatsLog
                                         .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     }
