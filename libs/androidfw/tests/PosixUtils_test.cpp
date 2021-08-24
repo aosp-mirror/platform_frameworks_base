@@ -30,14 +30,14 @@ TEST(PosixUtilsTest, AbsolutePathToBinary) {
   const auto result = ExecuteBinary({"/bin/date", "--help"});
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, 0);
-  ASSERT_EQ(result->stdout.find("usage: date "), 0);
+  ASSERT_EQ(result->stdout_str.find("usage: date "), 0);
 }
 
 TEST(PosixUtilsTest, RelativePathToBinary) {
   const auto result = ExecuteBinary({"date", "--help"});
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, 0);
-  ASSERT_EQ(result->stdout.find("usage: date "), 0);
+  ASSERT_EQ(result->stdout_str.find("usage: date "), 0);
 }
 
 TEST(PosixUtilsTest, BadParameters) {
