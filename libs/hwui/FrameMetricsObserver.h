@@ -26,11 +26,11 @@ public:
     virtual void notify(const int64_t* buffer) = 0;
     bool waitForPresentTime() const { return mWaitForPresentTime; };
 
-    void reportMetricsFrom(int64_t frameNumber, int32_t surfaceControlId) {
+    void reportMetricsFrom(uint64_t frameNumber, int32_t surfaceControlId) {
         mAttachedFrameNumber = frameNumber;
         mSurfaceControlId = surfaceControlId;
     };
-    int64_t attachedFrameNumber() const { return mAttachedFrameNumber; };
+    uint64_t attachedFrameNumber() const { return mAttachedFrameNumber; };
     int32_t attachedSurfaceControlId() const { return mSurfaceControlId; };
 
     /**
@@ -64,7 +64,7 @@ private:
 
     // The frame number the metrics observer was attached on. Metrics will be sent from this frame
     // number (inclusive) onwards in the case that the surface id is equal to mSurfaceControlId.
-    int64_t mAttachedFrameNumber;
+    uint64_t mAttachedFrameNumber;
 };
 
 }  // namespace uirenderer

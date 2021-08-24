@@ -69,7 +69,7 @@ public:
      * stats of frames that are from "old" surfaces (i.e. with surfaceControlIds older than the one
      * the observer was attached on) nor those that are from "old" frame numbers.
      */
-    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime, int64_t frameNumber,
+    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime, uint64_t frameNumber,
                             int32_t surfaceControlId);
 
 private:

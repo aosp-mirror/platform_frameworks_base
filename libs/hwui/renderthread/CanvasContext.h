@@ -173,7 +173,7 @@ public:
     // Used to queue up work that needs to be completed before this frame completes
     void enqueueFrameWork(std::function<void()>&& func);
 
-    int64_t getFrameNumber();
+    uint64_t getFrameNumber();
 
     void waitOnFences();
 
@@ -281,7 +281,7 @@ private:
 
     // Need at least 4 because we do quad buffer. Add a 5th for good measure.
     RingBuffer<SwapHistory, 5> mSwapHistory;
-    int64_t mFrameNumber = -1;
+    uint64_t mFrameNumber = -1;
     int64_t mDamageId = 0;
 
     // last vsync for a dropped frame due to stuffed queue

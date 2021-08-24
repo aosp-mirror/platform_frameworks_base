@@ -44,7 +44,7 @@ TEST(FrameMetricsReporter, reportsAllFramesIfNoFromFrameIsSpecified) {
 
     const int64_t* stats;
     bool hasPresentTime = false;
-    int64_t frameNumber = 0;
+    uint64_t frameNumber = 1;
     int32_t surfaceControlId = 0;
     reporter->reportFrameMetrics(stats, hasPresentTime, frameNumber, surfaceControlId);
 
@@ -69,7 +69,7 @@ TEST(FrameMetricsReporter, respectsWaitForPresentTimeUnset) {
 
     const int64_t* stats;
     bool hasPresentTime = false;
-    int64_t frameNumber = 3;
+    uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
     EXPECT_CALL(*observer, notify).Times(1);
@@ -88,7 +88,7 @@ TEST(FrameMetricsReporter, respectsWaitForPresentTimeSet) {
 
     const int64_t* stats;
     bool hasPresentTime = false;
-    int64_t frameNumber = 3;
+    uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
     EXPECT_CALL(*observer, notify).Times(0);
@@ -136,9 +136,9 @@ TEST(FrameMetricsReporter, doesNotReportsFramesBeforeSpecifiedFromFrame) {
     bool hasPresentTime = false;
 
     std::vector<uint64_t> frameNumbers{1, 10};
-    std::vector<uint32_t> surfaceControlIds{0, 1, 10};
+    std::vector<int32_t> surfaceControlIds{0, 1, 10};
     for (uint64_t frameNumber : frameNumbers) {
-        for (uint32_t surfaceControlId : surfaceControlIds) {
+        for (int32_t surfaceControlId : surfaceControlIds) {
             auto reporter = std::make_shared<FrameMetricsReporter>();
 
             auto observer =
@@ -161,7 +161,7 @@ TEST(FrameMetricsReporter, doesNotReportsFramesBeforeSpecifiedFromFrame) {
 TEST(FrameMetricsReporter, canRemoveObservers) {
     const int64_t* stats;
     bool hasPresentTime = false;
-    int64_t frameNumber = 3;
+    uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
     auto reporter = std::make_shared<FrameMetricsReporter>();
@@ -183,7 +183,7 @@ TEST(FrameMetricsReporter, canRemoveObservers) {
 TEST(FrameMetricsReporter, canSupportMultipleObservers) {
     const int64_t* stats;
     bool hasPresentTime = false;
-    int64_t frameNumber = 3;
+    uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
     auto reporter = std::make_shared<FrameMetricsReporter>();

@@ -513,7 +513,7 @@ nsecs_t CanvasContext::draw() {
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
                                       &(profiler()));
 
-    int64_t frameCompleteNr = getFrameNumber();
+    uint64_t frameCompleteNr = getFrameNumber();
 
     waitOnFences();
 
@@ -704,7 +704,7 @@ void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
     // We want to make sure we aren't reporting frames that have already been queued by the
     // BufferQueueProducer on the rendner thread but are still pending the callback to report their
     // their frame metrics.
-    int64_t nextFrameNumber = getFrameNumber();
+    uint64_t nextFrameNumber = getFrameNumber();
     observer->reportMetricsFrom(nextFrameNumber, mSurfaceControlGenerationId);
     mFrameMetricsReporter->addObserver(observer);
 }
@@ -890,7 +890,7 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
     mFrameFences.push_back(CommonPool::async(std::move(func)));
 }
 
-int64_t CanvasContext::getFrameNumber() {
+uint64_t CanvasContext::getFrameNumber() {
     // mFrameNumber is reset to -1 when the surface changes or we swap buffers
     if (mFrameNumber == -1 && mNativeSurface.get()) {
         mFrameNumber = ANativeWindow_getNextFrameId(mNativeSurface->getNativeWindow());

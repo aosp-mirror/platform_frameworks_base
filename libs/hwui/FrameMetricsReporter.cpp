@@ -20,7 +20,7 @@ namespace android {
 namespace uirenderer {
 
 void FrameMetricsReporter::reportFrameMetrics(const int64_t* stats, bool hasPresentTime,
-                                              int64_t frameNumber, int32_t surfaceControlId) {
+                                              uint64_t frameNumber, int32_t surfaceControlId) {
     FatVector<sp<FrameMetricsObserver>, 10> copy;
     {
         std::lock_guard lock(mObserversLock);
