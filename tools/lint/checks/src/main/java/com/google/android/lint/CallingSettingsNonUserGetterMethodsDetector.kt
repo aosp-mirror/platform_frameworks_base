@@ -45,8 +45,7 @@ class CallingSettingsNonUserGetterMethodsDetector : Detector(), SourceCodeScanne
                 evaluator.isMemberInClass(method, "android.provider.Settings.System")
         ) {
             val message = getIncidentMessageNonUserGetterMethods(getMethodSignature(method))
-            context.report(ISSUE_NON_USER_GETTER_CALLED, node, context.getNameLocation(node),
-                    message)
+            context.report(ISSUE_NON_USER_GETTER_CALLED, node, context.getLocation(node), message)
         }
     }
 
@@ -69,7 +68,7 @@ class CallingSettingsNonUserGetterMethodsDetector : Detector(), SourceCodeScanne
                     """,
                 category = Category.CORRECTNESS,
                 priority = 6,
-                severity = Severity.ERROR,
+                severity = Severity.WARNING,
                 implementation = Implementation(
                         CallingSettingsNonUserGetterMethodsDetector::class.java,
                         Scope.JAVA_FILE_SCOPE
