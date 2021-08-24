@@ -8411,7 +8411,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public final boolean isVisibleForAutofill() {
-        return mStopped;
+        return !mStopped;
     }
 
     /**
