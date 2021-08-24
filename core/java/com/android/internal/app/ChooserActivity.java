@@ -495,7 +495,7 @@ public class ChooserActivity extends ResolverActivity implements
                         if (adapterForUserHandle != null) {
                             adapterForUserHandle.addServiceResults(sri.originalTarget,
                                     sri.resultTargets, TARGET_TYPE_CHOOSER_TARGET,
-                                    /* directShareShortcutInfoCache */ null, mServiceConnections);
+                                    /* directShareShortcutInfoCache */ null);
                             if (!sri.resultTargets.isEmpty() && sri.originalTarget != null) {
                                 mChooserTargetComponentNameCache.put(
                                         sri.resultTargets.get(0).getComponentName(),
@@ -528,7 +528,7 @@ public class ChooserActivity extends ResolverActivity implements
                         if (adapterForUserHandle != null) {
                             adapterForUserHandle.addServiceResults(
                                     resultInfo.originalTarget, resultInfo.resultTargets, msg.arg1,
-                                    mDirectShareShortcutInfoCache, mServiceConnections);
+                                    mDirectShareShortcutInfoCache);
                         }
                     }
                     break;
@@ -1649,7 +1649,7 @@ public class ChooserActivity extends ResolverActivity implements
                     /* origTarget */ null,
                     Lists.newArrayList(mCallerChooserTargets),
                     TARGET_TYPE_DEFAULT,
-                    /* directShareShortcutInfoCache */ null, mServiceConnections);
+                    /* directShareShortcutInfoCache */ null);
         }
     }
 
