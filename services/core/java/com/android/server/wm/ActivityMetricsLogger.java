@@ -59,6 +59,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
@@ -89,6 +91,7 @@ import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -157,6 +160,9 @@ class ActivityMetricsLogger {
     private final ArrayList<TransitionInfo> mTransitionInfoList = new ArrayList<>();
     /** Map : Last launched activity => {@link TransitionInfo} */
     private final ArrayMap<ActivityRecord, TransitionInfo> mLastTransitionInfo = new ArrayMap<>();
+    /** SparseArray : Package UID => {@link PackageCompatStateInfo} */
+    private final SparseArray<PackageCompatStateInfo> mPackageUidToCompatStateInfo =
+            new SparseArray<>(0);
 
     private ArtManagerInternal mArtManagerInternal;
     private final StringBuilder mStringBuilder = new StringBuilder();
@@ -452,6 +458,15 @@ class ActivityMetricsLogger {
         }
     }
 
+    /** Information about the App Compat state logging associated with a package UID . */
+    private static final class PackageCompatStateInfo {
+        /** All activities that have a visible state. */
+        final ArrayList<ActivityRecord> mVisibleActivities = new ArrayList<>();
+        /** The last logged state. */
+        int mLastLoggedState = APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+        @Nullable ActivityRecord mLastLoggedActivity;
+    }
+
     ActivityMetricsLogger(ActivityTaskSupervisor supervisor, Looper looper) {
         mLastLogTimeSecs = SystemClock.elapsedRealtime() / 1000;
         mSupervisor = supervisor;
@@ -703,6 +718,7 @@ class ActivityMetricsLogger {
         // Always calculate the delay because the caller may need to know the individual drawn time.
         info.mWindowsDrawnDelayMs = info.calculateDelay(timestampNs);
         info.removePendingDrawActivity(r);
+        info.updatePendingDraw(false /* keepInitializing */);
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.mLoggedTransitionStarting && info.allDrawn()) {
             done(false /* abort */, info, "notifyWindowsDrawn - all windows drawn", timestampNs);
@@ -774,6 +790,21 @@ class ActivityMetricsLogger {
     /** Makes sure that the reference to the removed activity is cleared. */
     void notifyActivityRemoved(@NonNull ActivityRecord r) {
         mLastTransitionInfo.remove(r);
+
+        final int packageUid = r.info.applicationInfo.uid;
+        final PackageCompatStateInfo compatStateInfo = mPackageUidToCompatStateInfo.get(packageUid);
+        if (compatStateInfo == null) {
+            return;
+        }
+
+        compatStateInfo.mVisibleActivities.remove(r);
+        if (compatStateInfo.mLastLoggedActivity == r) {
+            compatStateInfo.mLastLoggedActivity = null;
+        }
+        if (compatStateInfo.mVisibleActivities.isEmpty()) {
+            // No need to keep the entry if there are no visible activities.
+            mPackageUidToCompatStateInfo.remove(packageUid);
+        }
     }
 
     /**
@@ -1268,6 +1299,115 @@ class ActivityMetricsLogger {
                 memoryStat.rssInBytes,
                 memoryStat.cacheInBytes,
                 memoryStat.swapInBytes);
+    }
+
+    /**
+     * Logs the current App Compat state of the given {@link ActivityRecord} with its package
+     * UID, if all of the following hold:
+     * <ul>
+     *   <li>The current state is different than the last logged state for the package UID of the
+     *   activity.
+     *   <li>If the current state is NOT_VISIBLE, there is a previously logged state for the
+     *   package UID and there are no other visible activities with the same package UID.
+     *   <li>The last logged activity with the same package UID is either {@code activity} or the
+     *   last logged state is NOT_VISIBLE or NOT_LETTERBOXED.
+     * </ul>
+     *
+     * <p>If the current state is NOT_VISIBLE and the previous state which was logged by {@code
+     * activity} wasn't, looks for the first visible activity with the same package UID that has
+     * a letterboxed state, or a non-letterboxed state if there isn't one, and logs that state.
+     *
+     * <p>This method assumes that the caller is wrapping the call with a synchronized block so
+     * that there won't be a race condition between two activities with the same package.
+     */
+    void logAppCompatState(@NonNull ActivityRecord activity) {
+        final int packageUid = activity.info.applicationInfo.uid;
+        final int state = activity.getAppCompatState();
+
+        if (!mPackageUidToCompatStateInfo.contains(packageUid)) {
+            mPackageUidToCompatStateInfo.put(packageUid, new PackageCompatStateInfo());
+        }
+        final PackageCompatStateInfo compatStateInfo = mPackageUidToCompatStateInfo.get(packageUid);
+        final int lastLoggedState = compatStateInfo.mLastLoggedState;
+        final ActivityRecord lastLoggedActivity = compatStateInfo.mLastLoggedActivity;
+
+        final boolean isVisible = state != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+        final ArrayList<ActivityRecord> visibleActivities = compatStateInfo.mVisibleActivities;
+        if (isVisible && !visibleActivities.contains(activity)) {
+            visibleActivities.add(activity);
+        } else if (!isVisible) {
+            visibleActivities.remove(activity);
+            if (visibleActivities.isEmpty()) {
+                // No need to keep the entry if there are no visible activities.
+                mPackageUidToCompatStateInfo.remove(packageUid);
+            }
+        }
+
+        if (state == lastLoggedState) {
+            // We don’t want to log the same state twice or log DEFAULT_NOT_VISIBLE before any
+            // visible state was logged.
+            return;
+        }
+
+        if (!isVisible && !visibleActivities.isEmpty()) {
+            // There is another visible activity for this package UID.
+            if (activity == lastLoggedActivity) {
+                // Make sure a new visible state is logged if needed.
+                findAppCompatStateToLog(compatStateInfo, packageUid);
+            }
+            return;
+        }
+
+        if (activity != lastLoggedActivity
+                && lastLoggedState != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE
+                && lastLoggedState != APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED) {
+            // Another visible activity for this package UID has logged a letterboxed state.
+            return;
+        }
+
+        logAppCompatStateInternal(activity, state, packageUid, compatStateInfo);
+    }
+
+    /**
+     * Looks for the first visible activity in {@code compatStateInfo} that has a letterboxed
+     * state, or a non-letterboxed state if there isn't one, and logs that state for the given
+     * {@code packageUid}.
+     */
+    private void findAppCompatStateToLog(PackageCompatStateInfo compatStateInfo, int packageUid) {
+        final ArrayList<ActivityRecord> visibleActivities = compatStateInfo.mVisibleActivities;
+
+        ActivityRecord activityToLog = null;
+        int stateToLog = APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+        for (int i = 0; i < visibleActivities.size(); i++) {
+            ActivityRecord activity = visibleActivities.get(i);
+            int state = activity.getAppCompatState();
+            if (state == APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE) {
+                // This shouldn't happen.
+                Slog.w(TAG, "Visible activity with NOT_VISIBLE App Compat state for package UID: "
+                        + packageUid);
+                continue;
+            }
+            if (stateToLog == APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE || (
+                    stateToLog == APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED
+                            && state != APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED)) {
+                activityToLog = activity;
+                stateToLog = state;
+            }
+        }
+        if (activityToLog != null && stateToLog != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE) {
+            logAppCompatStateInternal(activityToLog, stateToLog, packageUid, compatStateInfo);
+        }
+    }
+
+    private void logAppCompatStateInternal(@NonNull ActivityRecord activity, int state,
+            int packageUid, PackageCompatStateInfo compatStateInfo) {
+        compatStateInfo.mLastLoggedState = state;
+        compatStateInfo.mLastLoggedActivity = activity;
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED, packageUid, state);
+
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s)", packageUid, state));
+        }
     }
 
     private ArtManagerInternal getArtManagerInternal() {

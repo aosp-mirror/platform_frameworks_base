@@ -93,6 +93,7 @@ public final class SplitLayout {
     private final Rect mDividerBounds = new Rect();
     private final Rect mBounds1 = new Rect();
     private final Rect mBounds2 = new Rect();
+    private final Rect mTmpBounds = new Rect();
     private final SplitLayoutHandler mSplitLayoutHandler;
     private final SplitWindowManager mSplitWindowManager;
     private final DisplayImeController mDisplayImeController;
@@ -188,9 +189,10 @@ public final class SplitLayout {
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
         if (rotation != mRotation || !mRootBounds.equals(rootBounds)) {
+            mTmpBounds.set(mRootBounds);
             mRootBounds.set(rootBounds);
             mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
-            resetDividerPosition();
+            initDividerPosition(mTmpBounds);
             affectsLayout = true;
         }
 
@@ -200,6 +202,19 @@ public final class SplitLayout {
         }
 
         return affectsLayout;
+    }
+
+    private void initDividerPosition(Rect oldBounds) {
+        final float snapRatio = (float) mDividePosition
+                / (float) (isLandscape(oldBounds) ? oldBounds.width() : oldBounds.height());
+        // Estimate position by previous ratio.
+        final float length =
+                (float) (isLandscape() ? mRootBounds.width() : mRootBounds.height());
+        final int estimatePosition = (int) (length * snapRatio);
+        // Init divider position by estimated position using current bounds snap algorithm.
+        mDividePosition = mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(
+                estimatePosition).position;
+        updateBounds(mDividePosition);
     }
 
     /** Updates recording bounds of divider window and both of the splits. */

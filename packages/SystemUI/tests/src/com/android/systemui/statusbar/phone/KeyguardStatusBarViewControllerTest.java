@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -161,5 +162,19 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.setNoTopClipping();
 
         assertThat(mKeyguardStatusBarView.getClipBounds().top).isEqualTo(0);
+    }
+
+    @Test
+    public void updateViewState_alphaAndVisibilityGiven_viewUpdated() {
+        // Verify the initial values so we know the method triggers changes.
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(1f);
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        float newAlpha = 0.5f;
+        int newVisibility = View.INVISIBLE;
+        mController.updateViewState(newAlpha, newVisibility);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(newAlpha);
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(newVisibility);
     }
 }
