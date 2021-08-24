@@ -491,9 +491,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
             @ChooserActivity.ShareTargetType int targetType,
-            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
-            List<ChooserActivity.ChooserTargetServiceConnection>
-                    pendingChooserTargetServiceConnections) {
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos) {
         if (DEBUG) {
             Log.d(TAG, "addServiceResults " + origTarget.getResolvedComponentName() + ", "
                     + targets.size()
