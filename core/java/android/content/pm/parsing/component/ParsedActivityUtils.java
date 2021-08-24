@@ -18,6 +18,7 @@ package android.content.pm.parsing.component;
 
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.parsing.ParsingUtils.NOT_SET;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
@@ -269,15 +270,15 @@ public class ParsedActivityUtils {
                     activity, tag, null, pkg, sa, 0, useRoundIcon, input,
                     R.styleable.AndroidManifestActivityAlias_banner,
                     R.styleable.AndroidManifestActivityAlias_description,
-                    null /*directBootAwareAttr*/,
+                    NOT_SET /*directBootAwareAttr*/,
                     R.styleable.AndroidManifestActivityAlias_enabled,
                     R.styleable.AndroidManifestActivityAlias_icon,
                     R.styleable.AndroidManifestActivityAlias_label,
                     R.styleable.AndroidManifestActivityAlias_logo,
                     R.styleable.AndroidManifestActivityAlias_name,
-                    null /*processAttr*/,
+                    NOT_SET /*processAttr*/,
                     R.styleable.AndroidManifestActivityAlias_roundIcon,
-                    null /*splitNameAttr*/,
+                    NOT_SET /*splitNameAttr*/,
                     R.styleable.AndroidManifestActivityAlias_attributionTags);
             if (result.isError()) {
                 return result;

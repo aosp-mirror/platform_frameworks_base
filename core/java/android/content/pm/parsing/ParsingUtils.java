@@ -41,6 +41,8 @@ public class ParsingUtils {
     public static final int DEFAULT_MIN_SDK_VERSION = 1;
     public static final int DEFAULT_TARGET_SDK_VERSION = 0;
 
+    public static final int NOT_SET = -1;
+
     @Nullable
     public static String buildClassName(String pkg, CharSequence clsSeq) {
         if (clsSeq == null || clsSeq.length() <= 0) {
