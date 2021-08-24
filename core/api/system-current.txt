@@ -6197,7 +6197,7 @@ package android.media.tv.tuner.filter {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
     method public int flush();
-    method public int getId();
+    method @Deprecated public int getId();
     method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
