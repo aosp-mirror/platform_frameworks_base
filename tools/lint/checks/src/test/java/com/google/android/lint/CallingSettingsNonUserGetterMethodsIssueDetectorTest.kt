@@ -71,13 +71,13 @@ class CallingSettingsNonUserGetterMethodsIssueDetectorTest : LintDetectorTest() 
                 .run()
                 .expect(
                         """
-                        src/test/pkg/TestClass1.java:5: Error: \
+                        src/test/pkg/TestClass1.java:5: Warning: \
                         android.provider.Settings.Secure#getInt() called from system process. \
                         Please call android.provider.Settings.Secure#getIntForUser() instead.  \
                         [NonUserGetterCalled]
                                 final int value = Secure.getInt(context.getContentResolver(),
-                                                         ~~~~~~
-                        1 errors, 0 warnings
+                                                  ^
+                        0 errors, 1 warnings
                         """.addLineContinuation()
                 )
     }
@@ -100,13 +100,13 @@ class CallingSettingsNonUserGetterMethodsIssueDetectorTest : LintDetectorTest() 
                 .run()
                 .expect(
                         """
-                        src/test/pkg/TestClass1.java:5: Error: \
+                        src/test/pkg/TestClass1.java:5: Warning: \
                         android.provider.Settings.System#getFloat() called from system process. \
                         Please call android.provider.Settings.System#getFloatForUser() instead.  \
                         [NonUserGetterCalled]
                                 final float value = System.getFloat(context.getContentResolver(),
-                                                           ~~~~~~~~
-                        1 errors, 0 warnings
+                                                    ^
+                        0 errors, 1 warnings
                         """.addLineContinuation()
                 )
     }
@@ -130,13 +130,13 @@ class CallingSettingsNonUserGetterMethodsIssueDetectorTest : LintDetectorTest() 
                 .run()
                 .expect(
                         """
-                        src/test/pkg/TestClass1.java:5: Error: \
+                        src/test/pkg/TestClass1.java:5: Warning: \
                         android.provider.Settings.System#getFloat() called from system process. \
                         Please call android.provider.Settings.System#getFloatForUser() instead.  \
                         [NonUserGetterCalled]
                                 float value = Settings.System.getFloat(context.getContentResolver(),
-                                                              ~~~~~~~~
-                        1 errors, 0 warnings
+                                              ^
+                        0 errors, 1 warnings
                         """.addLineContinuation()
                 )
     }
@@ -163,19 +163,19 @@ class CallingSettingsNonUserGetterMethodsIssueDetectorTest : LintDetectorTest() 
                 .run()
                 .expect(
                         """
-                        src/test/pkg/TestClass1.java:6: Error: \
+                        src/test/pkg/TestClass1.java:6: Warning: \
                         android.provider.Settings.Secure#getLong() called from system process. \
                         Please call android.provider.Settings.Secure#getLongForUser() instead.  \
                         [NonUserGetterCalled]
                                 final long value1 = Secure.getLong(context.getContentResolver(),
-                                                           ~~~~~~~
-                        src/test/pkg/TestClass1.java:8: Error: \
+                                                    ^
+                        src/test/pkg/TestClass1.java:8: Warning: \
                         android.provider.Settings.System#getString() called from system process. \
                         Please call android.provider.Settings.System#getStringForUser() instead.  \
                         [NonUserGetterCalled]
                                 final String value2 = System.getString(context.getContentResolver(),
-                                                             ~~~~~~~~~
-                        2 errors, 0 warnings
+                                                      ^
+                        0 errors, 2 warnings
                         """.addLineContinuation()
                 )
     }
