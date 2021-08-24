@@ -20,6 +20,8 @@ import static com.android.systemui.statusbar.phone.ScrimController.OPAQUE;
 import static com.android.systemui.statusbar.phone.ScrimController.SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -734,9 +736,9 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToUnlockedFromAod() {
-        // Simulate unlock with fingerprint
-        mScrimController.transitionTo(ScrimState.AOD);
+    public void transitionToUnlockedFromOff() {
+        // Simulate unlock with fingerprint without AOD
+        mScrimController.transitionTo(ScrimState.OFF);
         mScrimController.setPanelExpansion(0f);
         finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
@@ -761,6 +763,28 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, false,
                 mScrimBehind, true,
                 mScrimForBubble, false
+        ));
+    }
+
+    @Test
+    public void transitionToUnlockedFromAod() {
+        // Simulate unlock with fingerprint
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.setPanelExpansion(0f);
+        finishAnimationsImmediately();
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+
+        finishAnimationsImmediately();
+
+        // All scrims should be transparent at the end of fade transition.
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
+
+        // Make sure at the very end of the animation, we're reset to transparent
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true
         ));
     }
 
@@ -1078,6 +1102,26 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, SEMI_TRANSPARENT,
                 mNotificationsScrim, SEMI_TRANSPARENT,
                 mScrimInFront, TRANSPARENT));
+    }
+
+    @Test
+    public void testDoesntAnimate_whenUnlocking() {
+        // LightRevealScrim will animate the transition, we should only hide the keyguard scrims.
+        ScrimState.UNLOCKED.prepare(ScrimState.KEYGUARD);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isTrue();
+        ScrimState.UNLOCKED.prepare(ScrimState.PULSING);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isFalse();
+
+        ScrimState.UNLOCKED.prepare(ScrimState.KEYGUARD);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isTrue();
+        ScrimState.UNLOCKED.prepare(ScrimState.AOD);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isFalse();
+
+        // LightRevealScrim doesn't animate when AOD is disabled. We need to use the legacy anim.
+        ScrimState.UNLOCKED.prepare(ScrimState.KEYGUARD);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isTrue();
+        ScrimState.UNLOCKED.prepare(ScrimState.OFF);
+        assertThat(ScrimState.UNLOCKED.getAnimateChange()).isTrue();
     }
 
     @Test
