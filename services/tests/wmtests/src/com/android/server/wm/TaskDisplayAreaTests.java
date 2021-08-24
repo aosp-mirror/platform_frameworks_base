@@ -620,7 +620,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task pinnedRootTask = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createRootTask(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task pinnedTask = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTaskFragment(pinnedRootTask).build();
+                .setParentTask(pinnedRootTask).build();
         new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
         pinnedRootTask.moveToFront("movePinnedRootTaskToFront");

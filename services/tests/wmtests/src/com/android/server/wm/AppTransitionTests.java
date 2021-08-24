@@ -23,8 +23,6 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -42,7 +40,6 @@ import static org.mockito.ArgumentMatchers.any;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.ArraySet;
 import android.view.Display;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -147,91 +144,6 @@ public class AppTransitionTests extends WindowTestsBase {
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
                         null /* wallpaperTarget */, null /* oldWallpaper */,
                         true /*skipAppTransitionAnimation*/));
-    }
-
-    @Test
-    public void testTaskFragmentOpeningTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                false /* createEmbeddedTask */);
-        activity.setVisible(false);
-
-        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
-        mDisplayContent.mOpeningApps.add(activity);
-        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
-                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
-    }
-
-    @Test
-    public void testEmbeddedTaskOpeningTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                true /* createEmbeddedTask */);
-        activity.setVisible(false);
-
-        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
-        mDisplayContent.mOpeningApps.add(activity);
-        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
-                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
-    }
-
-    @Test
-    public void testTaskFragmentClosingTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                false /* createEmbeddedTask */);
-        activity.setVisible(true);
-
-        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
-        mDisplayContent.mClosingApps.add(activity);
-        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
-                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
-    }
-
-    @Test
-    public void testEmbeddedTaskClosingTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                true /* createEmbeddedTask */);
-        activity.setVisible(true);
-
-        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
-        mDisplayContent.mClosingApps.add(activity);
-        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
-                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
-    }
-
-    /**
-     * Creates a {@link Task} with two {@link TaskFragment TaskFragments}.
-     * The bottom TaskFragment is to prevent
-     * {@link AppTransitionController#getAnimationTargets(ArraySet, ArraySet, boolean) the animation
-     * target} to promote to Task or above.
-     *
-     * @param createEmbeddedTask {@code true} to create embedded Task for verified TaskFragment
-     * @return The Activity to be put in either opening or closing Activity
-     */
-    private ActivityRecord createHierarchyForTaskFragmentTest(boolean createEmbeddedTask) {
-        final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment bottomTaskFragment = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
-        final ActivityRecord bottomActivity = bottomTaskFragment.getTopMostActivity();
-        bottomActivity.setOccludesParent(true);
-        bottomActivity.setVisible(true);
-
-        final TaskFragment verifiedTaskFragment = createTaskFragmentWithParentTask(parentTask,
-                createEmbeddedTask);
-        final ActivityRecord activity = verifiedTaskFragment.getTopMostActivity();
-        activity.setOccludesParent(true);
-
-        return activity;
     }
 
     @Test
