@@ -703,6 +703,7 @@ class ActivityMetricsLogger {
         // Always calculate the delay because the caller may need to know the individual drawn time.
         info.mWindowsDrawnDelayMs = info.calculateDelay(timestampNs);
         info.removePendingDrawActivity(r);
+        info.updatePendingDraw(false /* keepInitializing */);
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.mLoggedTransitionStarting && info.allDrawn()) {
             done(false /* abort */, info, "notifyWindowsDrawn - all windows drawn", timestampNs);
