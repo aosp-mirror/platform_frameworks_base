@@ -375,7 +375,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final ArraySet<ActivityRecord> closing = new ArraySet<>();
         closing.add(activity3);
 
-        // Promote animation targets to root Task level. Invisible ActivityRecords don't affect
+        // Promote animation targets to TaskStack level. Invisible ActivityRecords don't affect
         // promotion decision.
         assertEquals(
                 new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
@@ -516,128 +516,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                         opening, closing, true /* visible */));
         assertEquals(
                 new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
-    public void testGetAnimationTargets_openingClosingTaskFragment() {
-        // [DefaultTDA] - [Task] -+- [TaskFragment1] - [ActivityRecord1] (opening, invisible)
-        //                        +- [TaskFragment2] - [ActivityRecord2] (closing, visible)
-        final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
-        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
-
-        final TaskFragment taskFragment2 = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
-        final ActivityRecord activity2 = taskFragment2.getTopMostActivity();
-        activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Promote animation targets up to TaskFragment level, not beyond.
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment2}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
-    public void testGetAnimationTargets_openingClosingTaskFragmentWithEmbeddedTask() {
-        // [DefaultTDA] - [Task] -+- [TaskFragment1] - [ActivityRecord1] (opening, invisible)
-        //                        +- [TaskFragment2] - [ActivityRecord2] (closing, visible)
-        final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(parentTask,
-                true /* createEmbeddedTask */);
-        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
-
-        final TaskFragment taskFragment2 = createTaskFragmentWithParentTask(parentTask,
-                true /* createEmbeddedTask */);
-        final ActivityRecord activity2 = taskFragment2.getTopMostActivity();
-        activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Promote animation targets up to TaskFragment level, not beyond.
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment2}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
-    public void testGetAnimationTargets_openingTheOnlyTaskFragmentInTask() {
-        // [DefaultTDA] -+- [Task1] - [TaskFragment1] - [ActivityRecord1] (opening, invisible)
-        //               +- [Task2] - [ActivityRecord2] (closing, visible)
-        final Task task1 = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(task1,
-                false /* createEmbeddedTask */);
-        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
-
-        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
-        activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Promote animation targets up to leaf Task level because there's only one TaskFragment in
-        // the Task.
-        assertEquals(new ArraySet<>(new WindowContainer[]{task1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
-    public void testGetAnimationTargets_closingTheOnlyTaskFragmentInTask() {
-        // [DefaultTDA] -+- [Task1] - [TaskFragment1] - [ActivityRecord1] (closing, visible)
-        //               +- [Task2] - [ActivityRecord2] (opening, invisible)
-        final Task task1 = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(task1,
-                false /* createEmbeddedTask */);
-        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
-
-        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
-        activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity2);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity1);
-
-        // Promote animation targets up to leaf Task level because there's only one TaskFragment in
-        // the Task.
-        assertEquals(new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(new ArraySet<>(new WindowContainer[]{task1}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }
