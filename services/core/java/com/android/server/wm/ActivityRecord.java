@@ -3935,7 +3935,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (tStartingWindow != null && fromActivity.mStartingSurface != null) {
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
-            getDisplayContent().mSkipAppTransitionAnimation = true;
+            if (fromActivity.mVisible) {
+                mDisplayContent.mSkipAppTransitionAnimation = true;
+            }
 
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Moving existing starting %s"
                     + " from %s to %s", tStartingWindow, fromActivity, this);
