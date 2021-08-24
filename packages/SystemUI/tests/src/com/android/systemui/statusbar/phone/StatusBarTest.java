@@ -254,6 +254,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
     @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
+    @Mock private Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimationLazy;
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private StatusBarLocationPublisher mLocationPublisher;
@@ -428,6 +429,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mBrightnessSliderFactory,
                 mUnfoldTransitionConfig,
                 mUnfoldLightRevealOverlayAnimationLazy,
+                mMoveFromCenterAnimationLazy,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
