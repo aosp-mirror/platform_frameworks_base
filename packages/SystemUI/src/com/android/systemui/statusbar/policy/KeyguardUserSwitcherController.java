@@ -176,7 +176,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 mUserSwitcherController, this);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
                 keyguardStateController, dozeParameters,
-                unlockedScreenOffAnimationController, /* animateYPos= */ false);
+                unlockedScreenOffAnimationController, /* animateYPos= */ false,
+                /* visibleOnCommunal= */ false);
         mBackground = new KeyguardUserSwitcherScrim(context);
     }
 

@@ -24,8 +24,11 @@ import android.view.ViewGroup;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -69,6 +72,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
     private static final int SHOW_COMMUNAL_VIEW_REQUIRED_STATES = STATE_KEYGUARD_SHOWING;
     private static final int SHOW_COMMUNAL_VIEW_INVALID_STATES =
             STATE_DOZING | STATE_BOUNCER_SHOWING | STATE_KEYGUARD_OCCLUDED;
+
+    private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
 
     private ViewController<? extends View> mCommunalViewController;
 
@@ -123,6 +128,8 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
             CommunalStateController communalStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController,
+            DozeParameters dozeParameters,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             StatusBarStateController statusBarStateController, CommunalHostView view) {
         super(view);
         mCommunalStateController = communalStateController;
@@ -130,6 +137,21 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
         mMainExecutor = mainExecutor;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
+                keyguardStateController, dozeParameters, unlockedScreenOffAnimationController,
+                /* animateYPos= */ false, /* visibleOnCommunal= */ true);
+    }
+
+    /**
+     * Set the visibility of the keyguard status view based on some new state.
+     */
+    public void setKeyguardStatusViewVisibility(
+            int statusBarState,
+            boolean keyguardFadingAway,
+            boolean goingToFullShade,
+            int oldStatusBarState) {
+        mKeyguardVisibilityHelper.setViewVisibility(
+                statusBarState, keyguardFadingAway, goingToFullShade, oldStatusBarState);
     }
 
     @Override

@@ -43,6 +43,7 @@ public class KeyguardVisibilityHelper {
     private final KeyguardStateController mKeyguardStateController;
     private final DozeParameters mDozeParameters;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final boolean mVisibleOnCommunal;
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
@@ -53,13 +54,15 @@ public class KeyguardVisibilityHelper {
             KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            boolean animateYPos) {
+            boolean animateYPos,
+            boolean visibleOnCommunal) {
         mView = view;
         mCommunalStateController = communalStateController;
         mKeyguardStateController = keyguardStateController;
         mDozeParameters = dozeParameters;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mAnimateYPos = animateYPos;
+        mVisibleOnCommunal = visibleOnCommunal;
     }
 
     public boolean isVisibilityAnimating() {
@@ -79,7 +82,7 @@ public class KeyguardVisibilityHelper {
         mKeyguardViewVisibilityAnimating = false;
 
         // If the communal view is showing, hide immediately
-        if (mCommunalStateController.getCommunalViewShowing()) {
+        if (!mVisibleOnCommunal && mCommunalStateController.getCommunalViewShowing()) {
             mView.setVisibility(View.GONE);
             mView.setAlpha(1f);
             return;
