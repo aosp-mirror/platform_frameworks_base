@@ -786,7 +786,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .build(sensorIds, credentialAllowed, mFpProps, mFaceProps);
     }
 
-    interface Callback {
+    /**
+     * AuthController callback used to receive signal for when biometric authenticators are
+     * registered.
+     */
+    public interface Callback {
         /**
          * Called when authenticators are registered. If authenticators are already
          * registered before this call, this callback will never be triggered.

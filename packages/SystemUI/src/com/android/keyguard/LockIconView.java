@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
@@ -79,7 +80,11 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon.setImageDrawable(drawable);
     }
 
-    void setCenterLocation(@NonNull PointF center, int radius) {
+    /**
+     * Set the location of the lock icon.
+     */
+    @VisibleForTesting
+    public void setCenterLocation(@NonNull PointF center, int radius) {
         mLockIconCenter = center;
         mRadius = radius;
 

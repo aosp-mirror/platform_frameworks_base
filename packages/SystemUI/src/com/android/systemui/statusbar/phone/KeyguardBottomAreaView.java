@@ -203,13 +203,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ControlsListingController.ControlsListingCallback mListingCallback =
             new ControlsListingController.ControlsListingCallback() {
                 public void onServicesUpdated(List<ControlsServiceInfo> serviceInfos) {
-                    boolean available = !serviceInfos.isEmpty();
+                    post(() -> {
+                        boolean available = !serviceInfos.isEmpty();
 
-                    if (available != mControlServicesAvailable) {
-                        mControlServicesAvailable = available;
-                        updateControlsVisibility();
-                        updateAffordanceColors();
-                    }
+                        if (available != mControlServicesAvailable) {
+                            mControlServicesAvailable = available;
+                            updateControlsVisibility();
+                            updateAffordanceColors();
+                        }
+                    });
                 }
             };
 
