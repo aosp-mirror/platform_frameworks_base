@@ -56,6 +56,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.junit.Assert.assertEquals;
@@ -589,7 +590,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     Task createTaskInRootTask(Task rootTask, int userId) {
         final Task task = new TaskBuilder(rootTask.mTaskSupervisor)
                 .setUserId(userId)
-                .setParentTask(rootTask)
+                .setParentTaskFragment(rootTask)
                 .build();
         return task;
     }
@@ -673,6 +674,26 @@ class WindowTestsBase extends SystemServiceTestsBase {
         activity.setOccludesParent(true);
         activity.setVisible(true);
         activity.mVisibleRequested = true;
+    }
+
+    /**
+     * Creates a {@link TaskFragment} and attach it to the {@code parentTask}.
+     *
+     * @param parentTask the {@link Task} this TaskFragment is going to be attached
+     * @param createEmbeddedTask Sets to {@code true} to create an embedded Task for this
+     *                           TaskFragment. Otherwise, create a {@link ActivityRecord}.
+     * @return the created TaskFragment
+     */
+    static TaskFragment createTaskFragmentWithParentTask(@NonNull Task parentTask,
+            boolean createEmbeddedTask) {
+        final TaskFragmentBuilder builder = new TaskFragmentBuilder(parentTask.mAtmService)
+                .setParentTask(parentTask);
+        if (createEmbeddedTask) {
+            builder.createEmbeddedTask();
+        } else {
+            builder.createActivityCount(1);
+        }
+        return builder.build();
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -1042,7 +1063,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         // Apply the root activity info and intent
                         .setActivityInfo(aInfo)
                         .setIntent(intent)
-                        .setParentTask(mParentTask).build();
+                        .setParentTaskFragment(mParentTask).build();
             } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
                     mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
                 // The parent task can be the task root.
@@ -1101,6 +1122,64 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    static class TaskFragmentBuilder {
+        private final ActivityTaskManagerService mAtm;
+        private Task mParentTask;
+        private boolean mCreateParentTask;
+        private boolean mCreateEmbeddedTask;
+        private int mCreateActivityCount = 0;
+
+        TaskFragmentBuilder(ActivityTaskManagerService service) {
+            mAtm = service;
+        }
+
+        TaskFragmentBuilder setCreateParentTask() {
+            mCreateParentTask = true;
+            return this;
+        }
+
+        TaskFragmentBuilder setParentTask(Task task) {
+            mParentTask = task;
+            return this;
+        }
+
+        /** Creates a child embedded Task and its Activity */
+        TaskFragmentBuilder createEmbeddedTask() {
+            mCreateEmbeddedTask = true;
+            return this;
+        }
+
+        TaskFragmentBuilder createActivityCount(int count) {
+            mCreateActivityCount = count;
+            return this;
+        }
+
+        TaskFragment build() {
+            SystemServicesTestRule.checkHoldsLock(mAtm.mGlobalLock);
+
+            final TaskFragment taskFragment = new TaskFragment(mAtm, null /* fragmentToken */,
+                    false /* createdByOrganizer */);
+            if (mParentTask == null && mCreateParentTask) {
+                mParentTask = new TaskBuilder(mAtm.mTaskSupervisor).build();
+            }
+            if (mParentTask != null) {
+                mParentTask.addChild(taskFragment, POSITION_TOP);
+            }
+            if (mCreateEmbeddedTask) {
+                new TaskBuilder(mAtm.mTaskSupervisor)
+                        .setParentTaskFragment(taskFragment)
+                        .setCreateActivity(true)
+                        .build();
+            }
+            while (mCreateActivityCount > 0) {
+                final ActivityRecord activity = new ActivityBuilder(mAtm).build();
+                taskFragment.addChild(activity);
+                mCreateActivityCount--;
+            }
+            return taskFragment;
+        }
+    }
+
     /**
      * Builder for creating new tasks.
      */
@@ -1121,7 +1200,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private IVoiceInteractionSession mVoiceSession;
 
         private boolean mCreateParentTask = false;
-        private Task mParentTask;
+        private TaskFragment mParentTaskFragment;
 
         private boolean mCreateActivity = false;
 
@@ -1205,8 +1284,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        TaskBuilder setParentTask(Task parentTask) {
-            mParentTask = parentTask;
+        TaskBuilder setParentTaskFragment(TaskFragment parentTaskFragment) {
+            mParentTaskFragment = parentTaskFragment;
             return this;
         }
 
@@ -1219,12 +1298,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
             SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
 
             // Create parent task.
-            if (mParentTask == null && mCreateParentTask) {
-                mParentTask = mTaskDisplayArea.createRootTask(
+            if (mParentTaskFragment == null && mCreateParentTask) {
+                mParentTaskFragment = mTaskDisplayArea.createRootTask(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
             }
-            if (mParentTask != null && !Mockito.mockingDetails(mParentTask).isSpy()) {
-                spyOn(mParentTask);
+            if (mParentTaskFragment != null
+                    && !Mockito.mockingDetails(mParentTaskFragment).isSpy()) {
+                spyOn(mParentTaskFragment);
             }
 
             // Create task.
@@ -1252,13 +1332,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     .setOnTop(mOnTop)
                     .setVoiceSession(mVoiceSession);
             final Task task;
-            if (mParentTask == null) {
+            if (mParentTaskFragment == null) {
                 task = builder.setActivityType(mActivityType)
                         .setParent(mTaskDisplayArea)
                         .build();
             } else {
-                task = builder.setParent(mParentTask).build();
-                mParentTask.moveToFront("build-task");
+                task = builder.setParent(mParentTaskFragment).build();
+                if (mParentTaskFragment.asTask() != null) {
+                    mParentTaskFragment.asTask().moveToFront("build-task");
+                }
             }
             spyOn(task);
             task.mUserId = mUserId;
