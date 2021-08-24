@@ -243,6 +243,8 @@ cc_library_shared {
             shared_libs: [
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
+                "audiopolicy-types-aidl-cpp",
+                "spatializer-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
                 "libandroidicu",

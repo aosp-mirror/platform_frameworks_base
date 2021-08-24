@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothCodecConfig;
@@ -1999,6 +2000,46 @@ public class AudioSystem
      * @return command completion status
      */
     public static native int setVibratorInfos(@NonNull List<Vibrator> vibrators);
+
+    /**
+     * @hide
+     * If a spatializer effect is present on the platform, this will return an
+     * ISpatializer interface to control this feature.
+     * If no spatializer is present, a null interface is returned.
+     * The INativeSpatializerCallback passed must not be null.
+     * Only one ISpatializer interface can exist at a given time. The native audio policy
+     * service will reject the request if an interface was already acquired and previous owner
+     * did not die or call ISpatializer.release().
+     * @param callback the callback to receive state updates if the ISpatializer
+     *        interface is acquired.
+     * @return the ISpatializer interface made available to control the
+     *        platform spatializer
+     */
+    @Nullable
+    public static ISpatializer getSpatializer(INativeSpatializerCallback callback) {
+        return ISpatializer.Stub.asInterface(nativeGetSpatializer(callback));
+    }
+    private static native IBinder nativeGetSpatializer(INativeSpatializerCallback callback);
+
+    /**
+     * @hide
+     * Queries if some kind of spatialization will be performed if the audio playback context
+     * described by the provided arguments is present.
+     * The context is made of:
+     * - The audio attributes describing the playback use case.
+     * - The audio configuration describing the audio format, channels, sampling rate ...
+     * - The devices describing the sink audio device selected for playback.
+     * All arguments are optional and only the specified arguments are used to match against
+     * supported criteria. For instance, supplying no argument will tell if spatialization is
+     * supported or not in general.
+     * @param attributes audio attributes describing the playback use case
+     * @param format audio configuration describing the audio format, channels, sampling rate...
+     * @param devices the sink audio device selected for playback
+     * @return true if spatialization is enabled for this context, false otherwise.
+     */
+    public static native boolean canBeSpatialized(AudioAttributes attributes,
+                                              AudioFormat format,
+                                              AudioDeviceAttributes[] devices);
 
     // Items shared with audio service
 
