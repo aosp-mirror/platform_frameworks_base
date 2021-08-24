@@ -26,16 +26,15 @@ import android.view.MotionEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
@@ -48,13 +47,13 @@ import java.io.PrintWriter;
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @NonNull private final DelayableExecutor mExecutor;
-    @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final SystemClock mSystemClock;
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final UdfpsController mUdfpsController;
+    @NonNull private final UnlockedScreenOffAnimationController
+            mUnlockedScreenOffAnimationController;
 
     private boolean mShowingUdfpsBouncer;
     private boolean mUdfpsRequested;
@@ -81,24 +80,22 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @NonNull DelayableExecutor mainDelayableExecutor,
             @NonNull DumpManager dumpManager,
-            @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull LockscreenShadeTransitionController transitionController,
             @NonNull ConfigurationController configurationController,
             @NonNull SystemClock systemClock,
             @NonNull KeyguardStateController keyguardStateController,
+            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mExecutor = mainDelayableExecutor;
-        mKeyguardViewMediator = keyguardViewMediator;
         mLockScreenShadeTransitionController = transitionController;
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mKeyguardStateController = keyguardStateController;
         mUdfpsController = udfpsController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
     }
 
     @Override
@@ -135,6 +132,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(this);
+        mUnlockedScreenOffAnimationController.addCallback(mUnlockedScreenOffCallback);
     }
 
     @Override
@@ -151,6 +149,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
+        mUnlockedScreenOffAnimationController.removeCallback(mUnlockedScreenOffCallback);
     }
 
     @Override
@@ -421,4 +420,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     updatePauseAuth();
                 }
             };
+
+    private final UnlockedScreenOffAnimationController.Callback mUnlockedScreenOffCallback =
+            (linear, eased) -> mStateListener.onDozeAmountChanged(linear, eased);
 }
