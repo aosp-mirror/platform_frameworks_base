@@ -324,6 +324,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Reset the adjacent TaskFragment if its adjacent TaskFragment is also this TaskFragment.
         if (mAdjacentTaskFragment != null && mAdjacentTaskFragment.mAdjacentTaskFragment == this) {
             mAdjacentTaskFragment.mAdjacentTaskFragment = null;
+            mAdjacentTaskFragment.mDelayLastActivityRemoval = false;
         }
         mAdjacentTaskFragment = null;
         mDelayLastActivityRemoval = false;

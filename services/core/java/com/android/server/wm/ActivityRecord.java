@@ -127,6 +127,11 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
@@ -3935,7 +3940,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (tStartingWindow != null && fromActivity.mStartingSurface != null) {
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
-            getDisplayContent().mSkipAppTransitionAnimation = true;
+            if (fromActivity.mVisible) {
+                mDisplayContent.mSkipAppTransitionAnimation = true;
+            }
 
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Moving existing starting %s"
                     + " from %s to %s", tStartingWindow, fromActivity, this);
@@ -4690,6 +4697,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ActivityTaskManagerService.LAYOUT_REASON_VISIBILITY_CHANGED);
         mTaskSupervisor.getActivityMetricsLogger().notifyVisibilityChanged(this);
         mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
+        logAppCompatState();
     }
 
     @VisibleForTesting
@@ -7436,6 +7444,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
         }
+
+        logAppCompatState();
     }
 
     /**
@@ -7445,18 +7455,55 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * LetterboxUiController#shouldShowLetterboxUi} for more context.
      */
     boolean areBoundsLetterboxed() {
+        return getAppCompatState(/* ignoreVisibility= */ true)
+                != APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
+    }
+
+    /**
+     * Logs the current App Compat state via {@link ActivityMetricsLogger#logAppCompatState}.
+     */
+    private void logAppCompatState() {
+        mTaskSupervisor.getActivityMetricsLogger().logAppCompatState(this);
+    }
+
+    /**
+     * Returns the current App Compat state of this activity.
+     *
+     * <p>The App Compat state indicates whether the activity is visible and letterboxed, and if so
+     * what is the reason for letterboxing. The state is used for logging the time spent in
+     * letterbox (sliced by the reason) vs non-letterbox per app.
+     */
+    int getAppCompatState() {
+        return getAppCompatState(/* ignoreVisibility= */ false);
+    }
+
+    /**
+     * Same as {@link #getAppCompatState()} except when {@code ignoreVisibility} the visibility
+     * of the activity is ignored.
+     *
+     * @param ignoreVisibility whether to ignore the visibility of the activity and not return
+     *                         NOT_VISIBLE if {@code mVisibleRequested} is false.
+     */
+    private int getAppCompatState(boolean ignoreVisibility) {
+        if (!ignoreVisibility && !mVisibleRequested) {
+            return APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+        }
         if (mInSizeCompatModeForBounds) {
-            return true;
+            return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
         }
         // Letterbox for fixed orientation. This check returns true only when an activity is
         // letterboxed for fixed orientation. Aspect ratio restrictions are also applied if
         // present. But this doesn't return true when the activity is letterboxed only because
         // of aspect ratio restrictions.
         if (isLetterboxedForFixedOrientationAndAspectRatio()) {
-            return true;
+            return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
         }
         // Letterbox for limited aspect ratio.
-        return mIsAspectRatioApplied;
+        if (mIsAspectRatioApplied) {
+            return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
+        }
+
+        return APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
     }
 
     /**

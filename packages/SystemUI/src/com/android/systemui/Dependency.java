@@ -66,6 +66,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.ReduceBrightColorsController;
+import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -358,6 +359,7 @@ public class Dependency {
     @Inject Lazy<UiEventLogger> mUiEventLogger;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
     @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
+    @Inject Lazy<InternetDialogFactory> mInternetDialogFactory;
 
     @Inject
     public Dependency() {
@@ -568,6 +570,7 @@ public class Dependency {
         mProviders.put(PrivacyDotViewController.class, mPrivacyDotViewControllerLazy::get);
         mProviders.put(EdgeBackGestureHandler.Factory.class,
                 mEdgeBackGestureHandlerFactoryLazy::get);
+        mProviders.put(InternetDialogFactory.class, mInternetDialogFactory::get);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
         mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
