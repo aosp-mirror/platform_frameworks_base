@@ -163,14 +163,12 @@ final class InstallParams extends HandlerParams {
     final int mDataLoaderType;
     final long mRequiredInstalledVersionCode;
     final PackageLite mPackageLite;
-    @NonNull final PackageManagerService mPm;
 
     InstallParams(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
             UserHandle user, String packageAbiOverride, PackageLite packageLite,
             PackageManagerService pm) {
-        super(user);
-        mPm = pm;
+        super(user, pm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mObserver = observer;
@@ -195,8 +193,7 @@ final class InstallParams extends HandlerParams {
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
             PackageLite packageLite, PackageManagerService pm) {
-        super(user);
-        mPm = pm;
+        super(user, pm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mMoveInfo = null;
         mInstallReason = fixUpInstallReason(
@@ -373,7 +370,7 @@ final class InstallParams extends HandlerParams {
         // state can change within this delay and hence we need to re-verify certain conditions.
         boolean isStaged = (mInstallFlags & INSTALL_STAGED) != 0;
         if (isStaged) {
-            Pair<Integer, String> ret = mPm.verifyReplacingVersionCode(
+            Pair<Integer, String> ret = verifyReplacingVersionCode(
                     pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
             mRet = ret.first;
             if (mRet != INSTALL_SUCCEEDED) {
@@ -622,7 +619,7 @@ final class InstallParams extends HandlerParams {
                 Map<String, ReconciledPackage> reconciledPackages;
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
-                    reconciledPackages = PackageManagerService.reconcilePackagesLocked(
+                    reconciledPackages = mPm.reconcilePackagesLocked(
                             reconcileRequest, mPm.mSettings.getKeySetManagerService(),
                             mPm.mInjector);
                 } catch (ReconcileFailure e) {
@@ -2075,7 +2072,7 @@ final class InstallParams extends HandlerParams {
             throws PackageManagerException {
         final Message msg = mPm.mHandler.obtainMessage(INIT_COPY);
         final MultiPackageInstallParams params =
-                new MultiPackageInstallParams(this, children);
+                new MultiPackageInstallParams(this, children, mPm);
         params.setTraceMethod("installStageMultiPackage")
                 .setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
@@ -2107,9 +2104,10 @@ final class InstallParams extends HandlerParams {
         private final List<InstallParams> mChildParams;
         private final Map<InstallArgs, Integer> mCurrentState;
 
-        MultiPackageInstallParams(InstallParams parent, List<InstallParams> childParams)
+        MultiPackageInstallParams(InstallParams parent, List<InstallParams> childParams,
+                PackageManagerService pm)
                 throws PackageManagerException {
-            super(parent.getUser());
+            super(parent.getUser(), pm);
             if (childParams.size() == 0) {
                 throw new PackageManagerException("No child sessions found!");
             }
@@ -2159,4 +2157,6 @@ final class InstallParams extends HandlerParams {
                     installRequests);
         }
     }
+
+
 }

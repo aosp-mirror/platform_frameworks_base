@@ -87,6 +87,8 @@ public class ScanTests {
     PlatformCompat mMockCompatibility;
     @Mock
     PackageManagerService.Injector mMockInjector;
+    @Mock
+    PackageManagerService mMockPackageManager;
 
     @Before
     public void setupInjector() {
@@ -432,7 +434,7 @@ public class ScanTests {
         final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
                 .addUsesPermission(new ParsedUsesPermission(Manifest.permission.FACTORY_TEST, 0));
 
-        final ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
+        final ScanResult scanResult = mMockPackageManager.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
                 true /*isUnderFactoryTest*/,
@@ -480,7 +482,7 @@ public class ScanTests {
 
     private ScanResult executeScan(
             ScanRequest scanRequest) throws PackageManagerException {
-        ScanResult result = PackageManagerService.scanPackageOnlyLI(
+        ScanResult result = mMockPackageManager.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,
