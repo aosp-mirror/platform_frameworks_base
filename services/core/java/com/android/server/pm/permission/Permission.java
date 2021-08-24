@@ -497,13 +497,10 @@ public final class Permission {
                 if (permissionTree.getUid() == UserHandle.getAppId(callingUid)) {
                     return permissionTree;
                 }
-                throw new SecurityException("Calling uid " + callingUid
-                        + " is not allowed to add to permission tree "
-                        + permissionTree.getName() + " owned by uid "
-                        + permissionTree.getUid());
             }
         }
-        throw new SecurityException("No permission tree found for " + permissionName);
+        throw new SecurityException("Calling uid " + callingUid
+            + " is not allowed to add to or remove from the permission tree");
     }
 
     @Nullable
