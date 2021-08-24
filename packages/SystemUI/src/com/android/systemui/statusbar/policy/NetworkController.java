@@ -23,6 +23,7 @@ import android.telephony.SubscriptionInfo;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
@@ -223,6 +224,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
+        MergedCarrierEntry getMergedCarrierEntry();
         int getIcon(WifiEntry ap);
         boolean connect(WifiEntry ap);
         boolean canConfigWifi();
