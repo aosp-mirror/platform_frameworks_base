@@ -613,6 +613,36 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_STATE_DESCRIPTION = 0x00000040;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag has started while accessibility is enabled. This is either via an
+     * AccessibilityAction, or via touch events. This is sent from the source that initiated the
+     * drag.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_START
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 0x00000080;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag in with accessibility enabled has ended. This means the content has been
+     * successfully dropped. This is sent from the target that accepted the dragged content.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_DROP
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 0x00000100;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A drag in with accessibility enabled has ended. This means the content has been
+     * unsuccessfully dropped, the user has canceled the action via an AccessibilityAction, or
+     * no drop has been detected within a timeout and the drag was automatically cancelled. This is
+     * sent from the source that initiated the drag.
+     *
+     * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL
+     */
+    public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 0x0000200;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
