@@ -663,7 +663,7 @@ public class StatusBar extends SystemUI implements
     private final SysuiStatusBarStateController mStatusBarStateController;
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -782,7 +782,8 @@ public class StatusBar extends SystemUI implements
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            ActivityLaunchAnimator activityLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -886,6 +887,7 @@ public class StatusBar extends SystemUI implements
                 });
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
+        mActivityLaunchAnimator = activityLaunchAnimator;
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -1433,7 +1435,7 @@ public class StatusBar extends SystemUI implements
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(mKeyguardHandler, mContext);
+        mActivityLaunchAnimator.setCallback(mKeyguardHandler);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),

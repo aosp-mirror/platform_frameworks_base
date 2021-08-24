@@ -22,6 +22,8 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -261,4 +263,20 @@ public interface StatusBarDependenciesModule {
     @Binds
     QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
             QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static LaunchAnimator provideLaunchAnimator(Context context) {
+        return new LaunchAnimator(context);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static ActivityLaunchAnimator provideActivityLaunchAnimator(LaunchAnimator launchAnimator) {
+        return new ActivityLaunchAnimator(launchAnimator);
+    }
 }
