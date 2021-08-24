@@ -27,6 +27,8 @@
 #include "core_jni_helpers.h"
 
 #include <android/media/AudioVibratorInfo.h>
+#include <android/media/INativeSpatializerCallback.h>
+#include <android/media/ISpatializer.h>
 #include <audiomanager/AudioManager.h>
 #include <media/AudioContainers.h>
 #include <media/AudioPolicy.h>
@@ -2025,6 +2027,18 @@ android_media_AudioSystem_registerRoutingCallback(JNIEnv *env, jobject thiz)
     AudioSystem::setRoutingCallback(android_media_AudioSystem_routing_callback);
 }
 
+void javaAudioFormatToNativeAudioConfig(JNIEnv *env, audio_config_t *nConfig,
+                                       const jobject jFormat, bool isInput) {
+    *nConfig = AUDIO_CONFIG_INITIALIZER;
+    nConfig->format = audioFormatToNative(env->GetIntField(jFormat, gAudioFormatFields.mEncoding));
+    nConfig->sample_rate = env->GetIntField(jFormat, gAudioFormatFields.mSampleRate);
+    jint jChannelMask = env->GetIntField(jFormat, gAudioFormatFields.mChannelMask);
+    if (isInput) {
+        nConfig->channel_mask = inChannelMaskToNative(jChannelMask);
+    } else {
+        nConfig->channel_mask = outChannelMaskToNative(jChannelMask);
+    }
+}
 
 static jint convertAudioMixToNative(JNIEnv *env,
                                     AudioMix *nAudioMix,
@@ -2045,13 +2059,7 @@ static jint convertAudioMixToNative(JNIEnv *env,
     nAudioMix->mCbFlags = env->GetIntField(jAudioMix, gAudioMixFields.mCallbackFlags);
 
     jobject jFormat = env->GetObjectField(jAudioMix, gAudioMixFields.mFormat);
-    nAudioMix->mFormat = AUDIO_CONFIG_INITIALIZER;
-    nAudioMix->mFormat.sample_rate = env->GetIntField(jFormat,
-                                                     gAudioFormatFields.mSampleRate);
-    nAudioMix->mFormat.channel_mask = outChannelMaskToNative(env->GetIntField(jFormat,
-                                                     gAudioFormatFields.mChannelMask));
-    nAudioMix->mFormat.format = audioFormatToNative(env->GetIntField(jFormat,
-                                                     gAudioFormatFields.mEncoding));
+    javaAudioFormatToNativeAudioConfig(env, &nAudioMix->mFormat, jFormat, false /*isInput*/);
     env->DeleteLocalRef(jFormat);
 
     jobject jRule = env->GetObjectField(jAudioMix, gAudioMixFields.mRule);
@@ -2714,6 +2722,58 @@ static jint android_media_AudioSystem_setVibratorInfos(JNIEnv *env, jobject thiz
     return (jint)check_AudioSystem_Command(AudioSystem::setVibratorInfos(vibratorInfos));
 }
 
+static jobject android_media_AudioSystem_getSpatializer(JNIEnv *env, jobject thiz,
+                                                       jobject jISpatializerCallback) {
+    sp<media::INativeSpatializerCallback> nISpatializerCallback
+            = interface_cast<media::INativeSpatializerCallback>(
+                    ibinderForJavaObject(env, jISpatializerCallback));
+    sp<media::ISpatializer> nSpatializer;
+    status_t status = AudioSystem::getSpatializer(nISpatializerCallback,
+                                        &nSpatializer);
+    if (status != NO_ERROR) {
+        return nullptr;
+    }
+    return javaObjectForIBinder(env, IInterface::asBinder(nSpatializer));
+}
+
+static jboolean android_media_AudioSystem_canBeSpatialized(JNIEnv *env, jobject thiz,
+                                                       jobject jaa, jobject jFormat,
+                                                       jobjectArray jDeviceArray) {
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+       return false;
+    }
+
+    AudioDeviceTypeAddrVector nDevices;
+
+    const size_t numDevices = env->GetArrayLength(jDeviceArray);
+    for (size_t i = 0;  i < numDevices; ++i) {
+        AudioDeviceTypeAddr device;
+        jobject jDevice  = env->GetObjectArrayElement(jDeviceArray, i);
+        if (jDevice == nullptr) {
+            return false;
+        }
+        jStatus = createAudioDeviceTypeAddrFromJava(env, &device, jDevice);
+        if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+            return false;
+        }
+        nDevices.push_back(device);
+    }
+
+    audio_config_t nConfig;
+    javaAudioFormatToNativeAudioConfig(env, &nConfig, jFormat, false /*isInput*/);
+
+    bool canBeSpatialized;
+    status_t status =
+            AudioSystem::canBeSpatialized(paa.get(), &nConfig, nDevices, &canBeSpatialized);
+    if (status != NO_ERROR) {
+        ALOGW("%s native returned error %d", __func__, status);
+        return false;
+    }
+    return canBeSpatialized;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] =
@@ -2850,7 +2910,15 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_removeUserIdDeviceAffinities},
          {"setCurrentImeUid", "(I)I", (void *)android_media_AudioSystem_setCurrentImeUid},
          {"setVibratorInfos", "(Ljava/util/List;)I",
-          (void *)android_media_AudioSystem_setVibratorInfos}};
+          (void *)android_media_AudioSystem_setVibratorInfos},
+         {"nativeGetSpatializer",
+          "(Landroid/media/INativeSpatializerCallback;)Landroid/os/IBinder;",
+          (void *)android_media_AudioSystem_getSpatializer},
+         {"canBeSpatialized",
+          "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;"
+          "[Landroid/media/AudioDeviceAttributes;)Z",
+          (void *)android_media_AudioSystem_canBeSpatialized}};
+
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
