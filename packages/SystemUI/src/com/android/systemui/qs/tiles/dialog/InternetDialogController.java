@@ -269,15 +269,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return mContext.getText(SUBTITLE_TEXT_WIFI_IS_OFF);
         }
 
+        final List<ScanResult> wifiList = mWifiManager.getScanResults();
+        if (wifiList != null && wifiList.size() != 0) {
+            return mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT);
+        }
+
         if (isProgressBarVisible) {
             // When the Wi-Fi scan result callback is received
             //   Sub-Title: Searching for networks...
             return mContext.getText(SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS);
-        }
-
-        final List<ScanResult> wifiList = mWifiManager.getScanResults();
-        if (wifiList != null && wifiList.size() != 0) {
-            return mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT);
         }
 
         // Sub-Title:
