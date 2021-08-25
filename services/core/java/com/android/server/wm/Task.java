@@ -2166,16 +2166,6 @@ class Task extends TaskFragment {
         bounds.offset(horizontalDiff, verticalDiff);
     }
 
-    /**
-     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
-     */
-    private void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
-        mDisplayContent.mChangingContainers.add(this);
-
-        mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
-    }
-
     private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
         if (mWmService.mDisableTransitionAnimation
                 || !isVisible()
