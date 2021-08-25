@@ -21,13 +21,11 @@ import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,7 +52,9 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.annotation.WorkerThread;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -90,8 +90,6 @@ public class InternetDialog extends SystemUIDialog implements
     protected WifiManager mWifiManager;
     @VisibleForTesting
     protected View mDialogView;
-    @VisibleForTesting
-    protected WifiEntry mConnectedWifiEntry;
     @VisibleForTesting
     protected boolean mCanConfigWifi;
 
@@ -130,6 +128,10 @@ public class InternetDialog extends SystemUIDialog implements
     private int mListMaxWidth;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
+
+    // Wi-Fi entries
+    protected WifiEntry mConnectedWifiEntry;
+    protected int mWifiEntriesCount;
 
     // Wi-Fi scanning progress bar
     protected boolean mIsProgressBarVisible;
@@ -315,15 +317,10 @@ public class InternetDialog extends SystemUIDialog implements
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
 
-        List<WifiEntry> wifiEntryList = mInternetDialogController.getWifiEntryList();
-        final int wifiListVisibility =
-                (isDeviceLocked || wifiEntryList == null || wifiEntryList.size() <= 0)
-                        ? View.GONE : View.VISIBLE;
-        mWifiRecyclerView.setVisibility(wifiListVisibility);
-        if (wifiListVisibility == View.VISIBLE) {
-            mAdapter.notifyDataSetChanged();
-        }
-        mSeeAllLayout.setVisibility(wifiListVisibility);
+        final int visibility = (isDeviceLocked || !isWifiEnabled || mWifiEntriesCount <= 0)
+                ? View.GONE : View.VISIBLE;
+        mWifiRecyclerView.setVisibility(visibility);
+        mSeeAllLayout.setVisibility(visibility);
     }
 
     private void setOnClickListener() {
@@ -457,8 +454,7 @@ public class InternetDialog extends SystemUIDialog implements
             return;
         }
         setProgressBarVisible(true);
-        List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
-        if (wifiScanResults != null && wifiScanResults.size() > 0) {
+        if (mConnectedWifiEntry != null || mWifiEntriesCount > 0) {
             mHandler.postDelayed(mHideProgressBarRunnable, PROGRESS_DELAY_MS);
         } else if (!mIsSearchingHidden) {
             mHandler.postDelayed(mHideSearchingRunnable, PROGRESS_DELAY_MS);
@@ -543,8 +539,8 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
+    @WorkerThread
     public void onDataConnectionStateChanged(int state, int networkType) {
-        mAdapter.notifyDataSetChanged();
         mHandler.post(() -> updateDialog());
     }
 
@@ -559,10 +555,16 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
-    public void onAccessPointsChanged(List<WifiEntry> wifiEntryList, WifiEntry connectedEntry) {
+    @WorkerThread
+    public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
+            @Nullable WifiEntry connectedEntry) {
         mConnectedWifiEntry = connectedEntry;
-        mAdapter.notifyDataSetChanged();
-        mHandler.post(() -> updateDialog());
+        mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
+        mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
+        mHandler.post(() -> {
+            mAdapter.notifyDataSetChanged();
+            updateDialog();
+        });
     }
 
     @Override
@@ -572,24 +574,6 @@ public class InternetDialog extends SystemUIDialog implements
             if (!hasFocus && isShowing()) {
                 dismiss();
             }
-        }
-    }
-
-    @Override
-    public void onWifiStateReceived(Context context, Intent intent) {
-        if (intent == null) {
-            return;
-        }
-
-        String action = intent.getAction();
-        if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-            mInternetDialogController.scanWifiAccessPoints();
-            showProgressBar();
-            return;
-        }
-
-        if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            mHandler.post(() -> updateDialog());
         }
     }
 

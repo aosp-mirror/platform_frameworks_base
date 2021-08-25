@@ -32,7 +32,6 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
@@ -53,6 +52,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.annotation.WorkerThread;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -108,6 +108,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             R.string.all_network_unavailable;
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    static final int MAX_WIFI_ENTRY_COUNT = 4;
+
     private WifiManager mWifiManager;
     private Context mContext;
     private SubscriptionManager mSubscriptionManager;
@@ -122,7 +124,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private AccessPointController mAccessPointController;
     private IntentFilter mConnectionStateFilter;
     private InternetDialogCallback mCallback;
-    private List<WifiEntry> mWifiEntry;
+    private WifiEntry mConnectedEntry;
+    private int mWifiEntriesCount;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -132,8 +135,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     @VisibleForTesting
     protected ActivityStarter mActivityStarter;
     @VisibleForTesting
-    protected WifiEntry mConnectedEntry;
-    @VisibleForTesting
     protected SubscriptionManager.OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
     @VisibleForTesting
     protected InternetTelephonyCallback mInternetTelephonyCallback;
@@ -141,9 +142,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     protected WifiUtils.InternetIconInjector mWifiIconInjector;
     @VisibleForTesting
     protected boolean mCanConfigWifi;
-
     @VisibleForTesting
-    KeyguardStateController mKeyguardStateController;
+    protected KeyguardStateController mKeyguardStateController;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -185,8 +185,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
         mConnectionStateFilter = new IntentFilter();
-        mConnectionStateFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mConnectionStateFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         mConnectionStateFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         mUiEventLogger = uiEventLogger;
         mActivityStarter = starter;
@@ -291,8 +289,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return mContext.getText(SUBTITLE_TEXT_UNLOCK_TO_VIEW_NETWORKS);
         }
 
-        final List<ScanResult> wifiList = mWifiManager.getScanResults();
-        if (wifiList != null && wifiList.size() != 0) {
+        if (mConnectedEntry != null || mWifiEntriesCount > 0) {
             return mCanConfigWifi ? mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT) : null;
         }
 
@@ -576,18 +573,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
     }
 
-    List<WifiEntry> getWifiEntryList() {
-        return mWifiEntry;
-    }
-
-    WifiEntry getInternetWifiEntry() {
-        if (mConnectedEntry == null || !mConnectedEntry.isDefaultNetwork()
-                || !mConnectedEntry.hasInternetAccess()) {
-            return null;
-        }
-        return mConnectedEntry;
-    }
-
     WifiManager getWifiManager() {
         return mWifiManager;
     }
@@ -765,22 +750,33 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
     }
 
-    void scanWifiAccessPoints() {
+    private void scanWifiAccessPoints() {
         if (mCanConfigWifi) {
             mAccessPointController.scanForAccessPoints();
         }
     }
 
     @Override
+    @WorkerThread
     public void onAccessPointsChanged(List<WifiEntry> accessPoints) {
-        if (accessPoints == null || !mCanConfigWifi) {
+        if (!mCanConfigWifi) {
+            return;
+        }
+
+        if (accessPoints == null || accessPoints.size() == 0) {
+            mConnectedEntry = null;
+            mWifiEntriesCount = 0;
+            if (mCallback != null) {
+                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */);
+            }
             return;
         }
 
         boolean hasConnectedWifi = false;
-        mWifiEntry = accessPoints;
-        for (WifiEntry wifiEntry : accessPoints) {
-            if (wifiEntry.getConnectedState() == WifiEntry.CONNECTED_STATE_CONNECTED) {
+        final int accessPointSize = accessPoints.size();
+        for (int i = 0; i < accessPointSize; i++) {
+            WifiEntry wifiEntry = accessPoints.get(i);
+            if (wifiEntry.isDefaultNetwork() && wifiEntry.hasInternetAccess()) {
                 mConnectedEntry = wifiEntry;
                 hasConnectedWifi = true;
                 break;
@@ -790,7 +786,23 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             mConnectedEntry = null;
         }
 
-        mCallback.onAccessPointsChanged(mWifiEntry, getInternetWifiEntry());
+        int count = MAX_WIFI_ENTRY_COUNT;
+        if (hasCarrier()) {
+            count -= 1;
+        }
+        if (hasConnectedWifi) {
+            count -= 1;
+        }
+        final List<WifiEntry> wifiEntries = accessPoints.stream()
+                .filter(wifiEntry -> (!wifiEntry.isDefaultNetwork()
+                        || !wifiEntry.hasInternetAccess()))
+                .limit(count)
+                .collect(Collectors.toList());
+        mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
+
+        if (mCallback != null) {
+            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry);
+        }
     }
 
     @Override
@@ -843,8 +855,17 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
     private class DataConnectivityListener extends ConnectivityManager.NetworkCallback {
         @Override
+        @WorkerThread
         public void onCapabilitiesChanged(@NonNull Network network,
                 @NonNull NetworkCapabilities networkCapabilities) {
+            if (mCanConfigWifi) {
+                for (int transport : networkCapabilities.getTransportTypes()) {
+                    if (transport == NetworkCapabilities.TRANSPORT_WIFI) {
+                        scanWifiAccessPoints();
+                        break;
+                    }
+                }
+            }
             final Network activeNetwork = mConnectivityManager.getActiveNetwork();
             if (activeNetwork != null && activeNetwork.equals(network)) {
                 // update UI
@@ -857,11 +878,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (mCanConfigWifi && (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-                    || action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))) {
-                mCallback.onWifiStateReceived(context, intent);
-            }
-
             if (action.equals(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
                 if (DEBUG) {
                     Log.d(TAG, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED");
@@ -917,8 +933,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
         void dismissDialog();
 
-        void onAccessPointsChanged(List<WifiEntry> wifiEntryList, WifiEntry connectedEntry);
-
-        void onWifiStateReceived(Context context, Intent intent);
+        void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
+                @Nullable WifiEntry connectedEntry);
     }
 }
