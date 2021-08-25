@@ -18051,7 +18051,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 synchronized (mLock) {
                     mDomainVerificationManager.clearPackage(deletedPs.name);
                     mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                    mAppsFilter.removePackage(getPackageSetting(packageName));
+                    mAppsFilter.removePackage(getPackageSetting(packageName),
+                            false /* isReplace */);
                     removedAppId = mSettings.removePackageLPw(packageName);
                     if (outInfo != null) {
                         outInfo.mRemovedAppId = removedAppId;
@@ -23787,6 +23788,13 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void grantImplicitAccess(int userId, Intent intent,
                 int recipientAppId, int visibleUid, boolean direct) {
+            grantImplicitAccess(userId, intent, recipientAppId, visibleUid, direct,
+                    false /* retainOnUpdate */);
+        }
+
+        @Override
+        public void grantImplicitAccess(int userId, Intent intent,
+                int recipientAppId, int visibleUid, boolean direct, boolean retainOnUpdate) {
             synchronized (mLock) {
                 final AndroidPackage visiblePackage = getPackage(visibleUid);
                 final int recipientUid = UserHandle.getUid(userId, recipientAppId);
@@ -23807,7 +23815,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     accessGranted = mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                             recipientAppId, UserHandle.getAppId(visibleUid) /*instantAppId*/);
                 } else {
-                    accessGranted = mAppsFilter.grantImplicitAccess(recipientUid, visibleUid);
+                    accessGranted = mAppsFilter.grantImplicitAccess(recipientUid, visibleUid,
+                            retainOnUpdate);
                 }
                 if (accessGranted) {
                     ApplicationPackageManager.invalidateGetPackagesForUidCache();
@@ -24747,7 +24756,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         int visibleUid = providerInfo.applicationInfo.uid;
         mPmInternal.grantImplicitAccess(userId, null /*Intent*/, UserHandle.getAppId(recipientUid),
-                visibleUid, false);
+                visibleUid, false /*direct*/);
     }
 
     boolean canHaveOatDir(String packageName) {
