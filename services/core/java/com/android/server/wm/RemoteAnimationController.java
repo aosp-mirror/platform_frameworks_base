@@ -396,6 +396,7 @@ class RemoteAnimationController implements DeathRecipient {
         RemoteAnimationTarget mTarget;
         final WindowContainer mWindowContainer;
         final Rect mStartBounds;
+        private @RemoteAnimationTarget.Mode int mMode = RemoteAnimationTarget.MODE_CHANGING;
 
         RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect localBounds,
                 Rect endBounds, Rect startBounds) {
@@ -428,18 +429,12 @@ class RemoteAnimationController implements DeathRecipient {
             return mTarget;
         }
 
+        void setMode(@RemoteAnimationTarget.Mode int mode) {
+            mMode = mode;
+        }
+
         int getMode() {
-            final DisplayContent dc = mWindowContainer.getDisplayContent();
-            final ActivityRecord topActivity = mWindowContainer.getTopMostActivity();
-            // Note that opening/closing transitions are per-activity while changing transitions
-            // are per-task.
-            if (dc.mOpeningApps.contains(topActivity)) {
-                return RemoteAnimationTarget.MODE_OPENING;
-            } else if (dc.mChangingContainers.contains(mWindowContainer)) {
-                return RemoteAnimationTarget.MODE_CHANGING;
-            } else {
-                return RemoteAnimationTarget.MODE_CLOSING;
-            }
+            return mMode;
         }
     }
 

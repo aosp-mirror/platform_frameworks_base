@@ -53,6 +53,9 @@ class ShadeViewManager constructor(
             notifList.firstOrNull()?.section?.headerController?.let {
                 children.add(NodeSpecImpl(this, it))
             }
+            notifList.firstOrNull()?.let {
+                children.add(buildNotifNode(it, this))
+            }
             notifList.asSequence().zipWithNext().forEach { (prev, entry) ->
                 // Insert new header if the section has changed between two entries
                 entry.section.takeIf { it != prev.section }?.headerController?.let {

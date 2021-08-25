@@ -428,19 +428,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     };
 
-    private final BroadcastReceiver mDebugAnyPackageChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String[] stringArrayExtra = intent.getStringArrayExtra(
-                    Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-            Log.e("b/188806432", intent.toString()
-                    + (stringArrayExtra != null
-                            ? ", EXTRA_CHANGED_COMPONENT_NAME_LIST: " + String.join(", ",
-                            stringArrayExtra)
-                            : ""));
-        }
-    };
-
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -580,13 +567,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 PatternMatcher.PATTERN_LITERAL);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
-
-        // b/188806432
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addDataScheme("package");
-        filter.addDataSchemeSpecificPart("", PatternMatcher.PATTERN_PREFIX);
-        mContext.registerReceiver(mDebugAnyPackageChangedReceiver, filter);
 
         // Listen for status bar state changes
         statusBarWinController.registerCallback(mStatusBarWindowCallback);

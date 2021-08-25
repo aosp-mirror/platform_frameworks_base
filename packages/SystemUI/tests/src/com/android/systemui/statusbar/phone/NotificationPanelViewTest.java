@@ -63,7 +63,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.FrameLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -113,7 +112,6 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -303,10 +301,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private ControlsComponent mControlsComponent;
     @Mock
-    private LockscreenSmartspaceController mLockscreenSmartspaceController;
-    @Mock
-    private FrameLayout mSplitShadeSmartspaceContainer;
-    @Mock
     private LockscreenGestureLogger mLockscreenGestureLogger;
 
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -357,8 +351,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
-        when(mView.findViewById(R.id.split_shade_smartspace_container))
-                .thenReturn(mSplitShadeSmartspaceContainer);
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
         mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
         mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
@@ -452,7 +444,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,
                 mSplitShadeHeaderController,
-                mLockscreenSmartspaceController,
                 mUnlockedScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 mNotificationRemoteInputManager,
