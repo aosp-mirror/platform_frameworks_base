@@ -2149,6 +2149,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         sendTaskFragmentVanished();
     }
 
+    @Override
+    boolean canBeAnimationTarget() {
+        return true;
+    }
+
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage, final boolean needSep, Runnable header) {
         boolean printed = false;
