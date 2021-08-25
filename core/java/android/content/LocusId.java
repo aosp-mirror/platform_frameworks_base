@@ -62,6 +62,9 @@ import java.io.PrintWriter;
  *   <li>Configuring your app to launch the chat conversation through the
  *   {@link Intent#ACTION_VIEW_LOCUS} intent.
  * </ul>
+ *
+ * NOTE: The LocusId is only used by an on-device intelligence service provided by the Android
+ * System, see {@link ContentCaptureManager} for more details.
  */
 public final class LocusId implements Parcelable {
 
