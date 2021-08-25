@@ -18,11 +18,14 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
@@ -32,6 +35,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,6 +43,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -85,8 +90,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -100,8 +105,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -115,8 +120,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -130,8 +135,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -145,8 +150,44 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_UNSET,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        true /*skipAppTransitionAnimation*/));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, true /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testTaskChangeWindowingMode() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+
+        mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_CHANGE);
+        mDc.mOpeningApps.add(activity); // Make sure TRANSIT_CHANGE has the priority
+        mDc.mChangingContainers.add(activity.getTask());
+
+        assertEquals(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testTaskFragmentChange() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+        final TaskFragment taskFragment = new TaskFragment(mAtm, new Binder(),
+                true /* createdByOrganizer */, true /* isEmbedded */);
+        activity.getTask().addChild(taskFragment, POSITION_TOP);
+        activity.reparent(taskFragment, POSITION_TOP);
+
+        mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_CHANGE);
+        mDc.mOpeningApps.add(activity); // Make sure TRANSIT_CHANGE has the priority
+        mDc.mChangingContainers.add(taskFragment);
+
+        assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CHANGE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -159,9 +200,9 @@ public class AppTransitionTests extends WindowTestsBase {
         mDisplayContent.mOpeningApps.add(activity);
         assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
     }
 
     @Test
@@ -175,8 +216,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_TASK_FRAGMENT_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
     }
 
     @Test
@@ -190,8 +231,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
     }
 
     @Test
@@ -205,8 +246,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */,
-                        false /* skipAppTransitionAnimation */));
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /* skipAppTransitionAnimation */));
     }
 
     /**

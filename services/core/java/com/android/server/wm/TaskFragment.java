@@ -33,6 +33,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -1987,8 +1988,46 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        // Task will animate differently.
+        if (mTaskFragmentOrganizer != null) {
+            mTmpPrevBounds.set(getBounds());
+        }
+
         super.onConfigurationChanged(newParentConfig);
+
+        if (shouldStartChangeTransition(mTmpPrevBounds)) {
+            initializeChangeTransition(mTmpPrevBounds);
+        }
+
+        if (mTaskFragmentOrganizer != null) {
+            // Update the surface position here instead of in the organizer so that we can make sure
+            // it can be synced with the surface freezer.
+            updateSurfacePosition(getSyncTransaction());
+        }
+
         sendTaskFragmentInfoChanged();
+    }
+
+    /** Whether we should prepare a transition for this {@link TaskFragment} bounds change. */
+    private boolean shouldStartChangeTransition(Rect startBounds) {
+        if (mWmService.mDisableTransitionAnimation
+                || mDisplayContent == null
+                || mTaskFragmentOrganizer == null
+                || getSurfaceControl() == null
+                || !isVisible()) {
+            return false;
+        }
+
+        return !startBounds.equals(getBounds());
+    }
+
+    /**
+     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
+     */
+    void initializeChangeTransition(Rect startBounds) {
+        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
+        mDisplayContent.mChangingContainers.add(this);
+        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds);
     }
 
     @Override
@@ -2059,6 +2098,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     ITaskFragmentOrganizer getTaskFragmentOrganizer() {
         return mTaskFragmentOrganizer;
+    }
+
+    @Override
+    boolean isOrganized() {
+        return mTaskFragmentOrganizer != null;
     }
 
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
