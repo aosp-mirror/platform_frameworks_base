@@ -320,6 +320,19 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE = 27;
 
     /**
+     * A window in a new task fragment is being opened.
+     * @hide
+     */
+    int TRANSIT_OLD_TASK_FRAGMENT_OPEN = 28;
+
+    /**
+     * A window in the top-most activity of task fragment is being closed to reveal the activity
+     * below.
+     * @hide
+     */
+    int TRANSIT_OLD_TASK_FRAGMENT_CLOSE = 29;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
@@ -344,7 +357,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
             TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
             TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
+            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
+            TRANSIT_OLD_TASK_FRAGMENT_OPEN,
+            TRANSIT_OLD_TASK_FRAGMENT_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionOldType {}
