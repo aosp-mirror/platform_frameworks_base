@@ -175,12 +175,9 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiNetworkLayout.setVisibility(View.VISIBLE);
             mWifiTitleText.setText(title);
             if (TextUtils.isEmpty(summary)) {
-                mWifiTitleText.setGravity(Gravity.CENTER);
                 mWifiSummaryText.setVisibility(View.GONE);
                 return;
             } else {
-                mWifiTitleText.setGravity(Gravity.BOTTOM);
-                mWifiSummaryText.setGravity(Gravity.TOP);
                 mWifiSummaryText.setVisibility(View.VISIBLE);
             }
             mWifiSummaryText.setText(summary);

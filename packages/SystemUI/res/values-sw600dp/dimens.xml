@@ -95,4 +95,7 @@
     <dimen name="controls_top_margin">24dp</dimen>
 
     <dimen name="global_actions_grid_item_layout_height">80dp</dimen>
+
+    <!-- Internet panel related dimensions -->
+    <dimen name="internet_dialog_list_max_width">624dp</dimen>
 </resources>
