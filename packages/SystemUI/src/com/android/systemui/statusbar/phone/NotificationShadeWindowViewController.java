@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -106,7 +105,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final SuperStatusBarViewFactory mStatusBarViewFactory;
+    private final StatusBarWindowView mStatusBarWindowView;
 
     // Used for determining view / touch intersection
     private int[] mTempLocation = new int[2];
@@ -136,7 +135,7 @@ public class NotificationShadeWindowViewController {
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
-            SuperStatusBarViewFactory statusBarViewFactory,
+            StatusBarWindowView statusBarWindowView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mInjectionInflationController = injectionInflationController;
@@ -160,7 +159,7 @@ public class NotificationShadeWindowViewController {
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
         mDepthController = depthController;
-        mStatusBarViewFactory = statusBarViewFactory;
+        mStatusBarWindowView = statusBarWindowView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
 
@@ -477,11 +476,10 @@ public class NotificationShadeWindowViewController {
 
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
         mStatusBarView = statusBarView;
-        if (statusBarView != null && mStatusBarViewFactory != null) {
+        if (statusBarView != null) {
             mBarTransitions = new PhoneStatusBarTransitions(
                     statusBarView,
-                    mStatusBarViewFactory.getStatusBarWindowView()
-                            .findViewById(R.id.status_bar_container));
+                    mStatusBarWindowView.findViewById(R.id.status_bar_container));
         }
     }
 

@@ -20,6 +20,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
@@ -34,7 +36,6 @@ import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
 
-import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -46,11 +47,9 @@ public interface StatusBarComponent {
     /**
      * Builder for {@link StatusBarComponent}.
      */
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance Builder statusBarWindowView(
-                NotificationShadeWindowView notificationShadeWindowView);
-        StatusBarComponent build();
+    @Subcomponent.Factory
+    interface Factory {
+        StatusBarComponent create();
     }
 
     /**
@@ -60,6 +59,21 @@ public interface StatusBarComponent {
     @Retention(RUNTIME)
     @Scope
     @interface StatusBarScope {}
+
+    /**
+     * Creates a {@link NotificationShadeWindowView}/
+     * @return
+     */
+    @StatusBarScope
+    NotificationShadeWindowView getNotificationShadeWindowView();
+
+    /** */
+    @StatusBarScope
+    NotificationShelfController getNotificationShelfController();
+
+    /** */
+    @StatusBarScope
+    NotificationStackScrollLayoutController getNotificationStackScrollLayoutController();
 
     /**
      * Creates a NotificationShadeWindowViewController.
