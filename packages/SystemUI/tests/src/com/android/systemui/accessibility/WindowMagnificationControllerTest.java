@@ -171,6 +171,29 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void enableWindowMagnification_LargeScreen_windowSizeIsConstrained() {
+        final int screenSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_max_frame_size) * 10;
+        mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
+        //We need to initialize new one because the window size is determined when initialization.
+        final WindowMagnificationController controller = new WindowMagnificationController(mContext,
+                mHandler, mSfVsyncFrameProvider,
+                mMirrorWindowControl, mTransaction, mWindowMagnifierCallback, mSysUiState);
+
+        mInstrumentation.runOnMainSync(() -> {
+            controller.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        final int halfScreenSize = screenSize / 2;
+        WindowManager.LayoutParams params = mWindowManager.getLayoutParamsFromAttachedView();
+        // The frame size should be the half of smaller value of window height/width unless it
+        //exceed the max frame size.
+        assertTrue(params.width < halfScreenSize);
+        assertTrue(params.height < halfScreenSize);
+    }
+
+    @Test
     public void deleteWindowMagnification_destroyControl() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
@@ -315,6 +338,27 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertEquals(expectedRatio,
                 mWindowMagnificationController.getCenterY() / testWindowBounds.height(),
                 0);
+    }
+    @Test
+    public void screenSizeIsChangedToLarge_enabled_windowSizeIsConstrained() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+        final int screenSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_max_frame_size) * 10;
+        mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        final int halfScreenSize = screenSize / 2;
+        WindowManager.LayoutParams params = mWindowManager.getLayoutParamsFromAttachedView();
+        // The frame size should be the half of smaller value of window height/width unless it
+        //exceed the max frame size.
+        assertTrue(params.width < halfScreenSize);
+        assertTrue(params.height < halfScreenSize);
     }
 
     @Test
