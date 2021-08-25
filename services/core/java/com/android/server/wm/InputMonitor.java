@@ -288,10 +288,7 @@ final class InputMonitor {
         SurfaceControl touchableRegionCrop = null;
         final Task task = w.getTask();
         if (task != null) {
-            // TODO(b/165794636): Remove the special case for freeform window once drag resizing is
-            // handled by WM shell.
-            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
-                        && !task.inFreeformWindowingMode()) {
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 // If the window is in a TaskManaged by a TaskOrganizer then most cropping will
                 // be applied using the SurfaceControl hierarchy from the Organizer. This means
                 // we need to make sure that these changes in crop are reflected in the input

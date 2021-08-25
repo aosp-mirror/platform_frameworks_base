@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -43,15 +44,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
+    private final Handler mMainHandler;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
 
     public CaptionWindowDecorViewModel(
             Context context,
+            Handler mainHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue) {
         mContext = context;
+        mMainHandler = mainHandler;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
@@ -67,9 +71,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 mTaskOrganizer,
                 taskInfo,
                 taskSurface,
+                mMainHandler,
                 mSyncQueue);
-        CaptionTouchEventListener touchEventListener = new CaptionTouchEventListener(taskInfo);
+        TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration);
+        CaptionTouchEventListener touchEventListener =
+                new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
+        windowDecoration.setDragResizeCallback(taskPositioner);
         onTaskInfoChanged(taskInfo, windowDecoration);
         return windowDecoration;
     }
@@ -87,10 +95,15 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
+        private final DragResizeCallback mDragResizeCallback;
 
-        private CaptionTouchEventListener(RunningTaskInfo taskInfo) {
+        private int mDragPointerId = -1;
+
+        private CaptionTouchEventListener(
+                RunningTaskInfo taskInfo, DragResizeCallback dragResizeCallback) {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
+            mDragResizeCallback = dragResizeCallback;
         }
 
         @Override
@@ -120,6 +133,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
             if (v.getId() != R.id.caption) {
                 return false;
             }
+            handleEventForMove(e);
+
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return false;
             }
@@ -131,6 +146,29 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
             wct.reorder(mTaskToken, true /* onTop */);
             mSyncQueue.queue(wct);
             return true;
+        }
+
+        private void handleEventForMove(MotionEvent e) {
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mDragPointerId  = e.getPointerId(0);
+                    mDragResizeCallback.onDragResizeStart(
+                            0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
+                    break;
+                case MotionEvent.ACTION_MOVE: {
+                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    mDragResizeCallback.onDragResizeMove(
+                            e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL: {
+                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    mDragResizeCallback.onDragResizeEnd(
+                            e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    break;
+                }
+            }
         }
     }
 }

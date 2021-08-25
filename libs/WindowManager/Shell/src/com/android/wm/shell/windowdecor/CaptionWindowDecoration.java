@@ -17,12 +17,14 @@
 package com.android.wm.shell.windowdecor;
 
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.WindowContainerTransaction;
@@ -48,13 +50,22 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     // The thickness of shadows of a window that doesn't have focus in DIP.
     private static final int DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP = 5;
 
+    // Height of button (32dp)  + 2 * margin (5dp each)
     private static final int DECOR_CAPTION_HEIGHT_IN_DIP = 42;
-    private static final Rect EMPTY_OUTSET = new Rect();
+    private static final int RESIZE_HANDLE_IN_DIP = 30;
 
+    private static final Rect EMPTY_OUTSET = new Rect();
+    private static final Rect RESIZE_HANDLE_OUTSET = new Rect(
+            RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP);
+
+    private final Handler mHandler;
     private final SyncTransactionQueue mSyncQueue;
 
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
+    private DragResizeCallback mDragResizeCallback;
+
+    private DragResizeInputListener mDragResizeListener;
 
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
@@ -65,9 +76,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
+            Handler handler,
             SyncTransactionQueue syncQueue) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface);
 
+        mHandler = handler;
         mSyncQueue = syncQueue;
     }
 
@@ -78,15 +91,24 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mOnCaptionTouchListener = onCaptionTouchListener;
     }
 
+    void setDragResizeCallback(DragResizeCallback dragResizeCallback) {
+        mDragResizeCallback = dragResizeCallback;
+    }
+
     void relayout(ActivityManager.RunningTaskInfo taskInfo) {
         final int shadowRadiusDp = taskInfo.isFocused
                 ? DECOR_SHADOW_FOCUSED_THICKNESS_IN_DIP : DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP;
+        final boolean isFreeform = mTaskInfo.configuration.windowConfiguration.getWindowingMode()
+                == WindowConfiguration.WINDOWING_MODE_FREEFORM;
+        final boolean isDragResizeable = isFreeform && mTaskInfo.isResizeable;
+        final Rect outset = isDragResizeable ? RESIZE_HANDLE_OUTSET : EMPTY_OUTSET;
 
         WindowDecorLinearLayout oldRootView = mResult.mRootView;
+        final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         relayout(taskInfo, R.layout.caption_window_decoration, oldRootView,
-                DECOR_CAPTION_HEIGHT_IN_DIP, EMPTY_OUTSET, shadowRadiusDp, t, wct, mResult);
+                DECOR_CAPTION_HEIGHT_IN_DIP, outset, shadowRadiusDp, t, wct, mResult);
         taskInfo = null; // Clear it just in case we use it accidentally
 
         mSyncQueue.runInSync(transaction -> {
@@ -97,11 +119,31 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         });
 
         if (mResult.mRootView == null) {
+            // This means the task is hidden. Nothing is set up in this case including the
+            // decoration surface.
             return;
         }
         if (oldRootView != mResult.mRootView) {
             setupRootView();
         }
+
+        if (!isDragResizeable) {
+            closeDragResizeListener();
+            return;
+        }
+
+        if (oldDecorationSurface != mDecorationContainerSurface) {
+            closeDragResizeListener();
+            mDragResizeListener = new DragResizeInputListener(
+                    mContext,
+                    mHandler,
+                    mDisplay.getDisplayId(),
+                    mDecorationContainerSurface,
+                    mDragResizeCallback);
+        }
+
+        mDragResizeListener.setGeometry(
+                mResult.mWidth, mResult.mHeight, (int) (mResult.mDensity * RESIZE_HANDLE_IN_DIP));
     }
 
     /**
@@ -139,5 +181,19 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         View close = caption.findViewById(R.id.close_window);
         VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
         closeBackground.setTintList(buttonTintColor);
+    }
+
+    private void closeDragResizeListener() {
+        if (mDragResizeListener == null) {
+            return;
+        }
+        mDragResizeListener.close();
+        mDragResizeListener = null;
+    }
+
+    @Override
+    public void close() {
+        closeDragResizeListener();
+        super.close();
     }
 }

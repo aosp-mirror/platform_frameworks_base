@@ -137,11 +137,13 @@ public class WMShellModule {
     @Provides
     static WindowDecorViewModel<?> provideWindowDecorViewModel(
             Context context,
+            @ShellMainThread Handler mainHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue) {
         return new CaptionWindowDecorViewModel(
                         context,
+                        mainHandler,
                         taskOrganizer,
                         displayController,
                         syncQueue);
