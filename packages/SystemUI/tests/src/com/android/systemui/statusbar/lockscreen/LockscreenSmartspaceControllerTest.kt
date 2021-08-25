@@ -51,7 +51,6 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -114,6 +113,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var configChangeListener: ConfigurationListener
     private lateinit var statusBarStateListener: StateListener
 
+    private lateinit var smartspaceView: SmartspaceView
+
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
     private val execution = FakeExecution()
@@ -141,7 +142,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(smartspaceSession)
-        `when`(plugin.getView(any())).thenReturn(fakeSmartspaceView)
+        `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
         `when`(userTracker.userProfiles).thenReturn(userList)
         `when`(statusBarStateController.dozeAmount).thenReturn(0.5f)
 
@@ -249,7 +250,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         configChangeListener.onThemeChanged()
 
         // We update the new text color to match the wallpaper color
-        verify(fakeSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(smartspaceView).setPrimaryTextColor(anyInt())
     }
 
     @Test
@@ -261,7 +262,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         statusBarStateListener.onDozeAmountChanged(0.1f, 0.7f)
 
         // We pass that along to the view
-        verify(fakeSmartspaceView).setDozeAmount(0.7f)
+        verify(smartspaceView).setDozeAmount(0.7f)
     }
 
     @Test
@@ -393,40 +394,30 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBuildViewIsIdempotent() {
-        // GIVEN a connected session
-        connectSession()
-        clearInvocations(plugin)
-
-        // WHEN we disconnect and then reconnect
-        controller.disconnect()
-        controller.buildAndConnectView(fakeParent)
-
-        // THEN the view is not rebuilt
-        verify(plugin, never()).getView(any())
-        assertEquals(fakeSmartspaceView, controller.view)
-    }
-
-    @Test
-    fun testDoubleConnectIsIgnored() {
+    fun testMultipleViewsUseSameSession() {
         // GIVEN a connected session
         connectSession()
         clearInvocations(smartspaceManager)
         clearInvocations(plugin)
 
-        // WHEN we're asked to connect a second time and add to a parent
+        // WHEN we're asked to connect a second time and add to a parent. If the same view
+        // was created the ViewGroup will throw an exception
         val view = controller.buildAndConnectView(fakeParent)
         fakeParent.addView(view)
+        val smartspaceView2 = view as SmartspaceView
 
-        // THEN the existing view and session are reused
+        // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
-        verify(plugin, never()).getView(any())
-        assertEquals(fakeSmartspaceView, controller.view)
+        verify(smartspaceView2).registerDataProvider(plugin)
     }
 
     private fun connectSession() {
-        controller.buildAndConnectView(fakeParent)
+        val view = controller.buildAndConnectView(fakeParent)
+        smartspaceView = view as SmartspaceView
 
+        controller.stateChangeListener.onViewAttachedToWindow(view)
+
+        verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceSession)
                 .addOnTargetsAvailableListener(any(), capture(sessionListenerCaptor))
         sessionListener = sessionListenerCaptor.value
@@ -450,11 +441,11 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceSession).requestSmartspaceUpdate()
         clearInvocations(smartspaceSession)
 
-        verify(fakeSmartspaceView).setPrimaryTextColor(anyInt())
-        verify(fakeSmartspaceView).setDozeAmount(0.5f)
-        clearInvocations(fakeSmartspaceView)
+        verify(smartspaceView).setPrimaryTextColor(anyInt())
+        verify(smartspaceView).setDozeAmount(0.5f)
+        clearInvocations(view)
 
-        fakeParent.addView(fakeSmartspaceView)
+        fakeParent.addView(view)
     }
 
     private fun setActiveUser(userHandle: UserHandle) {
@@ -490,31 +481,33 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         ).thenReturn(if (value) 1 else 0)
     }
 
-    private val fakeSmartspaceView = spy(object : View(context), SmartspaceView {
-        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
-        }
+    private fun createSmartspaceView(): SmartspaceView {
+        return spy(object : View(context), SmartspaceView {
+            override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
+            }
 
-        override fun setPrimaryTextColor(color: Int) {
-        }
+            override fun setPrimaryTextColor(color: Int) {
+            }
 
-        override fun setDozeAmount(amount: Float) {
-        }
+            override fun setDozeAmount(amount: Float) {
+            }
 
-        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
-        }
+            override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
+            }
 
-        override fun setFalsingManager(falsingManager: FalsingManager?) {
-        }
+            override fun setFalsingManager(falsingManager: FalsingManager?) {
+            }
 
-        override fun setDnd(image: Drawable?, description: String?) {
-        }
+            override fun setDnd(image: Drawable?, description: String?) {
+            }
 
-        override fun setNextAlarm(image: Drawable?, description: String?) {
-        }
+            override fun setNextAlarm(image: Drawable?, description: String?) {
+            }
 
-        override fun setMediaTarget(target: SmartspaceTarget?) {
-        }
-    })
+            override fun setMediaTarget(target: SmartspaceTarget?) {
+            }
+        })
+    }
 }
 
 private const val PRIVATE_LOCKSCREEN_SETTING =
