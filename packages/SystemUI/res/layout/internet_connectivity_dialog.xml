@@ -19,18 +19,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/internet_connectivity_dialog"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_width="@dimen/internet_dialog_list_max_width"
+    android:layout_height="@dimen/internet_dialog_list_max_height"
     android:background="@drawable/internet_dialog_rounded_top_corner_background"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         style="@style/Widget.SliceView.Panel"
         android:gravity="center_vertical|center_horizontal"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="16dp"
-        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
@@ -54,21 +54,28 @@
             android:textSize="14sp"/>
     </LinearLayout>
 
-    <View
-        android:id="@+id/divider"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:layout_width="340dp"
-        android:layout_height="4dp"
-        android:background="?androidprv:attr/colorSurfaceVariant"/>
-
-    <ProgressBar
-        android:id="@+id/wifi_searching_progress"
-        android:indeterminate="true"
-        android:layout_width="340dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"
-        style="@style/TrimmedHorizontalProgressBar"/>
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/divider"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_width="340dp"
+            android:layout_height="4dp"
+            android:background="?androidprv:attr/colorSurfaceVariant"/>
+
+        <ProgressBar
+            android:id="@+id/wifi_searching_progress"
+            android:indeterminate="true"
+            android:layout_width="340dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            style="@style/TrimmedHorizontalProgressBar"/>
+    </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -96,7 +103,6 @@
                     android:orientation="horizontal"
                     android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
                     android:layout_marginStart="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginTop="16dp"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
 
@@ -148,14 +154,15 @@
                     </LinearLayout>
 
                     <FrameLayout
-                        android:layout_width="48dp"
+                        android:layout_width="@dimen/settingslib_switch_track_width"
                         android:layout_height="48dp"
                         android:layout_gravity="end|center_vertical">
                         <Switch
                             android:id="@+id/mobile_toggle"
+                            android:switchMinWidth="@dimen/settingslib_switch_track_width"
                             android:layout_gravity="center"
-                            android:layout_width="48dp"
-                            android:layout_height="wrap_content"
+                            android:layout_width="@dimen/settingslib_switch_track_width"
+                            android:layout_height="@dimen/settingslib_switch_track_height"
                             android:track="@drawable/settingslib_track_selector"
                             android:thumb="@drawable/settingslib_thumb_selector"
                             android:theme="@style/MainSwitch.Settingslib"/>
@@ -195,15 +202,16 @@
                     </FrameLayout>
 
                     <FrameLayout
-                        android:layout_width="48dp"
+                        android:layout_width="@dimen/settingslib_switch_track_width"
                         android:layout_height="48dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp">
                         <Switch
                             android:id="@+id/wifi_toggle"
+                            android:switchMinWidth="@dimen/settingslib_switch_track_width"
                             android:layout_gravity="center"
-                            android:layout_width="48dp"
-                            android:layout_height="wrap_content"
+                            android:layout_width="@dimen/settingslib_switch_track_width"
+                            android:layout_height="@dimen/settingslib_switch_track_height"
                             android:track="@drawable/settingslib_track_selector"
                             android:thumb="@drawable/settingslib_thumb_selector"
                             android:theme="@style/MainSwitch.Settingslib"/>
@@ -343,31 +351,23 @@
 
             </LinearLayout>
 
-            <Space
-                android:id="@+id/space"
-                android:layout_width="match_parent"
-                android:layout_height="28dp"
-                android:visibility="gone"/>
-
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="25dp"
-                android:gravity="end"
-                android:orientation="horizontal">
+                android:layout_marginBottom="40dp">
                 <Button
                     style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
                     android:id="@+id/done"
-                    android:layout_width="60dp"
-                    android:layout_height="30dp"
+                    android:layout_width="67dp"
+                    android:layout_height="36dp"
                     android:layout_marginEnd="24dp"
-                    android:layout_gravity="end"
+                    android:layout_gravity="end|center_vertical"
                     android:background="@drawable/internet_dialog_footer_background"
                     android:textColor="?android:attr/textColorPrimary"
                     android:text="@string/inline_done_button"
                     android:textSize="14sp"
                     android:fontFamily="google-sans"/>
-            </LinearLayout>
+            </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
