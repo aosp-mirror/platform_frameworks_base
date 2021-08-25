@@ -308,8 +308,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Sets a new alt auth interceptor.
      */
     public void setAlternateAuthInterceptor(@NonNull AlternateAuthInterceptor authInterceptor) {
-        mAlternateAuthInterceptor = authInterceptor;
-        resetAlternateAuth(false);
+        if (!Objects.equals(mAlternateAuthInterceptor, authInterceptor)) {
+            mAlternateAuthInterceptor = authInterceptor;
+            resetAlternateAuth(false);
+        }
     }
 
     private void registerListeners() {

@@ -706,15 +706,21 @@ public class UdfpsController implements DozeReceiver {
         return mCoreLayoutParams;
     }
 
+
     private void onOrientationChanged() {
         // When the configuration changes it's almost always necessary to destroy and re-create
         // the overlay's window to pass it the new LayoutParams.
         // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
         // of whether it is already hidden.
+        final boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateAuth();
         hideUdfpsOverlay();
+
         // If the overlay needs to be shown, this will re-create and show the overlay with the
         // updated LayoutParams. Otherwise, the overlay will remain hidden.
         updateOverlay();
+        if (wasShowingAltAuth) {
+            mKeyguardViewManager.showGenericBouncer(true);
+        }
     }
 
     private void showUdfpsOverlay(@NonNull ServerRequest request) {
@@ -785,6 +791,7 @@ public class UdfpsController implements DozeReceiver {
                         mLockscreenShadeTransitionController,
                         mConfigurationController,
                         mSystemClock,
+                        mKeyguardStateController,
                         this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
@@ -820,10 +827,14 @@ public class UdfpsController implements DozeReceiver {
             Log.v(TAG, "hideUdfpsOverlay | removing window");
             // Reset the controller back to its starting state.
             onFingerUp();
+            boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateAuth();
             mWindowManager.removeView(mView);
             mView.setOnTouchListener(null);
             mView.setOnHoverListener(null);
             mView.setAnimationViewController(null);
+            if (wasShowingAltAuth) {
+                mKeyguardViewManager.resetAlternateAuth(true);
+            }
             mAccessibilityManager.removeTouchExplorationStateChangeListener(
                     mTouchExplorationStateChangeListener);
             mView = null;

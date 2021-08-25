@@ -479,6 +479,35 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
             @AppIdInt int recipientAppId, int visibleUid,
             boolean direct);
 
+    /**
+     * Grants implicit access based on an interaction between two apps. This grants access to the
+     * from one application to the other's package metadata.
+     * <p>
+     * When an application explicitly tries to interact with another application [via an
+     * activity, service or provider that is either declared in the caller's
+     * manifest via the {@code <queries>} tag or has been exposed via the target apps manifest using
+     * the {@code visibleToInstantApp} attribute], the target application must be able to see
+     * metadata about the calling app. If the calling application uses an implicit intent [ie
+     * action VIEW, category BROWSABLE], it remains hidden from the launched app.
+     * <p>
+     * If an interaction is not explicit, the {@code direct} argument should be set to false as
+     * visibility should not be granted in some cases. This method handles that logic.
+     * <p>
+     * @param userId the user
+     * @param intent the intent that triggered the grant
+     * @param recipientAppId The app ID of the application that is being given access to {@code
+     *                       visibleUid}
+     * @param visibleUid The uid of the application that is becoming accessible to {@code
+     *                   recipientAppId}
+     * @param direct true if the access is being made due to direct interaction between visibleUid
+     *               and recipientAppId.
+     * @param retainOnUpdate true if the implicit access is retained across package update.
+     */
+    public abstract void grantImplicitAccess(
+            @UserIdInt int userId, Intent intent,
+            @AppIdInt int recipientAppId, int visibleUid,
+            boolean direct, boolean retainOnUpdate);
+
     public abstract boolean isInstantAppInstallerComponent(ComponentName component);
     /**
      * Prunes instant apps and state associated with uninstalled

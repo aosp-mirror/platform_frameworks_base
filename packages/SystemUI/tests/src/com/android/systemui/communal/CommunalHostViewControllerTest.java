@@ -29,6 +29,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -61,6 +63,12 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     @Mock
     private CommunalHostView mCommunalView;
 
+    @Mock
+    private DozeParameters mDozeParameters;
+
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     private CommunalHostViewController mController;
@@ -76,8 +84,8 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
         when(mCommunalView.isAttachedToWindow()).thenReturn(true);
 
         mController = new CommunalHostViewController(mFakeExecutor, mCommunalStateController,
-                mKeyguardUpdateMonitor, mKeyguardStateController, mStatusBarStateController,
-                mCommunalView);
+                mKeyguardUpdateMonitor, mKeyguardStateController, mDozeParameters,
+                mUnlockedScreenOffAnimationController, mStatusBarStateController, mCommunalView);
         mController.init();
         mFakeExecutor.runAllReady();
         Mockito.clearInvocations(mCommunalView);
