@@ -39,6 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -138,6 +139,9 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
 
     // Monitor for tracking touches for activity.
     private InputMonitorCompat mInputMonitor;
+
+    // Input receiver of touch activities.
+    private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     // Intent filter for receiving dream broadcasts.
     private IntentFilter mDreamIntentFilter;
@@ -335,7 +339,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
     }
 
     private void enableIdleMonitoring(boolean enable) {
-        if (enable && mInputMonitor == null) {
+        if (enable && mInputMonitor == null && mInputEventReceiver == null) {
             if (DEBUG) {
                 Log.d(TAG, "enable idle monitoring");
             }
@@ -345,7 +349,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
 
             // Monitor - any input should reset timer
             mInputMonitor = mInputMonitorFactory.getInputMonitor(INPUT_MONITOR_IDENTIFIER);
-            mInputMonitor.getInputReceiver(mLooper, mChoreographer,
+            mInputEventReceiver = mInputMonitor.getInputReceiver(mLooper, mChoreographer,
                     v -> {
                         if (DEBUG) {
                             Log.d(TAG, "touch detected, resetting timeout");
@@ -358,7 +362,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
                         mCancelEnableIdling = mDelayableExecutor.executeDelayed(
                                 mEnableIdlingCallback, mIdleTimeout);
                     });
-        } else if (!enable && mInputMonitor != null) {
+        } else if (!enable && mInputMonitor != null && mInputEventReceiver != null) {
             if (DEBUG) {
                 Log.d(TAG, "disable idle monitoring");
             }
@@ -368,7 +372,9 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
                 mCancelEnableIdling = null;
             }
 
+            mInputEventReceiver.dispose();
             mInputMonitor.dispose();
+            mInputEventReceiver = null;
             mInputMonitor = null;
         }
     }

@@ -42,6 +42,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -76,6 +77,7 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
     @Mock private Sensor mSensor;
     @Mock private DreamHelper mDreamHelper;
     @Mock private InputMonitorCompat mInputMonitor;
+    @Mock private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     private final long mTimestamp = Instant.now().toEpochMilli();
     private KeyguardStateController.Callback mKeyguardStateCallback;
@@ -91,6 +93,7 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(mSensor);
         when(mInputMonitorFactory.getInputMonitor("IdleHostViewController"))
                 .thenReturn(mInputMonitor);
+        when(mInputMonitor.getInputReceiver(any(), any(), any())).thenReturn(mInputEventReceiver);
 
         mController = new IdleHostViewController(mContext,
                 mBroadcastDispatcher, mPowerManager, mSensorManager, mIdleHostView,
@@ -230,5 +233,22 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
 
         // Verifies it goes to sleep.
         verify(mPowerManager).goToSleep(anyLong(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testInputEventReceiverLifecycle() {
+        // Keyguard showing.
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // Should register input event receiver.
+        verify(mInputMonitor).getInputReceiver(any(), any(), any());
+
+        // Keyguard dismissed.
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // Should dispose input event receiver.
+        verify(mInputEventReceiver).dispose();
     }
 }
