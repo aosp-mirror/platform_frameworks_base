@@ -281,7 +281,8 @@ class ProcessErrorStateRecord {
             EventLog.writeEvent(EventLogTags.AM_ANR, mApp.userId, pid, mApp.processName,
                     mApp.info.flags, annotation);
 
-            if (mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
+            if (mService.mTraceErrorLogger != null
+                    && mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
                 errorId = mService.mTraceErrorLogger.generateErrorId();
                 mService.mTraceErrorLogger.addErrorIdToTrace(mApp.processName, errorId);
             } else {
@@ -427,7 +428,7 @@ class ProcessErrorStateRecord {
         float loadingProgress = 1;
         IncrementalMetrics incrementalMetrics = null;
         final PackageManagerInternal packageManagerInternal = mService.getPackageManagerInternal();
-        if (mApp.info != null && mApp.info.packageName != null) {
+        if (mApp.info != null && mApp.info.packageName != null && packageManagerInternal != null) {
             IncrementalStatesInfo incrementalStatesInfo =
                     packageManagerInternal.getIncrementalStatesInfo(
                             mApp.info.packageName, mApp.uid, mApp.userId);
