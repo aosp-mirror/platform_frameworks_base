@@ -364,6 +364,13 @@ class ProcessRecord implements WindowProcessListener {
      */
     volatile ProcessRecord mSuccessor;
 
+    /**
+     * The routine to start its successor process.
+     *
+     * <p>Note: It should be accessed from process start thread only.</p>
+     */
+    Runnable mSuccessorStartRunnable;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.mStartUid = startUid;
