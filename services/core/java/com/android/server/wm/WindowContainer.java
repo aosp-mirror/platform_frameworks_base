@@ -2689,6 +2689,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final RemoteAnimationController.RemoteAnimationRecord adapters =
                     controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
                             screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+            if (!isChanging) {
+                adapters.setMode(enter
+                        ? RemoteAnimationTarget.MODE_OPENING
+                        : RemoteAnimationTarget.MODE_CLOSING);
+            }
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();
@@ -2839,6 +2844,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean canCreateRemoteAnimationTarget() {
+        return false;
+    }
+
+    /**
+     * {@code true} to indicate that this container can be a candidate of
+     * {@link AppTransitionController#getAnimationTargets(ArraySet, ArraySet, boolean) animation
+     * target}. */
+    boolean canBeAnimationTarget() {
         return false;
     }
 

@@ -190,7 +190,9 @@ public final class DisplayManagerService extends SystemService {
 
     private static final String PROP_DEFAULT_DISPLAY_TOP_INSET = "persist.sys.displayinset.top";
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
-    private static final float THRESHOLD_FOR_REFRESH_RATES_DIVIDERS = 0.1f;
+    // This value needs to be in sync with the threshold
+    // in RefreshRateConfigs::getFrameRateDivider.
+    private static final float THRESHOLD_FOR_REFRESH_RATES_DIVIDERS = 0.0009f;
 
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
     private static final int MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS = 2;
@@ -826,7 +828,7 @@ public final class DisplayManagerService extends SystemService {
 
         // Override the refresh rate only if it is a divider of the current
         // refresh rate. This calculation needs to be in sync with the native code
-        // in RefreshRateConfigs::getRefreshRateDividerForUid
+        // in RefreshRateConfigs::getFrameRateDivider
         Display.Mode currentMode = info.getMode();
         float numPeriods = currentMode.getRefreshRate() / frameRateHz;
         float numPeriodsRound = Math.round(numPeriods);
