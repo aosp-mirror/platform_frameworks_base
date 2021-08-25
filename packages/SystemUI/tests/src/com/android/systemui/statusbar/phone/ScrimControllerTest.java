@@ -751,12 +751,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
 
-        // Immediately tinted black after the transition starts
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true
-        ));
-
         finishAnimationsImmediately();
 
         // All scrims should be transparent at the end of fade transition.
