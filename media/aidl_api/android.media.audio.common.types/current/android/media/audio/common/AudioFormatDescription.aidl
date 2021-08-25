@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,8 @@
 package android.media.audio.common;
 /* @hide */
 @JavaDerive(equals=true, toString=true) @VintfStability
-parcelable AudioConfig {
-  int sampleRateHz;
-  android.media.audio.common.AudioChannelLayout channelMask;
-  android.media.audio.common.AudioFormatDescription format;
-  android.media.audio.common.AudioOffloadInfo offloadInfo;
-  long frameCount;
+parcelable AudioFormatDescription {
+  android.media.audio.common.AudioFormatType type = android.media.audio.common.AudioFormatType.DEFAULT;
+  android.media.audio.common.PcmType pcm = android.media.audio.common.PcmType.DEFAULT;
+  @utf8InCpp String encoding;
 }

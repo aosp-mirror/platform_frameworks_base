@@ -174,6 +174,67 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
     /** MIME type for MPEG-H Audio single stream, encapsulated in MHAS */
     public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
+    /** MIME type for DTS (up to 5.1 channels) audio stream. */
+    public static final String MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
+    /** MIME type for DTS HD (up to 7.1 channels) audio stream. */
+    public static final String MIMETYPE_AUDIO_DTS_HD = "audio/vnd.dts.hd";
+    /** MIME type for DTS UHD (object-based) audio stream. */
+    public static final String MIMETYPE_AUDIO_DTS_UHD = "audio/vnd.dts.uhd";
+    /** MIME type for Dynamic Resolution Adaptation (DRA) audio stream. */
+    public static final String MIMETYPE_AUDIO_DRA = "audio/vnd.dra";
+    /** MIME type for Dolby Metadata-enhanced Audio Transmission (MAT) audio stream. */
+    public static final String MIMETYPE_AUDIO_DOLBY_MAT = "audio/vnd.dolby.mat";
+    /** MIME type for Dolby TrueHD audio format, based on Meridian Lossless Packing (MLP). */
+    public static final String MIMETYPE_AUDIO_DOLBY_TRUEHD = "audio/vnd.dolby.mlp";
+    /**
+     * MIME type for AAC Low Complexity (LC) audio stream. Uses the scheme defined by
+     * RFC 6381 with OTI of MPEG-4 (40) and AOT of AAC LC (2) from ISO/IEC 14496-3.
+     */
+    public static final String MIMETYPE_AUDIO_AAC_LC = "audio/mp4a.40.02";
+    /**
+     * MIME type for HE-AAC v1 (LC + SBR) audio stream. Uses the scheme defined by
+     * RFC 6381 with OTI of MPEG-4 (40) and AOT of AAC SBR (5) from ISO/IEC 14496-3.
+     */
+    public static final String MIMETYPE_AUDIO_AAC_HE_V1 = "audio/mp4a.40.05";
+    /**
+     * MIME type for HE-AAC v2 (LC + SBR + PS) audio stream. Uses the scheme defined by
+     * RFC 6381 with OTI of MPEG-4 (40) and AOT of PS (29) from ISO/IEC 14496-3.
+     */
+    public static final String MIMETYPE_AUDIO_AAC_HE_V2 = "audio/mp4a.40.29";
+    /**
+     * MIME type for AAC Enhanced Low Delay (ELD) audio stream. Uses the scheme defined by
+     * RFC 6381 with OTI of MPEG-4 (40) and AOT of ELD (39) from ISO/IEC 14496-3.
+     */
+    public static final String MIMETYPE_AUDIO_AAC_ELD = "audio/mp4a.40.39";
+    /**
+     * MIME type for AAC XHE audio stream. Uses the scheme defined by
+     * RFC 6381 with OTI of MPEG-4 (40) and AOT of USAC (42) from ISO/IEC 14496-3.
+     */
+    public static final String MIMETYPE_AUDIO_AAC_XHE = "audio/mp4a.40.42";
+    /**
+     * MIME type for MPEG-H Baseline (BL) Profile L3 audio stream. Uses the scheme defined by
+     * RFC 6381 with mpegh3daProfileLevelIndication for main profile/L3 (0x3) from ISO/IEC 23008-3.
+     */
+    public static final String MIMETYPE_AUDIO_MPEGH_BL_L3 = "audio/mhm1.03";
+    /**
+     * MIME type for MPEG-H Baseline (BL) Profile L4 audio stream. Uses the scheme defined by
+     * RFC 6381 with mpegh3daProfileLevelIndication for main profile/L4 (0x4) from ISO/IEC 23008-3.
+     */
+    public static final String MIMETYPE_AUDIO_MPEGH_BL_L4 = "audio/mhm1.04";
+    /**
+     * MIME type for MPEG-H Low Complexity (LC) L3 audio stream. Uses the scheme defined by
+     * RFC 6381 with mpegh3daProfileLevelIndication for LC profile/L3 (0xD) from ISO/IEC 23008-3.
+     */
+    public static final String MIMETYPE_AUDIO_MPEGH_LC_L3 = "audio/mhm1.0d";
+    /**
+     * MIME type for MPEG-H Low Complexity (LC) L4 audio stream. Uses the scheme defined by
+     * RFC 6381 with mpegh3daProfileLevelIndication for LC profile/L4 (0xE) from ISO/IEC 23008-3.
+     */
+    public static final String MIMETYPE_AUDIO_MPEGH_LC_L4 = "audio/mhm1.0e";
+    /**
+     * MIME type for the IEC61937 audio stream encapsulation. This type isn't defined by IANA.
+     */
+    public static final String MIMETYPE_AUDIO_IEC61937 = "audio/x-iec61937";
 
     /**
      * MIME type for HEIF still image data encoded in HEVC.

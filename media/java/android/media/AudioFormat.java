@@ -495,6 +495,12 @@ public final class AudioFormat implements Parcelable {
     public static final int CHANNEL_OUT_FRONT_WIDE_LEFT = 0x4000000;
     /** Front wide right output channel (see FWR in channel diagram) */
     public static final int CHANNEL_OUT_FRONT_WIDE_RIGHT = 0x8000000;
+    /** @hide
+     * Haptic channels can be used by internal framework code. Use the same values as in native.
+     */
+    public static final int CHANNEL_OUT_HAPTIC_B = 0x10000000;
+    /** @hide */
+    public static final int CHANNEL_OUT_HAPTIC_A = 0x20000000;
 
     public static final int CHANNEL_OUT_MONO = CHANNEL_OUT_FRONT_LEFT;
     public static final int CHANNEL_OUT_STEREO = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT);

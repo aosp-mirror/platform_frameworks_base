@@ -162,6 +162,7 @@ cc_library_shared {
                 "android_util_CharsetUtils.cpp",
                 "android_util_MemoryIntArray.cpp",
                 "android_util_Process.cpp",
+                "android_media_audio_common_AidlConversion.cpp",
                 "android_media_AudioDeviceAttributes.cpp",
                 "android_media_AudioEffectDescriptor.cpp",
                 "android_media_AudioRecord.cpp",
@@ -242,6 +243,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "android.media.audio.common.types-V1-cpp",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "audiopolicy-types-aidl-cpp",
@@ -288,6 +290,7 @@ cc_library_shared {
                 "libmediametrics",
                 "libmeminfo",
                 "libaudioclient",
+                "libaudioclient_aidl_conversion",
                 "libaudiofoundation",
                 "libaudiopolicy",
                 "libusbhost",
