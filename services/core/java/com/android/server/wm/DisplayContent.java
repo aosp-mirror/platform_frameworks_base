@@ -5786,6 +5786,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mRemoved = true;
 
+        if (mMirroredSurface != null) {
+            // Do not wait for the mirrored surface to be garbage collected, but clean up
+            // immediately.
+            mWmService.mTransactionFactory.get().remove(mMirroredSurface).apply();
+            mMirroredSurface = null;
+        }
+
         // Only update focus/visibility for the last one because there may be many root tasks are
         // reparented and the intermediate states are unnecessary.
         if (lastReparentedRootTask != null) {
