@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 
@@ -63,7 +64,10 @@ final class LetterboxConfiguration {
     private int mLetterboxActivityCornersRadius;
 
     // Color for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
-    private Color mLetterboxBackgroundColor;
+    @Nullable private Color mLetterboxBackgroundColorOverride;
+
+    // Color resource id for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
+    @Nullable private Integer mLetterboxBackgroundColorResourceIdOverride;
 
     @LetterboxBackgroundType
     private int mLetterboxBackgroundType;
@@ -81,20 +85,18 @@ final class LetterboxConfiguration {
     // side of the screen and 1.0 to the right side.
     private float mLetterboxHorizontalPositionMultiplier;
 
-    LetterboxConfiguration(Context context) {
-        mContext = context;
-        mFixedOrientationLetterboxAspectRatio = context.getResources().getFloat(
+    LetterboxConfiguration(Context systemUiContext) {
+        mContext = systemUiContext;
+        mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
-        mLetterboxActivityCornersRadius = context.getResources().getInteger(
+        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
                 R.integer.config_letterboxActivityCornersRadius);
-        mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
-                R.color.config_letterboxBackgroundColor));
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(context);
-        mLetterboxBackgroundWallpaperBlurRadius = context.getResources().getDimensionPixelSize(
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
+        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = context.getResources().getFloat(
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
                 R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
-        mLetterboxHorizontalPositionMultiplier = context.getResources().getFloat(
+        mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
     }
 
@@ -158,12 +160,20 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Gets color of letterbox background which is  used when {@link
+     * Gets color of letterbox background which is used when {@link
      * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
      * fallback for other backfround types.
      */
     Color getLetterboxBackgroundColor() {
-        return mLetterboxBackgroundColor;
+        if (mLetterboxBackgroundColorOverride != null) {
+            return mLetterboxBackgroundColorOverride;
+        }
+        int colorId = mLetterboxBackgroundColorResourceIdOverride != null
+                ? mLetterboxBackgroundColorResourceIdOverride
+                : R.color.config_letterboxBackgroundColor;
+        // Query color dynamically because material colors extracted from wallpaper are updated
+        // when wallpaper is changed.
+        return Color.valueOf(mContext.getResources().getColor(colorId));
     }
 
 
@@ -173,7 +183,16 @@ final class LetterboxConfiguration {
      * fallback for other backfround types.
      */
     void setLetterboxBackgroundColor(Color color) {
-        mLetterboxBackgroundColor = color;
+        mLetterboxBackgroundColorOverride = color;
+    }
+
+    /**
+     * Sets color ID of letterbox background which is used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other backfround types.
+     */
+    void setLetterboxBackgroundColorResourceId(int colorId) {
+        mLetterboxBackgroundColorResourceIdOverride = colorId;
     }
 
     /**
@@ -181,8 +200,8 @@ final class LetterboxConfiguration {
      * com.android.internal.R.color.config_letterboxBackgroundColor}.
      */
     void resetLetterboxBackgroundColor() {
-        mLetterboxBackgroundColor = Color.valueOf(mContext.getResources().getColor(
-                com.android.internal.R.color.config_letterboxBackgroundColor));
+        mLetterboxBackgroundColorOverride = null;
+        mLetterboxBackgroundColorResourceIdOverride = null;
     }
 
     /**
