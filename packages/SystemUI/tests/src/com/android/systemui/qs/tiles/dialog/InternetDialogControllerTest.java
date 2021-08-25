@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.ServiceState;
@@ -33,13 +32,13 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -79,13 +78,11 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private GlobalSettings mGlobalSettings;
     @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private NetworkController.AccessPointController mAccessPointController;
     @Mock
     private WifiEntry mConnectedEntry;
-    @Mock
-    private WifiInfo mWifiInfo;
     @Mock
     private ServiceState mServiceState;
     @Mock
@@ -99,15 +96,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(SUB_ID);
-        when(mWifiManager.getConnectionInfo()).thenReturn(mWifiInfo);
+        doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
+        when(mConnectedEntry.hasInternetAccess()).thenReturn(true);
 
         mInternetDialogController = new MockInternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
-                mKeyguardUpdateMonitor, mGlobalSettings);
+                mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(
@@ -174,6 +172,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getSubtitleText_deviceLockedWithWifiOn_returnUnlockToViewNetworks() {
+        mInternetDialogController.setAirplaneModeEnabled(false);
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
+                getResourcesString("unlock_to_view_networks")));
+    }
+
+    @Test
     public void getSubtitleText_withNoService_returnNoNetworksAvailable() {
         mInternetDialogController.setAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
@@ -211,53 +219,62 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getDefaultWifiEntry_connectedEntryIsNull_returnNull() {
+    public void getInternetWifiEntry_connectedEntryIsNull_returnNull() {
         mInternetDialogController.mConnectedEntry = null;
 
-        assertThat(mInternetDialogController.getDefaultWifiEntry()).isNull();
+        assertThat(mInternetDialogController.getInternetWifiEntry()).isNull();
     }
 
     @Test
-    public void getDefaultWifiEntry_connectedEntryIsNotDefault_returnNull() {
+    public void getInternetWifiEntry_connectedWifiIsNotDefaultNetwork_returnNull() {
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(false);
 
-        assertThat(mInternetDialogController.getDefaultWifiEntry()).isNull();
+        assertThat(mInternetDialogController.getInternetWifiEntry()).isNull();
     }
 
     @Test
-    public void getDefaultWifiEntry_connectedEntryIsDefault_returnConnectedEntry() {
-        // The default conditions have been set in setUp().
-        //   - The connected Wi-Fi entry with the default network condition.
+    public void getInternetWifiEntry_connectedWifiHasNotInternetAccess_returnNull() {
+        when(mConnectedEntry.hasInternetAccess()).thenReturn(false);
 
-        assertThat(mInternetDialogController.getDefaultWifiEntry()).isEqualTo(mConnectedEntry);
+        assertThat(mInternetDialogController.getInternetWifiEntry()).isNull();
     }
 
     @Test
-    public void getDefaultWifiTitle_withNoDefaultEntry_returnEmpty() {
+    public void getInternetWifiEntry_connectedEntryIsInternetWifi_returnConnectedEntry() {
+        // The preconditions have been set in setUp().
+        //   - The connected Wi-Fi entry have both default network and internet access conditions.
+
+        assertThat(mInternetDialogController.getInternetWifiEntry()).isEqualTo(mConnectedEntry);
+    }
+
+    @Test
+    public void getInternetWifiTitle_withNoConnectedWifiEntry_returnEmpty() {
         mInternetDialogController.mConnectedEntry = null;
 
-        assertThat(mInternetDialogController.getDefaultWifiTitle()).isEmpty();
+        assertThat(mInternetDialogController.getInternetWifiTitle()).isEmpty();
     }
 
     @Test
-    public void getDefaultWifiTitle_withDefaultEntry_returnTitle() {
+    public void getInternetWifiTitle_withInternetWifi_returnTitle() {
+        // The preconditions have been set in setUp().
+        //   - The connected Wi-Fi entry have both default network and internet access conditions.
         when(mConnectedEntry.getTitle()).thenReturn(CONNECTED_TITLE);
 
-        assertThat(mInternetDialogController.getDefaultWifiTitle()).isEqualTo(CONNECTED_TITLE);
+        assertThat(mInternetDialogController.getInternetWifiTitle()).isEqualTo(CONNECTED_TITLE);
     }
 
     @Test
-    public void getDefaultWifiSummary_withNoDefaultEntry_returnEmpty() {
+    public void getInternetWifiSummary_withNoConnectedWifiEntry_returnEmpty() {
         mInternetDialogController.mConnectedEntry = null;
 
-        assertThat(mInternetDialogController.getDefaultWifiSummary()).isEmpty();
+        assertThat(mInternetDialogController.getInternetWifiSummary()).isEmpty();
     }
 
     @Test
-    public void getDefaultWifiSummary_withDefaultEntry_returnSummary() {
+    public void getInternetWifiSummary_withInternetWifi_returnSummary() {
         when(mConnectedEntry.getSummary(false)).thenReturn(CONNECTED_SUMMARY);
 
-        assertThat(mInternetDialogController.getDefaultWifiSummary()).isEqualTo(CONNECTED_SUMMARY);
+        assertThat(mInternetDialogController.getInternetWifiSummary()).isEqualTo(CONNECTED_SUMMARY);
     }
 
     @Test
@@ -282,11 +299,11 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getWifiConnectedDrawable_withConnectedEntry_returnIntentIconWithColorAccent() {
+    public void getWifiDrawable_withConnectedEntry_returnIntentIconWithCorrectColor() {
         final Drawable drawable = mock(Drawable.class);
         when(mWifiIconInjector.getIcon(anyBoolean(), anyInt())).thenReturn(drawable);
 
-        mInternetDialogController.getConnectedWifiDrawable(mConnectedEntry);
+        mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
 
         verify(mWifiIconInjector).getIcon(eq(false), anyInt());
         verify(drawable).setTint(mContext.getColor(R.color.connected_network_primary_color));
@@ -311,6 +328,20 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
+    @Test
+    public void isDeviceLocked_keyguardIsUnlocked_returnFalse() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+
+        assertThat(mInternetDialogController.isDeviceLocked()).isFalse();
+    }
+
+    @Test
+    public void isDeviceLocked_keyguardIsLocked_returnTrue() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        assertThat(mInternetDialogController.isDeviceLocked()).isTrue();
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
@@ -331,10 +362,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
                 @Main Handler handler, @Main Executor mainExecutor,
                 BroadcastDispatcher broadcastDispatcher,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings) {
+                KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
+                KeyguardStateController keyguardStateController) {
             super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
                     telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
-                    broadcastDispatcher, keyguardUpdateMonitor, globalSettings);
+                    broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
+                    keyguardStateController);
             mGlobalSettings = globalSettings;
         }
 
