@@ -197,11 +197,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the [testApp] window starts off invisible and once it becomes visible, stays
-     * visible until the end of the transition.
-     *
-     * NOTE: It does not ensure that the app becomes visible at some point ([testApp] can stay
-     * invisible throughout and pass this check), that is what [endsWithAppBeingVisible] is for.
+     * Checks that [testApp]'s window starts off invisible and becomes visible at some point before
+     * the end of the transition and then stays visible until the end of the transition.
      */
     @Postsubmit
     @Test
@@ -214,11 +211,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the [testApp] layer starts off invisible and once it becomes visible, stays
-     * visible until the end of the transition.
-     *
-     * NOTE: It does not ensure that the app becomes visible at some point ([testApp] can stay
-     * invisible throughout and pass this check).
+     * Checks that [testApp]'s layer starts off invisible and becomes visible at some point before
+     * the end of the transition and then stays visible until the end of the transition.
      */
     @Postsubmit
     @Test
@@ -231,11 +225,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher window starts off visible and once it becomes invisible, stays
-     * invisible until the end of the transition.
-     *
-     * NOTE: It does not ensure that the launcher becomes invisible at some point, (the launcher can
-     * stay invisible throughout and pass this check).
+     * Checks that the launcher window starts off visible and becomes invisible at some point before
+     * the end of the transition and then stays invisible until the end of the transition.
      */
     @Postsubmit
     @Test
@@ -248,11 +239,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher layer starts off visible and once it becomes invisible, stays
-     * invisible until the end of the transition.
-     *
-     * NOTE: It does not ensure that the launcher becomes invisible at some point, (the launcher can
-     * stay invisible throughout and pass this check).
+     * Checks that the launcher layer starts off visible and becomes invisible at some point before
+     * the end of the transition and then stays invisible until the end of the transition.
      */
     @Postsubmit
     @Test
