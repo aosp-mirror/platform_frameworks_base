@@ -86,7 +86,6 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
-import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
@@ -227,8 +226,6 @@ public class ChooserActivity extends ResolverActivity implements
     // statsd logger wrapper
     protected ChooserActivityLogger mChooserActivityLogger;
 
-    private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
-
     @IntDef(flag = false, prefix = { "TARGET_TYPE_" }, value = {
             TARGET_TYPE_DEFAULT,
             TARGET_TYPE_CHOOSER_TARGET,
@@ -268,7 +265,6 @@ public class ChooserActivity extends ResolverActivity implements
     private long mChooserShownTime;
     protected boolean mIsSuccessfullySelected;
 
-    private long mQueriedTargetServicesTimeMs;
     private long mQueriedSharingShortcutsTimeMs;
 
     private int mChooserRowServiceSpacing;
@@ -1887,96 +1883,6 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    @VisibleForTesting
-    protected void queryTargetServices(ChooserListAdapter adapter) {
-
-        mQueriedTargetServicesTimeMs = System.currentTimeMillis();
-
-        Context selectedProfileContext = createContextAsUser(
-                adapter.getUserHandle(), 0 /* flags */);
-        final PackageManager pm = selectedProfileContext.getPackageManager();
-        ShortcutManager sm = selectedProfileContext.getSystemService(ShortcutManager.class);
-        int targetsToQuery = 0;
-
-        for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
-            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
-            if (adapter.getScore(dri) == 0) {
-                // A score of 0 means the app hasn't been used in some time;
-                // don't query it as it's not likely to be relevant.
-                continue;
-            }
-            final ActivityInfo ai = dri.getResolveInfo().activityInfo;
-            if (sm.hasShareTargets(ai.packageName)) {
-                // Share targets will be queried from ShortcutManager
-                continue;
-            }
-            final Bundle md = ai.metaData;
-            final String serviceName = md != null ? convertServiceName(ai.packageName,
-                    md.getString(ChooserTargetService.META_DATA_NAME)) : null;
-            if (serviceName != null && ChooserFlags.USE_SERVICE_TARGETS_FOR_DIRECT_TARGETS) {
-                final ComponentName serviceComponent = new ComponentName(
-                        ai.packageName, serviceName);
-
-                UserHandle userHandle = adapter.getUserHandle();
-                Pair<ComponentName, UserHandle> requestedItem =
-                        new Pair<>(serviceComponent, userHandle);
-                if (mServicesRequested.contains(requestedItem)) {
-                    continue;
-                }
-                mServicesRequested.add(requestedItem);
-
-                final Intent serviceIntent = new Intent(ChooserTargetService.SERVICE_INTERFACE)
-                        .setComponent(serviceComponent);
-
-                if (DEBUG) {
-                    Log.d(TAG, "queryTargets found target with service " + serviceComponent);
-                }
-
-                try {
-                    final String perm = pm.getServiceInfo(serviceComponent, 0).permission;
-                    if (!ChooserTargetService.BIND_PERMISSION.equals(perm)) {
-                        Log.w(TAG, "ChooserTargetService " + serviceComponent + " does not require"
-                                + " permission " + ChooserTargetService.BIND_PERMISSION
-                                + " - this service will not be queried for ChooserTargets."
-                                + " add android:permission=\""
-                                + ChooserTargetService.BIND_PERMISSION + "\""
-                                + " to the <service> tag for " + serviceComponent
-                                + " in the manifest.");
-                        continue;
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Could not look up service " + serviceComponent
-                            + "; component name not found");
-                    continue;
-                }
-
-                final ChooserTargetServiceConnection conn =
-                        new ChooserTargetServiceConnection(this, dri,
-                                adapter.getUserHandle());
-
-                // Explicitly specify the user handle instead of calling bindService
-                // to avoid the warning from calling from the system process without an explicit
-                // user handle
-                if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
-                        adapter.getUserHandle())) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Binding service connection for target " + dri
-                                + " intent " + serviceIntent);
-                    }
-                    mServiceConnections.add(conn);
-                    targetsToQuery++;
-                }
-            }
-            if (targetsToQuery >= QUERY_TARGET_SERVICE_LIMIT) {
-                if (DEBUG) {
-                    Log.d(TAG, "queryTargets hit query target limit "
-                            + QUERY_TARGET_SERVICE_LIMIT);
-                }
-                break;
-            }
-        }
-    }
-
     private IntentFilter getTargetIntentFilter() {
         try {
             final Intent intent = getTargetIntent();
@@ -2241,10 +2147,7 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void logDirectShareTargetReceived(int logCategory) {
-        final long queryTime =
-                logCategory == MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER
-                        ? mQueriedSharingShortcutsTimeMs : mQueriedTargetServicesTimeMs;
-        final int apiLatency = (int) (System.currentTimeMillis() - queryTime);
+        final int apiLatency = (int) (System.currentTimeMillis() - mQueriedSharingShortcutsTimeMs);
         getMetricsLogger().write(new LogMaker(logCategory).setSubtype(apiLatency));
     }
 
@@ -2849,13 +2752,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             queryDirectShareTargets(chooserListAdapter, false);
-        }
-        if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
-            if (DEBUG) {
-                Log.d(TAG, "List built querying services");
-            }
-
-            queryTargetServices(chooserListAdapter);
         }
 
         getChooserActivityLogger().logSharesheetAppLoadComplete();
