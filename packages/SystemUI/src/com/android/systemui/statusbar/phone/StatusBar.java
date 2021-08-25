@@ -135,6 +135,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -664,6 +665,7 @@ public class StatusBar extends SystemUI implements
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -783,7 +785,8 @@ public class StatusBar extends SystemUI implements
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -888,6 +891,7 @@ public class StatusBar extends SystemUI implements
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -4392,6 +4396,8 @@ public class StatusBar extends SystemUI implements
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
+
+                    mDialogLaunchAnimator.onDozeAmountChanged(linear);
                 }
 
                 @Override

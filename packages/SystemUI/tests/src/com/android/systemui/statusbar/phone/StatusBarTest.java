@@ -78,6 +78,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -270,6 +271,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -445,7 +447,8 @@ public class StatusBarTest extends SysuiTestCase {
                 Optional.of(mStartingSurface),
                 mTunerService,
                 mock(DumpManager.class),
-                mActivityLaunchAnimator);
+                mActivityLaunchAnimator,
+                mDialogLaunchAnimator);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))
