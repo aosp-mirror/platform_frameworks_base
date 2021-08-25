@@ -33,6 +33,7 @@ import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -746,6 +747,92 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
                 wpcAfterConfigChange2.getConfiguration().getLocales());
         assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_localesNotSet_localeConfigRetrievedNull() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true,
+                DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        mAtm.mInternal.onProcessAdded(wpc);
+
+        ActivityTaskManagerInternal.PackageConfig appSpecificConfig = mAtm.mInternal
+                .getApplicationConfig(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        // when no configuration is set we get a null object.
+        assertNull(appSpecificConfig);
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
+                        DEFAULT_USER_ID);
+        packageConfigUpdater.setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        ActivityTaskManagerInternal.PackageConfig appSpecificConfig2 = mAtm.mInternal
+                .getApplicationConfig(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertNotNull(appSpecificConfig2);
+        assertNull(appSpecificConfig2.mLocales);
+        assertEquals(appSpecificConfig2.mNightMode.intValue(), Configuration.UI_MODE_NIGHT_YES);
+    }
+
+    @Test
+    public void testPackageConfigUpdate_appNotRunning_configSuccessfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true,
+                DEFAULT_USER_ID);
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
+                        DEFAULT_USER_ID);
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB")).commit();
+
+        // Verifies if the persisted app-specific configuration is same as the committed
+        // configuration.
+        ActivityTaskManagerInternal.PackageConfig appSpecificConfig = mAtm.mInternal
+                .getApplicationConfig(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertNotNull(appSpecificConfig);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB"), appSpecificConfig.mLocales);
+
+        // Verifies if the persisted configuration for an arbitrary app is applied correctly when
+        // a new WindowProcessController is created for it.
+        WindowProcessController wpcAfterConfigChange = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange.getConfiguration().getLocales());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_appRunning_configSuccessfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true,
+                DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        mAtm.mInternal.onProcessAdded(wpc);
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
+                        DEFAULT_USER_ID);
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB")).commit();
+
+        ActivityTaskManagerInternal.PackageConfig appSpecificConfig = mAtm.mInternal
+                .getApplicationConfig(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        // Verifies if the persisted app-specific configuration is same as the committed
+        // configuration.
+        assertNotNull(appSpecificConfig);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB"), appSpecificConfig.mLocales);
+
+        // Verifies if the committed configuration is successfully applied to the required
+        // application while it is currently running.
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpc.getConfiguration().getLocales());
     }
 
     private WindowProcessController createWindowProcessController(String packageName,
