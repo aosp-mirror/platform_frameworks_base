@@ -30,6 +30,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -8281,7 +8282,10 @@ public class Intent implements Parcelable, Cloneable {
      *         needed.
      */
     public @Nullable String resolveTypeIfNeeded(@NonNull ContentResolver resolver) {
-        if (mComponent != null) {
+        // Match logic in PackageManagerService#applyEnforceIntentFilterMatching(...)
+        if (mComponent != null && (Process.myUid() == Process.ROOT_UID
+                || Process.myUid() == Process.SYSTEM_UID
+                || mComponent.getPackageName().equals(ActivityThread.currentPackageName()))) {
             return mType;
         }
         return resolveType(resolver);
