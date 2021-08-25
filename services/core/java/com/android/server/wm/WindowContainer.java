@@ -2847,6 +2847,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    /**
+     * {@code true} to indicate that this container can be a candidate of
+     * {@link AppTransitionController#getAnimationTargets(ArraySet, ArraySet, boolean) animation
+     * target}. */
+    boolean canBeAnimationTarget() {
+        return false;
+    }
+
     boolean okToDisplay() {
         final DisplayContent dc = getDisplayContent();
         return dc != null && dc.okToDisplay();

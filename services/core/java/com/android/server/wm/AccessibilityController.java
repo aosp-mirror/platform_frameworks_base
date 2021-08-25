@@ -756,6 +756,7 @@ final class AccessibilityController {
             if (magnifying) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
+                    case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_TO_FRONT:
                     case WindowManager.TRANSIT_OLD_WALLPAPER_OPEN:

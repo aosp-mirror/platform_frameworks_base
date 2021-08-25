@@ -478,7 +478,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord splitSecondActivity =
                 new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
-                .setParentTask(splitOrg.mPrimary)
+                .setParentTaskFragment(splitOrg.mPrimary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
@@ -856,7 +856,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setParentTaskFragment(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
         doReturn(mActivityMetricsLogger).when(mSupervisor).getActivityMetricsLogger();
@@ -920,7 +920,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
         final Task task = new TaskBuilder(mSupervisor)
                 .setComponent(componentName)
-                .setParentTask(stack)
+                .setParentTaskFragment(stack)
                 .build();
         return new ActivityBuilder(mAtm)
                 .setComponent(componentName)
@@ -1056,8 +1056,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTask(mAtm.mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
+                .setParentTaskFragment(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+                        ACTIVITY_TYPE_STANDARD))
                 .setUserId(10)
                 .build();
 
