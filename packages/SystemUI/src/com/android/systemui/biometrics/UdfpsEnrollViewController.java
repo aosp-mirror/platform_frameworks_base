@@ -42,6 +42,11 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
         public void onLastStepAcquired() {
             mView.onLastStepAcquired();
         }
+
+        @Override
+        public void onEnrollmentHelp() {
+            mView.onEnrollmentHelp();
+        }
     };
 
     protected UdfpsEnrollViewController(
