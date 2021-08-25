@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.media.AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -563,5 +565,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 eq(mUdfpsController.EFFECT_CLICK),
                 eq("udfps-onStart"),
                 eq(UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES));
+
+        // THEN make sure vibration attributes has so that it always will play the haptic,
+        // even in battery saver mode
+        assertEquals(USAGE_ASSISTANCE_ACCESSIBILITY,
+                UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES.getUsage());
     }
 }
