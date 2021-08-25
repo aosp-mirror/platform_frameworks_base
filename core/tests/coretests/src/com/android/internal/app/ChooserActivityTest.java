@@ -2243,12 +2243,6 @@ public class ChooserActivityTest {
                     (chooserListAdapter.getUserHandle().getIdentifier() == 10);
             return null;
         };
-        boolean[] isQueryTargetServicesCalledOnWorkProfile = new boolean[] { false };
-        sOverrides.onQueryTargetServices = chooserListAdapter -> {
-            isQueryTargetServicesCalledOnWorkProfile[0] =
-                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
-            return null;
-        };
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
@@ -2261,8 +2255,6 @@ public class ChooserActivityTest {
 
         assertFalse("Direct share targets were queried on a paused work profile",
                 isQueryDirectShareCalledOnWorkProfile[0]);
-        assertFalse("Target services were queried on a paused work profile",
-                isQueryTargetServicesCalledOnWorkProfile[0]);
     }
 
     @Test
@@ -2282,12 +2274,6 @@ public class ChooserActivityTest {
                     (chooserListAdapter.getUserHandle().getIdentifier() == 10);
             return null;
         };
-        boolean[] isQueryTargetServicesCalledOnWorkProfile = new boolean[] { false };
-        sOverrides.onQueryTargetServices = chooserListAdapter -> {
-            isQueryTargetServicesCalledOnWorkProfile[0] =
-                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
-            return null;
-        };
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
@@ -2300,8 +2286,6 @@ public class ChooserActivityTest {
 
         assertFalse("Direct share targets were queried on a locked work profile user",
                 isQueryDirectShareCalledOnWorkProfile[0]);
-        assertFalse("Target services were queried on a locked work profile user",
-                isQueryTargetServicesCalledOnWorkProfile[0]);
     }
 
     @Test
@@ -2346,12 +2330,6 @@ public class ChooserActivityTest {
                     (chooserListAdapter.getUserHandle().getIdentifier() == 10);
             return null;
         };
-        boolean[] isQueryTargetServicesCalledOnWorkProfile = new boolean[] { false };
-        sOverrides.onQueryTargetServices = chooserListAdapter -> {
-            isQueryTargetServicesCalledOnWorkProfile[0] =
-                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
-            return null;
-        };
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
@@ -2364,8 +2342,6 @@ public class ChooserActivityTest {
 
         assertFalse("Direct share targets were queried on a locked work profile user",
                 isQueryDirectShareCalledOnWorkProfile[0]);
-        assertFalse("Target services were queried on a locked work profile user",
-                isQueryTargetServicesCalledOnWorkProfile[0]);
     }
 
     @Test
