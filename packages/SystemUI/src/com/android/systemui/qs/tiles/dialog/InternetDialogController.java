@@ -19,11 +19,11 @@ package com.android.systemui.qs.tiles.dialog;
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
 
-import android.annotation.ColorInt;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -134,6 +134,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     protected SubscriptionManager.OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
     @VisibleForTesting
     protected InternetTelephonyCallback mInternetTelephonyCallback;
+    @VisibleForTesting
+    protected WifiUtils.InternetIconInjector mWifiIconInjector;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -181,6 +183,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mActivityStarter = starter;
         mAccessPointController = accessPointController;
         mConfig = MobileMappings.Config.readConfig(mContext);
+        mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
     }
 
     void onStart(@NonNull InternetDialogCallback callback) {
@@ -269,15 +272,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return mContext.getText(SUBTITLE_TEXT_WIFI_IS_OFF);
         }
 
+        final List<ScanResult> wifiList = mWifiManager.getScanResults();
+        if (wifiList != null && wifiList.size() != 0) {
+            return mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT);
+        }
+
         if (isProgressBarVisible) {
             // When the Wi-Fi scan result callback is received
             //   Sub-Title: Searching for networks...
             return mContext.getText(SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS);
-        }
-
-        final List<ScanResult> wifiList = mWifiManager.getScanResults();
-        if (wifiList != null && wifiList.size() != 0) {
-            return mContext.getText(SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT);
         }
 
         // Sub-Title:
@@ -315,15 +318,19 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
     }
 
-    Drawable getWifiConnectedDrawable(WifiEntry wifiEntry) throws Throwable {
-        final @ColorInt int tint;
-        tint = Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorAccentPrimaryVariant);
-        final Drawable drawable = mContext.getDrawable(
-                com.android.settingslib.Utils.getWifiIconResource(wifiEntry.getLevel()));
-        drawable.setTint(tint);
-
+    Drawable getConnectedWifiDrawable(@NonNull WifiEntry wifiEntry) {
+        final Drawable drawable =
+                mWifiIconInjector.getIcon(false /* noInternet*/, wifiEntry.getLevel());
+        if (drawable == null) {
+            return null;
+        }
+        drawable.setTint(mContext.getColor(R.color.connected_network_primary_color));
         return drawable;
+    }
+
+    boolean isNightMode() {
+        return (mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
     }
 
     Drawable getSignalStrengthDrawable() {
@@ -343,13 +350,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 drawable = shared.get();
             }
 
-            drawable.setTint(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorControlNormal));
-            if (activeNetworkIsCellular()) {
-                drawable.setTint(Utils.getColorAttrDefaultColor(mContext,
-                        com.android.internal.R.attr.colorAccentPrimaryVariant));
-            }
-
+            drawable.setTint(activeNetworkIsCellular() ? mContext.getColor(
+                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
+                    mContext, android.R.attr.textColorTertiary));
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -396,7 +399,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         // Set the signal strength icon at the bottom right
         icons.setLayerGravity(1 /* index of SignalDrawable */, Gravity.BOTTOM | Gravity.RIGHT);
         icons.setLayerSize(1 /* index of SignalDrawable */, iconSize, iconSize);
-        icons.setTintList(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
+        icons.setTintList(Utils.getColorAttr(context, android.R.attr.textColorTertiary));
         return icons;
     }
 
@@ -530,24 +533,24 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return summary;
     }
 
-    String getConnectedWifiTitle() {
-        if (getConnectedWifiEntry() == null) {
+    String getDefaultWifiTitle() {
+        if (getDefaultWifiEntry() == null) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry is null");
             }
             return "";
         }
-        return getConnectedWifiEntry().getTitle();
+        return getDefaultWifiEntry().getTitle();
     }
 
-    String getConnectedWifiSummary() {
-        if (getConnectedWifiEntry() == null) {
+    String getDefaultWifiSummary() {
+        if (getDefaultWifiEntry() == null) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry is null");
             }
             return "";
         }
-        return getConnectedWifiEntry().getSummary(false);
+        return getDefaultWifiEntry().getSummary(false);
     }
 
     void launchNetworkSetting() {
@@ -575,8 +578,11 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mWifiEntry;
     }
 
-    WifiEntry getConnectedWifiEntry() {
-        return mConnectedEntry;
+    WifiEntry getDefaultWifiEntry() {
+        if (mConnectedEntry != null && mConnectedEntry.isDefaultNetwork()) {
+            return mConnectedEntry;
+        }
+        return null;
     }
 
     WifiManager getWifiManager() {
@@ -775,7 +781,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             mConnectedEntry = null;
         }
 
-        mCallback.onAccessPointsChanged(mWifiEntry, mConnectedEntry);
+        mCallback.onAccessPointsChanged(mWifiEntry, getDefaultWifiEntry());
     }
 
     @Override
@@ -876,6 +882,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                     mInternetTelephonyCallback);
             mCallback.onSubscriptionsChanged(mDefaultDataSubId);
         }
+    }
+
+    public WifiUtils.InternetIconInjector getWifiIconInjector() {
+        return mWifiIconInjector;
     }
 
     interface InternetDialogCallback {

@@ -4,7 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
@@ -30,6 +33,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.WifiUtils;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -60,16 +66,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private static final String CONNECTED_TITLE = "Connected Wi-Fi Title";
     private static final String CONNECTED_SUMMARY = "Connected Wi-Fi Summary";
 
-    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private MockInternetDialogController mInternetDialogController;
-    private InternetDialogController.InternetDialogCallback mCallback =
-            mock(InternetDialogController.InternetDialogCallback.class);
-    private ActivityStarter mStarter = mock(ActivityStarter.class);
-    private WifiManager mWifiManager = mock(WifiManager.class);
-    private ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
-    private TelephonyManager mTelephonyManager = mock(TelephonyManager.class);
-    private SubscriptionManager mSubscriptionManager = mock(SubscriptionManager.class);
-    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    @Mock
+    private WifiManager mWifiManager;
+    @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
+    private SubscriptionManager mSubscriptionManager;
     @Mock
     private Handler mHandler;
     @Mock
@@ -88,21 +90,31 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private ServiceState mServiceState;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private WifiUtils.InternetIconInjector mWifiIconInjector;
+
+    private MockInternetDialogController mInternetDialogController;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(SUB_ID);
         when(mWifiManager.getConnectionInfo()).thenReturn(mWifiInfo);
-        mInternetDialogController = new MockInternetDialogController(mContext, mUiEventLogger,
-                mStarter, mAccessPointController, mSubscriptionManager, mTelephonyManager,
-                mWifiManager, mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
+        when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
+
+        mInternetDialogController = new MockInternetDialogController(mContext,
+                mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
+                mSubscriptionManager, mTelephonyManager, mWifiManager,
+                mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mKeyguardUpdateMonitor, mGlobalSettings);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
-        mInternetDialogController.onStart(mCallback);
+        mInternetDialogController.onStart(
+                mock(InternetDialogController.InternetDialogCallback.class));
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mConnectedEntry = mConnectedEntry;
+        mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
     }
 
     @Test
@@ -138,9 +150,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getSubtitleText_withWifiOn_returnSearchWifi() {
+    public void getSubtitleText_withNoWifiEntry_returnSearchWifi() {
         mInternetDialogController.setAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        List<ScanResult> wifiScanResults = mock(ArrayList.class);
+        doReturn(0).when(wifiScanResults).size();
+        when(mWifiManager.getScanResults()).thenReturn(wifiScanResults);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(true),
                 getResourcesString("wifi_empty_list_wifi_on")));
@@ -196,35 +211,53 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getConnectedWifiTitle_withNoConnectedEntry_returnNull() {
+    public void getDefaultWifiEntry_connectedEntryIsNull_returnNull() {
         mInternetDialogController.mConnectedEntry = null;
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiTitle(),
-                ""));
+        assertThat(mInternetDialogController.getDefaultWifiEntry()).isNull();
     }
 
     @Test
-    public void getConnectedWifiTitle_withConnectedEntry_returnTitle() {
+    public void getDefaultWifiEntry_connectedEntryIsNotDefault_returnNull() {
+        when(mConnectedEntry.isDefaultNetwork()).thenReturn(false);
+
+        assertThat(mInternetDialogController.getDefaultWifiEntry()).isNull();
+    }
+
+    @Test
+    public void getDefaultWifiEntry_connectedEntryIsDefault_returnConnectedEntry() {
+        // The default conditions have been set in setUp().
+        //   - The connected Wi-Fi entry with the default network condition.
+
+        assertThat(mInternetDialogController.getDefaultWifiEntry()).isEqualTo(mConnectedEntry);
+    }
+
+    @Test
+    public void getDefaultWifiTitle_withNoDefaultEntry_returnEmpty() {
+        mInternetDialogController.mConnectedEntry = null;
+
+        assertThat(mInternetDialogController.getDefaultWifiTitle()).isEmpty();
+    }
+
+    @Test
+    public void getDefaultWifiTitle_withDefaultEntry_returnTitle() {
         when(mConnectedEntry.getTitle()).thenReturn(CONNECTED_TITLE);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiTitle(),
-                CONNECTED_TITLE));
+        assertThat(mInternetDialogController.getDefaultWifiTitle()).isEqualTo(CONNECTED_TITLE);
     }
 
     @Test
-    public void getConnectedWifiSummary_withNoConnectedEntry_returnNull() {
+    public void getDefaultWifiSummary_withNoDefaultEntry_returnEmpty() {
         mInternetDialogController.mConnectedEntry = null;
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiSummary(),
-                ""));
+        assertThat(mInternetDialogController.getDefaultWifiSummary()).isEmpty();
     }
 
     @Test
-    public void getConnectedWifiSummary_withConnectedEntry_returnSummary() {
+    public void getDefaultWifiSummary_withDefaultEntry_returnSummary() {
         when(mConnectedEntry.getSummary(false)).thenReturn(CONNECTED_SUMMARY);
 
-        assertTrue(TextUtils.equals(mInternetDialogController.getConnectedWifiSummary(),
-                CONNECTED_SUMMARY));
+        assertThat(mInternetDialogController.getDefaultWifiSummary()).isEqualTo(CONNECTED_SUMMARY);
     }
 
     @Test
@@ -246,6 +279,17 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mConnectedEntry.getKey()).thenReturn("test_key");
 
         assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNotNull();
+    }
+
+    @Test
+    public void getWifiConnectedDrawable_withConnectedEntry_returnIntentIconWithColorAccent() {
+        final Drawable drawable = mock(Drawable.class);
+        when(mWifiIconInjector.getIcon(anyBoolean(), anyInt())).thenReturn(drawable);
+
+        mInternetDialogController.getConnectedWifiDrawable(mConnectedEntry);
+
+        verify(mWifiIconInjector).getIcon(eq(false), anyInt());
+        verify(drawable).setTint(mContext.getColor(R.color.connected_network_primary_color));
     }
 
     @Test

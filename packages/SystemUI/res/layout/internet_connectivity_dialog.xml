@@ -17,6 +17,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/internet_connectivity_dialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -28,7 +29,7 @@
         style="@style/Widget.SliceView.Panel"
         android:gravity="center_vertical|center_horizontal"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
@@ -46,7 +47,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:fontFamily="google-sans"
@@ -54,18 +55,20 @@
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
+        android:id="@+id/divider"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:layout_width="340dp"
+        android:layout_height="4dp"
+        android:background="?androidprv:attr/colorSurfaceVariant"/>
 
     <ProgressBar
         android:id="@+id/wifi_searching_progress"
         android:indeterminate="true"
-        android:layout_width="match_parent"
+        android:layout_width="340dp"
         android:layout_height="wrap_content"
-        android:minHeight="1dp"
-        android:maxHeight="1dp"
-        style="@*android:style/Widget.Material.ProgressBar.Horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        style="@style/TrimmedHorizontalProgressBar"/>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -91,12 +94,11 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:layout_gravity="center_vertical|start"
                     android:orientation="horizontal"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="19dp"
-                    android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginTop="16dp"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -105,6 +107,7 @@
                         android:layout_gravity="center_vertical|start">
                         <ImageView
                             android:id="@+id/signal_icon"
+                            android:autoMirrored="true"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"/>
@@ -120,10 +123,11 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/mobile_title"
-                            android:layout_marginLeft="17dp"
+                            android:textDirection="locale"
+                            android:layout_marginStart="16dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
+                            android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
@@ -131,10 +135,11 @@
                             android:fontFamily="google-sans"/>
                         <TextView
                             android:id="@+id/mobile_summary"
-                            android:layout_marginLeft="17dp"
+                            android:textDirection="locale"
+                            android:layout_marginStart="16dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
+                            android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
@@ -161,18 +166,16 @@
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="72dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?android:attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
-                    android:paddingStart="@dimen/settingslib_switchbar_padding_left"
-                    android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp">
 
                     <FrameLayout
                         android:layout_weight="1"
@@ -182,6 +185,7 @@
                         android:layout_height="match_parent">
                         <TextView
                             android:text="@string/turn_on_wifi"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="start|center_vertical"
@@ -217,10 +221,10 @@
                     android:visibility="gone"
                     android:background="?android:attr/selectableItemBackground"
                     android:orientation="horizontal"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
-                    android:paddingStart="@dimen/settingslib_switchbar_padding_left"
-                    android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -244,10 +248,11 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/wifi_connected_title"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginStart="16dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
@@ -255,10 +260,11 @@
                             android:fontFamily="google-sans"/>
                         <TextView
                             android:id="@+id/wifi_connected_summary"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginStart="16dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
@@ -269,7 +275,7 @@
                     <FrameLayout
                         android:layout_width="24dp"
                         android:layout_height="match_parent"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginEnd="5dp"
                         android:clickable="false"
                         android:gravity="center">
                         <ImageView
@@ -301,8 +307,8 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="center_vertical|center_horizontal"
                 android:orientation="horizontal"
-                android:paddingStart="@dimen/settingslib_switchbar_padding_left"
-                android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+                android:paddingStart="22dp"
+                android:paddingEnd="22dp">
 
                 <FrameLayout
                     android:layout_width="24dp"
@@ -323,9 +329,10 @@
                     android:clickable="false"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="16dp">
+                    android:layout_marginStart="16dp">
                     <TextView
                         android:text="@string/see_all_networks"
+                        android:textDirection="locale"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="start|center_vertical"
@@ -353,7 +360,7 @@
                     android:id="@+id/done"
                     android:layout_width="60dp"
                     android:layout_height="30dp"
-                    android:layout_marginRight="24dp"
+                    android:layout_marginEnd="24dp"
                     android:layout_gravity="end"
                     android:background="@drawable/internet_dialog_footer_background"
                     android:textColor="?android:attr/textColorPrimary"

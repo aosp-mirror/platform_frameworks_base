@@ -291,6 +291,6 @@
     <color name="settingslib_track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
-    <color name="connected_network_primary_color">#ff000000</color>
-    <color name="connected_network_tertiary_color">#808080</color>
+    <color name="connected_network_primary_color">#191C18</color>
+    <color name="connected_network_secondary_color">#41493D</color>
 </resources>

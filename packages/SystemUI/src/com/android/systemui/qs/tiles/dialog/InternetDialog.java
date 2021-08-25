@@ -79,11 +79,11 @@ public class InternetDialog extends SystemUIDialog implements
         InternetDialogController.InternetDialogCallback, Window.Callback {
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    static final long PROGRESS_DELAY_MS = 2000L;
+
     private final Handler mHandler;
     private final LinearLayoutManager mLayoutManager;
-    private final Runnable mHideProgressBarRunnable = () -> {
-        setProgressBarVisible(false);
-    };
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -91,6 +91,8 @@ public class InternetDialog extends SystemUIDialog implements
     protected WifiManager mWifiManager;
     @VisibleForTesting
     protected View mDialogView;
+    @VisibleForTesting
+    protected WifiEntry mConnectedWifiEntry;
 
     private InternetDialogFactory mInternetDialogFactory;
     private SubscriptionManager mSubscriptionManager;
@@ -101,6 +103,7 @@ public class InternetDialog extends SystemUIDialog implements
     private InternetDialogController mInternetDialogController;
     private TextView mInternetDialogTitle;
     private TextView mInternetDialogSubTitle;
+    private View mDivider;
     private ProgressBar mProgressBar;
     private LinearLayout mInternetListLayout;
     private LinearLayout mConnectedWifListLayout;
@@ -122,11 +125,20 @@ public class InternetDialog extends SystemUIDialog implements
     private Switch mWiFiToggle;
     private Button mDoneButton;
     private Drawable mBackgroundOn;
-    private WifiEntry mConnectedWifiEntry;
     private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-    private boolean mIsProgressBarVisible;
     private boolean mCanConfigMobileData;
+
+    // Wi-Fi scanning progress bar
+    protected boolean mIsProgressBarVisible;
+    protected boolean mIsSearchingHidden;
+    protected final Runnable mHideProgressBarRunnable = () -> {
+        setProgressBarVisible(false);
+    };
+    protected Runnable mHideSearchingRunnable = () -> {
+        mIsSearchingHidden = true;
+        mInternetDialogSubTitle.setText(getSubtitleText());
+    };
 
     private final ViewTreeObserver.OnGlobalLayoutListener mInternetListLayoutListener = () -> {
         // Set max height for list
@@ -195,6 +207,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
         mInternetDialogSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
+        mDivider = mDialogView.requireViewById(R.id.divider);
         mProgressBar = mDialogView.requireViewById(R.id.wifi_searching_progress);
         mInternetListLayout = mDialogView.requireViewById(R.id.internet_list);
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
@@ -243,6 +256,7 @@ public class InternetDialog extends SystemUIDialog implements
             Log.d(TAG, "onStop");
         }
         mHandler.removeCallbacks(mHideProgressBarRunnable);
+        mHandler.removeCallbacks(mHideSearchingRunnable);
         mMobileNetworkLayout.setOnClickListener(null);
         mMobileDataToggle.setOnCheckedChangeListener(null);
         mConnectedWifListLayout.setOnClickListener(null);
@@ -327,14 +341,17 @@ public class InternetDialog extends SystemUIDialog implements
                 mMobileSummaryText.setVisibility(View.GONE);
             }
             mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
-            int titleColor = isCellularNetwork ? mContext.getColor(
-                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorPrimary);
-            int summaryColor = isCellularNetwork ? mContext.getColor(
-                    R.color.connected_network_tertiary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorTertiary);
-            mMobileTitleText.setTextColor(titleColor);
-            mMobileSummaryText.setTextColor(summaryColor);
+            if (mInternetDialogController.isNightMode()) {
+                int titleColor = isCellularNetwork ? mContext.getColor(
+                        R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
+                        mContext, android.R.attr.textColorPrimary);
+                int summaryColor = isCellularNetwork ? mContext.getColor(
+                        R.color.connected_network_secondary_color) : Utils.getColorAttrDefaultColor(
+                        mContext, android.R.attr.textColorSecondary);
+
+                mMobileTitleText.setTextColor(titleColor);
+                mMobileSummaryText.setTextColor(summaryColor);
+            }
             mMobileNetworkLayout.setBackground(isCellularNetwork ? mBackgroundOn : null);
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
@@ -342,8 +359,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setConnectedWifiLayout() {
-        if (!mWifiManager.isWifiEnabled()
-                || mInternetDialogController.getConnectedWifiEntry() == null) {
+        if (!mWifiManager.isWifiEnabled() || mConnectedWifiEntry == null) {
             mConnectedWifListLayout.setBackground(null);
             mConnectedWifListLayout.setVisibility(View.GONE);
             return;
@@ -351,11 +367,14 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifListLayout.setVisibility(View.VISIBLE);
         mConnectedWifiTitleText.setText(getConnectedWifiTitle());
         mConnectedWifiSummaryText.setText(getConnectedWifiSummary());
-        mConnectedWifiIcon.setImageDrawable(getConnectedWifiDrawable());
-        mConnectedWifiTitleText.setTextColor(
-                mContext.getColor(R.color.connected_network_primary_color));
-        mConnectedWifiSummaryText.setTextColor(
-                mContext.getColor(R.color.connected_network_tertiary_color));
+        mConnectedWifiIcon.setImageDrawable(
+                mInternetDialogController.getConnectedWifiDrawable(mConnectedWifiEntry));
+        if (mInternetDialogController.isNightMode()) {
+            mConnectedWifiTitleText.setTextColor(
+                    mContext.getColor(R.color.connected_network_primary_color));
+            mConnectedWifiSummaryText.setTextColor(
+                    mContext.getColor(R.color.connected_network_secondary_color));
+        }
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
         mConnectedWifListLayout.setBackground(mBackgroundOn);
@@ -374,16 +393,8 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     CharSequence getSubtitleText() {
-        return mInternetDialogController.getSubtitleText(mIsProgressBarVisible);
-    }
-
-    private Drawable getConnectedWifiDrawable() {
-        try {
-            return mInternetDialogController.getWifiConnectedDrawable(mConnectedWifiEntry);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return null;
+        return mInternetDialogController.getSubtitleText(
+                mIsProgressBarVisible && !mIsSearchingHidden);
     }
 
     private Drawable getSignalStrengthDrawable() {
@@ -399,14 +410,14 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     String getConnectedWifiTitle() {
-        return mInternetDialogController.getConnectedWifiTitle();
+        return mInternetDialogController.getDefaultWifiTitle();
     }
 
     String getConnectedWifiSummary() {
-        return mInternetDialogController.getConnectedWifiSummary();
+        return mInternetDialogController.getDefaultWifiSummary();
     }
 
-    private void showProgressBar() {
+    protected void showProgressBar() {
         if (mWifiManager == null || !mWifiManager.isWifiEnabled()) {
             setProgressBarVisible(false);
             return;
@@ -414,8 +425,9 @@ public class InternetDialog extends SystemUIDialog implements
         setProgressBarVisible(true);
         List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
         if (wifiScanResults != null && wifiScanResults.size() > 0) {
-            mContext.getMainThreadHandler().postDelayed(mHideProgressBarRunnable,
-                    2000 /* delay millis */);
+            mHandler.postDelayed(mHideProgressBarRunnable, PROGRESS_DELAY_MS);
+        } else if (!mIsSearchingHidden) {
+            mHandler.postDelayed(mHideSearchingRunnable, PROGRESS_DELAY_MS);
         }
     }
 
@@ -425,7 +437,8 @@ public class InternetDialog extends SystemUIDialog implements
             mIsProgressBarVisible = true;
         }
         mIsProgressBarVisible = visible;
-        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.INVISIBLE);
+        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
+        mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
         mInternetDialogSubTitle.setText(getSubtitleText());
     }
 
