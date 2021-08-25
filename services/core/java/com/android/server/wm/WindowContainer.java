@@ -2689,6 +2689,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final RemoteAnimationController.RemoteAnimationRecord adapters =
                     controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
                             screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+            if (!isChanging) {
+                adapters.setMode(enter
+                        ? RemoteAnimationTarget.MODE_OPENING
+                        : RemoteAnimationTarget.MODE_CLOSING);
+            }
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();
