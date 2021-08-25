@@ -1798,7 +1798,7 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        final boolean isTaskSwitch = startedTask != prevTopTask;
+        final boolean isTaskSwitch = startedTask != prevTopTask && !startedTask.isEmbedded();
         mTargetRootTask.startActivityLocked(mStartActivity,
                 topRootTask != null ? topRootTask.getTopNonFinishingActivity() : null, newTask,
                 isTaskSwitch, mOptions, sourceRecord);
