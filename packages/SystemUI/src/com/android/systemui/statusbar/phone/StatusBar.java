@@ -2521,7 +2521,8 @@ public class StatusBar extends SystemUI implements
                 animationController != null && !willLaunchResolverActivity && shouldAnimateLaunch(
                         true /* isActivityIntent */);
         ActivityLaunchAnimator.Controller animController =
-                animate ? wrapAnimationController(animationController, dismissShade) : null;
+                animationController != null ? wrapAnimationController(animationController,
+                        dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.

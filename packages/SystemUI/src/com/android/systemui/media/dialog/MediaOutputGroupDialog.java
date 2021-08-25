@@ -38,7 +38,6 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
-        show();
     }
 
     @Override
@@ -83,6 +82,8 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
     @Override
     void onHeaderIconClick() {
-        mMediaOutputController.launchMediaOutputDialog();
+        // Given that we launched the media output group dialog from the media output dialog,
+        // dismissing this dialog will show the media output dialog again.
+        dismiss();
     }
 }

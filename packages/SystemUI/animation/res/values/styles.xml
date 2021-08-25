@@ -15,7 +15,14 @@
      limitations under the License.
 -->
 <resources>
-  <style name="Animation.LaunchHostDialog" parent="@android:style/Animation">
+  <style name="HostDialogTheme">
+    <item name="android:windowAnimationStyle">@style/Animation.HostDialog</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:backgroundDimEnabled">true</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+  </style>
+
+  <style name="Animation.HostDialog" parent="@android:style/Animation">
     <item name="android:windowEnterAnimation">@anim/launch_host_dialog_enter</item>
     <item name="android:windowExitAnimation">@anim/launch_host_dialog_exit</item>
   </style>

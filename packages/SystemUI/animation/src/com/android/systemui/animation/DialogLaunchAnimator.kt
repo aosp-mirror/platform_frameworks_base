@@ -118,6 +118,20 @@ class DialogLaunchAnimator(
     fun onDozeAmountChanged(amount: Float) {
         currentAnimations.forEach { it.onDozeAmountChanged(amount) }
     }
+
+    /**
+     * Ensure that all dialogs currently shown won't animate into their touch surface when
+     * dismissed.
+     *
+     * This is a temporary API meant to be called right before we both dismiss a dialog and start
+     * an activity, which currently does not look good if we animate the dialog into the touch
+     * surface at the same time as the activity starts.
+     *
+     * TODO(b/193634619): Remove this function and animate dialog into opening activity instead.
+     */
+    fun disableAllCurrentDialogsExitAnimations() {
+        currentAnimations.forEach { it.exitAnimationDisabled = true }
+    }
 }
 
 interface HostDialogProvider {
@@ -133,6 +147,7 @@ interface HostDialogProvider {
      */
     fun createHostDialog(
         context: Context,
+        theme: Int,
         onCreateCallback: () -> Unit,
         dismissOverride: (() -> Unit) -> Unit
     ): Dialog
@@ -180,7 +195,7 @@ private class DialogLaunchAnimation(
      * [originalDialog].
      */
     val hostDialog = hostDialogProvider.createHostDialog(
-        context, this::onHostDialogCreated, this::onHostDialogDismissed)
+        context, R.style.HostDialogTheme, this::onHostDialogCreated, this::onHostDialogDismissed)
 
     /** The root content view of [hostDialog]. */
     private val hostDialogRoot = FrameLayout(context)
@@ -208,6 +223,7 @@ private class DialogLaunchAnimation(
     private var dismissRequested = false
     private var drawHostDialog = false
     var ignoreNextCallToHide = false
+    var exitAnimationDisabled = false
 
     fun start() {
         // Show the host (fullscreen) dialog, to which we will add the stolen dialog view.
@@ -235,10 +251,6 @@ private class DialogLaunchAnimation(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT
         )
-
-        // The host dialog animation is a translation of 0px so that it is shown directly. The
-        // translation lasts X ms, so that the scrim fades in during that amount of time.
-        window.attributes.windowAnimations = R.style.Animation_LaunchHostDialog
 
         // Prevent the host dialog from drawing until the animation starts.
         hostDialogRoot.viewTreeObserver.addOnPreDrawListener(
@@ -318,9 +330,11 @@ private class DialogLaunchAnimation(
         (dialogView.parent as? ViewGroup)?.removeView(dialogView)
         hostDialogRoot.addView(
             dialogView,
+
+            // We give it the size of its original dialog window.
             FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                originalDialog.window.attributes.width,
+                originalDialog.window.attributes.height,
                 Gravity.CENTER
             )
         )
@@ -496,6 +510,10 @@ private class DialogLaunchAnimation(
     }
 
     private fun shouldAnimateDialogIntoView(): Boolean {
+        if (exitAnimationDisabled) {
+            return false
+        }
+
         // The touch surface should be invisible by now, if it's not then something else changed its
         // visibility and we probably don't want to run the animation.
         if (touchSurface.visibility != View.INVISIBLE) {

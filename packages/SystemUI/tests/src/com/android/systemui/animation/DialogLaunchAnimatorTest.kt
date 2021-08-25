@@ -97,6 +97,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     private class TestHostDialogProvider : HostDialogProvider {
         override fun createHostDialog(
             context: Context,
+            theme: Int,
             onCreateCallback: () -> Unit,
             dismissOverride: (() -> Unit) -> Unit
         ): Dialog = TestHostDialog(context, onCreateCallback, dismissOverride)

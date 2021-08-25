@@ -19,7 +19,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/internet_connectivity_dialog"
-    android:layout_width="@dimen/internet_dialog_list_max_width"
+    android:layout_width="@dimen/large_dialog_width"
     android:layout_height="@dimen/internet_dialog_list_max_height"
     android:background="@drawable/internet_dialog_rounded_top_corner_background"
     android:orientation="vertical">

@@ -9,17 +9,19 @@ import com.android.systemui.animation.HostDialogProvider
 class SystemUIHostDialogProvider : HostDialogProvider {
     override fun createHostDialog(
         context: Context,
+        theme: Int,
         onCreateCallback: () -> Unit,
         dismissOverride: (() -> Unit) -> Unit
     ): Dialog {
-        return SystemUIHostDialog(context, onCreateCallback, dismissOverride)
+        return SystemUIHostDialog(context, theme, onCreateCallback, dismissOverride)
     }
 
     private class SystemUIHostDialog(
         context: Context,
+        theme: Int,
         private val onCreateCallback: () -> Unit,
         private val dismissOverride: (() -> Unit) -> Unit
-    ) : SystemUIDialog(context) {
+    ) : SystemUIDialog(context, theme) {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             onCreateCallback()
