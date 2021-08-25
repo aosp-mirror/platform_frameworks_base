@@ -194,6 +194,9 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -542,6 +545,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
+
+    /**
+     * It is now required for apps to explicitly set either
+     * {@link android.content.Context#RECEIVER_EXPORTED} or
+     * {@link android.content.Context#RECEIVER_NOT_EXPORTED} when registering a receiver for an
+     * unprotected broadcast in code.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -12416,6 +12429,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
                 = (flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
+        // Dynamic receivers are exported by default for versions prior to T
+        final boolean exported =
+                ((flags & Context.RECEIVER_EXPORTED) != 0
+                        || (!Compatibility.isChangeEnabled(161145287)));
+
         int callingUid;
         int callingPid;
         boolean instantApp;
@@ -12452,8 +12470,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 noAction.add(null);
                 actions = noAction.iterator();
             }
+            boolean onlyProtectedBroadcasts = actions.hasNext();
 
-            // Collect stickies of users
+            // Collect stickies of users and check if broadcast is only registered for protected
+            // broadcasts
             int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
             while (actions.hasNext()) {
                 String action = actions.next();
@@ -12469,6 +12489,31 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 }
+                if (onlyProtectedBroadcasts) {
+                    try {
+                        onlyProtectedBroadcasts &=
+                                AppGlobals.getPackageManager().isProtectedBroadcast(action);
+                    } catch (RemoteException e) {
+                        onlyProtectedBroadcasts = false;
+                        Slog.w(TAG, "Remote exception", e);
+                    }
+                }
+            }
+
+            // If the change is enabled, but neither exported or not exported is set, we need to log
+            // an error so the consumer can know to explicitly set the value for their flag
+            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(161145287)
+                    && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
+                    == 0)) {
+                Slog.e(TAG,
+                        callerPackage + ": Targeting T+ (version " + Build.VERSION_CODES.TIRAMISU
+                                + " and above) requires that one of RECEIVER_EXPORTED or "
+                                + "RECEIVER_NOT_EXPORTED be specified when registering a receiver");
+            } else if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
+                    (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
+                throw new IllegalArgumentException(
+                        "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
+                                + "flag");
             }
         }
 
@@ -12557,7 +12602,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " callerPackage is " + callerPackage);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, callerFeatureId,
-                    receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps);
+                    receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps,
+                    exported);
             if (rl.containsFilter(filter)) {
                 Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid

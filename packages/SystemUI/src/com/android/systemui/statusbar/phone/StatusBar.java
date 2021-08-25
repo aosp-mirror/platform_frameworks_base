@@ -1028,7 +1028,7 @@ public class StatusBar extends SystemUI implements
                 mNotificationShadeWindowViewController,
                 mNotificationPanelViewController,
                 mAmbientIndicationContainer);
-        mDozeParameters.addCallback(this::updateLightRevealScrimVisibility);
+        updateLightRevealScrimVisibility();
 
         mConfigurationController.addCallback(mConfigurationListener);
 
@@ -4174,12 +4174,6 @@ public class StatusBar extends SystemUI implements
         }
 
         mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
-        if (mFeatureFlags.useNewLockscreenAnimations()
-                && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
-            mLightRevealScrim.setVisibility(View.VISIBLE);
-        } else {
-            mLightRevealScrim.setVisibility(View.GONE);
-        }
     }
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =

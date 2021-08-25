@@ -31,7 +31,6 @@ import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.service.dreams.Sandman;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.View;
@@ -63,41 +62,41 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @Retention(RetentionPolicy.RUNTIME)
-    @IntDef({STATE_IDLE_MODE_ENABLED, STATE_DOZING, STATE_KEYGUARD_SHOWING, STATE_IDLING})
+    @IntDef({STATE_IDLE_MODE_ENABLED, STATE_KEYGUARD_SHOWING, STATE_DOZING, STATE_DREAMING,
+            STATE_LOW_LIGHT, STATE_IDLING, STATE_SHOULD_START_IDLING})
     public @interface State {}
 
     // Set at construction to indicate idle mode is available.
     private static final int STATE_IDLE_MODE_ENABLED = 1 << 0;
 
-    // Set when the device has entered a system level dream.
-    private static final int STATE_DOZING = 1 << 1;
+    // Set when keyguard is present, even below a dream or AOD. AKA the device is locked.
+    private static final int STATE_KEYGUARD_SHOWING = 1 << 1;
 
-    // Set when the keyguard is showing.
-    private static final int STATE_KEYGUARD_SHOWING = 1 << 2;
+    // Set when the device has entered a dozing / low power state.
+    private static final int STATE_DOZING = 1 << 2;
 
-    // Set when input monitoring has established the device is now idling.
-    private static final int STATE_IDLING = 1 << 3;
+    // Set when the device has entered a dreaming state, which includes dozing.
+    private static final int STATE_DREAMING = 1 << 3;
 
     // Set when the device is in a low light environment.
     private static final int STATE_LOW_LIGHT = 1 << 4;
 
-    // The state the controller must be in to start recognizing idleness (lack of input
-    // interaction).
-    private static final int CONDITIONS_IDLE_MONITORING =
-            STATE_IDLE_MODE_ENABLED | STATE_KEYGUARD_SHOWING;
+    // Set when the device is idling, which is either dozing or dreaming.
+    private static final int STATE_IDLING = 1 << 5;
 
-    // The state the controller must be in before entering idle mode.
-    private static final int CONDITIONS_IDLING = CONDITIONS_IDLE_MONITORING | STATE_IDLING;
-
-    // The state the controller must be in to start listening for low light signals.
-    private static final int CONDITIONS_LOW_LIGHT_MONITORING =
-            STATE_IDLE_MODE_ENABLED | STATE_KEYGUARD_SHOWING;
+    // Set when the controller decides that the device should start idling (either dozing or
+    // dreaming).
+    private static final int STATE_SHOULD_START_IDLING = 1 << 6;
 
     // The aggregate current state.
     private int mState;
     private boolean mIdleModeActive;
     private boolean mLowLightModeActive;
     private boolean mIsMonitoringLowLight;
+    private boolean mIsMonitoringDream;
+
+    // Whether in a state waiting for dozing to complete before starting dreaming.
+    private boolean mDozeToDreamLock = false;
 
     private final Context mContext;
 
@@ -134,15 +133,21 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
     // Choreographer to use for monitoring input.
     private final Choreographer mChoreographer;
 
+    // Helper class for DreamService related requests.
+    private final DreamHelper mDreamHelper;
+
     // Monitor for tracking touches for activity.
     private InputMonitorCompat mInputMonitor;
 
-    // Delayed callback for enabling idle mode.
+    // Intent filter for receiving dream broadcasts.
+    private IntentFilter mDreamIntentFilter;
+
+    // Delayed callback for starting idling.
     private final Runnable mEnableIdlingCallback = () -> {
         if (DEBUG) {
-            Log.d(TAG, "enabling idle");
+            Log.d(TAG, "time out, should start idling");
         }
-        setState(STATE_IDLING, true);
+        setState(STATE_SHOULD_START_IDLING, true);
     };
 
     private final KeyguardStateController.Callback mKeyguardCallback =
@@ -161,11 +166,13 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
                 }
             };
 
-    private final BroadcastReceiver mDreamEndedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mDreamStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
-                setState(STATE_IDLING, false);
+            if (Intent.ACTION_DREAMING_STARTED.equals(intent.getAction())) {
+                setState(STATE_DREAMING, true);
+            } else if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
+                setState(STATE_DREAMING, false);
             }
         }
     };
@@ -185,7 +192,8 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
             @Named(IDLE_VIEW) Provider<View> idleViewProvider,
             Choreographer choreographer,
             KeyguardStateController keyguardStateController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            DreamHelper dreamHelper) {
         super(view);
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -196,6 +204,7 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         mStatusBarStateController = statusBarStateController;
         mLooper = looper;
         mChoreographer = choreographer;
+        mDreamHelper = dreamHelper;
 
         mState = STATE_KEYGUARD_SHOWING;
 
@@ -226,6 +235,20 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
     }
 
     private void setState(@State int state, boolean active) {
+        // If waiting for dozing to stop, ignore any state update until dozing is stopped.
+        if (mDozeToDreamLock) {
+            if (state == STATE_DOZING && !active) {
+                if (DEBUG) {
+                    Log.d(TAG, "dozing stopped, now start dreaming");
+                }
+
+                mDozeToDreamLock = false;
+                enableIdleMode(true);
+            }
+
+            return;
+        }
+
         final int oldState = mState;
 
         if (active) {
@@ -234,27 +257,81 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
             mState &= ~state;
         }
 
-        // If we have entered doze or no longer match the preconditions for idling, remove idling.
-        if ((mState & STATE_DOZING) == STATE_DOZING
-                || (mState & CONDITIONS_IDLE_MONITORING) != CONDITIONS_IDLE_MONITORING) {
-            mState &= ~STATE_IDLING;
-        }
-
         if (oldState == mState) {
             return;
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "state changed from " + oldState + " to " + mState);
+        // Updates STATE_IDLING.
+        final boolean isIdling = getState(STATE_DOZING) || getState(STATE_DREAMING);
+        if (isIdling) {
+            mState |= STATE_IDLING;
+        } else {
+            mState &= ~STATE_IDLING;
         }
 
-        enableIdleMonitoring(mState == CONDITIONS_IDLE_MONITORING);
-        enableIdleMode(mState == CONDITIONS_IDLING);
-        // Loose matching. Doesn't need to be the exact state to monitor low light, but only
-        // the specified states need to match.
-        enableLowLightMonitoring(
-                (mState & CONDITIONS_LOW_LIGHT_MONITORING) == CONDITIONS_LOW_LIGHT_MONITORING);
-        enableLowLightMode((mState & STATE_LOW_LIGHT) == STATE_LOW_LIGHT);
+        // Updates STATE_SHOULD_START_IDLING.
+        final boolean stoppedIdling = stoppedIdling(oldState);
+        if (stoppedIdling) {
+            mState &= ~STATE_SHOULD_START_IDLING;
+        } else if (shouldStartIdling(oldState)) {
+            mState |= STATE_SHOULD_START_IDLING;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "set " + getStateName(state) + " to " + active);
+            logCurrentState();
+        }
+
+        final boolean wasLowLight = getState(STATE_LOW_LIGHT, oldState);
+        final boolean isLowLight = getState(STATE_LOW_LIGHT);
+        final boolean wasIdling = getState(STATE_IDLING, oldState);
+
+        // When the device is idling and no longer in low light, wake up from dozing, wait till
+        // done, and start dreaming.
+        if (wasLowLight && !isLowLight && wasIdling && isIdling) {
+            if (DEBUG) {
+                Log.d(TAG, "idling and no longer in low light, stop dozing");
+            }
+
+            mDozeToDreamLock = true;
+
+            enableLowLightMode(false);
+            return;
+        }
+
+        final boolean inCommunalMode = getState(STATE_IDLE_MODE_ENABLED)
+                && getState(STATE_KEYGUARD_SHOWING);
+
+        enableDreamMonitoring(inCommunalMode);
+        enableLowLightMonitoring(inCommunalMode);
+        enableIdleMonitoring(inCommunalMode && !getState(STATE_IDLING));
+        enableIdleMode(inCommunalMode && !getState(STATE_LOW_LIGHT)
+                && getState(STATE_SHOULD_START_IDLING));
+        enableLowLightMode(inCommunalMode && !stoppedIdling && getState(STATE_LOW_LIGHT));
+    }
+
+    private void enableDreamMonitoring(boolean enable) {
+        if (mIsMonitoringDream == enable) {
+            return;
+        }
+
+        mIsMonitoringDream = enable;
+
+        if (DEBUG) {
+            Log.d(TAG, (enable ? "enable" : "disable") + " dream monitoring");
+        }
+
+        if (mDreamIntentFilter == null) {
+            mDreamIntentFilter = new IntentFilter();
+            mDreamIntentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
+            mDreamIntentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
+        }
+
+        if (enable) {
+            mBroadcastDispatcher.registerReceiver(mDreamStateReceiver, mDreamIntentFilter);
+        } else {
+            mBroadcastDispatcher.unregisterReceiver(mDreamStateReceiver);
+        }
     }
 
     private void enableIdleMonitoring(boolean enable) {
@@ -302,22 +379,14 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         }
 
         if (DEBUG) {
-            Log.d(TAG, "enable idle mode:" + enable);
+            Log.d(TAG, (enable ? "enable" : "disable") + " idle mode");
         }
 
         mIdleModeActive = enable;
 
         if (mIdleModeActive) {
-            // Track when the dream ends to cancel any timeouts.
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-            mBroadcastDispatcher.registerReceiver(mDreamEndedReceiver, filter);
-
             // Start dream.
-            Sandman.startDreamByUserRequest(mContext);
-        } else {
-            // Stop tracking dream end.
-            mBroadcastDispatcher.unregisterReceiver(mDreamEndedReceiver);
+            mDreamHelper.startDreaming(mContext);
         }
     }
 
@@ -329,11 +398,11 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         mIsMonitoringLowLight = enable;
 
         if (mIsMonitoringLowLight) {
-            if (DEBUG) Log.d(TAG, "Enabling low light monitoring.");
+            if (DEBUG) Log.d(TAG, "enable low light monitoring");
             mSensorManager.registerListener(this /*listener*/, mSensor,
                     SensorManager.SENSOR_DELAY_NORMAL);
         } else {
-            if (DEBUG) Log.d(TAG, "Disabling low light monitoring.");
+            if (DEBUG) Log.d(TAG, "disable low light monitoring");
             mSensorManager.unregisterListener(this);
         }
     }
@@ -346,13 +415,13 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         mLowLightModeActive = enable;
 
         if (mLowLightModeActive) {
-            if (DEBUG) Log.d(TAG, "Entering low light, start dozing.");
+            if (DEBUG) Log.d(TAG, "enter low light, start dozing");
 
             mPowerManager.goToSleep(
                     SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
         } else {
-            if (DEBUG) Log.d(TAG, "Exiting low light, stop dozing.");
+            if (DEBUG) Log.d(TAG, "exit low light, stop dozing");
             mPowerManager.wakeUp(SystemClock.uptimeMillis(),
                     PowerManager.WAKE_REASON_APPLICATION, "Exit low light condition");
         }
@@ -381,8 +450,12 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
             return;
         }
 
-        final boolean isLowLight = event.values[0] < 10;
-        setState(STATE_LOW_LIGHT, isLowLight);
+        final boolean shouldBeLowLight = event.values[0] < 10;
+        final boolean isLowLight = getState(STATE_LOW_LIGHT);
+
+        if (shouldBeLowLight != isLowLight) {
+            setState(STATE_LOW_LIGHT, shouldBeLowLight);
+        }
     }
 
     @Override
@@ -390,5 +463,63 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         if (DEBUG) {
             Log.d(TAG, "onAccuracyChanged accuracy=" + accuracy);
         }
+    }
+
+    // Returns whether the device just stopped idling by comparing the previous state with the
+    // current one.
+    private boolean stoppedIdling(int oldState) {
+        // The device stopped idling if it's no longer dreaming or dozing.
+        return !getState(STATE_DOZING) && !getState(STATE_DREAMING)
+                && (getState(STATE_DOZING, oldState) || getState(STATE_DREAMING, oldState));
+    }
+
+    private boolean shouldStartIdling(int oldState) {
+        // Should start idling immediately if the device went in low light environment.
+        return !getState(STATE_LOW_LIGHT, oldState) && getState(STATE_LOW_LIGHT);
+    }
+
+    private String getStateName(@State int state) {
+        switch (state) {
+            case STATE_IDLE_MODE_ENABLED:
+                return "STATE_IDLE_MODE_ENABLED";
+            case STATE_KEYGUARD_SHOWING:
+                return "STATE_KEYGUARD_SHOWING";
+            case STATE_DOZING:
+                return "STATE_DOZING";
+            case STATE_DREAMING:
+                return "STATE_DREAMING";
+            case STATE_LOW_LIGHT:
+                return "STATE_LOW_LIGHT";
+            case STATE_IDLING:
+                return "STATE_IDLING";
+            case STATE_SHOULD_START_IDLING:
+                return "STATE_SHOULD_START_IDLING";
+            default:
+                return "STATE_UNKNOWN";
+        }
+    }
+
+    private boolean getState(@State int state) {
+        return getState(state, mState);
+    }
+
+    private boolean getState(@State int state, int oldState) {
+        return (oldState & state) == state;
+    }
+
+    private String getStateLog(@State int state) {
+        return getStateName(state) + " = " + getState(state);
+    }
+
+    private void logCurrentState() {
+        Log.d(TAG, "current state: {\n"
+                + "\t" + getStateLog(STATE_IDLE_MODE_ENABLED) + "\n"
+                + "\t" + getStateLog(STATE_KEYGUARD_SHOWING) + "\n"
+                + "\t" + getStateLog(STATE_DOZING) + "\n"
+                + "\t" + getStateLog(STATE_DREAMING) + "\n"
+                + "\t" + getStateLog(STATE_LOW_LIGHT) + "\n"
+                + "\t" + getStateLog(STATE_IDLING) + "\n"
+                + "\t" + getStateLog(STATE_SHOULD_START_IDLING) + "\n"
+                + "}");
     }
 }

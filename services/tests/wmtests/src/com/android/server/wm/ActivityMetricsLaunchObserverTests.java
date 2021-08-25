@@ -476,6 +476,16 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     @Test
+    public void testConsecutiveLaunch() {
+        mTrampolineActivity.setState(ActivityRecord.State.INITIALIZING, "test");
+        onActivityLaunched(mTrampolineActivity);
+        mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
+                mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+    }
+
+    @Test
     public void testConsecutiveLaunchNewTask() {
         final IBinder launchCookie = mock(IBinder.class);
         final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);

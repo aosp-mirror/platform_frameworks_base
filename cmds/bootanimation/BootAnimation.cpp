@@ -1339,7 +1339,7 @@ bool BootAnimation::movie() {
         mTimeCheckThread->run("BootAnimation::TimeCheckThread", PRIORITY_NORMAL);
     }
 
-    if (mAnimation != nullptr && mAnimation->dynamicColoringEnabled) {
+    if (mAnimation->dynamicColoringEnabled) {
         initDynamicColors();
     }
 

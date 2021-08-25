@@ -1051,9 +1051,8 @@ public class ZenModeConfig implements Parcelable {
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CONVERSATIONS,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_CONVERSATIONS, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-            conversationSenders = getNotificationPolicySenders(
-                    zenPolicy.getPriorityConversationSenders(),
-                    conversationSenders);
+            conversationSenders = getConversationSendersWithDefault(
+                    zenPolicy.getPriorityConversationSenders(), conversationSenders);
         }
 
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CALLS,
@@ -1166,6 +1165,17 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    private int getConversationSendersWithDefault(@ZenPolicy.ConversationSenders int senders,
+            int defaultPolicySender) {
+        switch (senders) {
+            case ZenPolicy.CONVERSATION_SENDERS_ANYONE:
+            case ZenPolicy.CONVERSATION_SENDERS_IMPORTANT:
+            case ZenPolicy.CONVERSATION_SENDERS_NONE:
+                return senders;
+            default:
+                return defaultPolicySender;
+        }
+    }
 
     /**
      * Maps NotificationManager.Policy senders type to ZenPolicy.PeopleType
@@ -1216,7 +1226,8 @@ public class ZenModeConfig implements Parcelable {
         }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
-        priorityConversationSenders = allowConversationsFrom;
+        priorityConversationSenders = getConversationSendersWithDefault(
+                allowConversationsFrom, priorityConversationSenders);
 
         return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
                 suppressedVisualEffects, areChannelsBypassingDnd
