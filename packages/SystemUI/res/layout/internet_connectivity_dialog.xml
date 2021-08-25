@@ -58,6 +58,15 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"/>
 
+    <ProgressBar
+        android:id="@+id/wifi_searching_progress"
+        android:indeterminate="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="1dp"
+        android:maxHeight="1dp"
+        style="@*android:style/Widget.Material.ProgressBar.Horizontal"/>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
@@ -148,15 +157,6 @@
                     </FrameLayout>
 
                 </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/wifi_searching_progress"
-                    android:indeterminate="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="1dp"
-                    android:maxHeight="1dp"
-                    style="@*android:style/Widget.Material.ProgressBar.Horizontal"/>
 
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
