@@ -168,7 +168,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
-        final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
         new ActivityBuilder(mAtm).setTask(task1).build().mVisibleRequested = true;
         mWm.mRoot.rankTaskLayers();
 
@@ -523,7 +523,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task targetRootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final Task targetTask = new TaskBuilder(mSupervisor).setParentTask(targetRootTask).build();
+        final Task targetTask = new TaskBuilder(mSupervisor).setParentTaskFragment(targetRootTask)
+                .build();
 
         // Create Recents on secondary display.
         final TestDisplayContent secondDisplay = addNewDisplayContentAt(
