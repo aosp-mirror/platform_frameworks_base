@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs
 
+import android.content.res.Configuration
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.internal.logging.MetricsLogger
@@ -27,12 +28,13 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.flags.FeatureFlags
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -65,11 +67,11 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var tileView: QSTileView
     @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
     private lateinit var quickQsBrightnessController: QuickQSBrightnessController
     @Mock
     private lateinit var footerActionsController: FooterActionsController
+    @Captor
+    private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
     private lateinit var controller: QuickQSPanelController
 
@@ -78,6 +80,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
+        `when`(quickQSPanel.isAttachedToWindow).thenReturn(true)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
         `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
@@ -122,5 +125,17 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
 
         verify(quickQSPanel, times(limit)).addTile(any())
+    }
+
+    @Test
+    fun testBrightnessAndFooterVisibilityRefreshedWhenConfigurationChanged() {
+        // times(2) because both controller and base controller are registering their listeners
+        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
+
+        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+
+        verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
+        // times(2) because footer visibility is also refreshed on controller init
+        verify(footerActionsController, times(2)).refreshVisibility(anyBoolean())
     }
 }

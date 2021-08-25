@@ -84,15 +84,15 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
                             Utils.shouldUseSplitNotificationShade(getResources());
+                    onConfigurationChanged();
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
-                        onScreenRotated();
                         switchTileLayout(false);
                     }
                 }
             };
 
-    protected void onScreenRotated() { }
+    protected void onConfigurationChanged() { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
