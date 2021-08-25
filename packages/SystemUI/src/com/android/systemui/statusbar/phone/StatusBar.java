@@ -1135,6 +1135,10 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
+                    for (ExpansionChangedListener listener : mExpansionChangedListeners) {
+                        sendInitialExpansionAmount(listener);
+                    }
+
                     mPhoneStatusBarViewController =
                             new PhoneStatusBarViewController(mStatusBarView, mCommandQueue);
                     mPhoneStatusBarViewController.init();
@@ -4162,6 +4166,14 @@ public class StatusBar extends SystemUI implements
 
     public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.add(listener);
+        sendInitialExpansionAmount(listener);
+    }
+
+    private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
+        if (mStatusBarView != null) {
+            expansionChangedListener.onExpansionChanged(mStatusBarView.getExpansionFraction(),
+                    mStatusBarView.isExpanded());
+        }
     }
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
