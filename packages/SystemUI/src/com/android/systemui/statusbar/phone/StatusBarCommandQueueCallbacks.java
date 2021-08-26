@@ -57,6 +57,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -98,6 +99,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final VibratorHelper mVibratorHelper;
     private final Optional<Vibrator> mVibratorOptional;
     private final LightBarController mLightBarController;
+    private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
@@ -134,6 +136,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             VibratorHelper vibratorHelper,
             Optional<Vibrator> vibratorOptional,
             LightBarController lightBarController,
+            DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId) {
 
         mStatusBar = statusBar;
@@ -159,6 +162,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         mVibratorHelper = vibratorHelper;
         mVibratorOptional = vibratorOptional;
         mLightBarController = lightBarController;
+        mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
@@ -267,7 +271,17 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         if (displayId != mDisplayId) {
             return;
         }
+
+        int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+        Log.d(StatusBar.TAG,
+                mDisableFlagsLogger.getDisableFlagsString(
+                        /* old= */ new DisableFlagsLogger.DisableState(
+                                mStatusBar.getDisabled1(), mStatusBar.getDisabled2()),
+                        /* new= */ new DisableFlagsLogger.DisableState(
+                                state1, state2BeforeAdjustment),
+                        /* newStateAfterLocalModification= */ new DisableFlagsLogger.DisableState(
+                                state1, state2)));
 
         final int old1 = mStatusBar.getDisabled1();
         final int diff1 = state1 ^ old1;
@@ -276,43 +290,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         final int old2 = mStatusBar.getDisabled2();
         final int diff2 = state2 ^ old2;
         mStatusBar.setDisabled2(state2);
-
-        if (StatusBar.DEBUG) {
-            Log.d(StatusBar.TAG, String.format("disable1: 0x%08x -> 0x%08x (diff1: 0x%08x)",
-                    old1, state1, diff1));
-            Log.d(StatusBar.TAG, String.format("disable2: 0x%08x -> 0x%08x (diff2: 0x%08x)",
-                    old2, state2, diff2));
-        }
-
-        StringBuilder flagdbg = new StringBuilder();
-        flagdbg.append("disable<");
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_EXPAND))               ? 'E' : 'e');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_EXPAND))               ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS))   ? 'I' : 'i');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_NOTIFICATION_ICONS))   ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS))  ? 'A' : 'a');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS))  ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_SYSTEM_INFO))          ? 'S' : 's');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_SYSTEM_INFO))          ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_BACK))                 ? 'B' : 'b');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_BACK))                 ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_HOME))                 ? 'H' : 'h');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_HOME))                 ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_RECENT))               ? 'R' : 'r');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_RECENT))               ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_CLOCK))                ? 'C' : 'c');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_CLOCK))                ? '!' : ' ');
-        flagdbg.append(0 != ((state1 & StatusBarManager.DISABLE_SEARCH))               ? 'S' : 's');
-        flagdbg.append(0 != ((diff1  & StatusBarManager.DISABLE_SEARCH))               ? '!' : ' ');
-        flagdbg.append("> disable2<");
-        flagdbg.append(0 != ((state2 & StatusBarManager.DISABLE2_QUICK_SETTINGS))      ? 'Q' : 'q');
-        flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_QUICK_SETTINGS))      ? '!' : ' ');
-        flagdbg.append(0 != ((state2 & StatusBarManager.DISABLE2_SYSTEM_ICONS))        ? 'I' : 'i');
-        flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_SYSTEM_ICONS))        ? '!' : ' ');
-        flagdbg.append(0 != ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE))  ? 'N' : 'n');
-        flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_NOTIFICATION_SHADE))  ? '!' : ' ');
-        flagdbg.append('>');
-        Log.d(StatusBar.TAG, flagdbg.toString());
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
