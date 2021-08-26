@@ -35,9 +35,12 @@ import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.ApexStagedEvent;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
+import android.os.Message;
 import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
@@ -58,6 +61,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.invocation.InvocationOnMock;
@@ -647,8 +651,16 @@ public class StagingManagerTest {
         parentSession.setSessionReady();
         mStagingManager.createSession(parentSession);
 
-        // Make mApexManager return ApexInfo with same module name as the sessionId
-        // of the parameter that was passed into it
+        mockApexManagerGetStagedApexInfoWithSessionId();
+
+        List<String> result = mStagingManager.getStagedApexModuleNames();
+        assertThat(result).containsExactly("239", "123", "124");
+        verify(mApexManager, times(2)).getStagedApexInfos(any());
+    }
+
+    // Make mApexManager return ApexInfo with same module name as the sessionId
+    // of the parameter that was passed into it
+    private void mockApexManagerGetStagedApexInfoWithSessionId() {
         when(mApexManager.getStagedApexInfos(any())).thenAnswer(new Answer<ApexInfo[]>() {
             @Override
             public ApexInfo[] answer(InvocationOnMock invocation) throws Throwable {
@@ -669,10 +681,6 @@ public class StagingManagerTest {
                 return result.toArray(new ApexInfo[0]);
             }
         });
-
-        List<String> result = mStagingManager.getStagedApexModuleNames();
-        assertThat(result).containsExactly("239", "123", "124");
-        verify(mApexManager, times(2)).getStagedApexInfos(any());
     }
 
     @Test
@@ -692,6 +700,106 @@ public class StagingManagerTest {
         result = mStagingManager.getStagedApexInfo("module1");
         assertThat(result).isEqualTo(fakeApexInfos[0]);
         verify(mApexManager, times(2)).getStagedApexInfos(any());
+    }
+
+    @Test
+    public void registeredStagedApexObserverIsNotifiedOnPreRebootVerificationCompletion()
+            throws Exception {
+        // Register observer
+        IStagedApexObserver observer = Mockito.mock(IStagedApexObserver.class);
+        mStagingManager.registerStagedApexObserver(observer);
+
+        // Create one staged session and trigger end of pre-reboot verification
+        {
+            FakeStagedSession session = new FakeStagedSession(239);
+            session.setIsApex(true);
+            mStagingManager.createSession(session);
+
+            mockApexManagerGetStagedApexInfoWithSessionId();
+            triggerEndOfPreRebootVerification(session);
+
+            assertThat(session.isSessionReady()).isTrue();
+            ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
+                    ApexStagedEvent.class);
+            verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue().stagedApexModuleNames).isEqualTo(
+                    new String[]{"239"});
+        }
+
+        // Create another staged session and verify observers are notified of union
+        {
+            Mockito.clearInvocations(observer);
+            FakeStagedSession session = new FakeStagedSession(240);
+            session.setIsApex(true);
+            mStagingManager.createSession(session);
+
+            triggerEndOfPreRebootVerification(session);
+
+            assertThat(session.isSessionReady()).isTrue();
+            ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
+                    ApexStagedEvent.class);
+            verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue().stagedApexModuleNames).isEqualTo(
+                    new String[]{"239", "240"});
+        }
+
+        // Finally, verify that once unregistered, observer is not notified
+        mStagingManager.unregisterStagedApexObserver(observer);
+        {
+            Mockito.clearInvocations(observer);
+            FakeStagedSession session = new FakeStagedSession(241);
+            session.setIsApex(true);
+            mStagingManager.createSession(session);
+
+            triggerEndOfPreRebootVerification(session);
+
+            assertThat(session.isSessionReady()).isTrue();
+            verify(observer, never()).onApexStaged(any());
+        }
+    }
+
+    @Test
+    public void registeredStagedApexObserverIsNotifiedOnSessionAbandon() throws Exception {
+        // Register observer
+        IStagedApexObserver observer = Mockito.mock(IStagedApexObserver.class);
+        mStagingManager.registerStagedApexObserver(observer);
+
+        // Create a ready session and abandon it
+        FakeStagedSession session = new FakeStagedSession(239);
+        session.setIsApex(true);
+        session.setSessionReady();
+        session.setDestroyed(true);
+        mStagingManager.createSession(session);
+
+        mStagingManager.abortCommittedSession(session);
+
+        assertThat(session.isSessionReady()).isTrue();
+        ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
+                ApexStagedEvent.class);
+        verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue().stagedApexModuleNames).hasLength(0);
+    }
+
+    @Test
+    public void stagedApexObserverIsOnlyCalledForApexSessions() throws Exception {
+        IStagedApexObserver observer = Mockito.mock(IStagedApexObserver.class);
+        mStagingManager.registerStagedApexObserver(observer);
+
+        //  Trigger end of pre-reboot verification
+        FakeStagedSession session = new FakeStagedSession(239);
+        mStagingManager.createSession(session);
+
+        triggerEndOfPreRebootVerification(session);
+        assertThat(session.isSessionReady()).isTrue();
+        verify(observer, never()).onApexStaged(any());
+    }
+
+    private void triggerEndOfPreRebootVerification(StagingManager.StagedSession session) {
+        StagingManager.PreRebootVerificationHandler handler =
+                mStagingManager.mPreRebootVerificationHandler;
+        Message msg =  handler.obtainMessage(
+                handler.MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId(), -1, session);
+        handler.handleMessage(msg);
     }
 
     private StagingManager.StagedSession createSession(int sessionId, String packageName,
@@ -956,9 +1064,7 @@ public class StagingManagerTest {
         }
 
         @Override
-        public void notifyEndPreRebootVerification() {
-            throw new UnsupportedOperationException();
-        }
+        public void notifyEndPreRebootVerification() {}
 
         @Override
         public void verifySession() {
