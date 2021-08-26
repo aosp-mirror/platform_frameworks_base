@@ -233,18 +233,18 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
          * @param packageName: Passes the top package name
          */
-        void topFocusedWindowChanged(String packageName);
+        default void topFocusedWindowChanged(String packageName) {}
 
         /**
          * Called when the window insets configuration has changed.
          */
-        void insetsChanged(InsetsState insetsState);
+        default void insetsChanged(InsetsState insetsState) {}
 
         /**
          * Called when this window retrieved control over a specified set of insets sources.
          */
-        void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls);
+        default void insetsControlChanged(InsetsState insetsState,
+                InsetsSourceControl[] activeControls) {}
 
         /**
          * Called when a set of insets source window should be shown by policy.
@@ -252,7 +252,7 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          * @param types internal insets types (WindowInsets.Type.InsetsType) to show
          * @param fromIme true if this request originated from IME (InputMethodService).
          */
-        void showInsets(int types, boolean fromIme);
+        default void showInsets(int types, boolean fromIme) {}
 
         /**
          * Called when a set of insets source window should be hidden by policy.
@@ -260,6 +260,6 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          * @param types internal insets types (WindowInsets.Type.InsetsType) to hide
          * @param fromIme true if this request originated from IME (InputMethodService).
          */
-        void hideInsets(int types, boolean fromIme);
+        default void hideInsets(int types, boolean fromIme) {}
     }
 }

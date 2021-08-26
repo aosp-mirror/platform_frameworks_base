@@ -377,11 +377,13 @@ public abstract class WMShellBaseModule {
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
-            DisplayImeController displayImeController, Transitions transitions,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool) {
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                    rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController, transitions,
+                    rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController,
+                    displayInsetsController, transitions,
                     transactionPool));
         } else {
             return Optional.empty();

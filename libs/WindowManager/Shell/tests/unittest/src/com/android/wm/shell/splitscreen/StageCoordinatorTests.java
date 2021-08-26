@@ -37,6 +37,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.transition.Transitions;
@@ -57,6 +58,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock private MainStage mMainStage;
     @Mock private SideStage mSideStage;
     @Mock private DisplayImeController mDisplayImeController;
+    @Mock private DisplayInsetsController mDisplayInsetsController;
     @Mock private Transitions mTransitions;
     @Mock private TransactionPool mTransactionPool;
     @Mock private SplitscreenEventLogger mLogger;
@@ -67,8 +69,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                mDisplayImeController, null /* splitLayout */, mTransitions, mTransactionPool,
-                mLogger);
+                mDisplayImeController, mDisplayInsetsController, null /* splitLayout */,
+                mTransitions, mTransactionPool, mLogger);
     }
 
     @Test
