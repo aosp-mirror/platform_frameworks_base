@@ -19,11 +19,10 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
-import android.util.Log
+import android.util.LruCache
 import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View.LAYOUT_DIRECTION_RTL
-import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
@@ -38,6 +37,7 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
+import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.Math.max
@@ -61,13 +61,14 @@ import javax.inject.Inject
 class StatusBarContentInsetsProvider @Inject constructor(
     val context: Context,
     val configurationController: ConfigurationController,
-    val windowManager: WindowManager,
     val dumpManager: DumpManager
 ) : CallbackController<StatusBarContentInsetsChangedListener>,
         ConfigurationController.ConfigurationListener,
         Dumpable {
-    // Indexed by @Rotation
-    private val insetsByCorner = arrayOfNulls<Rect>(4)
+
+    // Limit cache size as potentially we may connect large number of displays
+    // (e.g. network displays)
+    private val insetsCache = LruCache<CacheKey, Rect>(MAX_CACHE_SIZE)
     private val listeners = mutableSetOf<StatusBarContentInsetsChangedListener>()
 
     init {
@@ -91,12 +92,12 @@ class StatusBarContentInsetsProvider @Inject constructor(
         clearCachedInsets()
     }
 
-    private fun clearCachedInsets() {
-        insetsByCorner[0] = null
-        insetsByCorner[1] = null
-        insetsByCorner[2] = null
-        insetsByCorner[3] = null
+    override fun onMaxBoundsChanged() {
+        notifyInsetsChanged()
+    }
 
+    private fun clearCachedInsets() {
+        insetsCache.evictAll()
         notifyInsetsChanged()
     }
 
@@ -111,10 +112,10 @@ class StatusBarContentInsetsProvider @Inject constructor(
      * dot in the coordinates relative to the given rotation.
      */
     fun getBoundingRectForPrivacyChipForRotation(@Rotation rotation: Int): Rect {
-        var insets = insetsByCorner[rotation]
-        val rotatedResources = RotationUtils.getResourcesForRotation(rotation, context)
+        var insets = insetsCache[getCacheKey(rotation = rotation)]
+        val rotatedResources = getResourcesForRotation(rotation, context)
         if (insets == null) {
-            insets = getAndSetInsetsForRotation(rotation, rotatedResources)
+            insets = getStatusBarContentInsetsForRotation(rotation, rotatedResources)
         }
 
         val dotWidth = rotatedResources.getDimensionPixelSize(R.dimen.ongoing_appops_dot_diameter)
@@ -129,24 +130,16 @@ class StatusBarContentInsetsProvider @Inject constructor(
      * Calculates the necessary left and right locations for the status bar contents invariant of
      * the current device rotation, in the target rotation's coordinates
      */
-    fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Rect {
-        var insets = insetsByCorner[rotation]
-        if (insets == null) {
-            val rotatedResources = RotationUtils.getResourcesForRotation(rotation, context)
-            insets = getAndSetInsetsForRotation(rotation, rotatedResources)
-        }
-
-        return insets
-    }
-
-    private fun getAndSetInsetsForRotation(
-        @Rotation rot: Int,
-        rotatedResources: Resources
+    @JvmOverloads
+    fun getStatusBarContentInsetsForRotation(
+        @Rotation rotation: Int,
+        rotatedResources: Resources = getResourcesForRotation(rotation, context)
     ): Rect {
-        val insets = getCalculatedInsetsForRotation(rot, rotatedResources)
-        insetsByCorner[rot] = insets
-
-        return insets
+        val key = getCacheKey(rotation = rotation)
+        return insetsCache[key] ?: getCalculatedInsetsForRotation(rotation, rotatedResources)
+            .also {
+                insetsCache.put(key, it)
+            }
     }
 
     private fun getCalculatedInsetsForRotation(
@@ -176,17 +169,29 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 currentRotation,
                 targetRotation,
                 dc,
-                windowManager.maximumWindowMetrics,
+                context.resources.configuration.windowConfiguration.maxBounds,
                 rotatedResources.getDimensionPixelSize(R.dimen.status_bar_height),
                 minLeft,
                 minRight)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        insetsByCorner.forEachIndexed { index, rect ->
-            pw.println("${RotationUtils.toString(index)} -> $rect")
+        insetsCache.snapshot().forEach { (key, rect) ->
+            pw.println("$key -> $rect")
         }
+        pw.println(insetsCache)
     }
+
+    private fun getCacheKey(@Rotation rotation: Int): CacheKey =
+        CacheKey(
+            uniqueDisplayId = context.display.uniqueId,
+            rotation = rotation
+        )
+
+    private data class CacheKey(
+        val uniqueDisplayId: String,
+        @Rotation val rotation: Int
+    )
 }
 
 interface StatusBarContentInsetsChangedListener {
@@ -194,10 +199,9 @@ interface StatusBarContentInsetsChangedListener {
 }
 
 private const val TAG = "StatusBarInsetsProvider"
+private const val MAX_CACHE_SIZE = 16
 
-private fun getRotationZeroDisplayBounds(wm: WindowMetrics, @Rotation exactRotation: Int): Rect {
-    val bounds = wm.bounds
-
+private fun getRotationZeroDisplayBounds(bounds: Rect, @Rotation exactRotation: Int): Rect {
     if (exactRotation == ROTATION_NONE || exactRotation == ROTATION_UPSIDE_DOWN) {
         return bounds
     }
@@ -243,7 +247,7 @@ fun calculateInsetsForRotationWithRotatedResources(
     @Rotation currentRotation: Int,
     @Rotation targetRotation: Int,
     displayCutout: DisplayCutout?,
-    windowMetrics: WindowMetrics,
+    maxBounds: Rect,
     statusBarHeight: Int,
     minLeft: Int,
     minRight: Int
@@ -254,16 +258,15 @@ fun calculateInsetsForRotationWithRotatedResources(
     val right = if (isRtl) paddingStart else paddingEnd
      */
 
-    val rotZeroBounds = getRotationZeroDisplayBounds(windowMetrics, currentRotation)
-    val currentBounds = windowMetrics.bounds
+    val rotZeroBounds = getRotationZeroDisplayBounds(maxBounds, currentRotation)
 
     val sbLeftRight = getStatusBarLeftRight(
             displayCutout,
             statusBarHeight,
             rotZeroBounds.right,
             rotZeroBounds.bottom,
-            currentBounds.width(),
-            currentBounds.height(),
+            maxBounds.width(),
+            maxBounds.height(),
             minLeft,
             minRight,
             targetRotation,
