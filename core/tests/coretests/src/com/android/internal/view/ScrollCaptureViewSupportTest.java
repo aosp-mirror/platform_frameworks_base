@@ -32,6 +32,11 @@ public class ScrollCaptureViewSupportTest {
 
     ScrollCaptureViewHelper<View> mViewHelper = new ScrollCaptureViewHelper<View>() {
         @Override
+        public boolean onAcceptSession(@NonNull View view) {
+            return true;
+        }
+
+        @Override
         public void onPrepareForStart(@NonNull View view, @NonNull Rect scrollBounds) {
         }
 
