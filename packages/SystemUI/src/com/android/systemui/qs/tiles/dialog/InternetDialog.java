@@ -101,6 +101,7 @@ public class InternetDialog extends SystemUIDialog implements
     private InternetDialogController mInternetDialogController;
     private TextView mInternetDialogTitle;
     private TextView mInternetDialogSubTitle;
+    private View mDivider;
     private ProgressBar mProgressBar;
     private LinearLayout mInternetListLayout;
     private LinearLayout mConnectedWifListLayout;
@@ -205,6 +206,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
         mInternetDialogSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
+        mDivider = mDialogView.requireViewById(R.id.divider);
         mProgressBar = mDialogView.requireViewById(R.id.wifi_searching_progress);
         mInternetListLayout = mDialogView.requireViewById(R.id.internet_list);
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
@@ -438,7 +440,8 @@ public class InternetDialog extends SystemUIDialog implements
             mIsProgressBarVisible = true;
         }
         mIsProgressBarVisible = visible;
-        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.INVISIBLE);
+        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
+        mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
         mInternetDialogSubTitle.setText(getSubtitleText());
     }
 
