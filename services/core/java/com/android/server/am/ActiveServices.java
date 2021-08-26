@@ -4982,4 +4982,11 @@ public final class ActiveServices {
         }
         return false;
     }
+
+    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
+            String callingPackage) {
+        return shouldAllowWhileInUsePermissionInFgsLocked(
+                callingPackage, callingPid, callingUid, null, null, false);
+    }
+
 }
