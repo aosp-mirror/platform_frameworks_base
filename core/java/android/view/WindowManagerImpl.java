@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
@@ -300,7 +301,6 @@ public final class WindowManagerImpl implements WindowManager {
         }
     }
 
-    // TODO(b/150095967): Set window type to LayoutParams
     private WindowInsets computeWindowInsets(Rect bounds) {
         // Initialize params which used for obtaining all system insets.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
@@ -322,10 +322,10 @@ public final class WindowManagerImpl implements WindowManager {
                     .getWindowInsets(attrs, mContext.getDisplayId(), insetsState);
             final Configuration config = mContext.getResources().getConfiguration();
             final boolean isScreenRound = config.isScreenRound();
-            final int windowingMode = config.windowConfiguration.getWindowingMode();
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
                     isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode, null /* typeSideMap */);
+                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, WINDOWING_MODE_FULLSCREEN,
+                    null /* typeSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
