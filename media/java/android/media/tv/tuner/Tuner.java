@@ -1146,13 +1146,13 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
-    private void onFrequenciesReport(int[] frequency) {
+    private void onFrequenciesReport(long[] frequencies) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
                 mScanCallbackExecutor.execute(() -> {
                     synchronized (mScanCallbackLock) {
                         if (mScanCallback != null) {
-                            mScanCallback.onFrequenciesReported(frequency);
+                            mScanCallback.onFrequenciesLongReported(frequencies);
                         }
                     }
                 });
