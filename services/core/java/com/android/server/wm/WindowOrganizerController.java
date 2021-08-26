@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -698,10 +699,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         .startActivityInTaskFragment(tf, activityIntent, activityOptions,
                                 hop.getCallingActivity());
                 if (!isStartResultSuccessful(result)) {
-                    final Throwable exception =
-                            new ActivityNotFoundException("start activity in taskFragment failed");
                     sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
-                            errorCallbackToken, exception);
+                            errorCallbackToken,
+                            convertStartFailureToThrowable(result, activityIntent));
                 }
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
@@ -1222,5 +1222,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         mService.mTaskFragmentOrganizerController
                 .onTaskFragmentError(organizer, errorCallbackToken, exception);
+    }
+
+    private Throwable convertStartFailureToThrowable(int result, Intent intent) {
+        switch (result) {
+            case ActivityManager.START_INTENT_NOT_RESOLVED:
+            case ActivityManager.START_CLASS_NOT_FOUND:
+                return new ActivityNotFoundException("No Activity found to handle " + intent);
+            case ActivityManager.START_PERMISSION_DENIED:
+                return new SecurityException("Permission denied and not allowed to start activity "
+                        + intent);
+            case ActivityManager.START_CANCELED:
+                return new AndroidRuntimeException("Activity could not be started for " + intent
+                        + " with error code : " + result);
+            default:
+                return new AndroidRuntimeException("Start activity failed with error code : "
+                        + result + " when starting " + intent);
+        }
     }
 }
