@@ -59,24 +59,31 @@ public class InternetDialogTest extends SysuiTestCase {
     private static final String WIFI_TITLE = "Connected Wi-Fi Title";
     private static final String WIFI_SUMMARY = "Connected Wi-Fi Summary";
 
-    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-
-    private InternetDialogFactory mInternetDialogFactory = mock(InternetDialogFactory.class);
-    private InternetAdapter mInternetAdapter = mock(InternetAdapter.class);
-    private InternetDialogController mInternetDialogController = mock(
-            InternetDialogController.class);
-    private InternetDialogController.InternetDialogCallback mCallback =
-            mock(InternetDialogController.InternetDialogCallback.class);
-    private MockInternetDialog mInternetDialog;
-    private WifiReceiver mWifiReceiver = null;
-    private WifiManager mMockWifiManager = mock(WifiManager.class);
-    private TelephonyManager mTelephonyManager = mock(TelephonyManager.class);
     @Mock
-    private WifiEntry mWifiEntry = mock(WifiEntry.class);
+    private InternetDialogFactory mInternetDialogFactory;
     @Mock
-    private WifiInfo mWifiInfo;
+    private InternetDialogController mInternetDialogController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
     @Mock
     private Handler mHandler;
+    @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
+    private InternetAdapter mInternetAdapter;
+    @Mock
+    private WifiManager mMockWifiManager;
+    @Mock
+    private WifiEntry mWifiEntry;
+    @Mock
+    private WifiInfo mWifiInfo;
+
+    private MockInternetDialog mInternetDialog;
+    private WifiReceiver mWifiReceiver;
+    private LinearLayout mWifiToggle;
+    private LinearLayout mConnectedWifi;
+    private RecyclerView mWifiList;
+    private LinearLayout mSeeAll;
 
     @Before
     public void setUp() {
@@ -99,6 +106,10 @@ public class InternetDialogTest extends SysuiTestCase {
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
         when(mInternetDialogController.getWifiEntryList()).thenReturn(Arrays.asList(mWifiEntry));
+        mWifiToggle = mInternetDialog.mDialogView.requireViewById(R.id.turn_on_wifi_layout);
+        mConnectedWifi = mInternetDialog.mDialogView.requireViewById(R.id.wifi_connected_layout);
+        mWifiList = mInternetDialog.mDialogView.requireViewById(R.id.wifi_list_layout);
+        mSeeAll = mInternetDialog.mDialogView.requireViewById(R.id.see_all_layout);
     }
 
     @After
@@ -137,7 +148,7 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateDialog_withWifiOnAndHasConnectedWifi_connectedWifiLayoutVisible() {
+    public void updateDialog_wifiOnAndHasConnectedWifi_showConnectedWifi() {
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
@@ -147,36 +158,85 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog();
 
-        final LinearLayout linearLayout = mInternetDialog.mDialogView.requireViewById(
-                R.id.wifi_connected_layout);
-        assertThat(linearLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
-    public void updateDialog_withWifiOnAndNoConnectedWifi_connectedWifiLayoutGone() {
+    public void updateDialog_wifiOnAndNoConnectedWifi_hideConnectedWifi() {
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
-        mInternetDialog.updateDialog();
-        final LinearLayout linearLayout = mInternetDialog.mDialogView.requireViewById(
-                R.id.wifi_connected_layout);
 
-        assertThat(linearLayout.getVisibility()).isEqualTo(View.GONE);
+        mInternetDialog.updateDialog();
+
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
-    public void updateDialog_withWifiOff_WifiRecycleViewGone() {
-        when(mMockWifiManager.isWifiEnabled()).thenReturn(false);
-        mInternetDialog.updateDialog();
-        final RecyclerView view = mInternetDialog.mDialogView.requireViewById(
-                R.id.wifi_list_layout);
+    public void updateDialog_wifiOnAndNoWifiList_hideWifiListAndSeeAll() {
+        when(mInternetDialogController.getWifiEntryList()).thenReturn(null);
 
-        assertThat(view.getVisibility()).isEqualTo(View.GONE);
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
-    public void onClickSeeMoreButton_clickSeeMore_verifyLaunchNetworkSetting() {
-        final LinearLayout seeAllLayout = mInternetDialog.mDialogView.requireViewById(
-                R.id.see_all_layout);
-        seeAllLayout.performClick();
+    public void updateDialog_wifiOnAndHasWifiList_showWifiListAndSeeAll() {
+        List<WifiEntry> wifiEntries = new ArrayList<WifiEntry>();
+        wifiEntries.add(mWifiEntry);
+        when(mInternetDialogController.getWifiEntryList()).thenReturn(wifiEntries);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_deviceLockedAndHasConnectedWifi_showHighlightWifiToggle() {
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+        when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
+        when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
+        when(mWifiEntry.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry.isDefaultNetwork()).thenReturn(true);
+        mInternetDialog.mConnectedWifiEntry = mWifiEntry;
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiToggle.getBackground()).isNotNull();
+    }
+
+    @Test
+    public void updateDialog_deviceLockedAndHasConnectedWifi_hideConnectedWifi() {
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+        when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
+        when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
+        when(mWifiEntry.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry.isDefaultNetwork()).thenReturn(true);
+        mInternetDialog.mConnectedWifiEntry = mWifiEntry;
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_deviceLockedAndHasWifiList_hideWifiListAndSeeAll() {
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+        List<WifiEntry> wifiEntries = new ArrayList<WifiEntry>();
+        wifiEntries.add(mWifiEntry);
+        when(mInternetDialogController.getWifiEntryList()).thenReturn(wifiEntries);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void onClickSeeMoreButton_clickSeeAll_verifyLaunchNetworkSetting() {
+        mSeeAll.performClick();
 
         verify(mInternetDialogController).launchNetworkSetting();
     }
@@ -185,6 +245,17 @@ public class InternetDialogTest extends SysuiTestCase {
     public void showProgressBar_wifiDisabled_hideProgressBar() {
         Mockito.reset(mHandler);
         when(mMockWifiManager.isWifiEnabled()).thenReturn(false);
+
+        mInternetDialog.showProgressBar();
+
+        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
+        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
+    }
+
+    @Test
+    public void showProgressBar_deviceLocked_hideProgressBar() {
+        Mockito.reset(mHandler);
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
 
         mInternetDialog.showProgressBar();
 
