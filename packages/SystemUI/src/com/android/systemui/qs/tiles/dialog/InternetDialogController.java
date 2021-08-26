@@ -67,6 +67,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -97,6 +98,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private static final int SUBTITLE_TEXT_WIFI_IS_OFF = R.string.wifi_is_off;
     private static final int SUBTITLE_TEXT_TAP_A_NETWORK_TO_CONNECT =
             R.string.tap_a_network_to_connect;
+    private static final int SUBTITLE_TEXT_UNLOCK_TO_VIEW_NETWORKS =
+            R.string.unlock_to_view_networks;
     private static final int SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS =
             R.string.wifi_empty_list_wifi_on;
     private static final int SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE =
@@ -137,6 +140,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     @VisibleForTesting
     protected WifiUtils.InternetIconInjector mWifiIconInjector;
 
+    @VisibleForTesting
+    KeyguardStateController mKeyguardStateController;
+
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -161,7 +167,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            GlobalSettings globalSettings) {
+            GlobalSettings globalSettings, KeyguardStateController keyguardStateController) {
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialogController");
         }
@@ -175,6 +181,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mSubscriptionManager = subscriptionManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mKeyguardStateController = keyguardStateController;
         mConnectionStateFilter = new IntentFilter();
         mConnectionStateFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mConnectionStateFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
@@ -270,6 +277,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 Log.d(TAG, "Airplane mode off + Wi-Fi off.");
             }
             return mContext.getText(SUBTITLE_TEXT_WIFI_IS_OFF);
+        }
+
+        if (isDeviceLocked()) {
+            // When the device is locked.
+            //   Sub-Title: Unlock to view networks
+            if (DEBUG) {
+                Log.d(TAG, "The device is locked.");
+            }
+            return mContext.getText(SUBTITLE_TEXT_UNLOCK_TO_VIEW_NETWORKS);
         }
 
         final List<ScanResult> wifiList = mWifiManager.getScanResults();
@@ -681,6 +697,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         final ServiceState serviceState = mTelephonyManager.getServiceState();
         return serviceState != null
                 && serviceState.getState() == serviceState.STATE_IN_SERVICE;
+    }
+
+    public boolean isDeviceLocked() {
+        return !mKeyguardStateController.isUnlocked();
     }
 
     boolean activeNetworkIsCellular() {
