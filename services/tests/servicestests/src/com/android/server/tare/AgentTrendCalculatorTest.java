@@ -40,10 +40,10 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-/** Tests various aspects of the Agent. */
+/** Tests the TrendCalculator in the Agent. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class AgentTest {
+public class AgentTrendCalculatorTest {
 
     private MockEconomicPolicy mEconomicPolicy;
 
@@ -98,7 +98,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_NoOngoingEvents() {
+    public void testNoOngoingEvents() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT, 20);
 
@@ -128,7 +128,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_NoAffordabilityNotes() {
+    public void testNoAffordabilityNotes() {
         TrendCalculator trendCalculator = new TrendCalculator();
 
         OngoingEvent[] events = new OngoingEvent[]{
@@ -165,7 +165,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_NoTrendToThreshold() {
+    public void testNoTrendToThreshold() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING, 10);
 
@@ -213,7 +213,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_SimpleTrendToThreshold() {
+    public void testSimpleTrendToThreshold() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
 
@@ -257,7 +257,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_SelectCorrectThreshold() {
+    public void testSelectCorrectThreshold() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START, 15);
@@ -307,7 +307,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testTrendCalculator_TrendsToBothThresholds() {
+    public void testTrendsToBothThresholds() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
         mEconomicPolicy.mEventCosts.put(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 50);

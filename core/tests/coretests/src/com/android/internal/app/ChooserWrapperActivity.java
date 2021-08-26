@@ -229,14 +229,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     @Override
-    protected void queryTargetServices(ChooserListAdapter adapter) {
-        if (sOverrides.onQueryTargetServices != null) {
-            sOverrides.onQueryTargetServices.apply(adapter);
-        }
-        super.queryTargetServices(adapter);
-    }
-
-    @Override
     protected boolean isQuietModeEnabled(UserHandle userHandle) {
         return sOverrides.isQuietModeEnabled;
     }
@@ -267,7 +259,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Function<PackageManager, PackageManager> createPackageManager;
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public Function<ChooserListAdapter, Void> onQueryDirectShareTargets;
-        public Function<ChooserListAdapter, Void> onQueryTargetServices;
         public ResolverListController resolverListController;
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
@@ -290,7 +281,6 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public void reset() {
             onSafelyStartCallback = null;
             onQueryDirectShareTargets = null;
-            onQueryTargetServices = null;
             isVoiceInteraction = null;
             createPackageManager = null;
             previewThumbnail = null;

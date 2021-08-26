@@ -40,6 +40,8 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
@@ -1005,6 +1007,21 @@ public class AppTransition implements Dump {
                     animAttr = enter
                             ? WindowAnimation_launchTaskBehindSourceAnimation
                             : WindowAnimation_launchTaskBehindTargetAnimation;
+                    break;
+                // TODO(b/189386466): Use activity transition as the fallback. Investigate if we
+                //  need new TaskFragment transition.
+                case TRANSIT_OLD_TASK_FRAGMENT_OPEN:
+                    animAttr = enter
+                            ? WindowAnimation_activityOpenEnterAnimation
+                            : WindowAnimation_activityOpenExitAnimation;
+                    break;
+                // TODO(b/189386466): Use activity transition as the fallback. Investigate if we
+                //  need new TaskFragment transition.
+                case TRANSIT_OLD_TASK_FRAGMENT_CLOSE:
+                    animAttr = enter
+                            ? WindowAnimation_activityCloseEnterAnimation
+                            : WindowAnimation_activityCloseExitAnimation;
+                    break;
             }
             a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
@@ -1314,6 +1331,12 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE: {
                 return "TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE";
+            }
+            case TRANSIT_OLD_TASK_FRAGMENT_OPEN: {
+                return "TRANSIT_OLD_TASK_FRAGMENT_OPEN";
+            }
+            case TRANSIT_OLD_TASK_FRAGMENT_CLOSE: {
+                return "TRANSIT_OLD_TASK_FRAGMENT_CLOSE";
             }
             default: {
                 return "<UNKNOWN: " + transition + ">";

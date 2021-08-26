@@ -2352,10 +2352,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task rootTask4 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task task1 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask1).build();
-        final Task task2 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask2).build();
-        final Task task3 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask3).build();
-        final Task task4 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask4).build();
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask1).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask2).build();
+        final Task task3 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask3).build();
+        final Task task4 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask4).build();
 
         // Reordering root tasks while removing root tasks.
         doAnswer(invocation -> {

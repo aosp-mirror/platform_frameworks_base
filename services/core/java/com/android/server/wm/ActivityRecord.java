@@ -9267,6 +9267,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.finishSync(outMergedTransaction, cancel);
     }
 
+    @Override
+    boolean canBeAnimationTarget() {
+        return true;
+    }
+
     static class Builder {
         private final ActivityTaskManagerService mAtmService;
         private WindowProcessController mCallerApp;

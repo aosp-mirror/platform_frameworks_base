@@ -137,7 +137,8 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
                 keyguardStateController, dozeParameters,
-                unlockedScreenOffAnimationController,  /* animateYPos= */ false);
+                unlockedScreenOffAnimationController,  /* animateYPos= */ false,
+                /* visibleOnCommunal= */ false);
         mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
     }
 

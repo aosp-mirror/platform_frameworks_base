@@ -1022,7 +1022,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>which define a transform from input sensor colors, <code>P_in = [ r g b ]</code>,
      * to output linear sRGB, <code>P_out = [ r' g' b' ]</code>,</p>
      * <p>with colors as follows:</p>
-     * <pre><code>r' = I0r + I1g + I2b
+     * <pre><code>
+     * r' = I0r + I1g + I2b
      * g' = I3r + I4g + I5b
      * b' = I6r + I7g + I8b
      * </code></pre>

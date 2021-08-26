@@ -230,8 +230,6 @@ final class LogicalDisplay {
                 info.rotation = mOverrideDisplayInfo.rotation;
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
                 info.shouldConstrainMetricsForLauncher =
                         mOverrideDisplayInfo.shouldConstrainMetricsForLauncher;

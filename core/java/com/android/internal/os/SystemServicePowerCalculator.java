@@ -175,8 +175,11 @@ public class SystemServicePowerCalculator extends PowerCalculator {
         final double systemUidModeledPowerMah = mCpuPowerCalculator.calculateUidModeledPowerMah(
                 systemUid, BatteryStats.STATS_SINCE_CHARGED);
 
-        return uCtoMah(consumptionUC) * systemServiceModeledPowerMah
-                / systemUidModeledPowerMah;
+        if (systemUidModeledPowerMah > 0) {
+            return uCtoMah(consumptionUC) * systemServiceModeledPowerMah / systemUidModeledPowerMah;
+        } else {
+            return 0;
+        }
     }
 
     private double calculatePowerUsingPowerProfile(BatteryStats batteryStats) {

@@ -4567,6 +4567,15 @@ public class NotificationPanelViewController extends PanelViewController {
                     keyguardFadingAway,
                     goingToFullShade,
                     mBarState);
+
+            if (mCommunalViewController != null) {
+                mCommunalViewController.setKeyguardStatusViewVisibility(
+                        statusBarState,
+                        keyguardFadingAway,
+                        goingToFullShade,
+                        mBarState);
+            }
+
             setKeyguardBottomAreaVisibility(statusBarState, goingToFullShade);
 
             mBarState = statusBarState;
