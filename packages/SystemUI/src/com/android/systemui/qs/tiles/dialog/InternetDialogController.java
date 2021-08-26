@@ -318,7 +318,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     Drawable getWifiConnectedDrawable(WifiEntry wifiEntry) throws Throwable {
         final @ColorInt int tint;
         tint = Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorAccentPrimaryVariant);
+                com.android.internal.R.attr.colorControlNormal);
         final Drawable drawable = mContext.getDrawable(
                 com.android.settingslib.Utils.getWifiIconResource(wifiEntry.getLevel()));
         drawable.setTint(tint);
@@ -345,11 +345,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
             drawable.setTint(
                     Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorControlNormal));
-            if (activeNetworkIsCellular()) {
-                drawable.setTint(Utils.getColorAttrDefaultColor(mContext,
-                        com.android.internal.R.attr.colorAccentPrimaryVariant));
-            }
-
         } catch (Throwable e) {
             e.printStackTrace();
         }
