@@ -139,17 +139,15 @@ public class SignalIcon {
     public static class MobileIconGroup extends IconGroup {
         public final int dataContentDescription; // mContentDescriptionDataType
         public final int dataType;
-        public final boolean isWide;
         public final int qsDataType;
 
         public MobileIconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
-                int discContentDesc, int dataContentDesc, int dataType, boolean isWide) {
+                int discContentDesc, int dataContentDesc, int dataType) {
             super(name, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState, sbDiscState,
                 qsDiscState, discContentDesc);
             this.dataContentDescription = dataContentDesc;
             this.dataType = dataType;
-            this.isWide = isWide;
             this.qsDataType = dataType; // TODO: remove this field
         }
     }

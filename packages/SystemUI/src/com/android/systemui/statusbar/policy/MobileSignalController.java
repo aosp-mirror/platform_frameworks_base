@@ -419,7 +419,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
                     statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
+                    description, mSubscriptionInfo.getSubscriptionId(),
                     mCurrentState.roaming, showTriangle);
             callback.setMobileDataIndicators(mobileDataIndicators);
         } else {
@@ -464,7 +464,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
                     statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
+                    description, mSubscriptionInfo.getSubscriptionId(),
                     mCurrentState.roaming, showTriangle);
             callback.setMobileDataIndicators(mobileDataIndicators);
         }
