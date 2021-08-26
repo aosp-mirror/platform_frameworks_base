@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
@@ -476,6 +477,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
+        mOverrideTaskTransition = false;
         mNextAppTransitionIsSync = false;
     }
 
@@ -941,7 +943,7 @@ public class AppTransition implements Dump {
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS: "
                             + "anim=%s transit=%s isEntrance=true Callers=%s",
                     a, appTransitionOldToString(transit), Debug.getCallers(3));
-        } else if (transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE) {
+        } else if (isChangeTransitOld(transit)) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
             a = new AlphaAnimation(1.f, 1.f);
             a.setDuration(WindowChangeAnimationSpec.ANIMATION_DURATION);
@@ -1338,6 +1340,9 @@ public class AppTransition implements Dump {
             case TRANSIT_OLD_TASK_FRAGMENT_CLOSE: {
                 return "TRANSIT_OLD_TASK_FRAGMENT_CLOSE";
             }
+            case TRANSIT_OLD_TASK_FRAGMENT_CHANGE: {
+                return "TRANSIT_OLD_TASK_FRAGMENT_CHANGE";
+            }
             default: {
                 return "<UNKNOWN: " + transition + ">";
             }
@@ -1595,7 +1600,8 @@ public class AppTransition implements Dump {
     }
 
     static boolean isChangeTransitOld(@TransitionOldType int transit) {
-        return transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+        return transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
+                || transit == TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
     }
 
     static boolean isClosingTransitOld(@TransitionOldType int transit) {

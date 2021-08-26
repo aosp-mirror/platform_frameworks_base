@@ -16,32 +16,54 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.test.suitebuilder.annotation.SmallTest
+import android.view.Display
 import android.view.DisplayCutout
-import android.view.WindowMetrics
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 class StatusBarContentInsetsProviderTest : SysuiTestCase() {
+
     @Mock private lateinit var dc: DisplayCutout
-    @Mock private lateinit var windowMetrics: WindowMetrics
+    @Mock private lateinit var contextMock: Context
+    @Mock private lateinit var display: Display
+    private lateinit var configurationController: ConfigurationController
+
+    private val configuration = Configuration()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        `when`(contextMock.display).thenReturn(display)
+
+        context.ensureTestableResources()
+        `when`(contextMock.resources).thenReturn(context.resources)
+        `when`(contextMock.resources.configuration).thenReturn(configuration)
+        `when`(contextMock.createConfigurationContext(any())).thenAnswer {
+            context.createConfigurationContext(it.arguments[0] as Configuration)
+        }
+
+        configurationController = ConfigurationControllerImpl(contextMock)
     }
 
     @Test
@@ -55,15 +77,13 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val chipWidth = 30
         val dotWidth = 10
 
-        `when`(windowMetrics.bounds).thenReturn(screenBounds)
-
         var isRtl = false
         var targetRotation = ROTATION_NONE
         var bounds = calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -92,7 +112,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -127,7 +147,6 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val sbHeightLandscape = 60
         val currentRotation = ROTATION_NONE
 
-        `when`(windowMetrics.bounds).thenReturn(screenBounds)
         `when`(dc.boundingRects).thenReturn(listOf(dcBounds))
 
         // THEN rotations which share a short side should use the greater value between rounded
@@ -142,7 +161,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -159,7 +178,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -178,7 +197,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -196,7 +215,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -219,7 +238,6 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val sbHeightLandscape = 60
         val currentRotation = ROTATION_NONE
 
-        `when`(windowMetrics.bounds).thenReturn(screenBounds)
         `when`(dc.boundingRects).thenReturn(listOf(dcBounds))
 
         // THEN only the landscape/seascape rotations should avoid the cutout area because of the
@@ -234,7 +252,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -251,7 +269,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -268,7 +286,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -285,7 +303,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -303,8 +321,6 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val sbHeightPortrait = 100
         val sbHeightLandscape = 60
 
-        `when`(windowMetrics.bounds).thenReturn(screenBounds)
-
         // THEN content insets should only use rounded corner padding
         var targetRotation = ROTATION_NONE
         var expectedBounds = Rect(minLeftPadding,
@@ -316,7 +332,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -332,7 +348,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -348,7 +364,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
@@ -364,7 +380,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
-                windowMetrics,
+                screenBounds,
                 sbHeightLandscape,
                 minLeftPadding,
                 minRightPadding)
@@ -382,7 +398,6 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val sbHeightLandscape = 60
         val currentRotation = ROTATION_NONE
 
-        `when`(windowMetrics.bounds).thenReturn(screenBounds)
         `when`(dc.boundingRects).thenReturn(listOf(dcBounds))
 
         // THEN left should be set to the display cutout width, and right should use the minRight
@@ -396,12 +411,73 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 currentRotation,
                 targetRotation,
                 dc,
-                windowMetrics,
+                screenBounds,
                 sbHeightPortrait,
                 minLeftPadding,
                 minRightPadding)
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
+    }
+
+    @Test
+    fun testDisplayChanged_returnsUpdatedInsets() {
+        // GIVEN: get insets on the first display and switch to the second display
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+            mock(DumpManager::class.java))
+
+        givenDisplay(
+            screenBounds = Rect(0, 0, 1080, 2160),
+            displayUniqueId = "1"
+        )
+        val firstDisplayInsets = provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        givenDisplay(
+            screenBounds = Rect(0, 0, 800, 600),
+            displayUniqueId = "2"
+        )
+        configurationController.onConfigurationChanged(configuration)
+
+        // WHEN: get insets on the second display
+        val secondDisplayInsets = provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+
+        // THEN: insets are updated
+        assertThat(firstDisplayInsets).isNotEqualTo(secondDisplayInsets)
+    }
+
+    @Test
+    fun testDisplayChangedAndReturnedBack_returnsTheSameInsets() {
+        // GIVEN: get insets on the first display, switch to the second display,
+        // get insets and switch back
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+            mock(DumpManager::class.java))
+        givenDisplay(
+            screenBounds = Rect(0, 0, 1080, 2160),
+            displayUniqueId = "1"
+        )
+        val firstDisplayInsetsFirstCall = provider
+            .getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        givenDisplay(
+            screenBounds = Rect(0, 0, 800, 600),
+            displayUniqueId = "2"
+        )
+        configurationController.onConfigurationChanged(configuration)
+        provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        givenDisplay(
+            screenBounds = Rect(0, 0, 1080, 2160),
+            displayUniqueId = "1"
+        )
+        configurationController.onConfigurationChanged(configuration)
+
+        // WHEN: get insets on the first display again
+        val firstDisplayInsetsSecondCall = provider
+            .getStatusBarContentInsetsForRotation(ROTATION_NONE)
+
+        // THEN: insets for the first and second calls for the first display are the same
+        assertThat(firstDisplayInsetsFirstCall).isEqualTo(firstDisplayInsetsSecondCall)
+    }
+
+    private fun givenDisplay(screenBounds: Rect, displayUniqueId: String) {
+        `when`(display.uniqueId).thenReturn(displayUniqueId)
+        configuration.windowConfiguration.maxBounds = screenBounds
     }
 
     private fun assertRects(
