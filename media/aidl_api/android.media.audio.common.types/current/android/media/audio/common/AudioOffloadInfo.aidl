@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */// This file has been semi-automatically generated using hidl2aidl from its counterpart in
-// hardware/interfaces/audio/common/5.0/types.hal
+ */
 ///////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,8 +36,8 @@ package android.media.audio.common;
 @JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioOffloadInfo {
   int sampleRateHz;
-  int channelMask;
-  android.media.audio.common.AudioFormat format = android.media.audio.common.AudioFormat.INVALID;
+  android.media.audio.common.AudioChannelLayout channelMask;
+  android.media.audio.common.AudioFormatDescription format;
   android.media.audio.common.AudioStreamType streamType = android.media.audio.common.AudioStreamType.INVALID;
   int bitRatePerSecond;
   long durationMicroseconds;

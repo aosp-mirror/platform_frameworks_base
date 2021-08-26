@@ -45,7 +45,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -71,11 +70,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -86,14 +83,10 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
-import android.service.chooser.ChooserTargetService;
-import android.service.chooser.IChooserTargetResult;
-import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Size;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -145,10 +138,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The Chooser Activity handles intent resolution specifically for sharing intents -
@@ -206,7 +197,6 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
     private Map<ChooserTarget, ShortcutInfo> mDirectShareShortcutInfoCache;
-    private Map<ComponentName, ComponentName> mChooserTargetComponentNameCache;
 
     public static final int TARGET_TYPE_DEFAULT = 0;
     public static final int TARGET_TYPE_CHOOSER_TARGET = 1;
@@ -226,8 +216,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     // statsd logger wrapper
     protected ChooserActivityLogger mChooserActivityLogger;
-
-    private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
 
     @IntDef(flag = false, prefix = { "TARGET_TYPE_" }, value = {
             TARGET_TYPE_DEFAULT,
@@ -268,7 +256,6 @@ public class ChooserActivity extends ResolverActivity implements
     private long mChooserShownTime;
     protected boolean mIsSuccessfullySelected;
 
-    private long mQueriedTargetServicesTimeMs;
     private long mQueriedSharingShortcutsTimeMs;
 
     private int mChooserRowServiceSpacing;
@@ -277,9 +264,6 @@ public class ChooserActivity extends ResolverActivity implements
     private int mLastNumberOfChildren = -1;
 
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
-
-    private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
-    private final Set<Pair<ComponentName, UserHandle>> mServicesRequested = new HashSet<>();
 
     private static final int MAX_LOG_RANK_POSITION = 12;
 
@@ -457,16 +441,12 @@ public class ChooserActivity extends ResolverActivity implements
     private final ChooserHandler mChooserHandler = new ChooserHandler();
 
     private class ChooserHandler extends Handler {
-        private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 4;
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
         private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
 
-        private boolean mReceivedDirectShareTargets = false;
-
         private void removeAllMessages() {
             removeMessages(LIST_VIEW_UPDATE_MESSAGE);
-            removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
             removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
             removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
         }
@@ -478,36 +458,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             switch (msg.what) {
-                case CHOOSER_TARGET_SERVICE_RESULT:
-                    if (DEBUG) Log.d(TAG, "CHOOSER_TARGET_SERVICE_RESULT");
-                    final ServiceResultInfo sri = (ServiceResultInfo) msg.obj;
-                    if (!mServiceConnections.contains(sri.connection)) {
-                        Log.w(TAG, "ChooserTargetServiceConnection " + sri.connection
-                                + sri.originalTarget.getResolveInfo().activityInfo.packageName
-                                + " returned after being removed from active connections."
-                                + " Have you considered returning results faster?");
-                        break;
-                    }
-                    if (sri.resultTargets != null) {
-                        ChooserListAdapter adapterForUserHandle =
-                                mChooserMultiProfilePagerAdapter.getListAdapterForUserHandle(
-                                        sri.userHandle);
-                        if (adapterForUserHandle != null) {
-                            adapterForUserHandle.addServiceResults(sri.originalTarget,
-                                    sri.resultTargets, TARGET_TYPE_CHOOSER_TARGET,
-                                    /* directShareShortcutInfoCache */ null);
-                            if (!sri.resultTargets.isEmpty() && sri.originalTarget != null) {
-                                mChooserTargetComponentNameCache.put(
-                                        sri.resultTargets.get(0).getComponentName(),
-                                        sri.originalTarget.getResolvedComponentName());
-                            }
-                        }
-                    }
-                    unbindService(sri.connection);
-                    sri.connection.destroy();
-                    mServiceConnections.remove(sri.connection);
-                    break;
-
                 case LIST_VIEW_UPDATE_MESSAGE:
                     if (DEBUG) {
                         Log.d(TAG, "LIST_VIEW_UPDATE_MESSAGE; ");
@@ -752,7 +702,6 @@ public class ChooserActivity extends ResolverActivity implements
                 target.getAction()
         );
         mDirectShareShortcutInfoCache = new HashMap<>();
-        mChooserTargetComponentNameCache = new HashMap<>();
 
         setEnterSharedElementCallback(new SharedElementCallback() {
             @Override
@@ -1592,7 +1541,6 @@ public class ChooserActivity extends ResolverActivity implements
             mRefinementResultReceiver.destroy();
             mRefinementResultReceiver = null;
         }
-        unbindRemainingServices();
         mChooserHandler.removeAllMessages();
 
         if (mPreviewCoord != null) mPreviewCoord.cancelLoads();
@@ -1887,96 +1835,6 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    @VisibleForTesting
-    protected void queryTargetServices(ChooserListAdapter adapter) {
-
-        mQueriedTargetServicesTimeMs = System.currentTimeMillis();
-
-        Context selectedProfileContext = createContextAsUser(
-                adapter.getUserHandle(), 0 /* flags */);
-        final PackageManager pm = selectedProfileContext.getPackageManager();
-        ShortcutManager sm = selectedProfileContext.getSystemService(ShortcutManager.class);
-        int targetsToQuery = 0;
-
-        for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
-            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
-            if (adapter.getScore(dri) == 0) {
-                // A score of 0 means the app hasn't been used in some time;
-                // don't query it as it's not likely to be relevant.
-                continue;
-            }
-            final ActivityInfo ai = dri.getResolveInfo().activityInfo;
-            if (sm.hasShareTargets(ai.packageName)) {
-                // Share targets will be queried from ShortcutManager
-                continue;
-            }
-            final Bundle md = ai.metaData;
-            final String serviceName = md != null ? convertServiceName(ai.packageName,
-                    md.getString(ChooserTargetService.META_DATA_NAME)) : null;
-            if (serviceName != null && ChooserFlags.USE_SERVICE_TARGETS_FOR_DIRECT_TARGETS) {
-                final ComponentName serviceComponent = new ComponentName(
-                        ai.packageName, serviceName);
-
-                UserHandle userHandle = adapter.getUserHandle();
-                Pair<ComponentName, UserHandle> requestedItem =
-                        new Pair<>(serviceComponent, userHandle);
-                if (mServicesRequested.contains(requestedItem)) {
-                    continue;
-                }
-                mServicesRequested.add(requestedItem);
-
-                final Intent serviceIntent = new Intent(ChooserTargetService.SERVICE_INTERFACE)
-                        .setComponent(serviceComponent);
-
-                if (DEBUG) {
-                    Log.d(TAG, "queryTargets found target with service " + serviceComponent);
-                }
-
-                try {
-                    final String perm = pm.getServiceInfo(serviceComponent, 0).permission;
-                    if (!ChooserTargetService.BIND_PERMISSION.equals(perm)) {
-                        Log.w(TAG, "ChooserTargetService " + serviceComponent + " does not require"
-                                + " permission " + ChooserTargetService.BIND_PERMISSION
-                                + " - this service will not be queried for ChooserTargets."
-                                + " add android:permission=\""
-                                + ChooserTargetService.BIND_PERMISSION + "\""
-                                + " to the <service> tag for " + serviceComponent
-                                + " in the manifest.");
-                        continue;
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Could not look up service " + serviceComponent
-                            + "; component name not found");
-                    continue;
-                }
-
-                final ChooserTargetServiceConnection conn =
-                        new ChooserTargetServiceConnection(this, dri,
-                                adapter.getUserHandle());
-
-                // Explicitly specify the user handle instead of calling bindService
-                // to avoid the warning from calling from the system process without an explicit
-                // user handle
-                if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
-                        adapter.getUserHandle())) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Binding service connection for target " + dri
-                                + " intent " + serviceIntent);
-                    }
-                    mServiceConnections.add(conn);
-                    targetsToQuery++;
-                }
-            }
-            if (targetsToQuery >= QUERY_TARGET_SERVICE_LIMIT) {
-                if (DEBUG) {
-                    Log.d(TAG, "queryTargets hit query target limit "
-                            + QUERY_TARGET_SERVICE_LIMIT);
-                }
-                break;
-            }
-        }
-    }
-
     private IntentFilter getTargetIntentFilter() {
         try {
             final Intent intent = getTargetIntent();
@@ -2107,7 +1965,7 @@ public class ChooserActivity extends ResolverActivity implements
             final Message msg = Message.obtain();
             msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
             msg.obj = new ServiceResultInfo(chooserListAdapter.getDisplayResolveInfo(i),
-                    chooserTargets, null, userHandle);
+                    chooserTargets, userHandle);
             msg.arg1 = shortcutType;
             mChooserHandler.sendMessage(msg);
         }
@@ -2226,25 +2084,8 @@ public class ChooserActivity extends ResolverActivity implements
         return fullName;
     }
 
-    void unbindRemainingServices() {
-        if (DEBUG) {
-            Log.d(TAG, "unbindRemainingServices, " + mServiceConnections.size() + " left");
-        }
-        for (int i = 0, N = mServiceConnections.size(); i < N; i++) {
-            final ChooserTargetServiceConnection conn = mServiceConnections.get(i);
-            if (DEBUG) Log.d(TAG, "unbinding " + conn);
-            unbindService(conn);
-            conn.destroy();
-        }
-        mServicesRequested.clear();
-        mServiceConnections.clear();
-    }
-
     private void logDirectShareTargetReceived(int logCategory) {
-        final long queryTime =
-                logCategory == MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER
-                        ? mQueriedSharingShortcutsTimeMs : mQueriedTargetServicesTimeMs;
-        final int apiLatency = (int) (System.currentTimeMillis() - queryTime);
+        final int apiLatency = (int) (System.currentTimeMillis() - mQueriedSharingShortcutsTimeMs);
         getMetricsLogger().write(new LogMaker(logCategory).setSubtype(apiLatency));
     }
 
@@ -2290,8 +2131,7 @@ public class ChooserActivity extends ResolverActivity implements
         List<AppTargetId> targetIds = new ArrayList<>();
         for (ChooserTargetInfo chooserTargetInfo : surfacedTargetInfo) {
             ChooserTarget chooserTarget = chooserTargetInfo.getChooserTarget();
-            ComponentName componentName = mChooserTargetComponentNameCache.getOrDefault(
-                    chooserTarget.getComponentName(), chooserTarget.getComponentName());
+            ComponentName componentName = chooserTarget.getComponentName();
             if (mDirectShareShortcutInfoCache.containsKey(chooserTarget)) {
                 String shortcutId = mDirectShareShortcutInfoCache.get(chooserTarget).getId();
                 targetIds.add(new AppTargetId(
@@ -2782,7 +2622,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
-        mServicesRequested.clear();
         mChooserMultiProfilePagerAdapter.getActiveListAdapter().notifyDataSetChanged();
         super.onHandlePackagesChanged(listAdapter);
     }
@@ -2849,13 +2688,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             queryDirectShareTargets(chooserListAdapter, false);
-        }
-        if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
-            if (DEBUG) {
-                Log.d(TAG, "List built querying services");
-            }
-
-            queryTargetServices(chooserListAdapter);
         }
 
         getChooserActivityLogger().logSharesheetAppLoadComplete();
@@ -3897,116 +3729,15 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    static class ChooserTargetServiceConnection implements ServiceConnection {
-        private DisplayResolveInfo mOriginalTarget;
-        private ComponentName mConnectedComponent;
-        private ChooserActivity mChooserActivity;
-        private final UserHandle mUserHandle;
-        private final Object mLock = new Object();
-
-        private final IChooserTargetResult mChooserTargetResult = new IChooserTargetResult.Stub() {
-            @Override
-            public void sendResult(List<ChooserTarget> targets) throws RemoteException {
-                synchronized (mLock) {
-                    if (mChooserActivity == null) {
-                        Log.e(TAG, "destroyed ChooserTargetServiceConnection received result from "
-                                + mConnectedComponent + "; ignoring...");
-                        return;
-                    }
-                    Context contextAsUser =
-                            mChooserActivity.createContextAsUser(mUserHandle, 0 /* flags */);
-                    mChooserActivity.filterServiceTargets(contextAsUser,
-                            mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
-                    final Message msg = Message.obtain();
-                    msg.what = ChooserHandler.CHOOSER_TARGET_SERVICE_RESULT;
-                    msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
-                            ChooserTargetServiceConnection.this, mUserHandle);
-                    mChooserActivity.mChooserHandler.sendMessage(msg);
-                }
-            }
-        };
-
-        public ChooserTargetServiceConnection(ChooserActivity chooserActivity,
-                DisplayResolveInfo dri, UserHandle userHandle) {
-            mChooserActivity = chooserActivity;
-            mOriginalTarget = dri;
-            mUserHandle = userHandle;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG) Log.d(TAG, "onServiceConnected: " + name);
-            synchronized (mLock) {
-                if (mChooserActivity == null) {
-                    Log.e(TAG, "destroyed ChooserTargetServiceConnection got onServiceConnected");
-                    return;
-                }
-
-                final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
-                try {
-                    icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
-                            mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
-                    mChooserActivity.unbindService(this);
-                    mChooserActivity.mServiceConnections.remove(this);
-                    destroy();
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG) Log.d(TAG, "onServiceDisconnected: " + name);
-            synchronized (mLock) {
-                if (mChooserActivity == null) {
-                    Log.e(TAG,
-                            "destroyed ChooserTargetServiceConnection got onServiceDisconnected");
-                    return;
-                }
-
-                mChooserActivity.unbindService(this);
-                mChooserActivity.mServiceConnections.remove(this);
-                if (mChooserActivity.mServiceConnections.isEmpty()) {
-                    mChooserActivity.sendVoiceChoicesIfNeeded();
-                }
-                mConnectedComponent = null;
-                destroy();
-            }
-        }
-
-        public void destroy() {
-            synchronized (mLock) {
-                mChooserActivity = null;
-                mOriginalTarget = null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ChooserTargetServiceConnection{service="
-                    + mConnectedComponent + ", activity="
-                    + (mOriginalTarget != null
-                    ? mOriginalTarget.getResolveInfo().activityInfo.toString()
-                    : "<connection destroyed>") + "}";
-        }
-
-        public ComponentName getComponentName() {
-            return mOriginalTarget.getResolveInfo().activityInfo.getComponentName();
-        }
-    }
-
     static class ServiceResultInfo {
         public final DisplayResolveInfo originalTarget;
         public final List<ChooserTarget> resultTargets;
-        public final ChooserTargetServiceConnection connection;
         public final UserHandle userHandle;
 
         public ServiceResultInfo(DisplayResolveInfo ot, List<ChooserTarget> rt,
-                ChooserTargetServiceConnection c, UserHandle userHandle) {
+                UserHandle userHandle) {
             originalTarget = ot;
             resultTargets = rt;
-            connection = c;
             this.userHandle = userHandle;
         }
     }

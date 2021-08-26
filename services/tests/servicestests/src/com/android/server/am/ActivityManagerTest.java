@@ -470,6 +470,8 @@ public class ActivityManagerTest {
             sendCommand(COMMAND_UNBIND_SERVICE, TEST_APP2, TEST_APP1, null);
             runShellCommand("cmd deviceidle whitelist -" + TEST_APP1);
             runShellCommand("cmd deviceidle whitelist -" + TEST_APP2);
+            am.forceStopPackage(TEST_APP1);
+            am.forceStopPackage(TEST_APP2);
         }
     }
 
@@ -700,6 +702,7 @@ public class ActivityManagerTest {
             am.removeOnUidImportanceListener(uidListener1);
             am.removeOnUidImportanceListener(uidListener2);
             am.removeOnUidImportanceListener(uidListener3);
+            am.forceStopPackage(TEST_APP1);
         }
     }
 

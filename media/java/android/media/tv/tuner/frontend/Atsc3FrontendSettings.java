@@ -276,8 +276,8 @@ public class Atsc3FrontendSettings extends FrontendSettings {
     private final int mDemodOutputFormat;
     private final Atsc3PlpSettings[] mPlpSettings;
 
-    private Atsc3FrontendSettings(int frequency, int bandwidth, int demodOutputFormat,
-            Atsc3PlpSettings[] plpSettings) {
+    private Atsc3FrontendSettings(
+            long frequency, int bandwidth, int demodOutputFormat, Atsc3PlpSettings[] plpSettings) {
         super(frequency);
         mBandwidth = bandwidth;
         mDemodOutputFormat = demodOutputFormat;
@@ -319,7 +319,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
      * Builder for {@link Atsc3FrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mBandwidth = BANDWIDTH_UNDEFINED;
         private int mDemodOutputFormat = DEMOD_OUTPUT_FORMAT_UNDEFINED;
         private Atsc3PlpSettings[] mPlpSettings = {};
@@ -331,10 +331,23 @@ public class Atsc3FrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

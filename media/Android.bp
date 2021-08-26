@@ -35,6 +35,7 @@ aidl_interface {
         "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
     ],
     imports: [
+        "android.media.audio.common.types",
         "android.media.soundtrigger.types",
         "media_permission-aidl",
     ],
@@ -45,20 +46,29 @@ aidl_interface {
     vendor_available: true,
     host_supported: true,
     double_loadable: true,
-    flags: ["-Werror", "-Weverything", ],
+    flags: [
+        "-Werror",
+        "-Weverything",
+    ],
     local_include_dir: "aidl",
     srcs: [
-        "aidl/android/media/audio/common/AudioChannelMask.aidl",
+        "aidl/android/media/audio/common/AudioChannelLayout.aidl",
         "aidl/android/media/audio/common/AudioConfig.aidl",
-        "aidl/android/media/audio/common/AudioFormat.aidl",
+        "aidl/android/media/audio/common/AudioFormatDescription.aidl",
+        "aidl/android/media/audio/common/AudioFormatType.aidl",
         "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
         "aidl/android/media/audio/common/AudioStreamType.aidl",
         "aidl/android/media/audio/common/AudioUsage.aidl",
+        "aidl/android/media/audio/common/PcmType.aidl",
     ],
     stability: "vintf",
     backend: {
         cpp: {
-            enabled: true,
+            min_sdk_version: "29",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.media",
+            ],
         },
         java: {
             sdk_version: "module_current",
@@ -74,7 +84,10 @@ aidl_interface {
 aidl_interface {
     name: "android.media.soundtrigger.types",
     vendor_available: true,
-    flags: ["-Werror", "-Weverything", ],
+    flags: [
+        "-Werror",
+        "-Weverything",
+    ],
     local_include_dir: "aidl",
     srcs: [
         "aidl/android/media/soundtrigger/AudioCapabilities.aidl",

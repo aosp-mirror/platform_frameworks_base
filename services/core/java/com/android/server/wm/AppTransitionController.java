@@ -39,6 +39,9 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
@@ -68,6 +71,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -86,6 +90,8 @@ import android.view.animation.Animation;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.function.Predicate;
@@ -101,6 +107,20 @@ public class AppTransitionController {
     private final WallpaperController mWallpaperControllerLocked;
     private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
     private static final int KEYGUARD_GOING_AWAY_ANIMATION_DURATION = 400;
+
+    private static final int TYPE_NONE = 0;
+    private static final int TYPE_ACTIVITY = 1;
+    private static final int TYPE_TASK_FRAGMENT = 2;
+    private static final int TYPE_TASK = 3;
+
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_NONE,
+            TYPE_ACTIVITY,
+            TYPE_TASK_FRAGMENT,
+            TYPE_TASK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitContainerType {}
 
     private final ArrayMap<WindowContainer, Integer> mTempTransitionReasons = new ArrayMap<>();
 
@@ -185,8 +205,8 @@ public class AppTransitionController {
                 mDisplayContent.mOpeningApps);
 
         final @TransitionOldType int transit = getTransitCompatType(
-                mDisplayContent.mAppTransition,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                mDisplayContent.mAppTransition, mDisplayContent.mOpeningApps,
+                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers,
                 mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper(),
                 mDisplayContent.mSkipAppTransitionAnimation);
         mDisplayContent.mSkipAppTransitionAnimation = false;
@@ -267,6 +287,7 @@ public class AppTransitionController {
      * @param appTransition {@link AppTransition} for managing app transition state.
      * @param openingApps {@link ActivityRecord}s which are becoming visible.
      * @param closingApps {@link ActivityRecord}s which are becoming invisible.
+     * @param changingContainers {@link WindowContainer}s which are changed in configuration.
      * @param wallpaperTarget If non-null, this is the currently visible window that is associated
      *                        with the wallpaper.
      * @param oldWallpaper The currently visible window that is associated with the wallpaper in
@@ -275,8 +296,8 @@ public class AppTransitionController {
      */
     static @TransitionOldType int getTransitCompatType(AppTransition appTransition,
             ArraySet<ActivityRecord> openingApps, ArraySet<ActivityRecord> closingApps,
-            @Nullable WindowState wallpaperTarget, @Nullable WindowState oldWallpaper,
-            boolean skipAppTransitionAnimation) {
+            ArraySet<WindowContainer> changingContainers, @Nullable WindowState wallpaperTarget,
+            @Nullable WindowState oldWallpaper, boolean skipAppTransitionAnimation) {
 
         // Determine if closing and opening app token sets are wallpaper targets, in which case
         // special animations are needed.
@@ -309,8 +330,18 @@ public class AppTransitionController {
 
         // Special transitions
         // TODO(new-app-transitions): Revisit if those can be rewritten by using flags.
-        if (appTransition.containsTransitRequest(TRANSIT_CHANGE)) {
-            return TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+        if (appTransition.containsTransitRequest(TRANSIT_CHANGE) && !changingContainers.isEmpty()) {
+            @TransitContainerType int changingType =
+                    getTransitContainerType(changingContainers.valueAt(0));
+            switch (changingType) {
+                case TYPE_TASK:
+                    return TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+                case TYPE_TASK_FRAGMENT:
+                    return TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+                default:
+                    throw new IllegalStateException(
+                            "TRANSIT_CHANGE with unrecognized changing type=" + changingType);
+            }
         }
         if ((flags & TRANSIT_FLAG_APP_CRASHED) != 0) {
             return TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
@@ -387,33 +418,38 @@ public class AppTransitionController {
                 openingApps, closingApps, true /* visible */);
         final ArraySet<WindowContainer> closingWcs = getAnimationTargets(
                 openingApps, closingApps, false /* visible */);
-        final boolean isActivityOpening = !openingWcs.isEmpty()
-                && openingWcs.valueAt(0).asActivityRecord() != null;
-        final boolean isActivityClosing = !closingWcs.isEmpty()
-                && closingWcs.valueAt(0).asActivityRecord() != null;
-        final boolean isTaskOpening = !openingWcs.isEmpty() && !isActivityOpening;
-        final boolean isTaskClosing = !closingWcs.isEmpty() && !isActivityClosing;
-
-        if (appTransition.containsTransitRequest(TRANSIT_TO_FRONT) && isTaskOpening) {
+        final WindowContainer<?> openingContainer = !openingWcs.isEmpty()
+                ? openingWcs.valueAt(0) : null;
+        final WindowContainer<?> closingContainer = !closingWcs.isEmpty()
+                ? closingWcs.valueAt(0) : null;
+        @TransitContainerType int openingType = getTransitContainerType(openingContainer);
+        @TransitContainerType int closingType = getTransitContainerType(closingContainer);
+        if (appTransition.containsTransitRequest(TRANSIT_TO_FRONT) && openingType == TYPE_TASK) {
             return TRANSIT_OLD_TASK_TO_FRONT;
         }
-        if (appTransition.containsTransitRequest(TRANSIT_TO_BACK) && isTaskClosing) {
+        if (appTransition.containsTransitRequest(TRANSIT_TO_BACK) && closingType == TYPE_TASK) {
             return TRANSIT_OLD_TASK_TO_BACK;
         }
         if (appTransition.containsTransitRequest(TRANSIT_OPEN)) {
-            if (isTaskOpening) {
+            if (openingType == TYPE_TASK) {
                 return (appTransition.getTransitFlags() & TRANSIT_FLAG_OPEN_BEHIND) != 0
                         ? TRANSIT_OLD_TASK_OPEN_BEHIND : TRANSIT_OLD_TASK_OPEN;
             }
-            if (isActivityOpening) {
+            if (openingType == TYPE_ACTIVITY) {
                 return TRANSIT_OLD_ACTIVITY_OPEN;
+            }
+            if (openingType == TYPE_TASK_FRAGMENT) {
+                return TRANSIT_OLD_TASK_FRAGMENT_OPEN;
             }
         }
         if (appTransition.containsTransitRequest(TRANSIT_CLOSE)) {
-            if (isTaskClosing) {
+            if (closingType == TYPE_TASK) {
                 return TRANSIT_OLD_TASK_CLOSE;
             }
-            if (isActivityClosing) {
+            if (closingType == TYPE_TASK_FRAGMENT) {
+                return TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
+            }
+            if (closingType == TYPE_ACTIVITY) {
                 for (int i = closingApps.size() - 1; i >= 0; i--) {
                     if (closingApps.valueAt(i).visibleIgnoringKeyguard) {
                         return TRANSIT_OLD_ACTIVITY_CLOSE;
@@ -428,6 +464,23 @@ public class AppTransitionController {
             return TRANSIT_OLD_ACTIVITY_RELAUNCH;
         }
         return TRANSIT_OLD_NONE;
+    }
+
+    @TransitContainerType
+    private static int getTransitContainerType(@Nullable WindowContainer<?> container) {
+        if (container == null) {
+            return TYPE_NONE;
+        }
+        if (container.asTask() != null) {
+            return TYPE_TASK;
+        }
+        if (container.asTaskFragment() != null) {
+            return TYPE_TASK_FRAGMENT;
+        }
+        if (container.asActivityRecord() != null) {
+            return TYPE_ACTIVITY;
+        }
+        return TYPE_NONE;
     }
 
     private static WindowManager.LayoutParams getAnimLp(ActivityRecord activity) {
@@ -633,6 +686,7 @@ public class AppTransitionController {
             boolean canPromote = true;
 
             if (parent == null || !parent.canCreateRemoteAnimationTarget()
+                    || !parent.canBeAnimationTarget()
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.

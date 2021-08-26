@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
- // This file has been semi-automatically generated using hidl2aidl from its counterpart in
- // hardware/interfaces/audio/common/5.0/types.hal
-
 package android.media.audio.common;
 
-import android.media.audio.common.AudioFormat;
+import android.media.audio.common.AudioChannelLayout;
+import android.media.audio.common.AudioFormatDescription;
 import android.media.audio.common.AudioStreamType;
 import android.media.audio.common.AudioUsage;
 
@@ -32,8 +30,8 @@ import android.media.audio.common.AudioUsage;
 @VintfStability
 parcelable AudioOffloadInfo {
     int sampleRateHz;
-    int channelMask;
-    AudioFormat format = AudioFormat.INVALID;
+    AudioChannelLayout channelMask;
+    AudioFormatDescription format;
     AudioStreamType streamType = AudioStreamType.INVALID;
     int bitRatePerSecond;
     long durationMicroseconds;
@@ -43,4 +41,3 @@ parcelable AudioOffloadInfo {
     int bufferSize;
     AudioUsage usage = AudioUsage.INVALID;
 }
-

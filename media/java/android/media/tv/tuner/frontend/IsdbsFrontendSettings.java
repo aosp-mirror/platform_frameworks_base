@@ -143,7 +143,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     private final int mSymbolRate;
     private final int mRolloff;
 
-    private IsdbsFrontendSettings(int frequency, int streamId, int streamIdType, int modulation,
+    private IsdbsFrontendSettings(long frequency, int streamId, int streamIdType, int modulation,
             int codeRate, int symbolRate, int rolloff) {
         super(frequency);
         mStreamId = streamId;
@@ -207,7 +207,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
      * Builder for {@link IsdbsFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mStreamId = Tuner.INVALID_STREAM_ID;
         private int mStreamIdType = STREAM_ID_TYPE_ID;
         private int mModulation = MODULATION_UNDEFINED;
@@ -222,10 +222,23 @@ public class IsdbsFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

@@ -109,7 +109,6 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -140,12 +139,12 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -159,8 +158,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
-
-import javax.inject.Provider;
 
 import dagger.Lazy;
 
@@ -235,12 +232,11 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Provider<StatusBarComponent.Builder> mStatusBarComponentBuilderProvider;
-    @Mock private StatusBarComponent.Builder mStatusBarComponentBuilder;
+    @Mock private StatusBarComponent.Factory mStatusBarComponentFactory;
     @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
-    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private StatusBarWindowView mStatusBarWindowView;
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -341,8 +337,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
-        when(mStatusBarComponentBuilderProvider.get()).thenReturn(mStatusBarComponentBuilder);
-        when(mStatusBarComponentBuilder.build()).thenReturn(mStatusBarComponent);
+        when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
         when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
 
@@ -407,13 +402,13 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController,
                 mVolumeComponent,
                 mCommandQueue,
-                mStatusBarComponentBuilderProvider,
+                mStatusBarComponentFactory,
                 mPluginManager,
                 Optional.of(mLegacySplitScreen),
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,
-                mSuperStatusBarViewFactory,
+                mStatusBarWindowView,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,

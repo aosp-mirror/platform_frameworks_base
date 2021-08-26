@@ -399,7 +399,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
     private final int mPlpId;
     private final int mPlpGroupId;
 
-    private DvbtFrontendSettings(int frequency, int transmissionMode, int bandwidth,
+    private DvbtFrontendSettings(long frequency, int transmissionMode, int bandwidth,
             int constellation, int hierarchy, int hpCodeRate, int lpCodeRate, int guardInterval,
             boolean isHighPriority, int standard, boolean isMiso, int plpMode, int plpId,
             int plpGroupId) {
@@ -532,7 +532,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
      * Builder for {@link DvbtFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mTransmissionMode = TRANSMISSION_MODE_UNDEFINED;
         private int mBandwidth = BANDWIDTH_UNDEFINED;
         private int mConstellation = CONSTELLATION_UNDEFINED;
@@ -554,10 +554,23 @@ public class DvbtFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

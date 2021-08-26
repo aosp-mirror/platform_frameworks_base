@@ -2825,8 +2825,9 @@ public class AudioService extends IAudioService.Stub
         if (uid == android.os.Process.SYSTEM_UID) {
             uid = UserHandle.getUid(getCurrentUserId(), UserHandle.getAppId(uid));
         }
-        if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid,
-                callingPackage, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
+        // validate calling package and app op
+        if (!checkNoteAppOp(
+                STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage, attributionTag)) {
             return;
         }
 
@@ -3536,8 +3537,8 @@ public class AudioService extends IAudioService.Stub
         if (uid == android.os.Process.SYSTEM_UID) {
             uid = UserHandle.getUid(getCurrentUserId(), UserHandle.getAppId(uid));
         }
-        if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid,
-                callingPackage, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
+        if (!checkNoteAppOp(
+                STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage, attributionTag)) {
             return;
         }
 
@@ -3956,8 +3957,8 @@ public class AudioService extends IAudioService.Stub
             uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
         }
         // If OP_AUDIO_MASTER_VOLUME is set, disallow unmuting.
-        if (!mute && mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid,
-                callingPackage, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
+        if (!mute && !checkNoteAppOp(
+                AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage, attributionTag)) {
             return;
         }
         if (userId != UserHandle.getCallingUserId() &&
@@ -4090,8 +4091,8 @@ public class AudioService extends IAudioService.Stub
                         ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE);
 
         // If OP_MUTE_MICROPHONE is set, disallow unmuting.
-        if (!on && mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, uid,
-                callingPackage, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
+        if (!on && !checkNoteAppOp(
+                AppOpsManager.OP_MUTE_MICROPHONE, uid, callingPackage, attributionTag)) {
             mmi.set(MediaMetrics.Property.EARLY_RETURN, "disallow unmuting").record();
             return;
         }
@@ -10573,5 +10574,33 @@ public class AudioService extends IAudioService.Stub
                     + " from mFullVolumeDevices");
         }
         mFullVolumeDevices.remove(audioSystemDeviceOut);
+    }
+
+    //====================
+    // Helper functions for app ops
+    //====================
+    /**
+     * Validates, and notes an app op for a given uid and package name.
+     * Validation comes from exception catching: a security exception indicates the package
+     * doesn't exist, an IAE indicates the uid and package don't match. The code only checks
+     * if exception was thrown for robustness to code changes in op validation
+     * @param op the app op to check
+     * @param uid the uid of the caller
+     * @param packageName the package to check
+     * @return true if the origin of the call is valid (no uid / package mismatch) and the caller
+     *      is allowed to perform the operation
+     */
+    private boolean checkNoteAppOp(int op, int uid, String packageName, String attributionTag) {
+        try {
+            if (mAppOps.noteOp(op, uid, packageName, attributionTag, null)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error noting op:" + op + " on uid:" + uid + " for package:"
+                    + packageName, e);
+            return false;
+        }
+        return true;
     }
 }
