@@ -734,8 +734,11 @@ public final class ActiveServices {
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
 
-        setFgsRestrictionLocked(callingPackage, callingPid, callingUid, r,
-                allowBackgroundActivityStarts);
+        if (!r.mAllowWhileInUsePermissionInFgs) {
+            r.mAllowWhileInUsePermissionInFgs =
+                    shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingPid,
+                            callingUid, service, r, allowBackgroundActivityStarts);
+        }
 
         return cmp;
     }
@@ -1408,6 +1411,14 @@ public final class ActiveServices {
                         +  String.format("0x%08X", manifestType)
                         + " in service element of manifest file");
                 }
+                // If the foreground service is not started from TOP process, do not allow it to
+                // have while-in-use location/camera/microphone access.
+                if (!r.mAllowWhileInUsePermissionInFgs) {
+                    Slog.w(TAG,
+                            "Foreground service started from background can not have "
+                                    + "location/camera/microphone access: service "
+                                    + r.shortInstanceName);
+                }
             }
             boolean alreadyStartedOp = false;
             boolean stopProcStatsOp = false;
@@ -1455,57 +1466,6 @@ public final class ActiveServices {
                     ignoreForeground = true;
                 }
 
-                if (!ignoreForeground) {
-                    if (r.mStartForegroundCount == 0) {
-                        /*
-                        If the service was started with startService(), not
-                        startForegroundService(), and if startForeground() isn't called within
-                        mFgsStartForegroundTimeoutMs, then we check the state of the app
-                        (who owns the service, which is the app that called startForeground())
-                        again. If the app is in the foreground, or in any other cases where
-                        FGS-starts are allowed, then we still allow the FGS to be started.
-                        Otherwise, startForeground() would fail.
-
-                        If the service was started with startForegroundService(), then the service
-                        must call startForeground() within a timeout anyway, so we don't need this
-                        check.
-                        */
-                        if (!r.fgRequired) {
-                            final long delayMs = SystemClock.elapsedRealtime() - r.createRealTime;
-                            if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
-                                resetFgsRestrictionLocked(r);
-                                setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.pid,
-                                        r.appInfo.uid, r, false);
-                                EventLog.writeEvent(0x534e4554, "183147114",
-                                        r.appInfo.uid,
-                                        "call setFgsRestrictionLocked again due to "
-                                                + "startForegroundTimeout");
-                            }
-                        }
-                    } else if (r.mStartForegroundCount >= 1) {
-                        // The second or later time startForeground() is called after service is
-                        // started. Check for app state again.
-                        final long delayMs = SystemClock.elapsedRealtime() -
-                                r.mLastSetFgsRestrictionTime;
-                        if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
-                            resetFgsRestrictionLocked(r);
-                            setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.pid,
-                                    r.appInfo.uid, r, false);
-                            EventLog.writeEvent(0x534e4554, "183147114", r.appInfo.uid,
-                                    "call setFgsRestrictionLocked for "
-                                            + (r.mStartForegroundCount + 1) + "th startForeground");
-                        }
-                    }
-                    // If the foreground service is not started from TOP process, do not allow it to
-                    // have while-in-use location/camera/microphone access.
-                    if (!r.mAllowWhileInUsePermissionInFgs) {
-                        Slog.w(TAG,
-                                "Foreground service started from background can not have "
-                                        + "location/camera/microphone access: service "
-                                        + r.shortInstanceName);
-                    }
-                }
-
                 // Apps under strict background restrictions simply don't get to have foreground
                 // services, so now that we've enforced the startForegroundService() contract
                 // we only do the machinery of making the service foreground when the app
@@ -1541,7 +1501,6 @@ public final class ActiveServices {
                             active.mNumActive++;
                         }
                         r.isForeground = true;
-                        r.mStartForegroundCount++;
                         if (!stopProcStatsOp) {
                             ServiceState stracker = r.getTracker();
                             if (stracker != null) {
@@ -1600,7 +1559,6 @@ public final class ActiveServices {
                     decActiveForegroundAppLocked(smap, r);
                 }
                 r.isForeground = false;
-                resetFgsRestrictionLocked(r);
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -2160,7 +2118,12 @@ public final class ActiveServices {
                 }
             }
 
-            setFgsRestrictionLocked(callingPackage, callingPid, callingUid, s, false);
+            if (!s.mAllowWhileInUsePermissionInFgs) {
+                s.mAllowWhileInUsePermissionInFgs =
+                        shouldAllowWhileInUsePermissionInFgsLocked(callingPackage,
+                                callingPid, callingUid,
+                                service, s, false);
+            }
 
             if (s.app != null) {
                 if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -3456,7 +3419,7 @@ public final class ActiveServices {
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
-        resetFgsRestrictionLocked(r);
+        r.mAllowWhileInUsePermissionInFgs = false;
 
         // Clear start entries.
         r.clearDeliveredStartsLocked();
@@ -4937,7 +4900,7 @@ public final class ActiveServices {
      * @return true if allow, false otherwise.
      */
     private boolean shouldAllowWhileInUsePermissionInFgsLocked(String callingPackage,
-            int callingPid, int callingUid, ServiceRecord r,
+            int callingPid, int callingUid, Intent intent, ServiceRecord r,
             boolean allowBackgroundActivityStarts) {
         // Is the background FGS start restriction turned on?
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
@@ -5018,33 +4981,5 @@ public final class ActiveServices {
             return true;
         }
         return false;
-    }
-
-    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
-            String callingPackage) {
-        return shouldAllowWhileInUsePermissionInFgsLocked(
-                callingPackage, callingPid, callingUid, null, false);
-    }
-
-    /**
-     * In R, mAllowWhileInUsePermissionInFgs is to allow while-in-use permissions in foreground
-     *  service or not. while-in-use permissions in FGS started from background might be restricted.
-     * @param callingPackage caller app's package name.
-     * @param callingUid caller app's uid.
-     * @param r the service to start.
-     * @return true if allow, false otherwise.
-     */
-    private void setFgsRestrictionLocked(String callingPackage,
-            int callingPid, int callingUid, ServiceRecord r,
-            boolean allowBackgroundActivityStarts) {
-        r.mLastSetFgsRestrictionTime = SystemClock.elapsedRealtime();
-        if (!r.mAllowWhileInUsePermissionInFgs) {
-            r.mAllowWhileInUsePermissionInFgs = shouldAllowWhileInUsePermissionInFgsLocked(
-                    callingPackage, callingPid, callingUid, r, allowBackgroundActivityStarts);
-        }
-    }
-
-    private void resetFgsRestrictionLocked(ServiceRecord r) {
-        r.mAllowWhileInUsePermissionInFgs = false;
     }
 }
