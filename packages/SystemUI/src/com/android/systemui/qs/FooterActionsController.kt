@@ -213,5 +213,13 @@ class FooterActionsController @Inject constructor(
         mView.setKeyguardShowing()
     }
 
+    fun refreshVisibility(shouldBeVisible: Boolean) {
+        if (shouldBeVisible) {
+            showFooter()
+        } else {
+            hideFooter()
+        }
+    }
+
     private fun isTunerEnabled() = tunerService.isTunerEnabled
 }
