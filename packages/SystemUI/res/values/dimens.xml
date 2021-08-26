@@ -1599,8 +1599,6 @@
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
 
-    <dimen name="drag_and_drop_icon_size">70dp</dimen>
-
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
     <dimen name="internet_dialog_list_max_height">646dp</dimen>
