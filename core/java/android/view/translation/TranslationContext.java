@@ -17,6 +17,10 @@
 package android.view.translation;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.app.assist.ActivityId;
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
@@ -63,6 +67,46 @@ public final class TranslationContext implements Parcelable {
 
     private static int defaultTranslationFlags() {
         return 0;
+    }
+
+    /**
+     * The identifier for the Activity which needs UI translation.
+     *
+     * @hide
+     */
+    @Nullable
+    private final ActivityId mActivityId;
+
+    private static ActivityId defaultActivityId() {
+        return null;
+    }
+
+    private void parcelActivityId(@NonNull Parcel dest, int flags) {
+        dest.writeBoolean(mActivityId != null);
+        if (mActivityId != null) {
+            mActivityId.writeToParcel(dest, flags);
+        }
+    }
+
+    @Nullable
+    private ActivityId unparcelActivityId(@NonNull Parcel in) {
+        final boolean hasActivityId = in.readBoolean();
+        return hasActivityId ? new ActivityId(in) : null;
+    }
+
+    /**
+     * Returns the identifier for the Activity which needs UI translation or {@code null}
+     * if it is a non-UI translation request.
+     *
+     * NOTE: If the application receiving this ActivityId also provides a ContentCaptureService, it
+     * can be used to associate a TranslationRequest with a particular ContentCaptureSession.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public ActivityId getActivityId() {
+        return mActivityId;
     }
 
     @DataClass.Suppress({"setSourceSpec", "setTargetSpec"})
@@ -119,7 +163,8 @@ public final class TranslationContext implements Parcelable {
     /* package-private */ TranslationContext(
             @NonNull TranslationSpec sourceSpec,
             @NonNull TranslationSpec targetSpec,
-            @TranslationFlag int translationFlags) {
+            @TranslationFlag int translationFlags,
+            @Nullable ActivityId activityId) {
         this.mSourceSpec = sourceSpec;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSourceSpec);
@@ -133,6 +178,7 @@ public final class TranslationContext implements Parcelable {
                 FLAG_LOW_LATENCY
                         | FLAG_TRANSLITERATION
                         | FLAG_DEFINITIONS);
+        this.mActivityId = activityId;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -170,19 +216,24 @@ public final class TranslationContext implements Parcelable {
         return "TranslationContext { " +
                 "sourceSpec = " + mSourceSpec + ", " +
                 "targetSpec = " + mTargetSpec + ", " +
-                "translationFlags = " + translationFlagToString(mTranslationFlags) +
+                "translationFlags = " + translationFlagToString(mTranslationFlags) + ", " +
+                "activityId = " + mActivityId +
         " }";
     }
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mActivityId != null) flg |= 0x8;
+        dest.writeByte(flg);
         dest.writeTypedObject(mSourceSpec, flags);
         dest.writeTypedObject(mTargetSpec, flags);
         dest.writeInt(mTranslationFlags);
+        parcelActivityId(dest, flags);
     }
 
     @Override
@@ -192,13 +243,15 @@ public final class TranslationContext implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ TranslationContext(@NonNull android.os.Parcel in) {
+    /* package-private */ TranslationContext(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
         TranslationSpec sourceSpec = (TranslationSpec) in.readTypedObject(TranslationSpec.CREATOR);
         TranslationSpec targetSpec = (TranslationSpec) in.readTypedObject(TranslationSpec.CREATOR);
         int translationFlags = in.readInt();
+        ActivityId activityId = unparcelActivityId(in);
 
         this.mSourceSpec = sourceSpec;
         com.android.internal.util.AnnotationValidations.validate(
@@ -213,6 +266,7 @@ public final class TranslationContext implements Parcelable {
                 FLAG_LOW_LATENCY
                         | FLAG_TRANSLITERATION
                         | FLAG_DEFINITIONS);
+        this.mActivityId = activityId;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -226,7 +280,7 @@ public final class TranslationContext implements Parcelable {
         }
 
         @Override
-        public TranslationContext createFromParcel(@NonNull android.os.Parcel in) {
+        public TranslationContext createFromParcel(@NonNull Parcel in) {
             return new TranslationContext(in);
         }
     };
@@ -241,6 +295,7 @@ public final class TranslationContext implements Parcelable {
         private @NonNull TranslationSpec mSourceSpec;
         private @NonNull TranslationSpec mTargetSpec;
         private @TranslationFlag int mTranslationFlags;
+        private @Nullable ActivityId mActivityId;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -274,23 +329,40 @@ public final class TranslationContext implements Parcelable {
             return this;
         }
 
+        /**
+         * The identifier for the Activity which needs UI translation.
+         *
+         * @hide
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setActivityId(@NonNull ActivityId value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mActivityId = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull TranslationContext build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
+            mBuilderFieldsSet |= 0x10; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x4) == 0) {
                 mTranslationFlags = defaultTranslationFlags();
             }
+            if ((mBuilderFieldsSet & 0x8) == 0) {
+                mActivityId = defaultActivityId();
+            }
             TranslationContext o = new TranslationContext(
                     mSourceSpec,
                     mTargetSpec,
-                    mTranslationFlags);
+                    mTranslationFlags,
+                    mActivityId);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
+            if ((mBuilderFieldsSet & 0x10) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -298,10 +370,10 @@ public final class TranslationContext implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621545292157L,
+            time = 1638348645427L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationContext.java",
-            inputSignatures = "public static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_LOW_LATENCY\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_TRANSLITERATION\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_DEFINITIONS\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mTranslationFlags\nprivate static  int defaultTranslationFlags()\nclass TranslationContext extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_LOW_LATENCY\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_TRANSLITERATION\npublic static final @android.view.translation.TranslationContext.TranslationFlag int FLAG_DEFINITIONS\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mTranslationFlags\nprivate final @android.annotation.Nullable android.app.assist.ActivityId mActivityId\nprivate static  int defaultTranslationFlags()\nprivate static  android.app.assist.ActivityId defaultActivityId()\nprivate  void parcelActivityId(android.os.Parcel,int)\nprivate @android.annotation.Nullable android.app.assist.ActivityId unparcelActivityId(android.os.Parcel)\npublic @android.annotation.SystemApi @android.annotation.Nullable android.app.assist.ActivityId getActivityId()\nclass TranslationContext extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
