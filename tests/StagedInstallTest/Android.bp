@@ -37,6 +37,7 @@ android_test_helper_app {
         ":test.rebootless_apex_v1",
         ":test.rebootless_apex_v2",
     ],
+    platform_apis: true,
 }
 
 java_test_host {
