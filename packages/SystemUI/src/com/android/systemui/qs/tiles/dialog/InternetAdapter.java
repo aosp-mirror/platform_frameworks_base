@@ -19,7 +19,6 @@ package com.android.systemui.qs.tiles.dialog;
 import static com.android.wifitrackerlib.WifiEntry.SECURITY_NONE;
 import static com.android.wifitrackerlib.WifiEntry.SECURITY_OWE;
 
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -35,10 +34,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -98,8 +97,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         return mInternetDialogController.getWifiEntryList().stream()
-                .filter(wifiAp -> wifiAp.getConnectedState()
-                        != WifiEntry.CONNECTED_STATE_CONNECTED)
+                .filter(wifiEntry -> (!wifiEntry.isDefaultNetwork()
+                        || !wifiEntry.hasInternetAccess()))
                 .limit(getItemCount())
                 .collect(Collectors.toList());
     }
@@ -109,21 +108,21 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
      * {@link InternetDialog}.
      *
      * Airplane mode is ON (mobile network is gone):
-     *   Return four Wi-Fi's entries if no connected Wi-Fi.
-     *   Return three Wi-Fi's entries if one connected Wi-Fi.
+     *   Return four Wi-Fi's entries if no internet Wi-Fi.
+     *   Return three Wi-Fi's entries if one internet Wi-Fi.
      * Airplane mode is OFF (mobile network is visible):
-     *   Return three Wi-Fi's entries if no connected Wi-Fi.
-     *   Return two Wi-Fi's entries if one connected Wi-Fi.
+     *   Return three Wi-Fi's entries if no internet Wi-Fi.
+     *   Return two Wi-Fi's entries if one internet Wi-Fi.
      *
      * @return The total number of networks.
      */
     @Override
     public int getItemCount() {
-        boolean hasConnectedWifi = mInternetDialogController.getConnectedWifiEntry() != null;
+        final boolean hasInternetWifi = mInternetDialogController.getInternetWifiEntry() != null;
         if (mInternetDialogController.isAirplaneModeEnabled()) {
-            return hasConnectedWifi ? 3 : 4;
+            return hasInternetWifi ? 3 : 4;
         } else {
-            return hasConnectedWifi ? 2 : 3;
+            return hasInternetWifi ? 2 : 3;
         }
     }
 
@@ -142,6 +141,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         final Context mContext;
         final InternetDialogController mInternetDialogController;
 
+        protected WifiUtils.InternetIconInjector mWifiIconInjector;
+
         InternetViewHolder(View view, InternetDialogController internetDialogController) {
             super(view);
             mContext = view.getContext();
@@ -153,6 +154,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiTitleText = view.requireViewById(R.id.wifi_title);
             mWifiSummaryText = view.requireViewById(R.id.wifi_summary);
             mWifiLockedIcon = view.requireViewById(R.id.wifi_locked_icon);
+            mWifiIconInjector = mInternetDialogController.getWifiIconInjector();
         }
 
         void onBind(WifiEntry wifiEntry) {
@@ -174,10 +176,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                     Html.fromHtml(wifiEntry.getSummary(false), Html.FROM_HTML_MODE_LEGACY));
 
             mWifiListLayout.setOnClickListener(v -> {
-                if (!isOpenNetwork(security)) {
-                    // Popup Wi-Fi password dialog condition:
-                    // 1. The access point is a non-open network.
-                    // 2. The Wi-Fi connection is not connected with this access point.
+                if (wifiEntry.shouldEditBeforeConnect()) {
                     final Intent intent = new Intent(ACTION_WIFI_DIALOG);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -210,19 +209,17 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiSummaryText.setText(summary);
         }
 
-        Drawable getWifiDrawable(WifiEntry wifiEntry) throws Throwable {
-            Drawable drawable = mContext.getDrawable(
-                    com.android.internal.R.drawable.ic_wifi_signal_0);
-
-            AtomicReference<Drawable> shared = new AtomicReference<>();
-            final @ColorInt int tint = Utils.getColorAttrDefaultColor(mContext,
-                    android.R.attr.colorControlNormal);
-            Drawable signalDrawable = mContext.getDrawable(
-                    Utils.getWifiIconResource(wifiEntry.getLevel()));
-            signalDrawable.setTint(tint);
-            shared.set(signalDrawable);
-            drawable = shared.get();
-            return drawable;
+        Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) throws Throwable {
+            final Drawable drawable = mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(),
+                    wifiEntry.getLevel());
+            if (drawable == null) {
+                return null;
+            }
+            drawable.setTint(
+                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorTertiary));
+            final AtomicReference<Drawable> shared = new AtomicReference<>();
+            shared.set(drawable);
+            return shared.get();
         }
     }
 }

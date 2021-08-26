@@ -152,7 +152,6 @@
     <!-- Chosen so fill over background matches single tone -->
     <color name="dark_mode_qs_icon_color_dual_tone_fill">#99000000</color>
 
-    <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
     <color name="minimize_dock_shadow_start">#60000000</color>
@@ -294,6 +293,6 @@
     <color name="settingslib_track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
-    <color name="connected_network_primary_color">#ff000000</color>
-    <color name="connected_network_tertiary_color">#808080</color>
+    <color name="connected_network_primary_color">#191C18</color>
+    <color name="connected_network_secondary_color">#41493D</color>
 </resources>

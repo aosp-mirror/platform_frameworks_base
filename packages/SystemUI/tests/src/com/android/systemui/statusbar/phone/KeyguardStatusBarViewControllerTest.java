@@ -65,6 +65,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
+    @Mock
+    private KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider;
 
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
@@ -89,7 +91,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mUserInfoController,
                 mStatusBarIconController,
                 new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
-                mBatteryMeterViewController
+                mBatteryMeterViewController,
+                mViewStateProvider
         );
     }
 

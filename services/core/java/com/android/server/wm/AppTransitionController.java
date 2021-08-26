@@ -39,6 +39,7 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
@@ -204,8 +205,8 @@ public class AppTransitionController {
                 mDisplayContent.mOpeningApps);
 
         final @TransitionOldType int transit = getTransitCompatType(
-                mDisplayContent.mAppTransition,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                mDisplayContent.mAppTransition, mDisplayContent.mOpeningApps,
+                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers,
                 mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper(),
                 mDisplayContent.mSkipAppTransitionAnimation);
         mDisplayContent.mSkipAppTransitionAnimation = false;
@@ -286,6 +287,7 @@ public class AppTransitionController {
      * @param appTransition {@link AppTransition} for managing app transition state.
      * @param openingApps {@link ActivityRecord}s which are becoming visible.
      * @param closingApps {@link ActivityRecord}s which are becoming invisible.
+     * @param changingContainers {@link WindowContainer}s which are changed in configuration.
      * @param wallpaperTarget If non-null, this is the currently visible window that is associated
      *                        with the wallpaper.
      * @param oldWallpaper The currently visible window that is associated with the wallpaper in
@@ -294,8 +296,8 @@ public class AppTransitionController {
      */
     static @TransitionOldType int getTransitCompatType(AppTransition appTransition,
             ArraySet<ActivityRecord> openingApps, ArraySet<ActivityRecord> closingApps,
-            @Nullable WindowState wallpaperTarget, @Nullable WindowState oldWallpaper,
-            boolean skipAppTransitionAnimation) {
+            ArraySet<WindowContainer> changingContainers, @Nullable WindowState wallpaperTarget,
+            @Nullable WindowState oldWallpaper, boolean skipAppTransitionAnimation) {
 
         // Determine if closing and opening app token sets are wallpaper targets, in which case
         // special animations are needed.
@@ -328,8 +330,18 @@ public class AppTransitionController {
 
         // Special transitions
         // TODO(new-app-transitions): Revisit if those can be rewritten by using flags.
-        if (appTransition.containsTransitRequest(TRANSIT_CHANGE)) {
-            return TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+        if (appTransition.containsTransitRequest(TRANSIT_CHANGE) && !changingContainers.isEmpty()) {
+            @TransitContainerType int changingType =
+                    getTransitContainerType(changingContainers.valueAt(0));
+            switch (changingType) {
+                case TYPE_TASK:
+                    return TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+                case TYPE_TASK_FRAGMENT:
+                    return TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+                default:
+                    throw new IllegalStateException(
+                            "TRANSIT_CHANGE with unrecognized changing type=" + changingType);
+            }
         }
         if ((flags & TRANSIT_FLAG_APP_CRASHED) != 0) {
             return TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
