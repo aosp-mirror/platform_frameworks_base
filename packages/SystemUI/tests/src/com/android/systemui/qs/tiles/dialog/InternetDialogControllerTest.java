@@ -35,6 +35,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiUtils;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -288,8 +289,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.getConnectedWifiDrawable(mConnectedEntry);
 
         verify(mWifiIconInjector).getIcon(eq(false), anyInt());
-        verify(drawable).setTint(Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorControlNormal));
+        verify(drawable).setTint(mContext.getColor(R.color.connected_network_primary_color));
     }
 
     @Test

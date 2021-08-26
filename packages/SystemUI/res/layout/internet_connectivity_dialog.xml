@@ -94,8 +94,8 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:layout_gravity="center_vertical|start"
                     android:orientation="horizontal"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
                     android:layout_marginTop="16dp"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
@@ -107,6 +107,7 @@
                         android:layout_gravity="center_vertical|start">
                         <ImageView
                             android:id="@+id/signal_icon"
+                            android:autoMirrored="true"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"/>
@@ -122,10 +123,11 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/mobile_title"
-                            android:layout_marginLeft="16dp"
+                            android:textDirection="locale"
+                            android:layout_marginStart="16dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
+                            android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
@@ -133,10 +135,11 @@
                             android:fontFamily="google-sans"/>
                         <TextView
                             android:id="@+id/mobile_summary"
-                            android:layout_marginLeft="16dp"
+                            android:textDirection="locale"
+                            android:layout_marginStart="16dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
+                            android:layout_gravity="center_vertical|start"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
@@ -169,8 +172,8 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
 
@@ -182,6 +185,7 @@
                         android:layout_height="match_parent">
                         <TextView
                             android:text="@string/turn_on_wifi"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="start|center_vertical"
@@ -217,8 +221,8 @@
                     android:visibility="gone"
                     android:background="?android:attr/selectableItemBackground"
                     android:orientation="horizontal"
-                    android:layout_marginRight="@dimen/settingslib_switchbar_margin"
-                    android:layout_marginLeft="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginEnd="@dimen/settingslib_switchbar_margin"
+                    android:layout_marginStart="@dimen/settingslib_switchbar_margin"
                     android:paddingStart="22dp"
                     android:paddingEnd="22dp">
 
@@ -244,10 +248,11 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/wifi_connected_title"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginStart="16dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorPrimary"
@@ -255,10 +260,11 @@
                             android:fontFamily="google-sans"/>
                         <TextView
                             android:id="@+id/wifi_connected_summary"
+                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="16dp"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginStart="16dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="?android:attr/textColorTertiary"
@@ -269,7 +275,7 @@
                     <FrameLayout
                         android:layout_width="24dp"
                         android:layout_height="match_parent"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginEnd="5dp"
                         android:clickable="false"
                         android:gravity="center">
                         <ImageView
@@ -323,9 +329,10 @@
                     android:clickable="false"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="16dp">
+                    android:layout_marginStart="16dp">
                     <TextView
                         android:text="@string/see_all_networks"
+                        android:textDirection="locale"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="start|center_vertical"
@@ -353,7 +360,7 @@
                     android:id="@+id/done"
                     android:layout_width="60dp"
                     android:layout_height="30dp"
-                    android:layout_marginRight="24dp"
+                    android:layout_marginEnd="24dp"
                     android:layout_gravity="end"
                     android:background="@drawable/internet_dialog_footer_background"
                     android:textColor="?android:attr/textColorPrimary"
