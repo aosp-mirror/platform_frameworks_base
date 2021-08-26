@@ -326,12 +326,12 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"melakukan dan mengelola panggilan telepon"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensor tubuh"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"mengakses data sensor tentang tanda-tanda vital"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Mengambil konten jendela"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Membaca konten di jendela"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Memeriksa konten di jendela yang sedang Anda buka."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan gestur."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Mengamati teks yang Anda ketik"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Termasuk data pribadi, seperti nomor kartu kredit dan sandi."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Mengontrol perbesaran layar"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Mengontrol tingkat zoom dan pemosisian layar."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Melakukan isyarat"</string>
