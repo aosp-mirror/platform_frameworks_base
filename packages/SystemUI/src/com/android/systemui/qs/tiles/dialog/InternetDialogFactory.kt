@@ -41,15 +41,16 @@ class InternetDialogFactory @Inject constructor(
     }
 
     /** Creates a [InternetDialog]. */
-    fun create(aboveStatusBar: Boolean) {
+    fun create(aboveStatusBar: Boolean, canConfigMobileData: Boolean) {
         if (internetDialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "InternetDialog is showing, do not create it twice.")
             }
             return
         } else {
-            internetDialog = InternetDialog(context, this, internetDialogController, aboveStatusBar,
-                    uiEventLogger, handler)
+            internetDialog = InternetDialog(context, this, internetDialogController,
+                    canConfigMobileData, aboveStatusBar, uiEventLogger, handler)
+            internetDialog?.show()
         }
     }
 
