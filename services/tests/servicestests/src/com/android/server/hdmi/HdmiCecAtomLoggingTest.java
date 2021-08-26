@@ -42,7 +42,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.stats.hdmi.nano.HdmiStatsEnums;
+import android.stats.hdmi.HdmiStatsEnums;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -53,6 +53,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,6 +135,8 @@ public class HdmiCecAtomLoggingTest {
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mTestLooper.dispatchAll();
+
+        Mockito.reset(mHdmiCecAtomWriterSpy);
     }
 
     @Test
@@ -149,6 +152,7 @@ public class HdmiCecAtomLoggingTest {
                 mPhysicalAddress);
 
         mHdmiCecController.sendCommand(message);
+        mTestLooper.dispatchAll();
 
         verify(mHdmiCecAtomWriterSpy, times(1)).messageReported(
                 eq(message),
@@ -192,5 +196,110 @@ public class HdmiCecAtomLoggingTest {
                 anyInt(),
                 eq(callerUid),
                 anyInt());
+    }
+
+    @Test
+    public void testMessageReported_writesAtom_userControlPressed() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildUserControlPressed(
+                Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1,
+                HdmiCecKeycode.CEC_KEYCODE_MUTE
+        );
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_TV,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_USER_CONTROL_PRESSED,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.VOLUME_MUTE,
+                        HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+    }
+
+    @Test
+    public void testMessageReported_writesAtom_userControlPressed_noParams() {
+        HdmiCecMessage message = new HdmiCecMessage(
+                Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1,
+                Constants.MESSAGE_USER_CONTROL_PRESSED,
+                new byte[0]);
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_TV,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_USER_CONTROL_PRESSED,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
+                        HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+    }
+
+    @Test
+    public void testMessageReported_writesAtom_featureAbort() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1,
+                Constants.MESSAGE_RECORD_ON,
+                Constants.ABORT_UNRECOGNIZED_OPCODE
+        );
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_TV,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_FEATURE_ABORT,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
+                        Constants.MESSAGE_RECORD_ON,
+                        HdmiStatsEnums.UNRECOGNIZED_OPCODE);
+    }
+
+    @Test
+    public void testMessageReported_writesAtom_featureAbort_noParams() {
+        HdmiCecMessage message = new HdmiCecMessage(
+                Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1,
+                Constants.MESSAGE_FEATURE_ABORT,
+                new byte[0]);
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_TV,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_FEATURE_ABORT,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
+                        HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
     }
 }
