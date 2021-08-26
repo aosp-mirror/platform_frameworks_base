@@ -211,6 +211,8 @@ message DisplayContentProto {
 
     optional DisplayRotationProto display_rotation = 33;
     optional int32 ime_policy = 34;
+
+    repeated InsetsSourceProviderProto insets_source_providers = 35;
 }
 
 /* represents DisplayArea object */

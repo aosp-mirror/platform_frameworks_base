@@ -111,6 +111,7 @@ import static com.android.server.wm.DisplayContentProto.IME_POLICY;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_CONTROL_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
+import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
@@ -3225,10 +3226,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mCurrentFocus != null) {
             mCurrentFocus.dumpDebug(proto, CURRENT_FOCUS, logLevel);
         }
-        if (mInsetsStateController != null
-                && mInsetsStateController.getImeSourceProvider() != null) {
-            mInsetsStateController.getImeSourceProvider().dumpDebug(proto,
-                    IME_INSETS_SOURCE_PROVIDER, logLevel);
+        if (mInsetsStateController != null) {
+            for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
+                final InsetsSourceProvider provider = mInsetsStateController.peekSourceProvider(
+                        type);
+                if (provider != null) {
+                    provider.dumpDebug(proto, type == ITYPE_IME ? IME_INSETS_SOURCE_PROVIDER :
+                            INSETS_SOURCE_PROVIDERS, logLevel);
+                }
+            }
         }
         proto.write(IME_POLICY, getImePolicy());
         proto.end(token);
