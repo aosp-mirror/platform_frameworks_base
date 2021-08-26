@@ -39,7 +39,7 @@ interface IOverlayManager {
      *         requested user, an empty map is returned.
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    Map getAllOverlays(in int userId);
+    Map<String, List<OverlayInfo>> getAllOverlays(in int userId);
 
     /**
      * Returns information about all overlays for the given target package for
@@ -51,7 +51,7 @@ interface IOverlayManager {
      * @return A list of OverlayInfo objects; if no overlays exist for the
      *         requested package, an empty list is returned.
      */
-    List getOverlayInfosForTarget(in String targetPackageName, in int userId);
+    List<OverlayInfo> getOverlayInfosForTarget(in String targetPackageName, in int userId);
 
     /**
      * Returns information about the overlay with the given package name for the

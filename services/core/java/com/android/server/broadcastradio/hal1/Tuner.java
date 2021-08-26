@@ -28,10 +28,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 class Tuner extends ITuner.Stub {
     private static final String TAG = "BroadcastRadioService.Tuner";
@@ -292,12 +290,12 @@ class Tuner extends ITuner.Stub {
     }
 
     @Override
-    public Map setParameters(Map parameters) {
+    public Map<String, String> setParameters(Map<String, String> parameters) {
         throw new UnsupportedOperationException("Not supported by HAL 1.x");
     }
 
     @Override
-    public Map getParameters(List<String> keys) {
+    public Map<String, String> getParameters(List<String> keys) {
         throw new UnsupportedOperationException("Not supported by HAL 1.x");
     }
 }

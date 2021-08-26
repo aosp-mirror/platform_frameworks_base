@@ -2,4 +2,4 @@
 per-file android_mtp_*.cpp=marcone@google.com,jsharkey@android.com,jameswei@google.com,rmojumder@google.com
 
 # extra for TV related files
-per-file android_media_tv_*=nchalko@google.com,quxiangfang@google.com
+per-file android_media_tv_*=hgchen@google.com,quxiangfang@google.com
