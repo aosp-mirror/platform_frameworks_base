@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics;
 
-import static android.hardware.fingerprint.IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
+import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -241,8 +242,8 @@ public class UdfpsController implements DozeReceiver {
                 @NonNull IUdfpsOverlayControllerCallback callback) {
             mFgExecutor.execute(() -> {
                 final UdfpsEnrollHelper enrollHelper;
-                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                if (reason == BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
+                        || reason == BiometricOverlayConstants.REASON_ENROLL_ENROLLING) {
                     enrollHelper = new UdfpsEnrollHelper(mContext, reason);
                 } else {
                     enrollHelper = null;
@@ -320,7 +321,7 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mServerRequest != null
-                    && mServerRequest.mRequestReason != REASON_AUTH_FPM_KEYGUARD
+                    && mServerRequest.mRequestReason != REASON_AUTH_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
                         + mServerRequest.mRequestReason);
@@ -747,9 +748,9 @@ public class UdfpsController implements DozeReceiver {
 
                 // This view overlaps the sensor area, so prevent it from being selectable
                 // during a11y.
-                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING
-                        || reason == IUdfpsOverlayController.REASON_AUTH_BP) {
+                if (reason == BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
+                        || reason == BiometricOverlayConstants.REASON_ENROLL_ENROLLING
+                        || reason == BiometricOverlayConstants.REASON_AUTH_BP) {
                     mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
 
@@ -767,8 +768,8 @@ public class UdfpsController implements DozeReceiver {
 
     private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
         switch (reason) {
-            case IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR:
-            case IUdfpsOverlayController.REASON_ENROLL_ENROLLING:
+            case BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR:
+            case BiometricOverlayConstants.REASON_ENROLL_ENROLLING:
                 UdfpsEnrollView enrollView = (UdfpsEnrollView) mInflater.inflate(
                         R.layout.udfps_enroll_view, null);
                 mView.addView(enrollView);
@@ -780,7 +781,7 @@ public class UdfpsController implements DozeReceiver {
                         mStatusBarOptional,
                         mDumpManager
                 );
-            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
+            case BiometricOverlayConstants.REASON_AUTH_KEYGUARD:
                 UdfpsKeyguardView keyguardView = (UdfpsKeyguardView)
                         mInflater.inflate(R.layout.udfps_keyguard_view, null);
                 mView.addView(keyguardView);
@@ -799,7 +800,7 @@ public class UdfpsController implements DozeReceiver {
                         mKeyguardStateController,
                         this
                 );
-            case IUdfpsOverlayController.REASON_AUTH_BP:
+            case BiometricOverlayConstants.REASON_AUTH_BP:
                 // note: empty controller, currently shows no visual affordance
                 UdfpsBpView bpView = (UdfpsBpView) mInflater.inflate(R.layout.udfps_bp_view, null);
                 mView.addView(bpView);
@@ -809,7 +810,7 @@ public class UdfpsController implements DozeReceiver {
                         mStatusBarOptional,
                         mDumpManager
                 );
-            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
+            case BiometricOverlayConstants.REASON_AUTH_OTHER:
                 UdfpsFpmOtherView authOtherView = (UdfpsFpmOtherView)
                         mInflater.inflate(R.layout.udfps_fpm_other_view, null);
                 mView.addView(authOtherView);
