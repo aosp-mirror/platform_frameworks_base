@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট নিন"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock বন্ধ করা হয়েছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
@@ -1163,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"যাচাইকরণ করতে হবে। যাচাইকরণ করতে আঙুলের ছাপের সেন্সরে টাচ করুন।"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ব্যবহারকারী এখন ফোনে কথা বলছেন"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"বিমান মোড"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"মোবাইল ডেটা"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"কানেক্ট করা আছে"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ইন্টারনেট অটোমেটিক কানেক্ট হবে না"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"কানেকশন নেই"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"অন্য কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"ওয়াই-ফাই"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"নেটওয়ার্কের বিবরণ"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"কানেক্ট করতে একটি নেটওয়ার্কে ট্যাপ করুন"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"নেটওয়ার্ক দেখার জন্য আনলক করুন"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"নেটওয়ার্ক সার্চ করা হচ্ছে…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"নেটওয়ার্কে কানেক্ট করা যায়নি"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
 </resources>

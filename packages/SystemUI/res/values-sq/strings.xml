@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zmadho për të mbushur ekranin"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Shtrije për të mbushur ekranin"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Pamja e ekranit"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock është çaktivizuar"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"dërgoi një imazh"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Po ruan pamjen e ekranit..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Po ruan pamjen e ekranit…"</string>
@@ -1163,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Përdor gjurmën e gishtit për ta hapur"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kërkohet vërtetimi. Prek sensorin e gjurmës së gishtit për t\'u vërtetuar."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonatë në vazhdim"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"Modaliteti i aeroplanit"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Të dhënat celulare"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Lidhur"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Interneti nuk do të lidhet automatikisht"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nuk ka lidhje"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nuk ofrohet asnjë rrjet tjetër"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Nuk ofrohet asnjë rrjet"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Detajet e rrjetit"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Trokit te një rrjet për t\'u lidhur"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Shkyçe për të parë rrjetet"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Po kërkon për rrjete…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Lidhja me rrjetin dështoi"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Shiko të gjitha"</string>
 </resources>
