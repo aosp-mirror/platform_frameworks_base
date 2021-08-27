@@ -35,10 +35,12 @@ import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -76,6 +78,8 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
+    private final FeatureFlags mFeatureFlags;
+    private final UserSwitchDialogController mUserSwitchDialogController;
     private NotificationPanelViewController mNotificationPanelViewController;
     UserSwitcherController.UserRecord mCurrentUser;
 
@@ -124,7 +128,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
             Provider<UserDetailView.Adapter> userDetailViewAdapterProvider,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            FeatureFlags featureFlags,
+            UserSwitchDialogController userSwitchDialogController) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
@@ -140,6 +146,8 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                 unlockedScreenOffAnimationController,  /* animateYPos= */ false,
                 /* visibleOnCommunal= */ false);
         mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
+        mFeatureFlags = featureFlags;
+        mUserSwitchDialogController = userSwitchDialogController;
     }
 
     @Override
@@ -163,7 +171,11 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             }
 
             // Tapping anywhere in the view will open QS user panel
-            openQsUserPanel();
+            if (mFeatureFlags.useNewUserSwitcher()) {
+                mUserSwitchDialogController.showDialog(mView);
+            } else {
+                openQsUserPanel();
+            }
         });
 
         mView.setAccessibilityDelegate(new View.AccessibilityDelegate() {

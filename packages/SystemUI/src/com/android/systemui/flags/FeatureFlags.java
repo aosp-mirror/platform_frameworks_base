@@ -191,6 +191,13 @@ public class FeatureFlags {
         return FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
+    /**
+     * Use the new version of the user switcher
+     */
+    public boolean useNewUserSwitcher() {
+        return mFlagReader.isEnabled(R.bool.flag_new_user_switcher);
+    }
+
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
