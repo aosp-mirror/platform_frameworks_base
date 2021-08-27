@@ -27,13 +27,15 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.wm.shell.flicker.helpers.ImeAppHelper
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
+import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import com.android.wm.shell.flicker.helpers.ImeAppHelper
+import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -56,6 +58,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @Before
     open fun setup() {
+        // Only run legacy split tests when the system is using legacy split screen.
+        assumeTrue(SplitScreenHelper.isUsingLegacySplit())
         // Legacy split is having some issue with Shell transition, and will be deprecated soon.
         assumeFalse(isShellTransitionsEnabled())
     }
