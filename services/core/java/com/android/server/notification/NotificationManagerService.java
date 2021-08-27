@@ -8758,9 +8758,21 @@ public class NotificationManagerService extends SystemService {
 
     void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
             ManagedServiceInfo listener) {
-        String listenerName = listener == null ? null : listener.component.toShortString();
+        if (listener == null) {
+            return;
+        }
+        String listenerName = listener.component.toShortString();
         if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
             return;
+        }
+        synchronized (mNotificationLock) {
+            final NotificationRecord r = findInCurrentAndSnoozedNotificationByKeyLocked(key);
+            if (r == null) {
+                return;
+            }
+            if (!listener.enabledAndUserMatches(r.getSbn().getNormalizedUserId())){
+                return;
+            }
         }
 
         if (DBG) {

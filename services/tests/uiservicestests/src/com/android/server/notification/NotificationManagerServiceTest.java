@@ -516,7 +516,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
-        mWorkerHandler = mService.new WorkerHandler(mTestableLooper.getLooper());
+        mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
         mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
                 mockLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
@@ -2700,6 +2700,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mNotificationInstanceIdSequence);
 
         assertFalse(noManService.hasCompanionDevice(mListener));
+    }
+
+    @Test
+    public void testCrossUserSnooze() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 10);
+        mService.addNotification(r);
+        NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(r2);
+
+        mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        mListener.component = new ComponentName(PKG, PKG);
+        when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+
+        mService.snoozeNotificationInt(r.getKey(), 1000, null, mListener);
+
+        verify(mWorkerHandler, never()).post(
+                any(NotificationManagerService.SnoozeNotificationRunnable.class));
+    }
+
+    @Test
+    public void testSameUserSnooze() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 10);
+        mService.addNotification(r);
+        NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(r2);
+
+        mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        mListener.component = new ComponentName(PKG, PKG);
+        when(mListener.enabledAndUserMatches(anyInt())).thenReturn(true);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+
+        mService.snoozeNotificationInt(r2.getKey(), 1000, null, mListener);
+
+        verify(mWorkerHandler).post(
+                any(NotificationManagerService.SnoozeNotificationRunnable.class));
     }
 
     @Test
