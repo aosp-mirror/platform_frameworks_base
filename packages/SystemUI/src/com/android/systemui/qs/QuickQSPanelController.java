@@ -81,7 +81,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
         mBrightnessController.init(mShouldUseSplitNotificationShade);
         mFooterActionsController.init();
-        refreshFooterVisibility();
+        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override
@@ -109,14 +109,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         return mView.isListening();
     }
 
-    private void refreshFooterVisibility() {
-        if (mShouldUseSplitNotificationShade) {
-            mFooterActionsController.showFooter();
-        } else {
-            mFooterActionsController.hideFooter();
-        }
-    }
-
     private void setMaxTiles(int parseNumTiles) {
         mView.setMaxTiles(parseNumTiles);
         setTiles();
@@ -129,9 +121,9 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     }
 
     @Override
-    protected void onScreenRotated() {
+    protected void onConfigurationChanged() {
         mBrightnessController.refreshVisibility(mShouldUseSplitNotificationShade);
-        refreshFooterVisibility();
+        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override

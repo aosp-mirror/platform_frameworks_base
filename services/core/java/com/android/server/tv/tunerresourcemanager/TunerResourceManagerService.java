@@ -922,8 +922,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         if (clientId == fe.getOwnerClientId()) {
             ClientProfile ownerClient = getClientProfile(fe.getOwnerClientId());
-            for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
-                clearFrontendAndClientMapping(getClientProfile(shareOwnerId));
+            if (ownerClient != null) {
+                for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
+                    clearFrontendAndClientMapping(getClientProfile(shareOwnerId));
+                }
             }
         }
         clearFrontendAndClientMapping(getClientProfile(clientId));
@@ -1039,20 +1041,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     @VisibleForTesting
     protected boolean reclaimResource(int reclaimingClientId,
             @TunerResourceManager.TunerResourceType int resourceType) {
-        if (DEBUG) {
-            Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
-                    + resourceType);
-        }
-        try {
-            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
-            return false;
-        }
 
         // Reclaim all the resources of the share owners of the frontend that is used by the current
         // resource reclaimed client.
         ClientProfile profile = getClientProfile(reclaimingClientId);
+        if (profile == null) {
+            return true;
+        }
         Set<Integer> shareFeClientIds = profile.getShareFeClientIds();
         for (int clientId : shareFeClientIds) {
             try {
@@ -1062,6 +1057,17 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 return false;
             }
             clearAllResourcesAndClientMapping(getClientProfile(clientId));
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
+                    + resourceType + ", clientId:" + reclaimingClientId);
+        }
+        try {
+            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
+            return false;
         }
         clearAllResourcesAndClientMapping(profile);
         return true;
@@ -1319,13 +1325,21 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     private void clearFrontendAndClientMapping(ClientProfile profile) {
+        if (profile == null) {
+            return;
+        }
         for (Integer feId : profile.getInUseFrontendHandles()) {
             FrontendResource fe = getFrontendResource(feId);
-            if (fe.getOwnerClientId() == profile.getId()) {
+            int ownerClientId = fe.getOwnerClientId();
+            if (ownerClientId == profile.getId()) {
                 fe.removeOwner();
                 continue;
             }
-            getClientProfile(fe.getOwnerClientId()).stopSharingFrontend(profile.getId());
+            ClientProfile ownerClientProfile = getClientProfile(ownerClientId);
+            if (ownerClientProfile != null) {
+                ownerClientProfile.stopSharingFrontend(profile.getId());
+            }
+
         }
         profile.releaseFrontend();
     }

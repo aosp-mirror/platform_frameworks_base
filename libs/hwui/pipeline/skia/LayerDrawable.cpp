@@ -101,59 +101,58 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(layer->getColorFilter());
         const SkMatrix& totalMatrix = canvas->getTotalMatrix();
-        if (srcRect || dstRect) {
-            SkRect skiaSrcRect;
-            if (srcRect && !srcRect->isEmpty()) {
-                skiaSrcRect = *srcRect;
-            } else {
-                skiaSrcRect = SkRect::MakeIWH(imageWidth, imageHeight);
-            }
-            SkRect skiaDestRect;
-            if (dstRect && !dstRect->isEmpty()) {
-                skiaDestRect = *dstRect;
-            } else {
-                skiaDestRect = (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
-                                       ? SkRect::MakeIWH(layerHeight, layerWidth)
-                                       : SkRect::MakeIWH(layerWidth, layerHeight);
-            }
-
-            const float px = skiaDestRect.centerX();
-            const float py = skiaDestRect.centerY();
-            SkMatrix m;
-            if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
-                m.postScale(-1.f, 1.f, px, py);
-            }
-            if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_V) {
-                m.postScale(1.f, -1.f, px, py);
-            }
-            if (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
-                m.postRotate(90, 0, 0);
-                m.postTranslate(skiaDestRect.height(), 0);
-            }
-            auto constraint = SkCanvas::kFast_SrcRectConstraint;
-            if (srcRect && !srcRect->isEmpty()) {
-                constraint = SkCanvas::kStrict_SrcRectConstraint;
-            }
-
-            canvas->save();
-            canvas->concat(m);
-
-            // If (matrix is a rect-to-rect transform)
-            // and (src/dst buffers size match in screen coordinates)
-            // and (src/dst corners align fractionally),
-            // then use nearest neighbor, otherwise use bilerp sampling.
-            // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
-            // only for SrcOver blending and without color filter (readback uses Src blending).
-            SkSamplingOptions sampling(SkFilterMode::kNearest);
-            if (layer->getForceFilter() ||
-                shouldFilterRect(totalMatrix, skiaSrcRect, skiaDestRect)) {
-                sampling = SkSamplingOptions(SkFilterMode::kLinear);
-            }
-
-            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
-                                  constraint);
-            canvas->restore();
+        SkRect skiaSrcRect;
+        if (srcRect && !srcRect->isEmpty()) {
+            skiaSrcRect = *srcRect;
+        } else {
+            skiaSrcRect = SkRect::MakeIWH(imageWidth, imageHeight);
         }
+        SkRect skiaDestRect;
+        if (dstRect && !dstRect->isEmpty()) {
+            skiaDestRect = (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
+                                   ? SkRect::MakeIWH(dstRect->height(), dstRect->width())
+                                   : SkRect::MakeIWH(dstRect->width(), dstRect->height());
+        } else {
+            skiaDestRect = (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
+                                   ? SkRect::MakeIWH(layerHeight, layerWidth)
+                                   : SkRect::MakeIWH(layerWidth, layerHeight);
+        }
+
+        const float px = skiaDestRect.centerX();
+        const float py = skiaDestRect.centerY();
+        SkMatrix m;
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
+            m.postScale(-1.f, 1.f, px, py);
+        }
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_V) {
+            m.postScale(1.f, -1.f, px, py);
+        }
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+            m.postRotate(90, 0, 0);
+            m.postTranslate(skiaDestRect.height(), 0);
+        }
+        auto constraint = SkCanvas::kFast_SrcRectConstraint;
+        if (srcRect && !srcRect->isEmpty()) {
+            constraint = SkCanvas::kStrict_SrcRectConstraint;
+        }
+
+        canvas->save();
+        canvas->concat(m);
+
+        // If (matrix is a rect-to-rect transform)
+        // and (src/dst buffers size match in screen coordinates)
+        // and (src/dst corners align fractionally),
+        // then use nearest neighbor, otherwise use bilerp sampling.
+        // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
+        // only for SrcOver blending and without color filter (readback uses Src blending).
+        SkSamplingOptions sampling(SkFilterMode::kNearest);
+        if (layer->getForceFilter() || shouldFilterRect(totalMatrix, skiaSrcRect, skiaDestRect)) {
+            sampling = SkSamplingOptions(SkFilterMode::kLinear);
+        }
+
+        canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
+                              constraint);
+        canvas->restore();
         // restore the original matrix
         if (useLayerTransform) {
             canvas->restore();

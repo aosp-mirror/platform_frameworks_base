@@ -34,7 +34,10 @@ public interface KeyguardStatusBarViewComponent {
     /** Simple factory for {@link KeyguardStatusBarViewComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardStatusBarViewComponent build(@BindsInstance KeyguardStatusBarView view);
+        KeyguardStatusBarViewComponent build(
+                @BindsInstance KeyguardStatusBarView view,
+                @BindsInstance KeyguardStatusBarViewController.ViewStateProvider
+                        viewStateProvider);
     }
 
     /** Builds a {@link KeyguardStatusViewController}. */

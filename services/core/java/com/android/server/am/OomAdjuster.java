@@ -422,7 +422,7 @@ public class OomAdjuster {
 
     boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId, ApplicationInfo app,
             boolean defaultValue) {
-        return mPlatformCompatCache.isChangeEnabled(
+        return getPlatformCompatCache().isChangeEnabled(
                 CACHED_COMPAT_CHANGE_IDS_MAPPING[cachedCompatChangeId], app, defaultValue);
     }
 

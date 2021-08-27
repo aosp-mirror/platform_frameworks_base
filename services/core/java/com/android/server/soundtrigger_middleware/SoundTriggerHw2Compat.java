@@ -60,7 +60,6 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
     private @Nullable android.hardware.soundtrigger.V2_1.ISoundTriggerHw mUnderlying_2_1;
     private @Nullable android.hardware.soundtrigger.V2_2.ISoundTriggerHw mUnderlying_2_2;
     private @Nullable android.hardware.soundtrigger.V2_3.ISoundTriggerHw mUnderlying_2_3;
-    private @Nullable android.hardware.soundtrigger.V2_4.ISoundTriggerHw mUnderlying_2_4;
 
     // HAL <=2.1 requires us to pass a callback argument to startRecognition. We will store the one
     // passed on load and then pass it on start. We don't bother storing the callback on newer
@@ -89,13 +88,10 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
             ICaptureStateNotifier notifier) {
         SoundTriggerHw2Compat compat = new SoundTriggerHw2Compat(binder, rebootRunnable);
         ISoundTriggerHal result = compat;
-        // Add max model limiter for versions <2.4.
-        if (compat.mUnderlying_2_4 == null) {
-            result = new SoundTriggerHalMaxModelLimiter(result,
-                    compat.mProperties.maxSoundModels);
-        }
-        // Add concurrent capture handler for versions <2.4 which do not support concurrent capture.
-        if (compat.mUnderlying_2_4 == null && !compat.mProperties.concurrentCapture) {
+        // Add max model limiter for versions.
+        result = new SoundTriggerHalMaxModelLimiter(result, compat.mProperties.maxSoundModels);
+        // Add concurrent capture handler for HALs which do not support concurrent capture.
+        if (!compat.mProperties.concurrentCapture) {
             result = new SoundTriggerHalConcurrentCaptureHandler(result, notifier);
         }
         return result;
@@ -113,21 +109,11 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         // version, so we go down the versions in descending order to find the latest one supported,
         // and then simply up-cast it to obtain all the versions that are earlier.
 
-        // Attempt 2.4
-        android.hardware.soundtrigger.V2_4.ISoundTriggerHw as2_4 =
-                android.hardware.soundtrigger.V2_4.ISoundTriggerHw.asInterface(binder);
-        if (as2_4 != null) {
-            mUnderlying_2_0 =
-                    mUnderlying_2_1 = mUnderlying_2_2 = mUnderlying_2_3 = mUnderlying_2_4 = as2_4;
-            return;
-        }
-
         // Attempt 2.3
         android.hardware.soundtrigger.V2_3.ISoundTriggerHw as2_3 =
                 android.hardware.soundtrigger.V2_3.ISoundTriggerHw.asInterface(binder);
         if (as2_3 != null) {
             mUnderlying_2_0 = mUnderlying_2_1 = mUnderlying_2_2 = mUnderlying_2_3 = as2_3;
-            mUnderlying_2_4 = null;
             return;
         }
 
@@ -136,7 +122,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 android.hardware.soundtrigger.V2_2.ISoundTriggerHw.asInterface(binder);
         if (as2_2 != null) {
             mUnderlying_2_0 = mUnderlying_2_1 = mUnderlying_2_2 = as2_2;
-            mUnderlying_2_3 = mUnderlying_2_4 = null;
+            mUnderlying_2_3 = null;
             return;
         }
 
@@ -145,7 +131,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 android.hardware.soundtrigger.V2_1.ISoundTriggerHw.asInterface(binder);
         if (as2_1 != null) {
             mUnderlying_2_0 = mUnderlying_2_1 = as2_1;
-            mUnderlying_2_2 = mUnderlying_2_3 = mUnderlying_2_4 = null;
+            mUnderlying_2_2 = mUnderlying_2_3 = null;
             return;
         }
 
@@ -154,7 +140,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 android.hardware.soundtrigger.V2_0.ISoundTriggerHw.asInterface(binder);
         if (as2_0 != null) {
             mUnderlying_2_0 = as2_0;
-            mUnderlying_2_1 = mUnderlying_2_2 = mUnderlying_2_3 = mUnderlying_2_4 = null;
+            mUnderlying_2_1 = mUnderlying_2_2 = mUnderlying_2_3 = null;
             return;
         }
 
@@ -213,16 +199,8 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
 
     @Override
     public void registerCallback(GlobalCallback callback) {
-        try {
-            try {
-                as2_4().registerGlobalCallback(new GlobalCallbackWrapper(callback));
-            } catch (NotSupported e) {
-                // In versions < 2.4 the events represented by this callback don't exist, we can
-                // safely ignore this.
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+        // In versions 2.x the events represented by this callback don't exist, we can
+        // safely ignore this.
     }
 
     @Override
@@ -232,29 +210,18 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         try {
             AtomicInteger retval = new AtomicInteger(-1);
             AtomicInteger handle = new AtomicInteger(0);
-
             try {
-                as2_4().loadSoundModel_2_4(hidlModel, new ModelCallbackWrapper(callback),
+                as2_1().loadSoundModel_2_1(hidlModel, new ModelCallbackWrapper(callback),
+                        0,
                         (r, h) -> {
                             retval.set(r);
                             handle.set(h);
                         });
-                handleHalStatusAllowBusy(retval.get(), "loadSoundModel_2_4");
-            } catch (NotSupported e) {
-                // Fall-back to the 2.1 version:
-                try {
-                    as2_1().loadSoundModel_2_1(hidlModel, new ModelCallbackWrapper(callback),
-                            0,
-                            (r, h) -> {
-                                retval.set(r);
-                                handle.set(h);
-                            });
-                    handleHalStatus(retval.get(), "loadSoundModel_2_1");
-                    mModelCallbacks.put(handle.get(), callback);
-                } catch (NotSupported ee) {
-                    // Fall-back to the 2.0 version:
-                    return loadSoundModel_2_0(hidlModel, callback);
-                }
+                handleHalStatus(retval.get(), "loadSoundModel_2_1");
+                mModelCallbacks.put(handle.get(), callback);
+            } catch (NotSupported ee) {
+                // Fall-back to the 2.0 version:
+                return loadSoundModel_2_0(hidlModel, callback);
             }
             return handle.get();
         } catch (RemoteException e) {
@@ -270,27 +237,17 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
             AtomicInteger retval = new AtomicInteger(-1);
             AtomicInteger handle = new AtomicInteger(0);
             try {
-                as2_4().loadPhraseSoundModel_2_4(hidlModel, new ModelCallbackWrapper(callback),
+                as2_1().loadPhraseSoundModel_2_1(hidlModel, new ModelCallbackWrapper(callback),
+                        0,
                         (r, h) -> {
                             retval.set(r);
                             handle.set(h);
                         });
-                handleHalStatusAllowBusy(retval.get(), "loadPhraseSoundModel_2_4");
-            } catch (NotSupported e) {
-                // Fall-back to the 2.1 version:
-                try {
-                    as2_1().loadPhraseSoundModel_2_1(hidlModel, new ModelCallbackWrapper(callback),
-                            0,
-                            (r, h) -> {
-                                retval.set(r);
-                                handle.set(h);
-                            });
-                    handleHalStatus(retval.get(), "loadPhraseSoundModel_2_1");
-                    mModelCallbacks.put(handle.get(), callback);
-                } catch (NotSupported ee) {
-                    // Fall-back to the 2.0 version:
-                    return loadPhraseSoundModel_2_0(hidlModel, callback);
-                }
+                handleHalStatus(retval.get(), "loadPhraseSoundModel_2_1");
+                mModelCallbacks.put(handle.get(), callback);
+            } catch (NotSupported ee) {
+                // Fall-back to the 2.0 version:
+                return loadPhraseSoundModel_2_0(hidlModel, callback);
             }
             return handle.get();
         } catch (RemoteException e) {
@@ -328,17 +285,11 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 ConversionUtil.aidl2hidlRecognitionConfig(config, deviceHandle, ioHandle);
         try {
             try {
-                int retval = as2_4().startRecognition_2_4(modelHandle, hidlConfig);
-                handleHalStatusAllowBusy(retval, "startRecognition_2_4");
-            } catch (NotSupported e) {
-                // Fall-back to the 2.3 version:
-                try {
-                    int retval = as2_3().startRecognition_2_3(modelHandle, hidlConfig);
-                    handleHalStatus(retval, "startRecognition_2_3");
-                } catch (NotSupported ee) {
-                    // Fall-back to the 2.0 version:
-                    startRecognition_2_1(modelHandle, hidlConfig);
-                }
+                int retval = as2_3().startRecognition_2_3(modelHandle, hidlConfig);
+                handleHalStatus(retval, "startRecognition_2_3");
+            } catch (NotSupported ee) {
+                // Fall-back to the 2.0 version:
+                startRecognition_2_1(modelHandle, hidlConfig);
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -551,14 +502,6 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         return mUnderlying_2_3;
     }
 
-    private @NonNull
-    android.hardware.soundtrigger.V2_4.ISoundTriggerHw as2_4() throws NotSupported {
-        if (mUnderlying_2_4 == null) {
-            throw new NotSupported("Underlying driver version < 2.4");
-        }
-        return mUnderlying_2_4;
-    }
-
     /**
      * A checked exception representing the requested interface version not being supported.
      * At the public interface layer, use {@link #throwAsRecoverableException()} to propagate it to
@@ -580,32 +523,13 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         }
     }
 
-    private static class GlobalCallbackWrapper extends
-            android.hardware.soundtrigger.V2_4.ISoundTriggerHwGlobalCallback.Stub {
-        private final @NonNull GlobalCallback mDelegate;
-
-        private GlobalCallbackWrapper(@NonNull GlobalCallback delegate) {
-            mDelegate = delegate;
-        }
-
-        @Override
-        public void onResourcesAvailable() {
-            mDelegate.onResourcesAvailable();
-        }
-    }
-
     private static class ModelCallbackWrapper extends
-            android.hardware.soundtrigger.V2_4.ISoundTriggerHwCallback.Stub {
+            android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.Stub {
         private final @NonNull ModelCallback mDelegate;
 
         private ModelCallbackWrapper(
                 @NonNull ModelCallback delegate) {
             mDelegate = Objects.requireNonNull(delegate);
-        }
-
-        @Override
-        public void modelUnloaded(int modelHandle) {
-            mDelegate.modelUnloaded(modelHandle);
         }
 
         @Override
