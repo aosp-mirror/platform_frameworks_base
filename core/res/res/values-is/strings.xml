@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-þjónusta"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tilkynningaþjónusta nema"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Ljósaskiptaþjónusta"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Tímabeltisgreinir (engin tenging)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Tímastillingarþjónusta hnattræna gervihnattaleiðsögukerfisins (GNSS)"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Umsjónarþjónusta tónlistargreiningar"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tækið verður hreinsað"</string>
@@ -1483,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Hafna"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Beðið um heimild"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Beðið um heimild\nfyrir reikninginn <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Beiðni um heimild frá <xliff:g id="APP">%1$s</xliff:g>\nfyrir reikninginn <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Þú ert að nota þetta forrit utan vinnusniðsins"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Þú ert að nota þetta forrit á vinnusniðinu þínu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Innsláttaraðferð"</string>
@@ -2287,10 +2287,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Nú geturðu stækkað hluta skjásins"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Kveikja á í stillingum"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Hunsa"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Opna á hljóðnema tækisins"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Opna fyrir hljóðnema tækisins"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Opna fyrir myndavél tækisins"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Fyrir &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; og öll forrit og þjónustur"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Opna á"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Opna fyrir"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Persónuvernd skynjara"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Forritstákn"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Mynd af merki forrits"</string>

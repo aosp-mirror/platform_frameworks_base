@@ -362,8 +362,10 @@ public class AppTransitionController {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Wallpaper animation!");
             switch (firstTransit) {
                 case TRANSIT_OPEN:
+                case TRANSIT_TO_FRONT:
                     return TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
                 case TRANSIT_CLOSE:
+                case TRANSIT_TO_BACK:
                     return TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
             }
         } else if (oldWallpaper != null && !openingApps.isEmpty()

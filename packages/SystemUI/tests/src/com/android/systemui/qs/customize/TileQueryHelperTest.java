@@ -45,13 +45,11 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -60,11 +58,9 @@ import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,8 +70,6 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,7 +108,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
-    @Mock private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -122,18 +115,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private TileQueryHelper mTileQueryHelper;
     private FakeExecutor mMainExecutor;
     private FakeExecutor mBgExecutor;
-    MockitoSession mMockingSession = null;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        // TODO(b/174753536): Remove the mMockingSession when
-        // FeatureFlagUtils.SETTINGS_PROVIDER_MODEL is removed.
-        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlagUtils.class).startMocking();
-        ExtendedMockito.doReturn(false).when(() -> FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
-
         mContext.setMockPackageManager(mPackageManager);
 
         mState = new QSTile.State();
@@ -153,15 +138,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);
         mTileQueryHelper = new TileQueryHelper(
-                mContext, mUserTracker, mMainExecutor, mBgExecutor, mFeatureFlags);
+                mContext, mUserTracker, mMainExecutor, mBgExecutor);
         mTileQueryHelper.setListener(mListener);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mMockingSession != null) {
-            mMockingSession.finishMocking();
-        }
     }
 
     @Test

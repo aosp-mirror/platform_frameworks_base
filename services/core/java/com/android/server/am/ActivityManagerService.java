@@ -193,6 +193,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -5003,7 +5004,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
                     res.key.type);
         } else {
-            throw new IllegalArgumentException();
+            return new PendingIntentInfo(null, -1, false, ActivityManager.INTENT_SENDER_UNKNOWN);
         }
     }
 
@@ -11048,9 +11049,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-                if (gpuDmaBufUsage >= 0) {
-                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+                if (gpuPrivateUsage >= 0) {
+                    final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                     pw.print("      GPU: ");
                     pw.print(stringifyKBSize(gpuUsage));
                     pw.print(" (");
@@ -12423,6 +12424,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
+        }
+
+        // SafetyNet logging for b/177931370. If any process other than system_server tries to
+        // listen to this broadcast action, then log it.
+        if (callingPid != Process.myPid()) {
+            if (filter.hasAction("com.android.server.net.action.SNOOZE_WARNING")
+                    || filter.hasAction("com.android.server.net.action.SNOOZE_RAPID")) {
+                EventLog.writeEvent(0x534e4554, "177931370", callingUid, "");
+            }
         }
 
         synchronized (this) {
@@ -16120,10 +16130,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ServiceNotificationPolicy applyForegroundServiceNotification(
-                Notification notification, int id, String pkg, int userId) {
+                Notification notification, String tag, int id, String pkg, int userId) {
             synchronized (ActivityManagerService.this) {
                 return mServices.applyForegroundServiceNotificationLocked(notification,
-                        id, pkg, userId);
+                        tag, id, pkg, userId);
             }
         }
 
@@ -16560,13 +16570,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "scheduleApplicationInfoChanged()");
 
-        synchronized (mProcLock) {
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                updateApplicationInfoLOSP(packageNames, userId);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            final boolean updateFrameworkRes = packageNames.contains("android");
+            synchronized (mProcLock) {
+                updateApplicationInfoLOSP(packageNames, updateFrameworkRes, userId);
             }
+
+            AppWidgetManagerInternal widgets = LocalServices.getService(
+                    AppWidgetManagerInternal.class);
+            if (widgets != null) {
+                widgets.applyResourceOverlaysToWidgets(new HashSet<>(packageNames), userId,
+                        updateFrameworkRes);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -16583,11 +16601,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy(anyOf = {"this", "mProcLock"})
-    private void updateApplicationInfoLOSP(@NonNull List<String> packagesToUpdate, int userId) {
-        final boolean updateFrameworkRes = packagesToUpdate.contains("android");
+    private void updateApplicationInfoLOSP(@NonNull List<String> packagesToUpdate,
+            boolean updateFrameworkRes, int userId) {
         if (updateFrameworkRes) {
             ParsingPackageUtils.readConfigUseRoundIcon(null);
         }
+
         mProcessList.updateApplicationInfoLOSP(packagesToUpdate, userId, updateFrameworkRes);
 
         if (updateFrameworkRes) {

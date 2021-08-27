@@ -317,7 +317,7 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
      */
     public static final class Builder {
         private @Nullable Exception mException;
-        private int mErrorCode;
+        private int mErrorCode = ERROR_UNKNOWN;
         private int mSubErrorCode;
         private long mTimeSinceCreatedMillis = -1;
         private Bundle mMetricsBundle = new Bundle();

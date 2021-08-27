@@ -1652,7 +1652,7 @@ public final class BroadcastQueue {
         maybeScheduleTempAllowlistLocked(receiverUid, r, brOptions);
 
         // Report that a component is used for explicit broadcasts.
-        if (!r.intent.isExcludingStopped() && r.curComponent != null
+        if (r.intent.getComponent() != null && r.curComponent != null
                 && !TextUtils.equals(r.curComponent.getPackageName(), r.callerPackage)) {
             mService.mUsageStatsService.reportEvent(
                     r.curComponent.getPackageName(), r.userId, Event.APP_COMPONENT_USED);

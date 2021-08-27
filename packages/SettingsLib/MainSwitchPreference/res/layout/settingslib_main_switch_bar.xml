@@ -28,7 +28,7 @@
         android:layout_gravity="center_vertical"
         android:maxLines="2"
         android:ellipsize="end"
-        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title"
         android:textSize="16sp"
         android:textColor="?android:attr/textColorPrimaryInverse"
         android:layout_marginStart="@dimen/settingslib_switchbar_subsettings_margin_start"
@@ -42,7 +42,7 @@
         android:theme="@android:style/Theme.Material"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
-        android:src="@*android:drawable/ic_info"
+        android:src="@android:drawable/ic_info"
         android:visibility="gone"/>
 
     <Switch

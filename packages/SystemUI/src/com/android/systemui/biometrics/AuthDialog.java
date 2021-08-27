@@ -156,4 +156,12 @@ public interface AuthDialog {
      * @return true if device credential is allowed.
      */
     boolean isAllowDeviceCredentials();
+
+    /**
+     * Called when the device's orientation changed and the dialog may need to do another
+     * layout. This is most relevant to UDFPS since configuration changes are not sent by
+     * the framework in equivalent cases (landscape to reverse landscape) but the dialog
+     * must remain fixed on the physical sensor location.
+     */
+    void onOrientationChanged();
 }

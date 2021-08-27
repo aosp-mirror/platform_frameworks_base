@@ -15,6 +15,7 @@
   -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/top_level"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -55,7 +56,7 @@
         android:background="@drawable/rounded_bg_full_large_radius"
         android:onClick="dismissActivity"
         android:text="@string/got_it"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?androidprv:attr/textColorOnAccent"
         android:layout_marginBottom="60dp"
         android:layout_alignParentBottom="true" />
 

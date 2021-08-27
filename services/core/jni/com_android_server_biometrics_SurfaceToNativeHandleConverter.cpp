@@ -16,18 +16,19 @@
 
 #define LOG_TAG "SurfaceToNativeHandleConverter"
 
-#include <nativehelper/JNIHelp.h>
-#include "jni.h"
-
-#include <android/native_window_jni.h>
 #include <android_os_NativeHandle.h>
+#include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_view_Surface.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <gui/Surface.h>
 #include <gui/bufferqueue/1.0/WGraphicBufferProducer.h>
+#include <utils/Log.h>
+
+#include "jni.h"
 
 namespace android {
-
 namespace {
+
 constexpr int WINDOW_HAL_TOKEN_SIZE_MAX = 256;
 
 native_handle_t* convertHalTokenToNativeHandle(const HalToken& halToken) {
@@ -54,33 +55,73 @@ native_handle_t* convertHalTokenToNativeHandle(const HalToken& halToken) {
     memcpy(&(nh->data[1]), halToken.data(), nhDataByteSize);
     return nh;
 }
-} // namespace
 
-using ::android::sp;
+HalToken convertNativeHandleToHalToken(native_handle_t* handle) {
+    int size = handle->data[0];
+    auto data = reinterpret_cast<uint8_t*>(&handle->data[1]);
+    HalToken halToken;
+    halToken.setToExternal(data, size);
+    return halToken;
+}
 
-static jobject convertSurfaceToNativeHandle(JNIEnv* env, jobject /* clazz */,
-                                            jobject previewSurface) {
-    if (previewSurface == nullptr) {
+jobject acquireSurfaceHandle(JNIEnv* env, jobject /* clazz */, jobject jSurface) {
+    ALOGD("%s", __func__);
+    if (jSurface == nullptr) {
+        ALOGE("%s: jSurface is null", __func__);
         return nullptr;
     }
-    ANativeWindow* previewAnw = ANativeWindow_fromSurface(env, previewSurface);
-    sp<Surface> surface = static_cast<Surface*>(previewAnw);
+
+    sp<Surface> surface = android_view_Surface_getSurface(env, jSurface);
+    if (surface == nullptr) {
+        ALOGE("%s: surface is null", __func__);
+        return nullptr;
+    }
+
     sp<IGraphicBufferProducer> igbp = surface->getIGraphicBufferProducer();
     sp<HGraphicBufferProducer> hgbp = new TWGraphicBufferProducer<HGraphicBufferProducer>(igbp);
+    // The HAL token will be closed in releaseSurfaceHandle.
     HalToken halToken;
     createHalToken(hgbp, &halToken);
+
     native_handle_t* native_handle = convertHalTokenToNativeHandle(halToken);
-    return JNativeHandle::MakeJavaNativeHandleObj(env, native_handle);
+    if (native_handle == nullptr) {
+        ALOGE("%s: native_handle is null", __func__);
+        return nullptr;
+    }
+    jobject jHandle = JNativeHandle::MakeJavaNativeHandleObj(env, native_handle);
+    native_handle_delete(native_handle);
+
+    return jHandle;
 }
 
-static const JNINativeMethod method_table[] = {
-        {"convertSurfaceToNativeHandle", "(Landroid/view/Surface;)Landroid/os/NativeHandle;",
-         reinterpret_cast<void*>(convertSurfaceToNativeHandle)},
+void releaseSurfaceHandle(JNIEnv* env, jobject /* clazz */, jobject jHandle) {
+    ALOGD("%s", __func__);
+    // Creates a native handle from a Java handle. We must call native_handle_delete when we're done
+    // with it because we created it, but we shouldn't call native_handle_close because we don't own
+    // the underlying FDs.
+    native_handle_t* handle =
+            JNativeHandle::MakeCppNativeHandle(env, jHandle, nullptr /* storage */);
+    if (handle == nullptr) {
+        ALOGE("%s: handle is null", __func__);
+        return;
+    }
+
+    HalToken token = convertNativeHandleToHalToken(handle);
+    ALOGD("%s: deleteHalToken, success: %d", __func__, deleteHalToken(token));
+    ALOGD("%s: native_handle_delete, success: %d", __func__, !native_handle_delete(handle));
+}
+
+const JNINativeMethod method_table[] = {
+        {"acquireSurfaceHandle", "(Landroid/view/Surface;)Landroid/os/NativeHandle;",
+         reinterpret_cast<void*>(acquireSurfaceHandle)},
+        {"releaseSurfaceHandle", "(Landroid/os/NativeHandle;)V",
+         reinterpret_cast<void*>(releaseSurfaceHandle)},
 };
+} // namespace
 
 int register_android_server_FaceService(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "com/android/server/biometrics/sensors/face/FaceService",
-                                    method_table, NELEM(method_table));
+    return AndroidRuntime::
+            registerNativeMethods(env, "com/android/server/biometrics/sensors/face/FaceService",
+                                  method_table, NELEM(method_table));
 }
-
-}; // namespace android
+} // namespace android

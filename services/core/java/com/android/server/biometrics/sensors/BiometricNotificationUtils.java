@@ -23,7 +23,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.Slog;
 
 import com.android.internal.R;
 
@@ -32,9 +34,12 @@ import com.android.internal.R;
  */
 public class BiometricNotificationUtils {
 
+    private static final String TAG = "BiometricNotificationUtils";
     private static final String RE_ENROLL_NOTIFICATION_TAG = "FaceService";
     private static final String BAD_CALIBRATION_NOTIFICATION_TAG = "FingerprintService";
     private static final int NOTIFICATION_ID = 1;
+    private static final long NOTIFICATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
+    private static long sLastAlertTime = 0;
 
     /**
      * Shows a face re-enrollment notification.
@@ -67,8 +72,17 @@ public class BiometricNotificationUtils {
      * Shows a fingerprint bad calibration notification.
      */
     public static void showBadCalibrationNotification(@NonNull Context context) {
-        final NotificationManager notificationManager =
-                context.getSystemService(NotificationManager.class);
+        final long currentTime = SystemClock.elapsedRealtime();
+        final long timeSinceLastAlert = currentTime - sLastAlertTime;
+
+        // Only show the notification if not previously shown or a day has
+        // passed since the last notification.
+        if (sLastAlertTime != 0 && (timeSinceLastAlert < NOTIFICATION_INTERVAL_MS)) {
+            Slog.v(TAG, "Skipping calibration notification : " + timeSinceLastAlert);
+            return;
+        }
+
+        sLastAlertTime = currentTime;
 
         final String name =
                 context.getString(R.string.fingerprint_recalibrate_notification_name);

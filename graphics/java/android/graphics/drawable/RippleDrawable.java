@@ -49,7 +49,9 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
+import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 
@@ -113,6 +115,7 @@ import java.util.Arrays;
  * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
+    private static final String TAG = "RippleDrawable";
     /**
      * Radius value that specifies the ripple radius should be computed based
      * on the size of the ripple's container.
@@ -278,6 +281,15 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+        endPatternedAnimations();
+    }
+
+    private void endPatternedAnimations() {
+        for (int i = 0; i < mRunningAnimations.size(); i++) {
+            RippleAnimationSession session = mRunningAnimations.get(i);
+            session.end();
+        }
+        mRunningAnimations.clear();
     }
 
     private void cancelExitingRipples() {
@@ -291,7 +303,6 @@ public class RippleDrawable extends LayerDrawable {
             Arrays.fill(ripples, 0, count, null);
         }
         mExitingRipplesCount = 0;
-        mExitingAnimation = true;
         // Always draw an additional "clean" frame after canceling animations.
         invalidateSelf(false);
     }
@@ -714,7 +725,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
-        exitPatternedAnimation();
+        endPatternedAnimations();
     }
 
     @Override
@@ -840,6 +851,10 @@ public class RippleDrawable extends LayerDrawable {
 
     private void startBackgroundAnimation() {
         mRunBackgroundAnimation = false;
+        if (Looper.myLooper() == null) {
+            Log.w(TAG, "Thread doesn't have a looper. Skipping animation.");
+            return;
+        }
         mBackgroundAnimation = ValueAnimator.ofFloat(mBackgroundOpacity, mTargetBackgroundOpacity);
         mBackgroundAnimation.setInterpolator(LINEAR_INTERPOLATOR);
         mBackgroundAnimation.setDuration(BACKGROUND_OPACITY_DURATION);

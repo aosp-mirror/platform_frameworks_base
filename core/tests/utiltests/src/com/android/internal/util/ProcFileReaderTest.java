@@ -166,6 +166,46 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertEquals(-1L, reader.nextOptionalLong(-1L));
     }
 
+    public void testInvalidLongs() throws Exception {
+        final ProcFileReader reader = buildReader("12: 34\n56 78@#\n");
+
+        assertEquals(12L, reader.nextLong(true));
+        assertEquals(34L, reader.nextLong(true));
+        reader.finishLine();
+        assertTrue(reader.hasMoreData());
+
+        assertEquals(56L, reader.nextLong(true));
+        assertEquals(78L, reader.nextLong(true));
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    public void testConsecutiveDelimiters() throws Exception {
+        final ProcFileReader reader = buildReader("1 2  3   4     5\n");
+
+        assertEquals(1L, reader.nextLong());
+        assertEquals(2L, reader.nextLong());
+        assertEquals(3L, reader.nextLong());
+        assertEquals(4L, reader.nextLong());
+        assertEquals(5L, reader.nextLong());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    public void testIgnore() throws Exception {
+        final ProcFileReader reader = buildReader("a b c\n");
+
+        assertEquals("a", reader.nextString());
+        assertTrue(reader.hasMoreData());
+
+        reader.nextIgnored();
+        assertTrue(reader.hasMoreData());
+
+        assertEquals("c", reader.nextString());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
     private static ProcFileReader buildReader(String string) throws IOException {
         return buildReader(string, 2048);
     }

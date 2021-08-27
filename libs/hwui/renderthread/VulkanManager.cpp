@@ -579,7 +579,9 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
-    destroy_semaphore(mDestroySemaphoreContext);
+    if (mDestroySemaphoreContext) {
+        destroy_semaphore(mDestroySemaphoreContext);
+    }
 
     surface->presentCurrentBuffer(dirtyRect, fenceFd);
     mSwapSemaphore = VK_NULL_HANDLE;

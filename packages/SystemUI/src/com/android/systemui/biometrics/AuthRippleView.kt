@@ -38,6 +38,7 @@ private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
  * launcher.
  */
 class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+    private var alphaInDuration: Long = 0
     private var rippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
@@ -66,47 +67,37 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             .toFloat()
     }
 
+    fun setAlphaInDuration(duration: Long) {
+        alphaInDuration = duration
+    }
+
     fun startRipple(onAnimationEnd: Runnable?, lightReveal: LightRevealScrim?) {
         if (rippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
 
         val rippleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            interpolator = PathInterpolator(0.4f, 0f, 0f, 1f)
+            interpolator = PathInterpolator(0f, 0f, .2f, 1f)
             duration = RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
                 rippleShader.progress = animator.animatedValue as Float
                 rippleShader.time = now.toFloat()
 
-                lightReveal?.revealAmount = animator.animatedValue as Float
                 invalidate()
             }
         }
 
-        val revealAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+        val revealAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
             interpolator = rippleAnimator.interpolator
-            startDelay = 10
             duration = rippleAnimator.duration
             addUpdateListener { animator ->
                 lightReveal?.revealAmount = animator.animatedValue as Float
             }
         }
 
-        val alphaInAnimator = ValueAnimator.ofInt(0, 127).apply {
-            duration = 167
-            addUpdateListener { animator ->
-                rippleShader.color = ColorUtils.setAlphaComponent(
-                    rippleShader.color,
-                    animator.animatedValue as Int
-                )
-                invalidate()
-            }
-        }
-
-        val alphaOutAnimator = ValueAnimator.ofInt(127, 0).apply {
-            startDelay = 417
-            duration = 1116
+        val alphaInAnimator = ValueAnimator.ofInt(0, 255).apply {
+            duration = alphaInDuration
             addUpdateListener { animator ->
                 rippleShader.color = ColorUtils.setAlphaComponent(
                     rippleShader.color,
@@ -120,8 +111,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             playTogether(
                 rippleAnimator,
                 revealAnimator,
-                alphaInAnimator,
-                alphaOutAnimator
+                alphaInAnimator
             )
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
@@ -148,7 +138,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         // the active effect area. Values here should be kept in sync with the
         // animation implementation in the ripple shader.
         val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
-            (1 - rippleShader.progress)) * radius * 1.5f
+            (1 - rippleShader.progress)) * radius * 2f
         canvas?.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
     }
 }

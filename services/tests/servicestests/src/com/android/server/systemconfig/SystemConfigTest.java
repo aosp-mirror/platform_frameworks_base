@@ -19,6 +19,7 @@ package com.android.server.systemconfig;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.expectThrows;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -200,6 +201,46 @@ public class SystemConfigTest {
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers())
                 .containsExactly("com.android.package1");
+        assertThat(mSysConfig.getModulesInstallerPackageName()).isNull();
+    }
+
+    @Test
+    public void readPermissions_parsesStagedInstallerWhitelist_modulesInstaller()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <whitelisted-staged-installer package=\"com.android.package1\" "
+                + "         isModulesInstaller=\"true\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "staged-installer-whitelist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getWhitelistedStagedInstallers())
+                .containsExactly("com.android.package1");
+        assertThat(mSysConfig.getModulesInstallerPackageName())
+                .isEqualTo("com.android.package1");
+    }
+
+    @Test
+    public void readPermissions_parsesStagedInstallerWhitelist_multipleModulesInstallers()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <whitelisted-staged-installer package=\"com.android.package1\" "
+                + "         isModulesInstaller=\"true\" />\n"
+                + "    <whitelisted-staged-installer package=\"com.android.package2\" "
+                + "         isModulesInstaller=\"true\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "staged-installer-whitelist.xml", contents);
+
+        IllegalStateException e = expectThrows(
+                IllegalStateException.class,
+                () -> mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0));
+
+        assertThat(e).hasMessageThat().contains("Multiple modules installers");
     }
 
     /**
@@ -230,14 +271,16 @@ public class SystemConfigTest {
             throws IOException {
         final String contents =
                 "<config>\n"
-                        + "    <allowed-vendor-apex package=\"com.android.apex1\" />\n"
+                        + "    <allowed-vendor-apex package=\"com.android.apex1\" "
+                        + "installerPackage=\"com.installer\" />\n"
                         + "</config>";
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
         mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
 
-        assertThat(mSysConfig.getAllowedVendorApexes()).containsExactly("com.android.apex1");
+        assertThat(mSysConfig.getAllowedVendorApexes())
+                .containsExactly("com.android.apex1", "com.installer");
     }
 
     /**

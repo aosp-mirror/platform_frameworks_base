@@ -272,6 +272,9 @@
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
 
+    <!-- Be allowed to send commands to Flinger via SurfaceControl. -->
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+
     <!-- Restore settings (used by QS) even if they have been modified -->
     <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
 
@@ -451,6 +454,7 @@
         <!-- started from SensoryPrivacyService -->
         <activity android:name=".sensorprivacy.SensorUseStartedActivity"
                   android:exported="true"
+                  android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true">

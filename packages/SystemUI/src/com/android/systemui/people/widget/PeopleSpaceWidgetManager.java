@@ -375,7 +375,7 @@ public class PeopleSpaceWidgetManager {
                 widgetSp.getInt(USER_ID, INVALID_USER_ID),
                 widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
 
-        return getTileFromPersistentStorage(key, appWidgetId);
+        return getTileFromPersistentStorage(key, appWidgetId, /* supplementFromStorage= */ true);
     }
 
     /**
@@ -383,7 +383,8 @@ public class PeopleSpaceWidgetManager {
      * If a {@link PeopleTileKey} is not provided, fetch one from {@link SharedPreferences}.
      */
     @Nullable
-    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) throws
+    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId,
+            boolean supplementFromStorage) throws
             PackageManager.NameNotFoundException {
         if (!PeopleTileKey.isValid(key)) {
             Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
@@ -412,7 +413,8 @@ public class PeopleSpaceWidgetManager {
 
             // Supplement with our storage.
             String contactUri = mSharedPrefs.getString(String.valueOf(appWidgetId), null);
-            if (contactUri != null && storedTile.build().getContactUri() == null) {
+            if (supplementFromStorage && contactUri != null
+                    && storedTile.build().getContactUri() == null) {
                 if (DEBUG) Log.d(TAG, "Restore contact uri from storage: " + contactUri);
                 storedTile.setContactUri(Uri.parse(contactUri));
             }
@@ -811,7 +813,8 @@ public class PeopleSpaceWidgetManager {
         if (DEBUG) Log.d(TAG, "addNewWidget called with key for appWidgetId: " + appWidgetId);
         PeopleSpaceTile tile = null;
         try {
-            tile = getTileFromPersistentStorage(key, appWidgetId);
+            tile = getTileFromPersistentStorage(key, appWidgetId,  /* supplementFromStorage= */
+                    false);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Cannot add widget since app was uninstalled");
             return;
@@ -850,7 +853,9 @@ public class PeopleSpaceWidgetManager {
         } catch (Exception e) {
             Log.w(TAG, "Exception caching shortcut:" + e);
         }
-        updateAppWidgetOptionsAndView(appWidgetId, tile);
+        PeopleSpaceTile finalTile = tile;
+        mBgExecutor.execute(
+                () -> updateAppWidgetOptionsAndView(appWidgetId, finalTile));
     }
 
     /** Registers a conversation listener for {@code appWidgetId} if not already registered. */
@@ -1071,7 +1076,7 @@ public class PeopleSpaceWidgetManager {
             return;
         }
         for (int appWidgetId : appWidgetIds) {
-            if (DEBUG) Log.d(TAG, "Updating widget from broadcast, widget id: " +  appWidgetId);
+            if (DEBUG) Log.d(TAG, "Updating widget from broadcast, widget id: " + appWidgetId);
             PeopleSpaceTile existingTile = null;
             PeopleSpaceTile updatedTile = null;
             try {

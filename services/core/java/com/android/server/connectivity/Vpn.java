@@ -2527,6 +2527,8 @@ public class Vpn {
                     mConfig.dnsServers.clear();
                     mConfig.dnsServers.addAll(dnsAddrStrings);
 
+                    mConfig.underlyingNetworks = new Network[] {network};
+
                     networkAgent = mNetworkAgent;
 
                     // The below must be done atomically with the mConfig update, otherwise
@@ -2537,6 +2539,9 @@ public class Vpn {
                         }
                         agentConnect();
                         return; // Link properties are already sent.
+                    } else {
+                        // Underlying networks also set in agentConnect()
+                        networkAgent.setUnderlyingNetworks(Collections.singletonList(network));
                     }
 
                     lp = makeLinkProperties(); // Accesses VPN instance fields; must be locked

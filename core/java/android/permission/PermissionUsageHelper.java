@@ -19,9 +19,11 @@ package android.permission;
 import static android.Manifest.permission_group.CAMERA;
 import static android.Manifest.permission_group.LOCATION;
 import static android.Manifest.permission_group.MICROPHONE;
+import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
 import static android.app.AppOpsManager.AttributionFlags;
 import static android.app.AppOpsManager.OPSTR_CAMERA;
 import static android.app.AppOpsManager.OPSTR_COARSE_LOCATION;
@@ -29,7 +31,9 @@ import static android.app.AppOpsManager.OPSTR_FINE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.media.AudioSystem.MODE_IN_COMMUNICATION;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
@@ -61,7 +65,8 @@ import java.util.Objects;
  *
  * @hide
  */
-public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedListener {
+public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedListener,
+        AppOpsManager.OnOpStartedListener {
 
     /** Whether to show the mic and camera icons.  */
     private static final String PROPERTY_CAMERA_MIC_ICONS_ENABLED = "camera_mic_icons_enabled";
@@ -158,9 +163,10 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         mUserContexts = new ArrayMap<>();
         mUserContexts.put(Process.myUserHandle(), mContext);
         // TODO ntmyren: make this listen for flag enable/disable changes
-        String[] ops = { OPSTR_CAMERA, OPSTR_RECORD_AUDIO };
-        mContext.getSystemService(AppOpsManager.class).startWatchingActive(ops,
-                context.getMainExecutor(), this);
+        String[] opStrs = { OPSTR_CAMERA, OPSTR_RECORD_AUDIO };
+        mAppOpsManager.startWatchingActive(opStrs, context.getMainExecutor(), this);
+        int[] ops = { OP_CAMERA, OP_RECORD_AUDIO };
+        mAppOpsManager.startWatchingStarted(ops, this);
     }
 
     private Context getUserContext(UserHandle user) {
@@ -180,21 +186,64 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     public void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, boolean active, @AttributionFlags int attributionFlags,
             int attributionChainId) {
-        if ((attributionFlags & ATTRIBUTION_FLAGS_NONE) != 0) {
+        if (active) {
+            // Started callback handles these
             return;
         }
 
-        if (!active) {
-            // if any link in the chain is finished, remove the chain.
-            // TODO ntmyren: be smarter about this
-            mAttributionChains.remove(attributionChainId);
+        // if any link in the chain is finished, remove the chain. Then, find any other chains that
+        // contain this op/package/uid/tag combination, and remove them, as well.
+        // TODO ntmyren: be smarter about this
+        mAttributionChains.remove(attributionChainId);
+        int numChains = mAttributionChains.size();
+        ArrayList<Integer> toRemove = new ArrayList<>();
+        for (int i = 0; i < numChains; i++) {
+            int chainId = mAttributionChains.keyAt(i);
+            ArrayList<AccessChainLink> chain = mAttributionChains.valueAt(i);
+            int chainSize = chain.size();
+            for (int j = 0; j < chainSize; j++) {
+                AccessChainLink link = chain.get(j);
+                if (link.packageAndOpEquals(op, packageName, attributionTag, uid)) {
+                    toRemove.add(chainId);
+                    break;
+                }
+            }
+        }
+        mAttributionChains.removeAll(toRemove);
+    }
+
+    @Override
+    public void onOpStarted(int op, int uid, String packageName, String attributionTag,
+                @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+       // not part of an attribution chain. Do nothing
+    }
+
+    @Override
+    public void onOpStarted(int op, int uid, String packageName, String attributionTag,
+            @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result,
+            @StartedType int startedType, @AttributionFlags int attributionFlags,
+            int attributionChainId) {
+        if (startedType == START_TYPE_FAILED || attributionChainId == ATTRIBUTION_CHAIN_ID_NONE
+                || attributionFlags == ATTRIBUTION_FLAGS_NONE
+                || (attributionFlags & ATTRIBUTION_FLAG_TRUSTED) == 0) {
+            // If this is not a successful start, or it is not a chain, or it is untrusted, return
             return;
         }
+        addLinkToChainIfNotPresent(AppOpsManager.opToPublicName(op), packageName, uid,
+                attributionTag, attributionFlags, attributionChainId);
+    }
+
+    private void addLinkToChainIfNotPresent(String op, String packageName, int uid,
+            String attributionTag, int attributionFlags, int attributionChainId) {
 
         ArrayList<AccessChainLink> currentChain = mAttributionChains.computeIfAbsent(
                 attributionChainId, k -> new ArrayList<>());
         AccessChainLink link = new AccessChainLink(op, packageName, attributionTag, uid,
                 attributionFlags);
+
+        if (currentChain.contains(link)) {
+            return;
+        }
 
         int currSize = currentChain.size();
         if (currSize == 0 || link.isEnd() || !currentChain.get(currSize - 1).isEnd()) {
@@ -607,6 +656,22 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
         public boolean isStart() {
             return (flags & ATTRIBUTION_FLAG_RECEIVER) != 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof AccessChainLink)) {
+                return false;
+            }
+            AccessChainLink other = (AccessChainLink) obj;
+            return other.flags == flags && packageAndOpEquals(other.usage.op,
+                    other.usage.packageName, other.usage.attributionTag, other.usage.uid);
+        }
+
+        public boolean packageAndOpEquals(String op, String packageName, String attributionTag,
+                int uid) {
+            return Objects.equals(op, usage.op) && Objects.equals(packageName, usage.packageName)
+                    && Objects.equals(attributionTag, usage.attributionTag) && uid == usage.uid;
         }
     }
 }

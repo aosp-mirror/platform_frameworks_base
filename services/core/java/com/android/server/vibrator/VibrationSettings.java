@@ -99,16 +99,24 @@ final class VibrationSettings {
     private boolean mLowPowerMode;
 
     VibrationSettings(Context context, Handler handler) {
+        this(context, handler,
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampDownDuration),
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampStepDuration));
+    }
+
+    @VisibleForTesting
+    VibrationSettings(Context context, Handler handler, int rampDownDuration,
+            int rampStepDuration) {
         mContext = context;
         mSettingObserver = new SettingsObserver(handler);
         mUidObserver = new UidObserver();
         mUserReceiver = new UserObserver();
 
         // TODO(b/191150049): move these to vibrator static config file
-        mRampStepDuration = context.getResources().getInteger(
-                com.android.internal.R.integer.config_vibrationWaveformRampStepDuration);
-        mRampDownDuration = context.getResources().getInteger(
-                com.android.internal.R.integer.config_vibrationWaveformRampDownDuration);
+        mRampDownDuration = rampDownDuration;
+        mRampStepDuration = rampStepDuration;
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);

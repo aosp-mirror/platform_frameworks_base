@@ -3370,8 +3370,7 @@
     <integer name="config_vibrationWaveformRampStepDuration">5</integer>
 
     <!-- The duration (in milliseconds) that should be applied to waveform vibrations that ends in
-         non-zero amplitudes, . The waveform will
-         be played as a PWLE instead of on/off calls if this value is set. -->
+         non-zero amplitudes, to bring the vibrator amplitude down to zero using this timing. -->
     <integer name="config_vibrationWaveformRampDownDuration">0</integer>
 
     <!-- Number of retries Cell Data should attempt for a given error code before
@@ -4409,14 +4408,14 @@
         M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
 
-    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
-    <string name="config_signalXPath" translatable="false">
-        M22,16.41L20.59,15l-2.09,2.09L16.41,15L15,16.41l2.09,2.09L15,20.59L16.41,22l2.09-2.08L20.59,22L22,20.59l-2.08-2.09   L22,16.41z
+    <!-- Attribution path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalAttributionPath" translatable="false">
+        M20,10h2v8h-2z M20,20h2v2h-2z
     </string>
     <!-- config_signalCutout{Height,Width}Fraction define fraction of the 24x24 canvas that
-         should be cut out to display config_signalXPath.-->
-    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">11</item>
-    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">11</item>
+         should be cut out to display config_signalAttributionPath. -->
+    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">7</item>
+    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">17</item>
 
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
      and a second time clipped to the fill level to indicate charge -->
@@ -4805,7 +4804,7 @@
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
         ignored and 0 is used. -->
-    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">100dp</dimen>
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">31dp</dimen>
 
     <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
         the Option 3 is selected for R.integer.config_letterboxBackgroundType.
@@ -5042,4 +5041,7 @@
     <!-- The default number of times per second that the seconds hand on AnalogClock ticks. If set
          to 0, the seconds hand will be disabled. -->
     <integer name="config_defaultAnalogClockSecondsHandFps">1</integer>
+
+    <!-- the number of the max cached processes in the system. -->
+    <integer name="config_customizedMaxCachedProcesses">32</integer>
 </resources>

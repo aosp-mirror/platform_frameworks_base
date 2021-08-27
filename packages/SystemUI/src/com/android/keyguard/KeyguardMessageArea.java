@@ -54,6 +54,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private CharSequence mMessage;
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
     private boolean mBouncerVisible;
+    private boolean mAltBouncerShowing;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -144,7 +145,8 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     void update() {
         CharSequence status = mMessage;
-        setVisibility(TextUtils.isEmpty(status) || !mBouncerVisible ? INVISIBLE : VISIBLE);
+        setVisibility(TextUtils.isEmpty(status) || (!mBouncerVisible && !mAltBouncerShowing)
+                ? INVISIBLE : VISIBLE);
         setText(status);
         ColorStateList colorState = mDefaultColorState;
         if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
@@ -156,6 +158,16 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     public void setBouncerVisible(boolean bouncerVisible) {
         mBouncerVisible = bouncerVisible;
+    }
+
+    /**
+     * Set whether the alt bouncer is showing
+     */
+    void setAltBouncerShowing(boolean showing) {
+        if (mAltBouncerShowing != showing) {
+            mAltBouncerShowing = showing;
+            update();
+        }
     }
 
     /**

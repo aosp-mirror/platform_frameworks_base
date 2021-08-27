@@ -49,6 +49,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         protected Handler mHandler;
         protected boolean mLastPulseLightToDark; // false = dark to light, true = light to dark
         protected @BiometricState int mState;
+        protected boolean mDeactivated;
 
         protected IconController(Context context, ImageView iconView, TextView textView) {
             mContext = context;
@@ -67,6 +68,11 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         }
 
         protected void animateIcon(int iconRes, boolean repeat) {
+            Log.d(TAG, "animateIcon, state: " + mState + ", deactivated: " + mDeactivated);
+            if (mDeactivated) {
+                return;
+            }
+
             final AnimatedVectorDrawable icon =
                     (AnimatedVectorDrawable) mContext.getDrawable(iconRes);
             mIconView.setImageDrawable(icon);
@@ -92,12 +98,26 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         @Override
         public void onAnimationEnd(Drawable drawable) {
             super.onAnimationEnd(drawable);
+            Log.d(TAG, "onAnimationEnd, mState: " + mState + ", deactivated: " + mDeactivated);
+            if (mDeactivated) {
+                return;
+            }
+
             if (mState == STATE_AUTHENTICATING || mState == STATE_HELP) {
                 pulseInNextDirection();
             }
         }
 
+        protected void deactivate() {
+            mDeactivated = true;
+        }
+
         protected void updateState(int lastState, int newState) {
+            if (mDeactivated) {
+                Log.w(TAG, "Ignoring updateState when deactivated: " + newState);
+                return;
+            }
+
             final boolean lastStateIsErrorIcon =
                     lastState == STATE_ERROR || lastState == STATE_HELP;
 
@@ -142,7 +162,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         }
     }
 
-    protected IconController mIconController;
+    @Nullable @VisibleForTesting IconController mFaceIconController;
 
     public AuthBiometricFaceView(Context context) {
         this(context, null);
@@ -155,6 +175,12 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     @VisibleForTesting
     AuthBiometricFaceView(Context context, AttributeSet attrs, Injector injector) {
         super(context, attrs, injector);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mFaceIconController = new IconController(mContext, mIconView, mIndicatorView);
     }
 
     @Override
@@ -187,17 +213,9 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         return true;
     }
 
-    @NonNull
-    protected IconController getIconController() {
-        if (mIconController == null) {
-            mIconController = new IconController(mContext, mIconView, mIndicatorView);
-        }
-        return mIconController;
-    }
-
     @Override
     public void updateState(@BiometricState int newState) {
-        getIconController().updateState(mState, newState);
+        mFaceIconController.updateState(mState, newState);
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||
                 (newState == STATE_AUTHENTICATING && getSize() == AuthDialog.SIZE_MEDIUM)) {

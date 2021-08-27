@@ -1375,24 +1375,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
                 return context.getString(
                         com.android.internal.R.string.fingerprint_error_security_update_required);
-            case FINGERPRINT_ERROR_BAD_CALIBARTION:
+            case FINGERPRINT_ERROR_BAD_CALIBRATION:
                 return context.getString(
                             com.android.internal.R.string.fingerprint_error_bad_calibration);
             case FINGERPRINT_ERROR_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_error_vendor);
                 if (vendorCode < msgArray.length) {
-                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
-                        return msgArray[vendorCode];
-                    } else {
-                        return context.getString(
-                            com.android.internal.R.string.fingerprint_error_unable_to_process);
-                    }
+                    return msgArray[vendorCode];
                 }
             }
         }
+
+        // This is used as a last resort in case a vendor string is missing
+        // It should not happen for anything other than FINGERPRINT_ERROR_VENDOR, but
+        // warn and use the default if all else fails.
+        // TODO(b/196639965): update string
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
-        return null;
+        return "";
     }
 
     /**
@@ -1427,12 +1427,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_acquired_vendor);
                 if (vendorCode < msgArray.length) {
-                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
-                        return msgArray[vendorCode];
-                    } else {
-                        return context.getString(
-                            com.android.internal.R.string.fingerprint_error_unable_to_process);
-                    }
+                    return msgArray[vendorCode];
                 }
             }
                 break;

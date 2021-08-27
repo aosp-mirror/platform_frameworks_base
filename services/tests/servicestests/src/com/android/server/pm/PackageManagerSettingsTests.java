@@ -198,6 +198,7 @@ public class PackageManagerSettingsTests {
                 new WatchableTester(settingsUnderTest, "noSuspendingPackage");
         watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settingsUnderTest.readPackageRestrictionsLPr(0);
         watcher.verifyChangeReported("put package 1");
         // Collect a snapshot at the midway point (package 2 has not been added)
         final Settings snapshot = settingsUnderTest.snapshot();

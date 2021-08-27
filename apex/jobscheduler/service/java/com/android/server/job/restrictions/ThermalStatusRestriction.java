@@ -59,7 +59,7 @@ public class ThermalStatusRestriction extends JobRestriction {
 
     @Override
     public boolean isJobRestricted(JobStatus job) {
-        return mIsThermalRestricted && job.hasConnectivityConstraint();
+        return mIsThermalRestricted;
     }
 
     @Override

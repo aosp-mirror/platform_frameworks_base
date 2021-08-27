@@ -1242,6 +1242,8 @@ static jint convertAudioPortFromNative(JNIEnv *env, jobject *jAudioPort,
     jstring jDeviceName = NULL;
     jobject jAudioProfiles = NULL;
     jobject jAudioDescriptors = nullptr;
+    ScopedLocalRef<jobject> jPcmFloatProfileFromExtendedInteger(env, nullptr);
+    bool hasFloat = false;
     bool useInMask;
 
     ALOGV("convertAudioPortFromNative id %d role %d type %d name %s",
@@ -1338,6 +1340,25 @@ static jint convertAudioPortFromNative(JNIEnv *env, jobject *jAudioPort,
             goto exit;
         }
         env->CallBooleanMethod(jAudioProfiles, gArrayListMethods.add, jAudioProfile.get());
+        if (nAudioPort->audio_profiles[i].format == AUDIO_FORMAT_PCM_FLOAT) {
+            hasFloat = true;
+        } else if (jPcmFloatProfileFromExtendedInteger.get() == nullptr &&
+                   audio_is_linear_pcm(nAudioPort->audio_profiles[i].format) &&
+                   audio_bytes_per_sample(nAudioPort->audio_profiles[i].format) > 2) {
+            jPcmFloatProfileFromExtendedInteger.reset(
+                    env->NewObject(gAudioProfileClass, gAudioProfileCstor,
+                                   audioFormatFromNative(AUDIO_FORMAT_PCM_FLOAT),
+                                   jSamplingRates.get(), jChannelMasks.get(),
+                                   jChannelIndexMasks.get(), encapsulationType));
+        }
+    }
+    if (!hasFloat && jPcmFloatProfileFromExtendedInteger.get() != nullptr) {
+        // R and earlier compatibility - add ENCODING_PCM_FLOAT to the end
+        // (replacing the zero pad). This ensures pre-S apps that look
+        // for ENCODING_PCM_FLOAT continue to see that encoding if the device supports
+        // extended precision integers.
+        env->CallBooleanMethod(jAudioProfiles, gArrayListMethods.add,
+                               jPcmFloatProfileFromExtendedInteger.get());
     }
 
     jAudioDescriptors = env->NewObject(gArrayListClass, gArrayListMethods.cstor);
@@ -2408,6 +2429,12 @@ android_media_AudioSystem_setAssistantUid(JNIEnv *env, jobject thiz, jint uid)
     return (jint)nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioSystem_setHotwordDetectionServiceUid(JNIEnv *env, jobject thiz,
+                                                                    jint uid) {
+    status_t status = AudioSystem::setHotwordDetectionServiceUid(uid);
+    return (jint)nativeToJavaStatus(status);
+}
+
 static jint
 android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArray uids) {
     std::vector<uid_t> nativeUidsVector;
@@ -2778,6 +2805,8 @@ static const JNINativeMethod gMethods[] =
          {"setSurroundFormatEnabled", "(IZ)I",
           (void *)android_media_AudioSystem_setSurroundFormatEnabled},
          {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
+         {"setHotwordDetectionServiceUid", "(I)I",
+          (void *)android_media_AudioSystem_setHotwordDetectionServiceUid},
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},

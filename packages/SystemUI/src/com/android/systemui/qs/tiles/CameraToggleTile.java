@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
+import static android.os.UserManager.DISALLOW_CAMERA_TOGGLE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -85,5 +86,10 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @Sensor int getSensorId() {
         return CAMERA;
+    }
+
+    @Override
+    public String getRestriction() {
+        return DISALLOW_CAMERA_TOGGLE;
     }
 }

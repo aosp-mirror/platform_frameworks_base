@@ -153,6 +153,52 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 createCallNotifEntry(ongoingCallStyle, nullContentIntent = true))
     }
 
+    /** Regression test for b/192379214. */
+    @Test
+    fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(0)
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isEqualTo(0)
+    }
+
+    @Test
+    fun onEntryUpdated_notificationWhenIsValid_timeShown() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(clock.currentTimeMillis())
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isGreaterThan(0)
+    }
+
+    /** Regression test for b/194731244. */
+    @Test
+    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
+        val numCalls = 4
+
+        for (i in 0 until numCalls) {
+            // Re-create the notification each time so that it's considered a different object and
+            // observers will get re-registered (and hopefully unregistered).
+            notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        }
+
+        // There should be 1 observer still registered, so we should unregister n-1 times.
+        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+    }
+
     /**
      * If a call notification is never added before #onEntryRemoved is called, then the listener
      * should never be notified.

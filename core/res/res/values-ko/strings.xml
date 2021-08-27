@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 서비스"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"센서 알림 서비스"</string>
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"시간대 감지(연결되지 않음)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"음악 인식 관리자 서비스"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
@@ -580,7 +579,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"센서 닦기"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 오래 기다려 주세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 길게 터치하세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
@@ -1483,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"거부"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"권한 요청됨"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해\n권한 요청"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정에 대한\n권한을 요청했습니다"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"직장 프로필 외부에서 이 앱을 사용 중입니다."</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"직장 프로필에서 이 앱을 사용 중입니다."</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"입력 방법"</string>
@@ -1949,7 +1949,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"최대화"</string>
     <string name="close_button_text" msgid="10603510034455258">"닫기"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"답변"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"통화"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"동영상"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"거절"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"전화 끊기"</string>

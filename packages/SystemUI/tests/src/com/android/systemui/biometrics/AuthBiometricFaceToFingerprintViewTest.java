@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -50,7 +49,6 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -78,14 +76,16 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     @Mock private TextView mIndicatorView;
     @Mock private ImageView mIconView;
     @Mock private View mIconHolderView;
-    @Mock private AuthBiometricFaceView.IconController mIconController;
+    @Mock private AuthBiometricFaceView.IconController mFaceIconController;
+    @Mock private AuthBiometricFaceToFingerprintView.UdfpsIconController mUdfpsIconController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFaceToFpView = new TestableView(mContext);
-        mFaceToFpView.mIconController = mIconController;
+        mFaceToFpView.mFaceIconController = mFaceIconController;
+        mFaceToFpView.mUdfpsIconController = mUdfpsIconController;
         mFaceToFpView.setCallback(mCallback);
 
         mFaceToFpView.mNegativeButton = mNegativeButton;
@@ -99,20 +99,23 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     @Test
     public void testStateUpdated_whenDialogAnimatedIn() {
         mFaceToFpView.onDialogAnimatedIn();
-        verify(mFaceToFpView.mIconController)
+        verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
     }
 
     @Test
     public void testIconUpdatesState_whenDialogStateUpdated() {
         mFaceToFpView.onDialogAnimatedIn();
-        verify(mFaceToFpView.mIconController)
+        verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
 
         mFaceToFpView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATED);
-        verify(mFaceToFpView.mIconController).updateState(
+        verify(mFaceToFpView.mFaceIconController).updateState(
                 eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING),
                 eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATED));
+        verify(mFaceToFpView.mUdfpsIconController, never()).updateState(anyInt());
 
         assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATED, mFaceToFpView.mState);
     }
@@ -120,21 +123,45 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     @Test
     public void testStateUpdated_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
-        verify(mFaceToFpView.mIconController)
+        verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
+
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_ERROR);
+
+        verify(mFaceToFpView.mFaceIconController).deactivate();
+        verify(mFaceToFpView.mUdfpsIconController).updateState(
+                eq(AuthBiometricFaceToFingerprintView.STATE_IDLE));
+        verify(mConfirmButton).setVisibility(eq(View.GONE));
+
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING);
+
+        verify(mFaceToFpView.mUdfpsIconController).updateState(
+                eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
+    }
+
+    @Test
+    public void testStateUpdated_whenSwitchToFingerprint_invokesCallbacks() {
+        class TestModalityListener implements ModalityListener {
+            public int switchCount = 0;
+
+            @Override
+            public void onModalitySwitched(int oldModality, int newModality) {
+                assertEquals(TYPE_FINGERPRINT, newModality);
+                assertEquals(TYPE_FACE, oldModality);
+                switchCount++;
+            }
+        }
+        final TestModalityListener modalityListener = new TestModalityListener();
+
+        mFaceToFpView.onDialogAnimatedIn();
+        mFaceToFpView.setModalityListener(modalityListener);
+
+        assertEquals(0, modalityListener.switchCount);
 
         mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_ERROR);
         mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING);
 
-        InOrder order = inOrder(mFaceToFpView.mIconController);
-        order.verify(mFaceToFpView.mIconController).updateState(
-                eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING),
-                eq(AuthBiometricFaceToFingerprintView.STATE_ERROR));
-        order.verify(mFaceToFpView.mIconController).updateState(
-                eq(AuthBiometricFaceToFingerprintView.STATE_ERROR),
-                eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
-
-        verify(mConfirmButton).setVisibility(eq(View.GONE));
+        assertEquals(1, modalityListener.switchCount);
     }
 
     @Test
@@ -147,7 +174,10 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
                 eq(mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead)));
         verify(mCallback).onAction(
                 eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
-        assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING, mFaceToFpView.mState);
+
+        // First we enter the error state, since we need to show the error animation/text. The
+        // error state is later cleared based on a timer, and we enter STATE_AUTHENTICATING.
+        assertEquals(AuthBiometricFaceToFingerprintView.STATE_ERROR, mFaceToFpView.mState);
     }
 
     @Test
@@ -160,13 +190,16 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
                 eq(mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead)));
         verify(mCallback).onAction(
                 eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
-        assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING, mFaceToFpView.mState);
+
+        // First we enter the error state, since we need to show the error animation/text. The
+        // error state is later cleared based on a timer, and we enter STATE_AUTHENTICATING.
+        assertEquals(AuthBiometricFaceToFingerprintView.STATE_ERROR, mFaceToFpView.mState);
     }
 
     @Test
     public void testFingerprintOnlyStartsOnFirstError() {
         mFaceToFpView.onDialogAnimatedIn();
-        verify(mFaceToFpView.mIconController)
+        verify(mFaceToFpView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
 
         mFaceToFpView.onDialogAnimatedIn();
@@ -234,11 +267,6 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
         @Override
         protected int getDelayAfterAuthenticatedDurationMs() {
             return 0;
-        }
-
-        @Override
-        protected IconController createUdfpsIconController() {
-            return AuthBiometricFaceToFingerprintViewTest.this.mIconController;
         }
     }
 

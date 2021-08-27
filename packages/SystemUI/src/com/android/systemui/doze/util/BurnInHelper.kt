@@ -21,8 +21,8 @@ import android.util.MathUtils
 private const val MILLIS_PER_MINUTES = 1000 * 60f
 private const val BURN_IN_PREVENTION_PERIOD_Y = 521f
 private const val BURN_IN_PREVENTION_PERIOD_X = 83f
-private const val BURN_IN_PREVENTION_PERIOD_SCALE = 180f
-private const val BURN_IN_PREVENTION_PERIOD_PROGRESS = 120f
+private const val BURN_IN_PREVENTION_PERIOD_SCALE = 181f
+private const val BURN_IN_PREVENTION_PERIOD_PROGRESS = 89f
 
 /**
  * Returns the translation offset that should be used to avoid burn in at

@@ -82,6 +82,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private final UiEventLogger mUiEventLogger;
     private int mState;
     private int mLastState;
+    private int mUpcomingState;
     private boolean mLeaveOpenOnKeyguardHide;
     private boolean mKeyguardRequested;
 
@@ -169,6 +170,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
             mLastState = mState;
             mState = state;
+            mUpcomingState = state;
             mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStateChanged(mState);
@@ -181,6 +183,16 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         }
 
         return true;
+    }
+
+    @Override
+    public void setUpcomingState(int nextState) {
+        mUpcomingState = nextState;
+    }
+
+    @Override
+    public int getCurrentOrUpcomingState() {
+        return mUpcomingState;
     }
 
     @Override

@@ -64,9 +64,8 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
         return (dialog, which) -> {
             Log.d(TAG, "Positive button clicked, component: " + enforcedAdmin.component);
             final Intent intent = new Intent(ACTION_LEARN_MORE)
-                    .setComponent(enforcedAdmin.component)
                     .putExtra(EXTRA_SETTING_KEY, EXTRA_SETTING_VALUE)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    .setPackage(enforcedAdmin.component.getPackageName());
             context.startActivity(intent);
         };
     }

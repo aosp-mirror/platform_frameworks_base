@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -60,7 +61,6 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -3120,6 +3120,7 @@ class ContextImpl extends Context {
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
+            mContentCaptureOptions = container.mContentCaptureOptions;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
@@ -3149,7 +3150,8 @@ class ContextImpl extends Context {
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {
-            getSystemService(PermissionManager.class).registerAttributionSource(attributionSource);
+            attributionSource = getSystemService(PermissionManager.class)
+                    .registerAttributionSource(attributionSource);
         }
         return attributionSource;
     }

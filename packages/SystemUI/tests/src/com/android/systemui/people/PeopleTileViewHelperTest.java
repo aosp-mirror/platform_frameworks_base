@@ -289,6 +289,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.GONE, result.findViewById(R.id.last_interaction).getVisibility());
         // Has availability.
         assertEquals(View.VISIBLE, result.findViewById(R.id.availability).getVisibility());
+        assertEquals(result.findViewById(R.id.availability).getContentDescription(),
+                mContext.getString(R.string.person_available));
         // Has person icon.
         assertEquals(View.VISIBLE, result.findViewById(R.id.person_icon).getVisibility());
         // No status.
@@ -334,6 +336,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.GONE, largeResult.findViewById(R.id.last_interaction).getVisibility());
         // Has availability.
         assertEquals(View.VISIBLE, largeResult.findViewById(R.id.availability).getVisibility());
+        assertEquals(largeResult.findViewById(R.id.availability).getContentDescription(),
+                mContext.getString(R.string.person_available));
         // Shows person icon.
         assertEquals(View.VISIBLE, largeResult.findViewById(R.id.person_icon).getVisibility());
         // No status.

@@ -45,8 +45,11 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -62,6 +65,8 @@ public class ScrollCaptureClient {
     static final int MATCH_ANY_TASK = ActivityTaskManager.INVALID_TASK_ID;
 
     private static final String TAG = LogConfig.logTag(ScrollCaptureClient.class);
+
+    private final Executor mBgExecutor;
 
     /**
      * Represents the connection to a target window and provides a mechanism for requesting tiles.
@@ -155,8 +160,10 @@ public class ScrollCaptureClient {
     private IBinder mHostWindowToken;
 
     @Inject
-    public ScrollCaptureClient(@UiContext Context context, IWindowManager windowManagerService) {
+    public ScrollCaptureClient(IWindowManager windowManagerService,
+            @Background Executor bgExecutor, @UiContext Context context) {
         requireNonNull(context.getDisplay(), "context must be associated with a Display!");
+        mBgExecutor = bgExecutor;
         mWindowManagerService = windowManagerService;
     }
 
@@ -220,21 +227,25 @@ public class ScrollCaptureClient {
                 return "";
             }
             SessionWrapper session = new SessionWrapper(connection, response.getWindowBounds(),
-                    response.getBoundsInWindow(), maxPages);
+                    response.getBoundsInWindow(), maxPages, mBgExecutor);
             session.start(completer);
             return "IScrollCaptureCallbacks#onCaptureStarted";
         });
     }
 
     private static class SessionWrapper extends IScrollCaptureCallbacks.Stub implements Session,
-            IBinder.DeathRecipient {
+            IBinder.DeathRecipient, ImageReader.OnImageAvailableListener {
 
         private IScrollCaptureConnection mConnection;
+        private final Executor mBgExecutor;
+        private final Object mLock = new Object();
 
         private ImageReader mReader;
         private final int mTileHeight;
         private final int mTileWidth;
         private Rect mRequestRect;
+        private Rect mCapturedArea;
+        private Image mCapturedImage;
         private boolean mStarted;
         private final int mTargetHeight;
 
@@ -247,7 +258,8 @@ public class ScrollCaptureClient {
         private Completer<Void> mEndCompleter;
 
         private SessionWrapper(IScrollCaptureConnection connection, Rect windowBounds,
-                Rect boundsInWindow, float maxPages) throws RemoteException {
+                Rect boundsInWindow, float maxPages, Executor bgExecutor)
+                throws RemoteException {
             mConnection = requireNonNull(connection);
             mConnection.asBinder().linkToDeath(SessionWrapper.this, 0);
             mWindowBounds = requireNonNull(windowBounds);
@@ -259,7 +271,7 @@ public class ScrollCaptureClient {
             mTileWidth = mBoundsInWindow.width();
             mTileHeight = pxPerTile / mBoundsInWindow.width();
             mTargetHeight = (int) (mBoundsInWindow.height() * maxPages);
-
+            mBgExecutor = bgExecutor;
             if (DEBUG_SCROLL) {
                 Log.d(TAG, "boundsInWindow: " + mBoundsInWindow);
                 Log.d(TAG, "tile size: " + mTileWidth + "x" + mTileHeight);
@@ -289,6 +301,7 @@ public class ScrollCaptureClient {
             mReader = ImageReader.newInstance(mTileWidth, mTileHeight, PixelFormat.RGBA_8888,
                     MAX_TILES, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
             mStartCompleter = completer;
+            mReader.setOnImageAvailableListenerWithExecutor(this, mBgExecutor);
             try {
                 mCancellationSignal = mConnection.startCapture(mReader.getSurface(), this);
                 completer.addCancellationListener(() -> {
@@ -339,9 +352,34 @@ public class ScrollCaptureClient {
 
         @BinderThread
         @Override
-        public void onImageRequestCompleted(int flags, Rect contentArea) {
-            Image image = mReader.acquireLatestImage();
-            mTileRequestCompleter.set(new CaptureResult(image, mRequestRect, contentArea));
+        public void onImageRequestCompleted(int flagsUnused, Rect contentArea) {
+            synchronized (mLock) {
+                mCapturedArea = contentArea;
+                if (mCapturedImage != null || (mCapturedArea == null || mCapturedArea.isEmpty())) {
+                    completeCaptureRequest();
+                }
+            }
+        }
+
+        /** @see ImageReader.OnImageAvailableListener */
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            synchronized (mLock) {
+                mCapturedImage = mReader.acquireLatestImage();
+                if (mCapturedArea != null) {
+                    completeCaptureRequest();
+                }
+            }
+        }
+
+        /** Produces a result for the caller as soon as both asynchronous results are received. */
+        private void completeCaptureRequest() {
+            CaptureResult result =
+                    new CaptureResult(mCapturedImage, mRequestRect, mCapturedArea);
+            mCapturedImage = null;
+            mRequestRect = null;
+            mCapturedArea = null;
+            mTileRequestCompleter.set(result);
         }
 
         @Override

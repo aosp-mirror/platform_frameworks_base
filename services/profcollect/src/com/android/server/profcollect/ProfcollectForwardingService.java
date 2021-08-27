@@ -59,9 +59,7 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
-    private static final long BG_PROCESS_PERIOD = DEBUG
-            ? TimeUnit.MINUTES.toMillis(1)
-            : TimeUnit.DAYS.toMillis(1);
+    private static final long BG_PROCESS_PERIOD = TimeUnit.DAYS.toMillis(1); // every 1 day.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -286,6 +284,11 @@ public final class ProfcollectForwardingService extends SystemService {
         updateEngine.bind(new UpdateEngineCallback() {
             @Override
             public void onStatusUpdate(int status, float percent) {
+                if (DEBUG) {
+                    Log.d(LOG_TAG, "Received OTA status update, status: " + status + ", percent: "
+                            + percent);
+                }
+
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
                     packProfileReport();
                 }

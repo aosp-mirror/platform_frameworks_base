@@ -28,4 +28,12 @@
 
     <string name="tv_notification_panel_title">Notifications</string>
     <string name="tv_notification_panel_no_notifications">No Notifications</string>
+
+    <string name="mic_recording_announcement">Microphone is recording</string>
+    <string name="camera_recording_announcement">Camera is recording</string>
+    <string name="mic_and_camera_recording_announcement">Camera and Microphone are recording</string>
+    <string name="mic_stopped_recording_announcement">Microphone stopped recording</string>
+    <string name="camera_stopped_recording_announcement">Camera stopped recording</string>
+    <string name="mic_camera_stopped_recording_announcement">Camera and Microphone stopped recording</string>
+
 </resources>

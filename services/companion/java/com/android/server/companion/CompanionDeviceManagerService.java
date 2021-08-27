@@ -17,6 +17,7 @@
 
 package com.android.server.companion;
 
+import static android.Manifest.permission.BIND_COMPANION_DEVICE_SERVICE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.Context.BIND_IMPORTANT;
@@ -865,7 +866,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         Set<String> sameOemPackageCerts = new HashSet<>();
 
         // Assume OEM may enter same package name in the parallel string array with
-        // multiple ADK certs corresponding to it
+        // multiple APK certs corresponding to it
         for (int i = 0; i < oemPackages.length; i++) {
             if (oemPackages[i].equals(packageName)) {
                 sameOemPackageCerts.add(sameOemCerts[i].replaceAll(":", ""));
@@ -1195,6 +1196,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             Slog.w(LOG_TAG, "Device presence listener package must have exactly one "
                     + "CompanionDeviceService, but " + a.getPackageName()
                     + " has " + packageResolveInfos.size());
+            return new ServiceConnector.NoOp<>();
+        }
+        String servicePermission = packageResolveInfos.get(0).serviceInfo.permission;
+        if (!BIND_COMPANION_DEVICE_SERVICE.equals(servicePermission)) {
+            Slog.w(LOG_TAG, "Binding CompanionDeviceService must have "
+                    + BIND_COMPANION_DEVICE_SERVICE + " permission.");
             return new ServiceConnector.NoOp<>();
         }
         ComponentName componentName = packageResolveInfos.get(0).serviceInfo.getComponentName();

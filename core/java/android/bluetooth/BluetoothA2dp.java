@@ -1025,6 +1025,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
     public boolean setBufferLengthMillis(@BluetoothCodecConfig.SourceCodecType int codec,
             int value) {
         if (VDBG) log("setBufferLengthMillis(" + codec + ", " + value + ")");
+        if (value < 0) {
+            Log.e(TAG, "Trying to set audio buffer length to a negative value: " + value);
+            return false;
+        }
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {

@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -109,7 +110,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockDisplayAreaOrganizer.isReady()).thenReturn(true);
-        when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
+        when(mMockBackgroundOrganizer.isRegistered()).thenReturn(true);
         when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
         when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
@@ -234,13 +235,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedOneHandedController.onEnabledSettingChanged();
 
         verify(mSpiedOneHandedController).setOneHandedEnabled(anyBoolean());
-    }
-
-    @Test
-    public void testSettingsObserverUpdateTimeout() {
-        mSpiedOneHandedController.onTimeoutSettingChanged();
-
-        verify(mSpiedTimeoutHandler, atLeastOnce()).setTimeout(anyInt());
     }
 
     @Test
@@ -406,7 +400,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 false);
         mSpiedOneHandedController.onActivatedActionChanged();
 
-        verify(mSpiedOneHandedController).notifyUserConfigChanged(anyBoolean());
+        verify(mMockSettingsUitl).setOneHandedModeEnabled(any(), eq(1), anyInt());
     }
 
     @Test
@@ -441,7 +435,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedOneHandedController.registerEventCallback(mMockEventCallback);
         mSpiedOneHandedController.setOneHandedEnabled(true);
 
-        verify(mSpiedOneHandedController).notifyShortcutState(anyInt());
+        verify(mSpiedOneHandedController).notifyShortcutStateChanged(anyInt());
     }
 
     @Test
@@ -468,7 +462,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 false /* To avoid test runner create Toast */);
         mSpiedOneHandedController.onActivatedActionChanged();
 
-        verify(mSpiedOneHandedController).notifyUserConfigChanged(anyBoolean());
+        verify(mMockSettingsUitl).setOneHandedModeEnabled(any(), eq(1), anyInt());
     }
 
     @Test
@@ -481,6 +475,5 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mMockSettingsUitl, never()).setOneHandedModeEnabled(any(), anyInt(), anyInt());
-        verify(mSpiedOneHandedController, never()).notifyUserConfigChanged(anyBoolean());
     }
 }

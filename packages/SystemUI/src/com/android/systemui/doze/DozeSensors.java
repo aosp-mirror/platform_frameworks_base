@@ -115,6 +115,7 @@ public class DozeSensors {
         mSecureSettings = secureSettings;
         mCallback = callback;
         mProximitySensor = proximitySensor;
+        mProximitySensor.setTag(TAG);
         mSelectivelyRegisterProxSensors = dozeParameters.getSelectivelyRegisterSensorsUsingProx();
         mListeningProxSensors = !mSelectivelyRegisterProxSensors;
         mScreenOffUdfpsEnabled =

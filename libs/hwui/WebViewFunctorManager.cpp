@@ -100,6 +100,9 @@ WebViewFunctor::~WebViewFunctor() {
     destroyContext();
 
     ATRACE_NAME("WebViewFunctor::onDestroy");
+    if (mSurfaceControl) {
+        removeOverlays();
+    }
     mCallbacks.onDestroyed(mFunctor, mData);
 }
 

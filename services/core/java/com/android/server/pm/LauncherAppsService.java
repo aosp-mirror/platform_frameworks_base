@@ -18,7 +18,7 @@ package com.android.server.pm;
 
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
-import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
@@ -699,7 +699,8 @@ public class LauncherAppsService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 return injectCreatePendingIntent(0 /* requestCode */, intents,
-                        FLAG_MUTABLE, opts, packageName, mPackageManagerInternal.getPackageUid(
+                        FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT, opts, packageName,
+                        mPackageManagerInternal.getPackageUid(
                                 packageName, PackageManager.MATCH_DIRECT_BOOT_AUTO,
                                 user.getIdentifier()));
             } finally {

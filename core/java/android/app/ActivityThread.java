@@ -369,11 +369,12 @@ public final class ActivityThread extends ClientTransactionHandler
     @UnsupportedAppUsage(trackingBug = 176961850, maxTargetSdk = Build.VERSION_CODES.R,
             publicAlternatives = "Use {@code Context#getResources()#getConfiguration()} instead.")
     Configuration mConfiguration;
+    @GuardedBy("this")
+    private boolean mUpdateHttpProxyOnBind = false;
     @UnsupportedAppUsage
     Application mInitialApplication;
     @UnsupportedAppUsage
-    final ArrayList<Application> mAllApplications
-            = new ArrayList<Application>();
+    final ArrayList<Application> mAllApplications = new ArrayList<>();
     /**
      * Bookkeeping of instantiated backup agents indexed first by user id, then by package name.
      * Indexing by user id supports parallel backups across users on system packages as they run in
@@ -1169,7 +1170,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
-            mResourcesManager.updatePendingAppInfoUpdates(ai);
+            mResourcesManager.appendPendingAppInfoUpdate(new String[]{ai.sourceDir}, ai);
             mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
@@ -1187,8 +1188,18 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void updateHttpProxy() {
-            ActivityThread.updateHttpProxy(
-                    getApplication() != null ? getApplication() : getSystemContext());
+            final Application app;
+            synchronized (ActivityThread.this) {
+                app = getApplication();
+                if (null == app) {
+                    // The app is not bound yet. Make a note to update the HTTP proxy when the
+                    // app is bound.
+                    mUpdateHttpProxyOnBind = true;
+                    return;
+                }
+            }
+            // App is present, update the proxy inline.
+            ActivityThread.updateHttpProxy(app);
         }
 
         public void processInBackground() {
@@ -5643,8 +5654,8 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     private void scheduleRelaunchActivityIfPossible(@NonNull ActivityClientRecord r,
             boolean preserveWindow) {
-        if (r.activity.mFinished || r.token instanceof Binder) {
-            // Do not schedule relaunch if the activity is finishing or not a local object (e.g.
+        if ((r.activity != null && r.activity.mFinished) || r.token instanceof Binder) {
+            // Do not schedule relaunch if the activity is finishing or is a local object (e.g.
             // created by ActivtiyGroup that server side doesn't recognize it).
             return;
         }
@@ -6001,16 +6012,12 @@ public final class ActivityThread extends ClientTransactionHandler
             resApk = ref != null ? ref.get() : null;
         }
 
-        final String[] oldResDirs = new String[2];
-
         if (apk != null) {
-            oldResDirs[0] = apk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
             apk.updateApplicationInfo(ai, oldPaths);
         }
         if (resApk != null) {
-            oldResDirs[1] = resApk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
@@ -6018,7 +6025,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
-            mResourcesManager.applyNewResourceDirs(ai, oldResDirs);
+            mResourcesManager.applyAllPendingAppInfoUpdates();
         }
     }
 
@@ -6274,7 +6281,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
                                 synchronized (mResourcesManager) {
                                     // Update affected Resources objects to use new ResourcesImpl
-                                    mResourcesManager.applyNewResourceDirs(aInfo, oldResDirs);
+                                    mResourcesManager.appendPendingAppInfoUpdate(oldResDirs,
+                                            aInfo);
+                                    mResourcesManager.applyAllPendingAppInfoUpdates();
                                 }
                             } catch (RemoteException e) {
                             }
@@ -6687,6 +6696,15 @@ public final class ActivityThread extends ClientTransactionHandler
             sendMessage(H.SET_CONTENT_CAPTURE_OPTIONS_CALLBACK, data.appInfo.packageName);
 
             mInitialApplication = app;
+            final boolean updateHttpProxy;
+            synchronized (this) {
+                updateHttpProxy = mUpdateHttpProxyOnBind;
+                // This synchronized block ensures that any subsequent call to updateHttpProxy()
+                // will see a non-null mInitialApplication.
+            }
+            if (updateHttpProxy) {
+                ActivityThread.updateHttpProxy(app);
+            }
 
             // don't bring up providers in restricted mode; they may depend on the
             // app's custom Application class

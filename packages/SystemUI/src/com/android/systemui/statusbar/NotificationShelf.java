@@ -367,6 +367,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 && !mHostLayoutController.isViewAffectedBySwipe(anv)
                 && !isUnlockedHeadsUp
                 && !isHunGoingToShade
+                && !anv.isAboveShelf()
                 && !mAmbientState.isPulsing()
                 && !mAmbientState.isDozing();
 

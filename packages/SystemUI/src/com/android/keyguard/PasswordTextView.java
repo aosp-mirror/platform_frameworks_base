@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -87,7 +88,7 @@ public class PasswordTextView extends View {
     /**
      * The raw text size, will be multiplied by the scaled density when drawn
      */
-    private final int mTextHeightRaw;
+    private int mTextHeightRaw;
     private final int mGravity;
     private ArrayList<CharState> mTextChars = new ArrayList<>();
     private String mText = "";
@@ -147,6 +148,7 @@ public class PasswordTextView extends View {
         } finally {
             a.recycle();
         }
+
         mDrawPaint.setFlags(Paint.SUBPIXEL_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mDrawPaint.setTextAlign(Paint.Align.CENTER);
         mDrawPaint.setTypeface(Typeface.create(
@@ -161,6 +163,12 @@ public class PasswordTextView extends View {
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        mTextHeightRaw = getContext().getResources().getInteger(
+                R.integer.scaled_password_text_size);
     }
 
     @Override

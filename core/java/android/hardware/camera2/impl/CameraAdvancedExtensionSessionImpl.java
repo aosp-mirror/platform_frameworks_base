@@ -446,7 +446,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
     }
 
-    public void release() {
+    public void release(boolean skipCloseNotification) {
+        boolean notifyClose = false;
+
         synchronized (mInterfaceLock) {
             mHandlerThread.quitSafely();
 
@@ -463,6 +465,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
                 if (mInitialized) {
+                    notifyClose = true;
                     CameraExtensionCharacteristics.releaseSession();
                 }
             }
@@ -476,6 +479,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             mClientRepeatingRequestSurface = null;
             mClientCaptureSurface = null;
         }
+
+        if (notifyClose && !skipCloseNotification) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallbacks.onClosed(
+                        CameraAdvancedExtensionSessionImpl.this));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     private void notifyConfigurationFailure() {
@@ -485,7 +498,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
         }
 
-        release();
+        release(true /*skipCloseNotification*/);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -501,15 +514,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             android.hardware.camera2.CameraCaptureSession.StateCallback {
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
-            release();
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallbacks.onClosed(
-                       CameraAdvancedExtensionSessionImpl.this));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            release(false /*skipCloseNotification*/);
         }
 
         @Override
@@ -812,6 +817,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     Log.e(TAG,"Failed to parcel buffer fence!");
                 }
             }
+            parcelImage.width = img.getWidth();
+            parcelImage.height = img.getHeight();
             parcelImage.format = img.getFormat();
             parcelImage.timestamp = img.getTimestamp();
             parcelImage.transform = img.getTransform();
@@ -857,14 +864,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
 
         @Override
-        public boolean submit(Request request, IRequestCallback callback) {
+        public int submit(Request request, IRequestCallback callback) {
             ArrayList<Request> captureList = new ArrayList<>();
             captureList.add(request);
             return submitBurst(captureList, callback);
         }
 
         @Override
-        public boolean submitBurst(List<Request> requests, IRequestCallback callback) {
+        public int submitBurst(List<Request> requests, IRequestCallback callback) {
+            int seqId = -1;
             synchronized (mInterfaceLock) {
                 try {
                     CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
@@ -873,37 +881,36 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                         captureRequests.add(initializeCaptureRequest(mCameraDevice, request,
                                 mCameraConfigMap));
                     }
-                    mCaptureSession.captureBurstRequests(captureRequests,
+                    seqId = mCaptureSession.captureBurstRequests(captureRequests,
                             new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
                 } catch (CameraAccessException e) {
                     Log.e(TAG, "Failed to submit capture requests!");
-                    return false;
                 } catch (IllegalStateException e) {
                     Log.e(TAG, "Capture session closed!");
                 }
             }
 
-            return true;
+            return seqId;
         }
 
         @Override
-        public boolean setRepeating(Request request, IRequestCallback callback) {
+        public int setRepeating(Request request, IRequestCallback callback) {
+            int seqId = -1;
             synchronized (mInterfaceLock) {
                 try {
                     CaptureRequest repeatingRequest = initializeCaptureRequest(mCameraDevice,
                                 request, mCameraConfigMap);
                     CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
-                    mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
+                    seqId = mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
                             new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
                 } catch (CameraAccessException e) {
                     Log.e(TAG, "Failed to enable repeating request!");
-                    return false;
                 } catch (IllegalStateException e) {
                     Log.e(TAG, "Capture session closed!");
                 }
             }
 
-            return true;
+            return seqId;
         }
 
         @Override

@@ -24,8 +24,8 @@ import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
+import com.android.systemui.R
 import com.android.systemui.statusbar.CircleReveal
-import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
@@ -60,6 +60,11 @@ class AuthRippleController @Inject constructor(
     private var faceSensorLocation: PointF? = null
     private var circleReveal: LightRevealEffect? = null
 
+    override fun onInit() {
+        mView.setAlphaInDuration(sysuiContext.resources.getInteger(
+                R.integer.auth_ripple_alpha_in_duration).toLong())
+    }
+
     @VisibleForTesting
     public override fun onViewAttached() {
         updateRippleColor()
@@ -80,7 +85,7 @@ class AuthRippleController @Inject constructor(
         notificationShadeWindowController.setForcePluginOpen(false, this)
     }
 
-    private fun showRipple(biometricSourceType: BiometricSourceType?) {
+    fun showRipple(biometricSourceType: BiometricSourceType?) {
         if (!keyguardUpdateMonitor.isKeyguardVisible ||
             keyguardUpdateMonitor.userNeedsStrongAuth()) {
             return
@@ -116,9 +121,6 @@ class AuthRippleController @Inject constructor(
             /* end runnable */
             Runnable {
                 notificationShadeWindowController.setForcePluginOpen(false, this)
-                if (useCircleReveal) {
-                    lightRevealScrim?.revealEffect = LiftReveal
-                }
             },
             /* circleReveal */
             if (useCircleReveal) {

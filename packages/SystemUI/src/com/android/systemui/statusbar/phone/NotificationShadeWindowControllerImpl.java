@@ -38,8 +38,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -53,16 +55,18 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import com.google.android.collect.Lists;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -83,9 +87,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final LayoutParams mLpChanged;
     private final boolean mKeyguardScreenRotation;
     private final long mLockScreenDisplayTimeout;
-    private final float mKeyguardRefreshRate;
+    private final float mKeyguardPreferredRefreshRate; // takes precedence over max
+    private final float mKeyguardMaxRefreshRate;
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final AuthController mAuthController;
     private ViewGroup mNotificationShadeView;
     private LayoutParams mLp;
     private boolean mHasTopUi;
@@ -96,7 +102,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private ForcePluginOpenListener mForcePluginOpenListener;
     private Consumer<Integer> mScrimsVisibilityListener;
     private final ArrayList<WeakReference<StatusBarWindowCallback>>
-            mCallbacks = Lists.newArrayList();
+            mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -112,7 +118,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            AuthController authController) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -125,6 +132,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mColorExtractor = colorExtractor;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
+        mAuthController = authController;
 
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
@@ -133,13 +141,25 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
 
-        Display.Mode[] supportedModes = context.getDisplay().getSupportedModes();
-        Display.Mode currentMode = context.getDisplay().getMode();
+        float desiredPreferredRefreshRate = context.getResources()
+                .getInteger(R.integer.config_keyguardRefreshRate);
+        float actualPreferredRefreshRate = -1;
+        if (desiredPreferredRefreshRate > -1) {
+            for (Display.Mode displayMode : context.getDisplay().getSupportedModes()) {
+                if (Math.abs(displayMode.getRefreshRate() - desiredPreferredRefreshRate) <= .1) {
+                    actualPreferredRefreshRate = displayMode.getRefreshRate();
+                    break;
+                }
+            }
+        }
+
+        mKeyguardPreferredRefreshRate = actualPreferredRefreshRate;
+
         // Running on the highest frame rate available can be expensive.
         // Let's specify a preferred refresh rate, and allow higher FPS only when we
         // know that we're not falsing (because we unlocked.)
-        mKeyguardRefreshRate = context.getResources()
-                .getInteger(R.integer.config_keyguardRefreshRate);
+        mKeyguardMaxRefreshRate = context.getResources()
+                .getInteger(R.integer.config_keyguardMaxRefreshRate);
     }
 
     /**
@@ -274,12 +294,25 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mLpChanged.privateFlags &= ~LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         }
 
-        if (mKeyguardRefreshRate > 0) {
+        if (mKeyguardPreferredRefreshRate > 0) {
+            boolean onKeyguard = state.mStatusBarState == StatusBarState.KEYGUARD
+                    && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway;
+            if (onKeyguard
+                    && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
+                mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;
+                mLpChanged.preferredMinDisplayRefreshRate = mKeyguardPreferredRefreshRate;
+            } else {
+                mLpChanged.preferredMaxDisplayRefreshRate = 0;
+                mLpChanged.preferredMinDisplayRefreshRate = 0;
+            }
+            Trace.setCounter("display_set_preferred_refresh_rate",
+                    (long) mKeyguardPreferredRefreshRate);
+        } else if (mKeyguardMaxRefreshRate > 0) {
             boolean bypassOnKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && state.mStatusBarState == StatusBarState.KEYGUARD
                     && !state.mKeyguardFadingAway && !state.mKeyguardGoingAway;
             if (state.mDozing || bypassOnKeyguard) {
-                mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardRefreshRate;
+                mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardMaxRefreshRate;
             } else {
                 mLpChanged.preferredMaxDisplayRefreshRate = 0;
             }
@@ -432,13 +465,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void notifyStateChangedCallbacks() {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            StatusBarWindowCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onStateChanged(mCurrentState.mKeyguardShowing,
-                        mCurrentState.mKeyguardOccluded,
-                        mCurrentState.mBouncerShowing);
-            }
+        // Copy callbacks to separate ArrayList to avoid concurrent modification
+        List<StatusBarWindowCallback> activeCallbacks = mCallbacks.stream()
+                .map(Reference::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        for (StatusBarWindowCallback cb : activeCallbacks) {
+            cb.onStateChanged(mCurrentState.mKeyguardShowing,
+                    mCurrentState.mKeyguardOccluded,
+                    mCurrentState.mBouncerShowing);
         }
     }
 
@@ -685,7 +720,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
-        pw.println("  mKeyguardRefreshRate=" + mKeyguardRefreshRate);
+        pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
+        pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);
         pw.println(mCurrentState);
         if (mNotificationShadeView != null && mNotificationShadeView.getViewRootImpl() != null) {
             mNotificationShadeView.getViewRootImpl().dump("  ", pw);

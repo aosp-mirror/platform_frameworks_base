@@ -297,17 +297,40 @@ Status Idmap2Service::createFabricatedOverlay(
   return ok();
 }
 
-Status Idmap2Service::getFabricatedOverlayInfos(
+Status Idmap2Service::acquireFabricatedOverlayIterator() {
+  if (frro_iter_.has_value()) {
+    LOG(WARNING) << "active ffro iterator was not previously released";
+  }
+  frro_iter_ = std::filesystem::directory_iterator(kIdmapCacheDir);
+  return ok();
+}
+
+Status Idmap2Service::releaseFabricatedOverlayIterator() {
+  if (!frro_iter_.has_value()) {
+    LOG(WARNING) << "no active ffro iterator to release";
+  }
+  return ok();
+}
+
+Status Idmap2Service::nextFabricatedOverlayInfos(
     std::vector<os::FabricatedOverlayInfo>* _aidl_return) {
-  for (const auto& entry : std::filesystem::directory_iterator(kIdmapCacheDir)) {
-    if (!android::IsFabricatedOverlay(entry.path())) {
+  constexpr size_t kMaxEntryCount = 100;
+  if (!frro_iter_.has_value()) {
+    return error("no active frro iterator");
+  }
+
+  size_t count = 0;
+  auto& entry_iter = *frro_iter_;
+  auto entry_iter_end = end(*frro_iter_);
+  for (; entry_iter != entry_iter_end && count < kMaxEntryCount; ++entry_iter) {
+    auto& entry = *entry_iter;
+    if (!entry.is_regular_file() || !android::IsFabricatedOverlay(entry.path())) {
       continue;
     }
 
     const auto overlay = FabricatedOverlayContainer::FromPath(entry.path());
     if (!overlay) {
-      // This is a sign something went wrong.
-      LOG(ERROR) << "Failed to open '" << entry.path() << "': " << overlay.GetErrorMessage();
+      LOG(WARNING) << "Failed to open '" << entry.path() << "': " << overlay.GetErrorMessage();
       continue;
     }
 
@@ -319,8 +342,8 @@ Status Idmap2Service::getFabricatedOverlayInfos(
     out_info.targetOverlayable = info.target_name;
     out_info.path = entry.path();
     _aidl_return->emplace_back(std::move(out_info));
+    count++;
   }
-
   return ok();
 }
 

@@ -48,6 +48,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.singletonList;
+
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -233,6 +235,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         verify(mNetworkAgent).sendLinkProperties(
                 argThat(lp -> expectedMtu == lp.getMtu()
                         && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
+        verify(mNetworkAgent)
+                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_2.network)));
     }
 
     private void triggerChildOpened() {
@@ -293,6 +297,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         any());
         verify(mNetworkAgent).register();
+        verify(mNetworkAgent)
+                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_1.network)));
         verify(mNetworkAgent).markConnected();
 
         verify(mIpSecSvc)
@@ -570,6 +576,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testTeardown() throws Exception {
         mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());

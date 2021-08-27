@@ -53,6 +53,7 @@ import android.hardware.camera2.params.Capability;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.MandatoryStreamCombination;
 import android.hardware.camera2.params.MultiResolutionStreamConfigurationMap;
 import android.hardware.camera2.params.OisSample;
@@ -1708,6 +1709,34 @@ public class CameraMetadataNative implements Parcelable {
                 metadata.setGpsLocation((Location) value);
             }
         });
+        sSetCommandMap.put(CaptureRequest.SCALER_CROP_REGION.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setScalerCropRegion((Rect) value);
+            }
+        });
+        sSetCommandMap.put(CaptureRequest.CONTROL_AWB_REGIONS.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setAWBRegions(value);
+            }
+        });
+        sSetCommandMap.put(CaptureRequest.CONTROL_AF_REGIONS.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setAFRegions(value);
+            }
+        });
+        sSetCommandMap.put(CaptureRequest.CONTROL_AE_REGIONS.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setAERegions(value);
+            }
+        });
     }
 
     private boolean setAvailableFormats(int[] value) {
@@ -1774,6 +1803,45 @@ public class CameraMetadataNative implements Parcelable {
         setBase(CaptureRequest.TONEMAP_CURVE_GREEN, curve[1]);
         setBase(CaptureRequest.TONEMAP_CURVE_BLUE, curve[2]);
 
+        return true;
+    }
+
+    private <T> boolean setScalerCropRegion(Rect cropRegion) {
+        if (cropRegion == null) {
+            return false;
+        }
+        setBase(CaptureRequest.SCALER_CROP_REGION_SET, true);
+        setBase(CaptureRequest.SCALER_CROP_REGION, cropRegion);
+        return true;
+    }
+
+    private <T> boolean setAFRegions(T afRegions) {
+        if (afRegions == null) {
+            return false;
+        }
+        setBase(CaptureRequest.CONTROL_AF_REGIONS_SET, true);
+        // The cast to CaptureRequest.Key is needed since java does not support template
+        // specialization and we need to route this method to
+        // setBase(CaptureRequest.Key<T> key, T value)
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AF_REGIONS, afRegions);
+        return true;
+    }
+
+    private <T> boolean setAERegions(T aeRegions) {
+        if (aeRegions == null) {
+            return false;
+        }
+        setBase(CaptureRequest.CONTROL_AE_REGIONS_SET, true);
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AE_REGIONS, aeRegions);
+        return true;
+    }
+
+    private <T> boolean setAWBRegions(T awbRegions) {
+        if (awbRegions == null) {
+            return false;
+        }
+        setBase(CaptureRequest.CONTROL_AWB_REGIONS_SET, true);
+        setBase((CaptureRequest.Key)CaptureRequest.CONTROL_AWB_REGIONS, awbRegions);
         return true;
     }
 
@@ -1873,6 +1941,8 @@ public class CameraMetadataNative implements Parcelable {
     private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
     private static synchronized native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
+    @FastNative
+    private static native void nativeSetVendorId(long ptr, long vendorId);
     private static synchronized native void nativeClose(long ptr);
     private static synchronized native boolean nativeIsEmpty(long ptr);
     private static synchronized native int nativeGetEntryCount(long ptr);
@@ -1914,6 +1984,15 @@ public class CameraMetadataNative implements Parcelable {
         mMultiResolutionStreamConfigurationMap = other.mMultiResolutionStreamConfigurationMap;
         updateNativeAllocation();
         other.updateNativeAllocation();
+    }
+
+    /**
+     * Set the native metadata vendor id.
+     *
+     * @hide
+     */
+    public void setVendorId(long vendorId) {
+        nativeSetVendorId(mMetadataPtr, vendorId);
     }
 
     /**

@@ -66,7 +66,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
+import static com.android.server.wm.KeyguardController.KEYGUARD_SLEEP_TOKEN_TAG;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
@@ -2049,7 +2049,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     /**
      * Move root task with all its existing content to specified task display area.
      *
-     * @param rootTaskId         Id of root task to move.
+     * @param rootTaskId      Id of root task to move.
      * @param taskDisplayArea The task display area to move root task to.
      * @param onTop           Indicates whether container should be place on top or on bottom.
      */
@@ -2077,15 +2077,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     + " to its current taskDisplayArea=" + taskDisplayArea);
         }
         rootTask.reparent(taskDisplayArea, onTop);
+
+        // Resume focusable root task after reparenting to another display area.
+        rootTask.resumeNextFocusAfterReparent();
+
         // TODO(multi-display): resize rootTasks properly if moved from split-screen.
     }
 
     /**
      * Move root task with all its existing content to specified display.
      *
-     * @param rootTaskId   Id of root task to move.
-     * @param displayId Id of display to move root task to.
-     * @param onTop     Indicates whether container should be place on top or on bottom.
+     * @param rootTaskId Id of root task to move.
+     * @param displayId  Id of display to move root task to.
+     * @param onTop      Indicates whether container should be place on top or on bottom.
      */
     void moveRootTaskToDisplay(int rootTaskId, int displayId, boolean onTop) {
         final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
@@ -2147,7 +2151,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rootTask.setLastRecentsAnimationTransaction(
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
-                    task.clearLastRecentsAnimationTransaction();
+                    task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
                 }
 
                 // There are multiple activities in the task and moving the top activity should
@@ -2168,7 +2172,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final ActivityRecord oldTopActivity = task.getTopMostActivity();
                 if (oldTopActivity != null && oldTopActivity.isState(STOPPED)
                         && task.getDisplayContent().mAppTransition.containsTransitRequest(
-                                TRANSIT_TO_BACK)) {
+                        TRANSIT_TO_BACK)) {
                     task.getDisplayContent().mClosingApps.add(oldTopActivity);
                     oldTopActivity.mRequestForceTransition = true;
                 }
@@ -2188,6 +2192,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
+            r.mWaitForEnteringPinnedMode = true;
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             rootTask.setDeferTaskAppear(false);
 
@@ -2201,16 +2206,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         ensureActivitiesVisible(null, 0, false /* preserveWindows */);
         resumeFocusedTasksTopActivities();
 
-        notifyActivityPipModeChanged(r);
+        notifyActivityPipModeChanged(r.getTask(), r);
     }
 
     /**
      * Notifies when an activity enters or leaves PIP mode.
      *
+     * @param task the task of {@param r}
      * @param r indicates the activity currently in PIP, can be null to indicate no activity is
      *          currently in PIP mode.
      */
-    void notifyActivityPipModeChanged(@Nullable ActivityRecord r) {
+    void notifyActivityPipModeChanged(@NonNull Task task, @Nullable ActivityRecord r) {
         final boolean inPip = r != null;
         if (inPip) {
             mService.getTaskChangeNotificationController().notifyActivityPinned(r);
@@ -2218,6 +2224,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
         mWindowManager.mPolicy.setPipVisibilityLw(inPip);
+        mWmService.mTransactionFactory.get()
+                .setTrustedOverlay(task.getSurfaceControl(), inPip)
+                .apply();
     }
 
     void executeAppTransitionForAllDisplay() {
@@ -2660,13 +2669,28 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         mSleepTokens.remove(token.mHashKey);
         final DisplayContent display = getDisplayContent(token.mDisplayId);
-        if (display != null) {
-            display.mAllSleepTokens.remove(token);
-            if (display.mAllSleepTokens.isEmpty()) {
-                mService.updateSleepIfNeededLocked();
-                if (token.mTag.equals(DISPLAY_OFF_SLEEP_TOKEN_TAG)) {
-                    display.mSkipAppTransitionAnimation = true;
-                }
+        if (display == null) {
+            Slog.d(TAG, "Remove sleep token for non-existing display: " + token + " from "
+                    + Debug.getCallers(6));
+            return;
+        }
+
+        display.mAllSleepTokens.remove(token);
+        if (display.mAllSleepTokens.isEmpty()) {
+            mService.updateSleepIfNeededLocked();
+            // Assuming no lock screen is set and a user launches an activity, turns off the screen
+            // and turn on the screen again, then the launched activity should be displayed on the
+            // screen without app transition animation. When the screen turns on, both keyguard
+            // sleep token and display off sleep token are removed, but the order is
+            // non-deterministic.
+            // Note: Display#mSkipAppTransitionAnimation will be ignored when keyguard related
+            // transition exists, so this affects only when no lock screen is set. Otherwise
+            // keyguard going away animation will be played.
+            // See also AppTransitionController#getTransitCompatType for more details.
+            if ((!mTaskSupervisor.getKeyguardController().isDisplayOccluded(display.mDisplayId)
+                    && token.mTag.equals(KEYGUARD_SLEEP_TOKEN_TAG))
+                    || token.mTag.equals(DISPLAY_OFF_SLEEP_TOKEN_TAG)) {
+                display.mSkipAppTransitionAnimation = true;
             }
         }
     }

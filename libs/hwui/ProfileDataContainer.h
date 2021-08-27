@@ -37,8 +37,9 @@ public:
     void rotateStorage();
     void switchStorageToAshmem(int ashmemfd);
 
-    ProfileData* get() { return mData; }
-    ProfileData* operator->() { return mData; }
+    ProfileData* get() NO_THREAD_SAFETY_ANALYSIS { return mData; }
+
+    ProfileData* operator->() NO_THREAD_SAFETY_ANALYSIS { return mData; }
 
     std::mutex& getDataMutex() { return mJankDataMutex; }
 

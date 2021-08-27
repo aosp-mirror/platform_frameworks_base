@@ -885,10 +885,6 @@ public class NotificationStackScrollLayoutController {
         mView.setDozeAmount(amount);
     }
 
-    public float getWakeUpHeight() {
-        return mView.getWakeUpHeight();
-    }
-
     public int getSpeedBumpIndex() {
         return mView.getSpeedBumpIndex();
     }

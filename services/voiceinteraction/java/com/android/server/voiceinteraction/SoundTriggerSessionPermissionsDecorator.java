@@ -29,7 +29,6 @@ import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceSpecificException;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -61,7 +60,7 @@ final class SoundTriggerSessionPermissionsDecorator implements
 
     @Override
     public SoundTrigger.ModuleProperties getDspModuleProperties() throws RemoteException {
-        // No permission needed.
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.getDspModuleProperties();
     }
 
@@ -72,7 +71,9 @@ final class SoundTriggerSessionPermissionsDecorator implements
         if (DEBUG) {
             Slog.d(TAG, "startRecognition");
         }
-        enforcePermissions();
+        if (!isHoldingPermissions()) {
+            return SoundTrigger.STATUS_PERMISSION_DENIED;
+        }
         return mDelegate.startRecognition(i, s, iHotwordRecognitionStatusCallback,
                 recognitionConfig, b);
     }
@@ -81,25 +82,28 @@ final class SoundTriggerSessionPermissionsDecorator implements
     public int stopRecognition(int i,
             IHotwordRecognitionStatusCallback iHotwordRecognitionStatusCallback)
             throws RemoteException {
-        enforcePermissions();
+        // Stopping a model does not require special permissions. Having a handle to the session is
+        // sufficient.
         return mDelegate.stopRecognition(i, iHotwordRecognitionStatusCallback);
     }
 
     @Override
     public int setParameter(int i, int i1, int i2) throws RemoteException {
-        enforcePermissions();
+        if (!isHoldingPermissions()) {
+            return SoundTrigger.STATUS_PERMISSION_DENIED;
+        }
         return mDelegate.setParameter(i, i1, i2);
     }
 
     @Override
     public int getParameter(int i, int i1) throws RemoteException {
-        enforcePermissions();
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.getParameter(i, i1);
     }
 
     @Override
     public SoundTrigger.ModelParamRange queryParameter(int i, int i1) throws RemoteException {
-        enforcePermissions();
+        // No permission needed here (the app must have the Assistant Role to retrieve the session).
         return mDelegate.queryParameter(i, i1);
     }
 
@@ -110,33 +114,36 @@ final class SoundTriggerSessionPermissionsDecorator implements
     }
 
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
-    private void enforcePermissions() {
-        enforcePermissionForPreflight(mContext, mOriginatorIdentity, RECORD_AUDIO);
-        enforcePermissionForPreflight(mContext, mOriginatorIdentity, CAPTURE_AUDIO_HOTWORD);
+    private boolean isHoldingPermissions() {
+        try {
+            enforcePermissionForPreflight(mContext, mOriginatorIdentity, RECORD_AUDIO);
+            enforcePermissionForPreflight(mContext, mOriginatorIdentity, CAPTURE_AUDIO_HOTWORD);
+            return true;
+        } catch (SecurityException e) {
+            Slog.e(TAG, e.toString());
+            return false;
+        }
     }
 
     /**
      * Throws a {@link SecurityException} if originator permanently doesn't have the given
-     * permission, or a {@link ServiceSpecificException} with a {@link
-     * #TEMPORARY_PERMISSION_DENIED} if caller originator doesn't have the given permission.
+     * permission.
+     * Soft (temporary) denials are considered OK for preflight purposes.
      *
      * @param context    A {@link Context}, used for permission checks.
      * @param identity   The identity to check.
      * @param permission The identifier of the permission we want to check.
      */
-    private static void enforcePermissionForPreflight(@NonNull Context context,
+    static void enforcePermissionForPreflight(@NonNull Context context,
             @NonNull Identity identity, @NonNull String permission) {
         final int status = PermissionUtil.checkPermissionForPreflight(context, identity,
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
                 return;
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
-                        TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
-                                permission, toString(identity)));
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-                throw new ServiceSpecificException(TEMPORARY_PERMISSION_DENIED,
                         TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
                                 permission, toString(identity)));
             default:
@@ -144,7 +151,7 @@ final class SoundTriggerSessionPermissionsDecorator implements
         }
     }
 
-    private static String toString(Identity identity) {
+    static String toString(Identity identity) {
         return "{uid=" + identity.uid
                 + " pid=" + identity.pid
                 + " packageName=" + identity.packageName

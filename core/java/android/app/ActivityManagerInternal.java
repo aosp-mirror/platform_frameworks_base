@@ -486,7 +486,7 @@ public abstract class ActivityManagerInternal {
      * not associated with an FGS; ensure display; or only update if already displayed.
      */
     public abstract ServiceNotificationPolicy applyForegroundServiceNotification(
-            Notification notification, int id, String pkg, @UserIdInt int userId);
+            Notification notification, String tag, int id, String pkg, @UserIdInt int userId);
 
     /**
      * Callback from the notification subsystem that the given FGS notification has

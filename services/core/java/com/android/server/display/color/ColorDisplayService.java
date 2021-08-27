@@ -355,7 +355,7 @@ public final class ColorDisplayService extends SystemService {
                                 updateDisplayWhiteBalanceStatus();
                                 break;
                             case Secure.REDUCE_BRIGHT_COLORS_ACTIVATED:
-                                onReduceBrightColorsActivationChanged();
+                                onReduceBrightColorsActivationChanged(/*userInitiated*/ true);
                                 mHandler.sendEmptyMessage(MSG_APPLY_REDUCE_BRIGHT_COLORS);
                                 break;
                             case Secure.REDUCE_BRIGHT_COLORS_LEVEL:
@@ -437,7 +437,7 @@ public final class ColorDisplayService extends SystemService {
             onReduceBrightColorsStrengthLevelChanged();
             final boolean reset = resetReduceBrightColors();
             if (!reset) {
-                onReduceBrightColorsActivationChanged();
+                onReduceBrightColorsActivationChanged(/*userInitiated*/ false);
                 mHandler.sendEmptyMessage(MSG_APPLY_REDUCE_BRIGHT_COLORS);
             }
         }
@@ -614,7 +614,7 @@ public final class ColorDisplayService extends SystemService {
                 isAccessiblityInversionEnabled() ? MATRIX_INVERT_COLOR : null);
     }
 
-    private void onReduceBrightColorsActivationChanged() {
+    private void onReduceBrightColorsActivationChanged(boolean userInitiated) {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
@@ -622,7 +622,8 @@ public final class ColorDisplayService extends SystemService {
                 Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 0, mCurrentUser) == 1;
         mReduceBrightColorsTintController.setActivated(activated);
         if (mReduceBrightColorsListener != null) {
-            mReduceBrightColorsListener.onReduceBrightColorsActivationChanged(activated);
+            mReduceBrightColorsListener.onReduceBrightColorsActivationChanged(activated,
+                    userInitiated);
         }
     }
 
@@ -1551,7 +1552,7 @@ public final class ColorDisplayService extends SystemService {
         /**
          * Notify that the reduce bright colors activation status has changed.
          */
-        void onReduceBrightColorsActivationChanged(boolean activated);
+        void onReduceBrightColorsActivationChanged(boolean activated, boolean userInitiated);
 
         /**
          * Notify that the reduce bright colors strength has changed.

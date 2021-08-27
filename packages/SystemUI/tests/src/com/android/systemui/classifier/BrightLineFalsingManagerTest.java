@@ -32,7 +32,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -52,7 +51,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     private BrightLineFalsingManager mBrightLineFalsingManager;
     @Mock
     private FalsingDataProvider mFalsingDataProvider;
-    private final DockManagerFake mDockManager = new DockManagerFake();
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     private final Set<FalsingClassifier> mClassifiers = new HashSet<>();
     @Mock
@@ -84,7 +82,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mClassifiers.add(mClassifierA);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider, mDockManager,
+        mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mDoubleTapClassifier,
                 mHistoryTracker, mKeyguardStateController, mAccessibilityManager,
                 false);

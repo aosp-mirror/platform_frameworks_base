@@ -64,6 +64,12 @@ public final class AppSearchConfig implements AutoCloseable {
     static final int DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES = 512 * 1024; // 512KiB
     @VisibleForTesting
     static final int DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT = 20_000;
+    @VisibleForTesting
+    static final int DEFAULT_BYTES_OPTIMIZE_THRESHOLD = 1 * 1024 * 1024; // 1 MiB
+    @VisibleForTesting
+    static final int DEFAULT_TIME_OPTIMIZE_THRESHOLD_MILLIS = Integer.MAX_VALUE;
+    @VisibleForTesting
+    static final int DEFAULT_DOC_COUNT_OPTIMIZE_THRESHOLD = 10_000;
 
     /*
      * Keys for ALL the flags stored in DeviceConfig.
@@ -75,10 +81,21 @@ public final class AppSearchConfig implements AutoCloseable {
             "sampling_interval_for_batch_call_stats";
     public static final String KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS =
             "sampling_interval_for_put_document_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS =
+            "sampling_interval_for_initialize_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS =
+            "sampling_interval_for_search_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS =
+            "sampling_interval_for_global_search_stats";
+    public static final String KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS =
+            "sampling_interval_for_optimize_stats";
     public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES =
             "limit_config_max_document_size_bytes";
     public static final String KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT =
             "limit_config_max_document_docunt";
+    public static final String KEY_BYTES_OPTIMIZE_THRESHOLD = "bytes_optimize_threshold";
+    public static final String KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS = "time_optimize_threshold";
+    public static final String KEY_DOC_COUNT_OPTIMIZE_THRESHOLD = "doc_count_optimize_threshold";
 
     // Array contains all the corresponding keys for the cached values.
     private static final String[] KEYS_TO_ALL_CACHED_VALUES = {
@@ -86,8 +103,15 @@ public final class AppSearchConfig implements AutoCloseable {
             KEY_SAMPLING_INTERVAL_DEFAULT,
             KEY_SAMPLING_INTERVAL_FOR_BATCH_CALL_STATS,
             KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS,
+            KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS,
             KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
             KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
+            KEY_BYTES_OPTIMIZE_THRESHOLD,
+            KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS,
+            KEY_DOC_COUNT_OPTIMIZE_THRESHOLD
     };
 
     // Lock needed for all the operations in this class.
@@ -233,6 +257,58 @@ public final class AppSearchConfig implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns cached value for sampling interval for initialize.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForInitializeStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for search.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForSearchStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for globalSearch.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForGlobalSearchStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
+    /**
+     * Returns cached value for sampling interval for optimize.
+     *
+     * <p>For example, sampling_interval=10 means that one out of every 10 stats was logged.
+     */
+    public int getCachedSamplingIntervalForOptimizeStats() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS,
+                    getCachedSamplingIntervalDefault());
+        }
+    }
+
     /** Returns the maximum serialized size an indexed document can be, in bytes. */
     public int getCachedLimitConfigMaxDocumentSizeBytes() {
         synchronized (mLock) {
@@ -248,6 +324,48 @@ public final class AppSearchConfig implements AutoCloseable {
             throwIfClosedLocked();
             return mBundleLocked.getInt(KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
                     DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT);
+        }
+    }
+
+    /**
+     * Returns the cached optimize byte size threshold.
+     *
+     * An AppSearch Optimize job will be triggered if the bytes size of garbage resource exceeds
+     * this threshold.
+     */
+    int getCachedBytesOptimizeThreshold() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_BYTES_OPTIMIZE_THRESHOLD,
+                    DEFAULT_BYTES_OPTIMIZE_THRESHOLD);
+        }
+    }
+
+    /**
+     * Returns the cached optimize time interval threshold.
+     *
+     * An AppSearch Optimize job will be triggered if the time since last optimize job exceeds
+     * this threshold.
+     */
+    int getCachedTimeOptimizeThresholdMs() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS,
+                    DEFAULT_TIME_OPTIMIZE_THRESHOLD_MILLIS);
+        }
+    }
+
+    /**
+     * Returns the cached optimize document count threshold threshold.
+     *
+     * An AppSearch Optimize job will be triggered if the number of document of garbage resource
+     * exceeds this threshold.
+     */
+    int getCachedDocCountOptimizeThreshold() {
+        synchronized (mLock) {
+            throwIfClosedLocked();
+            return mBundleLocked.getInt(KEY_DOC_COUNT_OPTIMIZE_THRESHOLD,
+                    DEFAULT_DOC_COUNT_OPTIMIZE_THRESHOLD);
         }
     }
 
@@ -289,6 +407,10 @@ public final class AppSearchConfig implements AutoCloseable {
             case KEY_SAMPLING_INTERVAL_DEFAULT:
             case KEY_SAMPLING_INTERVAL_FOR_BATCH_CALL_STATS:
             case KEY_SAMPLING_INTERVAL_FOR_PUT_DOCUMENT_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_INITIALIZE_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_SEARCH_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_GLOBAL_SEARCH_STATS:
+            case KEY_SAMPLING_INTERVAL_FOR_OPTIMIZE_STATS:
                 synchronized (mLock) {
                     mBundleLocked.putInt(key, properties.getInt(key, DEFAULT_SAMPLING_INTERVAL));
                 }
@@ -305,6 +427,24 @@ public final class AppSearchConfig implements AutoCloseable {
                     mBundleLocked.putInt(
                             key,
                             properties.getInt(key, DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT));
+                }
+                break;
+            case KEY_BYTES_OPTIMIZE_THRESHOLD:
+                synchronized (mLock) {
+                    mBundleLocked.putInt(key, properties.getInt(key,
+                            DEFAULT_BYTES_OPTIMIZE_THRESHOLD));
+                }
+                break;
+            case KEY_TIME_OPTIMIZE_THRESHOLD_MILLIS:
+                synchronized (mLock) {
+                    mBundleLocked.putInt(key, properties.getInt(key,
+                            DEFAULT_TIME_OPTIMIZE_THRESHOLD_MILLIS));
+                }
+                break;
+            case KEY_DOC_COUNT_OPTIMIZE_THRESHOLD:
+                synchronized (mLock) {
+                    mBundleLocked.putInt(key, properties.getInt(key,
+                            DEFAULT_DOC_COUNT_OPTIMIZE_THRESHOLD));
                 }
                 break;
             default:

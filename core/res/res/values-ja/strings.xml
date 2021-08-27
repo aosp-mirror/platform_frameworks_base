@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
     <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Time Zone Detector（未接続）"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 時間アップデートサービス"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"楽曲認識マネージャー サービス"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
@@ -438,7 +437,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスが ON になっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
@@ -1483,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"拒否"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"アカウント <xliff:g id="ACCOUNT">%2$s</xliff:g> へのアクセス権限が\n<xliff:g id="APP">%1$s</xliff:g> からリクエストされました。"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"仕事用プロファイルの外部でこのアプリを使用しています"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"仕事用プロファイルでこのアプリを使用しています"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"入力方法"</string>

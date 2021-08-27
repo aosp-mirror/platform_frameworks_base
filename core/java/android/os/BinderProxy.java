@@ -560,6 +560,9 @@ public final class BinderProxy implements IBinder {
             }
         }
 
+        final AppOpsManager.PausedNotedAppOpsCollection prevCollection =
+                AppOpsManager.pauseNotedAppOpsCollection();
+
         if ((flags & FLAG_ONEWAY) == 0 && AppOpsManager.isListeningForOpNoted()) {
             flags |= FLAG_COLLECT_NOTED_APP_OPS;
         }
@@ -567,6 +570,8 @@ public final class BinderProxy implements IBinder {
         try {
             return transactNative(code, data, reply, flags);
         } finally {
+            AppOpsManager.resumeNotedAppOpsCollection(prevCollection);
+
             if (transactListener != null) {
                 transactListener.onTransactEnded(session);
             }

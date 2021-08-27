@@ -268,6 +268,14 @@ message SystemMessage {
     // Package: android
     NOTE_NAS_UPGRADE = 64;
 
+    // Notify the user to unblock the microphone global toggle
+    // Package: android
+    NOTE_UNBLOCK_MIC_TOGGLE = 65;
+
+    // Notify the user to unblock the camera global toggle
+    // Package: android
+    NOTE_UNBLOCK_CAM_TOGGLE = 66;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

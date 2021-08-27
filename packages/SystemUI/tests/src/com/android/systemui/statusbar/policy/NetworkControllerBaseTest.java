@@ -70,6 +70,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -241,7 +242,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockBd,
                 mDemoModeController,
                 mCarrierConfigTracker,
-                mFeatureFlags);
+                mFeatureFlags,
+                mock(DumpManager.class)
+        );
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
@@ -309,7 +312,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                        mCarrierConfigTracker, mFeatureFlags);
+                        mCarrierConfigTracker, mFeatureFlags,
+                        mock(DumpManager.class));
 
         setupNetworkController();
 

@@ -18,7 +18,6 @@ package android.app.appsearch;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.Objects;
 
@@ -67,8 +66,7 @@ public final class ReportUsageRequest {
     /** Builder for {@link ReportUsageRequest} objects. */
     public static final class Builder {
         private final String mNamespace;
-        // TODO(b/181887768): Make this final
-        private String mDocumentId;
+        private final String mDocumentId;
         private Long mUsageTimestampMillis;
 
         /**
@@ -82,40 +80,6 @@ public final class ReportUsageRequest {
         public Builder(@NonNull String namespace, @NonNull String documentId) {
             mNamespace = Objects.requireNonNull(namespace);
             mDocumentId = Objects.requireNonNull(documentId);
-        }
-
-        /**
-         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-         * @hide
-         */
-        @Deprecated
-        @UnsupportedAppUsage
-        public Builder(@NonNull String namespace) {
-            mNamespace = Objects.requireNonNull(namespace);
-        }
-
-        /**
-         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-         * @hide
-         */
-        @Deprecated
-        @UnsupportedAppUsage
-        @NonNull
-        public Builder setUri(@NonNull String uri) {
-            mDocumentId = uri;
-            return this;
-        }
-
-        /**
-         * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-         * @hide
-         */
-        @Deprecated
-        @UnsupportedAppUsage
-        @NonNull
-        public ReportUsageRequest.Builder setUsageTimeMillis(
-                @CurrentTimeMillisLong long usageTimestampMillis) {
-            return setUsageTimestampMillis(usageTimestampMillis);
         }
 
         /**

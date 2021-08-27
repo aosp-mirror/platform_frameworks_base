@@ -957,7 +957,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 android.Manifest.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
         final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
-        final boolean isUpdate = targetPackageUid != -1;
+        final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
                 ? mPm.getInstallSourceInfo(packageName)
                 : null;
@@ -1265,12 +1265,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
-        if (!mCommitted) {
+        if (!isIncrementalInstallation() || !mCommitted) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
-            // For incremental install, continue to publish incremental progress during committing.
-            if (isIncrementalInstallation() && (mIncrementalProgress - mProgress) >= 0.01) {
+            // For incremental, publish regular install progress before the session is committed,
+            // but publish incremental progress afterwards.
+            if (mIncrementalProgress - mProgress >= 0.01) {
                 // It takes some time for data loader to write to incremental file system, so at the
                 // beginning of the commit, the incremental progress might be very small.
                 // Wait till the incremental progress is larger than what's already displayed.
@@ -1279,7 +1280,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // Only publish when meaningful change
+        // Only publish meaningful progress changes.
         if (forcePublish || (mProgress - mReportedProgress) >= 0.01) {
             mReportedProgress = mProgress;
             mCallback.onSessionProgressChanged(this, mProgress);
@@ -2251,10 +2252,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     (params.installFlags & PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK)
                         == 0;
             synchronized (mLock) {
-                if (checkApexUpdateAllowed && !isApexUpdateAllowed(mPackageName)) {
+                if (checkApexUpdateAllowed && !isApexUpdateAllowed(mPackageName,
+                          mInstallSource.installerPackageName)) {
                     onSessionValidationFailure(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                            "Update of APEX package " + mPackageName + " is not allowed");
+                            "Update of APEX package " + mPackageName + " is not allowed for "
+                                    + mInstallSource.installerPackageName);
                     return;
+                }
+            }
+
+            if (!params.isStaged) {
+                // For non-staged APEX installs also check if there is a staged session that
+                // contains the same APEX. If that's the case, we should fail this session.
+                synchronized (mLock) {
+                    int sessionId = mStagingManager.getSessionIdByPackageName(mPackageName);
+                    if (sessionId != -1) {
+                        onSessionValidationFailure(
+                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                                "Staged session " + sessionId + " already contains "
+                                        + mPackageName);
+                        return;
+                    }
                 }
             }
         }
@@ -2797,9 +2815,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return sessionContains((s) -> !s.isApexSession());
     }
 
-    private boolean isApexUpdateAllowed(String apexPackageName) {
-        return mPm.getModuleInfo(apexPackageName, 0) != null
-                || SystemConfig.getInstance().getAllowedVendorApexes().contains(apexPackageName);
+    private boolean isApexUpdateAllowed(String apexPackageName, String installerPackageName) {
+        if (mPm.getModuleInfo(apexPackageName, 0) != null) {
+            final String modulesInstaller =
+                    SystemConfig.getInstance().getModulesInstallerPackageName();
+            if (modulesInstaller == null) {
+                Slog.w(TAG, "No modules installer defined");
+                return false;
+            }
+            return modulesInstaller.equals(installerPackageName);
+        }
+        final String vendorApexInstaller =
+                SystemConfig.getInstance().getAllowedVendorApexes().get(apexPackageName);
+        if (vendorApexInstaller == null) {
+            Slog.w(TAG, apexPackageName + " is not allowed to be updated");
+            return false;
+        }
+        return vendorApexInstaller.equals(installerPackageName);
     }
 
     /**

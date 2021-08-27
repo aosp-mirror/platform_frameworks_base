@@ -183,6 +183,7 @@ public final class NotificationEntry extends ListEntry {
     private boolean mIsMarkedForUserTriggeredMovement;
     private boolean mIsAlerting;
 
+    public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
     private boolean mExpandAnimationRunning;
 

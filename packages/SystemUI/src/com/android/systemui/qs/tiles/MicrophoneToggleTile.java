@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
+import static android.os.UserManager.DISALLOW_MICROPHONE_TOGGLE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -85,5 +86,10 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @Sensor int getSensorId() {
         return MICROPHONE;
+    }
+
+    @Override
+    public String getRestriction() {
+        return DISALLOW_MICROPHONE_TOGGLE;
     }
 }

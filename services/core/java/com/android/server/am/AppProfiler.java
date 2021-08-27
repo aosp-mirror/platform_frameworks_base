@@ -1561,9 +1561,9 @@ public class AppProfiler {
 
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
-            final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
-            if (gpuDmaBufUsage >= 0) {
-                final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+            final long gpuPrivateUsage = Debug.getGpuPrivateMemoryKb();
+            if (gpuPrivateUsage >= 0) {
+                final long gpuDmaBufUsage = gpuUsage - gpuPrivateUsage;
                 memInfoBuilder.append("      GPU: ");
                 memInfoBuilder.append(stringifyKBSize(gpuUsage));
                 memInfoBuilder.append(" (");

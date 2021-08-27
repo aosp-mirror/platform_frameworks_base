@@ -43,6 +43,7 @@ public final class LmkdStatsReporter {
     private static final int LOW_MEM_AND_THRASHING = 4;
     private static final int DIRECT_RECL_AND_THRASHING = 5;
     private static final int LOW_MEM_AND_SWAP_UTIL = 6;
+    private static final int LOW_FILECACHE_AFTER_THRASHING = 7;
 
     /**
      * Processes the LMK_KILL_OCCURRED packet data
@@ -63,11 +64,14 @@ public final class LmkdStatsReporter {
             final int freeMemKb = inputData.readInt();
             final int freeSwapKb = inputData.readInt();
             final int killReason = inputData.readInt();
+            final int thrashing = inputData.readInt();
+            final int maxThrashing = inputData.readInt();
             final String procName = inputData.readUTF();
 
             FrameworkStatsLog.write(FrameworkStatsLog.LMK_KILL_OCCURRED, uid, procName, oomScore,
                     pgFault, pgMajFault, rssInBytes, cacheInBytes, swapInBytes, processStartTimeNS,
-                    minOomScore, freeMemKb, freeSwapKb, mapKillReason(killReason));
+                    minOomScore, freeMemKb, freeSwapKb, mapKillReason(killReason), thrashing,
+                    maxThrashing);
         } catch (IOException e) {
             Slog.e(TAG, "Invalid buffer data. Failed to log LMK_KILL_OCCURRED");
             return;
@@ -100,6 +104,8 @@ public final class LmkdStatsReporter {
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__DIRECT_RECL_AND_THRASHING;
             case LOW_MEM_AND_SWAP_UTIL:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_MEM_AND_SWAP_UTIL;
+            case LOW_FILECACHE_AFTER_THRASHING:
+                return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_FILECACHE_AFTER_THRASHING;
             default:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__UNKNOWN;
         }

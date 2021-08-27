@@ -36,4 +36,11 @@
     <color name="settingslib_dialog_colorError">#f28b82</color> <!-- Red 300 -->
 
     <color name="settingslib_colorSurfaceVariant">@android:color/system_neutral1_700</color>
+
+    <color name="settingslib_colorSurfaceHeader">@android:color/system_neutral1_700</color>
+
+    <!-- copy from accent_primary_variant_dark_device_default-->
+    <color name="settingslib_accent_primary_variant">@android:color/system_accent1_300</color>
+
+    <color name="settingslib_text_color_primary_device_default">@android:color/system_neutral1_50</color>
 </resources>

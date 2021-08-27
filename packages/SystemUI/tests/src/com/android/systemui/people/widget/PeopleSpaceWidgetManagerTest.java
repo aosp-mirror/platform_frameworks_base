@@ -1125,7 +1125,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A));
         when(mIPeopleManager.getConversation(TEST_PACKAGE_A, 0, SHORTCUT_ID)).thenReturn(channel);
         PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
-        PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT);
+        PeopleSpaceTile tile = mManager
+                .getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT, true);
         assertThat(tile.getId()).isEqualTo(key.getShortcutId());
     }
 
@@ -1133,7 +1134,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testGetPeopleTileFromPersistentStorageNoConversation() throws Exception {
         when(mIPeopleManager.getConversation(TEST_PACKAGE_A, 0, SHORTCUT_ID)).thenReturn(null);
         PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
-        PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT);
+        PeopleSpaceTile tile = mManager
+                .getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT, false);
         assertThat(tile).isNull();
     }
 

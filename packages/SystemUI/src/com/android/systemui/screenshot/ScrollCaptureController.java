@@ -43,7 +43,7 @@ import javax.inject.Inject;
  * Interaction controller between the UI and ScrollCaptureClient.
  */
 public class ScrollCaptureController {
-    private static final String TAG = "ScrollCaptureController";
+    private static final String TAG = LogConfig.logTag(ScrollCaptureController.class);
     private static final float MAX_PAGES_DEFAULT = 3f;
 
     private static final String SETTING_KEY_MAX_PAGES = "screenshot.scroll_max_pages";
@@ -90,7 +90,9 @@ public class ScrollCaptureController {
 
         /** Releases image resources from the screenshot. */
         public void release() {
-            Log.d(TAG, "LongScreenshot :: release()");
+            if (LogConfig.DEBUG_SCROLL) {
+                Log.d(TAG, "LongScreenshot :: release()");
+            }
             mImageTileSet.clear();
             mSession.release();
         }
@@ -153,15 +155,11 @@ public class ScrollCaptureController {
      * @return a future ImageTile set containing the result
      */
     ListenableFuture<LongScreenshot> run(ScrollCaptureResponse response) {
-        Log.d(TAG, "run: " + response);
         return CallbackToFutureAdapter.getFuture(completer -> {
-            Log.d(TAG, "getFuture(ImageTileSet) ");
             mCaptureCompleter = completer;
             mBgExecutor.execute(() -> {
-                Log.d(TAG, "bgExecutor.execute");
                 float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                         SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
-                Log.d(TAG, "client start, maxPages=" + maxPages);
                 mSessionFuture = mClient.start(response, maxPages);
                 mSessionFuture.addListener(this::onStartComplete, mContext.getMainExecutor());
             });
@@ -172,21 +170,27 @@ public class ScrollCaptureController {
     private void onStartComplete() {
         try {
             mSession = mSessionFuture.get();
-            Log.d(TAG, "got session " + mSession);
+            if (LogConfig.DEBUG_SCROLL) {
+                Log.d(TAG, "got session " + mSession);
+            }
             requestNextTile(0);
         } catch (InterruptedException | ExecutionException e) {
             // Failure to start, propagate to caller
-            Log.d(TAG, "session start failed!");
+            Log.e(TAG, "session start failed!");
             mCaptureCompleter.setException(e);
         }
     }
 
     private void requestNextTile(int topPx) {
-        Log.d(TAG, "requestNextTile: " + topPx);
+        if (LogConfig.DEBUG_SCROLL) {
+            Log.d(TAG, "requestNextTile: " + topPx);
+        }
         mTileFuture = mSession.requestTile(topPx);
         mTileFuture.addListener(() -> {
             try {
-                Log.d(TAG, "onCaptureResult");
+                if (LogConfig.DEBUG_SCROLL) {
+                    Log.d(TAG, "onCaptureResult");
+                }
                 onCaptureResult(mTileFuture.get());
             } catch (InterruptedException | ExecutionException e) {
                 Log.e(TAG, "requestTile failed!", e);
@@ -196,14 +200,18 @@ public class ScrollCaptureController {
     }
 
     private void onCaptureResult(CaptureResult result) {
-        Log.d(TAG, "onCaptureResult: " + result + " scrolling " + (mScrollingUp ? "UP" : "DOWN")
-                + " finish on boundary: " + mFinishOnBoundary);
+        if (LogConfig.DEBUG_SCROLL) {
+            Log.d(TAG, "onCaptureResult: " + result + " scrolling " + (mScrollingUp ? "UP" : "DOWN")
+                    + " finish on boundary: " + mFinishOnBoundary);
+        }
         boolean emptyResult = result.captured.height() == 0;
 
         if (emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
             if (mFinishOnBoundary) {
-                Log.d(TAG, "Empty: finished!");
+                if (LogConfig.DEBUG_SCROLL) {
+                    Log.d(TAG, "Empty: finished!");
+                }
                 finishCapture();
                 return;
             } else {
@@ -212,13 +220,17 @@ public class ScrollCaptureController {
                 mImageTileSet.clear();
                 mFinishOnBoundary = true;
                 mScrollingUp = !mScrollingUp;
-                Log.d(TAG, "Empty: cleared, switch direction to finish");
+                if (LogConfig.DEBUG_SCROLL) {
+                    Log.d(TAG, "Empty: cleared, switch direction to finish");
+                }
             }
         } else {
             // Got a non-empty result, but may already have enough bitmap data now
             int expectedTiles = mImageTileSet.size() + 1;
             if (expectedTiles >= mSession.getMaxTiles()) {
-                Log.d(TAG, "Hit max tiles: finished");
+                if (LogConfig.DEBUG_SCROLL) {
+                    Log.d(TAG, "Hit max tiles: finished");
+                }
                 // If we ever hit the max tiles, we've got enough bitmap data to finish
                 // (even if we weren't sure we'd finish on this pass).
                 finishCapture();
@@ -229,7 +241,9 @@ public class ScrollCaptureController {
                     // by IDEAL_PORTION_ABOVE.
                     if (mImageTileSet.getHeight() + result.captured.height()
                             >= mSession.getTargetHeight() * IDEAL_PORTION_ABOVE) {
-                        Log.d(TAG, "Hit ideal portion above: clear and switch direction");
+                        if (LogConfig.DEBUG_SCROLL) {
+                            Log.d(TAG, "Hit ideal portion above: clear and switch direction");
+                        }
                         // We got enough above the start point, now see how far down it can go.
                         mImageTileSet.clear();
                         mScrollingUp = false;
@@ -241,20 +255,25 @@ public class ScrollCaptureController {
         if (!emptyResult) {
             mImageTileSet.addTile(new ImageTile(result.image, result.captured));
         }
-
-        Log.d(TAG, "bounds: " + mImageTileSet.getLeft() + "," + mImageTileSet.getTop()
-                + " - " +  mImageTileSet.getRight() + "," + mImageTileSet.getBottom()
-                + " (" + mImageTileSet.getWidth() + "x" + mImageTileSet.getHeight() + ")");
+        if (LogConfig.DEBUG_SCROLL) {
+            Log.d(TAG, "bounds: " + mImageTileSet.getLeft() + "," + mImageTileSet.getTop()
+                    + " - " + mImageTileSet.getRight() + "," + mImageTileSet.getBottom()
+                    + " (" + mImageTileSet.getWidth() + "x" + mImageTileSet.getHeight() + ")");
+        }
 
         Rect gapBounds = mImageTileSet.getGaps();
         if (!gapBounds.isEmpty()) {
-            Log.d(TAG, "Found gaps in tileset: " + gapBounds + ", requesting " + gapBounds.top);
+            if (LogConfig.DEBUG_SCROLL) {
+                Log.d(TAG, "Found gaps in tileset: " + gapBounds + ", requesting " + gapBounds.top);
+            }
             requestNextTile(gapBounds.top);
             return;
         }
 
         if (mImageTileSet.getHeight() >= mSession.getTargetHeight()) {
-            Log.d(TAG, "Target height reached.");
+            if (LogConfig.DEBUG_SCROLL) {
+                Log.d(TAG, "Target height reached.");
+            }
             finishCapture();
             return;
         }
@@ -275,10 +294,14 @@ public class ScrollCaptureController {
     }
 
     private void finishCapture() {
-        Log.d(TAG, "finishCapture()");
+        if (LogConfig.DEBUG_SCROLL) {
+            Log.d(TAG, "finishCapture()");
+        }
         mEndFuture = mSession.end();
         mEndFuture.addListener(() -> {
-            Log.d(TAG, "endCapture completed");
+            if (LogConfig.DEBUG_SCROLL) {
+                Log.d(TAG, "endCapture completed");
+            }
             // Provide result to caller and complete the top-level future
             // Caller is responsible for releasing this resource (ImageReader/HardwareBuffers)
             mCaptureCompleter.set(new LongScreenshot(mSession, mImageTileSet));

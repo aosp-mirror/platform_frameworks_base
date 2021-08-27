@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -30,12 +31,15 @@ import android.view.MotionEvent;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
-import com.android.systemui.utils.leaks.FakeBatteryController;
+import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
@@ -43,19 +47,21 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 public class FalsingDataProviderTest extends ClassifierTest {
 
-    private FakeBatteryController mFakeBatteryController;
     private FalsingDataProvider mDataProvider;
+    @Mock
+    private BatteryController mBatteryController;
+    private final DockManagerFake mDockManager = new DockManagerFake();
 
     @Before
     public void setup() {
         super.setup();
-        mFakeBatteryController = new FakeBatteryController(getLeakCheck());
+        MockitoAnnotations.initMocks(this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         displayMetrics.xdpi = 100;
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
+        mDataProvider = new FalsingDataProvider(displayMetrics, mBatteryController, mDockManager);
     }
 
     @After
@@ -250,10 +256,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
     @Test
     public void test_isWirelessCharging() {
-        assertThat(mDataProvider.isWirelessCharging()).isFalse();
+        assertThat(mDataProvider.isDocked()).isFalse();
 
-        mFakeBatteryController.setWirelessCharging(true);
-        assertThat(mDataProvider.isWirelessCharging()).isTrue();
+        when(mBatteryController.isWirelessCharging()).thenReturn(true);
+        assertThat(mDataProvider.isDocked()).isTrue();
+    }
+
+    @Test
+    public void test_isDocked() {
+        assertThat(mDataProvider.isDocked()).isFalse();
+        mDockManager.setIsDocked(true);
+        assertThat(mDataProvider.isDocked()).isTrue();
     }
 
     @Test

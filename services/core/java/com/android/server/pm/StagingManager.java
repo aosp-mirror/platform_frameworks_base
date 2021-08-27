@@ -425,9 +425,10 @@ public class StagingManager {
 
         for (StagedSession apexSession : apexSessions) {
             String packageName = apexSession.getPackageName();
-            if (!mApexManager.isApkInApexInstallSuccess(packageName)) {
+            String errorMsg = mApexManager.getApkInApexInstallError(packageName);
+            if (errorMsg != null) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Failed to install apk-in-apex of " + packageName);
+                        "Failed to install apk-in-apex of " + packageName + " : " + errorMsg);
             }
         }
     }
@@ -776,6 +777,26 @@ public class StagingManager {
         }
     }
 
+    /**
+     * Returns id of a committed and non-finalized stated session that contains same
+     * {@code packageName}, or {@code -1} if no sessions have this {@code packageName} staged.
+     */
+    int getSessionIdByPackageName(@NonNull String packageName) {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                StagedSession stagedSession = mStagedSessions.valueAt(i);
+                if (!stagedSession.isCommitted() || stagedSession.isDestroyed()
+                        || stagedSession.isInTerminalState()) {
+                    continue;
+                }
+                if (stagedSession.getPackageName().equals(packageName)) {
+                    return stagedSession.sessionId();
+                }
+            }
+        }
+        return -1;
+    }
+
     @VisibleForTesting
     void createSession(@NonNull StagedSession sessionInfo) {
         synchronized (mStagedSessions) {
@@ -955,12 +976,17 @@ public class StagingManager {
                 continue;
             } else if (isApexSessionFailed(apexSession)) {
                 hasFailedApexSession = true;
-                String errorMsg = "APEX activation failed. " + apexSession.errorMessage;
                 if (!TextUtils.isEmpty(apexSession.crashingNativeProcess)) {
                     prepareForLoggingApexdRevert(session, apexSession.crashingNativeProcess);
-                    errorMsg = "Session reverted due to crashing native process: "
-                            + apexSession.crashingNativeProcess;
                 }
+                String errorMsg = "APEX activation failed.";
+                final String reasonForRevert = getReasonForRevert();
+                if (!TextUtils.isEmpty(reasonForRevert)) {
+                    errorMsg += " Reason: " + reasonForRevert;
+                } else if (!TextUtils.isEmpty(apexSession.errorMessage)) {
+                    errorMsg += " Error: " + apexSession.errorMessage;
+                }
+                Slog.d(TAG, errorMsg);
                 session.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
                 continue;
             } else if (apexSession.isActivated || apexSession.isSuccess) {

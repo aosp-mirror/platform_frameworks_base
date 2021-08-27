@@ -174,7 +174,16 @@ class PackageSignatures {
                                 if (index >= 0 && index < readSignatures.size()) {
                                     Signature sig = readSignatures.get(index);
                                     if (sig != null) {
-                                        signatures.add(sig);
+                                        // An app using a shared signature in its signing lineage
+                                        // can have unique capabilities assigned to this previous
+                                        // signer; create a new instance of this Signature to ensure
+                                        // its flags do not overwrite those of the instance from
+                                        // readSignatures.
+                                        if (isPastSigs) {
+                                            signatures.add(new Signature(sig));
+                                        } else {
+                                            signatures.add(sig);
+                                        }
                                         signatureParsed = true;
                                     } else {
                                         PackageManagerService.reportSettingsProblem(Log.WARN,

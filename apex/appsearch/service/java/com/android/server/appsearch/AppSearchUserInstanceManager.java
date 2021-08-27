@@ -27,12 +27,13 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
-import com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.stats.PlatformLogger;
 import com.android.server.appsearch.visibilitystore.VisibilityStoreImpl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -158,6 +159,18 @@ public final class AppSearchUserInstanceManager {
         }
     }
 
+    /**
+     * Returns the list of all {@link UserHandle}s.
+     *
+     * <p>It can return an empty list if there is no {@link AppSearchUserInstance} created yet.
+     */
+    @NonNull
+    public List<UserHandle> getAllUserHandles() {
+        synchronized (mInstancesLocked) {
+            return new ArrayList<>(mInstancesLocked.keySet());
+        }
+    }
+
     @NonNull
     private AppSearchUserInstance createUserInstance(
             @NonNull Context userContext,
@@ -177,7 +190,7 @@ public final class AppSearchUserInstanceManager {
                 icingDir,
                 new FrameworkLimitConfig(config),
                 initStatsBuilder,
-                new FrameworkOptimizeStrategy());
+                new FrameworkOptimizeStrategy(config));
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
         VisibilityStoreImpl visibilityStore =

@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.startingsurface;
 
+import android.app.TaskInfo;
+import android.graphics.Color;
 /**
  * Interface to engage starting window feature.
  */
@@ -26,5 +28,12 @@ public interface StartingSurface {
      */
     default IStartingWindow createExternalInterface() {
         return null;
+    }
+
+    /**
+     * Returns the background color for a starting window if existing.
+     */
+    default int getBackgroundColor(TaskInfo taskInfo) {
+        return Color.BLACK;
     }
 }

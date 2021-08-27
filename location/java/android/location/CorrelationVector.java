@@ -94,8 +94,6 @@ public final class CorrelationVector implements Parcelable {
                 "FrequencyOffsetMetersPerSecond must be non-negative (greater than or equal to 0)");
         Preconditions.checkArgument(builder.mSamplingWidthMeters > 0.0,
                 "SamplingWidthMeters must be positive (greater than 0)");
-        Preconditions.checkArgument(builder.mSamplingStartMeters >= 0.0,
-                "SamplingStartMeters must be non-negative (greater than or equal to 0)");
         mMagnitude = builder.mMagnitude;
         mFrequencyOffsetMetersPerSecond = builder.mFrequencyOffsetMetersPerSecond;
         mSamplingWidthMeters = builder.mSamplingWidthMeters;

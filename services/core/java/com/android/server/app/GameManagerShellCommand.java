@@ -36,7 +36,9 @@ import android.app.GameManager;
 import android.app.IGameManagerService;
 import android.compat.Compatibility;
 import android.content.Context;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.ArraySet;
 
@@ -116,7 +118,7 @@ public class GameManagerShellCommand extends ShellCommand {
                         pw.println("Enable downscaling ratio for " + packageName + " to " + ratio);
                     }
 
-                    break;
+                    return 0;
                 }
                 case "mode": {
                     /** The "mode" command allows setting a package's current game mode outside of
@@ -128,65 +130,7 @@ public class GameManagerShellCommand extends ShellCommand {
                      *          <PACKAGE_NAME> <CONFIG_STRING>`
                      * see: {@link GameManagerServiceTests#mockDeviceConfigAll()}
                      */
-                    final String option = getNextOption();
-                    String userIdStr = null;
-                    if (option != null && option.equals("--user")) {
-                        userIdStr = getNextArgRequired();
-                    }
-
-                    final String gameMode = getNextArgRequired();
-                    final String packageName = getNextArgRequired();
-                    final IGameManagerService service = IGameManagerService.Stub.asInterface(
-                            ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
-                    boolean batteryModeSupported = false;
-                    boolean perfModeSupported = false;
-                    int[] modes = service.getAvailableGameModes(packageName);
-                    for (int mode : modes) {
-                        if (mode == GameManager.GAME_MODE_PERFORMANCE) {
-                            perfModeSupported = true;
-                        } else if (mode == GameManager.GAME_MODE_BATTERY) {
-                            batteryModeSupported = true;
-                        }
-                    }
-                    int userId = userIdStr != null ? Integer.parseInt(userIdStr)
-                            : ActivityManager.getCurrentUser();
-                    switch (gameMode.toLowerCase()) {
-                        case "1":
-                        case "standard":
-                            // Standard should only be available if other game modes are.
-                            if (batteryModeSupported || perfModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        case "2":
-                        case "performance":
-                            if (perfModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_PERFORMANCE,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        case "3":
-                        case "battery":
-                            if (batteryModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_BATTERY,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        default:
-                            pw.println("Invalid game mode: " + gameMode);
-                            break;
-                    }
-                    break;
+                    return runGameMode(pw);
                 }
                 default:
                     return handleDefaultCommands(cmd);
@@ -195,6 +139,71 @@ public class GameManagerShellCommand extends ShellCommand {
             pw.println("Error: " + e);
         }
         return -1;
+    }
+
+    private int runGameMode(PrintWriter pw) throws ServiceNotFoundException, RemoteException {
+        final String option = getNextOption();
+        String userIdStr = null;
+        if (option != null && option.equals("--user")) {
+            userIdStr = getNextArgRequired();
+        }
+
+        final String gameMode = getNextArgRequired();
+        final String packageName = getNextArgRequired();
+        final IGameManagerService service = IGameManagerService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
+        boolean batteryModeSupported = false;
+        boolean perfModeSupported = false;
+        int[] modes = service.getAvailableGameModes(packageName);
+        for (int mode : modes) {
+            if (mode == GameManager.GAME_MODE_PERFORMANCE) {
+                perfModeSupported = true;
+            } else if (mode == GameManager.GAME_MODE_BATTERY) {
+                batteryModeSupported = true;
+            }
+        }
+        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                : ActivityManager.getCurrentUser();
+        switch (gameMode.toLowerCase()) {
+            case "1":
+            case "standard":
+                // Standard should only be available if other game modes are.
+                if (batteryModeSupported || perfModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            case "2":
+            case "performance":
+                if (perfModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_PERFORMANCE,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            case "3":
+            case "battery":
+                if (batteryModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_BATTERY,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            default:
+                pw.println("Invalid game mode: " + gameMode);
+                return -1;
+        }
+        return 0;
     }
 
 

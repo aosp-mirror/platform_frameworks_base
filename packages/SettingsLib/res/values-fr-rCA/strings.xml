@@ -155,7 +155,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Utilisateur : <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Certaines préférences par défaut définies"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucune préférence par défaut définie"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Synthèse vocale"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Paramètres de synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Synthèse vocale"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
@@ -568,12 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Réinitialiser la session Invité"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invité"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8047270010895437534) -->
-    <skip />
-    <!-- no translation found for guest_reset_guest_confirm_button (2989915693215617237) -->
-    <skip />
-    <!-- no translation found for guest_resetting (7822120170191509566) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Réinitialiser la session Invité?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Réinitialiser"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité en cours…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Sélectionner une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionnez une photo"</string>

@@ -399,9 +399,6 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
-    // Received notifications of the device-state action (such as "fold", "unfold")
-    private DeviceStateManager mDeviceStateManager;
-
     private final boolean mAllowNonNativeRefreshRateOverride;
 
     private final BrightnessSynchronizer mBrightnessSynchronizer;
@@ -708,10 +705,8 @@ public final class DisplayManagerService extends SystemService {
             final BrightnessPair brightnessPair =
                     index < 0 ? null : mDisplayBrightnesses.valueAt(index);
             if (index < 0 || (mDisplayStates.valueAt(index) == state
-                    && BrightnessSynchronizer.floatEquals(
-                            brightnessPair.brightness, brightnessState)
-                    && BrightnessSynchronizer.floatEquals(
-                            brightnessPair.sdrBrightness, sdrBrightnessState))) {
+                    && brightnessPair.brightness == brightnessState
+                    && brightnessPair.sdrBrightness == sdrBrightnessState)) {
                 return; // Display no longer exists or no change.
             }
 
@@ -1236,13 +1231,6 @@ public final class DisplayManagerService extends SystemService {
         adapter.registerLocked();
     }
 
-    @VisibleForTesting
-    void handleLogicalDisplayAdded(LogicalDisplay display) {
-        synchronized (mSyncRoot) {
-            handleLogicalDisplayAddedLocked(display);
-        }
-    }
-
     private void handleLogicalDisplayAddedLocked(LogicalDisplay display) {
         final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
         final int displayId = display.getDisplayIdLocked();
@@ -1291,6 +1279,11 @@ public final class DisplayManagerService extends SystemService {
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
         mPersistentDataStore.saveIfNeeded();
+
+        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDisplayChanged();
+        }
     }
 
     private void handleLogicalDisplayFrameRateOverridesChangedLocked(
@@ -1321,11 +1314,6 @@ public final class DisplayManagerService extends SystemService {
         final Runnable work = updateDisplayStateLocked(device);
         if (work != null) {
             mHandler.post(work);
-        }
-        final int displayId = display.getDisplayIdLocked();
-        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
-        if (dpc != null) {
-            dpc.onDisplayChanged();
         }
         handleLogicalDisplayChangedLocked(display);
     }
@@ -2107,7 +2095,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
-                display, mContext);
+                display, mSyncRoot);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
                 mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
@@ -3297,6 +3285,9 @@ public final class DisplayManagerService extends SystemService {
 
             synchronized (mSyncRoot) {
                 final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (display == null) {
+                    return null;
+                }
                 final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
                 if (device == null) {
                     return null;

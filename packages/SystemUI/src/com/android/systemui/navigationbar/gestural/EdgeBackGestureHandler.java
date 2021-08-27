@@ -58,7 +58,6 @@ import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarView;
@@ -92,7 +91,6 @@ import javax.inject.Inject;
 /**
  * Utility class to handle edge swipes for back gesture
  */
-@SysUISingleton
 public class EdgeBackGestureHandler extends CurrentUserTracker
         implements PluginListener<NavigationEdgeBackPlugin>, ProtoTraceable<SystemUiTraceProto> {
 
@@ -294,8 +292,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
     };
 
-    @Inject
-    public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService,
+
+    EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService,
             SysUiState sysUiState, PluginManager pluginManager, @Main Executor executor,
             BroadcastDispatcher broadcastDispatcher, ProtoTracer protoTracer,
             NavigationModeController navigationModeController, ViewConfiguration viewConfiguration,
@@ -919,6 +917,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mGestureLogInsideInsets=" + String.join("\n", mGestureLogInsideInsets));
         pw.println("  mGestureLogOutsideInsets=" + String.join("\n", mGestureLogOutsideInsets));
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
+        if (mEdgeBackPlugin != null) {
+            mEdgeBackPlugin.dump(pw);
+        }
     }
 
     private boolean isGestureBlockingActivityRunning() {
@@ -941,6 +942,53 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
     }
 
+    /**
+     * Injectable instance to create a new EdgeBackGestureHandler.
+     *
+     * Necessary because we don't have good handling of per-display contexts at the moment. With
+     * this, you can pass in a specific context that knows what display it is in.
+     */
+    public static class Factory {
+        private final OverviewProxyService mOverviewProxyService;
+        private final SysUiState mSysUiState;
+        private final PluginManager mPluginManager;
+        private final Executor mExecutor;
+        private final BroadcastDispatcher mBroadcastDispatcher;
+        private final ProtoTracer mProtoTracer;
+        private final NavigationModeController mNavigationModeController;
+        private final ViewConfiguration mViewConfiguration;
+        private final WindowManager mWindowManager;
+        private final IWindowManager mWindowManagerService;
+        private final FalsingManager mFalsingManager;
+
+        @Inject
+        public Factory(OverviewProxyService overviewProxyService,
+                SysUiState sysUiState, PluginManager pluginManager, @Main Executor executor,
+                BroadcastDispatcher broadcastDispatcher, ProtoTracer protoTracer,
+                NavigationModeController navigationModeController,
+                ViewConfiguration viewConfiguration, WindowManager windowManager,
+                IWindowManager windowManagerService, FalsingManager falsingManager) {
+            mOverviewProxyService = overviewProxyService;
+            mSysUiState = sysUiState;
+            mPluginManager = pluginManager;
+            mExecutor = executor;
+            mBroadcastDispatcher = broadcastDispatcher;
+            mProtoTracer = protoTracer;
+            mNavigationModeController = navigationModeController;
+            mViewConfiguration = viewConfiguration;
+            mWindowManager = windowManager;
+            mWindowManagerService = windowManagerService;
+            mFalsingManager = falsingManager;
+        }
+
+        /** Construct a {@link EdgeBackGestureHandler}. */
+        public EdgeBackGestureHandler create(Context context) {
+            return new EdgeBackGestureHandler(context, mOverviewProxyService, mSysUiState,
+                    mPluginManager, mExecutor, mBroadcastDispatcher, mProtoTracer,
+                    mNavigationModeController, mViewConfiguration, mWindowManager,
+                    mWindowManagerService, mFalsingManager);
+        }
+    }
 
     private static class LogArray extends ArrayDeque<String> {
         private final int mLength;

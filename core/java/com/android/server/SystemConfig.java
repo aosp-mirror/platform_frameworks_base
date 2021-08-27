@@ -241,7 +241,11 @@ public class SystemConfig {
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
-    private final ArraySet<String> mAllowedVendorApexes = new ArraySet<>();
+    // A map from package name of vendor APEXes that can be updated to an installer package name
+    // allowed to install updates for it.
+    private final ArrayMap<String, String> mAllowedVendorApexes = new ArrayMap<>();
+
+    private String mModulesInstallerPackageName;
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -412,8 +416,12 @@ public class SystemConfig {
         return mWhitelistedStagedInstallers;
     }
 
-    public Set<String> getAllowedVendorApexes() {
+    public Map<String, String> getAllowedVendorApexes() {
         return mAllowedVendorApexes;
+    }
+
+    public String getModulesInstallerPackageName() {
+        return mModulesInstallerPackageName;
     }
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
@@ -1210,11 +1218,20 @@ public class SystemConfig {
                     case "whitelisted-staged-installer": {
                         if (allowAppConfigs) {
                             String pkgname = parser.getAttributeValue(null, "package");
+                            boolean isModulesInstaller = XmlUtils.readBooleanAttribute(
+                                    parser, "isModulesInstaller", false);
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in " + permFile
                                         + " at " + parser.getPositionDescription());
                             } else {
                                 mWhitelistedStagedInstallers.add(pkgname);
+                            }
+                            if (isModulesInstaller) {
+                                if (mModulesInstallerPackageName != null) {
+                                    throw new IllegalStateException(
+                                            "Multiple modules installers");
+                                }
+                                mModulesInstallerPackageName = pkgname;
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1224,11 +1241,18 @@ public class SystemConfig {
                     case "allowed-vendor-apex": {
                         if (allowVendorApex) {
                             String pkgName = parser.getAttributeValue(null, "package");
+                            String installerPkgName = parser.getAttributeValue(
+                                    null, "installerPackage");
                             if (pkgName == null) {
                                 Slog.w(TAG, "<" + name + "> without package in " + permFile
                                         + " at " + parser.getPositionDescription());
-                            } else {
-                                mAllowedVendorApexes.add(pkgName);
+                            }
+                            if (installerPkgName == null) {
+                                Slog.w(TAG, "<" + name + "> without installerPackage in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            }
+                            if (pkgName != null && installerPkgName != null) {
+                                mAllowedVendorApexes.put(pkgName, installerPkgName);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

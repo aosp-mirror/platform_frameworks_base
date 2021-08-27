@@ -31,6 +31,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
+import com.android.server.utils.SnapshotCache;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,6 +82,7 @@ public class PackageSetting extends PackageSettingBase {
      * object equality to check whether shared user settings are the same.
      */
     SharedUserSetting sharedUser;
+
     /**
      * Temporary holding space for the shared user ID. While parsing package settings, the
      * shared users tag may come after the packages. In this case, we must delay linking the
@@ -103,6 +105,19 @@ public class PackageSetting extends PackageSettingBase {
     @NonNull
     private UUID mDomainSetId;
 
+    /**
+     * Snapshot support.
+     */
+    private final SnapshotCache<PackageSetting> mSnapshot;
+
+    private SnapshotCache<PackageSetting> makeCache() {
+        return new SnapshotCache<PackageSetting>(this, this) {
+            @Override
+            public PackageSetting createSnapshot() {
+                return new PackageSetting(mSource, true);
+            }};
+    }
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public PackageSetting(String name, String realName, @NonNull File codePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
@@ -118,6 +133,7 @@ public class PackageSetting extends PackageSettingBase {
         this.sharedUserId = sharedUserId;
         mDomainSetId = domainSetId;
         copyMimeGroups(mimeGroups);
+        mSnapshot = makeCache();
     }
 
     /**
@@ -127,6 +143,7 @@ public class PackageSetting extends PackageSettingBase {
     PackageSetting(PackageSetting orig) {
         super(orig, orig.realName);
         doCopy(orig);
+        mSnapshot = makeCache();
     }
 
     /**
@@ -137,6 +154,33 @@ public class PackageSetting extends PackageSettingBase {
     PackageSetting(PackageSetting orig, String realPkgName) {
         super(orig, realPkgName);
         doCopy(orig);
+        mSnapshot = makeCache();
+    }
+
+    /**
+     * Create a snapshot.  The copy constructor is already in use and cannot be modified
+     * for this purpose.
+     */
+    PackageSetting(PackageSetting orig, boolean snapshot) {
+        super(orig, snapshot);
+        // The existing doCopy() method cannot be used in here because sharedUser must be
+        // a snapshot, and not a reference.  Also, the pkgState must be copied.  However,
+        // this code should otherwise be kept in sync with doCopy().
+        appId = orig.appId;
+        pkg = orig.pkg;
+        sharedUser = orig.sharedUser == null ? null : orig.sharedUser.snapshot();
+        sharedUserId = orig.sharedUserId;
+        copyMimeGroups(orig.mimeGroups);
+        pkgState = orig.pkgState;
+        mDomainSetId = orig.getDomainSetId();
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    /**
+     * Return the package snapshot.
+     */
+    public PackageSetting snapshot() {
+        return mSnapshot.snapshot();
     }
 
     /** @see #pkg **/

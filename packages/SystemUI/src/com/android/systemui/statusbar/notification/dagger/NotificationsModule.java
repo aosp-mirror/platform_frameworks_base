@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -92,6 +93,10 @@ public interface NotificationsModule {
     @Binds
     StackScrollAlgorithm.SectionProvider bindSectionProvider(
             NotificationSectionsManager impl);
+
+    @Binds
+    StackScrollAlgorithm.BypassController bindBypassController(
+            KeyguardBypassController impl);
 
     /** Provides an instance of {@link NotificationEntryManager} */
     @SysUISingleton

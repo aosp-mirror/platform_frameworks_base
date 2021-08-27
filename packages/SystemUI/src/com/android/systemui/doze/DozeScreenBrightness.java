@@ -24,6 +24,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -33,6 +34,8 @@ import android.view.Display;
 import com.android.systemui.doze.dagger.BrightnessSensor;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.io.PrintWriter;
@@ -58,8 +61,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private final Handler mHandler;
     private final SensorManager mSensorManager;
     private final Optional<Sensor> mLightSensorOptional;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final DozeParameters mDozeParameters;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
+    private final int mScreenBrightnessDim;
 
     private boolean mRegistered;
     private int mDefaultDozeBrightness;
@@ -79,15 +85,20 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     public DozeScreenBrightness(Context context, @WrappedService DozeMachine.Service service,
             AsyncSensorManager sensorManager,
             @BrightnessSensor Optional<Sensor> lightSensorOptional, DozeHost host, Handler handler,
-            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
+            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            DozeParameters dozeParameters) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
         mLightSensorOptional = lightSensorOptional;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mDozeParameters = dozeParameters;
         mDozeHost = host;
         mHandler = handler;
 
         mDefaultDozeBrightness = alwaysOnDisplayPolicy.defaultDozeBrightness;
+        mScreenBrightnessDim = alwaysOnDisplayPolicy.dimBrightness;
         mSensorToBrightness = alwaysOnDisplayPolicy.screenBrightnessArray;
         mSensorToScrimOpacity = alwaysOnDisplayPolicy.dimmingScrimArray;
     }
@@ -178,7 +189,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private void resetBrightnessToDefault() {
-        mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
+        mDozeService.setDozeScreenBrightness(
+                clampToDimBrightnessForScreenOff(
+                        clampToUserSetting(mDefaultDozeBrightness)));
         mDozeHost.setAodDimmingScrim(0f);
     }
     //TODO: brightnessfloat change usages to float.
@@ -187,6 +200,21 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
                 UserHandle.USER_CURRENT);
         return Math.min(brightness, userSetting);
+    }
+
+    /**
+     * Clamp the brightness to the dim brightness value used by PowerManagerService just before the
+     * device times out and goes to sleep, if we are sleeping from a timeout. This ensures that we
+     * don't raise the brightness back to the user setting before playing the screen off animation.
+     */
+    private int clampToDimBrightnessForScreenOff(int brightness) {
+        if (mDozeParameters.shouldControlUnlockedScreenOff()
+                && mWakefulnessLifecycle.getLastSleepReason()
+                == PowerManager.GO_TO_SLEEP_REASON_TIMEOUT) {
+            return Math.min(mScreenBrightnessDim, brightness);
+        } else {
+            return brightness;
+        }
     }
 
     private void setLightSensorEnabled(boolean enabled) {

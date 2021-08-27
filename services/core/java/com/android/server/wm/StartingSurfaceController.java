@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
@@ -68,7 +69,7 @@ public class StartingSurfaceController {
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
             if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity.token, theme, null /* taskSnapshot */)) {
+                    task, activity, theme, null /* taskSnapshot */)) {
                 return new ShellStartingSurface(task);
             }
         }
@@ -85,7 +86,7 @@ public class StartingSurfaceController {
 
     int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean useEmpty) {
+            boolean useEmpty, boolean useLegacy) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -104,6 +105,9 @@ public class StartingSurfaceController {
         }
         if (useEmpty) {
             parameter |= TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
+        }
+        if (useLegacy) {
+            parameter |= TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
         }
         return parameter;
     }
@@ -145,7 +149,7 @@ public class StartingSurfaceController {
             }
             if (DEBUG_ENABLE_SHELL_DRAWER) {
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity.token, 0 /* launchTheme */, taskSnapshot);
+                        activity, 0 /* launchTheme */, taskSnapshot);
                 return new ShellStartingSurface(task);
             }
         }
