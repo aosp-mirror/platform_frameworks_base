@@ -34,6 +34,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">10dp</item>
         <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@color/split_divider_background</item>
     </style>
 
     <style name="DockedDividerMinimizedShadow">
