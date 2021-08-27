@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -119,7 +118,7 @@ class EnterPipToOtherOrientationTest(
      * Checks that the [WindowManagerStateHelper.STATUS_BAR_COMPONENT] has the correct position at
      * the start and end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_90, Surface.ROTATION_0)
