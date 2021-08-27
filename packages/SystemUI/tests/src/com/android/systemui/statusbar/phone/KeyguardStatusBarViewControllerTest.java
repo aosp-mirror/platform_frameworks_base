@@ -17,10 +17,14 @@
 package com.android.systemui.statusbar.phone;
 
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -30,18 +34,24 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextController;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -66,10 +76,22 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
     @Mock
-    private KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider;
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private BiometricUnlockController mBiometricUnlockController;
+    @Mock
+    private SysuiStatusBarStateController mStatusBarStateController;
 
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
+
+    private float mAlpha = 0.5f;
+    private final KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider =
+            () -> new KeyguardStatusBarViewController.ViewState(mAlpha);
 
     @Before
     public void setup() throws Exception {
@@ -92,7 +114,12 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
                 mBatteryMeterViewController,
-                mViewStateProvider
+                mViewStateProvider,
+                mKeyguardStateController,
+                mKeyguardBypassController,
+                mKeyguardUpdateMonitor,
+                mBiometricUnlockController,
+                mStatusBarStateController
         );
     }
 
@@ -179,5 +206,93 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(newAlpha);
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(newVisibility);
+    }
+
+    @Test
+    public void updateViewState_notKeyguardState_nothingUpdated() {
+        mAlpha = 0.255f;
+        mController.onViewAttached();
+        updateStateToNotKeyguard();
+
+        float oldAlpha = mKeyguardStatusBarView.getAlpha();
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(oldAlpha);
+    }
+
+    @Test
+    public void updateViewState_bypassEnabledAndShouldListenForFace_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        when(mKeyguardUpdateMonitor.shouldListenForFace()).thenReturn(true);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        onFinishedGoingToSleep();
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_bypassNotEnabled_viewShown() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        when(mKeyguardUpdateMonitor.shouldListenForFace()).thenReturn(true);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(false);
+        onFinishedGoingToSleep();
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateViewState_shouldNotListenForFace_viewShown() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        when(mKeyguardUpdateMonitor.shouldListenForFace()).thenReturn(false);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        onFinishedGoingToSleep();
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    // TODO(b/195442899): Add more tests for #updateViewState once CLs are finalized.
+
+    private void updateStateToNotKeyguard() {
+        updateStatusBarState(SHADE);
+    }
+
+    private void updateStateToKeyguard() {
+        updateStatusBarState(KEYGUARD);
+    }
+
+    private void updateStatusBarState(int state) {
+        ArgumentCaptor<StatusBarStateController.StateListener> statusBarStateListenerCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mStatusBarStateController).addCallback(statusBarStateListenerCaptor.capture());
+        StatusBarStateController.StateListener callback = statusBarStateListenerCaptor.getValue();
+
+        callback.onStateChanged(state);
+    }
+
+    /**
+     * Calls {@link com.android.keyguard.KeyguardUpdateMonitorCallback#onFinishedGoingToSleep(int)}
+     * to ensure values are updated properly.
+     */
+    private void onFinishedGoingToSleep() {
+        ArgumentCaptor<KeyguardUpdateMonitorCallback> keyguardUpdateCallbackCaptor =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+        verify(mKeyguardUpdateMonitor).registerCallback(keyguardUpdateCallbackCaptor.capture());
+        KeyguardUpdateMonitorCallback callback = keyguardUpdateCallbackCaptor.getValue();
+
+        callback.onFinishedGoingToSleep(0);
     }
 }
