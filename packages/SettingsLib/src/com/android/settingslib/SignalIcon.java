@@ -139,7 +139,6 @@ public class SignalIcon {
     public static class MobileIconGroup extends IconGroup {
         public final int dataContentDescription; // mContentDescriptionDataType
         public final int dataType;
-        public final int qsDataType;
 
         public MobileIconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
@@ -148,7 +147,6 @@ public class SignalIcon {
                 qsDiscState, discContentDesc);
             this.dataContentDescription = dataContentDesc;
             this.dataType = dataType;
-            this.qsDataType = dataType; // TODO: remove this field
         }
     }
 
