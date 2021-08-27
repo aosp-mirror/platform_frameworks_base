@@ -1089,6 +1089,11 @@ public class StatusBar extends SystemUI implements
                         }
                     }
                 }, OverlayPlugin.class, true /* Allow multiple plugins */);
+
+        mStartingSurfaceOptional.ifPresent(startingSurface -> startingSurface.setSysuiProxy(
+                (requestTopUi, componentTag) -> mMainExecutor.execute(() ->
+                        mNotificationShadeWindowController.setRequestTopUi(
+                                requestTopUi, componentTag))));
     }
 
     // ================================================================================
