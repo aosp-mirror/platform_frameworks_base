@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -105,7 +104,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      * Checks that the pip app layer remains inside the display bounds throughout the whole
      * animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
         testSpec.assertLayers {
@@ -116,7 +115,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     /**
      * Checks that the visible region of [pipApp] always reduces during the animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerReduces() {
         val layerName = pipApp.component.toLayerName()

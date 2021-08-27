@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -106,7 +106,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that [testApp] windows fill the entire screen (i.e. is "fullscreen") at the end of the
      * transition once we have fully quick switched from the launcher back to the [testApp].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithAppWindowsCoveringFullScreen() {
         testSpec.assertWmEnd {
@@ -118,7 +118,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that [testApp] layers fill the entire screen (i.e. is "fullscreen") at the end of the
      * transition once we have fully quick switched from the launcher back to the [testApp].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithAppLayersCoveringFullScreen() {
         testSpec.assertLayersEnd {
@@ -130,7 +130,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that [testApp] is the top window at the end of the transition once we have fully quick
      * switched from the launcher back to the [testApp].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithAppBeingOnTop() {
         testSpec.assertWmEnd {
@@ -141,7 +141,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that the transition starts with the home activity being tagged as visible.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithHomeActivityFlaggedVisible() {
         testSpec.assertWmStart {
@@ -153,7 +153,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the transition starts with the launcher windows filling/covering exactly the
      * entirety of the display.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithLauncherWindowsCoverFullScreen() {
         testSpec.assertWmStart {
@@ -165,7 +165,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the transition starts with the launcher layers filling/covering exactly the
      * entirety of the display.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithLauncherLayersCoverFullScreen() {
         testSpec.assertLayersStart {
@@ -176,7 +176,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that the transition starts with the launcher being the top window.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithLauncherBeingOnTop() {
         testSpec.assertWmStart {
@@ -188,7 +188,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the transition ends with the home activity being flagged as not visible. By this
      * point we should have quick switched away from the launcher back to the [testApp].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithHomeActivityFlaggedInvisible() {
         testSpec.assertWmEnd {
@@ -200,7 +200,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that [testApp]'s window starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowBecomesAndStaysVisible() {
         testSpec.assertWm {
@@ -214,7 +214,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that [testApp]'s layer starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun appLayerBecomesAndStaysVisible() {
         testSpec.assertLayers {
@@ -228,7 +228,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the launcher window starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun launcherWindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
@@ -242,7 +242,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the launcher layer starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun launcherLayerBecomesAndStaysInvisible() {
         testSpec.assertLayers {
@@ -256,7 +256,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the launcher window is visible at least until the app window is visible. Ensures
      * that at any point, either the launcher or [testApp] windows are at least partially visible.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowIsVisibleOnceLauncherWindowIsInvisible() {
         testSpec.assertWm {
@@ -272,7 +272,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      * Checks that the launcher layer is visible at least until the app layer is visible. Ensures
      * that at any point, either the launcher or [testApp] layers are at least partially visible.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun appLayerIsVisibleOnceLauncherLayerIsInvisible() {
         testSpec.assertLayers {
@@ -287,14 +287,14 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that the navbar window is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsVisible()
 
     /**
      * Checks that the navbar layer is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerAlwaysIsVisible() = testSpec.navBarLayerIsVisible()
 
@@ -303,7 +303,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      *
      * NOTE: This doesn't check that the navbar is visible or not.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navbarIsAlwaysInRightPosition() =
             testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
@@ -311,21 +311,21 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that the status bar window is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsVisible()
 
     /**
      * Checks that the status bar layer is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsVisible()
 
     /**
      * Checks that the screen is always fully covered by visible layers throughout the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun screenIsAlwaysFilled() = testSpec.entireScreenCovered()
 
