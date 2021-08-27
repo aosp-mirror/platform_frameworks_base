@@ -27,21 +27,22 @@ struct R {
   struct integer {
     enum : uint32_t {
       foo_0 = 0x7f010000,
-      foo_1 = 0x7f010000,
-      foo_2 = 0x7f010000,
-      foo_3 = 0x7f010000,
-      foo_4 = 0x7f010000,
-      foo_5 = 0x7f010000,
-      foo_6 = 0x7f010000,
-      foo_7 = 0x7f010000,
-      foo_8 = 0x7f010000,
-      foo_9 = 0x7f010000,
+      foo_1 = 0x7f010001,
+      foo_2 = 0x7f010002,
+      foo_3 = 0x7f010003,
+      foo_4 = 0x7f010004,
+      foo_5 = 0x7f010005,
+      foo_6 = 0x7f010006,
+      foo_7 = 0x7f010007,
+      foo_8 = 0x7f010008,
+      foo_9 = 0x7f010009,
     };
   };
 
   struct string {
     enum : uint32_t {
       foo_999 = 0x7f0203e7,
+      only_v26 = 0x7f0203e8
     };
   };
 };
