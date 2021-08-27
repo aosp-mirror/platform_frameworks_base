@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -111,6 +112,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.VirtualDisplay;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.IBinder;
@@ -2292,7 +2294,7 @@ public class DisplayContentTests extends WindowTestsBase {
         float yScale = 2f;
         Rect displayAreaBounds = new Rect(0, 0, Math.round(surfaceSize.x * xScale),
                 Math.round(surfaceSize.y * yScale));
-        virtualDisplay.updateMirroredSurface(mTransaction, displayAreaBounds);
+        virtualDisplay.updateMirroredSurface(mTransaction, displayAreaBounds, surfaceSize);
 
         // THEN content in the captured DisplayArea is scaled to fit the surface size.
         verify(mTransaction, atLeastOnce()).setMatrix(mirroredSurface, 1.0f / yScale, 0, 0,
@@ -2302,6 +2304,72 @@ public class DisplayContentTests extends WindowTestsBase {
         float xInset = (surfaceSize.x - scaledWidth) / 2;
         verify(mTransaction, atLeastOnce()).setPosition(mirroredSurface, xInset, 0);
 
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testVirtualDisplayContent_withoutSurface() {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .spyStatic(SurfaceControl.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        setUpDefaultTaskDisplayAreaWindowToken();
+
+        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        Point surfaceSize = new Point(
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
+        surfaceControlMirrors(surfaceSize);
+
+        // GIVEN a new VirtualDisplay with an associated surface.
+        final VirtualDisplay display = createVirtualDisplay(surfaceSize, null /* surface */);
+        final int displayId = display.getDisplay().getDisplayId();
+        mWm.mRoot.onDisplayAdded(displayId);
+
+        // WHEN getting the DisplayContent for the new virtual display.
+        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
+
+        // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
+        assertThat(actualDC.mTokenToMirror).isNull();
+
+        display.release();
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testVirtualDisplayContent_withSurface() {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .spyStatic(SurfaceControl.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
+
+        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        Point surfaceSize = new Point(
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
+        surfaceControlMirrors(surfaceSize);
+
+        // GIVEN a new VirtualDisplay with an associated surface.
+        final VirtualDisplay display = createVirtualDisplay(surfaceSize, new Surface());
+        final int displayId = display.getDisplay().getDisplayId();
+        mWm.mRoot.onDisplayAdded(displayId);
+
+        // WHEN getting the DisplayContent for the new virtual display.
+        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
+
+        // THEN mirroring is initiated for the default display's DisplayArea.
+        assertThat(actualDC.mTokenToMirror).isEqualTo(tokenToMirror);
+
+        display.release();
         mockSession.finishMocking();
     }
 
@@ -2340,6 +2408,11 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(surfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
                 anyInt());
         return mirroredSurface;
+    }
+
+    private VirtualDisplay createVirtualDisplay(Point size, Surface surface) {
+        return mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay", size.x, size.y,
+                DisplayMetrics.DENSITY_140, surface, VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
     }
 
     private void removeRootTaskTests(Runnable runnable) {
