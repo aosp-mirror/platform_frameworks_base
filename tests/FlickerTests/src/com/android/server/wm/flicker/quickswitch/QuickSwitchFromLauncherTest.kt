@@ -327,7 +327,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
      */
     @Postsubmit
     @Test
-    fun screenIsAlwaysFilled() = testSpec.entireScreenCovered(testSpec.config.startRotation)
+    fun screenIsAlwaysFilled() = testSpec.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

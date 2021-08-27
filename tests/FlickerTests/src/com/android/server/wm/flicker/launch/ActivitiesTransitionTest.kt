@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
@@ -90,9 +89,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun entireScreenCovered() {
-        testSpec.entireScreenCovered(testSpec.config.startRotation)
-    }
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test

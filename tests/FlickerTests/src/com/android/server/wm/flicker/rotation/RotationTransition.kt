@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
@@ -39,8 +38,6 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     protected abstract val testApp: StandardAppHelper
 
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    protected val startingPos get() = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-    protected val endingPos get() = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
         setup {
@@ -107,10 +104,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun entireScreenCovered() {
-        testSpec.entireScreenCovered(testSpec.config.startRotation,
-            testSpec.config.endRotation, allStates = false)
-    }
+    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test
@@ -124,7 +118,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.visibleRegion(testApp.component).coversExactly(startingPos)
+            this.entry.displays.map { display ->
+                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+            }
         }
     }
 
@@ -132,7 +128,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.visibleRegion(testApp.component).coversExactly(endingPos)
+            this.entry.displays.map { display ->
+                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+            }
         }
     }
 }

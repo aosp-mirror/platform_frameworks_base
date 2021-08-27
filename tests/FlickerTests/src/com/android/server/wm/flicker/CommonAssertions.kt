@@ -36,30 +36,35 @@ fun FlickerTestParameter.navBarWindowIsVisible() {
     }
 }
 
+/**
+ * If [allStates] is true, checks if the stack space of all displays is fully covered
+ * by any visible layer, during the whole transitions
+ *
+ * Otherwise, checks if the stack space of all displays is fully covered
+ * by any visible layer, at the start and end of the transition
+ *
+ * @param allStates if all states should be checked, othersie, just initial and final
+ */
 @JvmOverloads
-fun FlickerTestParameter.entireScreenCovered(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    allStates: Boolean = true
-) {
-    val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
-    val endingBounds = WindowUtils.getDisplayBounds(endRotation)
+fun FlickerTestParameter.entireScreenCovered(allStates: Boolean = true) {
     if (allStates) {
         assertLayers {
-            if (startingBounds == endingBounds) {
-                this.coversAtLeast(startingBounds)
-            } else {
-                this.coversAtLeast(startingBounds)
-                    .then()
-                    .coversAtLeast(endingBounds)
+            this.invoke("entireScreenCovered") { entry ->
+                entry.entry.displays.forEach { display ->
+                    entry.visibleRegion().coversAtLeast(display.layerStackSpace)
+                }
             }
         }
     } else {
         assertLayersStart {
-            this.visibleRegion().coversAtLeast(startingBounds)
+            this.entry.displays.forEach { display ->
+                this.visibleRegion().coversAtLeast(display.layerStackSpace)
+            }
         }
         assertLayersEnd {
-            this.visibleRegion().coversAtLeast(endingBounds)
+            this.entry.displays.forEach { display ->
+                this.visibleRegion().coversAtLeast(display.layerStackSpace)
+            }
         }
     }
 }
