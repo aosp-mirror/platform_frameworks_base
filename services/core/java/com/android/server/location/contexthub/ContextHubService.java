@@ -28,7 +28,6 @@ import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.contexthub.V1_0.AsyncEventType;
-import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.contexthub.V1_0.TransactionResult;
@@ -200,7 +199,7 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        Pair<List<ContextHub>, List<String>> hubInfo;
+        Pair<List<ContextHubInfo>, List<String>> hubInfo;
         try {
             hubInfo = mContextHubWrapper.getHubs();
         } catch (RemoteException e) {

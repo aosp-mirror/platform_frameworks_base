@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.content.Context;
-import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.Result;
@@ -52,10 +51,10 @@ import java.util.List;
      * @return the HashMap object
      */
     /* package */
-    static HashMap<Integer, ContextHubInfo> createContextHubInfoMap(List<ContextHub> hubList) {
+    static HashMap<Integer, ContextHubInfo> createContextHubInfoMap(List<ContextHubInfo> hubList) {
         HashMap<Integer, ContextHubInfo> contextHubIdToInfoMap = new HashMap<>();
-        for (ContextHub contextHub : hubList) {
-            contextHubIdToInfoMap.put(contextHub.hubId, new ContextHubInfo(contextHub));
+        for (ContextHubInfo contextHubInfo : hubList) {
+            contextHubIdToInfoMap.put(contextHubInfo.getId(), contextHubInfo);
         }
 
         return contextHubIdToInfoMap;
