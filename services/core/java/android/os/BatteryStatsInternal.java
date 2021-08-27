@@ -16,6 +16,11 @@
 
 package android.os;
 
+import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+
+import java.util.Collection;
+
 /**
  * Battery stats local system service interface. This is used to pass internal data out of
  * BatteryStatsImpl, as well as make unchecked calls into BatteryStatsImpl.
@@ -33,6 +38,9 @@ public abstract class BatteryStatsInternal {
      */
     public abstract String[] getMobileIfaces();
 
+    /** Returns CPU times for system server thread groups. */
+    public abstract SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes();
+
     /**
      * Inform battery stats how many deferred jobs existed when the app got launched and how
      * long ago was the last job execution for the app.
@@ -41,4 +49,15 @@ public abstract class BatteryStatsInternal {
      * @param sinceLast how long in millis has it been since a job was run
      */
     public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
+
+    /**
+     * Informs battery stats of binder stats for the given work source UID.
+     */
+    public abstract void noteBinderCallStats(int workSourceUid, long incrementalBinderCallCount,
+            Collection<BinderCallsStats.CallStat> callStats);
+
+    /**
+     * Informs battery stats of native thread IDs of threads taking incoming binder calls.
+     */
+    public abstract void noteBinderThreadNativeIds(int[] binderThreadNativeTids);
 }

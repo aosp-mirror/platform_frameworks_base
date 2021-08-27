@@ -97,11 +97,6 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                /* Suppress PLAY/PAUSE toggle when phone is ringing or in-call
-                 * to avoid music playback */
-                if (getTelephonyManager().getCallState() != TelephonyManager.CALL_STATE_IDLE) {
-                    return true;  // suppress key event
-                }
             case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK:
             case KeyEvent.KEYCODE_MEDIA_STOP:

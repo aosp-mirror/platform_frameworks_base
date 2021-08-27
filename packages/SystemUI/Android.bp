@@ -14,6 +14,23 @@
 // limitations under the License.
 //
 
+package {
+    default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_packages_SystemUI_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
 java_library {
     name: "SystemUI-proto",
 
@@ -22,6 +39,10 @@ java_library {
     proto: {
         type: "nano",
     },
+
+    libs: [
+        "WindowManager-Shell-proto",
+    ],
 }
 
 java_library {
@@ -43,15 +64,17 @@ android_library {
     ],
     static_libs: [
         "WindowManager-Shell",
+        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
-	"SystemUI-statsd",
+        "SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
+        "androidx.concurrent_concurrent-futures",
         "androidx.mediarouter_mediarouter",
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
@@ -63,29 +86,41 @@ android_library {
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
-        "kotlinx-coroutines-android",
-        "kotlinx-coroutines-core",
+        "androidx.exifinterface_exifinterface",
+        "kotlinx_coroutines_android",
+        "kotlinx_coroutines",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
-        "dagger2-2.19",
-        "jsr330"
+        "dagger2",
+        "jsr330",
+        "lottie",
     ],
     manifest: "AndroidManifest.xml",
 
     kotlincflags: ["-Xjvm-default=enable"],
 
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 }
 
 filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
+        "tests/src/com/android/systemui/SysuiTestCase.java",
+        "tests/src/com/android/systemui/TestableDependency.java",
+        "tests/src/com/android/systemui/classifier/FalsingManagerFake.java",
         "tests/src/com/android/systemui/statusbar/notification/collection/NotificationEntryBuilder.java",
         "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
         "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
-        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
-        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
+        "tests/src/com/android/systemui/SysuiTestableContext.java",
+        "tests/src/com/android/systemui/utils/leaks/BaseLeakChecker.java",
+        "tests/src/com/android/systemui/utils/leaks/LeakCheckedTest.java",
+        "tests/src/com/android/systemui/**/Fake*.java",
+        "tests/src/com/android/systemui/**/Fake*.kt",
+    ],
+    exclude_srcs: [
+        "tests/src/com/android/systemui/**/*Test.java",
+        "tests/src/com/android/systemui/**/*Test.kt",
     ],
     path: "tests/src",
 }
@@ -109,6 +144,7 @@ android_library {
         "src/**/I*.aidl",
     ],
     static_libs: [
+        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUI-statsd",
@@ -118,6 +154,7 @@ android_library {
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
+        "androidx.concurrent_concurrent-futures",
         "androidx.mediarouter_mediarouter",
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
@@ -129,18 +166,22 @@ android_library {
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
+        "androidx.exifinterface_exifinterface",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
-        "androidx.test.rules", "hamcrest-library",
+        "hamcrest-library",
+        "androidx.test.rules",
+        "androidx.test.uiautomator",
         "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",
-        "dagger2-2.19",
-        "jsr330"
+        "dagger2",
+        "jsr330",
+        "WindowManager-Shell",
     ],
     libs: [
         "android.test.runner",
@@ -151,11 +192,12 @@ android_library {
         "--extra-packages",
         "com.android.systemui",
     ],
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 }
 
 android_app {
     name: "SystemUI",
+    defaults: ["platform_app_defaults"],
     static_libs: [
         "SystemUI-core",
     ],
@@ -173,6 +215,7 @@ android_app {
     kotlincflags: ["-Xjvm-default=enable"],
 
     dxflags: ["--multi-dex"],
-    required: ["privapp_whitelist_com.android.systemui"],
-
+    required: [
+        "privapp_whitelist_com.android.systemui",
+    ],
 }

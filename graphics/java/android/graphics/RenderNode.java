@@ -30,7 +30,6 @@ import android.view.View;
 import com.android.internal.util.ArrayUtils;
 
 import dalvik.annotation.optimization.CriticalNative;
-import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -273,6 +272,20 @@ public final class RenderNode {
         void positionChanged(long frameNumber, int left, int top, int right, int bottom);
 
         /**
+         * Call to apply a stretch effect to any child SurfaceControl layers
+         *
+         * TODO: Fold this into positionChanged & have HWUI do the ASurfaceControl calls?
+         *   (njawad) update to consume different stretch parameters for horizontal/vertical stretch
+         *   to ensure SkiaGLRenderEngine can also apply the same stretch to a surface
+         *
+         * @hide
+         */
+        default void applyStretch(long frameNumber, float width, float height,
+                float vecX, float vecY,
+                float maxStretchX, float maxStretchY, float childRelativeLeft,
+                float childRelativeTop, float childRelativeRight, float childRelativeBottom) { }
+
+        /**
          * Called by native on RenderThread to notify that the view is no longer in the
          * draw tree. UI thread is blocked at this point.
          *
@@ -311,6 +324,17 @@ public final class RenderNode {
         public void positionLost(long frameNumber) {
             for (PositionUpdateListener pul : mListeners) {
                 pul.positionLost(frameNumber);
+            }
+        }
+
+        @Override
+        public void applyStretch(long frameNumber, float width, float height,
+                float vecX, float vecY, float maxStretchX, float maxStretchY, float childRelativeLeft,
+                float childRelativeTop, float childRelativeRight, float childRelativeBottom) {
+            for (PositionUpdateListener pul : mListeners) {
+                pul.applyStretch(frameNumber, width, height, vecX, vecY, maxStretchX,
+                        maxStretchY, childRelativeLeft, childRelativeTop, childRelativeRight,
+                        childRelativeBottom);
             }
         }
     }
@@ -406,8 +430,7 @@ public final class RenderNode {
         }
         RecordingCanvas canvas = mCurrentRecordingCanvas;
         mCurrentRecordingCanvas = null;
-        long displayList = canvas.finishRecording();
-        nSetDisplayList(mNativeRenderNode, displayList);
+        canvas.finishRecording(this);
         canvas.recycle();
     }
 
@@ -438,7 +461,7 @@ public final class RenderNode {
      * obsolete resources after related resources are gone.
      */
     public void discardDisplayList() {
-        nSetDisplayList(mNativeRenderNode, 0);
+        nDiscardDisplayList(mNativeRenderNode);
     }
 
     /**
@@ -481,7 +504,7 @@ public final class RenderNode {
      * @param outMatrix The matrix to store the transform of the RenderNode
      */
     public void getMatrix(@NonNull Matrix outMatrix) {
-        nGetTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
+        nGetTransformMatrix(mNativeRenderNode, outMatrix.ni());
     }
 
     /**
@@ -491,7 +514,7 @@ public final class RenderNode {
      * @param outMatrix The matrix to store the inverse transform of the RenderNode
      */
     public void getInverseMatrix(@NonNull Matrix outMatrix) {
-        nGetInverseTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
+        nGetInverseTransformMatrix(mNativeRenderNode, outMatrix.ni());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -695,6 +718,38 @@ public final class RenderNode {
         throw new IllegalArgumentException("Unrecognized outline?");
     }
 
+    /** @hide */
+    public boolean clearStretch() {
+        return nClearStretch(mNativeRenderNode);
+    }
+
+    /** @hide */
+    public boolean stretch(float vecX, float vecY,
+        float maxStretchAmountX, float maxStretchAmountY) {
+        if (Float.isInfinite(vecX) || Float.isNaN(vecX)) {
+            throw new IllegalArgumentException("vecX must be a finite, non-NaN value " + vecX);
+        }
+        if (Float.isInfinite(vecY) || Float.isNaN(vecY)) {
+            throw new IllegalArgumentException("vecY must be a finite, non-NaN value " + vecY);
+        }
+
+        if (maxStretchAmountX <= 0.0f) {
+            throw new IllegalArgumentException(
+                    "The max horizontal stretch amount must be >0, got " + maxStretchAmountX);
+        }
+        if (maxStretchAmountY <= 0.0f) {
+            throw new IllegalArgumentException(
+                    "The max vertical stretch amount must be >0, got " + maxStretchAmountY);
+        }
+        return nStretch(
+                mNativeRenderNode,
+                vecX,
+                vecY,
+                maxStretchAmountX,
+                maxStretchAmountY
+        );
+    }
+
     /**
      * Checks if the RenderNode has a shadow. That is, if the combination of {@link #getElevation()}
      * and {@link #getTranslationZ()} is greater than zero, there is an {@link Outline} set with
@@ -797,7 +852,7 @@ public final class RenderNode {
      * @hide TODO Do we want this?
      */
     public boolean setStaticMatrix(Matrix matrix) {
-        return nSetStaticMatrix(mNativeRenderNode, matrix.native_instance);
+        return nSetStaticMatrix(mNativeRenderNode, matrix.ni());
     }
 
     /**
@@ -813,7 +868,7 @@ public final class RenderNode {
      */
     public boolean setAnimationMatrix(@Nullable Matrix matrix) {
         return nSetAnimationMatrix(mNativeRenderNode,
-                (matrix != null) ? matrix.native_instance : 0);
+                (matrix != null) ? matrix.ni() : 0);
     }
 
     /**
@@ -830,7 +885,7 @@ public final class RenderNode {
     @Nullable
     public Matrix getAnimationMatrix() {
         Matrix output = new Matrix();
-        if (nGetAnimationMatrix(mNativeRenderNode, output.native_instance)) {
+        if (nGetAnimationMatrix(mNativeRenderNode, output.ni())) {
             return output;
         } else {
             return null;
@@ -847,6 +902,22 @@ public final class RenderNode {
      */
     public boolean setAlpha(float alpha) {
         return nSetAlpha(mNativeRenderNode, alpha);
+    }
+
+    /**
+     * Configure the {@link android.graphics.RenderEffect} to apply to this RenderNode. This
+     * will apply a visual effect to the end result of the contents of this RenderNode before
+     * it is drawn into the destination. For example if
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, Shader.TileMode)}
+     * is provided, the contents will be drawn in a separate layer, then this layer will
+     * be blurred when this RenderNode is drawn into the destination.
+     * @param renderEffect to be applied to the RenderNode. Passing null clears all previously
+     *          configured RenderEffects
+     * @return True if the value changed, false if the new value was the same as the previous value.
+     */
+    public boolean setRenderEffect(@Nullable RenderEffect renderEffect) {
+        return nSetRenderEffect(mNativeRenderNode,
+                renderEffect != null ? renderEffect.getNativeInstance() : 0);
     }
 
     /**
@@ -1512,18 +1583,12 @@ public final class RenderNode {
 
     private static native void nEndAllAnimators(long renderNode);
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // @FastNative methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    @FastNative
-    private static native void nSetDisplayList(long renderNode, long newData);
-
-
     ///////////////////////////////////////////////////////////////////////////
     // @CriticalNative methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @CriticalNative
+    private static native void nDiscardDisplayList(long renderNode);
 
     @CriticalNative
     private static native boolean nIsValid(long renderNode);
@@ -1630,6 +1695,13 @@ public final class RenderNode {
     private static native boolean nSetOutlineNone(long renderNode);
 
     @CriticalNative
+    private static native boolean nClearStretch(long renderNode);
+
+    @CriticalNative
+    private static native boolean nStretch(long renderNode, float vecX, float vecY,
+            float maxStretchX, float maxStretchY);
+
+    @CriticalNative
     private static native boolean nHasShadow(long renderNode);
 
     @CriticalNative
@@ -1653,6 +1725,9 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nSetAlpha(long renderNode, float alpha);
+
+    @CriticalNative
+    private static native boolean nSetRenderEffect(long renderNode, long renderEffect);
 
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,

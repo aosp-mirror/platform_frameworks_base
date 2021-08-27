@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.lowstoragetest">
+     package="com.android.lowstoragetest">
     <application android:label="LowStorageTest">
         <activity android:name="LowStorageTest"
-                  android:theme="@android:style/Theme.Black.NoTitleBar">
+             android:theme="@android:style/Theme.Black.NoTitleBar"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

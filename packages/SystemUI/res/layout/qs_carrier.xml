@@ -28,22 +28,29 @@
     android:clipToPadding="false"
     android:focusable="true" >
 
-    <include
-        layout="@layout/mobile_signal_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/qs_carrier_margin_width"
-        android:visibility="gone" />
-
     <com.android.systemui.util.AutoMarqueeTextView
         android:id="@+id/qs_carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textAppearance="@style/TextAppearance.QS.Status"
+        android:textAppearance="@style/TextAppearance.QS.Status.Carriers"
         android:textDirection="locale"
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:maxEms="7"/>
+
+    <View
+        android:id="@+id/spacer"
+        android:layout_width="@dimen/qs_carrier_margin_width"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+    />
+
+    <include
+        layout="@layout/mobile_signal_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_carrier_margin_width"
+        android:visibility="gone" />
 
 </com.android.systemui.qs.carrier.QSCarrier>

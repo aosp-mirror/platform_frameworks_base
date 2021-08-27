@@ -24,8 +24,4 @@
     <fraction name="battery_subpixel_smoothing_right">10%</fraction>
 
     <dimen name="battery_margin_bottom">1px</dimen>
-
-    <!-- The dimensions to user for picture-in-picture action buttons. -->
-    <dimen name="picture_in_picture_button_width">100dp</dimen>
-    <dimen name="picture_in_picture_button_start_margin">-50dp</dimen>
 </resources>

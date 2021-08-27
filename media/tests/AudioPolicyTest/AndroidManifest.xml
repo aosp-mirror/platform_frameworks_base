@@ -25,7 +25,7 @@
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:label="@string/app_name" android:name="AudioPolicyTest"
-                  android:screenOrientation="landscape">
+                  android:screenOrientation="landscape" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER"/>

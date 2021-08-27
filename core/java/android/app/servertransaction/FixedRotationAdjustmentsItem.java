@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -74,7 +75,7 @@ public class FixedRotationAdjustmentsItem extends ClientTransactionItem {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

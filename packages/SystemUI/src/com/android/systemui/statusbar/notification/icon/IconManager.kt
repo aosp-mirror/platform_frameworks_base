@@ -95,11 +95,6 @@ class IconManager @Inject constructor(
         // Construct the shelf icon view.
         val shelfIcon = iconBuilder.createIconView(entry)
         shelfIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
-
-        // TODO: This doesn't belong here
-        shelfIcon.setOnVisibilityChangedListener { newVisibility: Int ->
-            entry.setShelfIconVisible(newVisibility == View.VISIBLE)
-        }
         shelfIcon.visibility = View.INVISIBLE
 
         // Construct the aod icon view.
@@ -255,7 +250,7 @@ class IconManager @Inject constructor(
     private fun createPeopleAvatar(entry: NotificationEntry): Icon? {
         var ic: Icon? = null
 
-        val shortcut = entry.ranking.shortcutInfo
+        val shortcut = entry.ranking.conversationShortcutInfo
         if (shortcut != null) {
             ic = launcherApps.getShortcutIcon(shortcut)
         }

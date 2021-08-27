@@ -1101,7 +1101,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     Animator loadAnimator(Fragment fragment, int transit, boolean enter,
             int transitionStyle) {
         Animator animObj = fragment.onCreateAnimator(transit, enter, fragment.getNextAnim());

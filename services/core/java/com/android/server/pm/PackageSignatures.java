@@ -21,12 +21,13 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -52,22 +53,20 @@ class PackageSignatures {
         mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
     }
 
-    void writeXml(XmlSerializer serializer, String tagName,
+    void writeXml(TypedXmlSerializer serializer, String tagName,
             ArrayList<Signature> writtenSignatures) throws IOException {
         if (mSigningDetails.signatures == null) {
             return;
         }
         serializer.startTag(null, tagName);
-        serializer.attribute(null, "count", Integer.toString(mSigningDetails.signatures.length));
-        serializer.attribute(null, "schemeVersion",
-                Integer.toString(mSigningDetails.signatureSchemeVersion));
+        serializer.attributeInt(null, "count", mSigningDetails.signatures.length);
+        serializer.attributeInt(null, "schemeVersion", mSigningDetails.signatureSchemeVersion);
         writeCertsListXml(serializer, writtenSignatures, mSigningDetails.signatures, false);
 
         // if we have past signer certificate information, write it out
         if (mSigningDetails.pastSigningCertificates != null) {
             serializer.startTag(null, "pastSigs");
-            serializer.attribute(null, "count",
-                    Integer.toString(mSigningDetails.pastSigningCertificates.length));
+            serializer.attributeInt(null, "count", mSigningDetails.pastSigningCertificates.length);
             writeCertsListXml(serializer, writtenSignatures,
                     mSigningDetails.pastSigningCertificates, true);
             serializer.endTag(null, "pastSigs");
@@ -75,8 +74,9 @@ class PackageSignatures {
         serializer.endTag(null, tagName);
     }
 
-    private void writeCertsListXml(XmlSerializer serializer, ArrayList<Signature> writtenSignatures,
-            Signature[] signatures, boolean isPastSigs) throws IOException {
+    private void writeCertsListXml(TypedXmlSerializer serializer,
+            ArrayList<Signature> writtenSignatures, Signature[] signatures, boolean isPastSigs)
+            throws IOException {
         for (int i=0; i<signatures.length; i++) {
             serializer.startTag(null, "cert");
             final Signature sig = signatures[i];
@@ -86,48 +86,44 @@ class PackageSignatures {
             for (j=0; j<numWritten; j++) {
                 Signature writtenSig = writtenSignatures.get(j);
                 if (writtenSig.hashCode() == sigHash && writtenSig.equals(sig)) {
-                    serializer.attribute(null, "index", Integer.toString(j));
+                    serializer.attributeInt(null, "index", j);
                     break;
                 }
             }
             if (j >= numWritten) {
                 writtenSignatures.add(sig);
-                serializer.attribute(null, "index", Integer.toString(numWritten));
-                serializer.attribute(null, "key", sig.toCharsString());
+                serializer.attributeInt(null, "index", numWritten);
+                sig.writeToXmlAttributeBytesHex(serializer, null, "key");
             }
             // The flags attribute is only written for previous signatures to represent the
             // capabilities the developer wants to grant to the previous signing certificates.
             if (isPastSigs) {
-                serializer.attribute(null, "flags", Integer.toString(sig.getFlags()));
+                serializer.attributeInt(null, "flags", sig.getFlags());
             }
             serializer.endTag(null, "cert");
         }
     }
 
-    void readXml(XmlPullParser parser, ArrayList<Signature> readSignatures)
+    void readXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures)
             throws IOException, XmlPullParserException {
         PackageParser.SigningDetails.Builder builder =
                 new PackageParser.SigningDetails.Builder();
 
-        String countStr = parser.getAttributeValue(null, "count");
-        if (countStr == null) {
+        final int count = parser.getAttributeInt(null, "count", -1);
+        if (count == -1) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Error in package manager settings: <sigs> has"
                        + " no count at " + parser.getPositionDescription());
             XmlUtils.skipCurrentTag(parser);
             return;
         }
-        final int count = Integer.parseInt(countStr);
 
-        String schemeVersionStr = parser.getAttributeValue(null, "schemeVersion");
-        int signatureSchemeVersion;
-        if (schemeVersionStr == null) {
+        final int signatureSchemeVersion = parser.getAttributeInt(null, "schemeVersion",
+                SignatureSchemeVersion.UNKNOWN);
+        if (signatureSchemeVersion == SignatureSchemeVersion.UNKNOWN) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Error in package manager settings: <sigs> has no schemeVersion at "
                         + parser.getPositionDescription());
-            signatureSchemeVersion = SignatureSchemeVersion.UNKNOWN;
-        } else {
-            signatureSchemeVersion = Integer.parseInt(schemeVersionStr);
         }
         builder.setSignatureSchemeVersion(signatureSchemeVersion);
         ArrayList<Signature> signatureList = new ArrayList<>();
@@ -150,7 +146,7 @@ class PackageSignatures {
         }
     }
 
-    private int readCertsListXml(XmlPullParser parser, ArrayList<Signature> readSignatures,
+    private int readCertsListXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
             ArrayList<Signature> signatures, int count, boolean isPastSigs,
             PackageParser.SigningDetails.Builder builder)
             throws IOException, XmlPullParserException {
@@ -169,17 +165,25 @@ class PackageSignatures {
             String tagName = parser.getName();
             if (tagName.equals("cert")) {
                 if (pos < count) {
-                    String index = parser.getAttributeValue(null, "index");
-                    if (index != null) {
+                    final int index = parser.getAttributeInt(null, "index", -1);
+                    if (index != -1) {
                         boolean signatureParsed = false;
                         try {
-                            int idx = Integer.parseInt(index);
-                            String key = parser.getAttributeValue(null, "key");
+                            final byte[] key = parser.getAttributeBytesHex(null, "key", null);
                             if (key == null) {
-                                if (idx >= 0 && idx < readSignatures.size()) {
-                                    Signature sig = readSignatures.get(idx);
+                                if (index >= 0 && index < readSignatures.size()) {
+                                    Signature sig = readSignatures.get(index);
                                     if (sig != null) {
-                                        signatures.add(sig);
+                                        // An app using a shared signature in its signing lineage
+                                        // can have unique capabilities assigned to this previous
+                                        // signer; create a new instance of this Signature to ensure
+                                        // its flags do not overwrite those of the instance from
+                                        // readSignatures.
+                                        if (isPastSigs) {
+                                            signatures.add(new Signature(sig));
+                                        } else {
+                                            signatures.add(sig);
+                                        }
                                         signatureParsed = true;
                                     } else {
                                         PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -197,7 +201,7 @@ class PackageSignatures {
                                 // Create the signature first to prevent adding null entries to the
                                 // output List if the key value is invalid.
                                 Signature sig = new Signature(key);
-                                while (readSignatures.size() < idx) {
+                                while (readSignatures.size() < index) {
                                     readSignatures.add(null);
                                 }
                                 readSignatures.add(sig);
@@ -218,10 +222,9 @@ class PackageSignatures {
                         }
 
                         if (isPastSigs) {
-                            String flagsStr = parser.getAttributeValue(null, "flags");
-                            if (flagsStr != null) {
+                            final int flagsValue = parser.getAttributeInt(null, "flags", -1);
+                            if (flagsValue != -1) {
                                 try {
-                                    int flagsValue = Integer.parseInt(flagsStr);
                                     // only modify the flags if the signature of the previous signer
                                     // was successfully parsed above
                                     if (signatureParsed) {
@@ -236,7 +239,7 @@ class PackageSignatures {
                                 } catch (NumberFormatException e) {
                                     PackageManagerService.reportSettingsProblem(Log.WARN,
                                             "Error in package manager settings: <cert> "
-                                                    + "flags " + flagsStr + " is not a number at "
+                                                    + "flags " + flagsValue + " is not a number at "
                                                     + parser.getPositionDescription());
                                 }
                             } else {
@@ -261,8 +264,8 @@ class PackageSignatures {
             } else if (tagName.equals("pastSigs")) {
                 if (!isPastSigs) {
                     // we haven't encountered pastSigs yet, go ahead
-                    String countStr = parser.getAttributeValue(null, "count");
-                    if (countStr == null) {
+                    final int pastSigsCount = parser.getAttributeInt(null, "count", -1);
+                    if (pastSigsCount == -1) {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: <pastSigs> has"
                                         + " no count at " + parser.getPositionDescription());
@@ -270,7 +273,6 @@ class PackageSignatures {
                         continue;
                     }
                     try {
-                        final int pastSigsCount = Integer.parseInt(countStr);
                         ArrayList<Signature> pastSignatureList = new ArrayList<>();
                         int pastSigsPos = readCertsListXml(parser, readSignatures,
                                 pastSignatureList,
@@ -288,7 +290,7 @@ class PackageSignatures {
                     } catch (NumberFormatException e) {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: <pastSigs> "
-                                        + "count " + countStr + " is not a number at "
+                                        + "count " + pastSigsCount + " is not a number at "
                                         + parser.getPositionDescription());
                     }
                 } else {
@@ -309,7 +311,7 @@ class PackageSignatures {
 
     @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer(128);
+        StringBuilder buf = new StringBuilder(128);
         buf.append("PackageSignatures{");
         buf.append(Integer.toHexString(System.identityHashCode(this)));
         buf.append(" version:");

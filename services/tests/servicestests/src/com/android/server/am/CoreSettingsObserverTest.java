@@ -23,7 +23,7 @@ import static com.android.server.am.ActivityManagerService.Injector;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -68,6 +68,7 @@ public class CoreSettingsObserverTest {
 
     private ActivityManagerService mAms;
     @Mock private Context mContext;
+    @Mock private Resources mResources;
 
     private MockContentResolver mContentResolver;
     private CoreSettingsObserver mCoreSettingsObserver;
@@ -94,7 +95,10 @@ public class CoreSettingsObserverTest {
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
-        when(mContext.getResources()).thenReturn(mock(Resources.class));
+        when(mContext.getResources()).thenReturn(mResources);
+        // To prevent NullPointerException at the constructor of ActivityManagerConstants.
+        when(mResources.getStringArray(anyInt())).thenReturn(new String[0]);
+        when(mResources.getIntArray(anyInt())).thenReturn(new int[0]);
 
         mAms = new ActivityManagerService(new TestInjector(mContext),
                 mServiceThreadRule.getThread());

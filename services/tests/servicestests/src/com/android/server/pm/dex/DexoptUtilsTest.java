@@ -134,7 +134,7 @@ public class DexoptUtilsTest {
 
     private List<SharedLibraryInfo> createMockSharedLibrary(String [] sharedLibrary) {
         SharedLibraryInfo info = new SharedLibraryInfo(null, null, Arrays.asList(sharedLibrary),
-                null, 0L, SharedLibraryInfo.TYPE_STATIC, null, null, null);
+                null, 0L, SharedLibraryInfo.TYPE_STATIC, null, null, null, false /* isNative */);
         ArrayList<SharedLibraryInfo> libraries = new ArrayList<>();
         libraries.add(info);
         return libraries;

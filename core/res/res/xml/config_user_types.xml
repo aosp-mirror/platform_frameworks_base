@@ -40,7 +40,7 @@ The following example modifies two AOSP user types (the FULL user android.os.use
 and the PROFILE user android.os.usertype.profile.MANAGED) and creates a new PROFILE user type
 (com.example.profilename):
 
-<user-types>
+<user-types version="0">
     <full-type name="android.os.usertype.full.SECONDARY" >
         <default-restrictions no_sms="true" />
     </full-type>
@@ -65,6 +65,11 @@ and the PROFILE user android.os.usertype.profile.MANAGED) and creates a new PROF
     <profile-type
         name="com.example.profilename"
         max-allowed-per-parent="2" />
+
+    <change-user-type
+        from="android.os.usertype.profile.MANAGED"
+        to="com.example.profilename"
+        whenVersionLeq="1" />
 </user-types>
 
 Mandatory attributes:
@@ -92,6 +97,10 @@ ignored and will instead obey this configuration.
 If this file is updated, the properties of any pre-existing user types will be updated too.
 Note, however, that default-restrictions refers to the restrictions applied at the time of user
 creation; therefore, the active restrictions of any pre-existing users will not be updated.
+
+The 'change-user-type' tag should be used in conjunction with the 'version' property of
+'user-types'. It defines a type change for all pre-existing users of 'from' type to the new 'to'
+type, if the former 'user-type's version of device is less than or equal to 'whenVersionLeq'.
 
 -->
 <user-types>

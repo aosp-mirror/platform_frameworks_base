@@ -19,6 +19,7 @@
 
     <application android:label="@string/app_name">
         <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.mediaroutertest.MediaRouter2ManagerTestActivity" />
         <service android:name=".StubMediaRoute2ProviderService"
                  android:exported="true">
             <intent-filter>
@@ -27,7 +28,7 @@
         </service>
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.mediaroutertest"
                      android:label="MediaRouter Tests"/>
 </manifest>

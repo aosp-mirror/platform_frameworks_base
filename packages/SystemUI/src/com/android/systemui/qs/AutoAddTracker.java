@@ -57,12 +57,18 @@ public class AutoAddTracker implements UserAwareController {
         mContext = context;
         mUserId = userId;
         mAutoAdded = new ArraySet<>(getAdded());
+    }
+
+    /**
+     * Init method must be called after construction to start listening
+     */
+    public void initialize() {
         // TODO: remove migration code and shared preferences keys after P release
         if (mUserId == UserHandle.USER_SYSTEM) {
             for (String[] convertPref : CONVERT_PREFS) {
-                if (Prefs.getBoolean(context, convertPref[0], false)) {
+                if (Prefs.getBoolean(mContext, convertPref[0], false)) {
                     setTileAdded(convertPref[1]);
-                    Prefs.remove(context, convertPref[0]);
+                    Prefs.remove(mContext, convertPref[0]);
                 }
             }
         }

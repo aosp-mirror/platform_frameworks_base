@@ -254,21 +254,28 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         int mCleanDateFormatInvokations;
         private int mCounter;
 
-        Uri getUri() {
-            return mSliceUri;
-        }
+        TestableKeyguardSliceProvider() {
+            super();
 
-        @Override
-        protected void inject() {
             mAlarmManager = KeyguardSliceProviderTest.this.mAlarmManager;
             mContentResolver = KeyguardSliceProviderTest.this.mContentResolver;
             mZenModeController = KeyguardSliceProviderTest.this.mZenModeController;
-            mMediaWakeLock = KeyguardSliceProviderTest.this.mMediaWakeLock;
             mDozeParameters = KeyguardSliceProviderTest.this.mDozeParameters;
             mNextAlarmController = KeyguardSliceProviderTest.this.mNextAlarmController;
             mStatusBarStateController = KeyguardSliceProviderTest.this.mStatusBarStateController;
             mKeyguardBypassController = KeyguardSliceProviderTest.this.mKeyguardBypassController;
             mMediaManager = KeyguardSliceProviderTest.this.mNotificationMediaManager;
+        }
+
+        @Override
+        public boolean onCreateSliceProvider() {
+            boolean result = super.onCreateSliceProvider();
+            mMediaWakeLock = KeyguardSliceProviderTest.this.mMediaWakeLock;
+            return result;
+        }
+
+        Uri getUri() {
+            return mSliceUri;
         }
 
         @Override

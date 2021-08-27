@@ -1,0 +1,19 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
+        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
+        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
+        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+      ]
+    }
+  ]
+}

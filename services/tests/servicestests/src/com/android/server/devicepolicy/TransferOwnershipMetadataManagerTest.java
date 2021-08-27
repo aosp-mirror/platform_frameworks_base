@@ -25,19 +25,19 @@ import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.T
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_TARGET_COMPONENT;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_USER_ID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Environment;
-import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Injector;
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Metadata;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -51,12 +51,14 @@ import java.nio.file.Paths;
 /**
 * Unit tests for {@link TransferOwnershipMetadataManager}.
  *
- * bit FrameworksServicesTests:com.android.server.devicepolicy.TransferOwnershipMetadataManagerTest
- * runtest -x frameworks/base/services/tests/servicestests/src/com/android/server/devicepolicy/TransferOwnershipMetadataManagerTest.java
-* */
-
+ * <p>Run this test with:
+ *
+ * <pre><code>
+ atest FrameworksServicesTests:com.android.server.devicepolicy.TransferOwnershipMetadataManagerTest
+ * </code></pre>
+ */
 @RunWith(AndroidJUnit4.class)
-public class TransferOwnershipMetadataManagerTest {
+public final class TransferOwnershipMetadataManagerTest {
     private final static String TAG = TransferOwnershipMetadataManagerTest.class.getName();
     private final static String SOURCE_COMPONENT =
             "com.dummy.admin.package/com.dummy.admin.package.SourceClassName";
@@ -77,28 +79,28 @@ public class TransferOwnershipMetadataManagerTest {
     @Test
     public void testSave() {
         TransferOwnershipMetadataManager paramsManager = getOwnerTransferParams();
-        assertTrue(paramsManager.saveMetadataFile(TEST_PARAMS));
-        assertTrue(paramsManager.metadataFileExists());
+        assertThat(paramsManager.saveMetadataFile(TEST_PARAMS)).isTrue();
+        assertThat(paramsManager.metadataFileExists()).isTrue();
     }
 
     @Test
+    @Ignore
     public void testFileContentValid() {
         TransferOwnershipMetadataManager paramsManager = getOwnerTransferParams();
-        assertTrue(paramsManager.saveMetadataFile(TEST_PARAMS));
+        assertThat(paramsManager.saveMetadataFile(TEST_PARAMS)).isTrue();
         Path path = Paths.get(new File(mMockInjector.getOwnerTransferMetadataDir(),
                 OWNER_TRANSFER_METADATA_XML).getAbsolutePath());
         try {
             String contents = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
-            assertEquals(
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                    + "<" + TAG_USER_ID + ">" + USER_ID + "</" + TAG_USER_ID + ">\n"
-                    + "<" + TAG_SOURCE_COMPONENT + ">" + SOURCE_COMPONENT + "</"
-                        + TAG_SOURCE_COMPONENT + ">\n"
-                    + "<" + TAG_TARGET_COMPONENT + ">" + TARGET_COMPONENT + "</"
-                        + TAG_TARGET_COMPONENT + ">\n"
-                    + "<" + TAG_ADMIN_TYPE + ">" + ADMIN_TYPE_DEVICE_OWNER + "</"
-                        + TAG_ADMIN_TYPE + ">\n",
-                contents);
+            assertThat(contents).isEqualTo(
+                    "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                            + "<" + TAG_USER_ID + ">" + USER_ID + "</" + TAG_USER_ID + ">\n"
+                            + "<" + TAG_SOURCE_COMPONENT + ">" + SOURCE_COMPONENT + "</"
+                            + TAG_SOURCE_COMPONENT + ">\n"
+                            + "<" + TAG_TARGET_COMPONENT + ">" + TARGET_COMPONENT + "</"
+                            + TAG_TARGET_COMPONENT + ">\n"
+                            + "<" + TAG_ADMIN_TYPE + ">" + ADMIN_TYPE_DEVICE_OWNER + "</"
+                            + TAG_ADMIN_TYPE + ">\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,7 +126,7 @@ public class TransferOwnershipMetadataManagerTest {
             Log.d(TAG, "testLoad: failed to get canonical file");
         }
         paramsManager.saveMetadataFile(TEST_PARAMS);
-        assertEquals(TEST_PARAMS, paramsManager.loadMetadataFile());
+        assertThat(paramsManager.loadMetadataFile()).isEqualTo(TEST_PARAMS);
     }
 
     @Test
@@ -132,7 +134,7 @@ public class TransferOwnershipMetadataManagerTest {
         TransferOwnershipMetadataManager paramsManager = getOwnerTransferParams();
         paramsManager.saveMetadataFile(TEST_PARAMS);
         paramsManager.deleteMetadataFile();
-        assertFalse(paramsManager.metadataFileExists());
+        assertThat(paramsManager.metadataFileExists()).isFalse();
     }
 
     @After

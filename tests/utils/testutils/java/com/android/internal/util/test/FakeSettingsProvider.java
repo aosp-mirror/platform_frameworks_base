@@ -92,6 +92,14 @@ public class FakeSettingsProvider extends MockContentProvider {
     }
 
     /**
+     * Creates a {@link org.junit.rules.TestRule} that makes sure {@link #clearSettingsProvider()}
+     * is triggered before and after each test.
+     */
+    public static FakeSettingsProviderRule rule() {
+        return new FakeSettingsProviderRule();
+    }
+
+    /**
      * This needs to be called before and after using the FakeSettingsProvider class.
      */
     public static void clearSettingsProvider() {

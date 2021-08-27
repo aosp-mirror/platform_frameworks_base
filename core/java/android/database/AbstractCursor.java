@@ -24,6 +24,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,6 +87,9 @@ public abstract class AbstractCursor implements CrossProcessCursor {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Bundle mExtras = Bundle.EMPTY;
+
+    /** CloseGuard to detect leaked cursor **/
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /* -------------------------------------------------------- */
     /* These need to be implemented by subclasses */
@@ -179,6 +184,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         mClosed = true;
         mContentObservable.unregisterAll();
         onDeactivateOrClose();
+        mCloseGuard.close();
     }
 
     /**
@@ -218,6 +224,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Implementation */
     public AbstractCursor() {
         mPos = -1;
+        mCloseGuard.open("close");
     }
 
     @Override
@@ -521,6 +528,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             mContentResolver.unregisterContentObserver(mSelfObserver);
         }
         try {
+            if (mCloseGuard != null) mCloseGuard.warnIfOpen();
             if (!mClosed) close();
         } catch(Exception e) { }
     }

@@ -46,6 +46,13 @@ import java.util.List;
  * at {@link TriggerEventListener}. {@link Sensor#TYPE_SIGNIFICANT_MOTION}
  * is an example of a trigger sensor.
  * </p>
+ * <p>
+ * In order to access sensor data at high sampling rates (i.e. greater than 200 Hz
+ * for {@link SensorEventListener} and greater than {@link SensorDirectChannel#RATE_NORMAL}
+ * for {@link SensorDirectChannel}), apps must declare
+ * the {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission
+ * in their AndroidManifest.xml file.
+ * </p>
  * <pre class="prettyprint">
  * public class SensorActivity extends Activity implements SensorEventListener {
  *     private final SensorManager mSensorManager;
@@ -399,7 +406,9 @@ public abstract class SensorManager {
      * Use this method to get the list of available sensors of a certain type.
      * Make multiple calls to get sensors of different types or use
      * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all the
-     * sensors.
+     * sensors. Note that the {@link android.hardware.Sensor#getName()} is
+     * expected to yield a value that is unique across any sensors that return
+     * the same value for {@link android.hardware.Sensor#getType()}.
      *
      * <p class="note">
      * NOTE: Both wake-up and non wake-up sensors matching the given type are

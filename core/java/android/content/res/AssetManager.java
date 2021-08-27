@@ -28,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.loader.ResourcesLoader;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.ArraySet;
 import android.util.Log;
@@ -42,6 +43,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -549,7 +551,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -730,7 +734,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -832,6 +838,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @Nullable
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
@@ -955,7 +962,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open(String, int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @NonNull InputStream openNonAsset(@NonNull String fileName, int accessMode)
             throws IOException {
         return openNonAsset(0, fileName, accessMode);
@@ -968,7 +975,7 @@ public final class AssetManager implements AutoCloseable {
      * @param fileName Name of the asset to retrieve.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName)
             throws IOException {
         return openNonAsset(cookie, fileName, ACCESS_STREAMING);
@@ -1058,7 +1065,7 @@ public final class AssetManager implements AutoCloseable {
             XmlResourceParser parser = block.newParser();
             // If openXmlBlockAsset doesn't throw, it will always return an XmlBlock object with
             // a valid native pointer, which makes newParser always return non-null. But let's
-            // be paranoid.
+            // be careful.
             if (parser == null) {
                 throw new AssertionError("block.newParser() returned a null parser");
             }
@@ -1105,7 +1112,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
@@ -1128,7 +1135,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
             @NonNull int[] outIndices) {
@@ -1144,7 +1151,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
             @NonNull int[] outValues, @NonNull int[] outIndices) {
         Objects.requireNonNull(parser, "parser");
@@ -1172,9 +1179,12 @@ public final class AssetManager implements AutoCloseable {
 
     void releaseTheme(long themePtr) {
         synchronized (this) {
-            nativeThemeDestroy(themePtr);
             decRefsLocked(themePtr);
         }
+    }
+
+    static long getThemeFreeFunction() {
+        return nativeGetThemeFreeFunction();
     }
 
     void applyStyleToTheme(long themePtr, @StyleRes int resId, boolean force) {
@@ -1186,7 +1196,32 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    AssetManager rebaseTheme(long themePtr, @NonNull AssetManager newAssetManager,
+            @StyleRes int[] styleIds, @StyleRes boolean[] force, int count) {
+        // Exchange ownership of the theme with the new asset manager.
+        if (this != newAssetManager) {
+            synchronized (this) {
+                ensureValidLocked();
+                decRefsLocked(themePtr);
+            }
+            synchronized (newAssetManager) {
+                newAssetManager.ensureValidLocked();
+                newAssetManager.incRefsLocked(themePtr);
+            }
+        }
+
+        try {
+            synchronized (newAssetManager) {
+                newAssetManager.ensureValidLocked();
+                nativeThemeRebase(newAssetManager.mObject, themePtr, styleIds, force, count);
+            }
+        } finally {
+            Reference.reachabilityFence(newAssetManager);
+        }
+        return newAssetManager;
+    }
+
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void setThemeTo(long dstThemePtr, @NonNull AssetManager srcAssetManager, long srcThemePtr) {
         synchronized (this) {
             ensureValidLocked();
@@ -1553,12 +1588,13 @@ public final class AssetManager implements AutoCloseable {
 
     // Theme related native methods
     private static native long nativeThemeCreate(long ptr);
-    private static native void nativeThemeDestroy(long themePtr);
+    private static native long nativeGetThemeFreeFunction();
     private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
             boolean force);
+    private static native void nativeThemeRebase(long ptr, long themePtr, @NonNull int[] styleIds,
+            @NonNull boolean[] force, int styleSize);
     private static native void nativeThemeCopy(long dstAssetManagerPtr, long dstThemePtr,
             long srcAssetManagerPtr, long srcThemePtr);
-    static native void nativeThemeClear(long themePtr);
     private static native int nativeThemeGetAttributeValue(long ptr, long themePtr,
             @AttrRes int resId, @NonNull TypedValue outValue, boolean resolve);
     private static native void nativeThemeDump(long ptr, long themePtr, int priority, String tag,
@@ -1573,7 +1609,6 @@ public final class AssetManager implements AutoCloseable {
     private static native long nativeAssetGetLength(long assetPtr);
     private static native long nativeAssetGetRemainingLength(long assetPtr);
 
-    private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
     private static native @Nullable Map nativeGetOverlayableMap(long ptr,
             @NonNull String packageName);
     private static native @Nullable String nativeGetOverlayablesToString(long ptr,

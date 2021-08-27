@@ -17,35 +17,43 @@
 package com.android.server.testutils
 
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.mockito.stubbing.Stubber
 
-// TODO(chiuwinson): Move this entire file to a shared utility module
-// TODO(b/135203078): De-dupe utils added for overlays vs package refactor
 object MockitoUtils {
     val ANSWER_THROWS = Answer<Any?> {
         when (val name = it.method.name) {
-            "toString" -> return@Answer Answers.CALLS_REAL_METHODS.answer(it)
+            "toString" -> return@Answer try {
+                Answers.CALLS_REAL_METHODS.answer(it)
+            } catch (e: Exception) {
+                "failure calling toString"
+            }
             else -> {
                 val arguments = it.arguments
                         ?.takeUnless { it.isEmpty() }
-                        ?.mapIndexed { index, arg ->
-                            try {
-                                arg?.toString()
-                            } catch (e: Exception) {
-                                "toString[$index] threw ${e.message}"
-                            }
-                        }
-                        ?.joinToString()
-                        ?.let {
-                            "with $it"
-                        }
+                        ?.mapIndexed { index, arg -> arg.attemptToString(index) }
+                        ?.joinToString { it.attemptToString(null) }
+                        ?.let { "with $it" }
                         .orEmpty()
 
                 throw UnsupportedOperationException("${it.mock::class.java.simpleName}#$name " +
                         "$arguments should not be called")
+            }
+        }
+    }
+
+    // Sometimes mocks won't have a toString method, so try-catch and return some default
+    private fun Any?.attemptToString(id: Any? = null): String {
+        return try {
+            toString()
+        } catch (e: Exception) {
+            if (id == null) {
+                e.message ?: "ERROR"
+            } else {
+                "$id ${e.message}"
             }
         }
     }
@@ -55,7 +63,7 @@ inline fun <reified T> mock(block: T.() -> Unit = {}) = Mockito.mock(T::class.ja
 
 fun <T> spy(value: T, block: T.() -> Unit = {}) = Mockito.spy(value).apply(block)
 
-fun <Type> Stubber.whenever(mock: Type) = Mockito.`when`(mock)
+fun <Type> Stubber.whenever(mock: Type) = this.`when`(mock)
 fun <Type : Any?> whenever(mock: Type) = Mockito.`when`(mock)
 
 @Suppress("UNCHECKED_CAST")
@@ -64,7 +72,7 @@ fun <Type : Any?> whenever(mock: Type, block: InvocationOnMock.() -> Any?) =
 
 fun whenever(mock: Unit) = Mockito.`when`(mock).thenAnswer { }
 
-inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
+inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit = {}): T {
     val swappingAnswer = object : Answer<Any?> {
         var delegate: Answer<*> = Answers.RETURNS_DEFAULTS
 
@@ -81,4 +89,28 @@ inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
             }
 }
 
-inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit) = spyThrowOnUnmocked<T>(null, block)
+inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit = {}) =
+        spyThrowOnUnmocked<T>(null, block)
+
+inline fun <reified T : Any> nullable() = ArgumentMatchers.nullable(T::class.java)
+
+/**
+ * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+
+/**
+ * Wrapper around [Mockito.any] for generic types.
+ */
+inline fun <reified T> any() = any(T::class.java)
+
+/**
+ * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> eq(obj: T): T = Mockito.eq<T>(obj)

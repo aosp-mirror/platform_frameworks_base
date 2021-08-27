@@ -24,7 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Various utilities related to HDMI CEC.
  *
- * TODO(b/110094868): unhide for Q
  * @hide
  */
 public final class HdmiUtils {
@@ -84,7 +83,6 @@ public final class HdmiUtils {
     }
 
     /**
-     * TODO(b/110094868): unhide for Q
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -95,49 +93,49 @@ public final class HdmiUtils {
     public @interface HdmiAddressRelativePosition {}
     /**
      * HDMI relative position is not determined.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_UNKNOWN = 0;
     /**
      * HDMI relative position: directly blow the device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_DIRECTLY_BELOW = 1;
     /**
      * HDMI relative position: indirectly below the device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_BELOW = 2;
     /**
      * HDMI relative position: the same device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_SAME = 3;
     /**
      * HDMI relative position: directly above the device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_DIRECTLY_ABOVE = 4;
     /**
      * HDMI relative position: indirectly above the device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_ABOVE = 5;
     /**
      * HDMI relative position: directly below a same device.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_SIBLING = 6;
     /**
      * HDMI relative position: different branch.
-     * TODO(b/110094868): unhide for Q
+     *
      * @hide
      */
     public static final int HDMI_RELATIVE_POSITION_DIFFERENT_BRANCH = 7;

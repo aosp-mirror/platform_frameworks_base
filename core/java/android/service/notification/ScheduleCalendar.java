@@ -57,25 +57,18 @@ public class ScheduleCalendar {
     }
 
     /**
-     * Sets next alarm of the schedule if the saved next alarm has passed or is further
-     * in the future than given nextAlarm
+     * Sets next alarm of the schedule
      * @param now current time in milliseconds
      * @param nextAlarm time of next alarm in milliseconds
      */
     public void maybeSetNextAlarm(long now, long nextAlarm) {
         if (mSchedule != null && mSchedule.exitAtAlarm) {
-            // alarm canceled
             if (nextAlarm == 0) {
+                // alarm canceled
                 mSchedule.nextAlarm = 0;
-            }
-            // only allow alarms in the future
-            if (nextAlarm > now) {
-                if (mSchedule.nextAlarm == 0 || mSchedule.nextAlarm < now) {
-                    mSchedule.nextAlarm = nextAlarm;
-                } else {
-                    // store earliest alarm
-                    mSchedule.nextAlarm = Math.min(mSchedule.nextAlarm, nextAlarm);
-                }
+            } else if (nextAlarm > now) {
+                // only allow alarms in the future
+                mSchedule.nextAlarm = nextAlarm;
             } else if (mSchedule.nextAlarm < now) {
                 if (DEBUG) {
                     Log.d(TAG, "All alarms are in the past " + mSchedule.nextAlarm);

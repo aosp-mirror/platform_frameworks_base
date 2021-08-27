@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.controller
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.IBinder
@@ -28,19 +27,21 @@ import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 @VisibleForTesting
 open class ControlsBindingControllerImpl @Inject constructor(
     private val context: Context,
     @Background private val backgroundExecutor: DelayableExecutor,
-    private val lazyController: Lazy<ControlsController>
+    private val lazyController: Lazy<ControlsController>,
+    userTracker: UserTracker
 ) : ControlsBindingController {
 
     companion object {
@@ -49,9 +50,14 @@ open class ControlsBindingControllerImpl @Inject constructor(
         private const val SUGGESTED_STRUCTURES = 6L
         private const val SUGGESTED_CONTROLS_REQUEST =
             ControlsControllerImpl.SUGGESTED_CONTROLS_PER_STRUCTURE * SUGGESTED_STRUCTURES
+
+        private val emptyCallback = object : ControlsBindingController.LoadCallback {
+            override fun accept(controls: List<Control>) {}
+            override fun error(message: String) {}
+        }
     }
 
-    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
+    private var currentUser = userTracker.userHandle
 
     override val currentUserId: Int
         get() = currentUser.identifier
@@ -283,7 +289,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     }
 
     private inner class LoadSubscriber(
-        val callback: ControlsBindingController.LoadCallback,
+        var callback: ControlsBindingController.LoadCallback,
         val requestLimit: Long
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
@@ -337,6 +343,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
             if (isTerminated.get()) return
 
             _loadCancelInternal = {}
+
+            // Reassign the callback to clear references to other areas of code. Binders such as
+            // this may not be GC'd right away, so do not hold onto these references.
+            callback = emptyCallback
             currentProvider?.cancelLoadTimeout()
 
             backgroundExecutor.execute {

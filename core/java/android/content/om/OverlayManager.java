@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.os.Build;
 import android.os.Process;
@@ -90,7 +90,7 @@ public class OverlayManager {
      * java.lang.IllegalStateException}, which existed in the source prior to R.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
 
     /**
@@ -205,6 +205,25 @@ public class OverlayManager {
     }
 
     /**
+     * Returns information about the overlay represented by the identifier for the specified user.
+     *
+     * @param overlay the identifier representing the overlay
+     * @param userHandle the user of which to get overlay state info
+     * @return the overlay info or null if the overlay cannot be found
+     *
+     * @hide
+     */
+    @Nullable
+    public OverlayInfo getOverlayInfo(@NonNull final OverlayIdentifier overlay,
+            @NonNull final UserHandle userHandle) {
+        try {
+            return mService.getOverlayInfoByIdentifier(overlay, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns information about all overlays for the given target package for
      * the specified user. The returned list is ordered according to the
      * overlay priority with the highest priority at the end of the list.
@@ -248,6 +267,29 @@ public class OverlayManager {
             @NonNull UserHandle user) {
         try {
             mService.invalidateCachesForOverlay(targetPackageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Perform a series of requests related to overlay packages. This is an
+     * atomic operation: either all requests were performed successfully and
+     * the changes were propagated to the rest of the system, or at least one
+     * request could not be performed successfully and nothing is changed and
+     * nothing is propagated to the rest of the system.
+     *
+     * @see OverlayManagerTransaction
+     *
+     * @param transaction the series of overlay related requests to perform
+     * @throws Exception if not all the requests could be successfully and
+     *         atomically executed
+     *
+     * @hide
+     */
+    public void commit(@NonNull final OverlayManagerTransaction transaction) {
+        try {
+            mService.commit(transaction);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

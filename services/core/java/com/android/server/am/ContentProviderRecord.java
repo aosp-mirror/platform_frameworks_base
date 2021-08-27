@@ -19,6 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.app.ContentProviderHolder;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
@@ -85,11 +86,12 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         noReleaseNeeded = cpr.noReleaseNeeded;
     }
 
-    public ContentProviderHolder newHolder(ContentProviderConnection conn) {
+    public ContentProviderHolder newHolder(ContentProviderConnection conn, boolean local) {
         ContentProviderHolder holder = new ContentProviderHolder(info);
         holder.provider = provider;
         holder.noReleaseNeeded = noReleaseNeeded;
         holder.connection = conn;
+        holder.mLocal = local;
         return holder;
     }
 
@@ -177,6 +179,50 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
 
     public boolean hasConnectionOrHandle() {
         return !connections.isEmpty() || hasExternalProcessHandles();
+    }
+
+    /**
+     * Notify all clients that the provider has been published and ready to use,
+     * or timed out.
+     *
+     * @param status true: successfully published; false: timed out
+     */
+    void onProviderPublishStatusLocked(boolean status) {
+        final int numOfConns = connections.size();
+        for (int i = 0; i < numOfConns; i++) {
+            final ContentProviderConnection conn = connections.get(i);
+            if (conn.waiting && conn.client != null) {
+                final ProcessRecord client = conn.client;
+                if (!status) {
+                    if (launchingApp == null) {
+                        Slog.w(TAG_AM, "Unable to launch app "
+                                + appInfo.packageName + "/"
+                                + appInfo.uid + " for provider "
+                                + info.authority + ": launching app became null");
+                        EventLogTags.writeAmProviderLostProcess(
+                                UserHandle.getUserId(appInfo.uid),
+                                appInfo.packageName,
+                                appInfo.uid, info.authority);
+                    } else {
+                        Slog.wtf(TAG_AM, "Timeout waiting for provider "
+                                + appInfo.packageName + "/"
+                                + appInfo.uid + " for provider "
+                                + info.authority
+                                + " caller=" + client);
+                    }
+                }
+                final IApplicationThread thread = client.getThread();
+                if (thread != null) {
+                    try {
+                        thread.notifyContentProviderPublishStatus(
+                                newHolder(status ? conn : null, false),
+                                info.authority, conn.mExpectedUserId, status);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            conn.waiting = false;
+        }
     }
 
     void dump(PrintWriter pw, String prefix, boolean full) {
@@ -275,6 +321,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         final String mOwningProcessName;
         int mAcquisitionCount;
         AssociationState.SourceState mAssociation;
+        private Object mProcStatsLock;  // Internal lock for accessing AssociationState
 
         public ExternalProcessHandle(IBinder token, int owningUid, String owningProcessName) {
             mToken = token;
@@ -298,8 +345,8 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     && mAssociation == null && provider.proc != null
                     && (provider.appInfo.uid != mOwningUid
                             || !provider.info.processName.equals(mOwningProcessName))) {
-                ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
-                        provider.name.getPackageName());
+                ProcessStats.ProcessStateHolder holder =
+                        provider.proc.getPkgList().get(provider.name.getPackageName());
                 if (holder == null) {
                     Slog.wtf(TAG_AM, "No package in referenced provider "
                             + provider.name.toShortString() + ": proc=" + provider.proc);
@@ -307,17 +354,21 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
                             + provider.name.toShortString() + ": proc=" + provider.proc);
                 } else {
-                    mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
-                            provider.name.getClassName()).startSource(mOwningUid,
-                            mOwningProcessName, null);
-
+                    mProcStatsLock = provider.proc.mService.mProcessStats.mLock;
+                    synchronized (mProcStatsLock) {
+                        mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
+                                provider.name.getClassName()).startSource(mOwningUid,
+                                mOwningProcessName, null);
+                    }
                 }
             }
         }
 
         public void stopAssociation() {
             if (mAssociation != null) {
-                mAssociation.stop();
+                synchronized (mProcStatsLock) {
+                    mAssociation.stop();
+                }
                 mAssociation = null;
             }
         }
@@ -328,7 +379,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                 if (hasExternalProcessHandles() &&
                         externalProcessTokenToHandle.get(mToken) != null) {
                     removeExternalProcessHandleInternalLocked(mToken);
-                }                        
+                }
             }
         }
     }

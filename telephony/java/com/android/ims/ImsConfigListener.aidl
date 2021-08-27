@@ -47,7 +47,7 @@ oneway interface ImsConfigListener {
      *
      * @return void.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onSetFeatureResponse(int feature, int network, int value, int status);
 
     /**

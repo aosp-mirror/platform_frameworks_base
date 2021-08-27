@@ -39,8 +39,8 @@ import java.util.List;
 public class FreezePeriod {
     private static final String TAG = "FreezePeriod";
 
-    private static final int DUMMY_YEAR = 2001;
-    static final int DAYS_IN_YEAR = 365; // 365 since DUMMY_YEAR is not a leap year
+    private static final int SENTINEL_YEAR = 2001;
+    static final int DAYS_IN_YEAR = 365; // 365 since SENTINEL_YEAR is not a leap year
 
     private final MonthDay mStart;
     private final MonthDay mEnd;
@@ -60,9 +60,9 @@ public class FreezePeriod {
      */
     public FreezePeriod(MonthDay start, MonthDay end) {
         mStart = start;
-        mStartDay = mStart.atYear(DUMMY_YEAR).getDayOfYear();
+        mStartDay = mStart.atYear(SENTINEL_YEAR).getDayOfYear();
         mEnd = end;
-        mEndDay = mEnd.atYear(DUMMY_YEAR).getDayOfYear();
+        mEndDay = mEnd.atYear(SENTINEL_YEAR).getDayOfYear();
     }
 
     /**
@@ -166,9 +166,9 @@ public class FreezePeriod {
                 endYearAdjustment = 1;
             }
         }
-        final LocalDate startDate = LocalDate.ofYearDay(DUMMY_YEAR, mStartDay).withYear(
+        final LocalDate startDate = LocalDate.ofYearDay(SENTINEL_YEAR, mStartDay).withYear(
                 now.getYear() + startYearAdjustment);
-        final LocalDate endDate = LocalDate.ofYearDay(DUMMY_YEAR, mEndDay).withYear(
+        final LocalDate endDate = LocalDate.ofYearDay(SENTINEL_YEAR, mEndDay).withYear(
                 now.getYear() + endYearAdjustment);
         return new Pair<>(startDate, endDate);
     }
@@ -176,13 +176,13 @@ public class FreezePeriod {
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
-        return LocalDate.ofYearDay(DUMMY_YEAR, mStartDay).format(formatter) + " - "
-                + LocalDate.ofYearDay(DUMMY_YEAR, mEndDay).format(formatter);
+        return LocalDate.ofYearDay(SENTINEL_YEAR, mStartDay).format(formatter) + " - "
+                + LocalDate.ofYearDay(SENTINEL_YEAR, mEndDay).format(formatter);
     }
 
     /** @hide */
     private static MonthDay dayOfYearToMonthDay(int dayOfYear) {
-        LocalDate date = LocalDate.ofYearDay(DUMMY_YEAR, dayOfYear);
+        LocalDate date = LocalDate.ofYearDay(SENTINEL_YEAR, dayOfYear);
         return MonthDay.of(date.getMonth(), date.getDayOfMonth());
     }
 
@@ -191,7 +191,7 @@ public class FreezePeriod {
      * @hide
      */
     private static int dayOfYearDisregardLeapYear(LocalDate date) {
-        return date.withYear(DUMMY_YEAR).getDayOfYear();
+        return date.withYear(SENTINEL_YEAR).getDayOfYear();
     }
 
     /**

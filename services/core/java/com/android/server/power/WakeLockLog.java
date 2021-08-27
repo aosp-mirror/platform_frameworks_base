@@ -16,16 +16,12 @@
 
 package com.android.server.power;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.SomeArgs;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -73,8 +69,6 @@ final class WakeLockLog {
     private static final String TAG = "PowerManagerService.WLLog";
 
     private static final boolean DEBUG = false;
-
-    private static final int MSG_ON_WAKE_LOCK_EVENT = 1;
 
     private static final int TYPE_TIME_RESET = 0x0;
     private static final int TYPE_ACQUIRE = 0x1;
@@ -130,7 +124,6 @@ final class WakeLockLog {
     private final Injector mInjector;
     private final TheLog mLog;
     private final TagDatabase mTagDatabase;
-    private final Handler mHandler;
     private final SimpleDateFormat mDumpsysDateFormat;
 
     WakeLockLog() {
@@ -140,7 +133,6 @@ final class WakeLockLog {
     @VisibleForTesting
     WakeLockLog(Injector injector) {
         mInjector = injector;
-        mHandler = new WakeLockLogHandler(injector.getLooper());
         mTagDatabase = new TagDatabase(injector);
         EntryByteTranslator translator = new EntryByteTranslator(mTagDatabase);
         mLog = new TheLog(injector, translator, mTagDatabase);
@@ -172,7 +164,7 @@ final class WakeLockLog {
      * Dumps all the wake lock data currently saved in the wake lock log to the specified
      * {@code PrintWriter}.
      *
-     * @param The {@code PrintWriter} to write to.
+     * @param pw The {@code PrintWriter} to write to.
      */
     public void dump(PrintWriter pw) {
         dump(pw, false);
@@ -221,9 +213,6 @@ final class WakeLockLog {
     /**
      * Adds a new entry to the log based on the specified wake lock parameters.
      *
-     * Grabs the current time for the event and then posts the rest of the logic (actually
-     * adding it to the log) to a background thread.
-     *
      * @param eventType The type of event (ACQUIRE, RELEASE);
      * @param tag The wake lock's identifying tag.
      * @param ownerUid The owner UID of the wake lock.
@@ -239,15 +228,11 @@ final class WakeLockLog {
         }
 
         final long time = mInjector.currentTimeMillis();
-
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = tagNameReducer(tag);
-        args.argi1 = eventType;
-        args.argi2 = ownerUid;
-        args.argi3 = eventType == TYPE_ACQUIRE ? translateFlagsFromPowerManager(flags) : 0;
-        args.argi4 = (int) ((time >> 32) & 0xFFFFFFFFL);
-        args.argi5 = (int) (time & 0xFFFFFFFFL);
-        mHandler.obtainMessage(MSG_ON_WAKE_LOCK_EVENT, args).sendToTarget();
+        final int translatedFlags = eventType == TYPE_ACQUIRE
+                ? translateFlagsFromPowerManager(flags)
+                : 0;
+        handleWakeLockEventInternal(eventType, tagNameReducer(tag), ownerUid, translatedFlags,
+                time);
     }
 
     /**
@@ -273,8 +258,8 @@ final class WakeLockLog {
      * flags, {@code WakeLockLog.FLAG_*}, and a log-level, {@code WakeLockLog.LEVEL_*}.
      *
      * @param flags Wake lock flags including {@code PowerManager.*_WAKE_LOCK}
-     *              {@link PowerManager.ACQUIRE_CAUSES_WAKEUP}, and
-     *              {@link PowerManager.ON_AFTER_RELEASE}.
+     *              {@link PowerManager#ACQUIRE_CAUSES_WAKEUP}, and
+     *              {@link PowerManager#ON_AFTER_RELEASE}.
      * @return The compressed flags value.
      */
     int translateFlagsFromPowerManager(int flags) {
@@ -328,9 +313,9 @@ final class WakeLockLog {
         }
 
         String reduciblePrefix = null;
-        for (int tp = 0; tp < REDUCED_TAG_PREFIXES.length; tp++) {
-            if (tag.startsWith(REDUCED_TAG_PREFIXES[tp])) {
-                reduciblePrefix = REDUCED_TAG_PREFIXES[tp];
+        for (String reducedTagPrefix : REDUCED_TAG_PREFIXES) {
+            if (tag.startsWith(reducedTagPrefix)) {
+                reduciblePrefix = reducedTagPrefix;
                 break;
             }
         }
@@ -339,7 +324,7 @@ final class WakeLockLog {
             final StringBuilder sb = new StringBuilder();
 
             // add prefix first
-            sb.append(tag.substring(0, reduciblePrefix.length()));
+            sb.append(tag, 0, reduciblePrefix.length());
 
             // Stop looping on final marker
             final int end = Math.max(tag.lastIndexOf("/"), tag.lastIndexOf("."));
@@ -604,7 +589,7 @@ final class WakeLockLog {
          * @return The number of bytes written to buffer, or required to write to the buffer.
          */
         int toBytes(LogEntry entry, byte[] bytes, long timeReference) {
-            int sizeNeeded = -1;
+            final int sizeNeeded;
             switch (entry.type) {
                 case TYPE_ACQUIRE: {
                     sizeNeeded = 3;
@@ -696,8 +681,9 @@ final class WakeLockLog {
      * {@link EntryByteTranslator} to convert byte {@link LogEntry} to bytes within the buffer.
      *
      * This class also implements the logic around TIME_RESET events. Since the LogEntries store
-     * their time (8-bit) relative to the previous event, this class can add {@link TYPE_TIME_RESET}
-     * LogEntries as necessary to allow a LogEntry's relative time to fit within that range.
+     * their time (8-bit) relative to the previous event, this class can add
+     * {@link #TYPE_TIME_RESET} LogEntries as necessary to allow a LogEntry's relative time to fit
+     * within that range.
      */
     static class TheLog {
         private final EntryByteTranslator mTranslator;
@@ -711,7 +697,7 @@ final class WakeLockLog {
         /**
          * Second temporary buffer used when reading and writing bytes from the buffer.
          * A second temporary buffer is necessary since additional items can be read concurrently
-         * from {@link mTempBuffer}. E.g., Adding an entry to a full buffer requires removing
+         * from {@link #mTempBuffer}. E.g., Adding an entry to a full buffer requires removing
          * other entries from the buffer.
          */
         private final byte[] mReadWriteTempBuffer = new byte[MAX_LOG_ENTRY_BYTE_SIZE];
@@ -832,7 +818,7 @@ final class WakeLockLog {
          * Returns an {@link Iterator} of {@link LogEntry}s for all the entries in the log.
          *
          * If the log is modified while the entries are being read, the iterator will throw a
-         * {@link ConcurrentModificationExceptoin}.
+         * {@link ConcurrentModificationException}.
          *
          * @param tempEntry A temporary {@link LogEntry} instance to use so that new instances
          *                  aren't allocated with every call to {@code Iterator.next}.
@@ -1063,7 +1049,7 @@ final class WakeLockLog {
      * instanced into bytes.
      *
      * If a new tag is added when the database is full, the oldest tag is removed. The oldest tag
-     * is calcualted using {@link TagData.lastUsedTime}.
+     * is calculated using {@link TagData#lastUsedTime}.
      */
     static class TagDatabase {
         private final int mInvalidIndex;
@@ -1086,9 +1072,9 @@ final class WakeLockLog {
             int byteEstimate = 0;
             int tagSize = 0;
             int tags = 0;
-            for (int i = 0; i < mArray.length; i++) {
+            for (TagData tagData : mArray) {
                 byteEstimate += 8;  // reference pointer
-                TagData data = mArray[i];
+                TagData data = tagData;
                 if (data != null) {
                     entries++;
                     byteEstimate += data.getByteSize();
@@ -1280,10 +1266,6 @@ final class WakeLockLog {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            if (DEBUG) {
-                sb.append("(").append(index).append(")");
-            }
             return "[" + ownerUid + " ; " + tag + "]";
         }
 
@@ -1308,10 +1290,6 @@ final class WakeLockLog {
      * Injector used by {@link WakeLockLog} for testing purposes.
      */
     public static class Injector {
-        public Looper getLooper() {
-            return BackgroundThread.get().getLooper();
-        }
-
         public int getTagDatabaseSize() {
             return TAG_DATABASE_SIZE;
         }
@@ -1326,30 +1304,6 @@ final class WakeLockLog {
 
         public SimpleDateFormat getDateFormat() {
             return DATE_FORMAT;
-        }
-    }
-
-    private class WakeLockLogHandler extends Handler {
-        WakeLockLogHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message message) {
-            switch(message.what) {
-                case MSG_ON_WAKE_LOCK_EVENT:
-                    final SomeArgs args = (SomeArgs) message.obj;
-                    final String tag = (String) args.arg1;
-                    final int eventType = args.argi1;
-                    final int ownerUid = args.argi2;
-                    final int flags = args.argi3;
-                    final long time = (((long) args.argi4) << 32) + (args.argi5 & 0xFFFFFFFFL);
-                    args.recycle();
-                    handleWakeLockEventInternal(eventType, tag, ownerUid, flags, time);
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

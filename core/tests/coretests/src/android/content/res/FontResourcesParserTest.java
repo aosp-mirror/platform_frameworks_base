@@ -105,6 +105,7 @@ public class FontResourcesParserTest {
         assertEquals("com.example.test.fontprovider.authority", providerEntry.getAuthority());
         assertEquals("com.example.test.fontprovider.package", providerEntry.getPackage());
         assertEquals("MyRequestedFont", providerEntry.getQuery());
+        assertEquals("my-request-font", providerEntry.getSystemFontFamilyName());
     }
 
     @Test

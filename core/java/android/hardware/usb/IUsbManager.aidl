@@ -118,6 +118,12 @@ interface IUsbManager
     /* Gets the current USB functions. */
     long getCurrentFunctions();
 
+    /* Gets the current USB Speed. */
+    int getCurrentUsbSpeed();
+
+    /* Gets the Gadget Hal Version. */
+    int getGadgetHalVersion();
+
     /* Sets the screen unlocked USB function(s), which will be set automatically
      * when the screen is unlocked.
      */
@@ -128,6 +134,12 @@ interface IUsbManager
 
     /* Resets the USB gadget. */
     void resetUsbGadget();
+
+    /* Set USB data on or off */
+    boolean enableUsbDataSignal(boolean enable);
+
+    /* Gets the USB Hal Version. */
+    int getUsbHalVersion();
 
     /* Get the functionfs control handle for the given function. Usb
      * descriptors will already be written, and the handle will be

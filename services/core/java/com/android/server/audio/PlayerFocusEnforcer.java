@@ -31,11 +31,12 @@ public interface PlayerFocusEnforcer {
                                boolean forceDuck);
 
     /**
-     * Unduck the players that had been ducked with
-     * {@link #duckPlayers(FocusRequester, FocusRequester, boolean)}
+     * Restore the initial state of any players that had had a volume ramp applied as the result
+     * of a duck or fade out through {@link #duckPlayers(FocusRequester, FocusRequester, boolean)}
+     * or {@link #fadeOutPlayers(FocusRequester, FocusRequester)}
      * @param winner
      */
-    void unduckPlayers(@NonNull FocusRequester winner);
+    void restoreVShapedPlayers(@NonNull FocusRequester winner);
 
     /**
      * Mute players at the beginning of a call
@@ -47,4 +48,20 @@ public interface PlayerFocusEnforcer {
      * Unmute players at the end of a call
      */
     void unmutePlayersForCall();
+
+    /**
+     * Fade out whatever is still playing after the non-transient focus change
+     * @param winner the new non-transient focus owner
+     * @param loser the previous focus owner
+     * @return true if there were any active players for the loser that qualified for being
+     *         faded out (because of audio attributes, or player types), and as such were faded
+     *         out.
+     */
+    boolean fadeOutPlayers(@NonNull FocusRequester winner, @NonNull FocusRequester loser);
+
+    /**
+     * Mark this UID as no longer playing a role in focus enforcement
+     * @param uid
+     */
+    void forgetUid(int uid);
 }

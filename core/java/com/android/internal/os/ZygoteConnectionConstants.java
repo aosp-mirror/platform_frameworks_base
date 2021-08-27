@@ -31,9 +31,6 @@ public class ZygoteConnectionConstants {
      */
     public static final int CONNECTION_TIMEOUT_MILLIS = 1000;
 
-    /** max number of arguments that a connection can specify */
-    public static final int MAX_ZYGOTE_ARGC = 1024;
-
     /**
      * Wait time for a wrapped app to report back its pid.
      *

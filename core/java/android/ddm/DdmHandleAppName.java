@@ -17,6 +17,7 @@
 package android.ddm;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.Log;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
@@ -29,9 +30,9 @@ import java.nio.ByteBuffer;
 /**
  * Track our app name.  We don't (currently) handle any inbound packets.
  */
-public class DdmHandleAppName extends ChunkHandler {
+public class DdmHandleAppName extends DdmHandle {
 
-    public static final int CHUNK_APNM = type("APNM");
+    public static final int CHUNK_APNM = ChunkHandler.type("APNM");
 
     private static volatile Names sNames = new Names("", "");
 
@@ -50,13 +51,13 @@ public class DdmHandleAppName extends ChunkHandler {
      * Called when the DDM server connects.  The handler is allowed to
      * send messages to the server.
      */
-    public void connected() {}
+    public void onConnected() {}
 
     /**
      * Called when the DDM server disconnects.  Can be used to disable
      * periodic transmissions or clean up saved state.
      */
-    public void disconnected() {}
+    public void onDisconnected() {}
 
     /**
      * Handle a chunk of data.
@@ -80,7 +81,7 @@ public class DdmHandleAppName extends ChunkHandler {
      * before or after DDMS connects.  For the latter we need to send up
      * an APNM message.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void setAppName(String appName, String pkgName, int userId) {
         if (appName == null || appName.isEmpty() || pkgName == null || pkgName.isEmpty()) return;
 
@@ -90,7 +91,7 @@ public class DdmHandleAppName extends ChunkHandler {
         sendAPNM(appName, pkgName, userId);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static Names getNames() {
         return sNames;
     }

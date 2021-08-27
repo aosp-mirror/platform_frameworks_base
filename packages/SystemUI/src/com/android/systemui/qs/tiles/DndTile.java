@@ -19,17 +19,16 @@ package com.android.systemui.qs.tiles;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
-import android.app.ActivityManager;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -46,18 +45,23 @@ import android.view.WindowManager;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -74,41 +78,32 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private static final Intent ZEN_PRIORITY_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
-    private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
-    private static final String EXTRA_VISIBLE = "visible";
-
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
-    private final ActivityStarter mActivityStarter;
     private final SharedPreferences mSharedPreferences;
-    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mListening;
     private boolean mShowingDetail;
-    private boolean mReceiverRegistered;
 
     @Inject
-    public DndTile(QSHost host, ZenModeController zenModeController,
-            ActivityStarter activityStarter, BroadcastDispatcher broadcastDispatcher,
-            @Main SharedPreferences sharedPreferences) {
-        super(host);
+    public DndTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            FalsingManager falsingManager,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            ZenModeController zenModeController,
+            @Main SharedPreferences sharedPreferences
+    ) {
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mController = zenModeController;
-        mActivityStarter = activityStarter;
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
-        mBroadcastDispatcher = broadcastDispatcher;
-        broadcastDispatcher.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
-        mReceiverRegistered = true;
         mController.observe(getLifecycle(), mZenCallback);
-    }
-
-    @Override
-    protected void handleDestroy() {
-        super.handleDestroy();
-        if (mReceiverRegistered) {
-            mBroadcastDispatcher.unregisterReceiver(mReceiver);
-            mReceiverRegistered = false;
-        }
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -144,7 +139,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         // Zen is currently on
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
@@ -190,7 +185,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     break;
                 default:
                     Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
-                            ActivityManager.getCurrentUser(), true).id;
+                            mHost.getUserId(), true).id;
                     mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                             conditionId, TAG);
             }
@@ -198,7 +193,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         if (mController.isVolumeRestricted()) {
             // Collapse the panels, so the user can see the toast.
             mHost.collapsePanels();
@@ -333,15 +328,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
             if (isShowingDetail()) {
                 mDetailAdapter.updatePanel();
             }
-        }
-    };
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final boolean visible = intent.getBooleanExtra(EXTRA_VISIBLE, false);
-            setVisible(mContext, visible);
-            refreshState();
         }
     };
 

@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,7 +35,7 @@ public final class BluetoothMasInstance implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof BluetoothMasInstance) {
             return mId == ((BluetoothMasInstance) o).mId;
         }

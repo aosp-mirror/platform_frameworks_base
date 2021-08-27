@@ -111,6 +111,7 @@ public class Annotation {
     public @interface NetworkType {
     }
 
+    // TODO(b/180542000): remove and replace references with @ApnSetting.ApnType
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
             ApnSetting.TYPE_DEFAULT,
             ApnSetting.TYPE_MMS,
@@ -124,6 +125,7 @@ public class Annotation {
             ApnSetting.TYPE_EMERGENCY,
             ApnSetting.TYPE_MCX,
             ApnSetting.TYPE_XCAP,
+            // ApnSetting.TYPE_ENTERPRISE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -445,6 +447,9 @@ public class Annotation {
             DataFailCause.VSNCP_RECONNECT_NOT_ALLOWED,
             DataFailCause.IPV6_PREFIX_UNAVAILABLE,
             DataFailCause.HANDOFF_PREFERENCE_CHANGED,
+            DataFailCause.SLICE_REJECTED,
+            DataFailCause.MATCH_ALL_RULE_NOT_ALLOWED,
+            DataFailCause.ALL_MATCHING_RULES_FAILED,
             DataFailCause.OEM_DCFAILCAUSE_1,
             DataFailCause.OEM_DCFAILCAUSE_2,
             DataFailCause.OEM_DCFAILCAUSE_3,
@@ -624,6 +629,20 @@ public class Annotation {
     public @interface UiccAppType{}
 
     /**
+     * UICC SIM Application Types including UNKNOWN
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            TelephonyManager.APPTYPE_UNKNOWN,
+            TelephonyManager.APPTYPE_SIM,
+            TelephonyManager.APPTYPE_USIM,
+            TelephonyManager.APPTYPE_RUIM,
+            TelephonyManager.APPTYPE_CSIM,
+            TelephonyManager.APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppTypeExt{}
+
+    /**
      * Override network type
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -632,6 +651,17 @@ public class Annotation {
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
-            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
+            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED})
     public @interface OverrideNetworkType {}
+
+    /**
+     *  Result of a thermal mitigation request.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "THERMAL_MITIGATION_RESULT_" }, value = {
+        TelephonyManager.THERMAL_MITIGATION_RESULT_SUCCESS,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_MODEM_ERROR,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_INVALID_STATE,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR})
+    public @interface ThermalMitigationResult {}
 }

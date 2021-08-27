@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
+import android.content.pm.PackageManager.InstallScenario;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -52,10 +53,12 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
@@ -406,14 +409,16 @@ public class PackageInstaller {
     private final IPackageInstaller mInstaller;
     private final int mUserId;
     private final String mInstallerPackageName;
+    private final String mAttributionTag;
 
     private final ArrayList<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
     /** {@hide} */
     public PackageInstaller(IPackageInstaller installer,
-            String installerPackageName, int userId) {
+            String installerPackageName, String installerAttributionTag, int userId) {
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
+        mAttributionTag = installerAttributionTag;
         mUserId = userId;
     }
 
@@ -437,7 +442,8 @@ public class PackageInstaller {
      */
     public int createSession(@NonNull SessionParams params) throws IOException {
         try {
-            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
+            return mInstaller.createSession(params, mInstallerPackageName, mAttributionTag,
+                    mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
@@ -697,7 +703,7 @@ public class PackageInstaller {
      * installer was created.
      *
      * <p>This will
-     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) whitelist
+     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) allowlist
      * all restricted permissions}.
      *
      * @param packageName The package to install.
@@ -726,8 +732,6 @@ public class PackageInstaller {
      *
      * @param packageName The package to install.
      * @param statusReceiver Where to deliver the result.
-     *
-     * {@hide}
      */
     @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
     public void uninstallExistingPackage(@NonNull String packageName,
@@ -1048,6 +1052,31 @@ public class PackageInstaller {
         }
 
         /**
+         * Populate an APK file by creating a hard link to avoid the need to copy.
+         * <p>
+         * Note this API is used by RollbackManager only and can only be called from system_server.
+         * {@code target} will be relabeled if link is created successfully. RollbackManager has
+         * to delete {@code target} when the session is committed successfully to avoid SELinux
+         * label conflicts.
+         * <p>
+         * Note No more bytes should be written to the file once the link is created successfully.
+         *
+         * @param target the path of the link target
+         *
+         * @hide
+         */
+        public void stageViaHardLink(String target) throws IOException {
+            try {
+                mSession.stageViaHardLink(target);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Ensure that any outstanding data for given stream has been committed
          * to disk. This is only valid for streams returned from
          * {@link #openWrite(String, long, long)}.
@@ -1138,9 +1167,6 @@ public class PackageInstaller {
 
         /**
          * @return data loader params or null if the session is not using one.
-         *
-         * WARNING: This is a system API to aid internal development.
-         * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
         @SystemApi
@@ -1158,7 +1184,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Adds a file to session. On commit this file will be pulled from dataLoader.
+         * Adds a file to session. On commit this file will be pulled from DataLoader {@code
+         * android.service.dataloader.DataLoaderService.DataLoader}.
          *
          * @param location target location for the file. Possible values:
          *            {@link #LOCATION_DATA_APP},
@@ -1172,15 +1199,15 @@ public class PackageInstaller {
          * @param lengthBytes total size of the file being written.
          *            The system may clear various caches as needed to allocate
          *            this space.
-         * @param metadata additional info use by dataLoader to pull data for the file.
+         * @param metadata additional info use by DataLoader to pull data for the file.
          * @param signature additional file signature, e.g.
          *                  <a href="https://source.android.com/security/apksigning/v4.html">APK Signature Scheme v4</a>
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
-         * @throws IllegalStateException if called for non-callback session
+         * @throws IllegalStateException if called for non-streaming session
          *
-         * WARNING: This is a system API to aid internal development.
-         * Use at your own risk. It will change or be removed without warning.
+         * @see android.content.pm.InstallationFile
+         *
          * {@hide}
          */
         @SystemApi
@@ -1204,7 +1231,7 @@ public class PackageInstaller {
          * @param name name of a file, e.g. split.
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
-         * @throws IllegalStateException if called for non-callback session
+         * @throws IllegalStateException if called for non-DataLoader session
          * {@hide}
          */
         @SystemApi
@@ -1212,6 +1239,49 @@ public class PackageInstaller {
         public void removeFile(@FileLocation int location, @NonNull String name) {
             try {
                 mSession.removeFile(location, name);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sets installer-provided checksums for the APK file in session.
+         *
+         * @param name      previously written as part of this session.
+         *                  {@link #openWrite}
+         * @param checksums installer intends to make available via
+         *                  {@link PackageManager#requestChecksums}.
+         * @param signature DER PKCS#7 detached signature bytes over binary serialized checksums
+         *                  to enable integrity checking for the checksums or null for no integrity
+         *                  checking. {@link PackageManager#requestChecksums} will return
+         *                  the certificate used to create signature.
+         *                  Binary format for checksums:
+         *                  <pre>{@code DataOutputStream dos;
+         *                  dos.writeInt(checksum.getType());
+         *                  dos.writeInt(checksum.getValue().length);
+         *                  dos.write(checksum.getValue());}</pre>
+         *                  If using <b>openssl cms</b>, make sure to specify -binary -nosmimecap.
+         *                  @see <a href="https://www.openssl.org/docs/man1.0.2/man1/cms.html">openssl cms</a>
+         * @throws SecurityException if called after the session has been
+         *                           committed or abandoned.
+         * @throws IllegalStateException if checksums for this file have already been added.
+         * @deprecated  do not use installer-provided checksums,
+         *              use platform-enforced checksums
+         *              e.g. {@link Checksum#TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}
+         *              in {@link PackageManager#requestChecksums}.
+         */
+        @Deprecated
+        public void setChecksums(@NonNull String name, @NonNull List<Checksum> checksums,
+                @Nullable byte[] signature) throws IOException {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(checksums);
+
+            try {
+                mSession.setChecksums(name, checksums.toArray(new Checksum[checksums.size()]),
+                        signature);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1291,13 +1361,13 @@ public class PackageInstaller {
          *
          * @throws PackageManager.NameNotFoundException if the new owner could not be found.
          * @throws SecurityException if called after the session has been committed or abandoned.
-         * @throws SecurityException if the session does not update the original installer
-         * @throws SecurityException if streams opened through
-         *                           {@link #openWrite(String, long, long) are still open.
+         * @throws IllegalStateException if streams opened through
+         *                                  {@link #openWrite(String, long, long) are still open.
+         * @throws IllegalArgumentException if {@code packageName} is invalid.
          */
         public void transfer(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {
-            Objects.requireNonNull(packageName);
+            Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
 
             try {
                 mSession.transfer(packageName);
@@ -1326,7 +1396,9 @@ public class PackageInstaller {
          * Completely abandon this session, destroying all staged data and
          * rendering it invalid. Abandoned sessions will be reported to
          * {@link SessionCallback} listeners as failures. This is equivalent to
-         * opening the session and calling {@link Session#abandon()}.
+         * {@link #abandonSession(int)}.
+         * <p>If the parent is abandoned, all children will also be abandoned. Any written data
+         * would be destroyed and the created {@link Session} information will be discarded.</p>
          */
         public void abandon() {
             try {
@@ -1389,7 +1461,8 @@ public class PackageInstaller {
          * when this session is committed.
          *
          * <p>If the parent is staged or has rollback enabled, all children must have
-         * the same properties.
+         * the same properties.</p>
+         * <p>If the parent is abandoned, all children will also be abandoned.</p>
          *
          * @param sessionId the session ID to add to this multi-package session.
          */
@@ -1456,6 +1529,33 @@ public class PackageInstaller {
          */
         public static final int MAX_PACKAGE_NAME_LENGTH = 255;
 
+        /** @hide */
+        @IntDef(prefix = {"USER_ACTION_"}, value = {
+                USER_ACTION_UNSPECIFIED,
+                USER_ACTION_REQUIRED,
+                USER_ACTION_NOT_REQUIRED
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface UserActionRequirement {}
+
+        /**
+         * The installer did not call {@link SessionParams#setRequireUserAction(int)} to
+         * specify whether user action should be required for the install.
+         */
+        public static final int USER_ACTION_UNSPECIFIED = 0;
+
+        /**
+         * The installer called {@link SessionParams#setRequireUserAction(int)} with
+         * {@code true} to require user action for the install to complete.
+         */
+        public static final int USER_ACTION_REQUIRED = 1;
+
+        /**
+         * The installer called {@link SessionParams#setRequireUserAction(int)} with
+         * {@code false} to request that user action not be required for this install.
+         */
+        public static final int USER_ACTION_NOT_REQUIRED = 2;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mode = MODE_INVALID;
@@ -1466,14 +1566,22 @@ public class PackageInstaller {
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
         public @InstallReason int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
+        /**
+         * {@hide}
+         *
+         * This flag indicates which installation scenario best describes this session.  The system
+         * may use this value when making decisions about how to handle the installation, such as
+         * prioritizing system health or user experience.
+         */
+        public @InstallScenario int installScenario = PackageManager.INSTALL_SCENARIO_DEFAULT;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long sizeBytes = -1;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String appPackageName;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Bitmap appIcon;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -1483,7 +1591,7 @@ public class PackageInstaller {
         /** {@hide} */
         public Uri originatingUri;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int originatingUid = UID_UNKNOWN;
         /** {@hide} */
         public Uri referrerUri;
@@ -1511,6 +1619,8 @@ public class PackageInstaller {
         public int rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
         /** {@hide} */
         public boolean forceQueryableOverride;
+        /** {@hide} */
+        public int requireUserAction = USER_ACTION_UNSPECIFIED;
 
         /**
          * Construct parameters for a new package install session.
@@ -1529,6 +1639,7 @@ public class PackageInstaller {
             installFlags = source.readInt();
             installLocation = source.readInt();
             installReason = source.readInt();
+            installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
@@ -1552,6 +1663,7 @@ public class PackageInstaller {
                 dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
             rollbackDataPolicy = source.readInt();
+            requireUserAction = source.readInt();
         }
 
         /** {@hide} */
@@ -1560,6 +1672,7 @@ public class PackageInstaller {
             ret.installFlags = installFlags;
             ret.installLocation = installLocation;
             ret.installReason = installReason;
+            ret.installScenario = installScenario;
             ret.sizeBytes = sizeBytes;
             ret.appPackageName = appPackageName;
             ret.appIcon = appIcon;  // not a copy.
@@ -1579,6 +1692,7 @@ public class PackageInstaller {
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
+            ret.requireUserAction = requireUserAction;
             return ret;
         }
 
@@ -1700,25 +1814,25 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets which restricted permissions to be whitelisted for the app. Whitelisting
+         * Sets which restricted permissions to be allowlisted for the app. Allowlisting
          * is not granting the permissions, rather it allows the app to hold permissions
-         * which are otherwise restricted. Whitelisting a non restricted permission has
+         * which are otherwise restricted. Allowlisting a non restricted permission has
          * no effect.
          *
          * <p> Permissions can be hard restricted which means that the app cannot hold
          * them or soft restricted where the app can hold the permission but in a weaker
          * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
          * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
-         * depends on the permission declaration. Whitelisting a hard restricted permission
-         * allows the app to hold that permission and whitelisting a soft restricted
+         * depends on the permission declaration. Allowlisting a hard restricted permission
+         * allows the app to hold that permission and allowlisting a soft restricted
          * permission allows the app to hold the permission in its full, unrestricted form.
          *
-         * <p> Permissions can also be immutably restricted which means that the whitelist
+         * <p> Permissions can also be immutably restricted which means that the allowlist
          * state of the permission can be determined only at install time and cannot be
          * changed on updated or at a later point via the package manager APIs.
          *
-         * <p>Initially, all restricted permissions are whitelisted but you can change
-         * which ones are whitelisted by calling this method or the corresponding ones
+         * <p>Initially, all restricted permissions are allowlisted but you can change
+         * which ones are allowlisted by calling this method or the corresponding ones
          * on the {@link PackageManager}. Only soft or hard restricted permissions on the current
          * Android version are supported and any invalid entries will be removed.
          *
@@ -1747,7 +1861,10 @@ public class PackageInstaller {
          * If user explicitly enabled or disabled it via settings, this call is ignored.
          *
          * @param shouldAutoRevoke whether permissions should be auto-revoked.
+         *
+         * @deprecated No longer used
          */
+        @Deprecated
         public void setAutoRevokePermissionsMode(boolean shouldAutoRevoke) {
             autoRevokePermissionsMode = shouldAutoRevoke ? MODE_ALLOWED : MODE_IGNORED;
         }
@@ -1897,6 +2014,14 @@ public class PackageInstaller {
         }
 
         /**
+         * @hide
+         */
+        @TestApi
+        public void setInstallFlagAllowTest() {
+            installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+        }
+
+        /**
          * Set the installer package for the app.
          *
          * By default this is the app that created the {@link PackageInstaller} object.
@@ -1957,11 +2082,11 @@ public class PackageInstaller {
 
         /**
          * Set the data loader params for the session.
-         * This also switches installation into data provider mode and disallow direct writes into
+         * This also switches installation into data loading mode and disallow direct writes into
          * staging folder.
          *
-         * WARNING: This is a system API to aid internal development.
-         * Use at your own risk. It will change or be removed without warning.
+         * @see android.service.dataloader.DataLoaderService.DataLoader
+         *
          * {@hide}
          */
         @SystemApi
@@ -1980,11 +2105,68 @@ public class PackageInstaller {
             this.forceQueryableOverride = true;
         }
 
+        /**
+         * Optionally indicate whether user action should be required when the session is
+         * committed.
+         * <p>
+         * Defaults to {@link #USER_ACTION_UNSPECIFIED} unless otherwise set. When unspecified for
+         * installers using the
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
+         * permission will behave as if set to {@link #USER_ACTION_REQUIRED}, and
+         * {@link #USER_ACTION_NOT_REQUIRED} otherwise. When {@code requireUserAction} is set to
+         * {@link #USER_ACTION_REQUIRED}, installers will receive a
+         * {@link #STATUS_PENDING_USER_ACTION} callback once the session is committed, indicating
+         * that user action is required for the install to proceed.
+         * <p>
+         * For installers that have been granted the
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
+         * permission, user action will not be required when all of the following conditions are
+         * met:
+         *
+         * <ul>
+         *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
+         *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
+         *     or higher.</li>
+         *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
+         *     installer of record} of an existing version of the app (in other words, this install
+         *     session is an app update) or the installer is updating itself.</li>
+         *     <li>The installer declares the
+         *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
+         *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
+         * </ul>
+         * <p>
+         * Note: The target API level requirement will advance in future Android versions.
+         * Session owners should always be prepared to handle {@link #STATUS_PENDING_USER_ACTION}.
+         *
+         * @param requireUserAction whether user action should be required.
+         */
+        public void setRequireUserAction(
+                @SessionParams.UserActionRequirement int requireUserAction) {
+            if (requireUserAction != USER_ACTION_UNSPECIFIED
+                    && requireUserAction != USER_ACTION_REQUIRED
+                    && requireUserAction != USER_ACTION_NOT_REQUIRED) {
+                throw new IllegalArgumentException("requireUserAction set as invalid value of "
+                        + requireUserAction + ", but must be one of ["
+                        + "USER_ACTION_UNSPECIFIED, USER_ACTION_REQUIRED, USER_ACTION_NOT_REQUIRED"
+                        + "]");
+            }
+            this.requireUserAction = requireUserAction;
+        }
+
+        /**
+         * Sets the install scenario for this session, which describes the expected user journey.
+         */
+        public void setInstallScenario(@InstallScenario int installScenario) {
+            this.installScenario = installScenario;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);
             pw.printPair("installLocation", installLocation);
+            pw.printPair("installReason", installReason);
+            pw.printPair("installScenario", installScenario);
             pw.printPair("sizeBytes", sizeBytes);
             pw.printPair("appPackageName", appPackageName);
             pw.printPair("appIcon", (appIcon != null));
@@ -2001,6 +2183,7 @@ public class PackageInstaller {
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
             pw.printPair("forceQueryable", forceQueryableOverride);
+            pw.printPair("requireUserAction", SessionInfo.userActionToString(requireUserAction));
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
@@ -2018,6 +2201,7 @@ public class PackageInstaller {
             dest.writeInt(installFlags);
             dest.writeInt(installLocation);
             dest.writeInt(installReason);
+            dest.writeInt(installScenario);
             dest.writeLong(sizeBytes);
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);
@@ -2041,6 +2225,7 @@ public class PackageInstaller {
                 dest.writeParcelable(null, flags);
             }
             dest.writeInt(rollbackDataPolicy);
+            dest.writeInt(requireUserAction);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2074,7 +2259,8 @@ public class PackageInstaller {
                 STAGED_SESSION_NO_ERROR,
                 STAGED_SESSION_VERIFICATION_FAILED,
                 STAGED_SESSION_ACTIVATION_FAILED,
-                STAGED_SESSION_UNKNOWN})
+                STAGED_SESSION_UNKNOWN,
+                STAGED_SESSION_CONFLICT})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StagedSessionErrorCode{}
         /**
@@ -2100,6 +2286,23 @@ public class PackageInstaller {
          */
         public static final int STAGED_SESSION_UNKNOWN = 3;
 
+        /**
+         * Constant indicating that the session was in conflict with another staged session and had
+         * to be sacrificed for resolution.
+         */
+        public static final int STAGED_SESSION_CONFLICT = 4;
+
+        private static String userActionToString(int requireUserAction) {
+            switch(requireUserAction) {
+                case SessionParams.USER_ACTION_REQUIRED:
+                    return "REQUIRED";
+                case SessionParams.USER_ACTION_NOT_REQUIRED:
+                    return "NOT_REQUIRED";
+                default:
+                    return "UNSPECIFIED";
+            }
+        }
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
@@ -2109,13 +2312,15 @@ public class PackageInstaller {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String installerPackageName;
         /** {@hide} */
-        @UnsupportedAppUsage
+        public String installerAttributionTag;
+        /** {@hide} */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String resolvedBaseCodePath;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public float progress;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean sealed;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -2126,6 +2331,8 @@ public class PackageInstaller {
         public int mode;
         /** {@hide} */
         public @InstallReason int installReason;
+        /** {@hide} */
+        public @InstallScenario int installScenario;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public long sizeBytes;
@@ -2188,7 +2395,10 @@ public class PackageInstaller {
         public int rollbackDataPolicy;
 
         /** {@hide} */
-        @UnsupportedAppUsage
+        public int requireUserAction;
+
+        /** {@hide} */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public SessionInfo() {
         }
 
@@ -2197,6 +2407,7 @@ public class PackageInstaller {
             sessionId = source.readInt();
             userId = source.readInt();
             installerPackageName = source.readString();
+            installerAttributionTag = source.readString();
             resolvedBaseCodePath = source.readString();
             progress = source.readFloat();
             sealed = source.readInt() != 0;
@@ -2204,6 +2415,7 @@ public class PackageInstaller {
 
             mode = source.readInt();
             installReason = source.readInt();
+            installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
@@ -2234,6 +2446,7 @@ public class PackageInstaller {
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
+            requireUserAction = source.readInt();
         }
 
         /**
@@ -2255,6 +2468,14 @@ public class PackageInstaller {
          */
         public @Nullable String getInstallerPackageName() {
             return installerPackageName;
+        }
+
+        /**
+         * @return {@link android.content.Context#getAttributionTag attribution tag} of the context
+         * that created this session
+         */
+        public @Nullable String getInstallerAttributionTag() {
+            return installerAttributionTag;
         }
 
         /**
@@ -2425,7 +2646,7 @@ public class PackageInstaller {
 
         /**
          * Get the value set in {@link SessionParams#setWhitelistedRestrictedPermissions(Set)}.
-         * Note that if all permissions are whitelisted this method returns {@link
+         * Note that if all permissions are allowlisted this method returns {@link
          * SessionParams#RESTRICTED_PERMISSIONS_ALL}.
          *
          * @hide
@@ -2491,12 +2712,16 @@ public class PackageInstaller {
         }
 
         /**
-         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code true},
-         * return true. If it was called with {@code false} or if it was not called return false.
+         * Get if this session is to be installed as Instant Apps.
          *
-         * @hide
+         * @param isInstantApp an unused parameter and is ignored.
+         * @return {@code true} if {@link SessionParams#setInstallAsInstantApp(boolean)} was called
+         * with {@code true}; {@code false} if it was called with {@code false} or if it was not
+         * called.
          *
          * @see #getInstallAsFullApp
+         *
+         * @hide
          */
         @SystemApi
         public boolean getInstallAsInstantApp(boolean isInstantApp) {
@@ -2504,12 +2729,16 @@ public class PackageInstaller {
         }
 
         /**
-         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code false},
-         * return true. If it was called with {@code true} or if it was not called return false.
+         * Get if this session is to be installed as full apps.
          *
-         * @hide
+         * @param isInstantApp an unused parameter and is ignored.
+         * @return {@code true} if {@link SessionParams#setInstallAsInstantApp(boolean)} was called
+         * with {@code false}; {code false} if it was called with {@code true} or if it was not
+         * called.
          *
          * @see #getInstallAsInstantApp
+         *
+         * @hide
          */
         @SystemApi
         public boolean getInstallAsFullApp(boolean isInstantApp) {
@@ -2717,6 +2946,22 @@ public class PackageInstaller {
             return updatedMillis;
         }
 
+        /**
+         * Whether user action was required by the installer.
+         *
+         * <p>
+         * Note: a return value of {@code USER_ACTION_NOT_REQUIRED} does not guarantee that the
+         * install will not result in user action.
+         *
+         * @return {@link SessionParams#USER_ACTION_NOT_REQUIRED},
+         *         {@link SessionParams#USER_ACTION_REQUIRED} or
+         *         {@link SessionParams#USER_ACTION_UNSPECIFIED}
+         */
+        @SessionParams.UserActionRequirement
+        public int getRequireUserAction() {
+            return requireUserAction;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -2727,6 +2972,7 @@ public class PackageInstaller {
             dest.writeInt(sessionId);
             dest.writeInt(userId);
             dest.writeString(installerPackageName);
+            dest.writeString(installerAttributionTag);
             dest.writeString(resolvedBaseCodePath);
             dest.writeFloat(progress);
             dest.writeInt(sealed ? 1 : 0);
@@ -2734,6 +2980,7 @@ public class PackageInstaller {
 
             dest.writeInt(mode);
             dest.writeInt(installReason);
+            dest.writeInt(installScenario);
             dest.writeLong(sizeBytes);
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);
@@ -2760,6 +3007,7 @@ public class PackageInstaller {
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);
+            dest.writeInt(requireUserAction);
         }
 
         public static final Parcelable.Creator<SessionInfo>

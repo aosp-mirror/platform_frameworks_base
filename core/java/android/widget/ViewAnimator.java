@@ -21,6 +21,7 @@ import android.annotation.AnimRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -156,7 +157,7 @@ public class ViewAnimator extends FrameLayout {
      * @param animate Whether or not to use the in and out animations, defaults
      *            to true.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void showOnly(int childIndex, boolean animate) {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {

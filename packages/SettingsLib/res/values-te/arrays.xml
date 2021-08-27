@@ -25,7 +25,7 @@
     <item msgid="3288373008277313483">"స్కాన్ చేస్తోంది…"</item>
     <item msgid="6050951078202663628">"కనెక్ట్ చేస్తోంది..."</item>
     <item msgid="8356618438494652335">"ప్రామాణీకరిస్తోంది…"</item>
-    <item msgid="2837871868181677206">"IP చిరునామాను పొందుతోంది…"</item>
+    <item msgid="2837871868181677206">"IP అడ్రస్‌ను పొందుతోంది…"</item>
     <item msgid="4613015005934755724">"కనెక్ట్ చేయబడింది"</item>
     <item msgid="3763530049995655072">"తాత్కాలికంగా రద్దు చేయబడింది"</item>
     <item msgid="7852381437933824454">"డిస్‌కనెక్ట్ చేస్తోంది..."</item>
@@ -39,7 +39,7 @@
     <item msgid="1818677602615822316">"స్కాన్ చేస్తోంది…"</item>
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>కి కనెక్ట్ చేస్తోంది…"</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>తో ప్రామాణీకరిస్తోంది…"</item>
-    <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి IP చిరునామాను పొందుతోంది…"</item>
+    <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి IP అడ్రస్‌ను పొందుతోంది…"</item>
     <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</item>
     <item msgid="7445993821842009653">"తాత్కాలికంగా రద్దు చేయబడింది"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి డిస్‌కనెక్ట్ చేస్తోంది…"</item>
@@ -55,24 +55,24 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించవద్దు"</item>
-    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP తనిఖీని ఉపయోగించండి"</item>
+    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP చెకింగ్‌ను ఉపయోగించండి"</item>
     <item msgid="6421717003037072581">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించు"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"నిలిపివేయబడింది"</item>
+    <item msgid="695678520785580527">"డిజేబుల్ చేయబడింది"</item>
     <item msgid="6336372935919715515">"ప్రారంభించబడింది ఫిల్టర్ చేయబడింది"</item>
     <item msgid="2779123106632690576">"ప్రారంభించబడింది"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="8036025277512210160">"AVRCP 1.4 (డిఫాల్ట్)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.4 (ఆటోమేటిక్ సెట్టింగ్)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.3"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="8965800440990431014">"avrcp14"</item>
+    <item msgid="4041937689950033942">"avrcp15"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="4398977131424970917">"avrcp15"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
@@ -138,15 +138,15 @@
     <item msgid="1333279807604675720">"స్టీరియో"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"ఆడియో నాణ్యత (990kbps/909kbps) కోసం అనుకూలీకరించబడింది"</item>
-    <item msgid="3523665555859696539">"సమతుల్య ఆడియో మరియు కనెక్షన్ నాణ్యత (660kbps/606kbps)"</item>
-    <item msgid="886408010459747589">"కనెక్షన్ నాణ్యత (330kbps/303kbps) కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="1241278021345116816">"ఆడియో క్వాలిటీ (990kbps/909kbps) కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="3523665555859696539">"సమతుల్య ఆడియో మరియు కనెక్షన్ క్వాలిటీ (660kbps/606kbps)"</item>
+    <item msgid="886408010459747589">"కనెక్షన్ క్వాలిటీ (330kbps/303kbps) కోసం అనుకూలీకరించబడింది"</item>
     <item msgid="3808414041654351577">"ఉత్తమ కృషి (అనుకూల బిట్ రేట్)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"ఆడియో నాణ్యత కోసం అనుకూలీకరించబడింది"</item>
-    <item msgid="7451422070435297462">"సమతుల్య ఆడియో మరియు కనెక్షన్ నాణ్యత"</item>
-    <item msgid="6173114545795428901">"కనెక్షన్ నాణ్యత కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="804499336721569838">"ఆడియో క్వాలిటీ కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="7451422070435297462">"సమతుల్య ఆడియో మరియు కనెక్షన్ క్వాలిటీ"</item>
+    <item msgid="6173114545795428901">"కనెక్షన్ క్వాలిటీ కోసం అనుకూలీకరించబడింది"</item>
     <item msgid="4349908264188040530">"ఉత్తమ కృషి (అనుకూల బిట్ రేట్)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"256K"</item>
     <item msgid="7099386891713159947">"1M"</item>
     <item msgid="6069075827077845520">"4M"</item>
-    <item msgid="8243549501764402572">"16M"</item>
+    <item msgid="6078203297886482480">"8M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"ఆఫ్"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"లాగ్ బఫర్‌కి 256K"</item>
     <item msgid="8539423820514360724">"లాగ్ బఫర్‌కి 1M"</item>
     <item msgid="1984761927103140651">"లాగ్ బఫర్‌కి 4M"</item>
-    <item msgid="7892098981256010498">"లాగ్ బఫర్‌కి 16M"</item>
+    <item msgid="2983219471251787208">"లాగ్ బఫర్‌కి 8M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"ఆఫ్ చేయి"</item>
@@ -252,7 +252,7 @@
     <item msgid="3474333938380896988">"డ్యూటెరానోమలీ కోసం ప్రాంతాలను చూపండి"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"ప్రామాణిక పరిమితి"</item>
+    <item msgid="794656271086646068">"స్టాండర్డ్ పరిమితి"</item>
     <item msgid="8628438298170567201">"నేపథ్య ప్రాసెస్‌లు లేవు"</item>
     <item msgid="915752993383950932">"గరిష్టంగా 1 ప్రాసెస్"</item>
     <item msgid="8554877790859095133">"గరిష్టంగా 2 ప్రాసెస్‌లు"</item>

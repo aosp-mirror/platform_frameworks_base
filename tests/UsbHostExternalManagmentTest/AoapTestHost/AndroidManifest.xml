@@ -13,18 +13,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-        package="com.android.hardware.usb.aoaphosttest" >
-    <application android:label="UsbAoapHostTestApp" >
+     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+     package="com.android.hardware.usb.aoaphosttest">
+    <application android:label="UsbAoapHostTestApp">
       <activity android:name=".UsbAoapHostTestActivity"
-            android:configChanges="keyboard|keyboardHidden" >
+           android:configChanges="keyboard|keyboardHidden"
+           android:exported="true">
             <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
             </intent-filter>
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/usb_device_filter"/>
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                 android:resource="@xml/usb_device_filter"/>
         </activity>
     </application>
 </manifest>

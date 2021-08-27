@@ -1,0 +1,12 @@
+# Scroll Capture (Long Screenshots)
+# Bug component: 801322
+#
+# Referenced by:
+#
+# core/java/src/android/view/OWNERS
+# core/java/src/com/android/internal/view/OWNERS
+# core/tests/coretests/src/android/view/OWNERS
+# core/tests/coretests/src/com/android/internal/view/OWNERS
+
+mrcasey@google.com
+mrenouf@google.com

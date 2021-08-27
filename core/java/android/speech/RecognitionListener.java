@@ -24,6 +24,7 @@ import android.os.Bundle;
  * Application main thread.
  */
 public interface RecognitionListener {
+
     /**
      * Called when the endpointer is ready for the user to start speaking.
      * 
@@ -61,9 +62,10 @@ public interface RecognitionListener {
     /**
      * A network or recognition error occurred.
      * 
-     * @param error code is defined in {@link SpeechRecognizer}
+     * @param error code is defined in {@link SpeechRecognizer}. Implementations need to handle any
+     *              integer error constant to be passed here beyond constants prefixed with ERROR_.
      */
-    void onError(int error);
+    void onError(@SpeechRecognizer.RecognitionError int error);
 
     /**
      * Called when recognition results are ready.

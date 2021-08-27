@@ -27,7 +27,8 @@
 
         <service
                 android:name="android.print.test.services.FirstPrintService"
-                android:permission="android.permission.BIND_PRINT_SERVICE">
+                android:permission="android.permission.BIND_PRINT_SERVICE"
+                android:exported="true">
 
             <intent-filter>
                 <action android:name="android.printservice.PrintService" />

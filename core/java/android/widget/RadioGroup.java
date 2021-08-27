@@ -31,6 +31,7 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
@@ -59,6 +60,7 @@ import com.android.internal.R;
  * @see RadioButton
  *
  */
+@RemoteView
 public class RadioGroup extends LinearLayout {
     private static final String LOG_TAG = RadioGroup.class.getSimpleName();
 
@@ -389,7 +391,7 @@ public class RadioGroup extends LinearLayout {
     /**
      * <p>A pass-through listener acts upon the events and dispatches them
      * to another listener. This allows the table layout to set its own internal
-     * hierarchy change listener without preventing the user to setup his.</p>
+     * hierarchy change listener without preventing the user to setup this.</p>
      */
     private class PassThroughHierarchyChangeListener implements
             ViewGroup.OnHierarchyChangeListener {

@@ -16,16 +16,17 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.example.loaders">
+     package="com.android.example.loaders">
     <application android:label="AppResourcesLoaders"
-                 android:name=".LoadersApplication">
-        <activity android:name=".LoaderActivity">
+         android:name=".LoadersApplication">
+        <activity android:name=".LoaderActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".LoaderActivityIsolated"
-                  android:process="com.android.phone" />
+             android:process="com.android.phone"/>
     </application>
 </manifest>

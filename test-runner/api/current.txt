@@ -78,6 +78,7 @@ package android.test {
 
   @Deprecated public class InstrumentationTestRunner extends android.app.Instrumentation implements android.test.TestSuiteProvider {
     ctor @Deprecated public InstrumentationTestRunner();
+    method @Deprecated protected void addTestListener(junit.framework.TestListener);
     method @Deprecated public junit.framework.TestSuite getAllTests();
     method @Deprecated protected android.test.AndroidTestRunner getAndroidTestRunner();
     method @Deprecated public android.os.Bundle getArguments();
@@ -98,6 +99,13 @@ package android.test {
   @Deprecated public class IsolatedContext extends android.content.ContextWrapper {
     ctor @Deprecated public IsolatedContext(android.content.ContentResolver, android.content.Context);
     method @Deprecated public java.util.List<android.content.Intent> getAndClearBroadcastIntents();
+  }
+
+  @Deprecated public class LaunchPerformanceBase extends android.app.Instrumentation {
+    ctor @Deprecated public LaunchPerformanceBase();
+    method @Deprecated protected void LaunchApp();
+    field @Deprecated protected android.content.Intent mIntent;
+    field @Deprecated protected android.os.Bundle mResults;
   }
 
   public class LoaderTestCase extends android.test.AndroidTestCase {
@@ -283,6 +291,11 @@ package android.test.suitebuilder {
   @Deprecated public static class TestSuiteBuilder.FailedToCreateTests extends junit.framework.TestCase {
     ctor @Deprecated public TestSuiteBuilder.FailedToCreateTests(Exception);
     method @Deprecated public void testSuiteConstructionFailed();
+  }
+
+  @Deprecated public class UnitTestSuiteBuilder extends android.test.suitebuilder.TestSuiteBuilder {
+    ctor @Deprecated public UnitTestSuiteBuilder(Class);
+    ctor @Deprecated public UnitTestSuiteBuilder(String, ClassLoader);
   }
 
 }

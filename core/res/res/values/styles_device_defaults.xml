@@ -290,6 +290,9 @@ easier.
     <style name="TextAppearance.DeviceDefault.Notification.Title" parent="TextAppearance.Material.Notification.Title">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
+    <style name="TextAppearance.DeviceDefault.Notification.BigTitle" parent="TextAppearance.Material.Notification.BigTitle">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Notification.Reply" parent="TextAppearance.Material.Notification.Reply">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
@@ -298,10 +301,6 @@ easier.
     </style>
     <style name="TextAppearance.DeviceDefault.Notification.Time" parent="TextAppearance.Material.Notification.Time">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
-    </style>
-    <style name="TextAppearance.DeviceDefault.Notification.Conversation.AppName"
-           parent="TextAppearance.Material.Notification.Conversation.AppName">
-        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget">
         <item name="fontFamily">@string/config_bodyFontFamily</item>

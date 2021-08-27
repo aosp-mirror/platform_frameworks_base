@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -31,14 +32,15 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.util.ExceptionUtils;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.FunctionalUtils;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.Assert;
 
@@ -113,7 +115,7 @@ public class DpmMockContext extends MockContext {
         }
 
         public void withCleanCallingIdentity(@NonNull FunctionalUtils.ThrowingRunnable action) {
-            long callingIdentity = clearCallingIdentity();
+            final long callingIdentity = clearCallingIdentity();
             Throwable throwableToPropagate = null;
             try {
                 action.runOrThrow();
@@ -174,6 +176,11 @@ public class DpmMockContext extends MockContext {
         binder = new MockBinder();
         resources = mock(Resources.class);
         spiedContext = mock(Context.class);
+
+        // Set up density for notification building
+        DisplayMetrics displayMetrics = mock(DisplayMetrics.class);
+        displayMetrics.density = 2.25f;
+        when(resources.getDisplayMetrics()).thenReturn(displayMetrics);
     }
 
     @Override
@@ -217,10 +224,14 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.accountManager;
             case Context.TELEPHONY_SERVICE:
                 return mMockSystemServices.telephonyManager;
+            case Context.CONNECTIVITY_SERVICE:
+                return mMockSystemServices.connectivityManager;
             case Context.APP_OPS_SERVICE:
                 return mMockSystemServices.appOpsManager;
             case Context.CROSS_PROFILE_APPS_SERVICE:
                 return mMockSystemServices.crossProfileApps;
+            case Context.VPN_MANAGEMENT_SERVICE:
+                return mMockSystemServices.vpnManager;
         }
         throw new UnsupportedOperationException();
     }
@@ -259,18 +270,7 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public int checkPermission(String permission, int pid, int uid) {
-        if (UserHandle.isSameApp(binder.getCallingUid(), SYSTEM_UID)) {
-            return PackageManager.PERMISSION_GRANTED; // Assume system has all permissions.
-        }
-        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
-        if (permissions == null) {
-            permissions = callerPermissions;
-        }
-        if (permissions.contains(permission)) {
-            return PackageManager.PERMISSION_GRANTED;
-        } else {
-            return PackageManager.PERMISSION_DENIED;
-        }
+        return checkPermission(permission);
     }
 
     @Override
@@ -286,6 +286,12 @@ public class DpmMockContext extends MockContext {
     @Override
     public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions) {
         spiedContext.sendBroadcastMultiplePermissions(intent, receiverPermissions);
+    }
+
+    @Override
+    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
+            Bundle options) {
+        spiedContext.sendBroadcastMultiplePermissions(intent, receiverPermissions, options);
     }
 
     @Override
@@ -480,11 +486,32 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public int checkCallingPermission(String permission) {
-        return spiedContext.checkCallingPermission(permission);
+        return checkPermission(permission);
+    }
+
+    @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        return checkPermission(permission);
     }
 
     @Override
     public void startActivityAsUser(Intent intent, UserHandle userHandle) {
         spiedContext.startActivityAsUser(intent, userHandle);
     }
+
+    private int checkPermission(String permission) {
+        if (UserHandle.isSameApp(binder.getCallingUid(), SYSTEM_UID)) {
+            return PackageManager.PERMISSION_GRANTED; // Assume system has all permissions.
+        }
+        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
+        if (permissions == null) {
+            permissions = callerPermissions;
+        }
+        if (permissions.contains(permission)) {
+            return PackageManager.PERMISSION_GRANTED;
+        } else {
+            return PackageManager.PERMISSION_DENIED;
+        }
+    }
+
 }

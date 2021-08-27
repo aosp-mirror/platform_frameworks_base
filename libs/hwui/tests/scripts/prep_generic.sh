@@ -28,11 +28,17 @@
 # performance between different device models.
 
 # Fun notes for maintaining this file:
-#      `expr` can deal with ints > INT32_MAX, but if compares cannot. This is why we use MHz.
-#      `expr` can sometimes evaluate right-to-left. This is why we use parens.
+#      $((arithmetic expressions)) can deal with ints > INT32_MAX, but if compares cannot. This is
+#      why we use MHz.
+#      $((arithmetic expressions)) can sometimes evaluate right-to-left. This is why we use parens.
 #      Everything below the initial host-check isn't bash - Android uses mksh
 #      mksh allows `\n` in an echo, bash doesn't
 #      can't use `awk`
+#      can't use `sed`
+#      can't use `cut` on < L
+#      can't use `expr` on < L
+
+ARG_CORES=${1:-big}
 
 CPU_TARGET_FREQ_PERCENT=50
 GPU_TARGET_FREQ_PERCENT=50
@@ -43,7 +49,7 @@ if [ "`command -v getprop`" == "" ]; then
         echo "Pushing $0 and running it on device..."
         dest=/data/local/tmp/`basename $0`
         adb push $0 ${dest}
-        adb shell ${dest}
+        adb shell ${dest} $@
         adb shell rm ${dest}
         exit
     else
@@ -56,7 +62,7 @@ if [ "`command -v getprop`" == "" ]; then
 fi
 
 # require root
-if [ "`id -u`" -ne "0" ]; then
+if [[ `id` != "uid=0"* ]]; then
     echo "Not running as root, cannot lock clocks, aborting"
     exit -1
 fi
@@ -64,74 +70,175 @@ fi
 DEVICE=`getprop ro.product.device`
 MODEL=`getprop ro.product.model`
 
-# Find CPU max frequency, and lock big cores to an available frequency
-# that's >= $CPU_TARGET_FREQ_PERCENT% of max. Disable other cores.
+if [ "$ARG_CORES" == "big" ]; then
+    CPU_IDEAL_START_FREQ_KHZ=0
+elif [ "$ARG_CORES" == "little" ]; then
+    CPU_IDEAL_START_FREQ_KHZ=100000000 ## finding min of max freqs, so start at 100M KHz (100 GHz)
+else
+    echo "Invalid argument \$1 for ARG_CORES, should be 'big' or 'little', but was $ARG_CORES"
+    exit -1
+fi
+
+function_core_check() {
+    if [ "$ARG_CORES" == "big" ]; then
+        [ $1 -gt $2 ]
+    elif [ "$ARG_CORES" == "little" ]; then
+        [ $1 -lt $2 ]
+    else
+        echo "Invalid argument \$1 for ARG_CORES, should be 'big' or 'little', but was $ARG_CORES"
+        exit -1
+    fi
+}
+
+function_setup_go() {
+    if [ -f /d/fpsgo/common/force_onoff ]; then
+        # Disable fpsgo
+        echo 0 > /d/fpsgo/common/force_onoff
+        fpsgoState=`cat /d/fpsgo/common/force_onoff`
+        if [ "$fpsgoState" != "0" ] && [ "$fpsgoState" != "force off" ]; then
+            echo "Failed to disable fpsgo"
+            exit -1
+        fi
+    fi
+}
+
+# Find the min or max (little vs big) of CPU max frequency, and lock cores of the selected type to
+# an available frequency that's >= $CPU_TARGET_FREQ_PERCENT% of max. Disable other cores.
 function_lock_cpu() {
     CPU_BASE=/sys/devices/system/cpu
     GOV=cpufreq/scaling_governor
 
+    # Options to make clock locking on go devices more sticky.
+    function_setup_go
+
     # Find max CPU freq, and associated list of available freqs
-    cpuMaxFreq=0
+    cpuIdealFreq=$CPU_IDEAL_START_FREQ_KHZ
     cpuAvailFreqCmpr=0
     cpuAvailFreq=0
     enableIndices=''
     disableIndices=''
     cpu=0
-    while [ -f ${CPU_BASE}/cpu${cpu}/online ]; do
-        # enable core, so we can find its frequencies
-        echo 1 > ${CPU_BASE}/cpu${cpu}/online
+    while [ -d ${CPU_BASE}/cpu${cpu}/cpufreq ]; do
+        # Try to enable core, so we can find its frequencies.
+        # Note: In cases where the online file is inaccessible, it represents a
+        # core which cannot be turned off, so we simply assume it is enabled if
+        # this command fails.
+        if [ -f "$CPU_BASE/cpu$cpu/online" ]; then
+            echo 1 > ${CPU_BASE}/cpu${cpu}/online || true
+        fi
+
+        # set userspace governor on all CPUs to ensure freq scaling is disabled
+        echo userspace > ${CPU_BASE}/cpu${cpu}/${GOV}
 
         maxFreq=`cat ${CPU_BASE}/cpu$cpu/cpufreq/cpuinfo_max_freq`
         availFreq=`cat ${CPU_BASE}/cpu$cpu/cpufreq/scaling_available_frequencies`
         availFreqCmpr=${availFreq// /-}
 
-        if [ ${maxFreq} -gt ${cpuMaxFreq} ]; then
-            # new highest max freq, look for cpus with same max freq and same avail freq list
-            cpuMaxFreq=${maxFreq}
+        if (function_core_check $maxFreq $cpuIdealFreq); then
+            # new min/max of max freq, look for cpus with same max freq and same avail freq list
+            cpuIdealFreq=${maxFreq}
             cpuAvailFreq=${availFreq}
             cpuAvailFreqCmpr=${availFreqCmpr}
 
-            if [ -z ${disableIndices} ]; then
+            if [ -z "$disableIndices" ]; then
                 disableIndices="$enableIndices"
             else
                 disableIndices="$disableIndices $enableIndices"
             fi
             enableIndices=${cpu}
-        elif [ ${maxFreq} == ${cpuMaxFreq} ] && [ ${availFreqCmpr} == ${cpuAvailFreqCmpr} ]; then
+        elif [ ${maxFreq} == ${cpuIdealFreq} ] && [ ${availFreqCmpr} == ${cpuAvailFreqCmpr} ]; then
             enableIndices="$enableIndices $cpu"
         else
-            disableIndices="$disableIndices $cpu"
+            if [ -z "$disableIndices" ]; then
+                disableIndices="$cpu"
+            else
+                disableIndices="$disableIndices $cpu"
+            fi
         fi
+
         cpu=$(($cpu + 1))
     done
 
+    # check that some CPUs will be enabled
+    if [ -z "$enableIndices" ]; then
+        echo "Failed to find any $ARG_CORES cores to enable, aborting."
+        exit -1
+    fi
+
     # Chose a frequency to lock to that's >= $CPU_TARGET_FREQ_PERCENT% of max
     # (below, 100M = 1K for KHz->MHz * 100 for %)
-    TARGET_FREQ_MHZ=`expr \( ${cpuMaxFreq} \* ${CPU_TARGET_FREQ_PERCENT} \) \/ 100000`
+    TARGET_FREQ_MHZ=$(( ($cpuIdealFreq * $CPU_TARGET_FREQ_PERCENT) / 100000 ))
     chosenFreq=0
+    chosenFreqDiff=100000000
     for freq in ${cpuAvailFreq}; do
-        freqMhz=`expr ${freq} \/ 1000`
+        freqMhz=$(( ${freq} / 1000 ))
         if [ ${freqMhz} -ge ${TARGET_FREQ_MHZ} ]; then
-            chosenFreq=${freq}
-            break
+            newChosenFreqDiff=$(( $freq - $TARGET_FREQ_MHZ ))
+            if [ $newChosenFreqDiff -lt $chosenFreqDiff ]; then
+                chosenFreq=${freq}
+                chosenFreqDiff=$(( $chosenFreq - $TARGET_FREQ_MHZ ))
+            fi
         fi
     done
+
+    # Lock wembley clocks using high-priority op code method.
+    # This block depends on the shell utility awk, which is only available on API 27+
+    if [ "$DEVICE" == "wembley" ]; then
+        # Get list of available frequencies to lock to by parsing the op-code list.
+        AVAIL_OP_FREQS=`cat /proc/cpufreq/MT_CPU_DVFS_LL/cpufreq_oppidx \
+            | awk '{print $2}' \
+            | tail -n +3 \
+            | while read line; do
+                echo "${line:1:${#line}-2}"
+            done`
+
+        # Compute the closest available frequency to the desired frequency, $chosenFreq.
+        # This assumes the op codes listen in /proc/cpufreq/MT_CPU_DVFS_LL/cpufreq_oppidx are listed
+        # in order and 0-indexed.
+        opCode=-1
+        opFreq=0
+        currOpCode=-1
+        for currOpFreq in $AVAIL_OP_FREQS; do
+            currOpCode=$((currOpCode + 1))
+
+            prevDiff=$((chosenFreq-opFreq))
+            prevDiff=`function_abs $prevDiff`
+            currDiff=$((chosenFreq-currOpFreq))
+            currDiff=`function_abs $currDiff`
+            if [ $currDiff -lt $prevDiff ]; then
+                opCode="$currOpCode"
+                opFreq="$currOpFreq"
+            fi
+        done
+
+        echo "$opCode" > /proc/ppm/policy/ut_fix_freq_idx
+    fi
 
     # enable 'big' CPUs
     for cpu in ${enableIndices}; do
         freq=${CPU_BASE}/cpu$cpu/cpufreq
 
-        echo 1 > ${CPU_BASE}/cpu${cpu}/online
-        echo userspace > ${CPU_BASE}/cpu${cpu}/${GOV}
+        # Try to enable core, so we can find its frequencies.
+        # Note: In cases where the online file is inaccessible, it represents a
+        # core which cannot be turned off, so we simply assume it is enabled if
+        # this command fails.
+        if [ -f "$CPU_BASE/cpu$cpu/online" ]; then
+            echo 1 > ${CPU_BASE}/cpu${cpu}/online || true
+        fi
+
+        # scaling_max_freq must be set before scaling_min_freq
         echo ${chosenFreq} > ${freq}/scaling_max_freq
         echo ${chosenFreq} > ${freq}/scaling_min_freq
         echo ${chosenFreq} > ${freq}/scaling_setspeed
+
+        # Give system a bit of time to propagate the change to scaling_setspeed.
+        sleep 0.1
 
         # validate setting the freq worked
         obsCur=`cat ${freq}/scaling_cur_freq`
         obsMin=`cat ${freq}/scaling_min_freq`
         obsMax=`cat ${freq}/scaling_max_freq`
-        if [ obsCur -ne ${chosenFreq} ] || [ obsMin -ne ${chosenFreq} ] || [ obsMax -ne ${chosenFreq} ]; then
+        if [ "$obsCur" -ne "$chosenFreq" ] || [ "$obsMin" -ne "$chosenFreq" ] || [ "$obsMax" -ne "$chosenFreq" ]; then
             echo "Failed to set CPU$cpu to $chosenFreq Hz! Aborting..."
             echo "scaling_cur_freq = $obsCur"
             echo "scaling_min_freq = $obsMin"
@@ -145,8 +252,20 @@ function_lock_cpu() {
       echo 0 > ${CPU_BASE}/cpu${cpu}/online
     done
 
-    echo "\nLocked CPUs ${enableIndices// /,} to $chosenFreq / $maxFreq KHz"
+    echo "=================================="
+    echo "Locked CPUs ${enableIndices// /,} to $chosenFreq / $cpuIdealFreq KHz"
     echo "Disabled CPUs ${disableIndices// /,}"
+    echo "=================================="
+}
+
+# Returns the absolute value of the first arg passed to this helper.
+function_abs() {
+    n=$1
+    if [ $n -lt 0 ]; then
+        echo "$((n * -1 ))"
+    else
+        echo "$n"
+    fi
 }
 
 # If we have a Qualcomm GPU, find its max frequency, and lock to
@@ -154,12 +273,12 @@ function_lock_cpu() {
 function_lock_gpu_kgsl() {
     if [ ! -d /sys/class/kgsl/kgsl-3d0/ ]; then
         # not kgsl, abort
-        echo "\nCurrently don't support locking GPU clocks of $MODEL ($DEVICE)"
+        echo "Currently don't support locking GPU clocks of $MODEL ($DEVICE)"
         return -1
     fi
     if [ ${DEVICE} == "walleye" ] || [ ${DEVICE} == "taimen" ]; then
         # Workaround crash
-        echo "\nUnable to lock GPU clocks of $MODEL ($DEVICE)"
+        echo "Unable to lock GPU clocks of $MODEL ($DEVICE)"
         return -1
     fi
 
@@ -174,13 +293,13 @@ function_lock_gpu_kgsl() {
     done
 
     # (below, 100M = 1M for MHz * 100 for %)
-    TARGET_FREQ_MHZ=`expr \( ${gpuMaxFreq} \* ${GPU_TARGET_FREQ_PERCENT} \) \/ 100000000`
+    TARGET_FREQ_MHZ=$(( (${gpuMaxFreq} * ${GPU_TARGET_FREQ_PERCENT}) / 100000000 ))
 
     chosenFreq=${gpuMaxFreq}
     index=0
     chosenIndex=0
     for freq in ${gpuAvailFreq}; do
-        freqMhz=`expr ${freq} \/ 1000000`
+        freqMhz=$(( ${freq} / 1000000 ))
         if [ ${freqMhz} -ge ${TARGET_FREQ_MHZ} ] && [ ${chosenFreq} -ge ${freq} ]; then
             # note avail freq are generally in reverse order, so we don't break out of this loop
             chosenFreq=${freq}
@@ -190,7 +309,7 @@ function_lock_gpu_kgsl() {
     done
     lastIndex=$(($index - 1))
 
-    firstFreq=`echo $gpuAvailFreq | cut -d" " -f1`
+    firstFreq=`function_cut_first_from_space_seperated_list $gpuAvailFreq`
 
     if [ ${gpuMaxFreq} != ${firstFreq} ]; then
         # pwrlevel is index of desired freq among available frequencies, from highest to lowest.
@@ -226,24 +345,40 @@ function_lock_gpu_kgsl() {
         echo "index = $chosenIndex"
         exit -1
     fi
-    echo "\nLocked GPU to $chosenFreq / $gpuMaxFreq Hz"
+    echo "Locked GPU to $chosenFreq / $gpuMaxFreq Hz"
+}
+
+# cut is not available on some devices (Nexus 5 running LRX22C).
+function_cut_first_from_space_seperated_list() {
+    list=$1
+
+    for freq in $list; do
+        echo $freq
+        break
+    done
 }
 
 # kill processes that manage thermals / scaling
-stop thermal-engine
-stop perfd
-stop vendor.thermal-engine
-stop vendor.perfd
+stop thermal-engine || true
+stop perfd || true
+stop vendor.thermal-engine || true
+stop vendor.perfd || true
+setprop vendor.powerhal.init 0 || true
+setprop ctl.interface_restart android.hardware.power@1.0::IPower/default || true
 
 function_lock_cpu
 
-function_lock_gpu_kgsl
+if [ "$DEVICE" -ne "wembley" ]; then
+    function_lock_gpu_kgsl
+else
+    echo "Unable to lock gpu clocks of $MODEL ($DEVICE)."
+fi
 
 # Memory bus - hardcoded per-device for now
 if [ ${DEVICE} == "marlin" ] || [ ${DEVICE} == "sailfish" ]; then
     echo 13763 > /sys/class/devfreq/soc:qcom,gpubw/max_freq
 else
-    echo "\nUnable to lock memory bus of $MODEL ($DEVICE)."
+    echo "Unable to lock memory bus of $MODEL ($DEVICE)."
 fi
 
-echo "\n$DEVICE clocks have been locked - to reset, reboot the device\n"
+echo "$DEVICE clocks have been locked - to reset, reboot the device"

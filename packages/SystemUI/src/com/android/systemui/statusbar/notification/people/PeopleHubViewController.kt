@@ -23,10 +23,10 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
 import android.view.View
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Boundary between the View and PeopleHub, as seen by the View. */
 interface PeopleHubViewAdapter {
@@ -68,7 +68,7 @@ interface PeopleHubViewModelFactory {
  *
  * @param dataSource PeopleHub data pipeline.
  */
-@Singleton
+@SysUISingleton
 class PeopleHubViewAdapterImpl @Inject constructor(
     private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubViewModelFactory>
 ) : PeopleHubViewAdapter {
@@ -99,7 +99,7 @@ private class PeopleHubDataListenerImpl(
  * This class serves as the glue between the View layer (which depends on
  * [PeopleHubViewBoundary]) and the Data layer (which produces [PeopleHubModel]s).
  */
-@Singleton
+@SysUISingleton
 class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(
     private val activityStarter: ActivityStarter,
     private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>
@@ -151,7 +151,7 @@ private class PeopleHubViewModelFactoryImpl(
     }
 }
 
-@Singleton
+@SysUISingleton
 class PeopleHubSettingChangeDataSourceImpl @Inject constructor(
     @Main private val handler: Handler,
     context: Context

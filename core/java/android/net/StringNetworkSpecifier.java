@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -45,7 +46,7 @@ public final class StringNetworkSpecifier extends NetworkSpecifier implements Pa
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof StringNetworkSpecifier)) return false;
         return TextUtils.equals(specifier, ((StringNetworkSpecifier) o).specifier);
     }

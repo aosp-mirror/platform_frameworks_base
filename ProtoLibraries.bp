@@ -1,0 +1,253 @@
+// Copyright (C) 2021 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+gensrcs {
+    name: "framework-javastream-protos",
+    depfile: true,
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-javastream",
+        "soong_zip",
+    ],
+
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        ":libtombstone_proto-src",
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+        ":service-permission-protos",
+    ],
+    output_extension: "srcjar",
+}
+
+gensrcs {
+    name: "framework-cppstream-protos",
+    depfile: true,
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-cppstream",
+    ],
+
+    cmd: "mkdir -p $(genDir) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-cppstream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --cppstream_out=$(genDir) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in)",
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+        ":service-permission-protos",
+    ],
+
+    output_extension: "proto.h",
+}
+
+// ====  java proto host library  ==============================
+java_library_host {
+    name: "platformprotos",
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        ":libstats_internal_protos",
+        ":statsd_internal_protos",
+        "cmds/am/proto/instrumentation_data.proto",
+        "cmds/statsd/src/**/*.proto",
+        "core/proto/**/*.proto",
+        "libs/incident/proto/**/*.proto",
+        ":service-permission-protos",
+    ],
+    proto: {
+        include_dirs: [
+            "external/protobuf/src",
+            "frameworks/proto_logging/stats",
+        ],
+        type: "full",
+    },
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
+
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotosnano",
+    proto: {
+        type: "nano",
+        output_params: ["store_unknown_fields=true"],
+        include_dirs: ["external/protobuf/src"],
+    },
+    exclude_srcs: [
+        "core/proto/android/privacy.proto",
+        "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
+    ],
+    sdk_version: "9",
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
+    ],
+}
+
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotoslite",
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
+    ],
+    exclude_srcs: [
+        "core/proto/android/privacy.proto",
+        "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
+    ],
+    sdk_version: "core_current",
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
+
+// ====  c++ proto device library  ==============================
+cc_defaults {
+    name: "libplatformprotos-defaults",
+
+    proto: {
+        export_proto_headers: true,
+        include_dirs: [
+            "external/protobuf/src",
+        ],
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
+        "core/proto/**/*.proto",
+        ":service-permission-protos",
+    ],
+}
+
+cc_library {
+    name: "libplatformprotos",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: true,
+
+    target: {
+        host: {
+            proto: {
+                type: "full",
+            },
+        },
+        android: {
+            proto: {
+                type: "lite",
+            },
+            shared_libs: [
+                "libprotobuf-cpp-lite",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
+// This library is meant for vendor code that needs to output protobuf. It links
+// against the static version of libprotobuf-cpp-lite, for which we can not guarantee
+// binary compatibility.
+cc_library {
+    name: "libplatformprotos-static",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    // This is okay because this library is only built as a static library.  The C++
+    // API is not guaranteed. The proto API is guaranteed to be stable via Metrics Council,
+    // but is not authorized to be used outside of debugging.
+    vendor_available: true,
+
+    target: {
+        android: {
+            proto: {
+                type: "lite",
+            },
+            static_libs: [
+                "libprotobuf-cpp-lite",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
+// This is the full proto version of libplatformprotos. It may only
+// be used by test code that is not shipped on the device.
+cc_library {
+    name: "libplatformprotos-test",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    target: {
+        android: {
+            proto: {
+                type: "full",
+            },
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}

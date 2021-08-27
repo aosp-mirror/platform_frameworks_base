@@ -131,7 +131,7 @@ static media_status_t AMIDI_getDeviceInfo(const AMidiDevice *device,
     MidiDeviceInfo deviceInfo;
     Status txResult = device->server->getDeviceInfo(&deviceInfo);
     if (!txResult.isOk()) {
-        ALOGE("AMIDI_getDeviceInfo transaction error: %d", txResult.transactionError());
+        ALOGE("%s server exception code: %d", __func__, txResult.exceptionCode());
         return AMEDIA_ERROR_UNKNOWN;
     }
 
@@ -253,7 +253,7 @@ static media_status_t AMIDI_openPort(const AMidiDevice *device, int32_t portNumb
             ? device->server->openOutputPort(portToken, portNumber, &ufd)
             : device->server->openInputPort(portToken, portNumber, &ufd);
     if (!txResult.isOk()) {
-        ALOGE("AMIDI_openPort transaction error: %d", txResult.transactionError());
+        ALOGE("%s server exception code: %d", __func__, txResult.exceptionCode());
         return AMEDIA_ERROR_UNKNOWN;
     }
 
@@ -282,7 +282,7 @@ static void AMIDI_closePort(AMIDI_Port *port) {
 
     Status txResult = port->device->server->closePort(port->binderToken);
     if (!txResult.isOk()) {
-        ALOGE("Transaction error closing MIDI port:%d", txResult.transactionError());
+        ALOGE("%s server exception code: %d", __func__, txResult.exceptionCode());
     }
 
     delete port;

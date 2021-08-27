@@ -24,10 +24,11 @@ import static android.net.TrafficStats.UID_TETHERING;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.app.AppOpsManager;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
@@ -108,15 +109,22 @@ public final class NetworkStatsAccess {
                 DevicePolicyManagerInternal.class);
         final TelephonyManager tm = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
-        boolean hasCarrierPrivileges = tm != null &&
-                tm.checkCarrierPrivilegesForPackageAnyPhone(callingPackage) ==
-                        TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
-        boolean isDeviceOwner = dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
-                DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        boolean hasCarrierPrivileges;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            hasCarrierPrivileges = tm != null
+                    && tm.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        final boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
+        final int appId = UserHandle.getAppId(callingUid);
         if (hasCarrierPrivileges || isDeviceOwner
-                || UserHandle.getAppId(callingUid) == android.os.Process.SYSTEM_UID) {
-            // Carrier-privileged apps and device owners, and the system can access data usage for
-            // all apps on the device.
+                || appId == Process.SYSTEM_UID || appId == Process.NETWORK_STACK_UID) {
+            // Carrier-privileged apps and device owners, and the system (including the
+            // network stack) can access data usage for all apps on the device.
             return NetworkStatsAccess.Level.DEVICE;
         }
 
@@ -126,8 +134,9 @@ public final class NetworkStatsAccess {
             return NetworkStatsAccess.Level.DEVICESUMMARY;
         }
 
-        boolean isProfileOwner = dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
-                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
+        boolean isProfileOwner = dpmi != null && (dpmi.isActiveProfileOwner(callingUid)
+                || dpmi.isActiveDeviceOwner(callingUid));
         if (isProfileOwner) {
             // Apps with the AppOps permission, profile owners, and apps with the privileged
             // permission can access data usage for all apps in this user/profile.

@@ -32,6 +32,7 @@ public final class StorageStats implements Parcelable {
     /** {@hide} */ public long codeBytes;
     /** {@hide} */ public long dataBytes;
     /** {@hide} */ public long cacheBytes;
+    /** {@hide} */ public long externalCacheBytes;
 
     /**
      * Return the size of app. This includes {@code APK} files, optimized
@@ -44,12 +45,6 @@ public final class StorageStats implements Parcelable {
      */
     public @BytesLong long getAppBytes() {
         return codeBytes;
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getCodeBytes() {
-        return getAppBytes();
     }
 
     /**
@@ -83,6 +78,17 @@ public final class StorageStats implements Parcelable {
         return cacheBytes;
     }
 
+    /**
+     * Return the size of all cached data in the primary external/shared storage.
+     * This includes files stored under
+     * {@link Context#getExternalCacheDir()}.
+     * <p>
+     * Cached data is isolated for each user on a multiuser device.
+     */
+    public @BytesLong long getExternalCacheBytes() {
+        return externalCacheBytes;
+    }
+
     /** {@hide} */
     public StorageStats() {
     }
@@ -92,6 +98,7 @@ public final class StorageStats implements Parcelable {
         this.codeBytes = in.readLong();
         this.dataBytes = in.readLong();
         this.cacheBytes = in.readLong();
+        this.externalCacheBytes = in.readLong();
     }
 
     @Override
@@ -104,6 +111,7 @@ public final class StorageStats implements Parcelable {
         dest.writeLong(codeBytes);
         dest.writeLong(dataBytes);
         dest.writeLong(cacheBytes);
+        dest.writeLong(externalCacheBytes);
     }
 
     public static final @android.annotation.NonNull Creator<StorageStats> CREATOR = new Creator<StorageStats>() {

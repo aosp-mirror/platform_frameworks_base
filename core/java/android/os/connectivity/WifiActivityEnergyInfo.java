@@ -110,7 +110,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         }
         // Calculate energy used using PowerProfile.
         PowerProfile powerProfile = new PowerProfile(context);
-        final double rxIdleCurrent = powerProfile.getAveragePower(
+        final double idleCurrent = powerProfile.getAveragePower(
                 PowerProfile.POWER_WIFI_CONTROLLER_IDLE);
         final double rxCurrent = powerProfile.getAveragePower(
                 PowerProfile.POWER_WIFI_CONTROLLER_RX);
@@ -121,7 +121,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
 
         return (long) ((txDurationMillis * txCurrent
                 + rxDurationMillis * rxCurrent
-                + idleDurationMillis * rxIdleCurrent)
+                + idleDurationMillis * idleCurrent)
                 * voltage);
     }
 

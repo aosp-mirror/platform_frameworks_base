@@ -43,6 +43,8 @@ public class RestrictedPreferenceHelperTest {
     private Context mContext;
     @Mock
     private Preference mPreference;
+    @Mock
+    private RestrictedTopLevelPreference mRestrictedTopLevelPreference;
 
     private PreferenceViewHolder mViewHolder;
     private RestrictedPreferenceHelper mHelper;
@@ -85,5 +87,22 @@ public class RestrictedPreferenceHelperTest {
 
         verify(summaryView).setText(null);
         verify(summaryView, never()).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void setDisabledByAdmin_RestrictedPreference_shouldDisablePreference() {
+        mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
+
+        verify(mPreference).setEnabled(false);
+    }
+
+    @Test
+    public void setDisabledByAdmin_TopLevelRestrictedPreference_shouldNotDisablePreference() {
+        mHelper = new RestrictedPreferenceHelper(mContext,
+                mRestrictedTopLevelPreference, /* attrs= */ null);
+
+        mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
+
+        verify(mRestrictedTopLevelPreference, never()).setEnabled(false);
     }
 }

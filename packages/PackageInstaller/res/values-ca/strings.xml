@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instal·lador de paquets"</string>
     <string name="install" msgid="711829760615509273">"Instal·la"</string>
+    <string name="update" msgid="3932142540719227615">"Actualitza"</string>
     <string name="done" msgid="6632441120016885253">"Fet"</string>
     <string name="cancel" msgid="1018267193425558088">"Cancel·la"</string>
     <string name="installing" msgid="4921993079741206516">"S\'està instal·lant…"</string>
     <string name="installing_app" msgid="1165095864863849422">"S\'està instal·lant <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"S\'ha instal·lat l\'aplicació."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Vols instal·lar aquesta aplicació?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vols instal·lar una actualització en aquesta aplicació? Les teves dades no es perdran."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vols instal·lar una actualització en aquesta aplicació integrada? Les teves dades no es perdran."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Vols instal·lar aquesta aplicació?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Vols actualitzar aquesta aplicació?"</string>
     <string name="install_failed" msgid="5777824004474125469">"No s\'ha instal·lat l\'aplicació."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"El paquet s\'ha bloquejat perquè no es pugui instal·lar."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'aplicació no s\'ha instal·lat perquè el paquet entra en conflicte amb un d\'existent."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Les accions d\'instal·lar o de desinstal·lar no s\'admeten a Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"S\'està preparant la instal·lació de l\'aplicació…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconeguda"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Per la teva seguretat, la tauleta no pot instal·lar aplicacions desconegudes d\'aquesta font."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Per la teva seguretat, el televisor no pot instal·lar aplicacions desconegudes d\'aquesta font."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Per la teva seguretat, el telèfon no pot instal·lar aplicacions desconegudes d\'aquesta font."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Per la teva seguretat, actualment la tauleta no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Per la teva seguretat, actualment la televisió no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Per la teva seguretat, actualment el telèfon no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"El telèfon i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi al telèfon o de la pèrdua de dades que pugui resultar del seu ús."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"La tauleta i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi a la tauleta o de la pèrdua de dades que pugui resultar del seu ús."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"El televisor i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi al televisor o de la pèrdua de dades que pugui resultar del seu ús."</string>

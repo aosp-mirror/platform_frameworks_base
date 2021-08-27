@@ -65,4 +65,12 @@ public class InputMethodDebugTest {
                 InputMethodDebug.startInputFlagsToString(
                         StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.INITIAL_CONNECTION));
     }
+
+    @Test
+    public void testSoftInputDisplayReasonToString() {
+        // TODO: add more tests
+        assertEquals("HIDE_REMOVE_CLIENT",
+                InputMethodDebug.softInputDisplayReasonToString(
+                        SoftInputShowHideReason.HIDE_REMOVE_CLIENT));
+    }
 }

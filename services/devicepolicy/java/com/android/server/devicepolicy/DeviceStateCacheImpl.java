@@ -16,9 +16,9 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.DeviceStateCache;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
 
 /**
  * Implementation of {@link DeviceStateCache}, to which {@link DevicePolicyManagerService} pushes

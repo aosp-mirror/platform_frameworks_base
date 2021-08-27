@@ -33,7 +33,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
     private final String mClock;
     private boolean mClockEnabled;
     private boolean mHasSeconds;
-    private ArraySet<String> mBlacklist;
+    private ArraySet<String> mHideList;
     private boolean mHasSetValue;
     private boolean mReceivedSeconds;
     private boolean mReceivedClock;
@@ -47,7 +47,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
     @Override
     public void onAttached() {
         super.onAttached();
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST,
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST,
                 Clock.CLOCK_SECONDS);
     }
 
@@ -59,10 +59,10 @@ public class ClockPreference extends DropDownPreference implements TunerService.
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+        if (StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
             mReceivedClock = true;
-            mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
-            mClockEnabled = !mBlacklist.contains(mClock);
+            mHideList = StatusBarIconController.getIconHideList(getContext(), newValue);
+            mClockEnabled = !mHideList.contains(mClock);
         } else if (Clock.CLOCK_SECONDS.equals(key)) {
             mReceivedSeconds = true;
             mHasSeconds = newValue != null && Integer.parseInt(newValue) != 0;
@@ -87,12 +87,12 @@ public class ClockPreference extends DropDownPreference implements TunerService.
         Dependency.get(TunerService.class).setValue(Clock.CLOCK_SECONDS, SECONDS.equals(value) ? 1
                 : 0);
         if (DISABLED.equals(value)) {
-            mBlacklist.add(mClock);
+            mHideList.add(mClock);
         } else {
-            mBlacklist.remove(mClock);
+            mHideList.remove(mClock);
         }
-        Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_BLACKLIST,
-                TextUtils.join(",", mBlacklist));
+        Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_HIDE_LIST,
+                TextUtils.join(",", mHideList));
         return true;
     }
 }

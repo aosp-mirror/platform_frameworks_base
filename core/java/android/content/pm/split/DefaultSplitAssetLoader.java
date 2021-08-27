@@ -18,9 +18,11 @@ package android.content.pm.split;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.ParseFlags;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.os.Build;
@@ -36,20 +38,23 @@ import java.io.IOException;
  * @hide
  */
 public class DefaultSplitAssetLoader implements SplitAssetLoader {
-    private final String mBaseCodePath;
-    private final String[] mSplitCodePaths;
+    private final String mBaseApkPath;
+    private final String[] mSplitApkPaths;
     private final @ParseFlags int mFlags;
     private AssetManager mCachedAssetManager;
 
-    public DefaultSplitAssetLoader(PackageParser.PackageLite pkg, @ParseFlags int flags) {
-        mBaseCodePath = pkg.baseCodePath;
-        mSplitCodePaths = pkg.splitCodePaths;
+    private ApkAssets mBaseApkAssets;
+
+    public DefaultSplitAssetLoader(PackageLite pkg, @ParseFlags int flags) {
+        mBaseApkPath = pkg.getBaseApkPath();
+        mSplitApkPaths = pkg.getSplitApkPaths();
         mFlags = flags;
     }
 
     private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
             throws PackageParserException {
-        if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(path)) {
+        if ((flags & ParsingPackageUtils.PARSE_MUST_BE_APK) != 0
+                && !ApkLiteParseUtils.isApkPath(path)) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "Invalid package file: " + path);
         }
@@ -68,16 +73,16 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
             return mCachedAssetManager;
         }
 
-        ApkAssets[] apkAssets = new ApkAssets[(mSplitCodePaths != null
-                ? mSplitCodePaths.length : 0) + 1];
+        ApkAssets[] apkAssets = new ApkAssets[(mSplitApkPaths != null
+                ? mSplitApkPaths.length : 0) + 1];
 
         // Load the base.
         int splitIdx = 0;
-        apkAssets[splitIdx++] = loadApkAssets(mBaseCodePath, mFlags);
+        apkAssets[splitIdx++] = mBaseApkAssets = loadApkAssets(mBaseApkPath, mFlags);
 
         // Load any splits.
-        if (!ArrayUtils.isEmpty(mSplitCodePaths)) {
-            for (String apkPath : mSplitCodePaths) {
+        if (!ArrayUtils.isEmpty(mSplitApkPaths)) {
+            for (String apkPath : mSplitApkPaths) {
                 apkAssets[splitIdx++] = loadApkAssets(apkPath, mFlags);
             }
         }
@@ -94,6 +99,11 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
     @Override
     public AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException {
         return getBaseAssetManager();
+    }
+
+    @Override
+    public ApkAssets getBaseApkAssets() {
+        return mBaseApkAssets;
     }
 
     @Override

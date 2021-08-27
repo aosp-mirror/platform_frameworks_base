@@ -1,0 +1,5 @@
+# compat-team@ for changes to hiddenapi files
+file:tools/platform-compat:/OWNERS
+
+# Escalations:
+per-file hiddenapi-* = bdc@google.com, narayan@google.com

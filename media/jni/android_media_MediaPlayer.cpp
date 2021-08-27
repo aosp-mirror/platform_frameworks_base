@@ -32,7 +32,8 @@
 #include <fcntl.h>
 #include <utils/threads.h>
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/Log.h"
@@ -590,7 +591,7 @@ android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
     ALOGV("getSyncSettings: %d %d %f %f",
             scp.sync.mSource, scp.sync.mAudioAdjustMode, scp.sync.mTolerance, scp.frameRate);
 
-    // sanity check params
+    // check params
     if (scp.sync.mSource >= AVSYNC_SOURCE_MAX
             || scp.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
             || scp.sync.mTolerance < 0.f
@@ -944,10 +945,15 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 }
 
 static void
-android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
+                                       jobject jAttributionSource)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer> mp = new MediaPlayer();
+
+    Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
+    android::content::AttributionSourceState attributionSource;
+    attributionSource.readFromParcel(parcel);
+    sp<MediaPlayer> mp = new MediaPlayer(attributionSource);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -1403,10 +1409,10 @@ static const JNINativeMethod gMethods[] = {
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
-    {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
+    {"native_setup",        "(Ljava/lang/Object;Landroid/os/Parcel;)V",(void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
-    {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
+    {"native_setAudioSessionId",   "(I)V",                      (void *)android_media_MediaPlayer_set_audio_session_id},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
@@ -1453,7 +1459,6 @@ extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
-extern int register_android_media_MediaTranscodeManager(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
@@ -1563,11 +1568,6 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaHTTPConnection(env) < 0) {
         ALOGE("ERROR: MediaHTTPConnection native registration failed");
-        goto bail;
-    }
-
-    if (register_android_media_MediaTranscodeManager(env) < 0) {
-        ALOGE("ERROR: MediaTranscodeManager native registration failed");
         goto bail;
     }
 

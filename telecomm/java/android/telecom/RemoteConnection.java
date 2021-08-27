@@ -16,12 +16,10 @@
 
 package android.telecom;
 
-import com.android.internal.telecom.IConnectionService;
-import com.android.internal.telecom.IVideoCallback;
-import com.android.internal.telecom.IVideoProvider;
-
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -32,6 +30,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.telecom.Logging.Session;
 import android.view.Surface;
+
+import com.android.internal.telecom.IConnectionService;
+import com.android.internal.telecom.IVideoCallback;
+import com.android.internal.telecom.IVideoProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1114,6 +1116,23 @@ public final class RemoteConnection {
     }
 
     /**
+     * Instructs this {@link RemoteConnection} to initiate a conference with a list of
+     * participants.
+     * <p>
+     *
+     * @param participants with which conference call will be formed.
+     */
+    public void addConferenceParticipants(@NonNull List<Uri> participants) {
+        try {
+            if (mConnected) {
+                mConnectionService.addConferenceParticipants(mConnectionId, participants,
+                        null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
@@ -1173,6 +1192,29 @@ public final class RemoteConnection {
         try {
             if (mConnected) {
                 mConnectionService.stopRtt(mConnectionId, null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
+        }
+    }
+
+    /**
+     * Notifies this {@link RemoteConnection} that call filtering has completed, as well as
+     * the results of a contacts lookup for the remote party.
+     *
+     * @param completionInfo Info provided by Telecom on the results of call filtering.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(
+            @NonNull Connection.CallFilteringCompletionInfo completionInfo) {
+        Log.startSession("RC.oCFC", getActiveOwnerInfo());
+        try {
+            if (mConnected) {
+                mConnectionService.onCallFilteringCompleted(mConnectionId, completionInfo,
+                        null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         } finally {

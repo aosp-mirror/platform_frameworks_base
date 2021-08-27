@@ -17,16 +17,33 @@
 package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 
+import android.app.ActivityTaskManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
+import android.util.Slog;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationDefinition;
+import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
@@ -34,12 +51,41 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.SystemUIApplication;
+import com.android.wm.shell.transition.Transitions;
 
 import javax.inject.Inject;
 
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
+
+    /**
+     * Run Keyguard animation as remote animation in System UI instead of local animation in
+     * the server process.
+     *
+     * 0: Runs all keyguard animation as local animation
+     * 1: Only runs keyguard going away animation as remote animation
+     * 2: Runs all keyguard animation as remote animation
+     *
+     * Note: Must be consistent with WindowManagerService.
+     */
+    private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
+            "persist.wm.enable_remote_keyguard_animation";
+
+    private static final int sEnableRemoteKeyguardAnimation =
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 0);
+
+    /**
+     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
+     */
+    public static boolean sEnableRemoteKeyguardGoingAwayAnimation =
+            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 1;
+
+    /**
+     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
+     */
+    public static boolean sEnableRemoteKeyguardOccludeAnimation =
+            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 2;
 
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
@@ -50,6 +96,23 @@ public class KeyguardService extends Service {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
+
+        RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        if (sEnableRemoteKeyguardGoingAwayAnimation) {
+            final RemoteAnimationAdapter exitAnimationAdapter =
+                    new RemoteAnimationAdapter(mExitAnimationRunner, 0, 0);
+            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY, exitAnimationAdapter);
+            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    exitAnimationAdapter);
+        }
+        if (sEnableRemoteKeyguardOccludeAnimation) {
+            final RemoteAnimationAdapter occludeAnimationAdapter =
+                    new RemoteAnimationAdapter(mOccludeAnimationRunner, 0, 0);
+            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE, occludeAnimationAdapter);
+            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE, occludeAnimationAdapter);
+        }
+        ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
+                DEFAULT_DISPLAY, definition);
     }
 
     @Override
@@ -73,6 +136,54 @@ public class KeyguardService extends Service {
                     + ", must have permission " + PERMISSION);
         }
     }
+
+    private final IRemoteAnimationRunner.Stub mExitAnimationRunner =
+            new IRemoteAnimationRunner.Stub() {
+        @Override // Binder interface
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) {
+            Trace.beginSection("KeyguardService.mBinder#startKeyguardExitAnimation");
+            checkPermission();
+            mKeyguardViewMediator.startKeyguardExitAnimation(transit, apps, wallpapers,
+                    null /* nonApps */, finishedCallback);
+            Trace.endSection();
+        }
+
+        @Override // Binder interface
+        public void onAnimationCancelled() {
+            mKeyguardViewMediator.cancelKeyguardExitAnimation();
+        }
+    };
+
+    private final IRemoteAnimationRunner.Stub mOccludeAnimationRunner =
+            new IRemoteAnimationRunner.Stub() {
+        @Override // Binder interface
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                       RemoteAnimationTarget[] apps,
+                       RemoteAnimationTarget[] wallpapers,
+                        RemoteAnimationTarget[] nonApps,
+                        IRemoteAnimationFinishedCallback finishedCallback) {
+            try {
+                if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
+                    mBinder.setOccluded(true /* isOccluded */, true /* animate */);
+                } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
+                    mBinder.setOccluded(false /* isOccluded */, true /* animate */);
+                }
+                // TODO(bc-unlock): Implement occlude/unocclude animation applied on apps,
+                //  wallpapers and nonApps.
+                finishedCallback.onAnimationFinished();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException");
+            }
+        }
+
+        @Override // Binder interface
+        public void onAnimationCancelled() {
+        }
+    };
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
 
@@ -117,27 +228,33 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onStartedGoingToSleep(int reason) {
+        public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
             checkPermission();
-            mKeyguardViewMediator.onStartedGoingToSleep(reason);
+            mKeyguardViewMediator.onStartedGoingToSleep(
+                    WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason));
             mKeyguardLifecyclesDispatcher.dispatch(
-                    KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP);
+                    KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP, pmSleepReason);
         }
 
         @Override // Binder interface
-        public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
+        public void onFinishedGoingToSleep(
+                @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
             checkPermission();
-            mKeyguardViewMediator.onFinishedGoingToSleep(reason, cameraGestureTriggered);
+            mKeyguardViewMediator.onFinishedGoingToSleep(
+                    WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
+                    cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.FINISHED_GOING_TO_SLEEP);
         }
 
         @Override // Binder interface
-        public void onStartedWakingUp() {
+        public void onStartedWakingUp(
+                @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
-            mKeyguardViewMediator.onStartedWakingUp();
-            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.STARTED_WAKING_UP);
+            mKeyguardViewMediator.onStartedWakingUp(cameraGestureTriggered);
+            mKeyguardLifecyclesDispatcher.dispatch(
+                    KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();
         }
 
@@ -218,6 +335,11 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.onBootCompleted();
         }
 
+        /**
+         * @deprecated When remote animation is enabled, this won't be called anymore. Use
+         * {@code IRemoteAnimationRunner#onAnimationStart} instead.
+         */
+        @Deprecated
         @Override
         public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
             Trace.beginSection("KeyguardService.mBinder#startKeyguardExitAnimation");

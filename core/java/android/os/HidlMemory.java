@@ -79,6 +79,7 @@ public class HidlMemory implements Closeable {
     public void close() throws IOException {
         if (mHandle != null) {
             mHandle.close();
+            mHandle = null;
         }
     }
 

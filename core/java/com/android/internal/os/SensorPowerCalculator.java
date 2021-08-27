@@ -17,73 +17,100 @@ package com.android.internal.os;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.UidBatteryConsumer;
 import android.util.SparseArray;
-
-import com.android.internal.location.gnssmetrics.GnssMetrics;
 
 import java.util.List;
 
 public class SensorPowerCalculator extends PowerCalculator {
-    private final List<Sensor> mSensors;
-    private final double mGpsPower;
+    private final SparseArray<Sensor> mSensors;
 
-    public SensorPowerCalculator(PowerProfile profile, SensorManager sensorManager,
-            BatteryStats stats, long rawRealtimeUs, int statsType) {
-        mSensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
-        mGpsPower = getAverageGpsPower(profile, stats, rawRealtimeUs, statsType);
+    public SensorPowerCalculator(SensorManager sensorManager) {
+        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+        mSensors = new SparseArray<>(sensors.size());
+        for (int i = 0; i < sensors.size(); i++) {
+            Sensor sensor = sensors.get(i);
+            mSensors.put(sensor.getHandle(), sensor);
+        }
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        double appsPowerMah = 0;
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+        }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, appsPowerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, appsPowerMah);
+    }
+
+    private double calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs) {
+        final double powerMah = calculatePowerMah(u, rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SENSORS,
+                        calculateDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED))
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, powerMah);
+        return powerMah;
+    }
+
+    @Override
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
-        // Process Sensor usage
+        app.sensorPowerMah = calculatePowerMah(u, rawRealtimeUs, statsType);
+    }
+
+    private long calculateDuration(BatteryStats.Uid u, long rawRealtimeUs, int statsType) {
+        long durationMs = 0;
         final SparseArray<? extends BatteryStats.Uid.Sensor> sensorStats = u.getSensorStats();
         final int NSE = sensorStats.size();
         for (int ise = 0; ise < NSE; ise++) {
-            final BatteryStats.Uid.Sensor sensor = sensorStats.valueAt(ise);
             final int sensorHandle = sensorStats.keyAt(ise);
-            final BatteryStats.Timer timer = sensor.getSensorTime();
-            final long sensorTime = timer.getTotalTimeLocked(rawRealtimeUs, statsType) / 1000;
-
-            switch (sensorHandle) {
-                case BatteryStats.Uid.Sensor.GPS:
-                    app.gpsTimeMs = sensorTime;
-                    app.gpsPowerMah = (app.gpsTimeMs * mGpsPower) / (1000*60*60);
-                    break;
-                default:
-                    final int sensorsCount = mSensors.size();
-                    for (int i = 0; i < sensorsCount; i++) {
-                        final Sensor s = mSensors.get(i);
-                        if (s.getHandle() == sensorHandle) {
-                            app.sensorPowerMah += (sensorTime * s.getPower()) / (1000*60*60);
-                            break;
-                        }
-                    }
-                    break;
+            if (sensorHandle == BatteryStats.Uid.Sensor.GPS) {
+                continue;
             }
+
+            final BatteryStats.Uid.Sensor sensor = sensorStats.valueAt(ise);
+            final BatteryStats.Timer timer = sensor.getSensorTime();
+            durationMs += timer.getTotalTimeLocked(rawRealtimeUs, statsType) / 1000;
         }
+        return durationMs;
     }
 
-    private double getAverageGpsPower(PowerProfile profile, BatteryStats stats, long rawRealtimeUs,
-            int statsType) {
-        double averagePower =
-                profile.getAveragePowerOrDefault(PowerProfile.POWER_GPS_ON, -1);
-        if (averagePower != -1) {
-            return averagePower;
+    private double calculatePowerMah(BatteryStats.Uid u, long rawRealtimeUs, int statsType) {
+        double powerMah = 0;
+        final SparseArray<? extends BatteryStats.Uid.Sensor> sensorStats = u.getSensorStats();
+        final int count = sensorStats.size();
+        for (int ise = 0; ise < count; ise++) {
+            final int sensorHandle = sensorStats.keyAt(ise);
+            // TODO(b/178127364): remove BatteryStats.Uid.Sensor.GPS and references to it.
+            if (sensorHandle == BatteryStats.Uid.Sensor.GPS) {
+                continue;
+            }
+
+            final BatteryStats.Uid.Sensor sensor = sensorStats.valueAt(ise);
+            final BatteryStats.Timer timer = sensor.getSensorTime();
+            final long sensorTime = timer.getTotalTimeLocked(rawRealtimeUs, statsType) / 1000;
+            if (sensorTime != 0) {
+                Sensor s = mSensors.get(sensorHandle);
+                if (s != null) {
+                    powerMah += (sensorTime * s.getPower()) / (1000 * 60 * 60);
+                }
+            }
         }
-        averagePower = 0;
-        long totalTime = 0;
-        double totalPower = 0;
-        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
-            long timePerLevel = stats.getGpsSignalQualityTime(i, rawRealtimeUs, statsType);
-            totalTime += timePerLevel;
-            totalPower += profile.getAveragePower(PowerProfile.POWER_GPS_SIGNAL_QUALITY_BASED, i)
-                    * timePerLevel;
-        }
-        if (totalTime != 0) {
-            averagePower = totalPower / totalTime;
-        }
-        return averagePower;
+        return powerMah;
     }
 }

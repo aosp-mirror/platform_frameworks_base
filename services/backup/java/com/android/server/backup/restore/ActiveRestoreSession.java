@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static android.app.backup.BackupManager.OperationType;
+
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
@@ -24,6 +26,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -42,6 +45,7 @@ import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.util.function.BiFunction;
 
@@ -50,11 +54,13 @@ import java.util.function.BiFunction;
  */
 public class ActiveRestoreSession extends IRestoreSession.Stub {
     private static final String TAG = "RestoreSession";
+    private static final String DEVICE_NAME_FOR_D2D_SET = "D2D";
 
     private final TransportManager mTransportManager;
     private final String mTransportName;
     private final UserBackupManagerService mBackupManagerService;
     private final int mUserId;
+    private final BackupEligibilityRules mBackupEligibilityRules;
     @Nullable private final String mPackageName;
     public RestoreSet[] mRestoreSets = null;
     boolean mEnded = false;
@@ -63,12 +69,14 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     public ActiveRestoreSession(
             UserBackupManagerService backupManagerService,
             @Nullable String packageName,
-            String transportName) {
+            String transportName,
+            BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
         mPackageName = packageName;
         mTransportManager = backupManagerService.getTransportManager();
         mTransportName = transportName;
         mUserId = backupManagerService.getUserId();
+        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     public void markTimedOut() {
@@ -94,7 +102,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             return -1;
         }
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             TransportClient transportClient =
                     mTransportManager.getTransportClient(
@@ -169,7 +177,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         synchronized (mBackupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
-                    long oldId = Binder.clearCallingIdentity();
+                    final long oldId = Binder.clearCallingIdentity();
+                    RestoreSet restoreSet = mRestoreSets[i];
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -178,7 +187,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                                 observer,
                                                 monitor,
                                                 token,
-                                                listener),
+                                                listener,
+                                                getBackupEligibilityRules(restoreSet)),
                                 "RestoreSession.restoreAll()");
                     } finally {
                         Binder.restoreCallingIdentity(oldId);
@@ -260,7 +270,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         synchronized (mBackupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
-                    long oldId = Binder.clearCallingIdentity();
+                    final long oldId = Binder.clearCallingIdentity();
+                    RestoreSet restoreSet = mRestoreSets[i];
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -271,7 +282,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                                 token,
                                                 packages,
                                                 /* isSystemRestore */ packages.length > 1,
-                                                listener),
+                                                listener,
+                                                getBackupEligibilityRules(restoreSet)),
                                 "RestoreSession.restorePackages(" + packages.length + " packages)");
                     } finally {
                         Binder.restoreCallingIdentity(oldId);
@@ -282,6 +294,14 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         Slog.w(TAG, "Restore token " + Long.toHexString(token) + " not found");
         return -1;
+    }
+
+    private BackupEligibilityRules getBackupEligibilityRules(RestoreSet restoreSet) {
+        // TODO(b/182986784): Remove device name comparison once a designated field for operation
+        //  type is added to RestoreSet object.
+        int operationType = DEVICE_NAME_FOR_D2D_SET.equals(restoreSet.device)
+                ? OperationType.MIGRATION : OperationType.BACKUP;
+        return mBackupManagerService.getEligibilityRulesForOperation(operationType);
     }
 
     public synchronized int restorePackage(String packageName, IRestoreObserver observer,
@@ -335,7 +355,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         // So far so good; we're allowed to try to restore this package.
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             // Check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
@@ -363,7 +383,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                     monitor,
                                     token,
                                     app,
-                                    listener),
+                                    listener,
+                                    mBackupEligibilityRules),
                     "RestoreSession.restorePackage(" + packageName + ")");
         } finally {
             Binder.restoreCallingIdentity(oldId);

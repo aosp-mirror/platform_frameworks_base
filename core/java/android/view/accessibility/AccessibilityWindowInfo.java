@@ -59,7 +59,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     public static final int TYPE_INPUT_METHOD = 2;
 
     /**
-     * Window type: This is an system window. Such a window shows UI for
+     * Window type: This is a system window. Such a window shows UI for
      * interacting with the system.
      */
     public static final int TYPE_SYSTEM = 3;
@@ -655,7 +655,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

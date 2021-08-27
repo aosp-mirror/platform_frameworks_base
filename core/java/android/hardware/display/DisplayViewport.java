@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
+import java.util.Objects;
 
 /**
  * Describes how the pixels of physical display device reflects the content of
@@ -76,7 +77,7 @@ public final class DisplayViewport {
     public String uniqueId;
 
     // The physical port that the associated display device is connected to.
-    public @Nullable Byte physicalPort;
+    public @Nullable Integer physicalPort;
 
     public @ViewportType int type;
 
@@ -104,7 +105,7 @@ public final class DisplayViewport {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
@@ -123,7 +124,7 @@ public final class DisplayViewport {
               && deviceWidth == other.deviceWidth
               && deviceHeight == other.deviceHeight
               && TextUtils.equals(uniqueId, other.uniqueId)
-              && physicalPort == other.physicalPort
+              && Objects.equals(physicalPort, other.physicalPort)
               && type == other.type;
     }
 
@@ -150,13 +151,12 @@ public final class DisplayViewport {
     // For debugging purposes.
     @Override
     public String toString() {
-        final Integer port = physicalPort == null ? null : Byte.toUnsignedInt(physicalPort);
         return "DisplayViewport{type=" + typeToString(type)
                 + ", valid=" + valid
                 + ", isActive=" + isActive
                 + ", displayId=" + displayId
                 + ", uniqueId='" + uniqueId + "'"
-                + ", physicalPort=" + port
+                + ", physicalPort=" + physicalPort
                 + ", orientation=" + orientation
                 + ", logicalFrame=" + logicalFrame
                 + ", physicalFrame=" + physicalFrame

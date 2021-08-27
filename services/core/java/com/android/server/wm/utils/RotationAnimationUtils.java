@@ -16,14 +16,15 @@
 
 package com.android.server.wm.utils;
 
-import static android.graphics.PixelFormat.RGBA_8888;
+import static android.hardware.HardwareBuffer.RGBA_8888;
+import static android.hardware.HardwareBuffer.USAGE_PROTECTED_CONTENT;
 
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
 import android.view.Display;
@@ -38,18 +39,27 @@ import java.util.Arrays;
 public class RotationAnimationUtils {
 
     /**
-     * Converts the provided {@link GraphicBuffer} and converts it to a bitmap to then sample the
+     * @return whether the hardwareBuffer passed in is marked as protected.
+     */
+    public static boolean hasProtectedContent(HardwareBuffer hardwareBuffer) {
+        return (hardwareBuffer.getUsage() & USAGE_PROTECTED_CONTENT) == USAGE_PROTECTED_CONTENT;
+    }
+
+    /**
+     * Converts the provided {@link HardwareBuffer} and converts it to a bitmap to then sample the
      * luminance at the borders of the bitmap
      * @return the average luminance of all the pixels at the borders of the bitmap
      */
-    public static float getMedianBorderLuma(GraphicBuffer graphicBuffer, ColorSpace colorSpace) {
-        if (graphicBuffer == null || graphicBuffer.getFormat() != RGBA_8888) {
+    public static float getMedianBorderLuma(HardwareBuffer hardwareBuffer, ColorSpace colorSpace) {
+        // Cannot read content from buffer with protected usage.
+        if (hardwareBuffer == null || hardwareBuffer.getFormat() != RGBA_8888
+                || hasProtectedContent(hardwareBuffer)) {
             return 0;
         }
 
-        ImageReader ir = ImageReader.newInstance(graphicBuffer.getWidth(),
-                graphicBuffer.getHeight(), graphicBuffer.getFormat(), 1);
-        ir.getSurface().attachAndQueueBufferWithColorSpace(graphicBuffer, colorSpace);
+        ImageReader ir = ImageReader.newInstance(hardwareBuffer.getWidth(),
+                hardwareBuffer.getHeight(), hardwareBuffer.getFormat(), 1);
+        ir.getSurface().attachAndQueueBufferWithColorSpace(hardwareBuffer, colorSpace);
         Image image = ir.acquireLatestImage();
         if (image == null || image.getPlanes().length == 0) {
             return 0;
@@ -98,7 +108,7 @@ public class RotationAnimationUtils {
 
     /**
      * Gets the average border luma by taking a screenshot of the {@param surfaceControl}.
-     * @see #getMedianBorderLuma(GraphicBuffer, ColorSpace)
+     * @see #getMedianBorderLuma(HardwareBuffer, ColorSpace)
      */
     public static float getLumaOfSurfaceControl(Display display, SurfaceControl surfaceControl) {
         if (surfaceControl ==  null) {
@@ -108,13 +118,13 @@ public class RotationAnimationUtils {
         Point size = new Point();
         display.getSize(size);
         Rect crop = new Rect(0, 0, size.x, size.y);
-        SurfaceControl.ScreenshotGraphicBuffer buffer =
+        SurfaceControl.ScreenshotHardwareBuffer buffer =
                 SurfaceControl.captureLayers(surfaceControl, crop, 1);
         if (buffer == null) {
             return 0;
         }
 
-        return RotationAnimationUtils.getMedianBorderLuma(buffer.getGraphicBuffer(),
+        return RotationAnimationUtils.getMedianBorderLuma(buffer.getHardwareBuffer(),
                 buffer.getColorSpace());
     }
 

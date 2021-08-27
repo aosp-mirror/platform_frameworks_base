@@ -14,166 +14,274 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
 #define LOG_TAG "CursorWindow"
 
 #include <androidfw/CursorWindow.h>
-#include <binder/Parcel.h>
-#include <utils/Log.h>
 
-#include <cutils/ashmem.h>
 #include <sys/mman.h>
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+#include "android-base/logging.h"
+#include "cutils/ashmem.h"
 
 namespace android {
 
-CursorWindow::CursorWindow(const String8& name, int ashmemFd,
-        void* data, size_t size, bool readOnly) :
-        mName(name), mAshmemFd(ashmemFd), mData(data), mSize(size), mReadOnly(readOnly) {
-    mHeader = static_cast<Header*>(mData);
+/**
+ * By default windows are lightweight inline allocations of this size;
+ * they're only inflated to ashmem regions when more space is needed.
+ */
+static constexpr const size_t kInlineSize = 16384;
+
+static constexpr const size_t kSlotShift = 4;
+static constexpr const size_t kSlotSizeBytes = 1 << kSlotShift;
+
+CursorWindow::CursorWindow() {
 }
 
 CursorWindow::~CursorWindow() {
-    ::munmap(mData, mSize);
-    ::close(mAshmemFd);
+    if (mAshmemFd != -1) {
+        ::munmap(mData, mSize);
+        ::close(mAshmemFd);
+    } else {
+        free(mData);
+    }
 }
 
-status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** outCursorWindow) {
+status_t CursorWindow::create(const String8 &name, size_t inflatedSize, CursorWindow **outWindow) {
+    *outWindow = nullptr;
+
+    CursorWindow* window = new CursorWindow();
+    if (!window) goto fail;
+
+    window->mName = name;
+    window->mSize = std::min(kInlineSize, inflatedSize);
+    window->mInflatedSize = inflatedSize;
+    window->mData = malloc(window->mSize);
+    if (!window->mData) goto fail;
+    window->mReadOnly = false;
+
+    window->clear();
+    window->updateSlotsData();
+
+    *outWindow = window;
+    return OK;
+
+fail:
+    LOG(ERROR) << "Failed create";
+fail_silent:
+    delete window;
+    return UNKNOWN_ERROR;
+}
+
+status_t CursorWindow::maybeInflate() {
+    int ashmemFd = 0;
+    void* newData = nullptr;
+
+    // Bail early when we can't expand any further
+    if (mReadOnly || mSize == mInflatedSize) {
+        return INVALID_OPERATION;
+    }
+
     String8 ashmemName("CursorWindow: ");
-    ashmemName.append(name);
+    ashmemName.append(mName);
 
-    status_t result;
-    int ashmemFd = ashmem_create_region(ashmemName.string(), size);
+    ashmemFd = ashmem_create_region(ashmemName.string(), mInflatedSize);
     if (ashmemFd < 0) {
-        result = -errno;
-        ALOGE("CursorWindow: ashmem_create_region() failed: errno=%d.", errno);
-    } else {
-        result = ashmem_set_prot_region(ashmemFd, PROT_READ | PROT_WRITE);
-        if (result < 0) {
-            ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d",errno);
-        } else {
-            void* data = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, ashmemFd, 0);
-            if (data == MAP_FAILED) {
-                result = -errno;
-                ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
-            } else {
-                result = ashmem_set_prot_region(ashmemFd, PROT_READ);
-                if (result < 0) {
-                    ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d.", errno);
-                } else {
-                    CursorWindow* window = new CursorWindow(name, ashmemFd,
-                            data, size, false /*readOnly*/);
-                    result = window->clear();
-                    if (!result) {
-                        LOG_WINDOW("Created new CursorWindow: freeOffset=%d, "
-                                "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
-                                window->mHeader->freeOffset,
-                                window->mHeader->numRows,
-                                window->mHeader->numColumns,
-                                window->mSize, window->mData);
-                        *outCursorWindow = window;
-                        return OK;
-                    }
-                    delete window;
-                }
-            }
-            ::munmap(data, size);
-        }
-        ::close(ashmemFd);
+        PLOG(ERROR) << "Failed ashmem_create_region";
+        goto fail_silent;
     }
-    *outCursorWindow = NULL;
-    return result;
+
+    if (ashmem_set_prot_region(ashmemFd, PROT_READ | PROT_WRITE) < 0) {
+        PLOG(ERROR) << "Failed ashmem_set_prot_region";
+        goto fail_silent;
+    }
+
+    newData = ::mmap(nullptr, mInflatedSize, PROT_READ | PROT_WRITE, MAP_SHARED, ashmemFd, 0);
+    if (newData == MAP_FAILED) {
+        PLOG(ERROR) << "Failed mmap";
+        goto fail_silent;
+    }
+
+    if (ashmem_set_prot_region(ashmemFd, PROT_READ) < 0) {
+        PLOG(ERROR) << "Failed ashmem_set_prot_region";
+        goto fail_silent;
+    }
+
+    {
+        // Migrate existing contents into new ashmem region
+        uint32_t slotsSize = mSize - mSlotsOffset;
+        uint32_t newSlotsOffset = mInflatedSize - slotsSize;
+        memcpy(static_cast<uint8_t*>(newData),
+                static_cast<uint8_t*>(mData), mAllocOffset);
+        memcpy(static_cast<uint8_t*>(newData) + newSlotsOffset,
+                static_cast<uint8_t*>(mData) + mSlotsOffset, slotsSize);
+
+        free(mData);
+        mAshmemFd = ashmemFd;
+        mData = newData;
+        mSize = mInflatedSize;
+        mSlotsOffset = newSlotsOffset;
+
+        updateSlotsData();
+    }
+
+    LOG(DEBUG) << "Inflated: " << this->toString();
+    return OK;
+
+fail:
+    LOG(ERROR) << "Failed maybeInflate";
+fail_silent:
+    ::munmap(newData, mInflatedSize);
+    ::close(ashmemFd);
+    return UNKNOWN_ERROR;
 }
 
-status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursorWindow) {
-    String8 name = parcel->readString8();
+status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outWindow) {
+    *outWindow = nullptr;
 
-    status_t result;
-    int actualSize;
-    int ashmemFd = parcel->readFileDescriptor();
-    if (ashmemFd == int(BAD_TYPE)) {
-        result = BAD_TYPE;
-        ALOGE("CursorWindow: readFileDescriptor() failed");
-    } else {
-        ssize_t size = ashmem_get_size_region(ashmemFd);
-        if (size < 0) {
-            result = UNKNOWN_ERROR;
-            ALOGE("CursorWindow: ashmem_get_size_region() failed: errno=%d.", errno);
-        } else {
-            int dupAshmemFd = ::fcntl(ashmemFd, F_DUPFD_CLOEXEC, 0);
-            if (dupAshmemFd < 0) {
-                result = -errno;
-                ALOGE("CursorWindow: fcntl() failed: errno=%d.", errno);
-            } else {
-                // the size of the ashmem descriptor can be modified between ashmem_get_size_region
-                // call and mmap, so we'll check again immediately after memory is mapped
-                void* data = ::mmap(NULL, size, PROT_READ, MAP_SHARED, dupAshmemFd, 0);
-                if (data == MAP_FAILED) {
-                    result = -errno;
-                    ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
-                } else if ((actualSize = ashmem_get_size_region(dupAshmemFd)) != size) {
-                    ::munmap(data, size);
-                    result = BAD_VALUE;
-                    ALOGE("CursorWindow: ashmem_get_size_region() returned %d, expected %d"
-                            " errno=%d",
-                            actualSize, (int) size, errno);
-                } else {
-                    CursorWindow* window = new CursorWindow(name, dupAshmemFd,
-                            data, size, true /*readOnly*/);
-                    LOG_WINDOW("Created CursorWindow from parcel: freeOffset=%d, "
-                            "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
-                            window->mHeader->freeOffset,
-                            window->mHeader->numRows,
-                            window->mHeader->numColumns,
-                            window->mSize, window->mData);
-                    *outCursorWindow = window;
-                    return OK;
-                }
-                ::close(dupAshmemFd);
-            }
-        }
+    CursorWindow* window = new CursorWindow();
+    if (!window) goto fail;
+
+    if (parcel->readString8(&window->mName)) goto fail;
+    if (parcel->readUint32(&window->mNumRows)) goto fail;
+    if (parcel->readUint32(&window->mNumColumns)) goto fail;
+    if (parcel->readUint32(&window->mSize)) goto fail;
+
+    if ((window->mNumRows * window->mNumColumns * kSlotSizeBytes) > window->mSize) {
+        LOG(ERROR) << "Unexpected size " << window->mSize << " for " << window->mNumRows
+                << " rows and " << window->mNumColumns << " columns";
+        goto fail_silent;
     }
-    *outCursorWindow = NULL;
-    return result;
+
+    bool isAshmem;
+    if (parcel->readBool(&isAshmem)) goto fail;
+    if (isAshmem) {
+        window->mAshmemFd = parcel->readFileDescriptor();
+        if (window->mAshmemFd < 0) {
+            LOG(ERROR) << "Failed readFileDescriptor";
+            goto fail_silent;
+        }
+
+        window->mAshmemFd = ::fcntl(window->mAshmemFd, F_DUPFD_CLOEXEC, 0);
+        if (window->mAshmemFd < 0) {
+            PLOG(ERROR) << "Failed F_DUPFD_CLOEXEC";
+            goto fail_silent;
+        }
+
+        window->mData = ::mmap(nullptr, window->mSize, PROT_READ, MAP_SHARED, window->mAshmemFd, 0);
+        if (window->mData == MAP_FAILED) {
+            PLOG(ERROR) << "Failed mmap";
+            goto fail_silent;
+        }
+    } else {
+        window->mAshmemFd = -1;
+
+        if (window->mSize > kInlineSize) {
+            LOG(ERROR) << "Unexpected size " << window->mSize << " for inline window";
+            goto fail_silent;
+        }
+
+        window->mData = malloc(window->mSize);
+        if (!window->mData) goto fail;
+
+        if (parcel->read(window->mData, window->mSize)) goto fail;
+    }
+
+    // We just came from a remote source, so we're read-only
+    // and we can't inflate ourselves
+    window->mInflatedSize = window->mSize;
+    window->mReadOnly = true;
+
+    window->updateSlotsData();
+
+    LOG(DEBUG) << "Created from parcel: " << window->toString();
+    *outWindow = window;
+    return OK;
+
+fail:
+    LOG(ERROR) << "Failed createFromParcel";
+fail_silent:
+    delete window;
+    return UNKNOWN_ERROR;
 }
 
 status_t CursorWindow::writeToParcel(Parcel* parcel) {
-    status_t status = parcel->writeString8(mName);
-    if (!status) {
-        status = parcel->writeDupFileDescriptor(mAshmemFd);
+    LOG(DEBUG) << "Writing to parcel: " << this->toString();
+
+    if (parcel->writeString8(mName)) goto fail;
+    if (parcel->writeUint32(mNumRows)) goto fail;
+    if (parcel->writeUint32(mNumColumns)) goto fail;
+    if (mAshmemFd != -1) {
+        if (parcel->writeUint32(mSize)) goto fail;
+        if (parcel->writeBool(true)) goto fail;
+        if (parcel->writeDupFileDescriptor(mAshmemFd)) goto fail;
+    } else {
+        // Since we know we're going to be read-only on the remote side,
+        // we can compact ourselves on the wire, with just enough padding
+        // to ensure our slots stay aligned
+        size_t slotsSize = mSize - mSlotsOffset;
+        size_t compactedSize = mAllocOffset + slotsSize;
+        compactedSize = (compactedSize + 3) & ~3;
+        if (parcel->writeUint32(compactedSize)) goto fail;
+        if (parcel->writeBool(false)) goto fail;
+        void* dest = parcel->writeInplace(compactedSize);
+        if (!dest) goto fail;
+        memcpy(static_cast<uint8_t*>(dest),
+                static_cast<uint8_t*>(mData), mAllocOffset);
+        memcpy(static_cast<uint8_t*>(dest) + compactedSize - slotsSize,
+                static_cast<uint8_t*>(mData) + mSlotsOffset, slotsSize);
     }
-    return status;
+    return OK;
+
+fail:
+    LOG(ERROR) << "Failed writeToParcel";
+fail_silent:
+    return UNKNOWN_ERROR;
 }
 
 status_t CursorWindow::clear() {
     if (mReadOnly) {
         return INVALID_OPERATION;
     }
-
-    mHeader->freeOffset = sizeof(Header) + sizeof(RowSlotChunk);
-    mHeader->firstChunkOffset = sizeof(Header);
-    mHeader->numRows = 0;
-    mHeader->numColumns = 0;
-
-    RowSlotChunk* firstChunk = static_cast<RowSlotChunk*>(offsetToPtr(mHeader->firstChunkOffset));
-    firstChunk->nextChunkOffset = 0;
+    mAllocOffset = 0;
+    mSlotsOffset = mSize;
+    mNumRows = 0;
+    mNumColumns = 0;
     return OK;
+}
+
+void CursorWindow::updateSlotsData() {
+    mSlotsStart = static_cast<uint8_t*>(mData) + mSize - kSlotSizeBytes;
+    mSlotsEnd = static_cast<uint8_t*>(mData) + mSlotsOffset;
+}
+
+void* CursorWindow::offsetToPtr(uint32_t offset, uint32_t bufferSize = 0) {
+    if (offset > mSize) {
+        LOG(ERROR) << "Offset " << offset
+                << " out of bounds, max value " << mSize;
+        return nullptr;
+    }
+    if (offset + bufferSize > mSize) {
+        LOG(ERROR) << "End offset " << (offset + bufferSize)
+                << " out of bounds, max value " << mSize;
+        return nullptr;
+    }
+    return static_cast<uint8_t*>(mData) + offset;
+}
+
+uint32_t CursorWindow::offsetFromPtr(void* ptr) {
+    return static_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(mData);
 }
 
 status_t CursorWindow::setNumColumns(uint32_t numColumns) {
     if (mReadOnly) {
         return INVALID_OPERATION;
     }
-
-    uint32_t cur = mHeader->numColumns;
-    if ((cur > 0 || mHeader->numRows > 0) && cur != numColumns) {
-        ALOGE("Trying to go from %d columns to %d", cur, numColumns);
+    uint32_t cur = mNumColumns;
+    if ((cur > 0 || mNumRows > 0) && cur != numColumns) {
+        LOG(ERROR) << "Trying to go from " << cur << " columns to " << numColumns;
         return INVALID_OPERATION;
     }
-    mHeader->numColumns = numColumns;
+    mNumColumns = numColumns;
     return OK;
 }
 
@@ -181,28 +289,19 @@ status_t CursorWindow::allocRow() {
     if (mReadOnly) {
         return INVALID_OPERATION;
     }
-
-    // Fill in the row slot
-    RowSlot* rowSlot = allocRowSlot();
-    if (rowSlot == NULL) {
-        return NO_MEMORY;
+    size_t size = mNumColumns * kSlotSizeBytes;
+    int32_t newOffset = mSlotsOffset - size;
+    if (newOffset < (int32_t) mAllocOffset) {
+        maybeInflate();
+        newOffset = mSlotsOffset - size;
+        if (newOffset < (int32_t) mAllocOffset) {
+            return NO_MEMORY;
+        }
     }
-
-    // Allocate the slots for the field directory
-    size_t fieldDirSize = mHeader->numColumns * sizeof(FieldSlot);
-    uint32_t fieldDirOffset = alloc(fieldDirSize, true /*aligned*/);
-    if (!fieldDirOffset) {
-        mHeader->numRows--;
-        LOG_WINDOW("The row failed, so back out the new row accounting "
-                "from allocRowSlot %d", mHeader->numRows);
-        return NO_MEMORY;
-    }
-    FieldSlot* fieldDir = static_cast<FieldSlot*>(offsetToPtr(fieldDirOffset));
-    memset(fieldDir, 0, fieldDirSize);
-
-    LOG_WINDOW("Allocated row %u, rowSlot is at offset %u, fieldDir is %zu bytes at offset %u\n",
-            mHeader->numRows - 1, offsetFromPtr(rowSlot), fieldDirSize, fieldDirOffset);
-    rowSlot->offset = fieldDirOffset;
+    memset(offsetToPtr(newOffset), 0, size);
+    mSlotsOffset = newOffset;
+    updateSlotsData();
+    mNumRows++;
     return OK;
 }
 
@@ -210,83 +309,48 @@ status_t CursorWindow::freeLastRow() {
     if (mReadOnly) {
         return INVALID_OPERATION;
     }
-
-    if (mHeader->numRows > 0) {
-        mHeader->numRows--;
+    size_t size = mNumColumns * kSlotSizeBytes;
+    size_t newOffset = mSlotsOffset + size;
+    if (newOffset > mSize) {
+        return NO_MEMORY;
     }
+    mSlotsOffset = newOffset;
+    updateSlotsData();
+    mNumRows--;
     return OK;
 }
 
-uint32_t CursorWindow::alloc(size_t size, bool aligned) {
-    uint32_t padding;
-    if (aligned) {
-        // 4 byte alignment
-        padding = (~mHeader->freeOffset + 1) & 3;
-    } else {
-        padding = 0;
+status_t CursorWindow::alloc(size_t size, uint32_t* outOffset) {
+    if (mReadOnly) {
+        return INVALID_OPERATION;
     }
-
-    uint32_t offset = mHeader->freeOffset + padding;
-    uint32_t nextFreeOffset = offset + size;
-    if (nextFreeOffset > mSize) {
-        ALOGW("Window is full: requested allocation %zu bytes, "
-                "free space %zu bytes, window size %zu bytes",
-                size, freeSpace(), mSize);
-        return 0;
-    }
-
-    mHeader->freeOffset = nextFreeOffset;
-    return offset;
-}
-
-CursorWindow::RowSlot* CursorWindow::getRowSlot(uint32_t row) {
-    uint32_t chunkPos = row;
-    RowSlotChunk* chunk = static_cast<RowSlotChunk*>(
-            offsetToPtr(mHeader->firstChunkOffset));
-    while (chunkPos >= ROW_SLOT_CHUNK_NUM_ROWS) {
-        chunk = static_cast<RowSlotChunk*>(offsetToPtr(chunk->nextChunkOffset));
-        chunkPos -= ROW_SLOT_CHUNK_NUM_ROWS;
-    }
-    return &chunk->slots[chunkPos];
-}
-
-CursorWindow::RowSlot* CursorWindow::allocRowSlot() {
-    uint32_t chunkPos = mHeader->numRows;
-    RowSlotChunk* chunk = static_cast<RowSlotChunk*>(
-            offsetToPtr(mHeader->firstChunkOffset));
-    while (chunkPos > ROW_SLOT_CHUNK_NUM_ROWS) {
-        chunk = static_cast<RowSlotChunk*>(offsetToPtr(chunk->nextChunkOffset));
-        chunkPos -= ROW_SLOT_CHUNK_NUM_ROWS;
-    }
-    if (chunkPos == ROW_SLOT_CHUNK_NUM_ROWS) {
-        if (!chunk->nextChunkOffset) {
-            chunk->nextChunkOffset = alloc(sizeof(RowSlotChunk), true /*aligned*/);
-            if (!chunk->nextChunkOffset) {
-                return NULL;
-            }
+    size_t alignedSize = (size + 3) & ~3;
+    size_t newOffset = mAllocOffset + alignedSize;
+    if (newOffset > mSlotsOffset) {
+        maybeInflate();
+        newOffset = mAllocOffset + alignedSize;
+        if (newOffset > mSlotsOffset) {
+            return NO_MEMORY;
         }
-        chunk = static_cast<RowSlotChunk*>(offsetToPtr(chunk->nextChunkOffset));
-        chunk->nextChunkOffset = 0;
-        chunkPos = 0;
     }
-    mHeader->numRows += 1;
-    return &chunk->slots[chunkPos];
+    *outOffset = mAllocOffset;
+    mAllocOffset = newOffset;
+    return OK;
 }
 
 CursorWindow::FieldSlot* CursorWindow::getFieldSlot(uint32_t row, uint32_t column) {
-    if (row >= mHeader->numRows || column >= mHeader->numColumns) {
-        ALOGE("Failed to read row %d, column %d from a CursorWindow which "
-                "has %d rows, %d columns.",
-                row, column, mHeader->numRows, mHeader->numColumns);
-        return NULL;
+    // This is carefully tuned to use as few cycles as
+    // possible, since this is an extremely hot code path;
+    // see CursorWindow_bench.cpp for more details
+    void *result = static_cast<uint8_t*>(mSlotsStart)
+            - (((row * mNumColumns) + column) << kSlotShift);
+    if (result < mSlotsEnd || result > mSlotsStart || column >= mNumColumns) {
+        LOG(ERROR) << "Failed to read row " << row << ", column " << column
+                << " from a window with " << mNumRows << " rows, " << mNumColumns << " columns";
+        return nullptr;
+    } else {
+        return static_cast<FieldSlot*>(result);
     }
-    RowSlot* rowSlot = getRowSlot(row);
-    if (!rowSlot) {
-        ALOGE("Failed to find rowSlot for row %d.", row);
-        return NULL;
-    }
-    FieldSlot* fieldDir = static_cast<FieldSlot*>(offsetToPtr(rowSlot->offset));
-    return &fieldDir[column];
 }
 
 status_t CursorWindow::putBlob(uint32_t row, uint32_t column, const void* value, size_t size) {
@@ -309,13 +373,14 @@ status_t CursorWindow::putBlobOrString(uint32_t row, uint32_t column,
         return BAD_VALUE;
     }
 
-    uint32_t offset = alloc(size);
-    if (!offset) {
+    uint32_t offset;
+    if (alloc(size, &offset)) {
         return NO_MEMORY;
     }
 
     memcpy(offsetToPtr(offset), value, size);
 
+    fieldSlot = getFieldSlot(row, column);
     fieldSlot->type = type;
     fieldSlot->data.buffer.offset = offset;
     fieldSlot->data.buffer.size = size;

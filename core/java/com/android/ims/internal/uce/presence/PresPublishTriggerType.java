@@ -17,6 +17,7 @@
 package com.android.ims.internal.uce.presence;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -70,7 +71,7 @@ public class PresPublishTriggerType implements Parcelable {
      * Sets the publish trigger type.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setPublishTrigeerType(int nPublishTriggerType) {
         this.mPublishTriggerType = nPublishTriggerType;
     }
@@ -80,7 +81,7 @@ public class PresPublishTriggerType implements Parcelable {
      * Constructor for the PresPublishTriggerType class.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public PresPublishTriggerType(){};
 
     /** @hide */

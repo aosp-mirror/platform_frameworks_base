@@ -18,18 +18,14 @@ package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.content.Context
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
-import com.android.systemui.statusbar.TransformableView
-import com.android.systemui.statusbar.ViewTransformationHelper
 import com.android.systemui.statusbar.notification.NotificationUtils
-import com.android.systemui.statusbar.notification.TransformState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.row.HybridNotificationView
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationMessagingTemplateViewWrapper.setCustomImageMessageTransform
 
 /**
  * Wraps a notification containing a conversation template
@@ -48,9 +44,8 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     private lateinit var conversationIconView: CachingIconView
     private lateinit var conversationBadgeBg: View
-    private lateinit var expandButton: View
-    private lateinit var expandButtonContainer: View
-    private lateinit var expandButtonInnerContainer: View
+    private lateinit var expandBtn: View
+    private lateinit var expandBtnContainer: View
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
     private lateinit var conversationTitleView: View
@@ -67,11 +62,8 @@ class NotificationConversationTemplateViewWrapper constructor(
             conversationIconView = requireViewById(com.android.internal.R.id.conversation_icon)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
-            expandButton = requireViewById(com.android.internal.R.id.expand_button)
-            expandButtonContainer =
-                    requireViewById(com.android.internal.R.id.expand_button_container)
-            expandButtonInnerContainer =
-                    requireViewById(com.android.internal.R.id.expand_button_inner_container)
+            expandBtn = requireViewById(com.android.internal.R.id.expand_button)
+            expandBtnContainer = requireViewById(com.android.internal.R.id.expand_button_container)
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
             conversationTitleView = requireViewById(com.android.internal.R.id.conversation_text)
@@ -93,43 +85,18 @@ class NotificationConversationTemplateViewWrapper constructor(
         // This also clears the existing types
         super.updateTransformedTypes()
 
+        mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TITLE, conversationTitleView)
         addTransformedViews(
                 messagingLinearLayout,
-                appName,
-                conversationTitleView)
-
-        // Let's ignore the image message container since that is transforming as part of the
-        // messages already
-        mTransformationHelper.setCustomTransformation(
-                object : ViewTransformationHelper.CustomTransformation() {
-                    override fun transformTo(
-                        ownState: TransformState,
-                        otherView: TransformableView,
-                        transformationAmount: Float
-                    ): Boolean {
-                        if (otherView is HybridNotificationView) {
-                            return false
-                        }
-                        // we're hidden by default by the transformState
-                        ownState.ensureVisible()
-                        // Let's do nothing otherwise, this is already handled by the messages
-                        return true
-                    }
-
-                    override fun transformFrom(
-                        ownState: TransformState,
-                        otherView: TransformableView,
-                        transformationAmount: Float
-                    ): Boolean =
-                            transformTo(ownState, otherView, transformationAmount)
-                },
-                imageMessageContainer.id
+                appName
         )
+
+        setCustomImageMessageTransform(mTransformationHelper, imageMessageContainer)
 
         addViewsTransformingToSimilar(
                 conversationIconView,
                 conversationBadgeBg,
-                expandButton,
+                expandBtn,
                 importanceRing,
                 facePileTop,
                 facePileBottom,
@@ -137,23 +104,9 @@ class NotificationConversationTemplateViewWrapper constructor(
         )
     }
 
-    override fun getExpandButton() = expandButtonInnerContainer
-
-    override fun setShelfIconVisible(visible: Boolean) {
-        if (conversationLayout.isImportantConversation) {
-            if (conversationIconView.visibility != GONE) {
-                conversationIconView.isForceHidden = visible
-                // We don't want the small icon to be hidden by the extended wrapper, as force
-                // hiding the conversationIcon will already do that via its listener.
-                return
-            }
-        }
-        super.setShelfIconVisible(visible)
-    }
-
     override fun getShelfTransformationTarget(): View? =
             if (conversationLayout.isImportantConversation)
-                if (conversationIconView.visibility != GONE)
+                if (conversationIconView.visibility != View.GONE)
                     conversationIconView
                 else
                     // A notification with a fallback icon was set to important. Currently
@@ -166,12 +119,15 @@ class NotificationConversationTemplateViewWrapper constructor(
     override fun setRemoteInputVisible(visible: Boolean) =
             conversationLayout.showHistoricMessages(visible)
 
-    override fun updateExpandability(expandable: Boolean, onClickListener: View.OnClickListener?) =
-            conversationLayout.updateExpandability(expandable, onClickListener)
+    override fun updateExpandability(
+        expandable: Boolean,
+        onClickListener: View.OnClickListener,
+        requestLayout: Boolean
+    ) = conversationLayout.updateExpandability(expandable, onClickListener)
 
     override fun disallowSingleClick(x: Float, y: Float): Boolean {
-        val isOnExpandButton = expandButtonContainer.visibility == View.VISIBLE &&
-                isOnView(expandButtonContainer, x, y)
+        val isOnExpandButton = expandBtnContainer.visibility == View.VISIBLE &&
+                isOnView(expandBtnContainer, x, y)
         return isOnExpandButton || super.disallowSingleClick(x, y)
     }
 
@@ -180,10 +136,4 @@ class NotificationConversationTemplateViewWrapper constructor(
                 minHeightWithActions
             else
                 super.getMinLayoutHeight()
-
-    private fun addTransformedViews(vararg vs: View?) =
-            vs.forEach { view -> view?.let(mTransformationHelper::addTransformedView) }
-
-    private fun addViewsTransformingToSimilar(vararg vs: View?) =
-            vs.forEach { view -> view?.let(mTransformationHelper::addViewTransformingToSimilar) }
 }

@@ -41,6 +41,15 @@ import java.util.List;
 public class InstallSuccess extends AlertActivity {
     private static final String LOG_TAG = InstallSuccess.class.getSimpleName();
 
+    @Nullable
+    private PackageUtil.AppSnippet mAppSnippet;
+
+    @Nullable
+    private String mAppPackageName;
+
+    @Nullable
+    private Intent mLaunchIntent;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,59 +64,73 @@ public class InstallSuccess extends AlertActivity {
             Intent intent = getIntent();
             ApplicationInfo appInfo =
                     intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
+            mAppPackageName = appInfo.packageName;
             Uri packageURI = intent.getData();
 
             // Set header icon and title
-            PackageUtil.AppSnippet as;
             PackageManager pm = getPackageManager();
 
             if ("package".equals(packageURI.getScheme())) {
-                as = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
+                mAppSnippet = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
                         pm.getApplicationIcon(appInfo));
             } else {
                 File sourceFile = new File(packageURI.getPath());
-                as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+                mAppSnippet = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
             }
 
-            mAlert.setIcon(as.icon);
-            mAlert.setTitle(as.label);
-            mAlert.setView(R.layout.install_content_view);
-            mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.launch), null,
-                    null);
-            mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.done),
-                    (ignored, ignored2) -> {
-                        if (appInfo.packageName != null) {
-                            Log.i(LOG_TAG, "Finished installing " + appInfo.packageName);
-                        }
-                        finish();
-                    }, null);
-            setupAlert();
-            requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
-            // Enable or disable "launch" button
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(
-                    appInfo.packageName);
-            boolean enabled = false;
-            if (launchIntent != null) {
-                List<ResolveInfo> list = getPackageManager().queryIntentActivities(launchIntent,
-                        0);
-                if (list != null && list.size() > 0) {
-                    enabled = true;
-                }
-            }
+            mLaunchIntent = getPackageManager().getLaunchIntentForPackage(mAppPackageName);
 
-            Button launchButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
-            if (enabled) {
-                launchButton.setOnClickListener(view -> {
-                    try {
-                        startActivity(launchIntent);
-                    } catch (ActivityNotFoundException | SecurityException e) {
-                        Log.e(LOG_TAG, "Could not start activity", e);
+            bindUi();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindUi();
+    }
+
+    private void bindUi() {
+        if (mAppSnippet == null) {
+            return;
+        }
+
+        mAlert.setIcon(mAppSnippet.icon);
+        mAlert.setTitle(mAppSnippet.label);
+        mAlert.setView(R.layout.install_content_view);
+        mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.launch), null,
+                null);
+        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.done),
+                (ignored, ignored2) -> {
+                    if (mAppPackageName != null) {
+                        Log.i(LOG_TAG, "Finished installing " + mAppPackageName);
                     }
                     finish();
-                });
-            } else {
-                launchButton.setEnabled(false);
+                }, null);
+        setupAlert();
+        requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
+        // Enable or disable "launch" button
+        boolean enabled = false;
+        if (mLaunchIntent != null) {
+            List<ResolveInfo> list = getPackageManager().queryIntentActivities(mLaunchIntent,
+                    0);
+            if (list != null && list.size() > 0) {
+                enabled = true;
             }
+        }
+
+        Button launchButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (enabled) {
+            launchButton.setOnClickListener(view -> {
+                try {
+                    startActivity(mLaunchIntent);
+                } catch (ActivityNotFoundException | SecurityException e) {
+                    Log.e(LOG_TAG, "Could not start activity", e);
+                }
+                finish();
+            });
+        } else {
+            launchButton.setEnabled(false);
         }
     }
 }

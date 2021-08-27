@@ -21,18 +21,22 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.settingslib.SignalIcon.IconGroup;
+import com.android.settingslib.SignalIcon.State;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.BitSet;
 
 
 /**
  * Common base class for handling signal for both wifi and mobile data.
+ *
+ * @param <T> State of the SysUI controller.
+ * @param <I> Icon groups of the SysUI controller for a given State.
  */
-public abstract class SignalController<T extends SignalController.State,
-        I extends SignalController.IconGroup> {
+public abstract class SignalController<T extends State, I extends IconGroup> {
     // Save the previous SignalController.States of all SignalControllers for dumps.
     static final boolean RECORD_HISTORY = true;
     // If RECORD_HISTORY how many to save, must be a power of 2.
@@ -124,11 +128,11 @@ public abstract class SignalController<T extends SignalController.State,
      */
     public int getQsCurrentIconId() {
         if (mCurrentState.connected) {
-            return getIcons().mQsIcons[mCurrentState.inetCondition][mCurrentState.level];
+            return getIcons().qsIcons[mCurrentState.inetCondition][mCurrentState.level];
         } else if (mCurrentState.enabled) {
-            return getIcons().mQsDiscState;
+            return getIcons().qsDiscState;
         } else {
-            return getIcons().mQsNullState;
+            return getIcons().qsNullState;
         }
     }
 
@@ -137,11 +141,11 @@ public abstract class SignalController<T extends SignalController.State,
      */
     public int getCurrentIconId() {
         if (mCurrentState.connected) {
-            return getIcons().mSbIcons[mCurrentState.inetCondition][mCurrentState.level];
+            return getIcons().sbIcons[mCurrentState.inetCondition][mCurrentState.level];
         } else if (mCurrentState.enabled) {
-            return getIcons().mSbDiscState;
+            return getIcons().sbDiscState;
         } else {
-            return getIcons().mSbNullState;
+            return getIcons().sbNullState;
         }
     }
 
@@ -151,9 +155,9 @@ public abstract class SignalController<T extends SignalController.State,
      */
     public int getContentDescription() {
         if (mCurrentState.connected) {
-            return getIcons().mContentDesc[mCurrentState.level];
+            return getIcons().contentDesc[mCurrentState.level];
         } else {
-            return getIcons().mDiscContentDesc;
+            return getIcons().discContentDesc;
         }
     }
 
@@ -162,6 +166,10 @@ public abstract class SignalController<T extends SignalController.State,
             saveLastState();
             notifyListeners();
         }
+    }
+
+    protected final void notifyCallStateChange(IconState statusIcon, int subId) {
+        mCallbackHandler.setCallIndicator(statusIcon, subId);
     }
 
     /**
@@ -180,7 +188,8 @@ public abstract class SignalController<T extends SignalController.State,
      * and last value of any state data.
      */
     protected void recordLastState() {
-        mHistory[mHistoryIndex++ & (HISTORY_SIZE - 1)].copyFrom(mLastState);
+        mHistory[mHistoryIndex].copyFrom(mLastState);
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
     public void dump(PrintWriter pw) {
@@ -216,108 +225,4 @@ public abstract class SignalController<T extends SignalController.State,
      * Generate a blank T.
      */
     protected abstract T cleanState();
-
-    /*
-     * Holds icons for a given state. Arrays are generally indexed as inet
-     * state (full connectivity or not) first, and second dimension as
-     * signal strength.
-     */
-    static class IconGroup {
-        final int[][] mSbIcons;
-        final int[][] mQsIcons;
-        final int[] mContentDesc;
-        final int mSbNullState;
-        final int mQsNullState;
-        final int mSbDiscState;
-        final int mQsDiscState;
-        final int mDiscContentDesc;
-        // For logging.
-        final String mName;
-
-        public IconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
-                int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
-                int discContentDesc) {
-            mName = name;
-            mSbIcons = sbIcons;
-            mQsIcons = qsIcons;
-            mContentDesc = contentDesc;
-            mSbNullState = sbNullState;
-            mQsNullState = qsNullState;
-            mSbDiscState = sbDiscState;
-            mQsDiscState = qsDiscState;
-            mDiscContentDesc = discContentDesc;
-        }
-
-        @Override
-        public String toString() {
-            return "IconGroup(" + mName + ")";
-        }
-    }
-
-    static class State {
-        // No locale as it's only used for logging purposes
-        private static SimpleDateFormat sSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
-        boolean connected;
-        boolean enabled;
-        boolean activityIn;
-        boolean activityOut;
-        int level;
-        IconGroup iconGroup;
-        int inetCondition;
-        int rssi; // Only for logging.
-
-        // Not used for comparison, just used for logging.
-        long time;
-
-        public void copyFrom(State state) {
-            connected = state.connected;
-            enabled = state.enabled;
-            level = state.level;
-            iconGroup = state.iconGroup;
-            inetCondition = state.inetCondition;
-            activityIn = state.activityIn;
-            activityOut = state.activityOut;
-            rssi = state.rssi;
-            time = state.time;
-        }
-
-        @Override
-        public String toString() {
-            if (time != 0) {
-                StringBuilder builder = new StringBuilder();
-                toString(builder);
-                return builder.toString();
-            } else {
-                return "Empty " + getClass().getSimpleName();
-            }
-        }
-
-        protected void toString(StringBuilder builder) {
-            builder.append("connected=").append(connected).append(',')
-                    .append("enabled=").append(enabled).append(',')
-                    .append("level=").append(level).append(',')
-                    .append("inetCondition=").append(inetCondition).append(',')
-                    .append("iconGroup=").append(iconGroup).append(',')
-                    .append("activityIn=").append(activityIn).append(',')
-                    .append("activityOut=").append(activityOut).append(',')
-                    .append("rssi=").append(rssi).append(',')
-                    .append("lastModified=").append(sSDF.format(time));
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!o.getClass().equals(getClass())) {
-                return false;
-            }
-            State other = (State) o;
-            return other.connected == connected
-                    && other.enabled == enabled
-                    && other.level == level
-                    && other.inetCondition == inetCondition
-                    && other.iconGroup == iconGroup
-                    && other.activityIn == activityIn
-                    && other.activityOut == activityOut
-                    && other.rssi == rssi;
-        }
-    }
 }

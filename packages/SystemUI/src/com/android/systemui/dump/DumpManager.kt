@@ -18,11 +18,11 @@ package com.android.systemui.dump
 
 import android.util.ArrayMap
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Maintains a registry of things that should be dumped when a bug report is taken
@@ -33,7 +33,7 @@ import javax.inject.Singleton
  *
  * See [DumpHandler] for more information on how and when this information is dumped.
  */
-@Singleton
+@SysUISingleton
 class DumpManager @Inject constructor() {
     private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
     private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()

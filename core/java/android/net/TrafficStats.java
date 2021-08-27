@@ -301,7 +301,7 @@ public class TrafficStats {
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
@@ -339,7 +339,7 @@ public class TrafficStats {
      *
      * @see #setThreadStatsUid(int)
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }
@@ -565,7 +565,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static long getMobileTcpRxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
@@ -581,7 +581,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static long getMobileTcpTxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
@@ -597,9 +597,16 @@ public class TrafficStats {
     }
 
     /**
-     * Return the number of packets transmitted on the specified interface since
-     * device boot. Statistics are measured at the network layer, so both TCP and
+     * Return the number of packets transmitted on the specified interface since the interface
+     * was created. Statistics are measured at the network layer, so both TCP and
      * UDP usage are included.
+     *
+     * Note that the returned values are partial statistics that do not count data from several
+     * sources and do not apply several adjustments that are necessary for correctness, such
+     * as adjusting for VPN apps, IPv6-in-IPv4 translation, etc. These values can be used to
+     * determine whether traffic is being transferred on the specific interface but are not a
+     * substitute for the more accurate statistics provided by the {@link NetworkStatsManager}
+     * APIs.
      *
      * @param iface The name of the interface.
      * @return The number of transmitted packets.
@@ -613,9 +620,16 @@ public class TrafficStats {
     }
 
     /**
-     * Return the number of packets received on the specified interface since
-     * device boot. Statistics are measured at the network layer, so both TCP
+     * Return the number of packets received on the specified interface since the interface was
+     * created. Statistics are measured at the network layer, so both TCP
      * and UDP usage are included.
+     *
+     * Note that the returned values are partial statistics that do not count data from several
+     * sources and do not apply several adjustments that are necessary for correctness, such
+     * as adjusting for VPN apps, IPv6-in-IPv4 translation, etc. These values can be used to
+     * determine whether traffic is being transferred on the specific interface but are not a
+     * substitute for the more accurate statistics provided by the {@link NetworkStatsManager}
+     * APIs.
      *
      * @param iface The name of the interface.
      * @return The number of received packets.
@@ -628,9 +642,22 @@ public class TrafficStats {
         }
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public static long getTxBytes(String iface) {
+    /**
+     * Return the number of bytes transmitted on the specified interface since the interface
+     * was created. Statistics are measured at the network layer, so both TCP and
+     * UDP usage are included.
+     *
+     * Note that the returned values are partial statistics that do not count data from several
+     * sources and do not apply several adjustments that are necessary for correctness, such
+     * as adjusting for VPN apps, IPv6-in-IPv4 translation, etc. These values can be used to
+     * determine whether traffic is being transferred on the specific interface but are not a
+     * substitute for the more accurate statistics provided by the {@link NetworkStatsManager}
+     * APIs.
+     *
+     * @param iface The name of the interface.
+     * @return The number of transmitted bytes.
+     */
+    public static long getTxBytes(@NonNull String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_TX_BYTES);
         } catch (RemoteException e) {
@@ -638,9 +665,22 @@ public class TrafficStats {
         }
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public static long getRxBytes(String iface) {
+    /**
+     * Return the number of bytes received on the specified interface since the interface
+     * was created. Statistics are measured at the network layer, so both TCP
+     * and UDP usage are included.
+     *
+     * Note that the returned values are partial statistics that do not count data from several
+     * sources and do not apply several adjustments that are necessary for correctness, such
+     * as adjusting for VPN apps, IPv6-in-IPv4 translation, etc. These values can be used to
+     * determine whether traffic is being transferred on the specific interface but are not a
+     * substitute for the more accurate statistics provided by the {@link NetworkStatsManager}
+     * APIs.
+     *
+     * @param iface The name of the interface.
+     * @return The number of received bytes.
+     */
+    public static long getRxBytes(@NonNull String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_RX_BYTES);
         } catch (RemoteException e) {
@@ -976,11 +1016,17 @@ public class TrafficStats {
         }
     }
 
-    // NOTE: keep these in sync with android_net_TrafficStats.cpp
-    private static final int TYPE_RX_BYTES = 0;
-    private static final int TYPE_RX_PACKETS = 1;
-    private static final int TYPE_TX_BYTES = 2;
-    private static final int TYPE_TX_PACKETS = 3;
-    private static final int TYPE_TCP_RX_PACKETS = 4;
-    private static final int TYPE_TCP_TX_PACKETS = 5;
+    // NOTE: keep these in sync with {@code com_android_server_net_NetworkStatsService.cpp}.
+    /** {@hide} */
+    public static final int TYPE_RX_BYTES = 0;
+    /** {@hide} */
+    public static final int TYPE_RX_PACKETS = 1;
+    /** {@hide} */
+    public static final int TYPE_TX_BYTES = 2;
+    /** {@hide} */
+    public static final int TYPE_TX_PACKETS = 3;
+    /** {@hide} */
+    public static final int TYPE_TCP_RX_PACKETS = 4;
+    /** {@hide} */
+    public static final int TYPE_TCP_TX_PACKETS = 5;
 }

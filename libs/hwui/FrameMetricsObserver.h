@@ -24,6 +24,24 @@ namespace uirenderer {
 class FrameMetricsObserver : public VirtualLightRefBase {
 public:
     virtual void notify(const int64_t* buffer) = 0;
+    bool waitForPresentTime() const { return mWaitForPresentTime; };
+
+    /**
+     * Create a new metrics observer. An observer that watches present time gets notified at a
+     * different time than the observer that doesn't.
+     *
+     * The observer that doesn't want present time is notified about metrics just after the frame
+     * is completed. This is the default behaviour that's used by public API's.
+     *
+     * An observer that watches present time is notified about metrics after the actual display
+     * present time is known.
+     * WARNING! This observer may not receive metrics for the last several frames that the app
+     * produces.
+     */
+    FrameMetricsObserver(bool waitForPresentTime) : mWaitForPresentTime(waitForPresentTime) {}
+
+private:
+    const bool mWaitForPresentTime;
 };
 
 }  // namespace uirenderer

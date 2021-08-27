@@ -453,19 +453,19 @@ public class Session {
 
     @Override
     public String toString() {
-        if (mParentSession != null && mIsStartedFromActiveSession) {
+        Session sessionToPrint = this;
+        if (getParentSession() != null && isStartedFromActiveSession()) {
             // Log.startSession was called from within another active session. Use the parent's
             // Id instead of the child to reduce confusion.
-            return mParentSession.toString();
-        } else {
-            StringBuilder methodName = new StringBuilder();
-            methodName.append(getFullMethodPath(false /*truncatePath*/));
-            if (mOwnerInfo != null && !mOwnerInfo.isEmpty()) {
-                methodName.append("(");
-                methodName.append(mOwnerInfo);
-                methodName.append(")");
-            }
-            return methodName.toString() + "@" + getFullSessionId();
+            sessionToPrint = getRootSession("toString");
         }
+        StringBuilder methodName = new StringBuilder();
+        methodName.append(sessionToPrint.getFullMethodPath(false /*truncatePath*/));
+        if (sessionToPrint.getOwnerInfo() != null && !sessionToPrint.getOwnerInfo().isEmpty()) {
+            methodName.append("(");
+            methodName.append(sessionToPrint.getOwnerInfo());
+            methodName.append(")");
+        }
+        return methodName.toString() + "@" + sessionToPrint.getFullSessionId();
     }
 }

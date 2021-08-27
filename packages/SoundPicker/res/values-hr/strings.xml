@@ -21,7 +21,7 @@
     <string name="alarm_sound_default" msgid="4787646764557462649">"Zadani zvuk alarma"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Dodaj melodiju zvona"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Dodaj alarm"</string>
-    <string name="add_notification_text" msgid="4431129543300614788">"Dodaj obavijest"</string>
+    <string name="add_notification_text" msgid="4431129543300614788">"Dodajte obavijest"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"Izbriši"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Dodavanje prilagođene melodije zvona nije moguće"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Brisanje prilagođene melodije zvona nije moguće"</string>

@@ -18,6 +18,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_PACKAGE_NAME := OverlayHostTests_UpdateOverlay
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_STATIC_JAVA_LIBRARIES := androidx.test.rules
@@ -30,6 +33,9 @@ my_package_prefix := com.android.server.om.hosttest.framework_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV1
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
@@ -42,6 +48,9 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV2
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
@@ -56,6 +65,9 @@ my_package_prefix := com.android.server.om.hosttest.app_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV1
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
@@ -67,6 +79,9 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV2
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2

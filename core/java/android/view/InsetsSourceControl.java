@@ -16,10 +16,18 @@
 
 package android.view;
 
+import static android.graphics.PointProto.X;
+import static android.graphics.PointProto.Y;
+import static android.view.InsetsSourceControlProto.LEASH;
+import static android.view.InsetsSourceControlProto.POSITION;
+import static android.view.InsetsSourceControlProto.TYPE;
+
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
@@ -35,11 +43,19 @@ public class InsetsSourceControl implements Parcelable {
     private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
 
+    // This is used while playing an insets animation regardless of the relative frame. This would
+    // be the insets received by the bounds of its source window.
+    private Insets mInsetsHint;
+
+    private boolean mSkipAnimationOnce;
+    private int mParcelableFlags;
+
     public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
-            Point surfacePosition) {
+            Point surfacePosition, Insets insetsHint) {
         mType = type;
         mLeash = leash;
         mSurfacePosition = surfacePosition;
+        mInsetsHint = insetsHint;
     }
 
     public InsetsSourceControl(InsetsSourceControl other) {
@@ -50,6 +66,16 @@ public class InsetsSourceControl implements Parcelable {
             mLeash = null;
         }
         mSurfacePosition = new Point(other.mSurfacePosition);
+        mInsetsHint = other.mInsetsHint;
+        mSkipAnimationOnce = other.getAndClearSkipAnimationOnce();
+    }
+
+    public InsetsSourceControl(Parcel in) {
+        mType = in.readInt();
+        mLeash = in.readTypedObject(SurfaceControl.CREATOR);
+        mSurfacePosition = in.readTypedObject(Point.CREATOR);
+        mInsetsHint = in.readTypedObject(Insets.CREATOR);
+        mSkipAnimationOnce = in.readBoolean();
     }
 
     public int getType() {
@@ -66,12 +92,6 @@ public class InsetsSourceControl implements Parcelable {
         return mLeash;
     }
 
-    public InsetsSourceControl(Parcel in) {
-        mType = in.readInt();
-        mLeash = in.readParcelable(null /* loader */);
-        mSurfacePosition = in.readParcelable(null /* loader */);
-    }
-
     public boolean setSurfacePosition(int left, int top) {
         if (mSurfacePosition.equals(left, top)) {
             return false;
@@ -84,6 +104,39 @@ public class InsetsSourceControl implements Parcelable {
         return mSurfacePosition;
     }
 
+    public void setInsetsHint(Insets insets) {
+        mInsetsHint = insets;
+    }
+
+    public void setInsetsHint(int left, int top, int right, int bottom) {
+        mInsetsHint = Insets.of(left, top, right, bottom);
+    }
+
+    public Insets getInsetsHint() {
+        return mInsetsHint;
+    }
+
+    public void setSkipAnimationOnce(boolean skipAnimation) {
+        mSkipAnimationOnce = skipAnimation;
+    }
+
+    /**
+     * Get the state whether the current control needs to skip animation or not.
+     *
+     * Note that this is a one-time check that the state is only valid and can be called when
+     * {@link InsetsController#applyAnimation} to check if the current control can skip animation
+     * at this time, and then will clear the state value.
+     */
+    public boolean getAndClearSkipAnimationOnce() {
+        final boolean result = mSkipAnimationOnce;
+        mSkipAnimationOnce = false;
+        return result;
+    }
+
+    public void setParcelableFlags(int parcelableFlags) {
+        mParcelableFlags = parcelableFlags;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -92,8 +145,10 @@ public class InsetsSourceControl implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeParcelable(mLeash, 0 /* flags*/);
-        dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
+        dest.writeTypedObject(mLeash, mParcelableFlags);
+        dest.writeTypedObject(mSurfacePosition, mParcelableFlags);
+        dest.writeTypedObject(mInsetsHint, mParcelableFlags);
+        dest.writeBoolean(mSkipAnimationOnce);
     }
 
     public void release(Consumer<SurfaceControl> surfaceReleaseConsumer) {
@@ -102,11 +157,41 @@ public class InsetsSourceControl implements Parcelable {
         }
     }
 
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final InsetsSourceControl that = (InsetsSourceControl) o;
+        final SurfaceControl thatLeash = that.mLeash;
+        return mType == that.mType
+                && ((mLeash == thatLeash)
+                        || (mLeash != null && thatLeash != null && mLeash.isSameSurface(thatLeash)))
+                && mSurfacePosition.equals(that.mSurfacePosition)
+                && mInsetsHint.equals(that.mInsetsHint)
+                && mSkipAnimationOnce == that.mSkipAnimationOnce;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mType;
+        result = 31 * result + (mLeash != null ? mLeash.hashCode() : 0);
+        result = 31 * result + mSurfacePosition.hashCode();
+        result = 31 * result + mInsetsHint.hashCode();
+        result = 31 * result + (mSkipAnimationOnce ? 1 : 0);
+        return result;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
         pw.print(" mLeash="); pw.print(mLeash);
         pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
+        pw.print(" mInsetsHint="); pw.print(mInsetsHint);
+        pw.print(" mSkipAnimationOnce="); pw.print(mSkipAnimationOnce);
         pw.println();
     }
 
@@ -120,4 +205,25 @@ public class InsetsSourceControl implements Parcelable {
             return new InsetsSourceControl[size];
         }
     };
+
+    /**
+     * Export the state of {@link InsetsSourceControl} into a protocol buffer output stream.
+     *
+     * @param proto   Stream to write the state to
+     * @param fieldId FieldId of InsetsSource as defined in the parent message
+     */
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(TYPE, InsetsState.typeToString(mType));
+
+        final long surfaceToken = proto.start(POSITION);
+        proto.write(X, mSurfacePosition.x);
+        proto.write(Y, mSurfacePosition.y);
+        proto.end(surfaceToken);
+
+        if (mLeash != null) {
+            mLeash.dumpDebug(proto, LEASH);
+        }
+        proto.end(token);
+    }
 }

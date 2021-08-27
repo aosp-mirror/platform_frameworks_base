@@ -16,6 +16,10 @@
 
 package android.util.apk;
 
+import android.annotation.NonNull;
+import android.os.incremental.IncrementalManager;
+
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.security.DigestException;
 
@@ -35,4 +39,22 @@ interface DataSource {
      */
     void feedIntoDataDigester(DataDigester md, long offset, int size)
             throws IOException, DigestException;
+
+    /**
+     * Creates a DataSource that can handle the passed fd in the most efficient and safe manner.
+     * @param fd file descriptor to read from
+     * @param pos starting offset
+     * @param size size of the region
+     * @return created DataSource object
+     */
+    static @NonNull DataSource create(@NonNull FileDescriptor fd, long pos, long size) {
+        if (IncrementalManager.isIncrementalFileFd(fd)) {
+            // IncFS-based files may have missing pages, and reading those via mmap() results
+            // in a SIGBUS signal. Java doesn't have a good way of catching it, ending up killing
+            // the process by default. Going back to read() is the safest option for these files.
+            return new ReadFileDataSource(fd, pos, size);
+        } else {
+            return new MemoryMappedFileDataSource(fd, pos, size);
+        }
+    }
 }

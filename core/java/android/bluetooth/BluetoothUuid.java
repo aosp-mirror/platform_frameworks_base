@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
@@ -34,6 +35,7 @@ import java.util.UUID;
  * @hide
  */
 @SystemApi
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class BluetoothUuid {
 
     /* See Bluetooth Assigned Numbers document - SDP section, to get the values of UUIDs
@@ -153,7 +155,22 @@ public final class BluetoothUuid {
     @SystemApi
     public static final ParcelUuid HEARING_AID =
             ParcelUuid.fromString("0000FDF0-0000-1000-8000-00805f9b34fb");
-
+   /** Placeholder until specification is released
+     * @hide */
+    @NonNull
+    @SystemApi
+    public static final ParcelUuid LE_AUDIO =
+            ParcelUuid.fromString("EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE");
+    /** @hide */
+    @NonNull
+    @SystemApi
+    public static final ParcelUuid DIP =
+            ParcelUuid.fromString("00001200-0000-1000-8000-00805F9B34FB");
+    /** @hide */
+    @NonNull
+    @SystemApi
+    public static final ParcelUuid VOLUME_CONTROL =
+            ParcelUuid.fromString("00001844-0000-1000-8000-00805F9B34FB");
     /** @hide */
     @NonNull
     @SystemApi

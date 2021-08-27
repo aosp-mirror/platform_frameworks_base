@@ -16,57 +16,49 @@
 
 package com.android.server.net;
 
-import static android.Manifest.permission.NETWORK_STACK;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
+
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkInfo.State;
+import android.net.NetworkRequest;
 import android.os.Handler;
-import android.security.Credentials;
-import android.security.KeyStore;
 import android.text.TextUtils;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
-import com.android.internal.notification.SystemNotificationChannels;
-import com.android.server.ConnectivityService;
-import com.android.server.EventLogTags;
 import com.android.server.connectivity.Vpn;
 
 import java.util.List;
 import java.util.Objects;
 
 /**
- * State tracker for lockdown mode. Watches for normal {@link NetworkInfo} to be
- * connected and kicks off VPN connection, managing any required {@code netd}
- * firewall rules.
+ * State tracker for legacy lockdown VPN. Watches for physical networks to be
+ * connected and kicks off VPN connection.
  */
 public class LockdownVpnTracker {
     private static final String TAG = "LockdownVpnTracker";
 
-    /** Number of VPN attempts before waiting for user intervention. */
-    private static final int MAX_ERROR_COUNT = 4;
-
-    private static final String ACTION_LOCKDOWN_RESET = "com.android.server.action.LOCKDOWN_RESET";
+    public static final String ACTION_LOCKDOWN_RESET = "com.android.server.action.LOCKDOWN_RESET";
 
     @NonNull private final Context mContext;
-    @NonNull private final ConnectivityService mConnService;
+    @NonNull private final ConnectivityManager mCm;
+    @NonNull private final NotificationManager mNotificationManager;
     @NonNull private final Handler mHandler;
     @NonNull private final Vpn mVpn;
     @NonNull private final VpnProfile mProfile;
@@ -76,65 +68,106 @@ public class LockdownVpnTracker {
     @NonNull private final PendingIntent mConfigIntent;
     @NonNull private final PendingIntent mResetIntent;
 
+    @NonNull private final NetworkCallback mDefaultNetworkCallback = new NetworkCallback();
+    @NonNull private final VpnNetworkCallback mVpnNetworkCallback = new VpnNetworkCallback();
+
+    private class NetworkCallback extends ConnectivityManager.NetworkCallback {
+        private Network mNetwork = null;
+        private LinkProperties mLinkProperties = null;
+
+        @Override
+        public void onLinkPropertiesChanged(Network network, LinkProperties lp) {
+            boolean networkChanged = false;
+            if (!network.equals(mNetwork)) {
+                // The default network just changed.
+                mNetwork = network;
+                networkChanged = true;
+            }
+            mLinkProperties = lp;
+            // Backwards compatibility: previously, LockdownVpnTracker only responded to connects
+            // and disconnects, not LinkProperties changes on existing networks.
+            if (networkChanged) {
+                synchronized (mStateLock) {
+                    handleStateChangedLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            // The default network has gone down.
+            mNetwork = null;
+            mLinkProperties = null;
+            synchronized (mStateLock) {
+                handleStateChangedLocked();
+            }
+        }
+
+        public Network getNetwork() {
+            return mNetwork;
+        }
+
+        public LinkProperties getLinkProperties() {
+            return mLinkProperties;
+        }
+    }
+
+    private class VpnNetworkCallback extends NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            synchronized (mStateLock) {
+                handleStateChangedLocked();
+            }
+        }
+        @Override
+        public void onLost(Network network) {
+            onAvailable(network);
+        }
+    }
+
     @Nullable
     private String mAcceptedEgressIface;
 
-    private int mErrorCount;
-
-    public static boolean isEnabled() {
-        return KeyStore.getInstance().contains(Credentials.LOCKDOWN_VPN);
-    }
-
     public LockdownVpnTracker(@NonNull Context context,
-            @NonNull ConnectivityService connService,
             @NonNull Handler handler,
             @NonNull Vpn vpn,
             @NonNull VpnProfile profile) {
         mContext = Objects.requireNonNull(context);
-        mConnService = Objects.requireNonNull(connService);
+        mCm = mContext.getSystemService(ConnectivityManager.class);
         mHandler = Objects.requireNonNull(handler);
         mVpn = Objects.requireNonNull(vpn);
         mProfile = Objects.requireNonNull(profile);
+        mNotificationManager = mContext.getSystemService(NotificationManager.class);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
-        mConfigIntent = PendingIntent.getActivity(mContext, 0, configIntent, 0);
+        mConfigIntent = PendingIntent.getActivity(mContext, 0 /* requestCode */, configIntent,
+                PendingIntent.FLAG_IMMUTABLE);
 
         final Intent resetIntent = new Intent(ACTION_LOCKDOWN_RESET);
         resetIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mResetIntent = PendingIntent.getBroadcast(mContext, 0, resetIntent, 0);
+        mResetIntent = PendingIntent.getBroadcast(mContext, 0 /* requestCode */, resetIntent,
+                PendingIntent.FLAG_IMMUTABLE);
     }
-
-    private BroadcastReceiver mResetReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            reset();
-        }
-    };
 
     /**
      * Watch for state changes to both active egress network, kicking off a VPN
      * connection when ready, or setting firewall rules once VPN is connected.
      */
     private void handleStateChangedLocked() {
-
-        final NetworkInfo egressInfo = mConnService.getActiveNetworkInfoUnfiltered();
-        final LinkProperties egressProp = mConnService.getActiveLinkProperties();
+        final Network network = mDefaultNetworkCallback.getNetwork();
+        final LinkProperties egressProp = mDefaultNetworkCallback.getLinkProperties();
 
         final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
         final VpnConfig vpnConfig = mVpn.getLegacyVpnConfig();
 
         // Restart VPN when egress network disconnected or changed
-        final boolean egressDisconnected = egressInfo == null
-                || State.DISCONNECTED.equals(egressInfo.getState());
+        final boolean egressDisconnected = (network == null);
         final boolean egressChanged = egressProp == null
                 || !TextUtils.equals(mAcceptedEgressIface, egressProp.getInterfaceName());
 
-        final String egressTypeName = (egressInfo == null) ?
-                null : ConnectivityManager.getNetworkTypeName(egressInfo.getType());
         final String egressIface = (egressProp == null) ?
                 null : egressProp.getInterfaceName();
-        Slog.d(TAG, "handleStateChanged: egress=" + egressTypeName +
-                " " + mAcceptedEgressIface + "->" + egressIface);
+        Log.d(TAG, "handleStateChanged: egress=" + mAcceptedEgressIface + "->" + egressIface);
 
         if (egressDisconnected || egressChanged) {
             mAcceptedEgressIface = null;
@@ -145,47 +178,49 @@ public class LockdownVpnTracker {
             return;
         }
 
-        final int egressType = egressInfo.getType();
-        if (vpnInfo.getDetailedState() == DetailedState.FAILED) {
-            EventLogTags.writeLockdownVpnError(egressType);
-        }
-
-        if (mErrorCount > MAX_ERROR_COUNT) {
-            showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
-
-        } else if (egressInfo.isConnected() && !vpnInfo.isConnectedOrConnecting()) {
-            if (mProfile.isValidLockdownProfile()) {
-                Slog.d(TAG, "Active network connected; starting VPN");
-                EventLogTags.writeLockdownVpnConnecting(egressType);
-                showNotification(R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected);
-
-                mAcceptedEgressIface = egressProp.getInterfaceName();
-                try {
-                    // Use the privileged method because Lockdown VPN is initiated by the system, so
-                    // no additional permission checks are necessary.
-                    mVpn.startLegacyVpnPrivileged(mProfile, KeyStore.getInstance(), egressProp);
-                } catch (IllegalStateException e) {
-                    mAcceptedEgressIface = null;
-                    Slog.e(TAG, "Failed to start VPN", e);
-                    showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
-                }
-            } else {
-                Slog.e(TAG, "Invalid VPN profile; requires IP-based server and DNS");
+        // At this point, |network| is known to be non-null.
+        if (!vpnInfo.isConnectedOrConnecting()) {
+            if (!mProfile.isValidLockdownProfile()) {
+                Log.e(TAG, "Invalid VPN profile; requires IP-based server and DNS");
                 showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
+                return;
             }
 
+            Log.d(TAG, "Active network connected; starting VPN");
+            showNotification(R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected);
+
+            mAcceptedEgressIface = egressIface;
+            try {
+                // Use the privileged method because Lockdown VPN is initiated by the system, so
+                // no additional permission checks are necessary.
+                //
+                // Pass in the underlying network here because the legacy VPN is, in fact, tightly
+                // coupled to a given underlying network and cannot provide mobility. This makes
+                // things marginally more correct in two ways:
+                //
+                // 1. When the legacy lockdown VPN connects, LegacyTypeTracker broadcasts an extra
+                //    CONNECTED broadcast for the underlying network type. The underlying type comes
+                //    from here. LTT *could* assume that the underlying network is the default
+                //    network, but that might introduce a race condition if, say, the VPN starts
+                //    connecting on cell, but when the connection succeeds and the agent is
+                //    registered, the default network is now wifi.
+                // 2. If no underlying network is passed in, then CS will assume the underlying
+                //    network is the system default. So, if the VPN  is up and underlying network
+                //    (e.g., wifi) disconnects, CS will inform apps that the VPN's capabilities have
+                //    changed to match the new default network (e.g., cell).
+                mVpn.startLegacyVpnPrivileged(mProfile, network, egressProp);
+            } catch (IllegalStateException e) {
+                mAcceptedEgressIface = null;
+                Log.e(TAG, "Failed to start VPN", e);
+                showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
+            }
         } else if (vpnInfo.isConnected() && vpnConfig != null) {
             final String iface = vpnConfig.interfaze;
             final List<LinkAddress> sourceAddrs = vpnConfig.addresses;
 
-            Slog.d(TAG, "VPN connected using iface=" + iface +
-                    ", sourceAddr=" + sourceAddrs.toString());
-            EventLogTags.writeLockdownVpnConnected(egressType);
+            Log.d(TAG, "VPN connected using iface=" + iface
+                    + ", sourceAddr=" + sourceAddrs.toString());
             showNotification(R.string.vpn_lockdown_connected, R.drawable.vpn_connected);
-
-            final NetworkInfo clone = new NetworkInfo(egressInfo);
-            augmentNetworkInfo(clone);
-            mConnService.sendConnectedBroadcast(clone);
         }
     }
 
@@ -196,14 +231,19 @@ public class LockdownVpnTracker {
     }
 
     private void initLocked() {
-        Slog.d(TAG, "initLocked()");
+        Log.d(TAG, "initLocked()");
 
         mVpn.setEnableTeardown(false);
         mVpn.setLockdown(true);
-
-        final IntentFilter resetFilter = new IntentFilter(ACTION_LOCKDOWN_RESET);
-        mContext.registerReceiver(mResetReceiver, resetFilter, NETWORK_STACK, mHandler);
+        mCm.setLegacyLockdownVpnEnabled(true);
         handleStateChangedLocked();
+
+        mCm.registerSystemDefaultNetworkCallback(mDefaultNetworkCallback, mHandler);
+        final NetworkRequest vpnRequest = new NetworkRequest.Builder()
+                .clearCapabilities()
+                .addTransportType(TRANSPORT_VPN)
+                .build();
+        mCm.registerNetworkCallback(vpnRequest, mVpnNetworkCallback, mHandler);
     }
 
     public void shutdown() {
@@ -213,21 +253,26 @@ public class LockdownVpnTracker {
     }
 
     private void shutdownLocked() {
-        Slog.d(TAG, "shutdownLocked()");
+        Log.d(TAG, "shutdownLocked()");
 
         mAcceptedEgressIface = null;
-        mErrorCount = 0;
 
         mVpn.stopVpnRunnerPrivileged();
         mVpn.setLockdown(false);
+        mCm.setLegacyLockdownVpnEnabled(false);
         hideNotification();
 
-        mContext.unregisterReceiver(mResetReceiver);
         mVpn.setEnableTeardown(true);
+        mCm.unregisterNetworkCallback(mDefaultNetworkCallback);
+        mCm.unregisterNetworkCallback(mVpnNetworkCallback);
     }
 
+    /**
+     * Reset VPN lockdown tracker. Called by ConnectivityService when receiving
+     * {@link #ACTION_LOCKDOWN_RESET} pending intent.
+     */
     public void reset() {
-        Slog.d(TAG, "reset()");
+        Log.d(TAG, "reset()");
         synchronized (mStateLock) {
             // cycle tracker, reset error count, and trigger retry
             shutdownLocked();
@@ -236,31 +281,9 @@ public class LockdownVpnTracker {
         }
     }
 
-    public void onNetworkInfoChanged() {
-        synchronized (mStateLock) {
-            handleStateChangedLocked();
-        }
-    }
-
-    public void onVpnStateChanged(NetworkInfo info) {
-        if (info.getDetailedState() == DetailedState.FAILED) {
-            mErrorCount++;
-        }
-        synchronized (mStateLock) {
-            handleStateChangedLocked();
-        }
-    }
-
-    public void augmentNetworkInfo(NetworkInfo info) {
-        if (info.isConnected()) {
-            final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
-            info.setDetailedState(vpnInfo.getDetailedState(), vpnInfo.getReason(), null);
-        }
-    }
-
     private void showNotification(int titleRes, int iconRes) {
         final Notification.Builder builder =
-                new Notification.Builder(mContext, SystemNotificationChannels.VPN)
+                new Notification.Builder(mContext, NOTIFICATION_CHANNEL_VPN)
                         .setWhen(0)
                         .setSmallIcon(iconRes)
                         .setContentTitle(mContext.getString(titleRes))
@@ -272,11 +295,11 @@ public class LockdownVpnTracker {
                         .setColor(mContext.getColor(
                                 com.android.internal.R.color.system_notification_accent_color));
 
-        NotificationManager.from(mContext).notify(null, SystemMessage.NOTE_VPN_STATUS,
+        mNotificationManager.notify(null /* tag */, SystemMessage.NOTE_VPN_STATUS,
                 builder.build());
     }
 
     private void hideNotification() {
-        NotificationManager.from(mContext).cancel(null, SystemMessage.NOTE_VPN_STATUS);
+        mNotificationManager.cancel(null, SystemMessage.NOTE_VPN_STATUS);
     }
 }

@@ -316,9 +316,10 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleCalendar.setSchedule(mScheduleInfo);
         mScheduleInfo.nextAlarm = 2000;
 
+        // next alarm updated to 3000 (alarm for 2000 was changed to 3000)
         mScheduleCalendar.maybeSetNextAlarm(1000, 3000);
 
-        assertEquals(2000, mScheduleInfo.nextAlarm);
+        assertEquals(3000, mScheduleInfo.nextAlarm);
     }
 
     @Test

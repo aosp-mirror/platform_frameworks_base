@@ -22,6 +22,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaRouter.RouteInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -31,22 +33,31 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -64,23 +75,35 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
     private final Callback mCallback = new Callback();
-    private final ActivityStarter mActivityStarter;
     private Dialog mDialog;
     private boolean mWifiConnected;
+    private boolean mHotspotConnected;
 
     @Inject
-    public CastTile(QSHost host, CastController castController,
-            KeyguardStateController keyguardStateController, NetworkController networkController,
-            ActivityStarter activityStarter) {
-        super(host);
+    public CastTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            FalsingManager falsingManager,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            CastController castController,
+            KeyguardStateController keyguardStateController,
+            NetworkController networkController,
+            HotspotController hotspotController
+    ) {
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mController = castController;
         mDetailAdapter = new CastDetailAdapter();
         mKeyguard = keyguardStateController;
         mNetworkController = networkController;
-        mActivityStarter = activityStarter;
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
         mNetworkController.observe(this, mSignalCallback);
+        hotspotController.observe(this, mHotspotCallback);
     }
 
     @Override
@@ -116,17 +139,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
-        handleClick();
+    protected void handleLongClick(@Nullable View view) {
+        handleClick(view);
     }
 
     @Override
-    protected void handleLongClick() {
-        handleClick();
-    }
-
-    @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
@@ -208,7 +226,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         }
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
                 : R.drawable.ic_cast);
-        if (mWifiConnected || state.value) {
+        if (canCastToWifi() || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {
                 state.secondaryLabel = "";
@@ -244,18 +262,38 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
 
+    private boolean canCastToWifi() {
+        return mWifiConnected || mHotspotConnected;
+    }
+
     private final NetworkController.SignalCallback mSignalCallback =
             new NetworkController.SignalCallback() {
                 @Override
-                public void setWifiIndicators(boolean enabled,
-                        NetworkController.IconState statusIcon,
-                        NetworkController.IconState qsIcon, boolean activityIn, boolean activityOut,
-                        String description, boolean isTransient, String statusLabel) {
+                public void setWifiIndicators(WifiIndicators indicators) {
                     // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected = enabled && qsIcon.visible;
+                    boolean enabledAndConnected = indicators.enabled
+                            && (indicators.qsIcon == null ? false : indicators.qsIcon.visible);
                     if (enabledAndConnected != mWifiConnected) {
                         mWifiConnected = enabledAndConnected;
-                        refreshState();
+                        // Hotspot is not connected, so changes here should update
+                        if (!mHotspotConnected) {
+                            refreshState();
+                        }
+                    }
+                }
+            };
+
+    private final HotspotController.Callback mHotspotCallback =
+            new HotspotController.Callback() {
+                @Override
+                public void onHotspotChanged(boolean enabled, int numDevices) {
+                    boolean enabledAndConnected = enabled && numDevices > 0;
+                    if (enabledAndConnected != mHotspotConnected) {
+                        mHotspotConnected = enabledAndConnected;
+                        // Wifi is not connected, so changes here should update
+                        if (!mWifiConnected) {
+                            refreshState();
+                        }
                     }
                 }
             };

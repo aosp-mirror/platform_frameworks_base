@@ -59,7 +59,7 @@ public class EditorTouchState {
     private boolean mMultiTapInSameArea;
 
     private boolean mMovedEnoughForDrag;
-    private boolean mIsDragCloseToVertical;
+    private float mInitialDragDirectionXYRatio;
 
     public float getLastDownX() {
         return mLastDownX;
@@ -98,8 +98,23 @@ public class EditorTouchState {
         return mMovedEnoughForDrag;
     }
 
-    public boolean isDragCloseToVertical() {
-        return mIsDragCloseToVertical && !mIsOnHandle;
+    /**
+     * When {@link #isMovedEnoughForDrag()} is {@code true}, this function returns the x/y ratio for
+     * the initial drag direction. Smaller values indicate that the direction is closer to vertical,
+     * while larger values indicate that the direction is closer to horizontal. For example:
+     * <ul>
+     *     <li>if the drag direction is exactly vertical, this returns 0
+     *     <li>if the drag direction is exactly horizontal, this returns {@link Float#MAX_VALUE}
+     *     <li>if the drag direction is 45 deg from vertical, this returns 1
+     *     <li>if the drag direction is 30 deg from vertical, this returns 0.58 (x delta is smaller
+     *     than y delta)
+     *     <li>if the drag direction is 60 deg from vertical, this returns 1.73 (x delta is bigger
+     *     than y delta)
+     * </ul>
+     * This function never returns negative values, regardless of the direction of the drag.
+     */
+    public float getInitialDragDirectionXYRatio() {
+        return mInitialDragDirectionXYRatio;
     }
 
     public void setIsOnHandle(boolean onHandle) {
@@ -155,7 +170,7 @@ public class EditorTouchState {
             mLastDownY = event.getY();
             mLastDownMillis = event.getEventTime();
             mMovedEnoughForDrag = false;
-            mIsDragCloseToVertical = false;
+            mInitialDragDirectionXYRatio = 0.0f;
         } else if (action == MotionEvent.ACTION_UP) {
             if (TextView.DEBUG_CURSOR) {
                 logCursor("EditorTouchState", "ACTION_UP");
@@ -164,7 +179,7 @@ public class EditorTouchState {
             mLastUpY = event.getY();
             mLastUpMillis = event.getEventTime();
             mMovedEnoughForDrag = false;
-            mIsDragCloseToVertical = false;
+            mInitialDragDirectionXYRatio = 0.0f;
         } else if (action == MotionEvent.ACTION_MOVE) {
             if (!mMovedEnoughForDrag) {
                 float deltaX = event.getX() - mLastDownX;
@@ -174,9 +189,8 @@ public class EditorTouchState {
                 int touchSlop = config.getScaledTouchSlop();
                 mMovedEnoughForDrag = distanceSquared > touchSlop * touchSlop;
                 if (mMovedEnoughForDrag) {
-                    // If the direction of the swipe motion is within 45 degrees of vertical, it is
-                    // considered a vertical drag.
-                    mIsDragCloseToVertical = Math.abs(deltaX) <= Math.abs(deltaY);
+                    mInitialDragDirectionXYRatio = (deltaY == 0) ? Float.MAX_VALUE :
+                            Math.abs(deltaX / deltaY);
                 }
             }
         } else if (action == MotionEvent.ACTION_CANCEL) {
@@ -185,7 +199,7 @@ public class EditorTouchState {
             mMultiTapStatus = MultiTapStatus.NONE;
             mMultiTapInSameArea = false;
             mMovedEnoughForDrag = false;
-            mIsDragCloseToVertical = false;
+            mInitialDragDirectionXYRatio = 0.0f;
         }
     }
 
@@ -200,5 +214,28 @@ public class EditorTouchState {
         float deltaY = y2 - y1;
         float distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
         return distanceSquared <= maxDistance * maxDistance;
+    }
+
+    /**
+     * Returns the x/y ratio corresponding to the given angle relative to vertical. Smaller angle
+     * values (ie, closer to vertical) will result in a smaller x/y ratio. For example:
+     * <ul>
+     *     <li>if the angle is 45 deg, the ratio is 1
+     *     <li>if the angle is 30 deg, the ratio is 0.58 (x delta is smaller than y delta)
+     *     <li>if the angle is 60 deg, the ratio is 1.73 (x delta is bigger than y delta)
+     * </ul>
+     * If the passed-in value is <= 0, this function returns 0. If the passed-in value is >= 90,
+     * this function returns {@link Float#MAX_VALUE}.
+     *
+     * @see #getInitialDragDirectionXYRatio()
+     */
+    public static float getXYRatio(int angleFromVerticalInDegrees) {
+        if (angleFromVerticalInDegrees <= 0) {
+            return 0.0f;
+        }
+        if (angleFromVerticalInDegrees >= 90) {
+            return Float.MAX_VALUE;
+        }
+        return (float) Math.tan(Math.toRadians(angleFromVerticalInDegrees));
     }
 }

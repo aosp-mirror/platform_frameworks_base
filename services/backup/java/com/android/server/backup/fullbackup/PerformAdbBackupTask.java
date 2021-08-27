@@ -38,7 +38,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.UserBackupManagerService;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -83,12 +83,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
     private final String mCurrentPassword;
     private final String mEncryptPassword;
     private final int mCurrentOpToken;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     public PerformAdbBackupTask(UserBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
             boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
             String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
-            boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
+            boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch,
+            BackupEligibilityRules backupEligibilityRules) {
         super(observer);
         mUserBackupManagerService = backupManagerService;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
@@ -119,6 +121,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         }
         mCompress = doCompress;
         mKeyValue = doKeyValue;
+        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     private void addPackagesToSet(TreeMap<String, PackageInfo> set, List<String> pkgNames) {
@@ -138,7 +141,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
     private OutputStream emitAesBackupHeader(StringBuilder headerbuf,
             OutputStream ofstream) throws Exception {
-        // User key will be used to encrypt the master key.
+        // User key will be used to encrypt the encryption key.
         byte[] newUserSalt = mUserBackupManagerService
                 .randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
         SecretKey userKey = PasswordUtils
@@ -146,16 +149,16 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                         newUserSalt,
                         PasswordUtils.PBKDF2_HASH_ROUNDS);
 
-        // the master key is random for each backup
-        byte[] masterPw = new byte[256 / 8];
-        mUserBackupManagerService.getRng().nextBytes(masterPw);
+        // the encryption key is random for each backup
+        byte[] encryptionKey = new byte[256 / 8];
+        mUserBackupManagerService.getRng().nextBytes(encryptionKey);
         byte[] checksumSalt = mUserBackupManagerService
                 .randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
 
-        // primary encryption of the datastream with the random key
+        // primary encryption of the datastream with the encryption key
         Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        SecretKeySpec masterKeySpec = new SecretKeySpec(masterPw, "AES");
-        c.init(Cipher.ENCRYPT_MODE, masterKeySpec);
+        SecretKeySpec encryptionKeySpec = new SecretKeySpec(encryptionKey, "AES");
+        c.init(Cipher.ENCRYPT_MODE, encryptionKeySpec);
         OutputStream finalOutput = new CipherOutputStream(ofstream, c);
 
         // line 4: name of encryption algorithm
@@ -164,7 +167,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         // line 5: user password salt [hex]
         headerbuf.append(PasswordUtils.byteArrayToHex(newUserSalt));
         headerbuf.append('\n');
-        // line 6: master key checksum salt [hex]
+        // line 6: encryption key checksum salt [hex]
         headerbuf.append(PasswordUtils.byteArrayToHex(checksumSalt));
         headerbuf.append('\n');
         // line 7: number of PBKDF2 rounds used [decimal]
@@ -179,21 +182,21 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         headerbuf.append(PasswordUtils.byteArrayToHex(IV));
         headerbuf.append('\n');
 
-        // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
+        // line 9: encryption IV + key blob, encrypted by the user key [hex].  Blob format:
         //    [byte] IV length = Niv
         //    [array of Niv bytes] IV itself
-        //    [byte] master key length = Nmk
-        //    [array of Nmk bytes] master key itself
-        //    [byte] MK checksum hash length = Nck
-        //    [array of Nck bytes] master key checksum hash
+        //    [byte] encryption key length = Nek
+        //    [array of Nek bytes] encryption key itself
+        //    [byte] encryption key checksum hash length = Nck
+        //    [array of Nck bytes] encryption key checksum hash
         //
-        // The checksum is the (master key + checksum salt), run through the
+        // The checksum is the (encryption key + checksum salt), run through the
         // stated number of PBKDF2 rounds
         IV = c.getIV();
-        byte[] mk = masterKeySpec.getEncoded();
+        byte[] mk = encryptionKeySpec.getEncoded();
         byte[] checksum = PasswordUtils
                 .makeKeyChecksum(PBKDF_CURRENT,
-                        masterKeySpec.getEncoded(),
+                        encryptionKeySpec.getEncoded(),
                         checksumSalt, PasswordUtils.PBKDF2_HASH_ROUNDS);
 
         ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
@@ -286,15 +289,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo,
-                    mUserBackupManagerService.getUserId())
-                    || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
+            if (!mBackupEligibilityRules.appIsEligibleForBackup(pkg.applicationInfo)
+                    || mBackupEligibilityRules.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (DEBUG) {
                     Slog.i(TAG, "Package " + pkg.packageName
                             + " is not eligible for backup, removing.");
                 }
-            } else if (AppBackupUtils.appIsKeyValueOnly(pkg)) {
+            } else if (mBackupEligibilityRules.appIsKeyValueOnly(pkg)) {
                 iter.remove();
                 if (DEBUG) {
                     Slog.i(TAG, "Package " + pkg.packageName
@@ -343,15 +345,15 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             // When line 4 is not "none", then additional header data follows:
             //
             // line 5: user password salt [hex]
-            // line 6: master key checksum salt [hex]
-            // line 7: number of PBKDF2 rounds to use (same for user & master) [decimal]
+            // line 6: encryption key checksum salt [hex]
+            // line 7: number of PBKDF2 rounds to use (same for user & encryption key) [decimal]
             // line 8: IV of the user key [hex]
-            // line 9: master key blob [hex]
-            //     IV of the master key, master key itself, master key checksum hash
+            // line 9: encryption key blob [hex]
+            //     IV of the encryption key, encryption key itself, encryption key checksum hash
             //
-            // The master key checksum is the master key plus its checksum salt, run through
+            // The encryption key checksum is the encryption key plus its checksum salt, run through
             // 10k rounds of PBKDF2.  This is used to verify that the user has supplied the
-            // correct password for decrypting the archive:  the master key decrypted from
+            // correct password for decrypting the archive:  the encryption key decrypted from
             // the archive using the user-supplied password is also run through PBKDF2 in
             // this way, and if the result does not match the checksum as stored in the
             // archive, then we know that the user-supplied password does not match the
@@ -419,7 +421,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                                 this,
                                 Long.MAX_VALUE,
                                 mCurrentOpToken,
-                                /*transportFlags=*/ 0);
+                                /*transportFlags=*/ 0,
+                                mBackupEligibilityRules);
                 sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                 // Don't need to check preflight result as there is no preflight hook.

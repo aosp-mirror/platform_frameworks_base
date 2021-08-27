@@ -19,6 +19,7 @@ package android.telephony.ims.compat.stub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
@@ -29,10 +30,13 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
+
+import java.util.List;
 
 /**
  * Compat implementation of ImsCallSessionImplBase for older implementations.
@@ -45,7 +49,7 @@ import com.android.ims.internal.IImsVideoCallProvider;
 
 public class ImsCallSessionImplBase extends IImsCallSession.Stub {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsCallSessionImplBase() {
     }
 
@@ -401,6 +405,15 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      */
     @Override
     public void sendRttMessage(String rttMessage) {
+    }
+
+    /**
+     * Device sends RTP header extensions.
+     * @param headerExtensions The header extensions to send.
+     */
+    @Override
+    public void sendRtpHeaderExtensions(@NonNull List<RtpHeaderExtension> headerExtensions) {
+        // no-op; not supported in compat layer.
     }
 
     /**

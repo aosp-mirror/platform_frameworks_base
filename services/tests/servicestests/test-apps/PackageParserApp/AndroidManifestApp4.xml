@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.servicestests.apps.packageparserapp" >
+    <application>
+        <uses-library android:name="android.test.runner" />
+        <property android:name="android.cts.PROPERTY_RESOURCE_XML" android:resource="@xml/xml_property" />
+        <property android:name="android.cts.PROPERTY_RESOURCE_INTEGER" android:resource="@integer/integer_property" />
+        <property android:name="android.cts.PROPERTY_BOOLEAN" android:value="true" />
+        <property android:name="android.cts.PROPERTY_BOOLEAN_VIA_RESOURCE" android:value="@bool/boolean_property" />
+        <property android:name="android.cts.PROPERTY_FLOAT" android:value="3.14" />
+        <property android:name="android.cts.PROPERTY_FLOAT_VIA_RESOURCE" android:value="@dimen/float_property" />
+        <property android:name="android.cts.PROPERTY_INTEGER" android:value="42" />
+        <property android:name="android.cts.PROPERTY_INTEGER_VIA_RESOURCE" android:value="@integer/integer_property" />
+        <property android:name="android.cts.PROPERTY_STRING" android:value="koala" />
+        <property android:name="android.cts.PROPERTY_STRING_VIA_RESOURCE" android:value="@string/string_property" />
+
+	    <activity android:name="com.android.servicestests.apps.packageparserapp.MyActivity"
+	              android:exported="true" >
+	        <property android:name="android.cts.PROPERTY_ACTIVITY" android:value="@integer/integer_property" />
+	        <property android:name="android.cts.PROPERTY_COMPONENT" android:value="@integer/integer_property" />
+	        <property android:name="android.cts.PROPERTY_STRING" android:value="koala activity" />
+	        <intent-filter>
+	           <action android:name="android.intent.action.MAIN" />
+	           <category android:name="android.intent.category.LAUNCHER" />
+	        </intent-filter>
+	    </activity>
+	    <activity-alias android:name="com.android.servicestests.apps.packageparserapp.MyActivityAlias"
+	                    android:targetActivity="com.android.servicestests.apps.packageparserapp.MyActivity">
+	        <property android:name="android.cts.PROPERTY_ACTIVITY_ALIAS" android:value="@integer/integer_property" />
+	        <property android:name="android.cts.PROPERTY_COMPONENT" android:value="@integer/integer_property" />
+	    </activity-alias>
+	    <provider android:name="com.android.servicestests.apps.packageparserapp.MyProvider"
+	             android:authorities="propertytest">
+	        <property android:name="android.cts.PROPERTY_PROVIDER" android:value="@integer/integer_property" />
+	    </provider>
+	    <receiver android:name="com.android.servicestests.apps.packageparserapp.MyReceiver">
+	        <property android:name="android.cts.PROPERTY_RECEIVER" android:value="@integer/integer_property" />
+	        <property android:name="android.cts.PROPERTY_STRING" android:value="koala receiver" />
+	    </receiver>
+	    <service android:name="com.android.servicestests.apps.packageparserapp.MyService">
+	        <property android:name="android.cts.PROPERTY_SERVICE" android:value="@integer/integer_property" />
+	        <property android:name="android.cts.PROPERTY_COMPONENT" android:resource="@integer/integer_property" />
+	    </service>
+    </application>
+
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.servicestests.apps.packageparserapp" />
+</manifest>

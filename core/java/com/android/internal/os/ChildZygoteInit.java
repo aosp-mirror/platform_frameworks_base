@@ -116,7 +116,7 @@ public class ChildZygoteInit {
         try {
             server.registerServerSocketAtAbstractName(socketName);
 
-            // Add the abstract socket to the FD whitelist so that the native zygote code
+            // Add the abstract socket to the FD allow list so that the native zygote code
             // can properly detach it after forking.
             Zygote.nativeAllowFileAcrossFork("ABSTRACT/" + socketName);
 

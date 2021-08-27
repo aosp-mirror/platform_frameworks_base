@@ -28,29 +28,61 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
+import com.android.server.utils.SnapshotCache;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Settings data for a particular package we know about.
  */
 public class PackageSetting extends PackageSettingBase {
-    int appId;
 
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public int appId;
+
+    /**
+     * This can be null whenever a physical APK on device is missing. This can be the result of
+     * removing an external storage device where the APK resides.
+     *
+     * This will result in the system reading the {@link PackageSetting} from disk, but without
+     * being able to parse the base APK's AndroidManifest.xml to read all of its metadata. The data
+     * that is written and read in {@link Settings} includes a minimal set of metadata needed to
+     * perform other checks in the system.
+     *
+     * This is important in order to enforce uniqueness within the system, as the package, even if
+     * on a removed storage device, is still considered installed. Another package of the same
+     * application ID or declaring the same permissions or similar cannot be installed.
+     *
+     * Re-attaching the storage device to make the APK available should allow the user to use the
+     * app once the device reboots or otherwise re-scans it.
+     *
+     * It is expected that all code that uses a {@link PackageSetting} understands this inner field
+     * may be null. Note that this relationship only works one way. It should not be possible to
+     * have an entry inside {@link PackageManagerService#mPackages} without a corresponding
+     * {@link PackageSetting} inside {@link Settings#mPackages}.
+     *
+     * @deprecated Use {@link #getPkg()}. The setter is favored to avoid unintended mutation.
+     */
     @Nullable
+    @Deprecated
     public AndroidPackage pkg;
+
     /**
      * WARNING. The object reference is important. We perform integer equality and NOT
      * object equality to check whether shared user settings are the same.
      */
     SharedUserSetting sharedUser;
+
     /**
      * Temporary holding space for the shared user ID. While parsing package settings, the
      * shared users tag may come after the packages. In this case, we must delay linking the
@@ -70,19 +102,38 @@ public class PackageSetting extends PackageSettingBase {
     @NonNull
     private PackageStateUnserialized pkgState = new PackageStateUnserialized();
 
+    @NonNull
+    private UUID mDomainSetId;
+
+    /**
+     * Snapshot support.
+     */
+    private final SnapshotCache<PackageSetting> mSnapshot;
+
+    private SnapshotCache<PackageSetting> makeCache() {
+        return new SnapshotCache<PackageSetting>(this, this) {
+            @Override
+            public PackageSetting createSnapshot() {
+                return new PackageSetting(mSource, true);
+            }};
+    }
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public PackageSetting(String name, String realName, File codePath, File resourcePath,
+    public PackageSetting(String name, String realName, @NonNull File codePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int privateFlags,
             int sharedUserId, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups) {
-        super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
+            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups,
+            @NonNull UUID domainSetId) {
+        super(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
+        mDomainSetId = domainSetId;
         copyMimeGroups(mimeGroups);
+        mSnapshot = makeCache();
     }
 
     /**
@@ -92,6 +143,7 @@ public class PackageSetting extends PackageSettingBase {
     PackageSetting(PackageSetting orig) {
         super(orig, orig.realName);
         doCopy(orig);
+        mSnapshot = makeCache();
     }
 
     /**
@@ -102,6 +154,39 @@ public class PackageSetting extends PackageSettingBase {
     PackageSetting(PackageSetting orig, String realPkgName) {
         super(orig, realPkgName);
         doCopy(orig);
+        mSnapshot = makeCache();
+    }
+
+    /**
+     * Create a snapshot.  The copy constructor is already in use and cannot be modified
+     * for this purpose.
+     */
+    PackageSetting(PackageSetting orig, boolean snapshot) {
+        super(orig, snapshot);
+        // The existing doCopy() method cannot be used in here because sharedUser must be
+        // a snapshot, and not a reference.  Also, the pkgState must be copied.  However,
+        // this code should otherwise be kept in sync with doCopy().
+        appId = orig.appId;
+        pkg = orig.pkg;
+        sharedUser = orig.sharedUser == null ? null : orig.sharedUser.snapshot();
+        sharedUserId = orig.sharedUserId;
+        copyMimeGroups(orig.mimeGroups);
+        pkgState = orig.pkgState;
+        mDomainSetId = orig.getDomainSetId();
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    /**
+     * Return the package snapshot.
+     */
+    public PackageSetting snapshot() {
+        return mSnapshot.snapshot();
+    }
+
+    /** @see #pkg **/
+    @Nullable
+    public AndroidPackage getPkg() {
+        return pkg;
     }
 
     public int getSharedUserId() {
@@ -133,6 +218,7 @@ public class PackageSetting extends PackageSettingBase {
         sharedUser = orig.sharedUser;
         sharedUserId = orig.sharedUserId;
         copyMimeGroups(orig.mimeGroups);
+        mDomainSetId = orig.getDomainSetId();
     }
 
     private void copyMimeGroups(@Nullable Map<String, ArraySet<String>> newMimeGroups) {
@@ -181,11 +267,12 @@ public class PackageSetting extends PackageSettingBase {
         mimeGroups = updatedMimeGroups;
     }
 
+    @Deprecated
     @Override
-    public PermissionsState getPermissionsState() {
+    public LegacyPermissionState getLegacyPermissionState() {
         return (sharedUser != null)
-                ? sharedUser.getPermissionsState()
-                : super.getPermissionsState();
+                ? sharedUser.getLegacyPermissionState()
+                : super.getLegacyPermissionState();
     }
 
     public int getAppId() {
@@ -200,7 +287,6 @@ public class PackageSetting extends PackageSettingBase {
         return installPermissionsFixed;
     }
 
-    // TODO(b/135203078): Remove these in favor of reading from the package directly
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -267,7 +353,8 @@ public class PackageSetting extends PackageSettingBase {
         return mimeGroups != null ? mimeGroups.get(mimeGroup) : null;
     }
 
-    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users,
+            LegacyPermissionDataProvider dataProvider) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
         proto.write(PackageProto.UID, appId);
@@ -301,8 +388,33 @@ public class PackageSetting extends PackageSettingBase {
                     installSource.originatingPackageName);
             proto.end(sourceToken);
         }
+        proto.write(PackageProto.StatesProto.IS_LOADING, isPackageLoading());
         writeUsersInfoToProto(proto, PackageProto.USERS);
+        writePackageUserPermissionsProto(proto, PackageProto.USER_PERMISSIONS, users, dataProvider);
         proto.end(packageToken);
+    }
+
+    /**
+     * TODO (b/170263003) refactor to dump to permissiongr proto
+     * Dumps the permissions that are granted to users for this package.
+     */
+    void writePackageUserPermissionsProto(ProtoOutputStream proto, long fieldId,
+            List<UserInfo> users, LegacyPermissionDataProvider dataProvider) {
+        Collection<LegacyPermissionState.PermissionState> runtimePermissionStates;
+        for (UserInfo user : users) {
+            final long permissionsToken = proto.start(PackageProto.USER_PERMISSIONS);
+            proto.write(PackageProto.UserPermissionsProto.ID, user.id);
+
+            runtimePermissionStates = dataProvider.getLegacyPermissionState(appId)
+                    .getPermissionStates(user.id);
+            for (LegacyPermissionState.PermissionState permission : runtimePermissionStates) {
+                if (permission.isGranted()) {
+                    proto.write(PackageProto.UserPermissionsProto.GRANTED_PERMISSIONS,
+                            permission.getName());
+                }
+            }
+            proto.end(permissionsToken);
+        }
     }
 
     /** Updates all fields in the current setting from another. */
@@ -312,6 +424,7 @@ public class PackageSetting extends PackageSettingBase {
         pkg = other.pkg;
         sharedUserId = other.sharedUserId;
         sharedUser = other.sharedUser;
+        mDomainSetId = other.mDomainSetId;
 
         Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
         updateMimeGroups(mimeGroupNames);
@@ -322,5 +435,15 @@ public class PackageSetting extends PackageSettingBase {
     @NonNull
     public PackageStateUnserialized getPkgState() {
         return pkgState;
+    }
+
+    @NonNull
+    public UUID getDomainSetId() {
+        return mDomainSetId;
+    }
+
+    public PackageSetting setDomainSetId(@NonNull UUID domainSetId) {
+        mDomainSetId = domainSetId;
+        return this;
     }
 }

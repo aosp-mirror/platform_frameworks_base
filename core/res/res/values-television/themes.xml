@@ -14,14 +14,14 @@
      limitations under the License.
 -->
 <resources>
-    <style name="Theme.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
+    <style name="Theme.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.Dialog.Confirmation" parent="Theme.Leanback.Dialog.Confirmation" />
     <style name="Theme.Holo.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
-    <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
+    <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.Material.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
-    <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
+    <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Leanback.Settings.Dialog.Alert" />
     <style name="Theme.Material.Dialog" parent="Theme.Leanback.Dialog" />
-    <style name="Theme.Material.Light.Dialog" parent="Theme.Leanback.Light.Dialog" />
+    <style name="Theme.Material.Light.Dialog" parent="Theme.Leanback.Dialog" />
     <style name="Theme.Material.Settings.Dialog" parent="Theme.Leanback.Settings.Dialog" />
 </resources>

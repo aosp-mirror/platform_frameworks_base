@@ -20,7 +20,12 @@ package android.renderscript;
 /**
  * Base class for all exceptions thrown by the Android
  * RenderScript
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  */
+@Deprecated
 public class RSIllegalArgumentException extends RSRuntimeException {
     public RSIllegalArgumentException(String string) {
         super(string);

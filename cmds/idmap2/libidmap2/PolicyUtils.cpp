@@ -17,6 +17,8 @@
 #include "include/idmap2/PolicyUtils.h"
 
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include "android-base/strings.h"
 #include "idmap2/Policies.h"

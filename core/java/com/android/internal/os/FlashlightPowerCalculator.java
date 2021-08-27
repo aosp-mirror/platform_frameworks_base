@@ -15,32 +15,60 @@
  */
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.UidBatteryConsumer;
 
 /**
  * Power calculator for the flashlight.
  */
 public class FlashlightPowerCalculator extends PowerCalculator {
-    private final double mFlashlightPowerOnAvg;
+    // Calculate flashlight power usage.  Right now, this is based on the average power draw
+    // of the flash unit when kept on over a short period of time.
+    private final UsageBasedPowerEstimator mPowerEstimator;
 
     public FlashlightPowerCalculator(PowerProfile profile) {
-        mFlashlightPowerOnAvg = profile.getAveragePower(PowerProfile.POWER_FLASHLIGHT);
+        mPowerEstimator = new UsageBasedPowerEstimator(
+                profile.getAveragePower(PowerProfile.POWER_FLASHLIGHT));
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                             long rawUptimeUs, int statsType) {
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
 
-        // Calculate flashlight power usage.  Right now, this is based on the average power draw
-        // of the flash unit when kept on over a short period of time.
-        final BatteryStats.Timer timer = u.getFlashlightTurnedOnTimer();
-        if (timer != null) {
-            final long totalTime = timer.getTotalTimeLocked(rawRealtimeUs, statsType) / 1000;
-            app.flashlightTimeMs = totalTime;
-            app.flashlightPowerMah = (totalTime * mFlashlightPowerOnAvg) / (1000*60*60);
-        } else {
-            app.flashlightTimeMs = 0;
-            app.flashlightPowerMah = 0;
-        }
+        final long durationMs = batteryStats.getFlashlightOnTime(rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED) / 1000;
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
+    }
+
+    @Override
+    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
+                rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
+    }
+
+    @Override
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+            long rawUptimeUs, int statsType) {
+        final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
+                rawRealtimeUs, statsType);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        app.flashlightTimeMs = durationMs;
+        app.flashlightPowerMah = powerMah;
     }
 }

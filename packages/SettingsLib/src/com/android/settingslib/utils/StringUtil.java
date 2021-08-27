@@ -40,6 +40,8 @@ public class StringUtil {
     public static final int SECONDS_PER_HOUR = 60 * 60;
     public static final int SECONDS_PER_DAY = 24 * 60 * 60;
 
+    private static final int LIMITED_TIME_UNIT_COUNT = 2;
+
     /**
      * Returns elapsed time for the given millis, in the following format:
      * 2 days, 5 hr, 40 min, 29 sec
@@ -47,10 +49,12 @@ public class StringUtil {
      * @param context     the application context
      * @param millis      the elapsed time in milli seconds
      * @param withSeconds include seconds?
+     * @param collapseTimeUnit limit the output to top 2 time unit
+     *                         e.g 2 days, 5 hr, 40 min, 29 sec will convert to 2 days, 5 hr
      * @return the formatted elapsed time
      */
     public static CharSequence formatElapsedTime(Context context, double millis,
-            boolean withSeconds) {
+            boolean withSeconds, boolean collapseTimeUnit) {
         SpannableStringBuilder sb = new SpannableStringBuilder();
         int seconds = (int) Math.floor(millis / 1000);
         if (!withSeconds) {
@@ -89,6 +93,12 @@ public class StringUtil {
             // Everything addable was zero, so nothing was added. We add a zero.
             measureList.add(new Measure(0, withSeconds ? MeasureUnit.SECOND : MeasureUnit.MINUTE));
         }
+
+        if (collapseTimeUnit && measureList.size() > LIMITED_TIME_UNIT_COUNT) {
+            // Limit the output to top 2 time unit.
+            measureList.subList(LIMITED_TIME_UNIT_COUNT, measureList.size()).clear();
+        }
+
         final Measure[] measureArray = measureList.toArray(new Measure[measureList.size()]);
 
         final Locale locale = context.getResources().getConfiguration().locale;

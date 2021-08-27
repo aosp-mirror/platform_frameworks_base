@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
 
     <application
             android:label="@string/app_label"
@@ -40,7 +41,7 @@
              LocationManagerService will bind to the service with the highest
              version. -->
         <service android:name="com.android.location.fused.FusedLocationService"
-                 android:exported="true"
+                 android:exported="false"
                  android:permission="android.permission.WRITE_SECURE_SETTINGS">
            <intent-filter>
                <action android:name="com.android.location.service.FusedLocationProvider" />

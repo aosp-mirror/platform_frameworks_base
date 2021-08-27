@@ -86,7 +86,7 @@ public class RecentLocationAccessesTest {
     @Test
     @Ignore
     public void testGetAppList_shouldFilterRecentAccesses() {
-        List<RecentLocationAccesses.Access> requests = mRecentLocationAccesses.getAppList();
+        List<RecentLocationAccesses.Access> requests = mRecentLocationAccesses.getAppList(false);
         // Only two of the apps have requested location within 15 min.
         assertThat(requests).hasSize(2);
         // Make sure apps are ordered by recency
@@ -115,7 +115,7 @@ public class RecentLocationAccessesTest {
         mockTestApplicationInfos(
                 Process.SYSTEM_UID, RecentLocationAccesses.ANDROID_SYSTEM_PACKAGE_NAME);
 
-        List<RecentLocationAccesses.Access> requests = mRecentLocationAccesses.getAppList();
+        List<RecentLocationAccesses.Access> requests = mRecentLocationAccesses.getAppList(true);
         // Android OS shouldn't show up in the list of apps.
         assertThat(requests).hasSize(2);
         // Make sure apps are ordered by recency

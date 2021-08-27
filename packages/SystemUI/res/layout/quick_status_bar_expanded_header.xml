@@ -32,38 +32,31 @@
     android:paddingStart="0dp"
     android:elevation="4dp" >
 
-    <!-- The clock -->
-    <include layout="@layout/quick_status_bar_header_system_icons" />
+    <!-- Date and privacy. Only visible in QS -->
+    <include layout="@layout/quick_status_bar_header_date_privacy"/>
 
-    <!-- Status icons within the panel itself (and not in the top-most status bar) -->
-    <include layout="@layout/quick_qs_status_icons" />
-
-    <!-- Layout containing tooltips, alarm text, etc. -->
-    <include layout="@layout/quick_settings_header_info" />
+    <RelativeLayout
+        android:id="@+id/qs_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+    <!-- Time, icons and Carrier (only in QS) -->
+    <include layout="@layout/quick_qs_status_icons"/>
 
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/quick_qs_status_icons"
-        android:accessibilityTraversalAfter="@+id/date_time_group"
-        android:accessibilityTraversalBefore="@id/expand_indicator"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:accessibilityTraversalAfter="@id/quick_qs_status_icons"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
-        android:paddingBottom="10dp"
+        android:paddingBottom="24dp"
         android:importantForAccessibility="yes" />
-
-    <TextView
-        android:id="@+id/header_debug_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="sans-serif-condensed"
-        android:padding="2dp"
-        android:textColor="#00A040"
-        android:textSize="11dp"
-        android:textStyle="bold"
-        android:visibility="invisible"/>
+    </RelativeLayout>
 
 </com.android.systemui.qs.QuickStatusBarHeader>

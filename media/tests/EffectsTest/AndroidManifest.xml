@@ -15,42 +15,43 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.effectstest">
+     package="com.android.effectstest">
 
-   <uses-permission android:name="android.permission.RECORD_AUDIO" />
-   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
    <application>
         <activity android:label="@string/app_name"
-                android:name="EffectsTest">
+             android:name="EffectsTest"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
         <activity android:label="@string/envreverb_test_name"
-                android:name="EnvReverbTest">
+             android:name="EnvReverbTest">
         </activity>
 
         <activity android:label="@string/presetrvb_test_name"
-                android:name="PresetReverbTest">
+             android:name="PresetReverbTest">
         </activity>
 
         <activity android:label="@string/equalizer_test_name"
-                android:name="EqualizerTest">
+             android:name="EqualizerTest">
         </activity>
 
         <activity android:label="@string/virtualizer_test_name"
-                android:name="VirtualizerTest">
+             android:name="VirtualizerTest">
         </activity>
 
         <activity android:label="@string/bassboost_test_name"
-                android:name="BassBoostTest">
+             android:name="BassBoostTest">
         </activity>
 
         <activity android:label="@string/visualizer_test_name"
-                android:name="VisualizerTest">
+             android:name="VisualizerTest">
         </activity>
 
     </application>

@@ -26,7 +26,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
-import android.hardware.power.V1_0.PowerHint;
+import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.util.ArrayMap;
@@ -246,7 +246,7 @@ class SurfaceAnimationRunner {
         synchronized (mLock) {
             startPendingAnimationsLocked();
         }
-        mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
+        mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
     }
 
     private void scheduleApplyTransaction() {
@@ -259,6 +259,7 @@ class SurfaceAnimationRunner {
 
     private void applyTransaction() {
         mFrameTransaction.setAnimationTransaction();
+        mFrameTransaction.setFrameTimelineVsync(mChoreographer.getVsyncId());
         mFrameTransaction.apply();
         mApplyScheduled = false;
     }

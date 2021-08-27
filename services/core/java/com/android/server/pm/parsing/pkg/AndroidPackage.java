@@ -23,8 +23,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
@@ -57,7 +57,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under
-     * {@link PackageParser#TAG_ADOPT_PERMISSIONS}.
+     * {@link ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      * @see R.styleable#AndroidManifestOriginalPackage_name
      */
     @NonNull
@@ -65,18 +65,16 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /** Path of base APK */
     @NonNull
-    String getBaseCodePath();
+    String getBaseApkPath();
 
     /** Revision code of base APK */
     int getBaseRevisionCode();
 
     /**
-     * Path where this package was found on disk. For monolithic packages
-     * this is path to single base APK file; for cluster packages this is
-     * path to the cluster directory.
+     * The path to the folder containing the base APK and any installed splits.
      */
     @NonNull
-    String getCodePath();
+    String getPath();
 
     /**
      * Permissions requested but not in the manifest. These may have been split or migrated from
@@ -87,7 +85,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
      */
@@ -233,7 +231,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestUpgradeKeySet
      */
     @NonNull
@@ -251,6 +249,19 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
      */
     @NonNull
     List<String> getUsesOptionalLibraries();
+
+    /** @see R.styleabele#AndroidManifestUsesNativeLibrary */
+    @NonNull
+    List<String> getUsesNativeLibraries();
+
+    /**
+     * Like {@link #getUsesNativeLibraries()}, but marked optional by setting
+     * {@link R.styleable#AndroidManifestUsesNativeLibrary_required} to false . Application is
+     * expected to handle absence manually.
+     * @see R.styleable#AndroidManifestUsesNativeLibrary
+     */
+    @NonNull
+    List<String> getUsesOptionalNativeLibraries();
 
     /**
      * TODO(b/135203078): Move static library stuff to an inner data class

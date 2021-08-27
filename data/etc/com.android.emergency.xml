@@ -19,5 +19,9 @@
         <!-- Required to place emergency calls from emergency info screen. -->
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+        <!-- Required to update emergency gesture settings -->
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 </permissions>

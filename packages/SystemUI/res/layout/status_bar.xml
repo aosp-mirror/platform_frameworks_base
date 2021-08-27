@@ -82,6 +82,8 @@
                     android:gravity="center_vertical|start"
                 />
 
+                <include layout="@layout/ongoing_call_chip" />
+
                 <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                     android:id="@+id/notification_icon_area"
                     android:layout_width="0dp"

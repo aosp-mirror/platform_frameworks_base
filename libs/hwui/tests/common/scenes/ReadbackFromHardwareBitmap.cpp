@@ -51,7 +51,7 @@ public:
                                                          hardwareBitmap->height(), &canvasBitmap));
 
         SkCanvas skCanvas(canvasBitmap);
-        skCanvas.drawBitmap(readback, 0, 0);
+        skCanvas.drawImage(readback.asImage(), 0, 0);
         canvas.drawBitmap(*heapBitmap, 0, 0, nullptr);
 
         canvas.drawBitmap(*hardwareBitmap, 0, 500, nullptr);

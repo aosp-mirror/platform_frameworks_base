@@ -51,8 +51,6 @@ public class TaskResizingAlgorithm {
     public static final int CTRL_BOTTOM = 0x8;
 
     // The minimal aspect ratio which needs to be met to count as landscape (or 1/.. for portrait).
-    // Note: We do not use the 1.33 from the CDD here since the user is allowed to use what ever
-    // aspect he desires.
     @VisibleForTesting
     public static final float MIN_ASPECT = 1.2f;
 

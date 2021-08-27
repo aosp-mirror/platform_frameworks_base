@@ -48,6 +48,7 @@ public class ScreenInternalAudioRecorder {
     private long mTotalBytes;
     private MediaMuxer mMuxer;
     private boolean mMic;
+    private boolean mStarted;
 
     private int mTrackId = -1;
 
@@ -263,10 +264,14 @@ public class ScreenInternalAudioRecorder {
     * start recording
      * @throws IllegalStateException if recording fails to initialize
     */
-    public void start() throws IllegalStateException {
-        if (mThread != null) {
-            Log.e(TAG, "a recording is being done in parallel or stop is not called");
+    public synchronized void start() throws IllegalStateException {
+        if (mStarted) {
+            if (mThread == null) {
+                throw new IllegalStateException("Recording stopped and can't restart (single use)");
+            }
+            throw new IllegalStateException("Recording already started");
         }
+        mStarted = true;
         mAudioRecord.startRecording();
         if (mMic) mAudioRecordMic.startRecording();
         Log.d(TAG, "channel count " + mAudioRecord.getChannelCount());

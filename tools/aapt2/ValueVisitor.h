@@ -43,6 +43,9 @@ class ValueVisitor {
   virtual void Visit(Array* value) { VisitAny(value); }
   virtual void Visit(Plural* value) { VisitAny(value); }
   virtual void Visit(Styleable* value) { VisitAny(value); }
+  virtual void Visit(Macro* value) {
+    VisitAny(value);
+  }
 };
 
 // Const version of ValueVisitor.
@@ -90,6 +93,9 @@ class ConstValueVisitor {
     VisitAny(value);
   }
   virtual void Visit(const Styleable* value) {
+    VisitAny(value);
+  }
+  virtual void Visit(const Macro* value) {
     VisitAny(value);
   }
 };

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (C) 2021 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<!--
+    This defines the format of the XML file used to defines how displays are laid out
+    for a given device-state.
+    It is parsed in com/android/server/display/layout/DeviceStateToLayoutMap.java
+    More information on device-state can be found in DeviceStateManager.java
+-->
+<xs:schema version="2.0"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="layouts">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element type="layout" name="layout" minOccurs="1" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+
+        <!-- Ensures only one layout is allowed per device state. -->
+        <xs:unique name="UniqueState">
+            <xs:selector xpath="layout" />
+            <xs:field xpath="@state" />
+        </xs:unique>
+    </xs:element>
+
+    <!-- Type definitions -->
+
+    <xs:complexType name="layout">
+        <xs:sequence>
+            <xs:element name="state" type="xs:nonNegativeInteger" />
+            <xs:element name="display" type="display" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="display">
+        <xs:sequence>
+            <xs:element name="address" type="xs:nonNegativeInteger"/>
+        </xs:sequence>
+        <xs:attribute name="enabled" type="xs:boolean" use="optional" />
+        <xs:attribute name="isDefault" type="xs:boolean" use="optional" />
+    </xs:complexType>
+</xs:schema>

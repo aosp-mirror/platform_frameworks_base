@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,88 +11,154 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.classifier;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
+
+import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.util.DeviceConfigProxy;
+
+import java.util.Locale;
+
+import javax.inject.Inject;
+
+
 /**
- * A classifier which looks at the proximity sensor during the gesture. It calculates the percentage
- * the proximity sensor showing the near state during the whole gesture
+ * False touch if proximity sensor is covered for more than a certain percentage of the gesture.
+ *
+ * This classifier is essentially a no-op for QUICK_SETTINGS, as we assume the sensor may be
+ * covered when swiping from the top.
  */
-public class ProximityClassifier extends GestureClassifier {
-    private long mGestureStartTimeNano;
-    private long mNearStartTimeNano;
-    private long mNearDuration;
+class ProximityClassifier extends FalsingClassifier {
+
+    private static final float PERCENT_COVERED_THRESHOLD = 0.1f;
+    private final DistanceClassifier mDistanceClassifier;
+    private final float mPercentCoveredThreshold;
+
     private boolean mNear;
-    private float mAverageNear;
+    private long mGestureStartTimeNs;
+    private long mPrevNearTimeNs;
+    private long mNearDurationNs;
+    private float mPercentNear;
 
-    public ProximityClassifier(ClassifierData classifierData) {
+    @Inject
+    ProximityClassifier(DistanceClassifier distanceClassifier,
+            FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
+        super(dataProvider);
+        mDistanceClassifier = distanceClassifier;
+
+        mPercentCoveredThreshold = deviceConfigProxy.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD,
+                PERCENT_COVERED_THRESHOLD);
     }
 
     @Override
-    public String getTag() {
-        return "PROX";
+    void onSessionStarted() {
+        mPrevNearTimeNs = 0;
+        mPercentNear = 0;
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-            update(event.values[0] < event.sensor.getMaximumRange(), event.timestamp);
-        }
+    void onSessionEnded() {
+        mPrevNearTimeNs = 0;
+        mPercentNear = 0;
     }
 
     @Override
-    public void onTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
+    public void onTouchEvent(MotionEvent motionEvent) {
+        int action = motionEvent.getActionMasked();
 
         if (action == MotionEvent.ACTION_DOWN) {
-            mGestureStartTimeNano = event.getEventTimeNano();
-            mNearStartTimeNano = event.getEventTimeNano();
-            mNearDuration = 0;
+            mGestureStartTimeNs = motionEvent.getEventTimeNano();
+            if (mPrevNearTimeNs > 0) {
+                // We only care about if the proximity sensor is triggered while a move event is
+                // happening.
+                mPrevNearTimeNs = motionEvent.getEventTimeNano();
+            }
+            logDebug("Gesture start time: " + mGestureStartTimeNs);
+            mNearDurationNs = 0;
         }
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            update(mNear, event.getEventTimeNano());
-            long duration = event.getEventTimeNano() - mGestureStartTimeNano;
+            update(mNear, motionEvent.getEventTimeNano());
+            long duration = motionEvent.getEventTimeNano() - mGestureStartTimeNs;
+
+            logDebug("Gesture duration, Proximity duration: " + duration + ", " + mNearDurationNs);
 
             if (duration == 0) {
-                mAverageNear = mNear ? 1.0f : 0.0f;
+                mPercentNear = mNear ? 1.0f : 0.0f;
             } else {
-                mAverageNear = (float) mNearDuration / (float) duration;
+                mPercentNear = (float) mNearDurationNs / (float) duration;
             }
         }
-    }
 
-
-    /**
-     * @param near is the sensor showing the near state right now
-     * @param timestampNano time of this event in nanoseconds
-     */
-    private void update(boolean near, long timestampNano) {
-        // This if is necessary because MotionEvents and SensorEvents do not come in
-        // chronological order
-        if (timestampNano > mNearStartTimeNano) {
-            // if the state before was near then add the difference of the current time and
-            // mNearStartTimeNano to mNearDuration.
-            if (mNear) {
-                mNearDuration += timestampNano - mNearStartTimeNano;
-            }
-
-            // if the new state is near, set mNearStartTimeNano equal to this moment.
-            if (near) {
-                mNearStartTimeNano = timestampNano;
-            }
-        }
-        mNear = near;
     }
 
     @Override
-    public float getFalseTouchEvaluation(int type) {
-        return ProximityEvaluator.evaluate(mAverageNear, type);
+    public void onProximityEvent(
+            FalsingManager.ProximityEvent proximityEvent) {
+        boolean covered = proximityEvent.getCovered();
+        long timestampNs = proximityEvent.getTimestampNs();
+        logDebug("Sensor is: " + covered + " at time " + timestampNs);
+        update(covered, timestampNs);
+    }
+
+    @Override
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
+        if (interactionType == QUICK_SETTINGS || interactionType == BRIGHTNESS_SLIDER
+                || interactionType == QS_COLLAPSE || interactionType == QS_SWIPE) {
+            return Result.passed(0);
+        }
+
+        if (mPercentNear > mPercentCoveredThreshold) {
+            Result longSwipeResult = mDistanceClassifier.isLongSwipe();
+            return longSwipeResult.isFalse()
+                    ? falsed(
+                            0.5, getReason(longSwipeResult, mPercentNear, mPercentCoveredThreshold))
+                    : Result.passed(0.5);
+        }
+
+        return Result.passed(0.5);
+    }
+
+    private static String getReason(Result longSwipeResult, float percentNear,
+            float percentCoveredThreshold) {
+        return String.format(
+                (Locale) null,
+                "{percentInProximity=%f, threshold=%f, distanceClassifier=%s}",
+                percentNear,
+                percentCoveredThreshold,
+                longSwipeResult.getReason());
+    }
+
+    /**
+     * @param near        is the sensor showing the near state right now
+     * @param timeStampNs time of this event in nanoseconds
+     */
+    private void update(boolean near, long timeStampNs) {
+        if (mPrevNearTimeNs != 0 && timeStampNs > mPrevNearTimeNs && mNear) {
+            mNearDurationNs += timeStampNs - mPrevNearTimeNs;
+            logDebug("Updating duration: " + mNearDurationNs);
+        }
+
+        if (near) {
+            logDebug("Set prevNearTimeNs: " + timeStampNs);
+            mPrevNearTimeNs = timeStampNs;
+        }
+
+        mNear = near;
     }
 }

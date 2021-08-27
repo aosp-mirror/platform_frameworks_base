@@ -22,6 +22,8 @@ import static android.view.DisplayCutout.fromSpec;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +32,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -130,6 +133,8 @@ public class DisplayCutoutTest {
     @Test
     public void testHasCutout_noCutout() throws Exception {
         assertTrue(NO_CUTOUT.isBoundsEmpty());
+        assertThat(NO_CUTOUT.getWaterfallInsets(), equalTo(Insets.NONE));
+        assertThat(NO_CUTOUT.getCutoutPath(), nullValue());
     }
 
     @Test
@@ -162,6 +167,59 @@ public class DisplayCutoutTest {
         DisplayCutout cutout =
                 createCutoutWaterfallOnly(Insets.of(5, 6, 7, 8));
         assertEquals(Insets.of(5, 6, 7, 8), cutout.getWaterfallInsets());
+    }
+
+    @Test
+    public void testGetCutoutPath() throws Exception {
+        final String cutoutSpecString = "L1,0 L1,1 L0,1 z";
+        final int displayWidth = 200;
+        final int displayHeight = 400;
+        final float density = 1f;
+        final DisplayCutout cutout = fromSpec(cutoutSpecString, displayWidth, displayHeight,
+                density, Insets.NONE);
+        assertThat(cutout.getCutoutPath(), notNullValue());
+    }
+
+    @Test
+    public void testGetCutoutPath_caches() throws Exception {
+        final String cutoutSpecString = "L1,0 L1,1 L0,1 z";
+        final int displayWidth = 200;
+        final int displayHeight = 400;
+        final float density = 1f;
+        final Path first = fromSpec(cutoutSpecString, displayWidth, displayHeight,
+                density, Insets.NONE).getCutoutPath();
+        final Path second = fromSpec(cutoutSpecString, displayWidth, displayHeight,
+                density, Insets.NONE).getCutoutPath();
+        assertThat(first, equalTo(second));
+    }
+
+    @Test
+    public void testGetCutoutPath_wontCacheIfCutoutPathParerInfoChanged() throws Exception {
+        final int displayWidth = 200;
+        final int displayHeight = 400;
+        final float density = 1f;
+        final Path first = fromSpec("L1,0 L1,1 L0,1 z", displayWidth, displayHeight,
+                density, Insets.NONE).getCutoutPath();
+        final Path second = fromSpec("L2,0 L2,2 L0,2 z", displayWidth, displayHeight,
+                density, Insets.NONE).getCutoutPath();
+        assertThat(first, not(equalTo(second)));
+    }
+
+    @Test
+    public void testGetCutoutPathParserInfo() throws Exception {
+        final String cutoutSpecString = "L1,0 L1,1 L0,1 z";
+        final int displayWidth = 200;
+        final int displayHeight = 400;
+        final float density = 1f;
+        final DisplayCutout cutout = fromSpec(cutoutSpecString, displayWidth, displayHeight,
+                density, Insets.NONE);
+        assertThat(displayWidth, equalTo(cutout.getCutoutPathParserInfo().getDisplayWidth()));
+        assertThat(displayHeight, equalTo(cutout.getCutoutPathParserInfo().getDisplayHeight()));
+        assertThat(density, equalTo(cutout.getCutoutPathParserInfo().getDensity()));
+        assertThat(cutoutSpecString.trim(),
+                equalTo(cutout.getCutoutPathParserInfo().getCutoutSpec()));
+        assertThat(0, equalTo(cutout.getCutoutPathParserInfo().getRotation()));
+        assertThat(1f, equalTo(cutout.getCutoutPathParserInfo().getScale()));
     }
 
     @Test

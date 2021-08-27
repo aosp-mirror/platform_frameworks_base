@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationMediaManager
@@ -30,13 +31,12 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.tuner.TunerService
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A class that automatically creates heads up for important notification when bypassing the
  * lockscreen
  */
-@Singleton
+@SysUISingleton
 class BypassHeadsUpNotifier @Inject constructor(
     private val context: Context,
     private val bypassController: KeyguardBypassController,

@@ -17,6 +17,7 @@
 
 package android.view;
 
+import static android.view.Surface.ROTATION_0;
 import static android.view.WindowInsets.Type.DISPLAY_CUTOUT;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.IME;
@@ -82,6 +83,8 @@ public final class WindowInsets {
     @Nullable private Rect mTempRect;
     private final boolean mIsRound;
     @Nullable private final DisplayCutout mDisplayCutout;
+    @Nullable private final RoundedCorners mRoundedCorners;
+    @Nullable private final PrivacyIndicatorBounds mPrivacyIndicatorBounds;
 
     /**
      * In multi-window we force show the navigation bar. Because we don't want that the surface size
@@ -125,12 +128,13 @@ public final class WindowInsets {
      * @hide
      * @deprecated Use {@link WindowInsets(SparseArray, SparseArray, boolean, boolean, DisplayCutout)}
      */
-    public WindowInsets(Rect systemWindowInsetsRect, Rect stableInsetsRect,
-            boolean isRound, boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
+    @Deprecated
+    public WindowInsets(Rect systemWindowInsetsRect, Rect stableInsetsRect, boolean isRound,
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         this(createCompatTypeMap(systemWindowInsetsRect), createCompatTypeMap(stableInsetsRect),
                 createCompatVisibilityMap(createCompatTypeMap(systemWindowInsetsRect)),
-                isRound, alwaysConsumeSystemBars, displayCutout, systemBars(),
-                false /* compatIgnoreVisibility */);
+                isRound, alwaysConsumeSystemBars, displayCutout, null, null,
+                systemBars(), false /* compatIgnoreVisibility */);
     }
 
     /**
@@ -150,6 +154,8 @@ public final class WindowInsets {
             boolean[] typeVisibilityMap,
             boolean isRound,
             boolean alwaysConsumeSystemBars, DisplayCutout displayCutout,
+            RoundedCorners roundedCorners,
+            PrivacyIndicatorBounds privacyIndicatorBounds,
             @InsetsType int compatInsetsTypes, boolean compatIgnoreVisibility) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
@@ -170,6 +176,9 @@ public final class WindowInsets {
         mDisplayCutoutConsumed = displayCutout == null;
         mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
                 ? null : displayCutout;
+
+        mRoundedCorners = roundedCorners;
+        mPrivacyIndicatorBounds = privacyIndicatorBounds;
     }
 
     /**
@@ -182,6 +191,8 @@ public final class WindowInsets {
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
                 src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src),
+                src.mRoundedCorners,
+                src.mPrivacyIndicatorBounds,
                 src.mCompatInsetsTypes,
                 src.mCompatIgnoreVisibility);
     }
@@ -235,12 +246,12 @@ public final class WindowInsets {
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
         this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, null,
-                systemBars(), false /* compatIgnoreVisibility */);
+                null, null, systemBars(), false /* compatIgnoreVisibility */);
     }
 
     /**
      * Creates a indexOf(type) -> inset map for which the {@code insets} is just mapped to
-     * {@link InsetsType#statusBars()} and {@link InsetsType#navigationBars()}, depending on the
+     * {@link Type#statusBars()} and {@link Type#navigationBars()}, depending on the
      * location of the inset.
      */
     private static Insets[] createCompatTypeMap(@Nullable Rect insets) {
@@ -321,9 +332,9 @@ public final class WindowInsets {
 
     /**
      * Returns the insets of a specific set of windows causing insets, denoted by the
-     * {@code typeMask} bit mask of {@link InsetsType}s.
+     * {@code typeMask} bit mask of {@link Type}s.
      *
-     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
+     * @param typeMask Bit mask of {@link Type}s to query the insets for.
      * @return The insets.
      */
     @NonNull
@@ -333,7 +344,7 @@ public final class WindowInsets {
 
     /**
      * Returns the insets a specific set of windows can cause, denoted by the
-     * {@code typeMask} bit mask of {@link InsetsType}s, regardless of whether that type is
+     * {@code typeMask} bit mask of {@link Type}s, regardless of whether that type is
      * currently visible or not.
      *
      * <p>The insets represents the area of a a window that that <b>may</b> be partially
@@ -342,7 +353,7 @@ public final class WindowInsets {
      * normally shown, but temporarily hidden, the inset returned here will still provide the inset
      * associated with the status bar being shown.</p>
      *
-     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
+     * @param typeMask Bit mask of {@link Type}s to query the insets for.
      * @return The insets.
      *
      * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Insets are
@@ -362,7 +373,7 @@ public final class WindowInsets {
      * Returns whether a set of windows that may cause insets is currently visible on screen,
      * regardless of whether it actually overlaps with this window.
      *
-     * @param typeMask Bit mask of {@link Type.InsetsType}s to query visibility status.
+     * @param typeMask Bit mask of {@link Type}s to query visibility status.
      * @return {@code true} if and only if all windows included in {@code typeMask} are currently
      *         visible on screen.
      */
@@ -466,7 +477,7 @@ public final class WindowInsets {
     public boolean hasInsets() {
         return !getInsets(mTypeInsetsMap, all()).equals(Insets.NONE)
                 || !getInsets(mTypeMaxInsetsMap, all()).equals(Insets.NONE)
-                || mDisplayCutout != null;
+                || mDisplayCutout != null || mRoundedCorners != null;
     }
 
     /**
@@ -487,6 +498,36 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns the {@link RoundedCorner} of the given position if there is one.
+     *
+     * @param position the position of the rounded corner on the display. The value should be one of
+     *                 the following:
+     *                 {@link RoundedCorner#POSITION_TOP_LEFT},
+     *                 {@link RoundedCorner#POSITION_TOP_RIGHT},
+     *                 {@link RoundedCorner#POSITION_BOTTOM_RIGHT},
+     *                 {@link RoundedCorner#POSITION_BOTTOM_LEFT}.
+     * @return the rounded corner of the given position. Returns {@code null} if there is none or
+     *         the rounded corner area is not inside the application's bounds.
+     */
+    @Nullable
+    public RoundedCorner getRoundedCorner(@RoundedCorner.Position int position) {
+        return mRoundedCorners == null ? null : mRoundedCorners.getRoundedCorner(position);
+    }
+
+    /**
+     * Returns the {@link Rect} of the maximum bounds of the system privacy indicator, for the
+     * current orientation, in relative coordinates, or null if the bounds have not been loaded yet.
+     * The privacy indicator shows over apps when an app uses the microphone or camera permissions,
+     * while an app is in immersive mode.
+     *
+     * @return A rectangle representing the maximum bounds of the indicator
+     */
+    public @Nullable Rect getPrivacyIndicatorBounds() {
+        return mPrivacyIndicatorBounds == null ? null
+                : mPrivacyIndicatorBounds.getStaticPrivacyIndicatorBounds();
+    }
+
+    /**
      * Returns a copy of this WindowInsets with the cutout fully consumed.
      *
      * @return A modified copy of this WindowInsets
@@ -501,7 +542,7 @@ public final class WindowInsets {
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
-                null /* displayCutout */,
+                null /* displayCutout */, mRoundedCorners, mPrivacyIndicatorBounds,
                 mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
@@ -553,7 +594,8 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this),
-                mCompatInsetsTypes, mCompatIgnoreVisibility);
+                mRoundedCorners, mPrivacyIndicatorBounds, mCompatInsetsTypes,
+                mCompatIgnoreVisibility);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -856,6 +898,11 @@ public final class WindowInsets {
 
         result.append(mDisplayCutout != null ? "cutout=" + mDisplayCutout : "");
         result.append("\n    ");
+        result.append(mRoundedCorners != null ? "roundedCorners=" + mRoundedCorners : "");
+        result.append("\n    ");
+        result.append(mPrivacyIndicatorBounds != null ? "privacyIndicatorBounds="
+                + mPrivacyIndicatorBounds : "");
+        result.append("\n    ");
         result.append(isRound() ? "round" : "");
         result.append("}");
         return result.toString();
@@ -924,6 +971,15 @@ public final class WindowInsets {
         Preconditions.checkArgumentNonnegative(right);
         Preconditions.checkArgumentNonnegative(bottom);
 
+        return insetUnchecked(left, top, right, bottom);
+    }
+
+    /**
+     * @see #inset(int, int, int, int)
+     * @hide
+     */
+    @NonNull
+    public WindowInsets insetUnchecked(int left, int top, int right, int bottom) {
         return new WindowInsets(
                 mSystemWindowInsetsConsumed
                         ? null
@@ -938,11 +994,17 @@ public final class WindowInsets {
                         : mDisplayCutout == null
                                 ? DisplayCutout.NO_CUTOUT
                                 : mDisplayCutout.inset(left, top, right, bottom),
+                mRoundedCorners == null
+                        ? RoundedCorners.NO_ROUNDED_CORNERS
+                        : mRoundedCorners.inset(left, top, right, bottom),
+                mPrivacyIndicatorBounds == null
+                        ? null
+                        : mPrivacyIndicatorBounds.inset(left, top, right, bottom),
                 mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || !(o instanceof WindowInsets)) return false;
         WindowInsets that = (WindowInsets) o;
@@ -955,15 +1017,17 @@ public final class WindowInsets {
                 && Arrays.equals(mTypeInsetsMap, that.mTypeInsetsMap)
                 && Arrays.equals(mTypeMaxInsetsMap, that.mTypeMaxInsetsMap)
                 && Arrays.equals(mTypeVisibilityMap, that.mTypeVisibilityMap)
-                && Objects.equals(mDisplayCutout, that.mDisplayCutout);
+                && Objects.equals(mDisplayCutout, that.mDisplayCutout)
+                && Objects.equals(mRoundedCorners, that.mRoundedCorners)
+                && Objects.equals(mPrivacyIndicatorBounds, that.mPrivacyIndicatorBounds);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(mTypeInsetsMap), Arrays.hashCode(mTypeMaxInsetsMap),
-                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout,
+                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mRoundedCorners,
                 mAlwaysConsumeSystemBars, mSystemWindowInsetsConsumed, mStableInsetsConsumed,
-                mDisplayCutoutConsumed);
+                mDisplayCutoutConsumed, mPrivacyIndicatorBounds);
     }
 
 
@@ -1023,9 +1087,12 @@ public final class WindowInsets {
         private boolean mStableInsetsConsumed = true;
 
         private DisplayCutout mDisplayCutout;
+        private RoundedCorners mRoundedCorners = RoundedCorners.NO_ROUNDED_CORNERS;
 
         private boolean mIsRound;
         private boolean mAlwaysConsumeSystemBars;
+
+        private PrivacyIndicatorBounds mPrivacyIndicatorBounds = new PrivacyIndicatorBounds();
 
         /**
          * Creates a builder where all insets are initially consumed.
@@ -1048,8 +1115,10 @@ public final class WindowInsets {
             mSystemInsetsConsumed = insets.mSystemWindowInsetsConsumed;
             mStableInsetsConsumed = insets.mStableInsetsConsumed;
             mDisplayCutout = displayCutoutCopyConstructorArgument(insets);
+            mRoundedCorners = insets.mRoundedCorners;
             mIsRound = insets.mIsRound;
             mAlwaysConsumeSystemBars = insets.mAlwaysConsumeSystemBars;
+            mPrivacyIndicatorBounds = insets.mPrivacyIndicatorBounds;
         }
 
         /**
@@ -1139,7 +1208,7 @@ public final class WindowInsets {
          *
          * @see #getInsets(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
+         * @param typeMask The bitmask of {@link Type} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
@@ -1163,7 +1232,7 @@ public final class WindowInsets {
          *
          * @see #getInsetsIgnoringVisibility(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
+         * @param typeMask The bitmask of {@link Type} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
@@ -1192,7 +1261,7 @@ public final class WindowInsets {
          *
          * @see #isVisible(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the visibility for.
+         * @param typeMask The bitmask of {@link Type} to set the visibility for.
          * @param visible Whether to mark the windows as visible or not.
          *
          * @return itself
@@ -1253,6 +1322,49 @@ public final class WindowInsets {
 
         /** @hide */
         @NonNull
+        public Builder setRoundedCorners(RoundedCorners roundedCorners) {
+            mRoundedCorners = roundedCorners != null
+                    ? roundedCorners : RoundedCorners.NO_ROUNDED_CORNERS;
+            return this;
+        }
+
+        /**
+         * Sets the rounded corner of given position.
+         *
+         * @see #getRoundedCorner(int)
+         * @param position the position of this rounded corner
+         * @param roundedCorner the rounded corner or null if there is none
+         * @return itself
+         */
+        @NonNull
+        public Builder setRoundedCorner(@RoundedCorner.Position int position,
+                @Nullable RoundedCorner roundedCorner) {
+            mRoundedCorners.setRoundedCorner(position, roundedCorner);
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public Builder setPrivacyIndicatorBounds(@Nullable PrivacyIndicatorBounds bounds) {
+            mPrivacyIndicatorBounds = bounds;
+            return this;
+        }
+
+        /**
+         * Sets the bounds of the system privacy indicator.
+         *
+         * @param bounds The bounds of the system privacy indicator
+         */
+        @NonNull
+        public Builder setPrivacyIndicatorBounds(@Nullable Rect bounds) {
+            //TODO 188788786: refactor the indicator bounds
+            Rect[] boundsArr = { bounds, bounds, bounds, bounds };
+            mPrivacyIndicatorBounds = new PrivacyIndicatorBounds(boundsArr, ROTATION_0);
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
         public Builder setRound(boolean round) {
             mIsRound = round;
             return this;
@@ -1274,8 +1386,8 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout,
-                    systemBars(), false /* compatIgnoreVisibility */);
+                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout, mRoundedCorners,
+                    mPrivacyIndicatorBounds, systemBars(), false /* compatIgnoreVisibility */);
         }
     }
 
@@ -1334,6 +1446,9 @@ public final class WindowInsets {
             }
             if ((types & NAVIGATION_BARS) != 0) {
                 result.append("navigationBars |");
+            }
+            if ((types & CAPTION_BAR) != 0) {
+                result.append("captionBar |");
             }
             if ((types & IME) != 0) {
                 result.append("ime |");

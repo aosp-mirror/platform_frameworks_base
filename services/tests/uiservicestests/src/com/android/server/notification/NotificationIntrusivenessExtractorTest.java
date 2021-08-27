@@ -59,7 +59,8 @@ public class NotificationIntrusivenessExtractorTest extends UiServiceTestCase {
         final Notification.Builder builder = new Notification.Builder(getContext())
                 .setContentTitle("foo")
                 .setFullScreenIntent(PendingIntent.getActivity(
-                        getContext(), 0, new Intent(""), 0), true)
+                        getContext(), 0, new Intent(""), PendingIntent.FLAG_IMMUTABLE),
+                        true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         Notification n = builder.build();
@@ -77,7 +78,8 @@ public class NotificationIntrusivenessExtractorTest extends UiServiceTestCase {
         final Notification.Builder builder = new Notification.Builder(getContext())
                 .setContentTitle("foo")
                 .setFullScreenIntent(PendingIntent.getActivity(
-                        getContext(), 0, new Intent(""), 0), true)
+                        getContext(), 0, new Intent(""), PendingIntent.FLAG_IMMUTABLE),
+                        true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         Notification n = builder.build();

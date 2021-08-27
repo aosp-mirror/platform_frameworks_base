@@ -199,7 +199,12 @@ public final class InputContentInfo implements Parcelable {
     }
 
     /**
-     * Requests a temporary read-only access permission for content URI associated with this object.
+     * Requests a temporary {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION read-only}
+     * access permission for the content URI associated with this object.
+     *
+     * <p>The lifecycle of the permission granted here is tied to this object instance. If the
+     * permission is not released explicitly via {@link #releasePermission()}, it will be
+     * released automatically when there are no more references to this object.</p>
      *
      * <p>Does nothing if the temporary permission is already granted.</p>
      */

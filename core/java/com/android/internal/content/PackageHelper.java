@@ -24,8 +24,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.parsing.PackageLite;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -63,9 +63,6 @@ public class PackageHelper {
     public static final int RECOMMEND_FAILED_ALREADY_EXISTS = -4;
     public static final int RECOMMEND_MEDIA_UNAVAILABLE = -5;
     public static final int RECOMMEND_FAILED_INVALID_URI = -6;
-    public static final int RECOMMEND_FAILED_VERSION_DOWNGRADE = -7;
-    /** {@hide} */
-    public static final int RECOMMEND_FAILED_WRONG_INSTALLED_VERSION = -8;
 
     private static final String TAG = "PackageHelper";
     // App installation location settings values
@@ -87,8 +84,8 @@ public class PackageHelper {
 
     /**
      * A group of external dependencies used in
-     * {@link #resolveInstallVolume(Context, String, int, long)}. It can be backed by real values
-     * from the system or mocked ones for testing purposes.
+     * {@link #resolveInstallVolume(Context, String, int, long, TestableInterface)}.
+     * It can be backed by real values from the system or mocked ones for testing purposes.
      */
     public static abstract class TestableInterface {
         abstract public StorageManager getStorageManager(Context context);
@@ -450,7 +447,7 @@ public class PackageHelper {
         long sizeBytes = 0;
 
         // Include raw APKs, and possibly unpacked resources
-        for (String codePath : pkg.getAllCodePaths()) {
+        for (String codePath : pkg.getAllApkPaths()) {
             final File codeFile = new File(codePath);
             sizeBytes += codeFile.length();
         }

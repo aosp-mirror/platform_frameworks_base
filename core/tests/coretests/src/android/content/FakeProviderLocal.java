@@ -20,7 +20,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
- * A dummy content provider for tests.  This provider runs in the same process as the test.
+ * A placeholder content provider for tests.  This provider runs in the same process as the test.
  */
 public class FakeProviderLocal extends ContentProvider {
 

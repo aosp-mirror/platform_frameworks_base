@@ -17,6 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
+import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.media.MediaCodec.LinearBlock;
@@ -154,6 +155,7 @@ public class MediaEvent extends FilterEvent {
     /**
      * Gets MPU sequence number of filtered data.
      */
+    @IntRange(from = 0)
     public int getMpuSequenceNumber() {
         return mMpuSequenceNumber;
     }
@@ -187,7 +189,6 @@ public class MediaEvent extends FilterEvent {
 
     /**
      * Releases the MediaEvent object.
-     * @hide
      */
     public void release() {
         synchronized (mLock) {

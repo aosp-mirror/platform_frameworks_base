@@ -52,7 +52,7 @@ void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
         RenderNodeDrawable* childNode = mChildren[drawIndex];
         SkASSERT(childNode);
         const float casterZ = childNode->getNodeProperties().getZ();
-        if (casterZ >= -NON_ZERO_EPSILON) {  // draw only children with negative Z
+        if (casterZ >= -MathUtils::NON_ZERO_EPSILON) {  // draw only children with negative Z
             return;
         }
         SkAutoCanvasRestore acr(canvas, true);
@@ -86,7 +86,7 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
 
     const size_t endIndex = zChildren.size();
     while (drawIndex < endIndex  // draw only children with positive Z
-           && zChildren[drawIndex]->getNodeProperties().getZ() <= NON_ZERO_EPSILON)
+           && zChildren[drawIndex]->getNodeProperties().getZ() <= MathUtils::NON_ZERO_EPSILON)
         drawIndex++;
     size_t shadowIndex = drawIndex;
 

@@ -160,10 +160,6 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
         }
     }
 
-    if (!mHasStartValue) {
-        doSetStartValue(getValue(mTarget));
-    }
-
     if (!mStagingRequests.empty()) {
         // No interpolator was set, use the default
         if (mPlayState == PlayState::NotStarted && !mInterpolator) {
@@ -270,8 +266,10 @@ bool BaseRenderNodeAnimator::updatePlayTime(nsecs_t playTime) {
     // to call setValue even if the animation isn't yet running or is still
     // being delayed as we need to override the staging value
     if (playTime < 0) {
-        setValue(mTarget, mFromValue);
         return false;
+    }
+    if (!this->mHasStartValue) {
+        doSetStartValue(getValue(mTarget));
     }
 
     float fraction = 1.0f;

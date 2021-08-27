@@ -17,10 +17,13 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_UNKNOWN;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.SparseIntArray;
+
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
 import java.util.List;
 
 /**
@@ -106,27 +109,34 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
     private void resetPowerStatus(List<HdmiDeviceInfo> deviceInfos) {
         mPowerStatus.clear();
         for (HdmiDeviceInfo info : deviceInfos) {
-            mPowerStatus.append(info.getLogicalAddress(), info.getDevicePowerStatus());
+            if (localDevice().mService.getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0
+                    || info.getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+                mPowerStatus.append(info.getLogicalAddress(), info.getDevicePowerStatus());
+            }
         }
     }
 
     private void queryPowerStatus() {
-        List<HdmiDeviceInfo> deviceInfos = tv().getDeviceInfoList(false);
+        List<HdmiDeviceInfo> deviceInfos =
+                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false);
         resetPowerStatus(deviceInfos);
         for (HdmiDeviceInfo info : deviceInfos) {
-            final int logicalAddress = info.getLogicalAddress();
-            sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
-                    logicalAddress),
-                    new SendMessageCallback() {
-                        @Override
-                        public void onSendCompleted(int error) {
-                            // If fails to send <Give Device Power Status>,
-                            // update power status into UNKNOWN.
-                            if (error != SendMessageResult.SUCCESS) {
-                               updatePowerStatus(logicalAddress, POWER_STATUS_UNKNOWN, true);
+            if (localDevice().mService.getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0
+                    || info.getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+                final int logicalAddress = info.getLogicalAddress();
+                sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
+                        logicalAddress),
+                        new SendMessageCallback() {
+                            @Override
+                            public void onSendCompleted(int error) {
+                                // If fails to send <Give Device Power Status>,
+                                // update power status into UNKNOWN.
+                                if (error != SendMessageResult.SUCCESS) {
+                                    updatePowerStatus(logicalAddress, POWER_STATUS_UNKNOWN, true);
+                                }
                             }
-                        }
-                    });
+                        });
+            }
         }
 
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
@@ -137,7 +147,8 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
     }
 
     private void updatePowerStatus(int logicalAddress, int newStatus, boolean remove) {
-        tv().updateDevicePowerStatus(logicalAddress, newStatus);
+        localDevice().mService.getHdmiCecNetwork().updateDevicePowerStatus(logicalAddress,
+                newStatus);
 
         if (remove) {
             mPowerStatus.delete(logicalAddress);

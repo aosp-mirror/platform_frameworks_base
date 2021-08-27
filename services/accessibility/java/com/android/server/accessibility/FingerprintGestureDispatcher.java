@@ -118,7 +118,7 @@ public class FingerprintGestureDispatcher extends IFingerprintClientActiveCallba
     public boolean isFingerprintGestureDetectionAvailable() {
         if (!mHardwareSupportsGestures) return false;
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return !mFingerprintService.isClientActive();
         } catch (RemoteException re) {
@@ -173,7 +173,7 @@ public class FingerprintGestureDispatcher extends IFingerprintClientActiveCallba
     @Override
     public boolean handleMessage(Message message) {
         if (message.what == MSG_REGISTER) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mFingerprintService.addClientActiveCallback(this);
                 mRegisteredReadOnlyExceptInHandler = true;
@@ -184,7 +184,7 @@ public class FingerprintGestureDispatcher extends IFingerprintClientActiveCallba
             }
             return false;
         } else if (message.what == MSG_UNREGISTER) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mFingerprintService.removeClientActiveCallback(this);
             } catch (RemoteException re) {

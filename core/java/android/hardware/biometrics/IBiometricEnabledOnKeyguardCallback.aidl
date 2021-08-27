@@ -16,11 +16,9 @@
 
 package android.hardware.biometrics;
 
-import android.hardware.biometrics.BiometricSourceType;
-
 /**
  * @hide
  */
 oneway interface IBiometricEnabledOnKeyguardCallback {
-    void onChanged(in BiometricSourceType type, boolean enabled, int userId);
+    void onChanged(boolean enabled, int userId);
 }

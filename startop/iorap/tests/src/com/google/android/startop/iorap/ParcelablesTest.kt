@@ -124,7 +124,7 @@ class ParcelablesTest<T : Parcelable>(private val inputData: InputData<T>) {
     data class InputData<T : Parcelable>(val valid: T, val validCopy: T, val validOther: T) {
         val kls = valid.javaClass
         init {
-            assertThat(valid).isNotSameAs(validCopy)
+            assertThat(valid).isNotSameInstanceAs(validCopy)
             // Don't use isInstanceOf because of phantom warnings in intellij about Class!
             assertThat(validCopy.javaClass).isEqualTo(valid.javaClass)
             assertThat(validOther.javaClass).isEqualTo(valid.javaClass)

@@ -20,16 +20,21 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.drawable.Animatable;
+import android.graphics.Color;
+import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.View;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.Interpolators;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
+import com.android.systemui.statusbar.charging.ChargingRippleView;
 
 import java.text.NumberFormat;
 
@@ -37,16 +42,21 @@ import java.text.NumberFormat;
  * @hide
  */
 public class WirelessChargingLayout extends FrameLayout {
-    private final static int UNKNOWN_BATTERY_LEVEL = -1;
+    public static final int UNKNOWN_BATTERY_LEVEL = -1;
+    private static final long RIPPLE_ANIMATION_DURATION = 1500;
+    private static final int SCRIM_COLOR = 0x4C000000;
+    private static final int SCRIM_FADE_DURATION = 300;
+    private ChargingRippleView mRippleView;
 
     public WirelessChargingLayout(Context context) {
         super(context);
         init(context, null, false);
     }
 
-    public WirelessChargingLayout(Context context, int batteryLevel, boolean isDozing) {
+    public WirelessChargingLayout(Context context, int transmittingBatteryLevel, int batteryLevel,
+            boolean isDozing) {
         super(context);
-        init(context, null, batteryLevel, isDozing);
+        init(context, null, transmittingBatteryLevel, batteryLevel, isDozing);
     }
 
     public WirelessChargingLayout(Context context, AttributeSet attrs) {
@@ -55,11 +65,13 @@ public class WirelessChargingLayout extends FrameLayout {
     }
 
     private void init(Context c, AttributeSet attrs, boolean isDozing) {
-        init(c, attrs, -1, false);
+        init(c, attrs, -1, -1, false);
     }
 
-    private void init(Context context, AttributeSet attrs, int batteryLevel, boolean isDozing) {
-        final int mBatteryLevel = batteryLevel;
+    private void init(Context context, AttributeSet attrs, int transmittingBatteryLevel,
+            int batteryLevel, boolean isDozing) {
+        final boolean showTransmittingBatteryLevel =
+                (transmittingBatteryLevel != UNKNOWN_BATTERY_LEVEL);
 
         // set style based on background
         int style = R.style.ChargingAnim_WallpaperBackground;
@@ -69,44 +81,41 @@ public class WirelessChargingLayout extends FrameLayout {
 
         inflate(new ContextThemeWrapper(context, style), R.layout.wireless_charging_layout, this);
 
-        // where the circle animation occurs:
-        final ImageView chargingView = findViewById(R.id.wireless_charging_view);
-        final Animatable chargingAnimation = (Animatable) chargingView.getDrawable();
-
         // amount of battery:
-        final TextView mPercentage = findViewById(R.id.wireless_charging_percentage);
+        final TextView percentage = findViewById(R.id.wireless_charging_percentage);
 
         if (batteryLevel != UNKNOWN_BATTERY_LEVEL) {
-            mPercentage.setText(NumberFormat.getPercentInstance().format(mBatteryLevel / 100f));
-            mPercentage.setAlpha(0);
+            percentage.setText(NumberFormat.getPercentInstance().format(batteryLevel / 100f));
+            percentage.setAlpha(0);
         }
 
-        final long chargingAnimationFadeStartOffset = (long) context.getResources().getInteger(
+        final long chargingAnimationFadeStartOffset = context.getResources().getInteger(
                 R.integer.wireless_charging_fade_offset);
-        final long chargingAnimationFadeDuration = (long) context.getResources().getInteger(
+        final long chargingAnimationFadeDuration = context.getResources().getInteger(
                 R.integer.wireless_charging_fade_duration);
         final float batteryLevelTextSizeStart = context.getResources().getFloat(
                 R.dimen.wireless_charging_anim_battery_level_text_size_start);
         final float batteryLevelTextSizeEnd = context.getResources().getFloat(
-                R.dimen.wireless_charging_anim_battery_level_text_size_end);
+                R.dimen.wireless_charging_anim_battery_level_text_size_end) * (
+                showTransmittingBatteryLevel ? 0.75f : 1.0f);
 
         // Animation Scale: battery percentage text scales from 0% to 100%
-        ValueAnimator textSizeAnimator = ObjectAnimator.ofFloat(mPercentage, "textSize",
+        ValueAnimator textSizeAnimator = ObjectAnimator.ofFloat(percentage, "textSize",
                 batteryLevelTextSizeStart, batteryLevelTextSizeEnd);
         textSizeAnimator.setInterpolator(new PathInterpolator(0, 0, 0, 1));
-        textSizeAnimator.setDuration((long) context.getResources().getInteger(
+        textSizeAnimator.setDuration(context.getResources().getInteger(
                 R.integer.wireless_charging_battery_level_text_scale_animation_duration));
 
         // Animation Opacity: battery percentage text transitions from 0 to 1 opacity
-        ValueAnimator textOpacityAnimator = ObjectAnimator.ofFloat(mPercentage, "alpha", 0, 1);
+        ValueAnimator textOpacityAnimator = ObjectAnimator.ofFloat(percentage, "alpha", 0, 1);
         textOpacityAnimator.setInterpolator(Interpolators.LINEAR);
-        textOpacityAnimator.setDuration((long) context.getResources().getInteger(
+        textOpacityAnimator.setDuration(context.getResources().getInteger(
                 R.integer.wireless_charging_battery_level_text_opacity_duration));
-        textOpacityAnimator.setStartDelay((long) context.getResources().getInteger(
+        textOpacityAnimator.setStartDelay(context.getResources().getInteger(
                 R.integer.wireless_charging_anim_opacity_offset));
 
         // Animation Opacity: battery percentage text fades from 1 to 0 opacity
-        ValueAnimator textFadeAnimator = ObjectAnimator.ofFloat(mPercentage, "alpha", 1, 0);
+        ValueAnimator textFadeAnimator = ObjectAnimator.ofFloat(percentage, "alpha", 1, 0);
         textFadeAnimator.setDuration(chargingAnimationFadeDuration);
         textFadeAnimator.setInterpolator(Interpolators.LINEAR);
         textFadeAnimator.setStartDelay(chargingAnimationFadeStartOffset);
@@ -114,7 +123,120 @@ public class WirelessChargingLayout extends FrameLayout {
         // play all animations together
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
-        chargingAnimation.start();
+
+        ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
+                "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
+        scrimFadeInAnimator.setDuration(SCRIM_FADE_DURATION);
+        scrimFadeInAnimator.setInterpolator(Interpolators.LINEAR);
+        ValueAnimator scrimFadeOutAnimator = ObjectAnimator.ofArgb(this,
+                "backgroundColor", SCRIM_COLOR, Color.TRANSPARENT);
+        scrimFadeOutAnimator.setDuration(SCRIM_FADE_DURATION);
+        scrimFadeOutAnimator.setInterpolator(Interpolators.LINEAR);
+        scrimFadeOutAnimator.setStartDelay(RIPPLE_ANIMATION_DURATION - SCRIM_FADE_DURATION);
+        AnimatorSet animatorSetScrim = new AnimatorSet();
+        animatorSetScrim.playTogether(scrimFadeInAnimator, scrimFadeOutAnimator);
+        animatorSetScrim.start();
+
+        mRippleView = findViewById(R.id.wireless_charging_ripple);
+        OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                mRippleView.setDuration(RIPPLE_ANIMATION_DURATION);
+                mRippleView.startRipple();
+                mRippleView.removeOnAttachStateChangeListener(this);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {}
+        };
+        mRippleView.addOnAttachStateChangeListener(listener);
+
+        if (!showTransmittingBatteryLevel) {
+            animatorSet.start();
+            return;
+        }
+
+        // amount of transmitting battery:
+        final TextView transmittingPercentage = findViewById(
+                R.id.reverse_wireless_charging_percentage);
+        transmittingPercentage.setVisibility(VISIBLE);
+        transmittingPercentage.setText(
+                NumberFormat.getPercentInstance().format(transmittingBatteryLevel / 100f));
+        transmittingPercentage.setAlpha(0);
+
+        // Animation Scale: transmitting battery percentage text scales from 0% to 100%
+        ValueAnimator textSizeAnimatorTransmitting = ObjectAnimator.ofFloat(transmittingPercentage,
+                "textSize", batteryLevelTextSizeStart, batteryLevelTextSizeEnd);
+        textSizeAnimatorTransmitting.setInterpolator(new PathInterpolator(0, 0, 0, 1));
+        textSizeAnimatorTransmitting.setDuration(context.getResources().getInteger(
+                R.integer.wireless_charging_battery_level_text_scale_animation_duration));
+
+        // Animation Opacity: transmitting battery percentage text transitions from 0 to 1 opacity
+        ValueAnimator textOpacityAnimatorTransmitting = ObjectAnimator.ofFloat(
+                transmittingPercentage, "alpha", 0, 1);
+        textOpacityAnimatorTransmitting.setInterpolator(Interpolators.LINEAR);
+        textOpacityAnimatorTransmitting.setDuration(context.getResources().getInteger(
+                R.integer.wireless_charging_battery_level_text_opacity_duration));
+        textOpacityAnimatorTransmitting.setStartDelay(
+                context.getResources().getInteger(R.integer.wireless_charging_anim_opacity_offset));
+
+        // Animation Opacity: transmitting battery percentage text fades from 1 to 0 opacity
+        ValueAnimator textFadeAnimatorTransmitting = ObjectAnimator.ofFloat(transmittingPercentage,
+                "alpha", 1, 0);
+        textFadeAnimatorTransmitting.setDuration(chargingAnimationFadeDuration);
+        textFadeAnimatorTransmitting.setInterpolator(Interpolators.LINEAR);
+        textFadeAnimatorTransmitting.setStartDelay(chargingAnimationFadeStartOffset);
+
+        // play all animations together
+        AnimatorSet animatorSetTransmitting = new AnimatorSet();
+        animatorSetTransmitting.playTogether(textSizeAnimatorTransmitting,
+                textOpacityAnimatorTransmitting, textFadeAnimatorTransmitting);
+
+        // transmitting battery icon
+        final ImageView chargingViewIcon = findViewById(R.id.reverse_wireless_charging_icon);
+        chargingViewIcon.setVisibility(VISIBLE);
+        final int padding = Math.round(
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, batteryLevelTextSizeEnd,
+                        getResources().getDisplayMetrics()));
+        chargingViewIcon.setPadding(padding, 0, padding, 0);
+
+        // Animation Opacity: transmitting battery icon transitions from 0 to 1 opacity
+        ValueAnimator textOpacityAnimatorIcon = ObjectAnimator.ofFloat(chargingViewIcon, "alpha", 0,
+                1);
+        textOpacityAnimatorIcon.setInterpolator(Interpolators.LINEAR);
+        textOpacityAnimatorIcon.setDuration(context.getResources().getInteger(
+                R.integer.wireless_charging_battery_level_text_opacity_duration));
+        textOpacityAnimatorIcon.setStartDelay(
+                context.getResources().getInteger(R.integer.wireless_charging_anim_opacity_offset));
+
+        // Animation Opacity: transmitting battery icon fades from 1 to 0 opacity
+        ValueAnimator textFadeAnimatorIcon = ObjectAnimator.ofFloat(chargingViewIcon, "alpha", 1,
+                0);
+        textFadeAnimatorIcon.setDuration(chargingAnimationFadeDuration);
+        textFadeAnimatorIcon.setInterpolator(Interpolators.LINEAR);
+        textFadeAnimatorIcon.setStartDelay(chargingAnimationFadeStartOffset);
+
+        // play all animations together
+        AnimatorSet animatorSetIcon = new AnimatorSet();
+        animatorSetIcon.playTogether(textOpacityAnimatorIcon, textFadeAnimatorIcon);
+
         animatorSet.start();
+        animatorSetTransmitting.start();
+        animatorSetIcon.start();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (mRippleView != null) {
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            mRippleView.setColor(
+                    Utils.getColorAttr(mRippleView.getContext(),
+                            android.R.attr.colorAccent).getDefaultColor());
+            mRippleView.setOrigin(new PointF(width / 2, height / 2));
+            mRippleView.setRadius(Math.max(width, height) * 0.5f);
+        }
+
+        super.onLayout(changed, left, top, right, bottom);
     }
 }

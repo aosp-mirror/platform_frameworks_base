@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2021 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- Contains the active ringer icon and a hidden drawer containing all three ringer options. -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/volume_ringer_and_drawer_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingLeft="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingTop="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingRight="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
+    android:background="@drawable/volume_background_top"
+    android:layoutDirection="ltr"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <!-- Drawer view, invisible by default. -->
+    <FrameLayout
+        android:id="@+id/volume_drawer_container"
+        android:alpha="0.0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/volume_drawer_bg"
+        android:orientation="vertical">
+
+        <!-- View that is animated to a tapped ringer selection, so it appears selected. -->
+        <FrameLayout
+            android:id="@+id/volume_drawer_selection_background"
+            android:alpha="0.0"
+            android:layout_width="@dimen/volume_ringer_drawer_item_size"
+            android:layout_height="@dimen/volume_ringer_drawer_item_size"
+            android:layout_gravity="bottom|right"
+            android:background="@drawable/volume_drawer_selection_bg" />
+
+        <LinearLayout
+            android:id="@+id/volume_drawer_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/volume_drawer_vibrate"
+                android:layout_width="@dimen/volume_ringer_drawer_item_size"
+                android:layout_height="@dimen/volume_ringer_drawer_item_size"
+                android:contentDescription="@string/volume_ringer_hint_vibrate"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/volume_drawer_vibrate_icon"
+                    android:layout_width="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_height="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_gravity="center"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:src="@drawable/ic_volume_ringer_vibrate" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/volume_drawer_mute"
+                android:layout_width="@dimen/volume_ringer_drawer_item_size"
+                android:layout_height="@dimen/volume_ringer_drawer_item_size"
+                android:contentDescription="@string/volume_ringer_hint_mute"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/volume_drawer_mute_icon"
+                    android:layout_width="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_height="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_gravity="center"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:src="@drawable/ic_volume_ringer_mute" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/volume_drawer_normal"
+                android:layout_width="@dimen/volume_ringer_drawer_item_size"
+                android:layout_height="@dimen/volume_ringer_drawer_item_size"
+                android:contentDescription="@string/volume_ringer_hint_unmute"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/volume_drawer_normal_icon"
+                    android:layout_width="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_height="@dimen/volume_ringer_drawer_icon_size"
+                    android:layout_gravity="center"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:src="@drawable/ic_volume_ringer" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- The current ringer selection. When the drawer is opened, this animates to the corresponding
+         position in the drawer. When the drawer is closed, it animates back. -->
+    <FrameLayout
+        android:id="@+id/volume_new_ringer_active_icon_container"
+        android:layout_width="@dimen/volume_ringer_drawer_item_size"
+        android:layout_height="@dimen/volume_ringer_drawer_item_size"
+        android:layout_gravity="bottom|right"
+        android:contentDescription="@string/volume_ringer_change"
+        android:background="@drawable/volume_drawer_selection_bg">
+
+        <ImageView
+            android:id="@+id/volume_new_ringer_active_icon"
+            android:layout_width="@dimen/volume_ringer_drawer_icon_size"
+            android:layout_height="@dimen/volume_ringer_drawer_icon_size"
+            android:layout_gravity="center"
+            android:tint="?android:attr/textColorPrimaryInverse"
+            android:src="@drawable/ic_volume_media" />
+
+    </FrameLayout>
+
+</FrameLayout>

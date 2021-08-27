@@ -33,8 +33,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.server.location.ComprehensiveCountryDetector;
-import com.android.server.location.CountryDetectorBase;
+import com.android.server.location.countrydetector.ComprehensiveCountryDetector;
+import com.android.server.location.countrydetector.CountryDetectorBase;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -43,10 +43,9 @@ import java.util.HashMap;
 
 /**
  * This class detects the country that the user is in. The default country detection is made through
- * {@link com.android.server.location.ComprehensiveCountryDetector}. It is possible to overlay the
- * detection algorithm by overlaying the attribute R.string.config_customCountryDetector with the
- * custom class name to use instead. The custom class must extend
- * {@link com.android.server.location.CountryDetectorBase}
+ * {@link ComprehensiveCountryDetector}. It is possible to overlay the detection algorithm by
+ * overlaying the attribute R.string.config_customCountryDetector with the custom class name to use
+ * instead. The custom class must extend {@link CountryDetectorBase}
  *
  * @hide
  */

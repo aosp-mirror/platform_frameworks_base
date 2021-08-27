@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
@@ -28,9 +30,27 @@ import android.view.WindowInsets.Type.InsetsType;
 public interface InsetsAnimationControlRunner {
 
     /**
-     * @return The {@link InsetsType} the animation of this runner is controlling.
+     * @return The {@link InsetsType} the animation of this runner controls.
      */
     @InsetsType int getTypes();
+
+    /**
+     * @return The {@link InsetsType} the animation of this runner is controlling. This can be
+     *         changed if a control is revoked.
+     */
+    @InsetsType int getControllingTypes();
+
+    /**
+     * Notifies {@link InsetsType types} of control are getting revoked.
+     */
+    void notifyControlRevoked(@InsetsType int types);
+
+    /**
+     * Updates the surface positions of the controls owned by this runner if there is any.
+     *
+     * @param controls An array of {@link InsetsSourceControl} that the caller newly receives.
+     */
+    void updateSurfacePosition(SparseArray<InsetsSourceControl> controls);
 
     /**
      * Cancels the animation.
@@ -53,4 +73,14 @@ public interface InsetsAnimationControlRunner {
      * @return The animation type this runner is running.
      */
     @AnimationType int getAnimationType();
+
+    /**
+     *
+     * Export the state of classes that implement this interface into a protocol buffer
+     * output stream.
+     *
+     * @param proto Stream to write the state to
+     * @param fieldId FieldId of the implementation class
+     */
+    void dumpDebug(ProtoOutputStream proto, long fieldId);
 }

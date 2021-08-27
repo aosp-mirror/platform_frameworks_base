@@ -34,6 +34,7 @@
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "core_jni_helpers.h"
 #include "nativehelper/ScopedLocalRef.h"
 #include "private/android_filesystem_config.h"
 
@@ -71,6 +72,7 @@ static jfieldID field_deviceInfo_version;
 static jfieldID field_deviceInfo_serialNumber;
 static jfieldID field_deviceInfo_operationsSupported;
 static jfieldID field_deviceInfo_eventsSupported;
+static jfieldID field_deviceInfo_devicePropertySupported;
 
 // MtpStorageInfo fields
 static jfieldID field_storageInfo_storageId;
@@ -107,6 +109,97 @@ static jfieldID field_event_parameter1;
 static jfieldID field_event_parameter2;
 static jfieldID field_event_parameter3;
 
+// Initializer for  the jclasses, jfieldIDs and jmethodIDs declared above. This method must be
+// invoked before using these static fields for JNI accesses.
+static void initializeJavaIDs(JNIEnv* env) {
+    static std::once_flag sJniInitialized;
+
+    std::call_once(sJniInitialized, [](JNIEnv* env) {
+        clazz_deviceInfo =
+            (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/mtp/MtpDeviceInfo"));
+        constructor_deviceInfo = GetMethodIDOrDie(env, clazz_deviceInfo, "<init>", "()V");
+        field_deviceInfo_manufacturer =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mManufacturer", "Ljava/lang/String;");
+        field_deviceInfo_model =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mModel", "Ljava/lang/String;");
+        field_deviceInfo_version =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mVersion", "Ljava/lang/String;");
+        field_deviceInfo_serialNumber =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mSerialNumber", "Ljava/lang/String;");
+        field_deviceInfo_operationsSupported =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mOperationsSupported", "[I");
+        field_deviceInfo_eventsSupported =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mEventsSupported", "[I");
+        field_deviceInfo_devicePropertySupported =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mDevicePropertySupported", "[I");
+
+        clazz_storageInfo =
+            (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/mtp/MtpStorageInfo"));
+        constructor_storageInfo = GetMethodIDOrDie(env, clazz_storageInfo, "<init>", "()V");
+        field_storageInfo_storageId = GetFieldIDOrDie(env, clazz_storageInfo, "mStorageId", "I");
+        field_storageInfo_maxCapacity =
+            GetFieldIDOrDie(env, clazz_storageInfo, "mMaxCapacity", "J");
+        field_storageInfo_freeSpace =
+            GetFieldIDOrDie(env, clazz_storageInfo, "mFreeSpace", "J");
+        field_storageInfo_description =
+            GetFieldIDOrDie(env, clazz_storageInfo, "mDescription", "Ljava/lang/String;");
+        field_storageInfo_volumeIdentifier =
+            GetFieldIDOrDie(env, clazz_storageInfo, "mVolumeIdentifier", "Ljava/lang/String;");
+
+        clazz_objectInfo =
+            (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/mtp/MtpObjectInfo"));
+        constructor_objectInfo = GetMethodIDOrDie(env, clazz_objectInfo, "<init>", "()V");
+        field_objectInfo_handle = GetFieldIDOrDie(env, clazz_objectInfo, "mHandle", "I");
+        field_objectInfo_storageId = GetFieldIDOrDie(env, clazz_objectInfo, "mStorageId", "I");
+        field_objectInfo_format = GetFieldIDOrDie(env, clazz_objectInfo, "mFormat", "I");
+        field_objectInfo_protectionStatus =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mProtectionStatus", "I");
+        field_objectInfo_compressedSize =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mCompressedSize", "I");
+        field_objectInfo_thumbFormat = GetFieldIDOrDie(env, clazz_objectInfo, "mThumbFormat", "I");
+        field_objectInfo_thumbCompressedSize =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mThumbCompressedSize", "I");
+        field_objectInfo_thumbPixWidth =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mThumbPixWidth", "I");
+        field_objectInfo_thumbPixHeight =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mThumbPixHeight", "I");
+        field_objectInfo_imagePixWidth =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mImagePixWidth", "I");
+        field_objectInfo_imagePixHeight =
+            GetFieldIDOrDie(env, clazz_objectInfo, "mImagePixHeight", "I");
+        field_objectInfo_imagePixDepth =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mImagePixDepth", "I");
+        field_objectInfo_parent = GetFieldIDOrDie(env, clazz_objectInfo, "mParent", "I");
+        field_objectInfo_associationType =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mAssociationType", "I");
+        field_objectInfo_associationDesc =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mAssociationDesc", "I");
+        field_objectInfo_sequenceNumber =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mSequenceNumber", "I");
+        field_objectInfo_name =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mName", "Ljava/lang/String;");
+        field_objectInfo_dateCreated = GetFieldIDOrDie(env, clazz_objectInfo, "mDateCreated", "J");
+        field_objectInfo_dateModified =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mDateModified", "J");
+        field_objectInfo_keywords =
+                GetFieldIDOrDie(env, clazz_objectInfo, "mKeywords", "Ljava/lang/String;");
+
+        clazz_event = (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/mtp/MtpEvent"));
+        constructor_event = GetMethodIDOrDie(env, clazz_event, "<init>", "()V");
+        field_event_eventCode = GetFieldIDOrDie(env, clazz_event, "mEventCode", "I");
+        field_event_parameter1 = GetFieldIDOrDie(env, clazz_event, "mParameter1", "I");
+        field_event_parameter2 = GetFieldIDOrDie(env, clazz_event, "mParameter2", "I");
+        field_event_parameter3 = GetFieldIDOrDie(env, clazz_event, "mParameter3", "I");
+
+        const jclass clazz = FindClassOrDie(env, "android/mtp/MtpDevice");
+        field_context = GetFieldIDOrDie(env, clazz, "mNativeContext", "J");
+
+        clazz_io_exception = (jclass)env->NewGlobalRef(FindClassOrDie(env, "java/io/IOException"));
+        clazz_operation_canceled_exception =
+            (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/os/OperationCanceledException"));
+    }, env);
+}
+
 class JavaArrayWriter {
 public:
     JavaArrayWriter(JNIEnv* env, jbyteArray array) :
@@ -132,6 +225,11 @@ private:
 
 MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
 {
+    // get_device_from_object() is called by the majority of JNI methods in this file. Call
+    // `initializeJavaIDs()` here to ensure JNI methodID's, fieldIDs and classes are initialized
+    // before use.
+    initializeJavaIDs(env);
+
     return (MtpDevice*)env->GetLongField(javaDevice, field_context);
 }
 
@@ -200,6 +298,8 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
     MtpDevice* device = MtpDevice::open(deviceNameStr, fd);
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
 
+    // The jfieldID `field_context` needs to be initialized before use below.
+    initializeJavaIDs(env);
     if (device)
         env->SetLongField(thiz, field_context,  (jlong)device);
     return (jboolean)(device != NULL);
@@ -280,7 +380,57 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
         }
     }
 
+    assert(deviceInfo->mDeviceProperties);
+    {
+        const size_t size = deviceInfo->mDeviceProperties->size();
+        ScopedLocalRef<jintArray> events(env, static_cast<jintArray>(env->NewIntArray(size)));
+        {
+            ScopedIntArrayRW elements(env, events.get());
+            if (elements.get() == NULL) {
+                ALOGE("Could not create devicePropertySupported element.");
+                return NULL;
+            }
+            for (size_t i = 0; i < size; ++i) {
+                elements[i] = static_cast<int>(deviceInfo->mDeviceProperties->at(i));
+            }
+            env->SetObjectField(info, field_deviceInfo_devicePropertySupported, events.get());
+        }
+    }
+
     return info;
+}
+
+static jint
+android_mtp_MtpDevice_set_device_property_init_version(JNIEnv *env, jobject thiz,
+                                                       jstring property_str) {
+    MtpDevice* const device = get_device_from_object(env, thiz);
+
+    if (!device) {
+        ALOGD("%s device is null\n", __func__);
+        env->ThrowNew(clazz_io_exception, "Failed to obtain MtpDevice.");
+        return -1;
+    }
+
+    const char *propertyStr = env->GetStringUTFChars(property_str, NULL);
+    if (propertyStr == NULL) {
+        return -1;
+    }
+
+    MtpProperty property(MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO, MTP_TYPE_STR, true);
+    if (property.getDataType() != MTP_TYPE_STR) {
+        env->ThrowNew(clazz_io_exception, "Unexpected property data type.");
+        return -1;
+    }
+
+    property.setCurrentValue(propertyStr);
+    if (!device->setDevicePropValueStr(&property)) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain property value.");
+        return -1;
+    }
+
+    env->ReleaseStringUTFChars(property_str, propertyStr);
+
+    return 0;
 }
 
 static jintArray
@@ -750,6 +900,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_close",            "()V",  (void *)android_mtp_MtpDevice_close},
     {"native_get_device_info",  "()Landroid/mtp/MtpDeviceInfo;",
                                         (void *)android_mtp_MtpDevice_get_device_info},
+    {"native_set_device_property_init_version",  "(Ljava/lang/String;)I",
+                        (void *)android_mtp_MtpDevice_set_device_property_init_version},
     {"native_get_storage_ids",  "()[I", (void *)android_mtp_MtpDevice_get_storage_ids},
     {"native_get_storage_info", "(I)Landroid/mtp/MtpStorageInfo;",
                                         (void *)android_mtp_MtpDevice_get_storage_info},
@@ -781,256 +933,7 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_mtp_MtpDevice(JNIEnv *env)
 {
-    jclass clazz;
-
     ALOGD("register_android_mtp_MtpDevice\n");
-
-    clazz = env->FindClass("android/mtp/MtpDeviceInfo");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpDeviceInfo");
-        return -1;
-    }
-    constructor_deviceInfo = env->GetMethodID(clazz, "<init>", "()V");
-    if (constructor_deviceInfo == NULL) {
-        ALOGE("Can't find android/mtp/MtpDeviceInfo constructor");
-        return -1;
-    }
-    field_deviceInfo_manufacturer = env->GetFieldID(clazz, "mManufacturer", "Ljava/lang/String;");
-    if (field_deviceInfo_manufacturer == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mManufacturer");
-        return -1;
-    }
-    field_deviceInfo_model = env->GetFieldID(clazz, "mModel", "Ljava/lang/String;");
-    if (field_deviceInfo_model == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mModel");
-        return -1;
-    }
-    field_deviceInfo_version = env->GetFieldID(clazz, "mVersion", "Ljava/lang/String;");
-    if (field_deviceInfo_version == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mVersion");
-        return -1;
-    }
-    field_deviceInfo_serialNumber = env->GetFieldID(clazz, "mSerialNumber", "Ljava/lang/String;");
-    if (field_deviceInfo_serialNumber == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mSerialNumber");
-        return -1;
-    }
-    field_deviceInfo_operationsSupported = env->GetFieldID(clazz, "mOperationsSupported", "[I");
-    if (field_deviceInfo_operationsSupported == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mOperationsSupported");
-        return -1;
-    }
-    field_deviceInfo_eventsSupported = env->GetFieldID(clazz, "mEventsSupported", "[I");
-    if (field_deviceInfo_eventsSupported == NULL) {
-        ALOGE("Can't find MtpDeviceInfo.mEventsSupported");
-        return -1;
-    }
-    clazz_deviceInfo = (jclass)env->NewGlobalRef(clazz);
-
-    clazz = env->FindClass("android/mtp/MtpStorageInfo");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpStorageInfo");
-        return -1;
-    }
-    constructor_storageInfo = env->GetMethodID(clazz, "<init>", "()V");
-    if (constructor_storageInfo == NULL) {
-        ALOGE("Can't find android/mtp/MtpStorageInfo constructor");
-        return -1;
-    }
-    field_storageInfo_storageId = env->GetFieldID(clazz, "mStorageId", "I");
-    if (field_storageInfo_storageId == NULL) {
-        ALOGE("Can't find MtpStorageInfo.mStorageId");
-        return -1;
-    }
-    field_storageInfo_maxCapacity = env->GetFieldID(clazz, "mMaxCapacity", "J");
-    if (field_storageInfo_maxCapacity == NULL) {
-        ALOGE("Can't find MtpStorageInfo.mMaxCapacity");
-        return -1;
-    }
-    field_storageInfo_freeSpace = env->GetFieldID(clazz, "mFreeSpace", "J");
-    if (field_storageInfo_freeSpace == NULL) {
-        ALOGE("Can't find MtpStorageInfo.mFreeSpace");
-        return -1;
-    }
-    field_storageInfo_description = env->GetFieldID(clazz, "mDescription", "Ljava/lang/String;");
-    if (field_storageInfo_description == NULL) {
-        ALOGE("Can't find MtpStorageInfo.mDescription");
-        return -1;
-    }
-    field_storageInfo_volumeIdentifier = env->GetFieldID(clazz, "mVolumeIdentifier", "Ljava/lang/String;");
-    if (field_storageInfo_volumeIdentifier == NULL) {
-        ALOGE("Can't find MtpStorageInfo.mVolumeIdentifier");
-        return -1;
-    }
-    clazz_storageInfo = (jclass)env->NewGlobalRef(clazz);
-
-    clazz = env->FindClass("android/mtp/MtpObjectInfo");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpObjectInfo");
-        return -1;
-    }
-    constructor_objectInfo = env->GetMethodID(clazz, "<init>", "()V");
-    if (constructor_objectInfo == NULL) {
-        ALOGE("Can't find android/mtp/MtpObjectInfo constructor");
-        return -1;
-    }
-    field_objectInfo_handle = env->GetFieldID(clazz, "mHandle", "I");
-    if (field_objectInfo_handle == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mHandle");
-        return -1;
-    }
-    field_objectInfo_storageId = env->GetFieldID(clazz, "mStorageId", "I");
-    if (field_objectInfo_storageId == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mStorageId");
-        return -1;
-    }
-    field_objectInfo_format = env->GetFieldID(clazz, "mFormat", "I");
-    if (field_objectInfo_format == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mFormat");
-        return -1;
-    }
-    field_objectInfo_protectionStatus = env->GetFieldID(clazz, "mProtectionStatus", "I");
-    if (field_objectInfo_protectionStatus == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mProtectionStatus");
-        return -1;
-    }
-    field_objectInfo_compressedSize = env->GetFieldID(clazz, "mCompressedSize", "I");
-    if (field_objectInfo_compressedSize == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mCompressedSize");
-        return -1;
-    }
-    field_objectInfo_thumbFormat = env->GetFieldID(clazz, "mThumbFormat", "I");
-    if (field_objectInfo_thumbFormat == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mThumbFormat");
-        return -1;
-    }
-    field_objectInfo_thumbCompressedSize = env->GetFieldID(clazz, "mThumbCompressedSize", "I");
-    if (field_objectInfo_thumbCompressedSize == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mThumbCompressedSize");
-        return -1;
-    }
-    field_objectInfo_thumbPixWidth = env->GetFieldID(clazz, "mThumbPixWidth", "I");
-    if (field_objectInfo_thumbPixWidth == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mThumbPixWidth");
-        return -1;
-    }
-    field_objectInfo_thumbPixHeight = env->GetFieldID(clazz, "mThumbPixHeight", "I");
-    if (field_objectInfo_thumbPixHeight == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mThumbPixHeight");
-        return -1;
-    }
-    field_objectInfo_imagePixWidth = env->GetFieldID(clazz, "mImagePixWidth", "I");
-    if (field_objectInfo_imagePixWidth == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mImagePixWidth");
-        return -1;
-    }
-    field_objectInfo_imagePixHeight = env->GetFieldID(clazz, "mImagePixHeight", "I");
-    if (field_objectInfo_imagePixHeight == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mImagePixHeight");
-        return -1;
-    }
-    field_objectInfo_imagePixDepth = env->GetFieldID(clazz, "mImagePixDepth", "I");
-    if (field_objectInfo_imagePixDepth == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mImagePixDepth");
-        return -1;
-    }
-    field_objectInfo_parent = env->GetFieldID(clazz, "mParent", "I");
-    if (field_objectInfo_parent == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mParent");
-        return -1;
-    }
-    field_objectInfo_associationType = env->GetFieldID(clazz, "mAssociationType", "I");
-    if (field_objectInfo_associationType == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mAssociationType");
-        return -1;
-    }
-    field_objectInfo_associationDesc = env->GetFieldID(clazz, "mAssociationDesc", "I");
-    if (field_objectInfo_associationDesc == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mAssociationDesc");
-        return -1;
-    }
-    field_objectInfo_sequenceNumber = env->GetFieldID(clazz, "mSequenceNumber", "I");
-    if (field_objectInfo_sequenceNumber == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mSequenceNumber");
-        return -1;
-    }
-    field_objectInfo_name = env->GetFieldID(clazz, "mName", "Ljava/lang/String;");
-    if (field_objectInfo_name == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mName");
-        return -1;
-    }
-    field_objectInfo_dateCreated = env->GetFieldID(clazz, "mDateCreated", "J");
-    if (field_objectInfo_dateCreated == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mDateCreated");
-        return -1;
-    }
-    field_objectInfo_dateModified = env->GetFieldID(clazz, "mDateModified", "J");
-    if (field_objectInfo_dateModified == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mDateModified");
-        return -1;
-    }
-    field_objectInfo_keywords = env->GetFieldID(clazz, "mKeywords", "Ljava/lang/String;");
-    if (field_objectInfo_keywords == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mKeywords");
-        return -1;
-    }
-    clazz_objectInfo = (jclass)env->NewGlobalRef(clazz);
-
-    clazz = env->FindClass("android/mtp/MtpEvent");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpEvent");
-        return -1;
-    }
-    constructor_event = env->GetMethodID(clazz, "<init>", "()V");
-    if (constructor_event == NULL) {
-        ALOGE("Can't find android/mtp/MtpEvent constructor");
-        return -1;
-    }
-    field_event_eventCode = env->GetFieldID(clazz, "mEventCode", "I");
-    if (field_event_eventCode == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mEventCode");
-        return -1;
-    }
-    field_event_parameter1 = env->GetFieldID(clazz, "mParameter1", "I");
-    if (field_event_parameter1 == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mParameter1");
-        return -1;
-    }
-    field_event_parameter2 = env->GetFieldID(clazz, "mParameter2", "I");
-    if (field_event_parameter2 == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mParameter2");
-        return -1;
-    }
-    field_event_parameter3 = env->GetFieldID(clazz, "mParameter3", "I");
-    if (field_event_parameter3 == NULL) {
-        ALOGE("Can't find MtpObjectInfo.mParameter3");
-        return -1;
-    }
-    clazz_event = (jclass)env->NewGlobalRef(clazz);
-
-    clazz = env->FindClass("android/mtp/MtpDevice");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpDevice");
-        return -1;
-    }
-    field_context = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (field_context == NULL) {
-        ALOGE("Can't find MtpDevice.mNativeContext");
-        return -1;
-    }
-    clazz = env->FindClass("java/io/IOException");
-    if (clazz == NULL) {
-        ALOGE("Can't find java.io.IOException");
-        return -1;
-    }
-    clazz_io_exception = (jclass)env->NewGlobalRef(clazz);
-    clazz = env->FindClass("android/os/OperationCanceledException");
-    if (clazz == NULL) {
-        ALOGE("Can't find android.os.OperationCanceledException");
-        return -1;
-    }
-    clazz_operation_canceled_exception = (jclass)env->NewGlobalRef(clazz);
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/mtp/MtpDevice", gMethods, NELEM(gMethods));
 }

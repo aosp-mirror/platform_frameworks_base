@@ -56,6 +56,37 @@
          android:layout_height="wrap_content"
          android:scaleType="fitXY"/>
 
+    <LinearLayout android:id="@+id/visuMultithreadedLayout"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="10dip"
+        android:layout_marginRight="10dip"
+        android:layout_marginBottom="10dip" >
+
+        <TextView android:id="@+id/visuMultithreaded"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:layout_gravity="center_vertical|left"
+            android:text="@string/effect_multithreaded"
+            style="@android:style/TextAppearance.Medium" />
+
+        <ToggleButton android:id="@+id/visuMultithreadedOnOff"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_vertical|right"
+            android:layout_weight="0.0" />
+
+    </LinearLayout>
+
+    <ImageView
+         android:src="@android:drawable/divider_horizontal_dark"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:scaleType="fitXY"/>
+
     <LinearLayout android:id="@+id/visuControlLayout"
         android:orientation="horizontal"
         android:layout_width="fill_parent"

@@ -46,8 +46,25 @@ public abstract class QSTileView extends LinearLayout {
      * background circle/peripherals. To retrieve only the inner icon, use {@link #getIcon()}.
      */
     public abstract View getIconWithBackground();
+
+    /**
+     * Returns the {@link View} containing the icon on the right
+     *
+     * @see com.android.systemui.qs.tileimpl.QSTileViewHorizontal#sideView
+     */
+    public View getSecondaryIcon() {
+        return null;
+    }
     public abstract void init(QSTile tile);
     public abstract void onStateChanged(State state);
 
     public abstract int getDetailY();
+
+    public View getLabelContainer() {
+        return null;
+    }
+
+    public View getSecondaryLabel() {
+        return null;
+    }
 }

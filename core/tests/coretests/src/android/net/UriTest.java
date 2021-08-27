@@ -136,6 +136,23 @@ public class UriTest extends TestCase {
         assertEquals(0, b.compareTo(b2));
     }
 
+    /**
+     * Check that {@link Uri#EMPTY} is properly initialized to guard against a
+     * regression based on a problematic initialization order (b/159907422).
+     *
+     * The problematic initialization order happened when {@code Uri$PathPart<clinit>}
+     * ran before {@code Uri.<clinit>}. De facto this test would probably never have
+     * failed on Android because {@code Uri.<clinit>} will almost certainly have run
+     * somewhere in the Zygote, but just in case and in case this test is ever run on
+     * a platform that doesn't perform Zygote initialization, this test attempts to
+     * trigger {@code Uri$PathPart<clinit>} prior to inspecting {@link Uri#EMPTY}.
+     */
+    @SmallTest
+    public void testEmpty_initializerOrder() {
+        new Uri.Builder().scheme("http").path("path").build();
+        assertEquals("", Uri.EMPTY.toString());
+    }
+
     @SmallTest
     public void testEqualsAndHashCode() {
 

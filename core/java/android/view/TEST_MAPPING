@@ -2,6 +2,39 @@
   "presubmit": [
     {
       "name": "CtsAccelerationTestCases"
+    },
+    {
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.os.cts.StrictModeTest"
+        }
+      ],
+      "file_patterns": ["(/|^)ViewConfiguration.java", "(/|^)GestureDetector.java"]
+    },
+    {
+      "name": "CtsViewReceiveContentTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ],
+      "file_patterns": ["ContentInfo\\.java", "OnReceiveContentListener\\.java", "View\\.java"]
     }
   ],
   "imports": [

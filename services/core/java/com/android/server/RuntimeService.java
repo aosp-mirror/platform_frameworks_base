@@ -23,10 +23,9 @@ import android.service.runtime.RuntimeServiceInfoProto;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import libcore.timezone.TimeZoneDataFiles;
-import libcore.util.CoreLibraryDebug;
-import libcore.util.DebugInfo;
-
+import com.android.i18n.timezone.DebugInfo;
+import com.android.i18n.timezone.I18nModuleDebug;
+import com.android.i18n.timezone.TimeZoneDataFiles;
 import com.android.internal.util.DumpUtils;
 import com.android.timezone.distro.DistroException;
 import com.android.timezone.distro.DistroVersion;
@@ -61,14 +60,14 @@ public class RuntimeService extends Binder {
         boolean protoFormat = hasOption(args, "--proto");
         ProtoOutputStream proto = null;
 
-        DebugInfo coreLibraryDebugInfo = CoreLibraryDebug.getDebugInfo();
-        addTimeZoneApkDebugInfo(coreLibraryDebugInfo);
+        DebugInfo i18nLibraryDebugInfo = I18nModuleDebug.getDebugInfo();
+        addTimeZoneApkDebugInfo(i18nLibraryDebugInfo);
 
         if (protoFormat) {
             proto = new ProtoOutputStream(fd);
-            reportTimeZoneInfoProto(coreLibraryDebugInfo, proto);
+            reportTimeZoneInfoProto(i18nLibraryDebugInfo, proto);
         } else {
-            reportTimeZoneInfo(coreLibraryDebugInfo, pw);
+            reportTimeZoneInfo(i18nLibraryDebugInfo, pw);
         }
 
         if (protoFormat) {

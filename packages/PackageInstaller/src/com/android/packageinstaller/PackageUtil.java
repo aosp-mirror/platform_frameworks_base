@@ -107,12 +107,17 @@ public class PackageUtil {
                 icon);
     }
 
-    static public class AppSnippet {
+    static final class AppSnippet {
         @NonNull public CharSequence label;
         @Nullable public Drawable icon;
         public AppSnippet(@NonNull CharSequence label, @Nullable Drawable icon) {
             this.label = label;
             this.icon = icon;
+        }
+
+        @Override
+        public String toString() {
+            return "AppSnippet[" + label + (icon != null ? "(has" : "(no ") + " icon)]";
         }
     }
 

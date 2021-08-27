@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"Ez dago SIM txartelik MM#2"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"Ez dago SIMik MM#2"</string>
     <string name="mmcc_illegal_ms" msgid="4618730283812066268">"Ez da onartzen SIM txartela MM#3"</string>
     <string name="mmcc_illegal_me" msgid="8522039751358990401">"Telefonoa ez da onartzen MM#6"</string>
 </resources>

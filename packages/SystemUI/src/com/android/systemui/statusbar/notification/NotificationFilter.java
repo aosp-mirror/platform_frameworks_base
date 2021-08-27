@@ -27,90 +27,61 @@ import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Component which manages the various reasons a notification might be filtered out.*/
 // TODO: delete NotificationFilter.java after migrating to new NotifPipeline b/145659174.
 //  Notification filtering is taken care of across the different Coordinators (mostly
 //  KeyguardCoordinator.java)
-@Singleton
+@SysUISingleton
 public class NotificationFilter {
 
-    private final NotificationGroupManager mGroupManager = Dependency.get(
-            NotificationGroupManager.class);
     private final StatusBarStateController mStatusBarStateController;
+    private final KeyguardEnvironment mKeyguardEnvironment;
+    private final ForegroundServiceController mForegroundServiceController;
+    private final NotificationLockscreenUserManager mUserManager;
     private final Boolean mIsMediaFlagEnabled;
-
-    private NotificationEntryManager.KeyguardEnvironment mEnvironment;
-    private ShadeController mShadeController;
-    private ForegroundServiceController mFsc;
-    private NotificationLockscreenUserManager mUserManager;
 
     @Inject
     public NotificationFilter(
             StatusBarStateController statusBarStateController,
+            KeyguardEnvironment keyguardEnvironment,
+            ForegroundServiceController foregroundServiceController,
+            NotificationLockscreenUserManager userManager,
             MediaFeatureFlag mediaFeatureFlag) {
         mStatusBarStateController = statusBarStateController;
+        mKeyguardEnvironment = keyguardEnvironment;
+        mForegroundServiceController = foregroundServiceController;
+        mUserManager = userManager;
         mIsMediaFlagEnabled = mediaFeatureFlag.getEnabled();
     }
-
-    private NotificationEntryManager.KeyguardEnvironment getEnvironment() {
-        if (mEnvironment == null) {
-            mEnvironment = Dependency.get(NotificationEntryManager.KeyguardEnvironment.class);
-        }
-        return mEnvironment;
-    }
-
-    private ShadeController getShadeController() {
-        if (mShadeController == null) {
-            mShadeController = Dependency.get(ShadeController.class);
-        }
-        return mShadeController;
-    }
-
-    private ForegroundServiceController getFsc() {
-        if (mFsc == null) {
-            mFsc = Dependency.get(ForegroundServiceController.class);
-        }
-        return mFsc;
-    }
-
-    private NotificationLockscreenUserManager getUserManager() {
-        if (mUserManager == null) {
-            mUserManager = Dependency.get(NotificationLockscreenUserManager.class);
-        }
-        return mUserManager;
-    }
-
 
     /**
      * @return true if the provided notification should NOT be shown right now.
      */
     public boolean shouldFilterOut(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
-        if (!(getEnvironment().isDeviceProvisioned()
+        if (!(mKeyguardEnvironment.isDeviceProvisioned()
                 || showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
         }
 
-        if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
+        if (!mKeyguardEnvironment.isNotificationForCurrentProfiles(sbn)) {
             return true;
         }
 
-        if (getUserManager().isLockscreenPublicMode(sbn.getUserId())
+        if (mUserManager.isLockscreenPublicMode(sbn.getUserId())
                 && (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
-                        || getUserManager().shouldHideNotifications(sbn.getUserId())
-                        || getUserManager().shouldHideNotifications(sbn.getKey()))) {
+                        || mUserManager.shouldHideNotifications(sbn.getUserId())
+                        || mUserManager.shouldHideNotifications(sbn.getKey()))) {
             return true;
         }
 
@@ -126,19 +97,10 @@ public class NotificationFilter {
             return true;
         }
 
-        if (getFsc().isDisclosureNotification(sbn)
-                && !getFsc().isDisclosureNeededForUser(sbn.getUserId())) {
+        if (mForegroundServiceController.isDisclosureNotification(sbn)
+                && !mForegroundServiceController.isDisclosureNeededForUser(sbn.getUserId())) {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
-        }
-        if (getFsc().isSystemAlertNotification(sbn)) {
-            final String[] apps = sbn.getNotification().extras.getStringArray(
-                    Notification.EXTRA_FOREGROUND_APPS);
-            if (apps != null && apps.length >= 1) {
-                if (!getFsc().isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
-                    return true;
-                }
-            }
         }
 
         if (mIsMediaFlagEnabled && isMediaNotification(sbn)) {

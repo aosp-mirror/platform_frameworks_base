@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.thermal.V2_0.TemperatureType;
 import android.hardware.thermal.V2_0.ThrottlingSeverity;
 
@@ -171,7 +172,7 @@ public final class Temperature implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof Temperature)) {
             return false;
         }

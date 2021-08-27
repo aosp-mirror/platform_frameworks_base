@@ -194,7 +194,8 @@ static String16 pseudo_generate_expansion(const unsigned int length) {
             break;
           }
         }
-        result.remove(length + ext, 0);
+        // Just keep the first length + ext characters
+        result = String16(result, length + ext);
     }
     return result;
 }

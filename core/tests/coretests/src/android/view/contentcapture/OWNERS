@@ -1,0 +1,3 @@
+# Bug component: 544200
+
+include /core/java/android/view/contentcapture/OWNERS

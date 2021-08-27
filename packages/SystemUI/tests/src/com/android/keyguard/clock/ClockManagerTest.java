@@ -168,7 +168,7 @@ public final class ClockManagerTest extends SysuiTestCase {
         verify(mMockListener2).onClockChanged(captor2.capture());
         assertThat(captor1.getValue()).isInstanceOf(BUBBLE_CLOCK_CLASS);
         assertThat(captor2.getValue()).isInstanceOf(BUBBLE_CLOCK_CLASS);
-        assertThat(captor1.getValue()).isNotSameAs(captor2.getValue());
+        assertThat(captor1.getValue()).isNotSameInstanceAs(captor2.getValue());
     }
 
     @Test

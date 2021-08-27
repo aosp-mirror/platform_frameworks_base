@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.TaskInfo;
+import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.LocusId;
@@ -36,6 +37,8 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
+
 /**
  * Context associated with a {@link ContentCaptureSession} - see {@link ContentCaptureManager} for
  * more info.
@@ -99,16 +102,17 @@ public final class ContentCaptureContext implements Parcelable {
 
     // Fields below are set by server when the session starts
     private final @Nullable ComponentName mComponentName;
-    private final int mTaskId;
     private final int mFlags;
     private final int mDisplayId;
+    private final ActivityId mActivityId;
 
     // Fields below are set by the service upon "delivery" and are not marshalled in the parcel
     private int mParentSessionId = NO_SESSION_ID;
 
     /** @hide */
     public ContentCaptureContext(@Nullable ContentCaptureContext clientContext,
-            @NonNull ComponentName componentName, int taskId, int displayId, int flags) {
+            @NonNull ActivityId activityId, @NonNull ComponentName componentName, int displayId,
+            int flags) {
         if (clientContext != null) {
             mHasClientContext = true;
             mExtras = clientContext.mExtras;
@@ -118,10 +122,10 @@ public final class ContentCaptureContext implements Parcelable {
             mExtras = null;
             mId = null;
         }
-        mComponentName = Preconditions.checkNotNull(componentName);
-        mTaskId = taskId;
-        mDisplayId = displayId;
+        mComponentName = Objects.requireNonNull(componentName);
         mFlags = flags;
+        mDisplayId = displayId;
+        mActivityId = activityId;
     }
 
     private ContentCaptureContext(@NonNull Builder builder) {
@@ -130,8 +134,9 @@ public final class ContentCaptureContext implements Parcelable {
         mId = builder.mId;
 
         mComponentName  = null;
-        mTaskId = mFlags = 0;
+        mFlags = 0;
         mDisplayId = Display.INVALID_DISPLAY;
+        mActivityId = null;
     }
 
     /** @hide */
@@ -140,9 +145,9 @@ public final class ContentCaptureContext implements Parcelable {
         mExtras = original.mExtras;
         mId = original.mId;
         mComponentName = original.mComponentName;
-        mTaskId = original.mTaskId;
         mFlags = original.mFlags | extraFlags;
         mDisplayId = original.mDisplayId;
+        mActivityId = original.mActivityId;
     }
 
     /**
@@ -170,7 +175,7 @@ public final class ContentCaptureContext implements Parcelable {
      */
     @SystemApi
     public int getTaskId() {
-        return mTaskId;
+        return mHasClientContext ? 0 : mActivityId.getTaskId();
     }
 
     /**
@@ -181,6 +186,18 @@ public final class ContentCaptureContext implements Parcelable {
     @SystemApi
     public @Nullable ComponentName getActivityComponent() {
         return mComponentName;
+    }
+
+    /**
+     * Gets the Activity id information associated with this context, or {@code null} when it is a
+     * child session.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public ActivityId getActivityId() {
+        return mHasClientContext ? null : mActivityId;
     }
 
     /**
@@ -309,7 +326,7 @@ public final class ContentCaptureContext implements Parcelable {
         if (mId != null) {
             pw.print(", id="); mId.dump(pw);
         }
-        pw.print(", taskId="); pw.print(mTaskId);
+        pw.print(", activityId="); pw.print(mActivityId);
         pw.print(", displayId="); pw.print(mDisplayId);
         if (mParentSessionId != NO_SESSION_ID) {
             pw.print(", parentId="); pw.print(mParentSessionId);
@@ -333,7 +350,7 @@ public final class ContentCaptureContext implements Parcelable {
 
         if (fromServer()) {
             builder.append("act=").append(ComponentName.flattenToShortString(mComponentName))
-                .append(", taskId=").append(mTaskId)
+                .append(", activityId=").append(mActivityId)
                 .append(", displayId=").append(mDisplayId)
                 .append(", flags=").append(mFlags);
         } else {
@@ -363,9 +380,9 @@ public final class ContentCaptureContext implements Parcelable {
         }
         parcel.writeParcelable(mComponentName, flags);
         if (fromServer()) {
-            parcel.writeInt(mTaskId);
             parcel.writeInt(mDisplayId);
             parcel.writeInt(mFlags);
+            mActivityId.writeToParcel(parcel, flags);
         }
     }
 
@@ -393,11 +410,12 @@ public final class ContentCaptureContext implements Parcelable {
                 // Client-state only
                 return clientContext;
             } else {
-                final int taskId = parcel.readInt();
                 final int displayId = parcel.readInt();
                 final int flags = parcel.readInt();
-                return new ContentCaptureContext(clientContext, componentName, taskId, displayId,
-                        flags);
+                final ActivityId activityId = new ActivityId(parcel);
+
+                return new ContentCaptureContext(clientContext, activityId, componentName,
+                        displayId, flags);
             }
         }
 

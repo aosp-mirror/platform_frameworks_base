@@ -29,8 +29,15 @@ import java.util.Objects;
 public final class CellInfoNr extends CellInfo {
     private static final String TAG = "CellInfoNr";
 
-    private final CellIdentityNr mCellIdentity;
+    private CellIdentityNr mCellIdentity;
     private final CellSignalStrengthNr mCellSignalStrength;
+
+    /** @hide */
+    public CellInfoNr() {
+        super();
+        mCellIdentity = new CellIdentityNr();
+        mCellSignalStrength = new CellSignalStrengthNr();
+    }
 
     private CellInfoNr(Parcel in) {
         super(in);
@@ -61,6 +68,14 @@ public final class CellInfoNr extends CellInfo {
         mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrengthNr);
     }
 
+    /** @hide */
+    public CellInfoNr(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_6.CellInfoNr cil = ci.ratSpecificInfo.nr();
+        mCellIdentity = new CellIdentityNr(cil.cellIdentityNr);
+        mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrengthNr);
+    }
+
     /**
      * @return a {@link CellIdentityNr} instance.
      */
@@ -69,6 +84,11 @@ public final class CellInfoNr extends CellInfo {
     @NonNull
     public CellIdentity getCellIdentity() {
         return mCellIdentity;
+    }
+
+    /** @hide */
+    public void setCellIdentity(CellIdentityNr cid) {
+        mCellIdentity = cid;
     }
 
     /**

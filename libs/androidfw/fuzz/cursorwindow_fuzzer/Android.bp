@@ -1,0 +1,44 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_libs_androidfw_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_libs_androidfw_license"],
+}
+
+cc_fuzz {
+    name: "cursorwindow_fuzzer",
+    srcs: [
+        "cursorwindow_fuzzer.cpp",
+    ],
+    host_supported: true,
+    corpus: ["corpus/*"],
+    static_libs: ["libgmock"],
+    target: {
+        android: {
+            shared_libs: [
+                "libandroidfw_fuzzer_lib",
+                "libbase",
+                "libbinder",
+                "libcutils",
+                "liblog",
+                "libutils",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libandroidfw_fuzzer_lib",
+                "libbase",
+                "libbinder",
+                "libcutils",
+                "liblog",
+                "libutils",
+            ],
+        },
+        darwin: {
+            // libbinder is not supported on mac
+            enabled: false,
+        },
+    },
+}

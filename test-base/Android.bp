@@ -19,10 +19,20 @@
 // This contains the junit.framework and android.test classes that were in
 // Android API level 25 excluding those from android.test.runner.
 // Also contains the com.android.internal.util.Predicate[s] classes.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-CPL-1.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_sdk_library {
     name: "android.test.base",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-base-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -38,6 +48,14 @@ java_sdk_library {
     ],
 
     compile_dex: true,
+    default_to_stubs: true,
+
+    // Additional hiddenapi annotations are provided in a separate module.
+    // TODO(b/180295980) - investigate whether this can be removed
+    hiddenapi_additional_annotations: [
+        "android.test.base-hiddenapi-annotations",
+    ],
+    dist_group: "android",
 }
 
 // Build the android.test.base_static library
@@ -49,7 +67,7 @@ java_library_static {
     name: "android.test.base_static",
     installable: false,
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-base-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -80,8 +98,9 @@ java_library_static {
 // ===============================================
 // This contains the android.test classes from android.test.base plus
 // the com.android.internal.util.Predicate[s] classes. This is only
-// intended for inclusion in android.test.legacy and must not be used
-// elsewhere.
+// intended for inclusion in android.test.legacy and in
+// android.test.base-hiddenapi-annotations to avoid a dependency cycle and must
+// not be used elsewhere.
 java_library_static {
     name: "android.test.base-minus-junit",
 
@@ -94,6 +113,12 @@ java_library_static {
     libs: [
         "junit",
     ],
+}
+
+filegroup {
+    name: "android-test-base-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }
 
 // Make the current.txt available for use by the cts/tests/signature tests.

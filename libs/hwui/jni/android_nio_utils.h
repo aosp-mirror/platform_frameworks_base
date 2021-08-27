@@ -17,7 +17,9 @@
 #ifndef _ANDROID_NIO_UTILS_H_
 #define _ANDROID_NIO_UTILS_H_
 
-#include <nativehelper/JNIHelp.h>
+#include <jni.h>
+
+#include <cstddef>
 
 namespace android {
 

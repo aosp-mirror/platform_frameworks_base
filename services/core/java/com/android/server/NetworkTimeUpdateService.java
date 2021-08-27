@@ -103,7 +103,9 @@ public class NetworkTimeUpdateService extends Binder {
         mCM = mContext.getSystemService(ConnectivityManager.class);
 
         Intent pollIntent = new Intent(ACTION_POLL, null);
-        mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent, 0);
+        // Broadcast alarms sent by system are immutable
+        mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent,
+                PendingIntent.FLAG_IMMUTABLE);
 
         mPollingIntervalMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_ntpPollingInterval);

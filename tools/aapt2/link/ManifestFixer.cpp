@@ -112,6 +112,27 @@ static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std
   };
 }
 
+static xml::XmlNodeAction::ActionFuncWithDiag RequiredOneAndroidAttribute(
+    const std::string& attrName1, const std::string& attrName2) {
+  return [=](xml::Element* el, SourcePathDiagnostics* diag) -> bool {
+    xml::Attribute* attr1 = el->FindAttribute(xml::kSchemaAndroid, attrName1);
+    xml::Attribute* attr2 = el->FindAttribute(xml::kSchemaAndroid, attrName2);
+    if (attr1 == nullptr && attr2 == nullptr) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "<" << el->name << "> is missing required attribute 'android:" << attrName1
+                  << "' or 'android:" << attrName2 << "'");
+      return false;
+    }
+    if (attr1 != nullptr && attr2 != nullptr) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "<" << el->name << "> can only specify one of attribute 'android:" << attrName1
+                  << "' or 'android:" << attrName2 << "'");
+      return false;
+    }
+    return true;
+  };
+}
+
 static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* diag) {
   constexpr const char* kFeatureSplit = "featureSplit";
   constexpr const char* kIsFeatureSplit = "isFeatureSplit";
@@ -142,7 +163,8 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
   return true;
 }
 
-static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy,
+                           SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
     diag->Error(DiagMessage(el->line_number)
@@ -153,10 +175,16 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
   } else if (!util::IsAndroidPackageName(attr->value)) {
-    diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
-                << attr->value << "'");
-    return false;
+    DiagMessage error_msg(el->line_number);
+    error_msg << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
+              << attr->value << "'";
+    if (policy == xml::XmlActionExecutorPolicy::kAllowListWarning) {
+      // Treat the error only as a warning.
+      diag->Warn(error_msg);
+    } else {
+      diag->Error(error_msg);
+      return false;
+    }
   }
 
   attr = el->FindAttribute({}, "split");
@@ -282,6 +310,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   // Common <meta-data> actions.
   xml::XmlNodeAction meta_data_action;
 
+  // Common <property> actions.
+  xml::XmlNodeAction property_action;
+  property_action.Action(RequiredOneAndroidAttribute("resource", "value"));
+
   // Common <uses-feature> actions.
   xml::XmlNodeAction uses_feature_action;
   uses_feature_action.Action(VerifyUsesFeature);
@@ -292,6 +324,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   component_action["intent-filter"] = intent_filter_action;
   component_action["preferred"] = intent_filter_action;
   component_action["meta-data"] = meta_data_action;
+  component_action["property"] = property_action;
 
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
@@ -331,6 +364,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionCodeMajor",
                            options_.version_code_major_default.value()});
+      }
+    }
+
+    if (options_.revision_code_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "revisionCode");
+      }
+      if (el->FindAttribute(xml::kSchemaAndroid, "revisionCode") == nullptr) {
+        el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, "revisionCode",
+                                                options_.revision_code_default.value()});
       }
     }
 
@@ -376,10 +419,6 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   });
   manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
-  // TODO moltmann: Remove
-  manifest_action["feature"];
-  manifest_action["feature"]["inherit-from"];
-
   manifest_action["attribution"];
   manifest_action["attribution"]["inherit-from"];
   manifest_action["original-package"];
@@ -397,6 +436,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["protected-broadcast"];
   manifest_action["adopt-permissions"];
   manifest_action["uses-permission"];
+  manifest_action["uses-permission"]["required-feature"].Action(RequiredNameIsNotEmpty);
+  manifest_action["uses-permission"]["required-not-feature"].Action(RequiredNameIsNotEmpty);
   manifest_action["uses-permission-sdk-23"];
   manifest_action["permission"];
   manifest_action["permission"]["meta-data"] = meta_data_action;
@@ -426,8 +467,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action.Action(OptionalNameIsJavaClassName);
 
   application_action["uses-library"].Action(RequiredNameIsNotEmpty);
+  application_action["uses-native-library"].Action(RequiredNameIsNotEmpty);
   application_action["library"].Action(RequiredNameIsNotEmpty);
   application_action["profileable"];
+  application_action["property"] = property_action;
 
   xml::XmlNodeAction& static_library_action = application_action["static-library"];
   static_library_action.Action(RequiredNameIsJavaPackage);
@@ -573,8 +616,8 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
   }
 
   xml::XmlActionExecutorPolicy policy = options_.warn_validation
-                                            ? xml::XmlActionExecutorPolicy::kWhitelistWarning
-                                            : xml::XmlActionExecutorPolicy::kWhitelist;
+                                            ? xml::XmlActionExecutorPolicy::kAllowListWarning
+                                            : xml::XmlActionExecutorPolicy::kAllowList;
   if (!executor.Execute(policy, context->GetDiagnostics(), doc)) {
     return false;
   }

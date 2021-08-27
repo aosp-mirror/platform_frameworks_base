@@ -99,7 +99,7 @@ public interface WindowInsetsAnimationController {
     float getCurrentAlpha();
 
     /**
-     * @return The {@link InsetsType}s this object is currently controlling.
+     * @return The {@link WindowInsets.Type}s this object is currently controlling.
      */
     @InsetsType int getTypes();
 

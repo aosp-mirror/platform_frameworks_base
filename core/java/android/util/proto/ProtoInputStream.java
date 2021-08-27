@@ -16,10 +16,11 @@
 
 package android.util.proto;
 
+import android.util.LongArray;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 /**
  * Class to read to a protobuf stream.
@@ -96,9 +97,9 @@ public final class ProtoInputStream extends ProtoStream {
     private byte mState = 0;
 
     /**
-     * Keeps track of the currently read nested Objects, for end object sanity checking and debug
+     * Keeps track of the currently read nested Objects, for end object checking and debug
      */
-    private ArrayList<Long> mExpectedObjectTokenStack = null;
+    private LongArray mExpectedObjectTokenStack = null;
 
     /**
      * Current nesting depth of start calls.
@@ -498,7 +499,7 @@ public final class ProtoInputStream extends ProtoStream {
         int messageSize = (int) readVarint();
 
         if (mExpectedObjectTokenStack == null) {
-            mExpectedObjectTokenStack = new ArrayList<>();
+            mExpectedObjectTokenStack = new LongArray();
         }
         if (++mDepth == mExpectedObjectTokenStack.size()) {
             // Create a token to keep track of nested Object and extend the object stack
@@ -513,7 +514,7 @@ public final class ProtoInputStream extends ProtoStream {
                     (int) fieldId, getOffset() + messageSize));
         }
 
-        // Sanity check
+        // Validation check
         if (mDepth > 0
                 && getOffsetFromToken(mExpectedObjectTokenStack.get(mDepth))
                 > getOffsetFromToken(mExpectedObjectTokenStack.get(mDepth - 1))) {
@@ -536,7 +537,7 @@ public final class ProtoInputStream extends ProtoStream {
      * @param token - token
      */
     public void end(long token) {
-        // Sanity check to make sure user is keeping track of their embedded messages
+        // Make sure user is keeping track of their embedded messages
         if (mExpectedObjectTokenStack.get(mDepth) != token) {
             throw new ProtoParseException(
                     "end token " + token + " does not match current message token "

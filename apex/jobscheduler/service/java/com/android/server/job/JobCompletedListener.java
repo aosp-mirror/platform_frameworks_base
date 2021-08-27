@@ -25,7 +25,9 @@ import com.android.server.job.controllers.JobStatus;
 public interface JobCompletedListener {
     /**
      * Callback for when a job is completed.
+     *
+     * @param stopReason      The stop reason provided to JobParameters.
      * @param needsReschedule Whether the implementing class should reschedule this job.
      */
-    void onJobCompletedLocked(JobStatus jobStatus, boolean needsReschedule);
+    void onJobCompletedLocked(JobStatus jobStatus, int stopReason, boolean needsReschedule);
 }

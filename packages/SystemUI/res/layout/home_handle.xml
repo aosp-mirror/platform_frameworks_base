@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<com.android.systemui.statusbar.phone.NavigationHandle
+<com.android.systemui.navigationbar.gestural.NavigationHandle
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_handle"
     android:layout_width="@dimen/navigation_home_handle_width"

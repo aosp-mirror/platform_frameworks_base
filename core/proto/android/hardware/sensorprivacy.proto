@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service;
+
+option java_multiple_files = true;
+option java_outer_classname = "SensorPrivacyServiceProto";
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+message SensorPrivacyServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // DEPRECATED
+    // Is global sensor privacy enabled
+    optional bool is_enabled = 1;
+
+    // DEPRECATED
+    // Per sensor privacy enabled
+    repeated SensorPrivacyIndividualEnabledSensorProto individual_enabled_sensor = 2;
+
+    // Per user settings for sensor privacy
+    repeated SensorPrivacyUserProto user = 3;
+}
+
+message SensorPrivacyUserProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // User id
+    optional int32 user_id = 1;
+
+    // Is global sensor privacy enabled
+    optional bool is_enabled = 2;
+
+    // Per sensor privacy enabled
+    repeated SensorPrivacyIndividualEnabledSensorProto individual_enabled_sensor = 3;
+}
+
+message SensorPrivacyIndividualEnabledSensorProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Sensor {
+        UNKNOWN = 0;
+
+        MICROPHONE = 1;
+        CAMERA = 2;
+    }
+
+    // Sensor for which privacy might be enabled
+    optional Sensor sensor = 1;
+
+    // If sensor privacy is enabled for this sensor
+    optional bool is_enabled = 2;
+}
+
+message SensorPrivacyToggleSourceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Source {
+        UNKNOWN = 0;
+
+        QS_TILE = 1;
+        SETTINGS = 2;
+        DIALOG = 3;
+        SHELL = 4;
+        OTHER = 5;
+    }
+
+    // Source for which sensor privacy was toggled.
+    optional Source source = 1;
+
+}

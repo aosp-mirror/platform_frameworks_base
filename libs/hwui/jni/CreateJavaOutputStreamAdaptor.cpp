@@ -177,8 +177,12 @@ SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream, jbyteArray s
     return JavaInputStreamAdaptor::Create(env, stream, storage, swallowExceptions);
 }
 
-static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
-    SkASSERT(stream != NULL);
+sk_sp<SkData> CopyJavaInputStream(JNIEnv* env, jobject inputStream, jbyteArray storage) {
+    std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, inputStream, storage));
+    if (!stream) {
+        return nullptr;
+    }
+
     size_t bufferSize = 4096;
     size_t streamLen = 0;
     size_t len;
@@ -194,18 +198,7 @@ static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
     }
     data = (char*)sk_realloc_throw(data, streamLen);
 
-    SkMemoryStream* streamMem = new SkMemoryStream();
-    streamMem->setMemoryOwned(data, streamLen);
-    return streamMem;
-}
-
-SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
-                                        jbyteArray storage) {
-    std::unique_ptr<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
-    if (NULL == adaptor.get()) {
-        return NULL;
-    }
-    return adaptor_to_mem_stream(adaptor.get());
+    return SkData::MakeFromMalloc(data, streamLen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

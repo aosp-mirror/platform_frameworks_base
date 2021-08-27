@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
@@ -55,7 +54,7 @@ final class InputMethodSubtypeSwitchingController {
         public final boolean mIsSystemLocale;
         public final boolean mIsSystemLanguage;
 
-        public ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
+        ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
                 InputMethodInfo imi, int subtypeId, String subtypeLocale, String systemLocale) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
@@ -72,8 +71,8 @@ final class InputMethodSubtypeSwitchingController {
                     // TODO: Use Locale#getLanguage or Locale#toLanguageTag
                     final String systemLanguage = parseLanguageFromLocaleString(systemLocale);
                     final String subtypeLanguage = parseLanguageFromLocaleString(subtypeLocale);
-                    mIsSystemLanguage = systemLanguage.length() >= 2 &&
-                            systemLanguage.equals(subtypeLanguage);
+                    mIsSystemLanguage = systemLanguage.length() >= 2
+                            && systemLanguage.equals(subtypeLanguage);
                 }
             }
         }
@@ -159,7 +158,7 @@ final class InputMethodSubtypeSwitchingController {
                 return true;
             }
             if (o instanceof ImeSubtypeListItem) {
-                final ImeSubtypeListItem that = (ImeSubtypeListItem)o;
+                final ImeSubtypeListItem that = (ImeSubtypeListItem) o;
                 return Objects.equals(this.mImi, that.mImi) && this.mSubtypeId == that.mSubtypeId;
             }
             return false;
@@ -173,7 +172,7 @@ final class InputMethodSubtypeSwitchingController {
         private final String mSystemLocaleStr;
         private final InputMethodSettings mSettings;
 
-        public InputMethodAndSubtypeList(Context context, InputMethodSettings settings) {
+        InputMethodAndSubtypeList(Context context, InputMethodSettings settings) {
             mContext = context;
             mSettings = settings;
             mPm = context.getPackageManager();
@@ -182,7 +181,7 @@ final class InputMethodSubtypeSwitchingController {
         }
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
-                boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
+                boolean includeAuxiliarySubtypes, boolean isScreenLocked, boolean forImeMenu) {
             final ArrayList<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
             if (imis.isEmpty()) {
                 return Collections.emptyList();
@@ -197,6 +196,9 @@ final class InputMethodSubtypeSwitchingController {
             final int numImes = imis.size();
             for (int i = 0; i < numImes; ++i) {
                 final InputMethodInfo imi = imis.get(i);
+                if (forImeMenu && !imi.shouldShowInInputMethodPicker()) {
+                    continue;
+                }
                 final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
                         mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
                 final ArraySet<String> enabledSubtypeSet = new ArraySet<>();
@@ -245,7 +247,7 @@ final class InputMethodSubtypeSwitchingController {
 
     private static class StaticRotationList {
         private final List<ImeSubtypeListItem> mImeSubtypeList;
-        public StaticRotationList(final List<ImeSubtypeListItem> imeSubtypeList) {
+        StaticRotationList(final List<ImeSubtypeListItem> imeSubtypeList) {
             mImeSubtypeList = imeSubtypeList;
         }
 
@@ -258,8 +260,8 @@ final class InputMethodSubtypeSwitchingController {
          */
         private int getIndex(InputMethodInfo imi, InputMethodSubtype subtype) {
             final int currentSubtypeId = calculateSubtypeId(imi, subtype);
-            final int N = mImeSubtypeList.size();
-            for (int i = 0; i < N; ++i) {
+            final int numSubtypes = mImeSubtypeList.size();
+            for (int i = 0; i < numSubtypes; ++i) {
                 final ImeSubtypeListItem isli = mImeSubtypeList.get(i);
                 // Skip until the current IME/subtype is found.
                 if (imi.equals(isli.mImi) && isli.mSubtypeId == currentSubtypeId) {
@@ -281,10 +283,10 @@ final class InputMethodSubtypeSwitchingController {
             if (currentIndex < 0) {
                 return null;
             }
-            final int N = mImeSubtypeList.size();
-            for (int offset = 1; offset < N; ++offset) {
+            final int numSubtypes = mImeSubtypeList.size();
+            for (int offset = 1; offset < numSubtypes; ++offset) {
                 // Start searching the next IME/subtype from the next of the current index.
-                final int candidateIndex = (currentIndex + offset) % N;
+                final int candidateIndex = (currentIndex + offset) % numSubtypes;
                 final ImeSubtypeListItem candidate = mImeSubtypeList.get(candidateIndex);
                 // Skip if searching inside the current IME only, but the candidate is not
                 // the current IME.
@@ -297,8 +299,8 @@ final class InputMethodSubtypeSwitchingController {
         }
 
         protected void dump(final Printer pw, final String prefix) {
-            final int N = mImeSubtypeList.size();
-            for (int i = 0; i < N; ++i) {
+            final int numSubtypes = mImeSubtypeList.size();
+            for (int i = 0; i < numSubtypes; ++i) {
                 final int rank = i;
                 final ImeSubtypeListItem item = mImeSubtypeList.get(i);
                 pw.println(prefix + "rank=" + rank + " item=" + item);
@@ -314,8 +316,8 @@ final class InputMethodSubtypeSwitchingController {
         private DynamicRotationList(final List<ImeSubtypeListItem> imeSubtypeListItems) {
             mImeSubtypeList = imeSubtypeListItems;
             mUsageHistoryOfSubtypeListItemIndex = new int[mImeSubtypeList.size()];
-            final int N = mImeSubtypeList.size();
-            for (int i = 0; i < N; i++) {
+            final int numSubtypes = mImeSubtypeList.size();
+            for (int i = 0; i < numSubtypes; i++) {
                 mUsageHistoryOfSubtypeListItemIndex[i] = i;
             }
         }
@@ -329,13 +331,13 @@ final class InputMethodSubtypeSwitchingController {
          */
         private int getUsageRank(final InputMethodInfo imi, InputMethodSubtype subtype) {
             final int currentSubtypeId = calculateSubtypeId(imi, subtype);
-            final int N = mUsageHistoryOfSubtypeListItemIndex.length;
-            for (int usageRank = 0; usageRank < N; usageRank++) {
+            final int numItems = mUsageHistoryOfSubtypeListItemIndex.length;
+            for (int usageRank = 0; usageRank < numItems; usageRank++) {
                 final int subtypeListItemIndex = mUsageHistoryOfSubtypeListItemIndex[usageRank];
                 final ImeSubtypeListItem subtypeListItem =
                         mImeSubtypeList.get(subtypeListItemIndex);
-                if (subtypeListItem.mImi.equals(imi) &&
-                        subtypeListItem.mSubtypeId == currentSubtypeId) {
+                if (subtypeListItem.mImi.equals(imi)
+                        && subtypeListItem.mSubtypeId == currentSubtypeId) {
                     return usageRank;
                 }
             }
@@ -364,9 +366,9 @@ final class InputMethodSubtypeSwitchingController {
                 }
                 return null;
             }
-            final int N = mUsageHistoryOfSubtypeListItemIndex.length;
-            for (int i = 1; i < N; i++) {
-                final int subtypeListItemRank = (currentUsageRank + i) % N;
+            final int numItems = mUsageHistoryOfSubtypeListItemIndex.length;
+            for (int i = 1; i < numItems; i++) {
+                final int subtypeListItemRank = (currentUsageRank + i) % numItems;
                 final int subtypeListItemIndex =
                         mUsageHistoryOfSubtypeListItemIndex[subtypeListItemRank];
                 final ImeSubtypeListItem subtypeListItem =
@@ -400,9 +402,10 @@ final class InputMethodSubtypeSwitchingController {
                 final List<ImeSubtypeListItem> switchingAwareImeSubtypes =
                         filterImeSubtypeList(sortedEnabledItems,
                                 true /* supportsSwitchingToNextInputMethod */);
-                if (currentInstance != null &&
-                        currentInstance.mSwitchingAwareRotationList != null &&
-                        Objects.equals(currentInstance.mSwitchingAwareRotationList.mImeSubtypeList,
+                if (currentInstance != null
+                        && currentInstance.mSwitchingAwareRotationList != null
+                        && Objects.equals(
+                                currentInstance.mSwitchingAwareRotationList.mImeSubtypeList,
                                 switchingAwareImeSubtypes)) {
                     // Can reuse the current instance.
                     switchingAwareRotationList = currentInstance.mSwitchingAwareRotationList;
@@ -416,9 +419,9 @@ final class InputMethodSubtypeSwitchingController {
             {
                 final List<ImeSubtypeListItem> switchingUnawareImeSubtypes = filterImeSubtypeList(
                         sortedEnabledItems, false /* supportsSwitchingToNextInputMethod */);
-                if (currentInstance != null &&
-                        currentInstance.mSwitchingUnawareRotationList != null &&
-                        Objects.equals(
+                if (currentInstance != null
+                        && currentInstance.mSwitchingUnawareRotationList != null
+                        && Objects.equals(
                                 currentInstance.mSwitchingUnawareRotationList.mImeSubtypeList,
                                 switchingUnawareImeSubtypes)) {
                     // Can reuse the current instance.
@@ -466,11 +469,11 @@ final class InputMethodSubtypeSwitchingController {
                 final List<ImeSubtypeListItem> items,
                 final boolean supportsSwitchingToNextInputMethod) {
             final ArrayList<ImeSubtypeListItem> result = new ArrayList<>();
-            final int ALL_ITEMS_COUNT = items.size();
-            for (int i = 0; i < ALL_ITEMS_COUNT; i++) {
+            final int numItems = items.size();
+            for (int i = 0; i < numItems; i++) {
                 final ImeSubtypeListItem item = items.get(i);
-                if (item.mImi.supportsSwitchingToNextInputMethod() ==
-                        supportsSwitchingToNextInputMethod) {
+                if (item.mImi.supportsSwitchingToNextInputMethod()
+                        == supportsSwitchingToNextInputMethod) {
                     result.add(item);
                 }
             }
@@ -502,7 +505,7 @@ final class InputMethodSubtypeSwitchingController {
     public void onUserActionLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
         if (mController == null) {
             if (DEBUG) {
-                Log.e(TAG, "mController shouldn't be null.");
+                Slog.e(TAG, "mController shouldn't be null.");
             }
             return;
         }
@@ -513,24 +516,25 @@ final class InputMethodSubtypeSwitchingController {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         mController = ControllerImpl.createFrom(mController,
                 mSubtypeList.getSortedInputMethodAndSubtypeList(
-                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */));
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
+                        false /* forImeMenu */));
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
             InputMethodSubtype subtype) {
         if (mController == null) {
             if (DEBUG) {
-                Log.e(TAG, "mController shouldn't be null.");
+                Slog.e(TAG, "mController shouldn't be null.");
             }
             return null;
         }
         return mController.getNextInputMethod(onlyCurrentIme, imi, subtype);
     }
 
-    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(
+    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListForImeMenuLocked(
             boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                includingAuxiliarySubtypes, isScreenLocked);
+                includingAuxiliarySubtypes, isScreenLocked, true /* forImeMenu */);
     }
 
     public void dump(final Printer pw) {

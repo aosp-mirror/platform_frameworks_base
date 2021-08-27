@@ -16,13 +16,19 @@
 
 package android.service.voice;
 
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.RECORD_AUDIO;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -32,13 +38,23 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
+import android.media.permission.Identity;
 import android.os.AsyncTask;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.SharedMemory;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -48,8 +64,13 @@ import java.util.Locale;
 /**
  * A class that lets a VoiceInteractionService implementation interact with
  * always-on keyphrase detection APIs.
+ *
+ * @hide
+ * TODO(b/168605867): Once Metalava supports expressing a removed public, but current system API,
+ *                    mark and track it as such.
  */
-public class AlwaysOnHotwordDetector {
+@SystemApi
+public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
      * Indicates that this hotword detector is no longer valid for any recognition
@@ -63,6 +84,7 @@ public class AlwaysOnHotwordDetector {
      * No further interaction should be performed with the detector that returns this availability.
      */
     public static final int STATE_HARDWARE_UNAVAILABLE = -2;
+
     /**
      * Indicates that recognition for the given keyphrase is not supported.
      * No further interaction should be performed with the detector that returns this availability.
@@ -73,16 +95,26 @@ public class AlwaysOnHotwordDetector {
      */
     @Deprecated
     public static final int STATE_KEYPHRASE_UNSUPPORTED = -1;
+
     /**
      * Indicates that the given keyphrase is not enrolled.
      * The caller may choose to begin an enrollment flow for the keyphrase.
      */
     public static final int STATE_KEYPHRASE_UNENROLLED = 1;
+
     /**
      * Indicates that the given keyphrase is currently enrolled and it's possible to start
      * recognition for it.
      */
     public static final int STATE_KEYPHRASE_ENROLLED = 2;
+
+    /**
+     * Indicates that the availability state of the active keyphrase can't be known due to an error.
+     *
+     * <p>NOTE: No further interaction should be performed with the detector that returns this
+     * state, it would be better to create {@link AlwaysOnHotwordDetector} again.
+     */
+    public static final int STATE_ERROR = 3;
 
     /**
      * Indicates that the detector isn't ready currently.
@@ -98,6 +130,7 @@ public class AlwaysOnHotwordDetector {
             RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS,
             RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION,
             RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION,
+            RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER,
     })
     public @interface RecognitionFlags {}
 
@@ -107,11 +140,13 @@ public class AlwaysOnHotwordDetector {
      * @hide
      */
     public static final int RECOGNITION_FLAG_NONE = 0;
+
     /**
      * Recognition flag for {@link #startRecognition(int)} that indicates
      * whether the trigger audio for hotword needs to be captured.
      */
     public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 0x1;
+
     /**
      * Recognition flag for {@link #startRecognition(int)} that indicates
      * whether the recognition should keep going on even after the keyphrase triggers.
@@ -142,6 +177,14 @@ public class AlwaysOnHotwordDetector {
      */
     public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 0x8;
 
+    /**
+     * Recognition flag for {@link #startRecognition(int)} that indicates whether the recognition
+     * should continue after battery saver mode is enabled.
+     * When this flag is specified, the caller will be checked for
+     * {@link android.Manifest.permission#SOUND_TRIGGER_RUN_IN_BATTERY_SAVER} permission granted.
+     */
+    public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 0x10;
+
     //---- Recognition mode flags. Return codes for getSupportedRecognitionModes() ----//
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
 
@@ -159,6 +202,7 @@ public class AlwaysOnHotwordDetector {
      */
     public static final int RECOGNITION_MODE_VOICE_TRIGGER
             = SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER;
+
     /**
      * User identification performed with the keyphrase recognition.
      * Returned by {@link #getSupportedRecognitionModes()}
@@ -217,6 +261,9 @@ public class AlwaysOnHotwordDetector {
     private static final int MSG_DETECTION_ERROR = 3;
     private static final int MSG_DETECTION_PAUSE = 4;
     private static final int MSG_DETECTION_RESUME = 5;
+    private static final int MSG_HOTWORD_REJECTED = 6;
+    private static final int MSG_HOTWORD_STATUS_REPORTED = 7;
+    private static final int MSG_PROCESS_RESTARTED = 8;
 
     private final String mText;
     private final Locale mLocale;
@@ -228,10 +275,13 @@ public class AlwaysOnHotwordDetector {
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionManagerService mModelManagementService;
+    private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
-    private final Object mLock = new Object();
     private final Handler mHandler;
+    private final IBinder mBinder = new Binder();
+    private final int mTargetSdkVersion;
+    private final boolean mSupportHotwordDetectionService;
 
     private int mAvailability = STATE_NOT_READY;
 
@@ -296,14 +346,42 @@ public class AlwaysOnHotwordDetector {
         // Raw data associated with the event.
         // This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
         private final byte[] mData;
+        private final HotwordDetectedResult mHotwordDetectedResult;
+        private final ParcelFileDescriptor mAudioStream;
+
+        EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
+                    null);
+        }
+
+        EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data,
+                    hotwordDetectedResult, null);
+        }
+
+        EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
+        }
+
+        EventPayload(AudioFormat audioFormat,
+                HotwordDetectedResult hotwordDetectedResult,
+                ParcelFileDescriptor audioStream) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
+        }
 
         private EventPayload(boolean triggerAvailable, boolean captureAvailable,
-                AudioFormat audioFormat, int captureSession, byte[] data) {
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
             mTriggerAvailable = triggerAvailable;
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
             mData = data;
+            mHotwordDetectedResult = hotwordDetectedResult;
+            mAudioStream = audioStream;
         }
 
         /**
@@ -359,26 +437,62 @@ public class AlwaysOnHotwordDetector {
                 return null;
             }
         }
+
+        /**
+         * Returns {@link HotwordDetectedResult} associated with the hotword event, passed from
+         * {@link HotwordDetectionService}.
+         */
+        @Nullable
+        public HotwordDetectedResult getHotwordDetectedResult() {
+            return mHotwordDetectedResult;
+        }
+
+        /**
+         * Returns a stream with bytes corresponding to the open audio stream with hotword data.
+         *
+         * <p>This data represents an audio stream in the format returned by
+         * {@link #getCaptureAudioFormat}.
+         *
+         * <p>Clients are expected to start consuming the stream within 1 second of receiving the
+         * event.
+         *
+         * <p>When this method returns a non-null, clients must close this stream when it's no
+         * longer needed. Failing to do so will result in microphone being open for longer periods
+         * of time, and app being attributed for microphone usage.
+         */
+        @Nullable
+        public ParcelFileDescriptor getAudioStream() {
+            return mAudioStream;
+        }
     }
 
     /**
      * Callbacks for always-on hotword detection.
      */
-    public static abstract class Callback {
+    public abstract static class Callback implements HotwordDetector.Callback {
+
         /**
-         * Called when the hotword availability changes.
-         * This indicates a change in the availability of recognition for the given keyphrase.
-         * It's called at least once with the initial availability.<p/>
+         * Updates the availability state of the active keyphrase and locale on every keyphrase
+         * sound model change.
          *
-         * Availability implies whether the hardware on this system is capable of listening for
-         * the given keyphrase or not. <p/>
+         * <p>This API is called whenever there's a possibility that the keyphrase associated
+         * with this detector has been updated. It is not guaranteed that there is in fact any
+         * change, as it may be called for other reasons.</p>
+         *
+         * <p>This API is also guaranteed to be called right after an AlwaysOnHotwordDetector
+         * instance is created to updated the current availability state.</p>
+         *
+         * <p>Availability implies the current enrollment state of the given keyphrase. If the
+         * hardware on this system is not capable of listening for the given keyphrase,
+         * {@link AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE} will be returned.
          *
          * @see AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE
-         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNSUPPORTED
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNENROLLED
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_ENROLLED
+         * @see AlwaysOnHotwordDetector#STATE_ERROR
          */
         public abstract void onAvailabilityChanged(int status);
+
         /**
          * Called when the keyphrase is spoken.
          * This implicitly stops listening for the keyphrase once it's detected.
@@ -390,22 +504,56 @@ public class AlwaysOnHotwordDetector {
          *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
         public abstract void onDetected(@NonNull EventPayload eventPayload);
+
         /**
          * Called when the detection fails due to an error.
          */
         public abstract void onError();
+
         /**
          * Called when the recognition is paused temporarily for some reason.
          * This is an informational callback, and the clients shouldn't be doing anything here
          * except showing an indication on their UI if they have to.
          */
         public abstract void onRecognitionPaused();
+
         /**
          * Called when the recognition is resumed after it was temporarily paused.
          * This is an informational callback, and the clients shouldn't be doing anything here
          * except showing an indication on their UI if they have to.
          */
         public abstract void onRecognitionResumed();
+
+        /**
+         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * keyphrase.
+         *
+         * @param result Info about the second stage detection result, provided by the
+         *         {@link HotwordDetectionService}.
+         */
+        public void onRejected(@NonNull HotwordRejectedResult result) {
+        }
+
+        /**
+         * Called when the {@link HotwordDetectionService} is created by the system and given a
+         * short amount of time to report it's initialization state.
+         *
+         * @param status Info about initialization state of {@link HotwordDetectionService}; the
+         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
+         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
+         */
+        public void onHotwordDetectionServiceInitialized(int status) {
+        }
+
+        /**
+         * Called with the {@link HotwordDetectionService} is restarted.
+         *
+         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
+         * the newly created service.
+         */
+        public void onHotwordDetectionServiceRestarted() {
+        }
     }
 
     /**
@@ -413,19 +561,98 @@ public class AlwaysOnHotwordDetector {
      * @param locale The java locale for the detector.
      * @param callback A non-null Callback for receiving the recognition events.
      * @param modelManagementService A service that allows management of sound models.
+     * @param targetSdkVersion The target SDK version.
+     * @param supportHotwordDetectionService {@code true} if hotword detection service should be
+     * triggered, otherwise {@code false}.
+     * @param options Application configuration data provided by the
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob provided by the
+     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
-            IVoiceInteractionManagerService modelManagementService) {
+            IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
+            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory) {
+        super(modelManagementService, callback);
+
+        mHandler = new MyHandler();
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mExternalCallback = callback;
-        mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
+        mTargetSdkVersion = targetSdkVersion;
+        mSupportHotwordDetectionService = supportHotwordDetectionService;
+        if (mSupportHotwordDetectionService) {
+            updateStateLocked(options, sharedMemory, mInternalCallback);
+        }
+        try {
+            Identity identity = new Identity();
+            identity.packageName = ActivityThread.currentOpPackageName();
+            mSoundTriggerSession = mModelManagementService.createSoundTriggerSessionAsOriginator(
+                    identity, mBinder);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
         new RefreshAvailabiltyTask().execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
+     * {@link HotwordDetectionService} when it was created. In addition, if this
+     * AlwaysOnHotwordDetector is in an invalid or error state.
+     */
+    @Override
+    public final void updateState(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory) {
+        synchronized (mLock) {
+            if (!mSupportHotwordDetectionService) {
+                throw new IllegalStateException(
+                        "updateState called, but it doesn't support hotword detection service");
+            }
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "updateState called on an invalid detector or error state");
+            }
+        }
+
+        super.updateState(options, sharedMemory);
+    }
+
+    /**
+     * Test API to simulate to trigger hardware recognition event for test.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
+            boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+        Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException("triggerHardwareRecognitionEventForTest called on"
+                        + " an invalid detector or error state");
+            }
+            try {
+                mModelManagementService.triggerHardwareRecognitionEventForTest(
+                        new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
+                                captureSession, captureDelayMs, capturePreambleMs, triggerInData,
+                                captureFormat, data, null /* keyphraseExtras */),
+                        mInternalCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -437,7 +664,7 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
+     * @throws IllegalStateException if the detector is in an invalid or error state.
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
@@ -449,9 +676,9 @@ public class AlwaysOnHotwordDetector {
     }
 
     private int getSupportedRecognitionModesLocked() {
-        if (mAvailability == STATE_INVALID) {
+        if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
             throw new IllegalStateException(
-                    "getSupportedRecognitionModes called on an invalid detector");
+                    "getSupportedRecognitionModes called on an invalid detector or error state");
         }
 
         // This method only makes sense if we can actually support a recognition.
@@ -485,7 +712,7 @@ public class AlwaysOnHotwordDetector {
     private int getSupportedAudioCapabilitiesLocked() {
         try {
             ModuleProperties properties =
-                    mModelManagementService.getDspModuleProperties();
+                    mSoundTriggerSession.getDspModuleProperties();
             if (properties != null) {
                 return properties.getAudioCapabilities();
             }
@@ -509,15 +736,17 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
+     * @throws IllegalStateException if the detector is in an invalid or error state.
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID) {
-                throw new IllegalStateException("startRecognition called on an invalid detector");
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "startRecognition called on an invalid detector or error state");
             }
 
             // Check if we can start/stop a recognition.
@@ -531,6 +760,17 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
+     * Starts recognition for the associated keyphrase.
+     *
+     * @see #startRecognition(int)
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
+    public boolean startRecognition() {
+        return startRecognition(0);
+    }
+
+    /**
      * Stops recognition for the associated keyphrase.
      * Caller must be the active voice interaction service via
      * Settings.Secure.VOICE_INTERACTION_SERVICE.
@@ -539,15 +779,21 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
+     * @throws IllegalStateException if the detector is in an invalid or error state.
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    // TODO: Remove this RequiresPermission since it isn't actually enforced. Also fix the javadoc
+    // about permissions enforcement (when it throws vs when it just returns false) for other
+    // methods in this class.
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
     public boolean stopRecognition() {
         if (DBG) Slog.d(TAG, "stopRecognition()");
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID) {
-                throw new IllegalStateException("stopRecognition called on an invalid detector");
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "stopRecognition called on an invalid detector or error state");
             }
 
             // Check if we can start/stop a recognition.
@@ -576,15 +822,20 @@ public class AlwaysOnHotwordDetector {
      *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
      *           if API is not supported by HAL
+     * @throws IllegalStateException if the detector is in an invalid or error state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public int setParameter(@ModelParams int modelParam, int value) {
         if (DBG) {
             Slog.d(TAG, "setParameter(" + modelParam + ", " + value + ")");
         }
 
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID) {
-                throw new IllegalStateException("setParameter called on an invalid detector");
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "setParameter called on an invalid detector or error state");
             }
 
             return setParameterLocked(modelParam, value);
@@ -603,15 +854,20 @@ public class AlwaysOnHotwordDetector {
      *
      * @param modelParam   {@link ModelParams}
      * @return value of parameter
+     * @throws IllegalStateException if the detector is in an invalid or error state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public int getParameter(@ModelParams int modelParam) {
         if (DBG) {
             Slog.d(TAG, "getParameter(" + modelParam + ")");
         }
 
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID) {
-                throw new IllegalStateException("getParameter called on an invalid detector");
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "getParameter called on an invalid detector or error state");
             }
 
             return getParameterLocked(modelParam);
@@ -627,7 +883,11 @@ public class AlwaysOnHotwordDetector {
      *
      * @param modelParam {@link ModelParams}
      * @return supported range of parameter, null if not supported
+     * @throws IllegalStateException if the detector is in an invalid or error state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Nullable
     public ModelParamRange queryParameter(@ModelParams int modelParam) {
         if (DBG) {
@@ -635,8 +895,9 @@ public class AlwaysOnHotwordDetector {
         }
 
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID) {
-                throw new IllegalStateException("queryParameter called on an invalid detector");
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "queryParameter called on an invalid detector or error state");
             }
 
             return queryParameterLocked(modelParam);
@@ -658,6 +919,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createEnrollIntent() {
         if (DBG) Slog.d(TAG, "createEnrollIntent");
         synchronized (mLock) {
@@ -679,6 +941,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createUnEnrollIntent() {
         if (DBG) Slog.d(TAG, "createUnEnrollIntent");
         synchronized (mLock) {
@@ -696,10 +959,11 @@ public class AlwaysOnHotwordDetector {
      * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
+     * @throws IllegalStateException if the detector is in an invalid or error state.
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createReEnrollIntent() {
         if (DBG) Slog.d(TAG, "createReEnrollIntent");
         synchronized (mLock) {
@@ -708,8 +972,9 @@ public class AlwaysOnHotwordDetector {
     }
 
     private Intent getManageIntentLocked(@KeyphraseEnrollmentInfo.ManageActions int action) {
-        if (mAvailability == STATE_INVALID) {
-            throw new IllegalStateException("getManageIntent called on an invalid detector");
+        if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+            throw new IllegalStateException(
+                    "getManageIntent called on an invalid detector or error state");
         }
 
         // This method only makes sense if we can actually support a recognition.
@@ -732,6 +997,14 @@ public class AlwaysOnHotwordDetector {
         synchronized (mLock) {
             mAvailability = STATE_INVALID;
             notifyStateChangedLocked();
+
+            if (mSupportHotwordDetectionService) {
+                try {
+                    mModelManagementService.shutdownHotwordDetectionService();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
         }
     }
 
@@ -743,8 +1016,10 @@ public class AlwaysOnHotwordDetector {
     void onSoundModelsChanged() {
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
-                    || mAvailability == STATE_HARDWARE_UNAVAILABLE) {
-                Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config");
+                    || mAvailability == STATE_HARDWARE_UNAVAILABLE
+                    || mAvailability == STATE_ERROR) {
+                Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config"
+                        + " or in the error state");
                 return;
             }
 
@@ -754,7 +1029,16 @@ public class AlwaysOnHotwordDetector {
             // The availability change callback should ensure that the client starts recognition
             // again if needed.
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
-                stopRecognitionLocked();
+                try {
+                    stopRecognitionLocked();
+                } catch (SecurityException e) {
+                    Slog.w(TAG, "Failed to Stop the recognition", e);
+                    if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
+                        throw e;
+                    }
+                    updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    return;
+                }
             }
 
             // Execute a refresh availability task - which should then notify of a change.
@@ -771,6 +1055,7 @@ public class AlwaysOnHotwordDetector {
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
                 (recognitionFlags&RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS) != 0;
+        boolean runInBatterySaver = (recognitionFlags&RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER) != 0;
 
         int audioCapabilities = 0;
         if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION) != 0) {
@@ -782,10 +1067,11 @@ public class AlwaysOnHotwordDetector {
 
         int code;
         try {
-            code = mModelManagementService.startRecognition(
+            code = mSoundTriggerSession.startRecognition(
                     mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, null /* additional data */, audioCapabilities));
+                            recognitionExtra, null /* additional data */, audioCapabilities),
+                    runInBatterySaver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -799,7 +1085,7 @@ public class AlwaysOnHotwordDetector {
     private int stopRecognitionLocked() {
         int code;
         try {
-            code = mModelManagementService.stopRecognition(mKeyphraseMetadata.getId(),
+            code = mSoundTriggerSession.stopRecognition(mKeyphraseMetadata.getId(),
                     mInternalCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -813,7 +1099,7 @@ public class AlwaysOnHotwordDetector {
 
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
-            int code = mModelManagementService.setParameter(mKeyphraseMetadata.getId(), modelParam,
+            int code = mSoundTriggerSession.setParameter(mKeyphraseMetadata.getId(), modelParam,
                     value);
 
             if (code != STATUS_OK) {
@@ -828,7 +1114,7 @@ public class AlwaysOnHotwordDetector {
 
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
-            return mModelManagementService.getParameter(mKeyphraseMetadata.getId(), modelParam);
+            return mSoundTriggerSession.getParameter(mKeyphraseMetadata.getId(), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -838,7 +1124,7 @@ public class AlwaysOnHotwordDetector {
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
             SoundTrigger.ModelParamRange modelParamRange =
-                    mModelManagementService.queryParameter(mKeyphraseMetadata.getId(), modelParam);
+                    mSoundTriggerSession.queryParameter(mKeyphraseMetadata.getId(), modelParam);
 
             if (modelParamRange == null) {
                 return null;
@@ -850,6 +1136,15 @@ public class AlwaysOnHotwordDetector {
         }
     }
 
+    private void updateAndNotifyStateChangedLocked(int availability) {
+        if (DBG) {
+            Slog.d(TAG, "Hotword availability changed from " + mAvailability
+                    + " -> " + availability);
+        }
+        mAvailability = availability;
+        notifyStateChangedLocked();
+    }
+
     private void notifyStateChangedLocked() {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
         message.arg1 = mAvailability;
@@ -857,7 +1152,7 @@ public class AlwaysOnHotwordDetector {
     }
 
     /** @hide */
-    static final class SoundTriggerListener extends IRecognitionStatusCallback.Stub {
+    static final class SoundTriggerListener extends IHotwordRecognitionStatusCallback.Stub {
         private final Handler mHandler;
 
         public SoundTriggerListener(Handler handler) {
@@ -865,7 +1160,8 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onKeyphraseDetected(KeyphraseRecognitionEvent event) {
+        public void onKeyphraseDetected(
+                KeyphraseRecognitionEvent event, HotwordDetectedResult result) {
             if (DBG) {
                 Slog.d(TAG, "onDetected(" + event + ")");
             } else {
@@ -873,12 +1169,22 @@ public class AlwaysOnHotwordDetector {
             }
             Message.obtain(mHandler, MSG_HOTWORD_DETECTED,
                     new EventPayload(event.triggerInData, event.captureAvailable,
-                            event.captureFormat, event.captureSession, event.data))
+                            event.captureFormat, event.captureSession, event.data, result))
                     .sendToTarget();
         }
         @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
+        }
+
+        @Override
+        public void onRejected(@NonNull HotwordRejectedResult result) {
+            if (DBG) {
+                Slog.d(TAG, "onRejected(" + result + ")");
+            } else {
+                Slog.i(TAG, "onRejected");
+            }
+            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
         }
 
         @Override
@@ -897,6 +1203,24 @@ public class AlwaysOnHotwordDetector {
         public void onRecognitionResumed() {
             Slog.i(TAG, "onRecognitionResumed");
             mHandler.sendEmptyMessage(MSG_DETECTION_RESUME);
+        }
+
+        @Override
+        public void onStatusReported(int status) {
+            if (DBG) {
+                Slog.d(TAG, "onStatusReported(" + status + ")");
+            } else {
+                Slog.i(TAG, "onStatusReported");
+            }
+            Message message = Message.obtain(mHandler, MSG_HOTWORD_STATUS_REPORTED);
+            message.arg1 = status;
+            message.sendToTarget();
+        }
+
+        @Override
+        public void onProcessRestarted() {
+            Slog.i(TAG, "onProcessRestarted");
+            mHandler.sendEmptyMessage(MSG_PROCESS_RESTARTED);
         }
     }
 
@@ -926,6 +1250,15 @@ public class AlwaysOnHotwordDetector {
                 case MSG_DETECTION_RESUME:
                     mExternalCallback.onRecognitionResumed();
                     break;
+                case MSG_HOTWORD_REJECTED:
+                    mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
+                    break;
+                case MSG_HOTWORD_STATUS_REPORTED:
+                    mExternalCallback.onHotwordDetectionServiceInitialized(msg.arg1);
+                    break;
+                case MSG_PROCESS_RESTARTED:
+                    mExternalCallback.onHotwordDetectionServiceRestarted();
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -936,25 +1269,30 @@ public class AlwaysOnHotwordDetector {
 
         @Override
         public Void doInBackground(Void... params) {
-            int availability = internalGetInitialAvailability();
+            try {
+                int availability = internalGetInitialAvailability();
 
-            synchronized (mLock) {
-                if (availability == STATE_NOT_READY) {
-                    internalUpdateEnrolledKeyphraseMetadata();
-                    if (mKeyphraseMetadata != null) {
-                        availability = STATE_KEYPHRASE_ENROLLED;
-                    } else {
-                        availability = STATE_KEYPHRASE_UNENROLLED;
+                synchronized (mLock) {
+                    if (availability == STATE_NOT_READY) {
+                        internalUpdateEnrolledKeyphraseMetadata();
+                        if (mKeyphraseMetadata != null) {
+                            availability = STATE_KEYPHRASE_ENROLLED;
+                        } else {
+                            availability = STATE_KEYPHRASE_UNENROLLED;
+                        }
                     }
+                    updateAndNotifyStateChangedLocked(availability);
                 }
-
-                if (DBG) {
-                    Slog.d(TAG, "Hotword availability changed from " + mAvailability
-                            + " -> " + availability);
+            } catch (SecurityException e) {
+                Slog.w(TAG, "Failed to refresh availability", e);
+                if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
+                    throw e;
                 }
-                mAvailability = availability;
-                notifyStateChangedLocked();
+                synchronized (mLock) {
+                    updateAndNotifyStateChangedLocked(STATE_ERROR);
+                }
             }
+
             return null;
         }
 
@@ -972,7 +1310,7 @@ public class AlwaysOnHotwordDetector {
             ModuleProperties dspModuleProperties;
             try {
                 dspModuleProperties =
-                        mModelManagementService.getDspModuleProperties();
+                        mSoundTriggerSession.getDspModuleProperties();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

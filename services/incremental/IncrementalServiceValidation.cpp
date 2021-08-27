@@ -56,13 +56,18 @@ binder::Status CheckPermissionForDataDelivery(const char* permission, const char
 
     String16 packageName{package};
 
-    // Caller must also have op granted.
     PermissionController pc;
     if (auto packageUid = pc.getPackageUid(packageName, 0); packageUid != uid) {
         return Exception(binder::Status::EX_SECURITY,
                          StringPrintf("UID %d / PID %d does not own package %s", uid, pid,
                                       package));
     }
+
+    if (!operation) {
+        return binder::Status::ok();
+    }
+
+    // Caller must also have op granted.
     switch (auto result = pc.noteOp(String16(operation), uid, packageName); result) {
         case PermissionController::MODE_ALLOWED:
         case PermissionController::MODE_DEFAULT:

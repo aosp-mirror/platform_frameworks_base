@@ -17,15 +17,15 @@ package com.android.systemui.plugins;
 import android.util.ArrayMap;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.PluginDependency.DependencyProvider;
 import com.android.systemui.shared.plugins.PluginManager;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class PluginDependencyProvider extends DependencyProvider {
 
     private final ArrayMap<Class<?>, Object> mDependencies = new ArrayMap<>();

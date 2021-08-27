@@ -16,8 +16,11 @@
 
 package android.os;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.system.ErrnoException;
@@ -32,6 +35,7 @@ import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -70,7 +74,7 @@ public class Process {
      * Defines the UID/GID for the log group.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int LOG_UID = 1007;
 
     /**
@@ -83,14 +87,14 @@ public class Process {
      * Defines the UID/GID for the mediaserver process.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int MEDIA_UID = 1013;
 
     /**
      * Defines the UID/GID for the DRM process.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int DRM_UID = 1019;
 
     /**
@@ -103,7 +107,8 @@ public class Process {
      * Defines the UID/GID for the group that controls VPN services.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int VPN_UID = 1016;
 
     /**
@@ -122,7 +127,8 @@ public class Process {
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @TestApi
     public static final int NFC_UID = 1027;
 
     /**
@@ -203,6 +209,12 @@ public class Process {
     public static final int SE_UID = 1068;
 
     /**
+     * Defines the UID/GID for the iorapd.
+     * @hide
+     */
+    public static final int IORAPD_UID = 1071;
+
+    /**
      * Defines the UID/GID for the NetworkStack app.
      * @hide
      */
@@ -213,6 +225,12 @@ public class Process {
      * @hide
      */
     public static final int FSVERITY_CERT_UID = 1075;
+
+    /**
+     * GID that gives access to USB OTG (unreliable) volumes on /mnt/media_rw/<vol name>
+     * @hide
+     */
+    public static final int EXTERNAL_STORAGE_GID = 1077;
 
     /**
      * GID that gives write access to app-private data directories on external
@@ -227,6 +245,12 @@ public class Process {
      * @hide
      */
     public static final int EXT_OBB_RW_GID = 1079;
+
+    /**
+     * Defines the UID/GID for the Uwb service process.
+     * @hide
+     */
+    public static final int UWB_UID = 1083;
 
     /**
      * GID that corresponds to the INTERNET permission.
@@ -276,7 +300,7 @@ public class Process {
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int FIRST_ISOLATED_UID = 99000;
 
@@ -284,7 +308,7 @@ public class Process {
      * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int LAST_ISOLATED_UID = 99999;
 
@@ -385,6 +409,12 @@ public class Process {
      * {@link java.lang.Thread} class.
      */
     public static final int THREAD_PRIORITY_VIDEO = -10;
+
+    /**
+     * Priority we boost main thread and RT of top app to.
+     * @hide
+     */
+    public static final int THREAD_PRIORITY_TOP_APP_BOOST = -10;
 
     /**
      * Standard priority of audio threads.  Applications can not normally
@@ -614,7 +644,7 @@ public class Process {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     * @param whitelistedDataInfoMap Map from allowlisted package names to private data directory
      *                       volume UUID and inode number.
      * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
@@ -724,7 +754,7 @@ public class Process {
      * Returns the identifier of this process' parent.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171962076)
     public static final int myPpid() {
         return Os.getppid();
     }
@@ -851,12 +881,11 @@ public class Process {
 
     /**
      * Set the priority of a thread, based on Linux priorities.
-     *
-     * @param tid The identifier of the thread/process to change. It should be
-     * the native thread id but not the managed id of {@link java.lang.Thread}.
+     * 
+     * @param tid The identifier of the thread/process to change.
      * @param priority A Linux priority level, from -20 for highest scheduling
      * priority to 19 for lowest scheduling priority.
-     *
+     * 
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
@@ -947,7 +976,7 @@ public class Process {
 
     /**
      * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
-     * but aren't removed from the freezer. Processes can still be added or removed
+     * but aren't removed from the freezer. While in this state, processes can be added or removed
      * by using setProcessFrozen, but they won't actually be frozen until the freezer is enabled
      * again. If enable == true the freezer is enabled again, and all processes
      * in the freezer (including the ones added while the freezer was disabled) are frozen.
@@ -965,6 +994,16 @@ public class Process {
      */
     public static final native int getProcessGroup(int pid)
             throws IllegalArgumentException, SecurityException;
+
+    /**
+     *
+     * Create a new process group in the cgroup uid/pid hierarchy
+     *
+     * @return <0 in case of error
+     *
+     * @hide
+     */
+    public static final native int createProcessGroup(int uid, int pid);
 
     /**
      * On some devices, the foreground process may have one or more CPU
@@ -1165,38 +1204,38 @@ public class Process {
     public static final native int[] getPids(String path, int[] lastArray);
     
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_TERM_MASK = 0xff;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_ZERO_TERM = 0;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_SPACE_TERM = (int)' ';
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_TAB_TERM = (int)'\t';
     /** @hide */
     public static final int PROC_NEWLINE_TERM = (int) '\n';
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_PARENS = 0x200;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_QUOTES = 0x400;
     /** @hide */
     public static final int PROC_CHAR = 0x800;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_OUT_LONG = 0x2000;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROC_OUT_FLOAT = 0x4000;
 
     /**
@@ -1317,33 +1356,16 @@ public class Process {
      */
     public static void waitForProcessDeath(int pid, int timeout)
             throws InterruptedException, TimeoutException {
-        FileDescriptor pidfd = null;
-        if (sPidFdSupported == PIDFD_UNKNOWN) {
-            int fd = -1;
+        boolean fallback = supportsPidFd();
+        if (!fallback) {
+            FileDescriptor pidfd = null;
             try {
-                fd = nativePidFdOpen(pid, 0);
-                sPidFdSupported = PIDFD_SUPPORTED;
-            } catch (ErrnoException e) {
-                sPidFdSupported = e.errno != OsConstants.ENOSYS
-                    ? PIDFD_SUPPORTED : PIDFD_UNSUPPORTED;
-            } finally {
+                final int fd = nativePidFdOpen(pid, 0);
                 if (fd >= 0) {
                     pidfd = new FileDescriptor();
                     pidfd.setInt$(fd);
-                }
-            }
-        }
-        boolean fallback = sPidFdSupported == PIDFD_UNSUPPORTED;
-        if (!fallback) {
-            try {
-                if (pidfd == null) {
-                    int fd = nativePidFdOpen(pid, 0);
-                    if (fd >= 0) {
-                        pidfd = new FileDescriptor();
-                        pidfd.setInt$(fd);
-                    } else {
-                        fallback = true;
-                    }
+                } else {
+                    fallback = true;
                 }
                 if (pidfd != null) {
                     StructPollfd[] fds = new StructPollfd[] {
@@ -1390,6 +1412,60 @@ public class Process {
             }
         }
         throw new TimeoutException();
+    }
+
+    /**
+     * Determine whether the system supports pidfd APIs
+     *
+     * @return Returns true if the system supports pidfd APIs
+     * @hide
+     */
+    public static boolean supportsPidFd() {
+        if (sPidFdSupported == PIDFD_UNKNOWN) {
+            int fd = -1;
+            try {
+                fd = nativePidFdOpen(myPid(), 0);
+                sPidFdSupported = PIDFD_SUPPORTED;
+            } catch (ErrnoException e) {
+                sPidFdSupported = e.errno != OsConstants.ENOSYS
+                        ? PIDFD_SUPPORTED : PIDFD_UNSUPPORTED;
+            } finally {
+                if (fd >= 0) {
+                    final FileDescriptor f = new FileDescriptor();
+                    f.setInt$(fd);
+                    IoUtils.closeQuietly(f);
+                }
+            }
+        }
+        return sPidFdSupported == PIDFD_SUPPORTED;
+    }
+
+    /**
+     * Open process file descriptor for given pid.
+     *
+     * @param pid The process ID to open for
+     * @param flags Reserved, unused now, must be 0
+     * @return The process file descriptor for given pid
+     * @throws IOException if it can't be opened
+     *
+     * @hide
+     */
+    public static @Nullable FileDescriptor openPidFd(int pid, int flags) throws IOException {
+        if (!supportsPidFd()) {
+            return null;
+        }
+        if (flags != 0) {
+            throw new IllegalArgumentException();
+        }
+        try {
+            FileDescriptor pidfd = new FileDescriptor();
+            pidfd.setInt$(nativePidFdOpen(pid, flags));
+            return pidfd;
+        } catch (ErrnoException e) {
+            IOException ex = new IOException();
+            ex.initCause(e);
+            throw ex;
+        }
     }
 
     private static native int nativePidFdOpen(int pid, int flags) throws ErrnoException;

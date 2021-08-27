@@ -18,31 +18,18 @@ package com.android.systemui.statusbar.notification;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertNotSame;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.widget.RemoteViews;
 
 import androidx.palette.graphics.Palette;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.tests.R;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -58,16 +45,7 @@ public class MediaNotificationProcessorTest extends SysuiTestCase {
      */
     private static final int COLOR_TOLERANCE = 8;
 
-    private MediaNotificationProcessor mProcessor;
-    private Bitmap mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-    private ImageGradientColorizer mColorizer;
     @Nullable private Bitmap mArtwork;
-
-    @Before
-    public void setUp() {
-        mColorizer = spy(new TestableColorizer(mBitmap));
-        mProcessor = new MediaNotificationProcessor(getContext(), getContext(), mColorizer);
-    }
 
     @After
     public void tearDown() {
@@ -75,53 +53,6 @@ public class MediaNotificationProcessorTest extends SysuiTestCase {
             mArtwork.recycle();
             mArtwork = null;
         }
-    }
-
-    @Test
-    public void testColorizedWithLargeIcon() {
-        Notification.Builder builder = new Notification.Builder(getContext()).setSmallIcon(
-                R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setLargeIcon(mBitmap)
-                .setContentText("Text");
-        Notification notification = builder.build();
-        mProcessor.processNotification(notification, builder);
-        verify(mColorizer).colorize(any(), anyInt(), anyBoolean());
-    }
-
-    @Test
-    public void testNotColorizedWithoutLargeIcon() {
-        Notification.Builder builder = new Notification.Builder(getContext()).setSmallIcon(
-                R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setContentText("Text");
-        Notification notification = builder.build();
-        mProcessor.processNotification(notification, builder);
-        verifyZeroInteractions(mColorizer);
-    }
-
-    @Test
-    public void testRemoteViewsReset() {
-        Notification.Builder builder = new Notification.Builder(getContext()).setSmallIcon(
-                R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setStyle(new Notification.MediaStyle())
-                .setLargeIcon(mBitmap)
-                .setContentText("Text");
-        Notification notification = builder.build();
-        RemoteViews remoteViews = new RemoteViews(getContext().getPackageName(),
-                R.layout.custom_view_dark);
-        notification.contentView = remoteViews;
-        notification.bigContentView = remoteViews;
-        notification.headsUpContentView = remoteViews;
-        mProcessor.processNotification(notification, builder);
-        verify(mColorizer).colorize(any(), anyInt(), anyBoolean());
-        RemoteViews contentView = builder.createContentView();
-        assertNotSame(contentView, remoteViews);
-        contentView = builder.createBigContentView();
-        assertNotSame(contentView, remoteViews);
-        contentView = builder.createHeadsUpContentView();
-        assertNotSame(contentView, remoteViews);
     }
 
     @Test
@@ -152,18 +83,5 @@ public class MediaNotificationProcessorTest extends SysuiTestCase {
         assertThat((float) Color.red(expected)).isWithin(COLOR_TOLERANCE).of(Color.red(actual));
         assertThat((float) Color.green(expected)).isWithin(COLOR_TOLERANCE).of(Color.green(actual));
         assertThat((float) Color.blue(expected)).isWithin(COLOR_TOLERANCE).of(Color.blue(actual));
-    }
-
-    public static class TestableColorizer extends ImageGradientColorizer {
-        private final Bitmap mBitmap;
-
-        private TestableColorizer(Bitmap bitmap) {
-            mBitmap = bitmap;
-        }
-
-        @Override
-        public Bitmap colorize(Drawable drawable, int backgroundColor, boolean isRtl) {
-            return mBitmap;
-        }
     }
 }

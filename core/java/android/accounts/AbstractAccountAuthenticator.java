@@ -93,7 +93,8 @@ import java.util.Arrays;
  * {@link AccountAuthenticatorResponse#onError} when it is complete.
  * <li> If the authenticator cannot synchronously process the request and return a result then it
  * may choose to return null and then use the AccountManagerResponse to send the result
- * when it has completed the request.
+ * when it has completed the request. This asynchronous option is not available for the
+ * {@link #addAccount} method, which must complete synchronously.
  * </ul>
  * <p>
  * The following descriptions of each of the abstract authenticator methods will not describe the
@@ -101,7 +102,7 @@ import java.util.Arrays;
  * parameters and the expected result.
  * <p>
  * When writing an activity to satisfy these requests one must pass in the AccountManagerResponse
- * and return the result via that response when the activity finishes (or whenever else  the
+ * and return the result via that response when the activity finishes (or whenever else the
  * activity author deems it is the correct time to respond).
  */
 public abstract class AbstractAccountAuthenticator {

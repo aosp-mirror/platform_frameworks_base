@@ -46,7 +46,7 @@ public class StringUtilTest {
         final double testMillis = 5 * DateUtils.MINUTE_IN_MILLIS + 30 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "5 min, 30 sec";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true, false).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -55,7 +55,7 @@ public class StringUtilTest {
         final double testMillis = 5 * DateUtils.MINUTE_IN_MILLIS + 30 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "6 min";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false, false).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -65,7 +65,17 @@ public class StringUtilTest {
                 + 4 * DateUtils.HOUR_IN_MILLIS + 15 * DateUtils.MINUTE_IN_MILLIS;
         final String expectedTime = "2 days, 4 hr, 15 min";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false, false).toString())
+                .isEqualTo(expectedTime);
+    }
+
+    @Test
+    public void testFormatElapsedTime_TimeMoreThanOneDayAndCollapseTimeUnit_ShowCorrectly() {
+        final double testMillis = 2 * DateUtils.DAY_IN_MILLIS
+                + 4 * DateUtils.HOUR_IN_MILLIS + 15 * DateUtils.MINUTE_IN_MILLIS;
+        final String expectedTime = "2 days, 4 hr";
+
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false, true).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -74,7 +84,7 @@ public class StringUtilTest {
         final double testMillis = 2 * DateUtils.DAY_IN_MILLIS + 15 * DateUtils.MINUTE_IN_MILLIS;
         final String expectedTime = "2 days, 15 min";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false, false).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -83,7 +93,7 @@ public class StringUtilTest {
         final double testMillis = 0;
         final String expectedTime = "0 sec";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true, false).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -92,7 +102,7 @@ public class StringUtilTest {
         final double testMillis = 0;
         final String expectedTime = "0 min";
 
-        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
+        assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false, false).toString())
                 .isEqualTo(expectedTime);
     }
 
@@ -101,7 +111,7 @@ public class StringUtilTest {
         final double testMillis = 15 * DateUtils.MINUTE_IN_MILLIS;
 
         final CharSequence charSequence =
-                StringUtil.formatElapsedTime(mContext, testMillis, false);
+                StringUtil.formatElapsedTime(mContext, testMillis, false, false);
         assertThat(charSequence).isInstanceOf(SpannableStringBuilder.class);
 
         final SpannableStringBuilder expectedString = (SpannableStringBuilder) charSequence;

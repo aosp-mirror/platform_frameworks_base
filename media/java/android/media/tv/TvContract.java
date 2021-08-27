@@ -2450,6 +2450,71 @@ public final class TvContract {
          */
         public static final String COLUMN_GLOBAL_CONTENT_ID = "global_content_id";
 
+        /**
+         * The remote control key preset number that is assigned to this channel.
+         *
+         * <p> This can be used for one-touch-tuning, tuning to the channel with
+         * pressing the preset button.
+         *
+         * <p> Type: INTEGER (remote control key preset number)
+         */
+        public static final String COLUMN_REMOTE_CONTROL_KEY_PRESET_NUMBER =
+                "remote_control_key_preset_number";
+
+        /**
+         * The flag indicating whether this TV channel is scrambled or not.
+         *
+         * <p>Use the same coding for scrambled in the underlying broadcast standard
+         * if {@code free_ca_mode} in SDT is defined there (e.g. ETSI EN 300 468).
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_SCRAMBLED = "scrambled";
+
+        /**
+         * The typical video resolution.
+         *
+         * <p>This is primarily used to filter out channels based on video resolution
+         * by applications. The value is from SDT if defined there. (e.g. ETSI EN 300 468)
+         * The value should match one of the followings: {@link #VIDEO_RESOLUTION_SD},
+         * {@link #VIDEO_RESOLUTION_HD}, {@link #VIDEO_RESOLUTION_UHD}.
+         *
+         * <p>Type: TEXT
+         *
+         */
+        public static final String COLUMN_VIDEO_RESOLUTION = "video_resolution";
+
+        /**
+         * The channel list ID of this TV channel.
+         *
+         * <p>It is used to identify the channel list constructed from broadcast SI based on the
+         * underlying broadcast standard or country/operator profile, if applicable. Otherwise,
+         * leave empty.
+         *
+         * <p>The ID can be defined by individual TV input services. For example, one may assign a
+         * service operator name for the service operator channel list constructed from broadcast
+         * SI or one may assign the {@code profile_name} of the operator_info() APDU defined in CI
+         * Plus 1.3 for the dedicated CICAM operator profile channel list constructed
+         * from CICAM NIT.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_CHANNEL_LIST_ID = "channel_list_id";
+
+        /**
+         * The comma-separated genre string of this TV channel.
+         *
+         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
+         * Otherwise, leave empty. Use
+         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
+         * Use {@link Genres#decode Genres.decode()} to get the broadcast genre strings from the
+         * text stored in the column.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_BROADCAST_GENRE
+         */
+        public static final String COLUMN_BROADCAST_GENRE = Programs.COLUMN_BROADCAST_GENRE;
+
         private Channels() {}
 
         /**

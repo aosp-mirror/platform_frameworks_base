@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "SettingsLibTests",
+      "options": [
+        {
+          "include-filter": "com.android.settingslib.users."
+        }
+      ]
+    }
+  ]
+}

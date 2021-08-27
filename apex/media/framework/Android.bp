@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_library {
     name: "updatable-media",
 
@@ -33,10 +42,14 @@ java_library {
 
     sdk_version: "module_current",
     libs: [
-        "framework_media_annotation",
+        "androidx.annotation_annotation",
+        "framework-annotations-lib",
     ],
     static_libs: [
-        "exoplayer2-extractor"
+        "exoplayer2-extractor",
+        "mediatranscoding_aidl_interface-java",
+        "modules-annotation-minsdk",
+        "modules-utils-build",
     ],
     jarjar_rules: "jarjar_rules.txt",
 
@@ -51,15 +64,19 @@ java_library {
     visibility: [
         "//frameworks/av/apex:__subpackages__",
         "//frameworks/base", // For framework-all
+        "//frameworks/base/apex/media/service",
     ],
 }
 
 filegroup {
     name: "updatable-media-srcs",
     srcs: [
+        "java/android/media/MediaFrameworkInitializer.java",
+        ":media-aidl-srcs",
+        ":mediaparceledlistslice-java-srcs",
         ":mediaparser-srcs",
         ":mediasession2-java-srcs",
-        ":mediasession2-aidl-srcs",
+        ":mediatranscoding-srcs",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -76,6 +93,16 @@ filegroup {
         "java/android/media/Session2CommandGroup.java",
         "java/android/media/Session2Link.java",
         "java/android/media/Session2Token.java",
+        "java/android/media/MediaCommunicationManager.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediaparceledlistslice-java-srcs",
+    srcs: [
+        "java/android/media/MediaParceledListSlice.java",
+        "java/android/media/BaseMediaParceledListSlice.java",
     ],
     path: "java",
 }
@@ -83,7 +110,17 @@ filegroup {
 filegroup {
     name: "mediaparser-srcs",
     srcs: [
-        "java/android/media/MediaParser.java"
+        "java/android/media/MediaParser.java",
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediatranscoding-srcs",
+    srcs: [
+        "java/android/media/ApplicationMediaCapabilities.java",
+        "java/android/media/MediaFeature.java",
+        "java/android/media/MediaTranscodingManager.java",
     ],
     path: "java",
 }
@@ -99,17 +136,7 @@ java_sdk_library {
         ":updatable-media-srcs",
     ],
 
-    libs: [
-        "framework_media_annotation",
-    ],
     impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
-}
-
-java_library {
-    name: "framework_media_annotation",
-    srcs: [":framework-media-annotation-srcs"],
-    installable: false,
-    sdk_version: "core_current",
 }
 
 cc_library_shared {
@@ -117,6 +144,7 @@ cc_library_shared {
     srcs: [
         "jni/android_media_MediaParserJNI.cpp",
     ],
+    header_libs: ["jni_headers"],
     shared_libs: [
         "libandroid",
         "liblog",

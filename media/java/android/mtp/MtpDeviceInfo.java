@@ -31,6 +31,7 @@ public class MtpDeviceInfo {
     private String mSerialNumber;
     private int[] mOperationsSupported;
     private int[] mEventsSupported;
+    private int[] mDevicePropertySupported;
 
     // only instantiated via JNI
     private MtpDeviceInfo() {
@@ -144,6 +145,21 @@ public class MtpDeviceInfo {
     }
 
     /**
+     * Returns Device property code supported by the device.
+     *
+     * @return supported Device property code. Can be null if device does not provide the property.
+     *
+     * @see MtpConstants#DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER
+     * @see MtpConstants#DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME
+     * @see MtpConstants#DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO
+     *
+     * {@hide}
+     */
+    public final @NonNull int[] getDevicePropertySupported() {
+        return mDevicePropertySupported;
+    }
+
+    /**
      * Returns if the given operation is supported by the device or not.
      * @param code Operation code.
      * @return If the given operation is supported by the device or not.
@@ -159,6 +175,17 @@ public class MtpDeviceInfo {
      */
     public boolean isEventSupported(int code) {
         return isSupported(mEventsSupported, code);
+    }
+
+    /**
+     * Returns if the given Device property is supported by the device or not.
+     * @param code Device property code.
+     * @return If the given Device property is supported by the device or not.
+     *
+     * {@hide}
+     */
+    public boolean isDevicePropertySupported(int code) {
+        return isSupported(mDevicePropertySupported, code);
     }
 
     /**

@@ -18,6 +18,8 @@ package android.telephony.data;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
@@ -26,7 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
-import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -113,6 +114,37 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_MCX = ApnTypes.MCX;
     /** APN type for XCAP. */
     public static final int TYPE_XCAP = ApnTypes.XCAP;
+    /** APN type for VSIM. */
+    public static final int TYPE_VSIM = 1 << 12;  // TODO: Refer to ApnTypes.VSIM
+    /** APN type for BIP. */
+    public static final int TYPE_BIP = 1 << 13;   // TODO: Refer to ApnTypes.BIP
+    /**
+     * APN type for ENTERPRISE.
+     * @hide
+     */
+    public static final int TYPE_ENTERPRISE = TYPE_BIP << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"TYPE_"}, value = {
+            TYPE_DEFAULT,
+            TYPE_MMS,
+            TYPE_SUPL,
+            TYPE_DUN,
+            TYPE_HIPRI,
+            TYPE_FOTA,
+            TYPE_IMS,
+            TYPE_CBS,
+            TYPE_IA,
+            TYPE_EMERGENCY,
+            TYPE_MCX,
+            TYPE_XCAP,
+            TYPE_BIP,
+            TYPE_VSIM,
+            TYPE_ENTERPRISE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApnType {
+    }
 
     // Possible values for authentication types.
     /** No authentication type. */
@@ -133,6 +165,28 @@ public class ApnSetting implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Skip464XlatStatus {}
 
+    /** @hide */
+    @StringDef(value = {
+            TYPE_ALL_STRING,
+            TYPE_CBS_STRING,
+            TYPE_DEFAULT_STRING,
+            TYPE_DUN_STRING,
+            TYPE_EMERGENCY_STRING,
+            TYPE_FOTA_STRING,
+            TYPE_HIPRI_STRING,
+            TYPE_IA_STRING,
+            TYPE_IMS_STRING,
+            TYPE_MCX_STRING,
+            TYPE_MMS_STRING,
+            TYPE_SUPL_STRING,
+            TYPE_XCAP_STRING,
+            TYPE_VSIM_STRING,
+            TYPE_BIP_STRING,
+            TYPE_ENTERPRISE_STRING,
+    }, prefix = "TYPE_", suffix = "_STRING")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApnTypeString {}
+
     /**
      * APN types for data connections.  These are usage categories for an APN
      * entry.  One APN entry may support multiple APN types, eg, a single APN
@@ -140,100 +194,165 @@ public class ApnSetting implements Parcelable {
      * connections.<br/>
      * APN_TYPE_ALL is a special type to indicate that this APN entry can
      * service all data connections.
-     * <p>
-     * Note: The goal is to deprecate this.  Due to the Carrier Table being used
-     * directly, this isn't feasible right now.
      *
      * @hide
      */
+    @SystemApi
     public static final String TYPE_ALL_STRING = "*";
 
     /**
      * APN type for default data traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_DEFAULT_STRING = "default";
 
 
     /**
-     * APN type for MMS traffic
+     * APN type for MMS (Multimedia Messaging Service) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_MMS_STRING = "mms";
 
 
     /**
-     * APN type for SUPL assisted GPS
+     * APN type for SUPL (Secure User Plane Location) assisted GPS.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_SUPL_STRING = "supl";
 
     /**
-     * APN type for DUN traffic
+     * APN type for DUN (Dial-up networking) traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_DUN_STRING = "dun";
 
     /**
-     * APN type for HiPri traffic
+     * APN type for high-priority traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_HIPRI_STRING = "hipri";
 
     /**
-     * APN type for FOTA
+     * APN type for FOTA (Firmware over-the-air) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_FOTA_STRING = "fota";
 
     /**
-     * APN type for IMS
+     * APN type for IMS (IP Multimedia Subsystem) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_IMS_STRING = "ims";
 
     /**
-     * APN type for CBS
+     * APN type for CBS (Carrier Branded Services) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_CBS_STRING = "cbs";
 
     /**
-     * APN type for IA Initial Attach APN
+     * APN type for the IA (Initial Attach) APN
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_IA_STRING = "ia";
 
     /**
      * APN type for Emergency PDN. This is not an IA apn, but is used
      * for access to carrier services in an emergency call situation.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_EMERGENCY_STRING = "emergency";
 
     /**
-     * APN type for Mission Critical Services
+     * APN type for Mission Critical Services.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_MCX_STRING = "mcx";
 
     /**
-     * APN type for XCAP
+     * APN type for XCAP (XML Configuration Access Protocol) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_XCAP_STRING = "xcap";
+
+
+
+    /**
+     * APN type for Virtual SIM service.
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_VSIM_STRING = "vsim";
+
+    /**
+     * APN type for Bearer Independent Protocol.
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_BIP_STRING = "bip";
+
+    /**
+     * APN type for ENTERPRISE traffic.
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    public static final String TYPE_ENTERPRISE_STRING = "enterprise";
 
 
     /** @hide */
@@ -314,6 +433,9 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put(TYPE_EMERGENCY_STRING, TYPE_EMERGENCY);
         APN_TYPE_STRING_MAP.put(TYPE_MCX_STRING, TYPE_MCX);
         APN_TYPE_STRING_MAP.put(TYPE_XCAP_STRING, TYPE_XCAP);
+        APN_TYPE_STRING_MAP.put(TYPE_ENTERPRISE_STRING, TYPE_ENTERPRISE);
+        APN_TYPE_STRING_MAP.put(TYPE_VSIM_STRING, TYPE_VSIM);
+        APN_TYPE_STRING_MAP.put(TYPE_BIP_STRING, TYPE_BIP);
 
         APN_TYPE_INT_MAP = new ArrayMap<>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, TYPE_DEFAULT_STRING);
@@ -328,6 +450,9 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_EMERGENCY, TYPE_EMERGENCY_STRING);
         APN_TYPE_INT_MAP.put(TYPE_MCX, TYPE_MCX_STRING);
         APN_TYPE_INT_MAP.put(TYPE_XCAP, TYPE_XCAP_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_ENTERPRISE, TYPE_ENTERPRISE_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_VSIM, TYPE_VSIM_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_BIP, TYPE_BIP_STRING);
 
         PROTOCOL_STRING_MAP = new ArrayMap<>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -1214,12 +1339,16 @@ public class ApnSetting implements Parcelable {
         return false;
     }
 
-    // TODO - if we have this function we should also have hashCode.
-    // Also should handle changes in type order and perhaps case-insensitivity.
+    @Override
+    public int hashCode() {
+        return Objects.hash(mApnName, mProxyAddress, mProxyPort, mMmsc, mMmsProxyAddress,
+                mMmsProxyPort, mUser, mPassword, mAuthType, mApnTypeBitmask, mId, mOperatorNumeric,
+                mProtocol, mRoamingProtocol, mMtu, mCarrierEnabled, mNetworkTypeBitmask, mProfileId,
+                mPersistent, mMaxConns, mWaitTime, mMaxConnsTime, mMvnoType, mMvnoMatchData,
+                mApnSetId, mCarrierId, mSkip464Xlat);
+    }
 
-    /**
-     * @hide
-     */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ApnSetting == false) {
             return false;
@@ -1422,16 +1551,47 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * @param apnType APN type
-     * @return APN type in string format
+     * Converts the APN type bitmask to an array of all APN types
+     * @param apnTypeBitmask bitmask of APN types.
+     * @return int array of APN types
      * @hide
      */
-    public static String getApnTypeString(int apnType) {
+    @NonNull
+    public static int[] getApnTypesFromBitmask(int apnTypeBitmask) {
+        return APN_TYPE_INT_MAP.keySet().stream()
+                .filter(type -> ((apnTypeBitmask & type) == type))
+                .mapToInt(Integer::intValue)
+                .toArray();
+    }
+
+    /**
+     * Converts the integer representation of APN type to its string representation.
+     *
+     * @param apnType APN type as an integer
+     * @return String representation of the APN type, or an empty string if the provided integer is
+     * not a valid APN type.
+     * @hide
+     */
+    @SystemApi
+    public static @NonNull @ApnTypeString String getApnTypeString(@ApnType int apnType) {
         if (apnType == TYPE_ALL) {
             return "*";
         }
         String apnTypeString = APN_TYPE_INT_MAP.get(apnType);
-        return apnTypeString == null ? "Unknown" : apnTypeString;
+        return apnTypeString == null ? "" : apnTypeString;
+    }
+
+    /**
+     * Converts the string representation of an APN type to its integer representation.
+     *
+     * @param apnType APN type as a string
+     * @return Integer representation of the APN type, or 0 if the provided string is not a valid
+     * APN type.
+     * @hide
+     */
+    @SystemApi
+    public static @ApnType int getApnTypeInt(@NonNull @ApnTypeString String apnType) {
+        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(), 0);
     }
 
     /**
@@ -1643,7 +1803,7 @@ public class ApnSetting implements Parcelable {
      *
      * <pre><code>
      * // Create an MMS proxy address with a hostname. A network might not be
-     * // available, so supply a dummy (0.0.0.0) IPv4 address to avoid DNS lookup.
+     * // available, so supply a placeholder (0.0.0.0) IPv4 address to avoid DNS lookup.
      * String host = "mms.example.com";
      * byte[] ipAddress = new byte[4];
      * InetAddress mmsProxy;
@@ -1828,7 +1988,8 @@ public class ApnSetting implements Parcelable {
          * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
          * resolution. To avoid this requirement when setting a hostname, call
          * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
-         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
+         * hostname and a placeholder IP address. See {@link ApnSetting.Builder above} for an
+         * example.
          *
          * @param proxy the proxy address to set for the APN
          * @deprecated use {@link #setProxyAddress(String)} instead.
@@ -1882,7 +2043,8 @@ public class ApnSetting implements Parcelable {
          * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
          * resolution. To avoid this requirement when setting a hostname, call
          * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
-         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
+         * hostname and a placeholder IP address. See {@link ApnSetting.Builder above} for an
+         * example.
          *
          * @param mmsProxy the MMS proxy address to set for the APN
          * @deprecated use {@link #setMmsProxyAddress(String)} instead.
@@ -2073,7 +2235,7 @@ public class ApnSetting implements Parcelable {
         public ApnSetting build() {
             if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
-                    | TYPE_XCAP)) == 0
+                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }

@@ -141,6 +141,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     private final Object mSessionLock = new Object();
     private final Object mRequestIdsLock = new Object();
     private final AtomicBoolean mStatePublishScheduled = new AtomicBoolean(false);
+    private final AtomicBoolean mSessionUpdateScheduled = new AtomicBoolean(false);
     private MediaRoute2ProviderServiceStub mStub;
     private IMediaRoute2ProviderServiceCallback mRemoteCallback;
     private volatile MediaRoute2ProviderInfo mProviderInfo;
@@ -287,16 +288,8 @@ public abstract class MediaRoute2ProviderService extends Service {
                 Log.w(TAG, "notifySessionUpdated: Ignoring unknown session info.");
                 return;
             }
-
-            if (mRemoteCallback == null) {
-                return;
-            }
-            try {
-                mRemoteCallback.notifySessionUpdated(sessionInfo);
-            } catch (RemoteException ex) {
-                Log.w(TAG, "Failed to notify session info changed.");
-            }
         }
+        scheduleUpdateSessions();
     }
 
     /**
@@ -479,6 +472,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     void setCallback(IMediaRoute2ProviderServiceCallback callback) {
         mRemoteCallback = callback;
         schedulePublishState();
+        scheduleUpdateSessions();
     }
 
     void schedulePublishState() {
@@ -497,10 +491,38 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         try {
-            mRemoteCallback.updateState(mProviderInfo);
+            mRemoteCallback.notifyProviderUpdated(mProviderInfo);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to publish provider state.", ex);
         }
+    }
+
+    void scheduleUpdateSessions() {
+        if (mSessionUpdateScheduled.compareAndSet(false, true)) {
+            mHandler.post(this::updateSessions);
+        }
+    }
+
+    private void updateSessions() {
+        if (!mSessionUpdateScheduled.compareAndSet(true, false)) {
+            return;
+        }
+
+        if (mRemoteCallback == null) {
+            return;
+        }
+
+        List<RoutingSessionInfo> sessions;
+        synchronized (mSessionLock) {
+            sessions = new ArrayList<>(mSessionInfo.values());
+        }
+
+        try {
+            mRemoteCallback.notifySessionsUpdated(sessions);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session info changed.");
+        }
+
     }
 
     /**

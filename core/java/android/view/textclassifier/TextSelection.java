@@ -45,15 +45,19 @@ public final class TextSelection implements Parcelable {
     private final int mEndIndex;
     private final EntityConfidence mEntityConfidence;
     @Nullable private final String mId;
+    @Nullable
+    private final TextClassification mTextClassification;
     private final Bundle mExtras;
 
     private TextSelection(
             int startIndex, int endIndex, Map<String, Float> entityConfidence, String id,
+            @Nullable TextClassification textClassification,
             Bundle extras) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence(entityConfidence);
         mId = id;
+        mTextClassification = textClassification;
         mExtras = extras;
     }
 
@@ -111,6 +115,19 @@ public final class TextSelection implements Parcelable {
     }
 
     /**
+     * Returns the text classification result of the suggested selection span. Enables the text
+     * classification by calling
+     * {@link TextSelection.Request.Builder#setIncludeTextClassification(boolean)}. If the text
+     * classifier does not support it, a {@code null} is returned.
+     *
+     * @see TextSelection.Request.Builder#setIncludeTextClassification(boolean)
+     */
+    @Nullable
+    public TextClassification getTextClassification() {
+        return mTextClassification;
+    }
+
+    /**
      * Returns the extended data.
      *
      * <p><b>NOTE: </b>Do not modify this bundle.
@@ -118,6 +135,15 @@ public final class TextSelection implements Parcelable {
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    /** @hide */
+    public TextSelection.Builder toBuilder() {
+        return new TextSelection.Builder(mStartIndex, mEndIndex)
+                .setId(mId)
+                .setEntityConfidence(mEntityConfidence)
+                .setTextClassification(mTextClassification)
+                .setExtras(mExtras);
     }
 
     @Override
@@ -137,6 +163,8 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
         @Nullable private String mId;
+        @Nullable
+        private TextClassification mTextClassification;
         @Nullable
         private Bundle mExtras;
 
@@ -169,12 +197,33 @@ public final class TextSelection implements Parcelable {
             return this;
         }
 
+        Builder setEntityConfidence(EntityConfidence scores) {
+            mEntityConfidence.clear();
+            mEntityConfidence.putAll(scores.toMap());
+            return this;
+        }
+
         /**
          * Sets an id for the TextSelection object.
          */
         @NonNull
         public Builder setId(@Nullable String id) {
             mId = id;
+            return this;
+        }
+
+        /**
+         * Sets the text classification result of the suggested selection. If
+         * {@link Request#shouldIncludeTextClassification()} is {@code true}, set this value.
+         * Otherwise this value may be set to null. The intention of this method is to avoid
+         * doing expensive work if the client is not interested in such result.
+         *
+         * @return this builder
+         * @see Request#shouldIncludeTextClassification()
+         */
+        @NonNull
+        public Builder setTextClassification(@Nullable TextClassification textClassification) {
+            mTextClassification = textClassification;
             return this;
         }
 
@@ -196,7 +245,7 @@ public final class TextSelection implements Parcelable {
         public TextSelection build() {
             return new TextSelection(
                     mStartIndex, mEndIndex, mEntityConfidence, mId,
-                    mExtras == null ? Bundle.EMPTY : mExtras);
+                    mTextClassification, mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 
@@ -210,6 +259,7 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         @Nullable private final LocaleList mDefaultLocales;
         private final boolean mDarkLaunchAllowed;
+        private final boolean mIncludeTextClassification;
         private final Bundle mExtras;
         @Nullable private SystemTextClassifierMetadata mSystemTcMetadata;
 
@@ -219,12 +269,14 @@ public final class TextSelection implements Parcelable {
                 int endIndex,
                 LocaleList defaultLocales,
                 boolean darkLaunchAllowed,
+                boolean includeTextClassification,
                 Bundle extras) {
             mText = text;
             mStartIndex = startIndex;
             mEndIndex = endIndex;
             mDefaultLocales = defaultLocales;
             mDarkLaunchAllowed = darkLaunchAllowed;
+            mIncludeTextClassification = includeTextClassification;
             mExtras = extras;
         }
 
@@ -303,6 +355,14 @@ public final class TextSelection implements Parcelable {
         }
 
         /**
+         * Returns true if the client wants the text classifier to classify the text as well and
+         * include a {@link TextClassification} object in the result.
+         */
+        public boolean shouldIncludeTextClassification() {
+            return mIncludeTextClassification;
+        }
+
+        /**
          * Returns the extended data.
          *
          * <p><b>NOTE: </b>Do not modify this bundle.
@@ -320,9 +380,9 @@ public final class TextSelection implements Parcelable {
             private final CharSequence mText;
             private final int mStartIndex;
             private final int mEndIndex;
-
             @Nullable private LocaleList mDefaultLocales;
             private boolean mDarkLaunchAllowed;
+            private boolean mIncludeTextClassification;
             private Bundle mExtras;
 
             /**
@@ -372,6 +432,21 @@ public final class TextSelection implements Parcelable {
             }
 
             /**
+             * @param includeTextClassification If true, suggests the TextClassifier to classify the
+             *     text in the suggested selection span and include a TextClassification object in
+             *     the result. The TextClassifier may not support this and in which case,
+             *     {@link TextSelection#getTextClassification()} returns {@code null}.
+             *
+             * @return this builder.
+             * @see TextSelection#getTextClassification()
+             */
+            @NonNull
+            public Builder setIncludeTextClassification(boolean includeTextClassification) {
+                mIncludeTextClassification = includeTextClassification;
+                return this;
+            }
+
+            /**
              * Sets the extended data.
              *
              * @return this builder
@@ -389,6 +464,7 @@ public final class TextSelection implements Parcelable {
             public Request build() {
                 return new Request(new SpannedString(mText), mStartIndex, mEndIndex,
                         mDefaultLocales, mDarkLaunchAllowed,
+                        mIncludeTextClassification,
                         mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
@@ -406,6 +482,7 @@ public final class TextSelection implements Parcelable {
             dest.writeParcelable(mDefaultLocales, flags);
             dest.writeBundle(mExtras);
             dest.writeParcelable(mSystemTcMetadata, flags);
+            dest.writeBoolean(mIncludeTextClassification);
         }
 
         private static Request readFromParcel(Parcel in) {
@@ -415,9 +492,10 @@ public final class TextSelection implements Parcelable {
             final LocaleList defaultLocales = in.readParcelable(null);
             final Bundle extras = in.readBundle();
             final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
+            final boolean includeTextClassification = in.readBoolean();
 
             final Request request = new Request(text, startIndex, endIndex, defaultLocales,
-                    /* darkLaunchAllowed= */ false, extras);
+                    /* darkLaunchAllowed= */ false, includeTextClassification, extras);
             request.setSystemTextClassifierMetadata(systemTcMetadata);
             return request;
         }
@@ -448,6 +526,7 @@ public final class TextSelection implements Parcelable {
         mEntityConfidence.writeToParcel(dest, flags);
         dest.writeString(mId);
         dest.writeBundle(mExtras);
+        dest.writeParcelable(mTextClassification, flags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextSelection> CREATOR =
@@ -469,5 +548,6 @@ public final class TextSelection implements Parcelable {
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
         mExtras = in.readBundle();
+        mTextClassification = in.readParcelable(TextClassification.class.getClassLoader());
     }
 }

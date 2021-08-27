@@ -20,38 +20,36 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string>
 
-#include <binder/Parcel.h>
-#include <log/log.h>
-#include <utils/String8.h>
+#include "android-base/stringprintf.h"
+#include "binder/Parcel.h"
+#include "utils/String8.h"
 
-#if LOG_NDEBUG
-
-#define IF_LOG_WINDOW() if (false)
 #define LOG_WINDOW(...)
-
-#else
-
-#define IF_LOG_WINDOW() IF_ALOG(LOG_DEBUG, "CursorWindow")
-#define LOG_WINDOW(...) ALOG(LOG_DEBUG, "CursorWindow", __VA_ARGS__)
-
-#endif
 
 namespace android {
 
 /**
- * This class stores a set of rows from a database in a buffer. The begining of the
- * window has first chunk of RowSlots, which are offsets to the row directory, followed by
- * an offset to the next chunk in a linked-list of additional chunk of RowSlots in case
- * the pre-allocated chunk isn't big enough to refer to all rows. Each row directory has a
- * FieldSlot per column, which has the size, offset, and type of the data for that field.
- * Note that the data types come from sqlite3.h.
+ * This class stores a set of rows from a database in a buffer. Internally
+ * data is structured as a "heap" of string/blob allocations at the bottom
+ * of the memory region, and a "stack" of FieldSlot allocations at the top
+ * of the memory region. Here's an example visual representation:
+ *
+ *   +----------------------------------------------------------------+
+ *   |heap\0of\0strings\0                                 222211110000| ...
+ *   +-------------------+--------------------------------+-------+---+
+ *    ^                  ^                                ^       ^   ^     ^
+ *    |                  |                                |       |   |     |
+ *    |                  +- mAllocOffset    mSlotsOffset -+       |   |     |
+ *    +- mData                                       mSlotsStart -+   |     |
+ *                                                             mSize -+     |
+ *                                                           mInflatedSize -+
  *
  * Strings are stored in UTF-8.
  */
 class CursorWindow {
-    CursorWindow(const String8& name, int ashmemFd,
-            void* data, size_t size, bool readOnly);
+    CursorWindow();
 
 public:
     /* Field types. */
@@ -88,9 +86,9 @@ public:
 
     inline String8 name() { return mName; }
     inline size_t size() { return mSize; }
-    inline size_t freeSpace() { return mSize - mHeader->freeOffset; }
-    inline uint32_t getNumRows() { return mHeader->numRows; }
-    inline uint32_t getNumColumns() { return mHeader->numColumns; }
+    inline size_t freeSpace() { return mSlotsOffset - mAllocOffset; }
+    inline uint32_t getNumRows() { return mNumRows; }
+    inline uint32_t getNumColumns() { return mNumColumns; }
 
     status_t clear();
     status_t setNumColumns(uint32_t numColumns);
@@ -138,62 +136,57 @@ public:
         return offsetToPtr(fieldSlot->data.buffer.offset, fieldSlot->data.buffer.size);
     }
 
+    inline std::string toString() const {
+        return android::base::StringPrintf("CursorWindow{name=%s, fd=%d, size=%d, inflatedSize=%d, "
+                "allocOffset=%d, slotsOffset=%d, numRows=%d, numColumns=%d}", mName.c_str(),
+                mAshmemFd, mSize, mInflatedSize, mAllocOffset, mSlotsOffset, mNumRows, mNumColumns);
+    }
+
 private:
-    static const size_t ROW_SLOT_CHUNK_NUM_ROWS = 100;
-
-    struct Header {
-        // Offset of the lowest unused byte in the window.
-        uint32_t freeOffset;
-
-        // Offset of the first row slot chunk.
-        uint32_t firstChunkOffset;
-
-        uint32_t numRows;
-        uint32_t numColumns;
-    };
-
-    struct RowSlot {
-        uint32_t offset;
-    };
-
-    struct RowSlotChunk {
-        RowSlot slots[ROW_SLOT_CHUNK_NUM_ROWS];
-        uint32_t nextChunkOffset;
-    };
-
     String8 mName;
-    int mAshmemFd;
-    void* mData;
-    size_t mSize;
-    bool mReadOnly;
-    Header* mHeader;
+    int mAshmemFd = -1;
+    void* mData = nullptr;
+    /**
+     * Pointer to the first FieldSlot, used to optimize the extremely
+     * hot code path of getFieldSlot().
+     */
+    void* mSlotsStart = nullptr;
+    void* mSlotsEnd = nullptr;
+    uint32_t mSize = 0;
+    /**
+     * When a window starts as lightweight inline allocation, this value
+     * holds the "full" size to be created after ashmem inflation.
+     */
+    uint32_t mInflatedSize = 0;
+    /**
+     * Offset to the top of the "heap" of string/blob allocations. By
+     * storing these allocations at the bottom of our memory region we
+     * avoid having to rewrite offsets when inflating.
+     */
+    uint32_t mAllocOffset = 0;
+    /**
+     * Offset to the bottom of the "stack" of FieldSlot allocations.
+     */
+    uint32_t mSlotsOffset = 0;
+    uint32_t mNumRows = 0;
+    uint32_t mNumColumns = 0;
+    bool mReadOnly = false;
 
-    inline void* offsetToPtr(uint32_t offset, uint32_t bufferSize = 0) {
-        if (offset >= mSize) {
-            ALOGE("Offset %" PRIu32 " out of bounds, max value %zu", offset, mSize);
-            return NULL;
-        }
-        if (offset + bufferSize > mSize) {
-            ALOGE("End offset %" PRIu32 " out of bounds, max value %zu",
-                    offset + bufferSize, mSize);
-            return NULL;
-        }
-        return static_cast<uint8_t*>(mData) + offset;
-    }
+    void updateSlotsData();
 
-    inline uint32_t offsetFromPtr(void* ptr) {
-        return static_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(mData);
-    }
+    void* offsetToPtr(uint32_t offset, uint32_t bufferSize);
+    uint32_t offsetFromPtr(void* ptr);
 
     /**
-     * Allocate a portion of the window. Returns the offset
-     * of the allocation, or 0 if there isn't enough space.
-     * If aligned is true, the allocation gets 4 byte alignment.
+     * By default windows are lightweight inline allocations; this method
+     * inflates the window into a larger ashmem region.
      */
-    uint32_t alloc(size_t size, bool aligned = false);
+    status_t maybeInflate();
 
-    RowSlot* getRowSlot(uint32_t row);
-    RowSlot* allocRowSlot();
+    /**
+     * Allocate a portion of the window.
+     */
+    status_t alloc(size_t size, uint32_t* outOffset);
 
     status_t putBlobOrString(uint32_t row, uint32_t column,
             const void* value, size_t size, int32_t type);

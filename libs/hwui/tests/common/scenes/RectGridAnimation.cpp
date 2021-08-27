@@ -29,7 +29,7 @@ public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
-        canvas.insertReorderBarrier(true);
+        canvas.enableZ(true);
 
         card = TestUtils::createNode(50, 50, 250, 250, [](RenderProperties& props, Canvas& canvas) {
             canvas.drawColor(0xFFFF00FF, SkBlendMode::kSrcOver);
@@ -47,7 +47,7 @@ public:
         });
         canvas.drawRenderNode(card.get());
 
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;

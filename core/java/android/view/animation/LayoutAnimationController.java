@@ -27,8 +27,8 @@ import android.view.ViewGroup;
 import java.util.Random;
 
 /**
- * A layout animation controller is used to animated a layout's, or a view
- * group's, children. Each child uses the same animation but for every one of
+ * A layout animation controller is used to animate the children of a layout or a view
+ * group. Each child uses the same animation but for every one of
  * them, the animation starts at a different time. A layout animation controller
  * is used by {@link android.view.ViewGroup} to compute the delay by which each
  * child's animation start must be offset. The delay is computed by using

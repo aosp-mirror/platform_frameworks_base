@@ -19,15 +19,15 @@ package android.net;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsSession;
 import android.net.Network;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.IBinder;
 import android.os.Messenger;
-import com.android.internal.net.VpnInfo;
 
 /** {@hide} */
 interface INetworkStatsService {
@@ -42,7 +42,7 @@ interface INetworkStatsService {
      *  PACKAGE_USAGE_STATS permission is always checked. If PACKAGE_USAGE_STATS is not granted
      *  READ_NETWORK_USAGE_STATS is checked for.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     INetworkStatsSession openSessionForUsageStats(int flags, String callingPackage);
 
     /** Return data layer snapshot of UID network usage. */
@@ -65,12 +65,12 @@ interface INetworkStatsService {
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 
-    /** Force update of ifaces. */
-    void forceUpdateIfaces(
+    /**  Notify {@code NetworkStatsService} about network status changed. */
+    void notifyNetworkStatus(
          in Network[] defaultNetworks,
-         in NetworkState[] networkStates,
+         in NetworkStateSnapshot[] snapshots,
          in String activeIface,
-         in VpnInfo[] vpnInfos);
+         in UnderlyingNetworkInfo[] underlyingNetworkInfos);
     /** Force update of statistics. */
     @UnsupportedAppUsage
     void forceUpdate();

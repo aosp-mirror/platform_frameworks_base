@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
@@ -47,6 +48,10 @@ final class NetworkLogger {
     private final PackageManagerInternal mPm;
     private final AtomicBoolean mIsLoggingEnabled = new AtomicBoolean(false);
 
+    // The target userId to collect network events on. The target userId will be
+    // {@link android.os.UserHandle#USER_ALL} if network events should be collected for all users.
+    private final int mTargetUserId;
+
     private IIpConnectivityMetrics mIpConnectivityMetrics;
     private ServiceThread mHandlerThread;
     private NetworkLoggingHandler mNetworkLoggingHandler;
@@ -58,6 +63,11 @@ final class NetworkLogger {
             if (!mIsLoggingEnabled.get()) {
                 return;
             }
+            // If the network logging was enabled by the profile owner, then do not
+            // include events in the personal profile.
+            if (!shouldLogNetworkEvent(uid)) {
+                return;
+            }
             DnsEvent dnsEvent = new DnsEvent(hostname, ipAddresses, ipAddressesCount,
                     mPm.getNameForUid(uid), timestamp);
             sendNetworkEvent(dnsEvent);
@@ -66,6 +76,11 @@ final class NetworkLogger {
         @Override
         public void onConnectEvent(String ipAddr, int port, long timestamp, int uid) {
             if (!mIsLoggingEnabled.get()) {
+                return;
+            }
+            // If the network logging was enabled by the profile owner, then do not
+            // include events in the personal profile.
+            if (!shouldLogNetworkEvent(uid)) {
                 return;
             }
             ConnectEvent connectEvent = new ConnectEvent(ipAddr, port, mPm.getNameForUid(uid),
@@ -81,11 +96,17 @@ final class NetworkLogger {
             msg.setData(bundle);
             mNetworkLoggingHandler.sendMessage(msg);
         }
+
+        private boolean shouldLogNetworkEvent(int uid) {
+            return mTargetUserId == UserHandle.USER_ALL
+                    || mTargetUserId == UserHandle.getUserId(uid);
+        }
     };
 
-    NetworkLogger(DevicePolicyManagerService dpm, PackageManagerInternal pm) {
+    NetworkLogger(DevicePolicyManagerService dpm, PackageManagerInternal pm, int targetUserId) {
         mDpm = dpm;
         mPm = pm;
+        mTargetUserId = targetUserId;
     }
 
     private boolean checkIpConnectivityMetricsService() {
@@ -114,7 +135,7 @@ final class NetworkLogger {
                         /* allowIo */ false);
                 mHandlerThread.start();
                 mNetworkLoggingHandler = new NetworkLoggingHandler(mHandlerThread.getLooper(),
-                        mDpm);
+                        mDpm, mTargetUserId);
                 mNetworkLoggingHandler.scheduleBatchFinalization();
                 mIsLoggingEnabled.set(true);
                 return true;
@@ -153,7 +174,7 @@ final class NetworkLogger {
     }
 
     /**
-     * If logs are being collected, keep collecting them but stop notifying the device owner that
+     * If logs are being collected, keep collecting them but stop notifying the admin that
      * new logs are available (since they cannot be retrieved)
      */
     void pause() {
@@ -163,11 +184,11 @@ final class NetworkLogger {
     }
 
     /**
-     * If logs are being collected, start notifying the device owner when logs are ready to be
+     * If logs are being collected, start notifying the admin when logs are ready to be
      * collected again (if it was paused).
      * <p>If logging is enabled and there are logs ready to be retrieved, this method will attempt
-     * to notify the device owner. Therefore calling identity should be cleared before calling it
-     * (in case the method is called from a user other than the DO's user).
+     * to notify the admin. Therefore calling identity should be cleared before calling it
+     * (in case the method is called from a user other than the admin's user).
      */
     void resume() {
         if (mNetworkLoggingHandler != null) {

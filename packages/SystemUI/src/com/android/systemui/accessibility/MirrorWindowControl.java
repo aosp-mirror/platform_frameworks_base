@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -36,9 +35,8 @@ import com.android.systemui.R;
 
 /**
  * Contains a movable control UI to manipulate mirrored window's position, size and scale. The
- * window type of the UI is {@link LayoutParams#TYPE_APPLICATION_SUB_PANEL} and the window type
- * of the window token should be {@link LayoutParams#TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY} to
- * ensure it is above all windows and won't be mirrored. It is not movable to the navigation bar.
+ * window type of the UI is {@link LayoutParams#TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY} to
+ * ensure it won't be magnified. It is not movable to the navigation bar.
  */
 public abstract class MirrorWindowControl {
     private static final String TAG = "MirrorWindowControl";
@@ -86,10 +84,9 @@ public abstract class MirrorWindowControl {
     /**
      * Shows the control UI.
      *
-     * @param binder the window token of the
      * {@link LayoutParams#TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY}  window.
      */
-    public final void showControl(IBinder binder) {
+    public final void showControl() {
         if (mControlsView != null) {
             Log.w(TAG, "control view is visible");
             return;
@@ -102,7 +99,6 @@ public abstract class MirrorWindowControl {
                 R.dimen.magnification_controls_size);
         lp.width = viewSize.x <= 0 ? defaultSize : viewSize.x;
         lp.height = viewSize.y <= 0 ? defaultSize : viewSize.y;
-        lp.token = binder;
         setDefaultParams(lp);
         setDefaultPosition(lp);
         mWindowManager.addView(mControlsView, lp);
@@ -113,7 +109,7 @@ public abstract class MirrorWindowControl {
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.type = LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+        lp.type = LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
         lp.format = PixelFormat.RGBA_8888;
         lp.setTitle(getWindowTitle());
     }

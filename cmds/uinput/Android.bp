@@ -1,0 +1,35 @@
+// Copyright 2020 The Android Open Source Project
+//
+
+package {
+    default_applicable_licenses: ["frameworks_base_cmds_uinput_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_cmds_uinput_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+java_binary {
+    name: "uinput",
+    wrapper: "uinput",
+    srcs: ["**/*.java",
+           ":uinputcommand_aidl"
+    ],
+    required: ["libuinputcommand_jni"],
+}
+
+filegroup {
+    name: "uinputcommand_aidl",
+    srcs: [
+        "src/com/android/commands/uinput/InputAbsInfo.aidl",
+    ],
+}

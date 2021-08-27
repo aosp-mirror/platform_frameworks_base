@@ -18,16 +18,13 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewStub;
-import android.view.ViewStub.OnInflateListener;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
-import androidx.annotation.DimenRes;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -42,17 +39,16 @@ import java.util.Comparator;
 /**
  * The container with notification stack scroller and quick settings inside.
  */
-public class NotificationsQuickSettingsContainer extends FrameLayout
-        implements OnInflateListener, FragmentListener,
-        AboveShelfObserver.HasViewAboveShelfChangedListener {
+public class NotificationsQuickSettingsContainer extends ConstraintLayout
+        implements FragmentListener, AboveShelfObserver.HasViewAboveShelfChangedListener {
 
     private FrameLayout mQsFrame;
-    private View mUserSwitcher;
     private NotificationStackScrollLayout mStackScroller;
     private View mKeyguardStatusBar;
-    private boolean mInflated;
     private boolean mQsExpanded;
     private boolean mCustomizerAnimating;
+    private boolean mCustomizing;
+    private boolean mDetailShowing;
 
     private int mBottomPadding;
     private int mStackScrollerMargin;
@@ -68,13 +64,10 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQsFrame = (FrameLayout) findViewById(R.id.qs_frame);
+        mQsFrame = findViewById(R.id.qs_frame);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
-        ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
-        userSwitcher.setOnInflateListener(this);
-        mUserSwitcher = userSwitcher;
     }
 
     @Override
@@ -90,22 +83,6 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        reloadWidth(mQsFrame, R.dimen.qs_panel_width);
-        reloadWidth(mStackScroller, R.dimen.notification_panel_width);
-    }
-
-    /**
-     * Loads the given width resource and sets it on the given View.
-     */
-    private void reloadWidth(View view, @DimenRes int width) {
-        LayoutParams params = (LayoutParams) view.getLayoutParams();
-        params.width = getResources().getDimensionPixelSize(width);
-        view.setLayoutParams(params);
-    }
-
-    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mBottomPadding = insets.getStableInsetBottom();
         setPadding(0, 0, 0, mBottomPadding);
@@ -114,34 +91,22 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        // Invert the order of the scroll view and user switcher such that the notifications receive
-        // touches first but the panel gets drawn above.
         mDrawingOrderedChildren.clear();
         mLayoutDrawingOrder.clear();
-        if (mInflated && mUserSwitcher.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mUserSwitcher);
-            mLayoutDrawingOrder.add(mUserSwitcher);
-        }
         if (mKeyguardStatusBar.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mKeyguardStatusBar);
             mLayoutDrawingOrder.add(mKeyguardStatusBar);
-        }
-        if (mStackScroller.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mStackScroller);
-            mLayoutDrawingOrder.add(mStackScroller);
         }
         if (mQsFrame.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mQsFrame);
             mLayoutDrawingOrder.add(mQsFrame);
         }
-
-        if (mHasViewsAboveShelf) {
-            // StackScroller needs to be on top
-            mDrawingOrderedChildren.remove(mStackScroller);
+        if (mStackScroller.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mStackScroller);
+            mLayoutDrawingOrder.add(mStackScroller);
         }
 
-        // Let's now find the order that the view has when drawing regulary by sorting
+        // Let's now find the order that the view has when drawing regularly by sorting
         mLayoutDrawingOrder.sort(mIndexComparator);
         super.dispatchDraw(canvas);
     }
@@ -153,14 +118,6 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
             return super.drawChild(canvas, mDrawingOrderedChildren.get(layoutIndex), drawingTime);
         } else {
             return super.drawChild(canvas, child, drawingTime);
-        }
-    }
-
-    @Override
-    public void onInflate(ViewStub stub, View inflated) {
-        if (stub == mUserSwitcher) {
-            mUserSwitcher = inflated;
-            mInflated = true;
         }
     }
 
@@ -185,7 +142,18 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     }
 
     public void setCustomizerShowing(boolean isShowing) {
-        if (isShowing) {
+        mCustomizing = isShowing;
+        updateBottomMargin();
+        mStackScroller.setQsCustomizerShowing(isShowing);
+    }
+
+    public void setDetailShowing(boolean isShowing) {
+        mDetailShowing = isShowing;
+        updateBottomMargin();
+    }
+
+    private void updateBottomMargin() {
+        if (mCustomizing || mDetailShowing) {
             // Clear out bottom paddings/margins so the qs customization can be full height.
             setPadding(0, 0, 0, 0);
             setBottomMargin(mStackScroller, 0);
@@ -193,7 +161,6 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
             setPadding(0, 0, 0, mBottomPadding);
             setBottomMargin(mStackScroller, mStackScrollerMargin);
         }
-        mStackScroller.setQsCustomizerShowing(isShowing);
     }
 
     private void setBottomMargin(View v, int bottomMargin) {

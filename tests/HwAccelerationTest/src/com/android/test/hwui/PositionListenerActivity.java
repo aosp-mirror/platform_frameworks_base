@@ -19,8 +19,13 @@ package com.android.test.hwui;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PointF;
+import android.graphics.RecordingCanvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -38,7 +43,44 @@ public class PositionListenerActivity extends Activity {
         ProgressBar spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         layout.addView(spinner);
 
-        ScrollView scrollingThing = new ScrollView(this);
+        ScrollView scrollingThing = new ScrollView(this) {
+            int setting = 0;
+            PointF opts[] = new PointF[] {
+                    new PointF(0, 0),
+                    new PointF(0, -1f),
+                    new PointF(1f, 0),
+                    new PointF(0, 1f),
+                    new PointF(-1f, 0),
+                    new PointF(-1f, 1f),
+            };
+            {
+                setWillNotDraw(false);
+            }
+
+            @Override
+            public boolean onTouchEvent(MotionEvent ev) {
+                if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+                    setting = (setting + 1) % opts.length;
+                    invalidate();
+                }
+                return super.onTouchEvent(ev);
+            }
+
+            @Override
+            protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+                RenderNode node = ((RecordingCanvas) canvas).mNode;
+                PointF dir = opts[setting];
+                float maxStretchAmount = 100f;
+                // Although we could do this in a single call, the real one won't be - so mimic that
+                if (dir.x != 0f) {
+                    node.stretch(dir.x, 0f, maxStretchAmount, maxStretchAmount);
+                }
+                if (dir.y != 0f) {
+                    node.stretch(0f, dir.y, maxStretchAmount, maxStretchAmount);
+                }
+            }
+        };
         scrollingThing.addView(new MyPositionReporter(this));
         layout.addView(scrollingThing);
 
@@ -49,6 +91,14 @@ public class PositionListenerActivity extends Activity {
         RenderNode mNode;
         int mCurrentCount = 0;
         int mTranslateY = 0;
+        Rect mPosition = new Rect();
+        float mWidth = 0f;
+        float mHeight = 0f;
+        RectF mMappedBounds = new RectF();
+        float mStretchX = 0.0f;
+        float mStretchY = 0.0f;
+        float mStretchMaxX = 0.0f;
+        float mStretchMaxY = 0.0f;
 
         MyPositionReporter(Context c) {
             super(c);
@@ -78,18 +128,45 @@ public class PositionListenerActivity extends Activity {
             canvas.drawRenderNode(mNode);
         }
 
+        void updateText() {
+            String posText =
+              "%d: Position %s, stretch width %f, height %f, vec %f,%f, amountX %f amountY %f mappedBounds %s";
+            setText(String.format(posText,
+                    mCurrentCount, mPosition.toShortString(), mWidth, mHeight,
+                    mStretchX, mStretchY, mStretchMaxX, mStretchMaxY,
+                    mMappedBounds.toShortString()));
+        }
+
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            post(() -> {
+            getHandler().postAtFrontOfQueue(() -> {
                 mCurrentCount++;
-                setText(String.format("%d: Position [%d, %d, %d, %d]", mCurrentCount,
-                        left, top, right, bottom));
+                mPosition.set(left, top, right, bottom);
+                updateText();
+            });
+        }
+
+        @Override
+        public void applyStretch(long frameNumber, float width, float height,
+                float vecX, float vecY,
+                float maxStretchX, float maxStretchY, float childRelativeLeft,
+                float childRelativeTop, float childRelativeRight, float childRelativeBottom) {
+            getHandler().postAtFrontOfQueue(() -> {
+                mWidth = width;
+                mHeight = height;
+                mStretchX = vecX;
+                mStretchY = vecY;
+                mStretchMaxX = maxStretchX;
+                mStretchMaxY = maxStretchY;
+                mMappedBounds.set(childRelativeLeft, childRelativeTop, childRelativeRight,
+                        childRelativeBottom);
+                updateText();
             });
         }
 
         @Override
         public void positionLost(long frameNumber) {
-            post(() -> {
+            getHandler().postAtFrontOfQueue(() -> {
                 mCurrentCount++;
                 setText(mCurrentCount + " No position");
             });

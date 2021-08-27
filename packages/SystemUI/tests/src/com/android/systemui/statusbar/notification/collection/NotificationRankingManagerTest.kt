@@ -21,6 +21,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
+import android.app.PendingIntent
+import android.app.Person
 import android.os.SystemClock
 import android.service.notification.NotificationListenerService.RankingMap
 import android.testing.AndroidTestingRunner
@@ -28,9 +30,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking
 import com.android.systemui.statusbar.NotificationMediaManager
+import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
@@ -40,7 +44,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
-import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -71,15 +74,17 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         notificationFilter = mock(NotificationFilter::class.java)
         rankingManager = TestableNotificationRankingManager(
                 lazyMedia,
-                mock(NotificationGroupManager::class.java),
+                mock(NotificationGroupManagerLegacy::class.java),
                 mock(HeadsUpManager::class.java),
                 notificationFilter,
                 mock(NotificationEntryManagerLogger::class.java),
                 sectionsManager,
                 personNotificationIdentifier,
-                HighPriorityProvider(personNotificationIdentifier,
-                    mock(NotificationGroupManager::class.java))
-        )
+                HighPriorityProvider(
+                        personNotificationIdentifier,
+                        mock(NotificationGroupManagerLegacy::class.java)),
+                mock(KeyguardEnvironment::class.java)
+                )
     }
 
     @Test
@@ -174,7 +179,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setOverrideGroupKey("")
                 .build()
 
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -194,7 +199,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
             whenever(it.isHeadsUp).thenReturn(true)
         }
 
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         assertEquals(listOf(b, a), rankingManager.updateRanking(null, listOf(a, b), "test"))
@@ -216,7 +221,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -232,7 +237,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(b))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_IMPORTANT_PERSON))
@@ -261,7 +266,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -277,7 +282,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(b))
                 .thenReturn(TYPE_FULL_PERSON)
 
         whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_FULL_PERSON))
@@ -400,7 +405,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         assertThat(rankingManager.updateRanking(null, listOf(a, b, c), "test"))
@@ -408,15 +413,84 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         assertThat(b.bucket).isEqualTo(BUCKET_FOREGROUND_SERVICE)
     }
 
+    @Test
+    fun testSort_importantCall() {
+        whenever(sectionsManager.isFilteringEnabled()).thenReturn(true)
+
+        val a = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(
+                        Notification.Builder(mContext, "test")
+                                .build())
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val b = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_DEFAULT) // high priority
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(mock(Notification::class.java).also { notif ->
+                    whenever(notif.isForegroundService).thenReturn(true)
+                    whenever(notif.isColorized).thenReturn(true)
+                })
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val cN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val c = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(cN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+
+        val dN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        Person.Builder().setName("caller").build(),
+                        mock(PendingIntent::class.java)))
+                .build()
+        val d = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_DEFAULT) // high priority
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(dN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
+                .thenReturn(TYPE_IMPORTANT_PERSON)
+
+        assertThat(rankingManager.updateRanking(null, listOf(a, b, c, d), "test"))
+                .containsExactly(b, d, c, a)
+        assertThat(d.bucket).isEqualTo(BUCKET_FOREGROUND_SERVICE)
+    }
+
     internal class TestableNotificationRankingManager(
         mediaManager: Lazy<NotificationMediaManager>,
-        groupManager: NotificationGroupManager,
+        groupManager: NotificationGroupManagerLegacy,
         headsUpManager: HeadsUpManager,
         filter: NotificationFilter,
         logger: NotificationEntryManagerLogger,
         sectionsFeatureManager: NotificationSectionsFeatureManager,
         peopleNotificationIdentifier: PeopleNotificationIdentifier,
-        highPriorityProvider: HighPriorityProvider
+        highPriorityProvider: HighPriorityProvider,
+        keyguardEnvironment: KeyguardEnvironment
     ) : NotificationRankingManager(
         mediaManager,
         groupManager,
@@ -425,7 +499,8 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         logger,
         sectionsFeatureManager,
         peopleNotificationIdentifier,
-        highPriorityProvider
+        highPriorityProvider,
+        keyguardEnvironment
     ) {
         fun applyTestRankingMap(r: RankingMap) {
             rankingMap = r

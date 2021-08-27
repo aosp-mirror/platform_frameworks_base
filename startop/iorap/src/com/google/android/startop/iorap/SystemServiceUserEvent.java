@@ -36,15 +36,15 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class SystemServiceUserEvent implements Parcelable {
 
-    /** @see com.android.server.SystemService#onStartUser */
+    /** @see com.android.server.SystemService#onUserStarting */
     public static final int TYPE_START_USER = 0;
-    /** @see com.android.server.SystemService#onUnlockUser */
+    /** @see com.android.server.SystemService#onUserUnlocking */
     public static final int TYPE_UNLOCK_USER = 1;
-    /** @see com.android.server.SystemService#onSwitchUser*/
+    /** @see com.android.server.SystemService#onUserSwitching*/
     public static final int TYPE_SWITCH_USER = 2;
-    /** @see com.android.server.SystemService#onStopUser */
+    /** @see com.android.server.SystemService#onUserStopping */
     public static final int TYPE_STOP_USER = 3;
-    /** @see com.android.server.SystemService#onCleanupUser */
+    /** @see com.android.server.SystemService#onUserStopped */
     public static final int TYPE_CLEANUP_USER = 4;
     private static final int TYPE_MAX = TYPE_CLEANUP_USER;
 

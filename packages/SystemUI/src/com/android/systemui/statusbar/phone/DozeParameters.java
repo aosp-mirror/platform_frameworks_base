@@ -24,23 +24,32 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Retrieve doze information
  */
-@Singleton
+@SysUISingleton
 public class DozeParameters implements TunerService.Tunable,
-        com.android.systemui.plugins.statusbar.DozeParameters {
+        com.android.systemui.plugins.statusbar.DozeParameters, Dumpable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final boolean FORCE_NO_BLANKING =
             SystemProperties.getBoolean("debug.force_no_blanking", false);
@@ -52,6 +61,11 @@ public class DozeParameters implements TunerService.Tunable,
 
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
     private final Resources mResources;
+    private final BatteryController mBatteryController;
+    private final FeatureFlags mFeatureFlags;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+
+    private final Set<Callback> mCallbacks = new HashSet<>();
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
@@ -62,33 +76,27 @@ public class DozeParameters implements TunerService.Tunable,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             PowerManager powerManager,
-            TunerService tunerService) {
+            BatteryController batteryController,
+            TunerService tunerService,
+            DumpManager dumpManager,
+            FeatureFlags featureFlags,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
+        mBatteryController = batteryController;
+        dumpManager.registerDumpable("DozeParameters", this);
 
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
         mPowerManager = powerManager;
         mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
+        mFeatureFlags = featureFlags;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         tunerService.addTunable(
                 this,
                 Settings.Secure.DOZE_ALWAYS_ON,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-    }
-
-    public void dump(PrintWriter pw) {
-        pw.println("  DozeParameters:");
-        pw.print("    getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
-        pw.print("    getPulseDuration(): "); pw.println(getPulseDuration());
-        pw.print("    getPulseInDuration(): "); pw.println(getPulseInDuration());
-        pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
-        pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
-        pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
-        pw.print("    getVibrateOnSigMotion(): "); pw.println(getVibrateOnSigMotion());
-        pw.print("    getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
-        pw.print("    getProxCheckBeforePulse(): "); pw.println(getProxCheckBeforePulse());
-        pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
     }
 
     public boolean getDisplayStateSupported() {
@@ -136,8 +144,23 @@ public class DozeParameters implements TunerService.Tunable,
         return getBoolean("doze.pulse.proxcheck", R.bool.doze_proximity_check_before_pulse);
     }
 
+    /**
+     * @return true if we should only register for sensors that use the proximity sensor when the
+     * display state is {@link android.view.Display.STATE_OFF},
+     * {@link android.view.Display.STATE_DOZE} or {@link android.view.Display.STATE_DOZE_SUSPEND}
+     */
+    public boolean getSelectivelyRegisterSensorsUsingProx() {
+        return getBoolean("doze.prox.selectively_register",
+                R.bool.doze_selectively_register_prox);
+    }
+
     public int getPickupVibrationThreshold() {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
+    }
+
+    public int getQuickPickupAodDuration() {
+        return getInt("doze.gesture.quickpickup.duration",
+                R.integer.doze_quick_pickup_aod_duration);
     }
 
     /**
@@ -164,7 +187,11 @@ public class DozeParameters implements TunerService.Tunable,
      * @return {@code true} if enabled and available.
      */
     public boolean getAlwaysOn() {
-        return mDozeAlwaysOn;
+        return mDozeAlwaysOn && !mBatteryController.isAodPowerSave();
+    }
+
+    public boolean isQuickPickupEnabled() {
+        return mAmbientDisplayConfiguration.quickPickupSensorEnabled(UserHandle.USER_CURRENT);
     }
 
     /**
@@ -190,6 +217,25 @@ public class DozeParameters implements TunerService.Tunable,
         mPowerManager.setDozeAfterScreenOff(!controlScreenOffAnimation);
     }
 
+    /**
+     * Whether we want to control the screen off animation when the device is unlocked. If we do,
+     * we'll animate in AOD before turning off the screen, rather than simply fading to black and
+     * then abruptly showing AOD.
+     */
+    public boolean shouldControlUnlockedScreenOff() {
+        return mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
+    }
+
+    /**
+     * Whether we're capable of controlling the screen off animation if we want to. This isn't
+     * possible if AOD isn't even enabled or if the flag is disabled.
+     */
+    public boolean canControlUnlockedScreenOff() {
+        return getAlwaysOn()
+                && mFeatureFlags.useNewLockscreenAnimations()
+                && !getDisplayNeedsBlanking();
+    }
+
     private boolean getBoolean(String propName, int resId) {
         return SystemProperties.getBoolean(propName, mResources.getBoolean(resId));
     }
@@ -207,12 +253,62 @@ public class DozeParameters implements TunerService.Tunable,
         return mResources.getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
     }
 
+    /**
+     * Whether the single tap sensor uses the proximity sensor.
+     */
+    public boolean singleTapUsesProx() {
+        return mResources.getBoolean(R.bool.doze_single_tap_uses_prox);
+    }
+
+    /**
+     * Whether the long press sensor uses the proximity sensor.
+     */
+    public boolean longPressUsesProx() {
+        return mResources.getBoolean(R.bool.doze_long_press_uses_prox);
+    }
+
+    /**
+     * Callback to listen for DozeParameter changes.
+     */
+    public void addCallback(Callback callback) {
+        mCallbacks.add(callback);
+    }
+
+    /**
+     * Remove callback that listens for DozeParameter changes.
+     */
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        for (Callback callback : mCallbacks) {
+            callback.onAlwaysOnChange();
+        }
     }
 
-    public AlwaysOnDisplayPolicy getPolicy() {
-        return mAlwaysOnPolicy;
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.print("getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
+        pw.print("getPulseDuration(): "); pw.println(getPulseDuration());
+        pw.print("getPulseInDuration(): "); pw.println(getPulseInDuration());
+        pw.print("getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
+        pw.print("getPulseOutDuration(): "); pw.println(getPulseOutDuration());
+        pw.print("getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
+        pw.print("getVibrateOnSigMotion(): "); pw.println(getVibrateOnSigMotion());
+        pw.print("getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
+        pw.print("getProxCheckBeforePulse(): "); pw.println(getProxCheckBeforePulse());
+        pw.print("getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
+        pw.print("getSelectivelyRegisterSensorsUsingProx(): ");
+        pw.println(getSelectivelyRegisterSensorsUsingProx());
+    }
+
+    interface Callback {
+        /**
+         * Invoked when the value of getAlwaysOn may have changed.
+         */
+        void onAlwaysOnChange();
     }
 }

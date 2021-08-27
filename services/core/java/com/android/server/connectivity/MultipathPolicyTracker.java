@@ -26,6 +26,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
+import static android.net.NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -60,8 +62,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DebugUtils;
+import android.util.Log;
 import android.util.Range;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -95,7 +97,11 @@ public class MultipathPolicyTracker {
 
     private static final boolean DBG = false;
 
+    // This context is for the current user.
     private final Context mContext;
+    // This context is for all users, so register a BroadcastReceiver which can receive intents from
+    // all users.
+    private final Context mUserAllContext;
     private final Handler mHandler;
     private final Clock mClock;
     private final Dependencies mDeps;
@@ -132,6 +138,7 @@ public class MultipathPolicyTracker {
 
     public MultipathPolicyTracker(Context ctx, Handler handler, Dependencies deps) {
         mContext = ctx;
+        mUserAllContext = ctx.createContextAsUser(UserHandle.ALL, 0 /* flags */);
         mHandler = handler;
         mClock = deps.getClock();
         mDeps = deps;
@@ -155,8 +162,8 @@ public class MultipathPolicyTracker {
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiverAsUser(
-                mConfigChangeReceiver, UserHandle.ALL, intentFilter, null, mHandler);
+        mUserAllContext.registerReceiver(
+                mConfigChangeReceiver, intentFilter, null /* broadcastPermission */, mHandler);
     }
 
     public void shutdown() {
@@ -167,7 +174,7 @@ public class MultipathPolicyTracker {
         }
         mMultipathTrackers.clear();
         mResolver.unregisterContentObserver(mSettingsObserver);
-        mContext.unregisterReceiver(mConfigChangeReceiver);
+        mUserAllContext.unregisterReceiver(mConfigChangeReceiver);
     }
 
     // Called on an arbitrary binder thread.
@@ -221,11 +228,12 @@ public class MultipathPolicyTracker {
             mNetworkTemplate = new NetworkTemplate(
                     NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
                     null, NetworkStats.METERED_ALL, NetworkStats.ROAMING_ALL,
-                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL);
+                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
+                    SUBSCRIBER_ID_MATCH_RULE_EXACT);
             mUsageCallback = new UsageCallback() {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
-                    if (DBG) Slog.d(TAG, "onThresholdReached for network " + network);
+                    if (DBG) Log.d(TAG, "onThresholdReached for network " + network);
                     mMultipathBudget = 0;
                     updateMultipathBudget();
                 }
@@ -247,7 +255,7 @@ public class MultipathPolicyTracker {
             final long bytes = getNetworkTotalBytes(
                     start.toInstant().toEpochMilli(),
                     end.toInstant().toEpochMilli());
-            if (DBG) Slog.d(TAG, "Non-default data usage: " + bytes);
+            if (DBG) Log.d(TAG, "Non-default data usage: " + bytes);
             return bytes;
         }
 
@@ -256,7 +264,7 @@ public class MultipathPolicyTracker {
                 return LocalServices.getService(NetworkStatsManagerInternal.class)
                         .getNetworkTotalBytes(mNetworkTemplate, start, end);
             } catch (RuntimeException e) {
-                Slog.w(TAG, "Failed to get data usage: " + e);
+                Log.w(TAG, "Failed to get data usage: " + e);
                 return -1;
             }
         }
@@ -269,7 +277,8 @@ public class MultipathPolicyTracker {
                     null /* networkId, unused for matching mobile networks */,
                     !nc.hasCapability(NET_CAPABILITY_NOT_ROAMING),
                     !nc.hasCapability(NET_CAPABILITY_NOT_METERED),
-                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */);
+                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */,
+                    OEM_MANAGED_ALL);
         }
 
         private long getRemainingDailyBudget(long limitBytes,
@@ -321,17 +330,17 @@ public class MultipathPolicyTracker {
         void updateMultipathBudget() {
             long quota = LocalServices.getService(NetworkPolicyManagerInternal.class)
                     .getSubscriptionOpportunisticQuota(this.network, QUOTA_TYPE_MULTIPATH);
-            if (DBG) Slog.d(TAG, "Opportunistic quota from data plan: " + quota + " bytes");
+            if (DBG) Log.d(TAG, "Opportunistic quota from data plan: " + quota + " bytes");
 
             // Fallback to user settings-based quota if not available from phone plan
             if (quota == OPPORTUNISTIC_QUOTA_UNKNOWN) {
                 quota = getUserPolicyOpportunisticQuotaBytes();
-                if (DBG) Slog.d(TAG, "Opportunistic quota from user policy: " + quota + " bytes");
+                if (DBG) Log.d(TAG, "Opportunistic quota from user policy: " + quota + " bytes");
             }
 
             if (quota == OPPORTUNISTIC_QUOTA_UNKNOWN) {
                 quota = getDefaultDailyMultipathQuotaBytes();
-                if (DBG) Slog.d(TAG, "Setting quota: " + quota + " bytes");
+                if (DBG) Log.d(TAG, "Setting quota: " + quota + " bytes");
             }
 
             // TODO: re-register if day changed: budget may have run out but should be refreshed.
@@ -339,7 +348,7 @@ public class MultipathPolicyTracker {
                 // If there is already a usage callback pending , there's no need to re-register it
                 // if the quota hasn't changed. The callback will simply fire as expected when the
                 // budget is spent.
-                if (DBG) Slog.d(TAG, "Quota still " + quota + ", not updating.");
+                if (DBG) Log.d(TAG, "Quota still " + quota + ", not updating.");
                 return;
             }
             mQuota = quota;
@@ -359,8 +368,9 @@ public class MultipathPolicyTracker {
             // since last time, so even if this is called very often the budget will not snap to 0
             // as soon as there are less than 2MB left for today.
             if (budget > NetworkStatsManager.MIN_THRESHOLD_BYTES) {
-                if (DBG) Slog.d(TAG, "Setting callback for " + budget +
-                        " bytes on network " + network);
+                if (DBG) {
+                    Log.d(TAG, "Setting callback for " + budget + " bytes on network " + network);
+                }
                 registerUsageCallback(budget);
             } else {
                 maybeUnregisterUsageCallback();
@@ -397,7 +407,7 @@ public class MultipathPolicyTracker {
 
         private void maybeUnregisterUsageCallback() {
             if (haveMultipathBudget()) {
-                if (DBG) Slog.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
+                if (DBG) Log.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
                 mStatsManager.unregisterUsageCallback(mUsageCallback);
                 mMultipathBudget = 0;
             }
@@ -462,9 +472,9 @@ public class MultipathPolicyTracker {
                 try {
                     mMultipathTrackers.put(network, new MultipathTracker(network, nc));
                 } catch (IllegalStateException e) {
-                    Slog.e(TAG, "Can't track mobile network " + network + ": " + e.getMessage());
+                    Log.e(TAG, "Can't track mobile network " + network + ": " + e.getMessage());
                 }
-                if (DBG) Slog.d(TAG, "Tracking mobile network " + network);
+                if (DBG) Log.d(TAG, "Tracking mobile network " + network);
             }
 
             @Override
@@ -474,7 +484,7 @@ public class MultipathPolicyTracker {
                     existing.shutdown();
                     mMultipathTrackers.remove(network);
                 }
-                if (DBG) Slog.d(TAG, "No longer tracking mobile network " + network);
+                if (DBG) Log.d(TAG, "No longer tracking mobile network " + network);
             }
         };
 
@@ -519,16 +529,16 @@ public class MultipathPolicyTracker {
 
         @Override
         public void onChange(boolean selfChange) {
-            Slog.wtf(TAG, "Should never be reached.");
+            Log.wtf(TAG, "Should never be reached.");
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (!Settings.Global.getUriFor(NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES)
                     .equals(uri)) {
-                Slog.wtf(TAG, "Unexpected settings observation: " + uri);
+                Log.wtf(TAG, "Unexpected settings observation: " + uri);
             }
-            if (DBG) Slog.d(TAG, "Settings change: updating budgets.");
+            if (DBG) Log.d(TAG, "Settings change: updating budgets.");
             updateAllMultipathBudgets();
         }
     }
@@ -536,7 +546,7 @@ public class MultipathPolicyTracker {
     private final class ConfigChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DBG) Slog.d(TAG, "Configuration change: updating budgets.");
+            if (DBG) Log.d(TAG, "Configuration change: updating budgets.");
             updateAllMultipathBudgets();
         }
     }

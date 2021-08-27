@@ -22,16 +22,7 @@
     <integer name="qs_footer_actions_width">0</integer>
     <integer name="qs_footer_actions_weight">1</integer>
 
-    <!-- Maximum number of bubbles to render and animate at one time. While the animations used are
-         lightweight translation animations, this number can be reduced on lower end devices if any
-         performance issues arise. -->
-    <integer name="bubbles_max_rendered">5</integer>
-
-    <!-- Number of columns in bubble overflow. -->
-    <integer name="bubbles_overflow_columns">4</integer>
-
-    <!-- Maximum number of bubbles we allow in overflow before we dismiss the oldest one. -->
-    <integer name="bubbles_max_overflow">16</integer>
+    <integer name="qs_security_footer_maxLines">2</integer>
 
     <integer name="magnification_default_scale">2</integer>
 

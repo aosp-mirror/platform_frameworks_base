@@ -16,8 +16,12 @@
 
 package android.util;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkArgumentFinite;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Immutable class for describing width and height dimensions in some arbitrary
@@ -26,7 +30,7 @@ import static com.android.internal.util.Preconditions.checkArgumentFinite;
  * Width and height are finite values stored as a floating point representation.
  * </p>
  */
-public final class SizeF {
+public final class SizeF implements Parcelable {
     /**
      * Create a new immutable SizeF instance.
      *
@@ -161,4 +165,43 @@ public final class SizeF {
 
     private final float mWidth;
     private final float mHeight;
+
+    /**
+     * Parcelable interface methods
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Write this size to the specified parcel. To restore a size from a parcel, use the
+     * {@link #CREATOR}.
+     * @param out The parcel to write the point's coordinates into
+     */
+    @Override
+    public void writeToParcel(@NonNull Parcel out, int flags) {
+        out.writeFloat(mWidth);
+        out.writeFloat(mHeight);
+    }
+
+    public static final @NonNull Creator<SizeF> CREATOR = new Creator<SizeF>() {
+        /**
+         * Return a new size from the data in the specified parcel.
+         */
+        @Override
+        public @NonNull SizeF createFromParcel(@NonNull Parcel in) {
+            float width = in.readFloat();
+            float height = in.readFloat();
+            return new SizeF(width, height);
+        }
+
+        /**
+         * Return an array of sizes of the specified size.
+         */
+        @Override
+        public @NonNull SizeF[] newArray(int size) {
+            return new SizeF[size];
+        }
+    };
 }

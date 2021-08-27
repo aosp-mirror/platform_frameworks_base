@@ -16,6 +16,13 @@
 
 package android.inputmethodservice;
 
+import static android.inputmethodservice.SoftInputWindowProto.BOUNDS;
+import static android.inputmethodservice.SoftInputWindowProto.GRAVITY;
+import static android.inputmethodservice.SoftInputWindowProto.NAME;
+import static android.inputmethodservice.SoftInputWindowProto.TAKES_FOCUS;
+import static android.inputmethodservice.SoftInputWindowProto.WINDOW_STATE;
+import static android.inputmethodservice.SoftInputWindowProto.WINDOW_TYPE;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -25,6 +32,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -361,5 +369,16 @@ public class SoftInputWindow extends Dialog {
             default:
                 throw new IllegalStateException("Unknown state=" + state);
         }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(NAME, mName);
+        proto.write(WINDOW_TYPE, mWindowType);
+        proto.write(GRAVITY, mGravity);
+        proto.write(TAKES_FOCUS, mTakesFocus);
+        mBounds.dumpDebug(proto, BOUNDS);
+        proto.write(WINDOW_STATE, mWindowState);
+        proto.end(token);
     }
 }

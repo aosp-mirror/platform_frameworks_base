@@ -165,6 +165,23 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
     }
 
+    /**
+     * Ensures that the {@link PackageBackwardCompatibility} uses a
+     * {@link AndroidNetIpSecIkeUpdater}.
+     */
+    @Test
+    public void android_net_ipsec_ike_in_usesLibraries() {
+        ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.CUR_DEVELOPMENT)
+                .addUsesLibrary("android.net.ipsec.ike")
+                .hideAsParsed());
+
+        ParsingPackage after = PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.CUR_DEVELOPMENT);
+
+        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+    }
+
     private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
         checkBackwardsCompatibility(before, after, PackageBackwardCompatibility::getInstance);
     }

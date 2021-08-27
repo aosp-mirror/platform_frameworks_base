@@ -15,5 +15,9 @@
   ~ limitations under the License
   -->
 <resources>
-    <integer name="quick_settings_num_columns">3</integer>
+    <!-- Max number of columns for quick controls area -->
+    <integer name="controls_max_columns">2</integer>
+
+    <!-- Whether to use the split 2-column notification shade -->
+    <bool name="config_use_split_notification_shade">true</bool>
 </resources>

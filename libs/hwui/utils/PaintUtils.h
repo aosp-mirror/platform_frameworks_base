@@ -20,7 +20,6 @@
 #include <utils/Blur.h>
 
 #include <SkColorFilter.h>
-#include <SkDrawLooper.h>
 #include <SkPaint.h>
 #include <SkShader.h>
 
@@ -53,18 +52,10 @@ public:
         return mode == SkBlendMode::kSrcOver || mode == SkBlendMode::kSrc;
     }
 
-    static bool isBlendedShader(const SkShader* shader) {
-        if (shader == nullptr) {
-            return false;
-        }
-        return !shader->isOpaque();
-    }
+    static bool isBlendedShader(const SkShader* shader) { return shader && !shader->isOpaque(); }
 
     static bool isBlendedColorFilter(const SkColorFilter* filter) {
-        if (filter == nullptr) {
-            return false;
-        }
-        return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
+        return filter && !filter->isAlphaUnchanged();
     }
 
     static inline SkBlendMode getBlendModeDirect(const SkPaint* paint) {

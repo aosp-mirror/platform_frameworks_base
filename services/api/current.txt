@@ -1,50 +1,10 @@
 // Signature format: 2.0
-package com.android.permission.persistence {
-
-  public interface RuntimePermissionsPersistence {
-    method @NonNull public static com.android.permission.persistence.RuntimePermissionsPersistence createInstance();
-    method public void deleteForUser(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.permission.persistence.RuntimePermissionsState readForUser(@NonNull android.os.UserHandle);
-    method public void writeForUser(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
-  }
-
-  public final class RuntimePermissionsState {
-    ctor public RuntimePermissionsState(int, @Nullable String, @NonNull java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>>, @NonNull java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>>);
-    method @Nullable public String getFingerprint();
-    method @NonNull public java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>> getPackagePermissions();
-    method @NonNull public java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>> getSharedUserPermissions();
-    method public int getVersion();
-    field public static final int NO_VERSION = -1; // 0xffffffff
-  }
-
-  public static final class RuntimePermissionsState.PermissionState {
-    ctor public RuntimePermissionsState.PermissionState(@NonNull String, boolean, int);
-    method public int getFlags();
-    method @NonNull public String getName();
-    method public boolean isGranted();
-  }
-
-}
-
-package com.android.role.persistence {
-
-  public interface RolesPersistence {
-    method @NonNull public static com.android.role.persistence.RolesPersistence createInstance();
-    method public void deleteForUser(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.role.persistence.RolesState readForUser(@NonNull android.os.UserHandle);
-    method public void writeForUser(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
-  }
-
-  public final class RolesState {
-    ctor public RolesState(int, @Nullable String, @NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.String>>);
-    method @Nullable public String getPackagesHash();
-    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getRoles();
-    method public int getVersion();
-  }
-
-}
-
 package com.android.server {
+
+  public final class LocalManagerRegistry {
+    method public static <T> void addManager(@NonNull Class<T>, @NonNull T);
+    method @Nullable public static <T> T getManager(@NonNull Class<T>);
+  }
 
   public abstract class SystemService {
     ctor public SystemService(@NonNull android.content.Context);
@@ -71,6 +31,45 @@ package com.android.server {
 
   public static final class SystemService.TargetUser {
     method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
+}
+
+package com.android.server.am {
+
+  public interface ActivityManagerLocal {
+    method public boolean canStartForegroundService(int, int, @NonNull String);
+  }
+
+}
+
+package com.android.server.role {
+
+  public interface RoleServicePlatformHelper {
+    method @NonNull public String computePackageStateHash(int);
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getLegacyRoleState(int);
+  }
+
+}
+
+package com.android.server.stats {
+
+  public final class StatsHelper {
+    method public static void sendStatsdReadyBroadcast(@NonNull android.content.Context);
+  }
+
+}
+
+package com.android.server.usage {
+
+  public interface StorageStatsManagerLocal {
+    method public void registerStorageStatsAugmenter(@NonNull com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter, @NonNull String);
+  }
+
+  public static interface StorageStatsManagerLocal.StorageStatsAugmenter {
+    method public void augmentStatsForPackageForUser(@NonNull android.content.pm.PackageStats, @NonNull String, @NonNull android.os.UserHandle, boolean);
+    method public void augmentStatsForUid(@NonNull android.content.pm.PackageStats, int, boolean);
+    method public void augmentStatsForUser(@NonNull android.content.pm.PackageStats, @NonNull android.os.UserHandle);
   }
 
 }

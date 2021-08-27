@@ -20,6 +20,7 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,6 +64,16 @@ public final class HdmiControlServiceWrapper {
         @Override
         public void oneTouchPlay(IHdmiControlCallback callback) {
             HdmiControlServiceWrapper.this.oneTouchPlay(callback);
+        }
+
+        @Override
+        public void toggleAndFollowTvPower() {
+            HdmiControlServiceWrapper.this.toggleAndFollowTvPower();
+        }
+
+        @Override
+        public boolean shouldHandleTvPowerKey() {
+            return HdmiControlServiceWrapper.this.shouldHandleTvPowerKey();
         }
 
         @Override
@@ -262,17 +273,6 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
-            HdmiControlServiceWrapper.this.setHdmiCecVolumeControlEnabled(
-                    isHdmiCecVolumeControlEnabled);
-        }
-
-        @Override
-        public boolean isHdmiCecVolumeControlEnabled() {
-            return HdmiControlServiceWrapper.this.isHdmiCecVolumeControlEnabled();
-        }
-
-        @Override
         public void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute) {
             HdmiControlServiceWrapper.this.reportAudioStatus(deviceType, volume, maxVolume, isMute);
         }
@@ -292,6 +292,53 @@ public final class HdmiControlServiceWrapper {
         public void removeHdmiCecVolumeControlFeatureListener(
                 IHdmiCecVolumeControlFeatureListener listener) {
             HdmiControlServiceWrapper.this.removeHdmiCecVolumeControlFeatureListener(listener);
+        }
+
+        @Override
+        public void addCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.addCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.removeCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public List<String> getUserCecSettings() {
+            return HdmiControlServiceWrapper.this.getUserCecSettings();
+        }
+
+        @Override
+        public List<String> getAllowedCecSettingStringValues(String name) {
+            return HdmiControlServiceWrapper.this.getAllowedCecSettingStringValues(name);
+        }
+
+        @Override
+        public int[] getAllowedCecSettingIntValues(String name) {
+            return HdmiControlServiceWrapper.this.getAllowedCecSettingIntValues(name);
+        }
+
+        @Override
+        public String getCecSettingStringValue(String name) {
+            return HdmiControlServiceWrapper.this.getCecSettingStringValue(name);
+        }
+
+        @Override
+        public void setCecSettingStringValue(String name, String value) {
+            HdmiControlServiceWrapper.this.setCecSettingStringValue(name, value);
+        }
+
+        @Override
+        public int getCecSettingIntValue(String name) {
+            return HdmiControlServiceWrapper.this.getCecSettingIntValue(name);
+        }
+
+        @Override
+        public void setCecSettingIntValue(String name, int value) {
+            HdmiControlServiceWrapper.this.setCecSettingIntValue(name, value);
         }
     };
 
@@ -322,6 +369,14 @@ public final class HdmiControlServiceWrapper {
 
     /** @hide */
     public void oneTouchPlay(IHdmiControlCallback callback) {}
+
+    /** @hide */
+    public void toggleAndFollowTvPower() {}
+
+    /** @hide */
+    public boolean shouldHandleTvPowerKey() {
+        return true;
+    }
 
     /** @hide */
     public void queryDisplayStatus(IHdmiControlCallback callback) {}
@@ -466,4 +521,45 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
+
+    /** @hide */
+    public void addCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
+
+    /** @hide */
+    public void removeCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
+
+    /** @hide */
+    public List<String> getUserCecSettings() {
+        return new ArrayList<>();
+    }
+
+    /** @hide */
+    public List<String> getAllowedCecSettingStringValues(String name) {
+        return new ArrayList<>();
+    }
+
+    /** @hide */
+    public int[] getAllowedCecSettingIntValues(String name) {
+        return new int[0];
+    }
+
+    /** @hide */
+    public String getCecSettingStringValue(String name) {
+        return "";
+    }
+
+    /** @hide */
+    public void setCecSettingStringValue(String name, String value) {
+    }
+
+    /** @hide */
+    public int getCecSettingIntValue(String name) {
+        return 0;
+    }
+
+    /** @hide */
+    public void setCecSettingIntValue(String name, int value) {
+    }
 }

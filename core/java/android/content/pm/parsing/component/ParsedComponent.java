@@ -18,10 +18,13 @@ package android.content.pm.parsing.component;
 
 import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
+import static java.util.Collections.emptyMap;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.pm.PackageManager.Property;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +38,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /** @hide */
 public abstract class ParsedComponent implements Parcelable {
@@ -70,6 +74,8 @@ public abstract class ParsedComponent implements Parcelable {
     @Nullable
     protected Bundle metaData;
 
+    private Map<String, Property> mProperties = emptyMap();
+
     ParsedComponent() {
 
     }
@@ -94,6 +100,11 @@ public abstract class ParsedComponent implements Parcelable {
 
     public void addIntent(ParsedIntentInfo intent) {
         this.intents = CollectionUtils.add(this.intents, intent);
+    }
+
+    /** Add a property to the component */
+    public void addProperty(@NonNull Property property) {
+        this.mProperties = CollectionUtils.add(this.mProperties, property.getName(), property);
     }
 
     @NonNull
@@ -142,6 +153,7 @@ public abstract class ParsedComponent implements Parcelable {
         sForInternedString.parcel(this.packageName, dest, flags);
         sForIntentInfos.parcel(this.getIntents(), dest, flags);
         dest.writeBundle(this.metaData);
+        dest.writeMap(this.mProperties);
     }
 
     protected ParsedComponent(Parcel in) {
@@ -160,6 +172,7 @@ public abstract class ParsedComponent implements Parcelable {
         this.packageName = sForInternedString.unparcel(in);
         this.intents = sForIntentInfos.unparcel(in);
         this.metaData = in.readBundle(boot);
+        this.mProperties = in.readHashMap(boot);
     }
 
     @NonNull
@@ -204,5 +217,10 @@ public abstract class ParsedComponent implements Parcelable {
     @Nullable
     public Bundle getMetaData() {
         return metaData;
+    }
+
+    @NonNull
+    public Map<String, Property> getProperties() {
+        return mProperties;
     }
 }

@@ -31,7 +31,7 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,7 +62,7 @@ public abstract class ContentSuggestionsService extends Service {
 
     private final IContentSuggestionsService mInterface = new IContentSuggestionsService.Stub() {
         @Override
-        public void provideContextImage(int taskId, GraphicBuffer contextImage,
+        public void provideContextImage(int taskId, HardwareBuffer contextImage,
                 int colorSpaceId, Bundle imageContextRequestExtras) {
             if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)
                     && contextImage != null) {

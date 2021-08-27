@@ -52,6 +52,7 @@ public class LooperStatsService extends Binder {
     private static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
     private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
+    private static final String SETTINGS_IGNORE_BATTERY_STATUS_KEY = "ignore_battery_status";
     private static final String DEBUG_SYS_LOOPER_STATS_ENABLED =
             "debug.sys.looper_stats_enabled";
     private static final int DEFAULT_SAMPLING_INTERVAL = 1000;
@@ -64,6 +65,7 @@ public class LooperStatsService extends Binder {
     // Default should be false so that the first call to #setEnabled installed the looper observer.
     private boolean mEnabled = false;
     private boolean mTrackScreenInteractive = false;
+    private boolean mIgnoreBatteryStatus = LooperStats.DEFAULT_IGNORE_BATTERY_STATUS;
 
     private LooperStatsService(Context context, LooperStats stats) {
         this.mContext = context;
@@ -85,6 +87,9 @@ public class LooperStatsService extends Binder {
         setTrackScreenInteractive(
                 parser.getBoolean(SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY,
                 DEFAULT_TRACK_SCREEN_INTERACTIVE));
+        setIgnoreBatteryStatus(
+                parser.getBoolean(SETTINGS_IGNORE_BATTERY_STATUS_KEY,
+                LooperStats.DEFAULT_IGNORE_BATTERY_STATUS));
         // Manually specified value takes precedence over Settings.
         setEnabled(SystemProperties.getBoolean(
                 DEBUG_SYS_LOOPER_STATS_ENABLED,
@@ -164,6 +169,14 @@ public class LooperStatsService extends Binder {
     private void setTrackScreenInteractive(boolean enabled) {
         if (mTrackScreenInteractive != enabled) {
             mTrackScreenInteractive = enabled;
+            mStats.reset();
+        }
+    }
+
+    private void setIgnoreBatteryStatus(boolean ignore) {
+        if (mIgnoreBatteryStatus != ignore) {
+            mStats.setIgnoreBatteryStatus(ignore);
+            mIgnoreBatteryStatus = ignore;
             mStats.reset();
         }
     }

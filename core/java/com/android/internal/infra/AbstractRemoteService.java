@@ -58,9 +58,12 @@ import java.util.ArrayList;
  * @param <S> the concrete remote service class
  * @param <I> the interface of the binder service
  *
+ * @deprecated Use {@link ServiceConnector} to manage remote service connections
+ *
  * @hide
  */
 //TODO(b/117779333): improve javadoc above instead of using Autofill as an example
+@Deprecated
 public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I>,
         I extends IInterface> implements DeathRecipient {
     private static final int MSG_BIND = 1;
@@ -85,7 +88,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private final int mBindingFlags;
     protected I mService;
 
-    private boolean mBinding;
+    private boolean mConnecting;
     private boolean mDestroyed;
     private boolean mServiceDied;
     private boolean mCompleted;
@@ -225,6 +228,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         if (mService != null) {
             mService.asBinder().unlinkToDeath(this, 0);
         }
+        mConnecting = true;
         mService = null;
         mServiceDied = true;
         cancelScheduledUnbind();
@@ -431,20 +435,20 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     }
 
     private void handleEnsureBound() {
-        if (handleIsBound() || mBinding) return;
+        if (handleIsBound() || mConnecting) return;
 
         if (mVerbose) Slog.v(mTag, "ensureBound()");
-        mBinding = true;
+        mConnecting = true;
 
         final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
-                | mBindingFlags;
+                | Context.BIND_INCLUDE_CAPABILITIES | mBindingFlags;
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                 mHandler, new UserHandle(mUserId));
 
         if (!willBind) {
             Slog.w(mTag, "could not bind to " + mIntent + " using flags " + flags);
-            mBinding = false;
+            mConnecting = false;
 
             if (!mServiceDied) {
                 handleBinderDied();
@@ -453,10 +457,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     }
 
     private void handleEnsureUnbound() {
-        if (!handleIsBound() && !mBinding) return;
+        if (!handleIsBound() && !mConnecting) return;
 
         if (mVerbose) Slog.v(mTag, "ensureUnbound()");
-        mBinding = false;
+        mConnecting = false;
         if (handleIsBound()) {
             handleOnConnectedStateChangedInternal(false);
             if (mService != null) {
@@ -472,12 +476,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (mVerbose) Slog.v(mTag, "onServiceConnected()");
-            if (mDestroyed || !mBinding) {
+            if (mDestroyed || !mConnecting) {
                 // This is abnormal. Unbinding the connection has been requested already.
                 Slog.wtf(mTag, "onServiceConnected() was dispatched after unbindService.");
                 return;
             }
-            mBinding = false;
+            mConnecting = false;
             try {
                 service.linkToDeath(AbstractRemoteService.this, 0);
             } catch (RemoteException re) {
@@ -492,7 +496,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (mVerbose) Slog.v(mTag, "onServiceDisconnected()");
-            mBinding = true;
+            mConnecting = true;
             mService = null;
         }
 

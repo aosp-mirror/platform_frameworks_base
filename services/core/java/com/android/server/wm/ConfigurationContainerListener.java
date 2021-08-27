@@ -23,7 +23,7 @@ import android.content.res.Configuration;
  */
 public interface ConfigurationContainerListener {
 
-    /** {@see ConfigurationContainer#onRequestedOverrideConfigurationChanged} */
+    /** @see ConfigurationContainer#onRequestedOverrideConfigurationChanged */
     default void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {}
 
     /** Called when new merged override configuration is reported. */

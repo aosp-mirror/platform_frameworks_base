@@ -1,0 +1,259 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server.powerstats;
+
+option java_multiple_files = true;
+
+/**
+ * IncidentReportMeterProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
+ */
+message IncidentReportMeterProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceMeterProto incident_report = 3054;
+}
+
+/**
+ * IncidentReportModelProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
+ */
+message IncidentReportModelProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceModelProto incident_report = 3055;
+}
+
+/**
+ * IncidentReportResidencyProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
+ */
+message IncidentReportResidencyProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceResidencyProto incident_report = 3056;
+}
+
+/**
+ * EnergyConsumer (model) data is exposed by the PowerStats HAL.  This data
+ * represents modeled energy consumption estimates and is provided per
+ * subsystem.  The default subsystems are defined in EnergyConsumerType.aidl.
+ * Energy model estimates will be logged to incident reports in addition to
+ * the raw energy meter data.
+ */
+message PowerStatsServiceModelProto {
+    repeated EnergyConsumerProto energy_consumer = 1;
+    repeated EnergyConsumerResultProto energy_consumer_result = 2;
+}
+
+/**
+ * EnergyMeasurement (meter) data is exposed by the PowerStats HAL.  This data
+ * represents measurements taken directly from on-device energy meters.
+ * This raw energy meter data will be logged to incident reports.
+ */
+message PowerStatsServiceMeterProto {
+    repeated ChannelProto channel = 1;
+    repeated EnergyMeasurementProto energy_measurement = 2;
+}
+
+/**
+ * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
+ * that impacts the total device power consumption.  PowerEntity is
+ * information related to each power entity.  Each PowerEntity may reside in one
+ * of multiple states. It may also transition from one state to another.
+ * StateResidency is defined as an accumulation of time that a PowerEntity
+ * resided in each of its possible states, the number of times that each state
+ * was entered, and a timestamp corresponding to the last time that state was
+ * entered.
+ */
+message PowerStatsServiceResidencyProto {
+    repeated PowerEntityProto power_entity = 1;
+    repeated StateResidencyResultProto state_residency_result = 2;
+}
+
+/**
+ * Information about the possible states for a particular PowerEntity.
+ */
+message StateProto {
+    /**
+     * Unique (for a given PowerEntity) ID of this State
+     */
+    optional int32 id = 1;
+    /**
+     * Unique (for a given PowerEntity) name of the state. Vendor/device specific.
+     * Opaque to framework
+     */
+    optional string name = 2;
+}
+
+/**
+ * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
+ * that impacts the total device power consumption.  PowerEntity is
+ * information about a PowerEntity.  It includes an array of information about
+ * each possible state of the PowerEntity.
+ */
+message PowerEntityProto {
+    /**
+     * Unique ID of this PowerEntity
+     */
+    optional int32 id = 1;
+    /**
+     * Unique name of the PowerEntity. Vendor/device specific. Opaque to framework
+     */
+    optional string name = 2;
+    /**
+     * List of states that the PowerEntity may reside in
+     */
+    repeated StateProto states = 3;
+}
+
+/**
+ * StateResidency is defined as an accumulation of time that a PowerEntity
+ * resided in each of its possible states, the number of times that each state
+ * was entered, and a timestamp corresponding to the last time that state was
+ * entered.  Data is accumulated starting at device boot.
+ */
+message StateResidencyProto {
+    /**
+     * ID of the state associated with this residency
+     */
+    optional int32 id = 1;
+    /**
+     * Total time in milliseconds that the corresponding PowerEntity resided
+     * in this state since boot
+     */
+    optional int64 total_time_in_state_ms = 2;
+    /**
+     * Total number of times that the state was entered since boot
+     */
+    optional int64 total_state_entry_count = 3;
+    /**
+     * Last time this state was entered. Walltime in milliseconds since Unix epoch.
+     */
+    optional int64 last_entry_timestamp_ms = 4;
+}
+
+/**
+ * A StateResidencyResult is an array of StateResidencies for a particular
+ * PowerEntity.  The StateResidencyResult can be matched to its corresponding
+ * PowerEntity through the id field.
+ */
+message StateResidencyResultProto {
+    /**
+     * ID of the PowerEntity associated with this result
+     */
+    optional int32 id = 1;
+    /**
+     * Residency for each state in the PowerEntity's state space
+     */
+    repeated StateResidencyProto state_residency_data = 2;
+}
+
+/**
+ * Energy consumer:
+ * A list of default subsystems for which energy consumption estimates
+ * may be provided (hardware dependent).
+ */
+message EnergyConsumerProto {
+    /** Unique ID of this EnergyConsumer */
+    optional int32 id = 1;
+
+    /**
+     * For a group of EnergyConsumers of the same logical type, sorting by
+     * ordinal should be give their physical order. No other meaning is
+     * carried by it.
+     */
+    optional int32 ordinal = 2;
+
+    /** Type of this EnergyConsumer */
+    optional int32 type = 3;
+
+    /**
+     * Unique name of this EnergyConsumer. Vendor/device specific. Opaque
+     * to framework
+     */
+    optional string name = 4;
+}
+
+message EnergyConsumerAttributionProto {
+    /** Android ID / Linux UID, the accumulated energy should be attributed to. */
+    optional int32 uid = 1;
+
+    /** Accumulated energy since boot in microwatt-seconds (uWs) for this AID. */
+    optional int64 energy_uws = 2;
+}
+
+/**
+ * Energy consumer result:
+ * An estimate of energy consumption since boot for the subsystem identified
+ * by the unique id.
+ */
+message EnergyConsumerResultProto {
+    /** Unique index identifying the energy consumer. */
+    optional int32 id = 1;
+
+    /** Walltime in milliseconds since Unix epoch */
+    optional int64 timestamp_ms = 2;
+
+    /** Accumulated energy since device boot in microwatt-seconds (uWs) */
+    optional int64 energy_uws = 3;
+
+    /** Optional attribution per UID for this EnergyConsumer. */
+    repeated EnergyConsumerAttributionProto attribution = 4;
+}
+
+/**
+ * Channel information:
+ * Reports information related to the energy meter channels being monitored.
+ */
+message ChannelProto {
+    /**
+     * Index corresponding to the energy meter channel. This index matches
+     * the index returned in Channel.
+     */
+    optional int32 id = 1;
+
+    /** Name of the energy meter channel */
+    optional string name = 2;
+
+    /** Name of the subsystem associated with this Channel. Opaque to framework */
+    optional string subsystem = 3;
+}
+
+/**
+ * Energy measurements:
+ * Reports accumulated energy since boot for each energy meter.
+ */
+message EnergyMeasurementProto {
+    /**
+     * Index corresponding to the energy meter channel. This index matches
+     * the index returned in Channel.
+     */
+    optional int32 id = 1;
+
+    /** Walltime in milliseconds since Unix epoch */
+    optional int64 timestamp_ms = 2;
+
+    /** Accumulated energy since device boot in microwatt-seconds (uWs) */
+    optional int64 energy_uws = 3;
+
+    /** Duration in milliseconds that energy has been accumulated */
+    optional int64 duration_ms = 4;
+
+}

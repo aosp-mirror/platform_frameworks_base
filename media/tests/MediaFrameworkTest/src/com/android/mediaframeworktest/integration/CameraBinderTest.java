@@ -158,40 +158,13 @@ public class CameraBinderTest extends AndroidTestCase {
             ICamera cameraUser = mUtils.getCameraService()
                     .connect(dummyCallbacks, cameraId, clientPackageName,
                             ICameraService.USE_CALLING_UID,
-                            ICameraService.USE_CALLING_PID);
+                            ICameraService.USE_CALLING_PID,
+                            getContext().getApplicationInfo().targetSdkVersion);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
 
             cameraUser.disconnect();
-        }
-    }
-
-    @SmallTest
-    public void testConnectLegacy() throws Exception {
-        final int CAMERA_HAL_API_VERSION_1_0 = 0x100;
-        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
-            ICamera cameraUser = null;
-            ICameraClient dummyCallbacks = new DummyCameraClient();
-
-            String clientPackageName = getContext().getPackageName();
-
-            try {
-                cameraUser = mUtils.getCameraService()
-                        .connectLegacy(dummyCallbacks, cameraId, CAMERA_HAL_API_VERSION_1_0,
-                                clientPackageName,
-                                ICameraService.USE_CALLING_UID);
-                assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
-
-                Log.v(TAG, String.format("Camera %s connected as HAL1 legacy device", cameraId));
-            } catch (RuntimeException e) {
-                // Not all camera device support openLegacy.
-                Log.i(TAG, "Unable to open camera as HAL1 legacy camera device " + e);
-            } finally {
-                if (cameraUser != null) {
-                    cameraUser.disconnect();
-                }
-            }
         }
     }
 
@@ -290,7 +263,8 @@ public class CameraBinderTest extends AndroidTestCase {
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
                         clientPackageName, clientAttributionTag,
-                        ICameraService.USE_CALLING_UID);
+                        ICameraService.USE_CALLING_UID, 0 /*oomScoreOffset*/,
+                        getContext().getApplicationInfo().targetSdkVersion);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));

@@ -41,6 +41,28 @@ public final class WidgetFlags {
     public static final boolean ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT = true;
 
     /**
+     * Threshold for the direction of a swipe gesture in order for it to be handled as a cursor drag
+     * rather than a scroll. The direction angle of the swipe gesture must exceed this value in
+     * order to trigger cursor drag; otherwise, the swipe will be assumed to be a scroll gesture.
+     * The value units for this flag is degrees and the valid range is [0,90] inclusive. If a value
+     * < 0 is set, 0 will be used instead; if a value > 90 is set, 90 will be used instead.
+     */
+    public static final String CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL =
+            "CursorControlFeature__min_angle_from_vertical_to_start_cursor_drag";
+
+    /**
+     * The key used in app core settings for the flag
+     * {@link #CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL}.
+     */
+    public static final String KEY_CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL =
+            "widget__min_angle_from_vertical_to_start_cursor_drag";
+
+    /**
+     * Default value for the flag {@link #CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL}.
+     */
+    public static final int CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL_DEFAULT = 45;
+
+    /**
      * The flag of finger-to-cursor distance in DP for cursor dragging.
      * The value unit is DP and the range is {0..100}. If the value is out of range, the legacy
      * value, which is based on handle size, will be used.
@@ -113,6 +135,24 @@ public final class WidgetFlags {
     public static final int INSERTION_HANDLE_OPACITY_DEFAULT = 50;
 
     /**
+     * The flag of line slop ratio applies to cursor movement.
+     * Note: the actual slop value is bound: lineHeight + slop within the range of {8dp..45dp}.
+     */
+    public static final String LINE_SLOP_RATIO =
+            "CursorControlFeature__line_slop_ratio";
+
+    /**
+     * The key name used in app core settings for {@link #LINE_SLOP_RATIO}.
+     */
+    public static final String KEY_LINE_SLOP_RATIO =
+            "widget__line_slop_ratio";
+
+    /**
+     * Default value for the flag {@link #LINE_SLOP_RATIO}.
+     */
+    public static final float LINE_SLOP_RATIO_DEFAULT = .5f;
+
+    /**
      * The flag of enabling the new magnifier.
      */
     public static final String ENABLE_NEW_MAGNIFIER = "CursorControlFeature__enable_new_magnifier";
@@ -158,6 +198,14 @@ public final class WidgetFlags {
      * Default value for the flag {@link #MAGNIFIER_ASPECT_RATIO}.
      */
     public static final float MAGNIFIER_ASPECT_RATIO_DEFAULT = 5.5f;
+
+    /** The flag of the fps of the analog clock seconds hand. */
+    public static final String ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "AnalogClockFeature__analog_clock_seconds_hand_fps";
+
+    /** The key name used in app core settings for {@link #ANALOG_CLOCK_SECONDS_HAND_FPS}. */
+    public static final String KEY_ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "widget__analog_clock_seconds_hand_fps";
 
     private WidgetFlags() {
     }

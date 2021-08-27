@@ -1,0 +1,3 @@
+# Bug component: 137825
+
+include platform/frameworks/base:/core/java/android/permission/OWNERS

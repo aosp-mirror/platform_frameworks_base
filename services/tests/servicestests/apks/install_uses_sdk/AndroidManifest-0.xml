@@ -18,7 +18,7 @@
 
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
         <!-- This is invalid, because there is no sdk version specified -->
-        <extension-sdk android:minExtensionVersion="5" />
+        <extension-sdk android:minExtensionVersion="0" />
     </uses-sdk>
 
     <application>

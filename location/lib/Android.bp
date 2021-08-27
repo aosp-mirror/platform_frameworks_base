@@ -14,11 +14,24 @@
 // limitations under the License.
 //
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_sdk_library {
     name: "com.android.location.provider",
     srcs: ["java/**/*.java"],
     libs: [
         "androidx.annotation_annotation",
     ],
-    api_packages: ["com.android.location.provider"],
+    api_packages: [
+        "com.android.location.provider",
+        "com.android.location.timezone.provider",
+    ],
+    dist_group: "android",
 }

@@ -14,8 +14,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
+import static android.provider.Settings.Global.SHOW_NEW_NOTIF_DISMISS;
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
+import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -33,6 +34,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
@@ -43,7 +45,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,21 +56,17 @@ import org.mockito.Mockito;
 public class NotificationMenuRowTest extends LeakCheckedTest {
 
     private ExpandableNotificationRow mRow;
+    private View mView;
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     @Before
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mRow = mock(ExpandableNotificationRow.class);
+        mView = mock(View.class);
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
         NotificationEntry entry = new NotificationEntryBuilder().build();
         when(mRow.getEntry()).thenReturn(entry);
-    }
-
-    @After
-    public void tearDown() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
     }
 
     @Test
@@ -104,6 +101,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testNoAppOpsInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -116,6 +114,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testNoSnoozeInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -128,6 +127,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testSnoozeInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 1);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -135,6 +135,19 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         ViewGroup container = (ViewGroup) row.getMenuView();
         // one for snooze and one for noti blocking
         assertEquals(2, container.getChildCount());
+    }
+
+    @Test
+    public void testSlowSwipe_newDismiss() {
+        Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 1);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 1);
+
+        NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
+        row.createMenu(mRow, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // Clear menu
+        assertEquals(0, container.getChildCount());
     }
 
     @Test
@@ -399,5 +412,62 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
 
         row.setMenuAlpha(0.5f);
         assertTrue("when alpha is .5, menu is visible", row.isMenuVisible());
+    }
+
+    @Test
+    public void testOnTouchMove() {
+        NotificationMenuRow row = Mockito.spy(
+                new NotificationMenuRow(mContext, mPeopleNotificationIdentifier));
+        row.createMenu(mRow, null);
+        doReturn(50f).when(row).getDismissThreshold();
+        doReturn(true).when(row).canBeDismissed();
+        doReturn(mView).when(row).getMenuView();
+        row.onTouchMove(30f);
+
+        assertFalse("When moving not farther than threshold, menu is not snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(0)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(60f);
+
+        assertTrue("When moving farther than threshold, menu is snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(1)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(70f);
+
+        assertTrue("When moving farther than threshold, menu is snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(1)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(30f);
+
+        assertFalse("When moving not farther than threshold, menu is not snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(2)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(-30f);
+
+        assertFalse("When moving not farther than threshold, menu is not snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(2)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(-60f);
+
+        assertTrue("When moving farther than threshold, menu is snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(3)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(-70f);
+
+        assertTrue("When moving farther than threshold, menu is snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(3)).performHapticFeedback(CLOCK_TICK);
+
+        row.onTouchMove(-30f);
+
+        assertFalse("When moving not farther than threshold, menu is not snapping to dismiss",
+                row.isSnappingToDismiss());
+        verify(mView, times(4)).performHapticFeedback(CLOCK_TICK);
     }
 }

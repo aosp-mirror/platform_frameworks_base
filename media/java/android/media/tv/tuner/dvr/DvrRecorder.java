@@ -19,12 +19,12 @@ package android.media.tv.tuner.dvr;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.app.ActivityManager;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -47,6 +47,8 @@ public class DvrRecorder implements AutoCloseable {
     private static int sInstantId = 0;
     private int mSegmentId = 0;
     private int mOverflow;
+    private Boolean mIsStopped = true;
+    private final Object mListenerLock = new Object();
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -60,7 +62,7 @@ public class DvrRecorder implements AutoCloseable {
     private native long nativeWrite(byte[] bytes, long offset, long size);
 
     private DvrRecorder() {
-        mUserId = ActivityManager.getCurrentUser();
+        mUserId = Process.myUid();
         mSegmentId = (sInstantId & 0x0000ffff) << 16;
         sInstantId++;
     }
@@ -68,16 +70,20 @@ public class DvrRecorder implements AutoCloseable {
     /** @hide */
     public void setListener(
             @NonNull Executor executor, @NonNull OnRecordStatusChangedListener listener) {
-        mExecutor = executor;
-        mListener = listener;
+        synchronized (mListenerLock) {
+            mExecutor = executor;
+            mListener = listener;
+        }
     }
 
     private void onRecordStatusChanged(int status) {
         if (status == Filter.STATUS_OVERFLOW) {
             mOverflow++;
         }
-        if (mExecutor != null && mListener != null) {
-            mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+        synchronized (mListenerLock) {
+            if (mExecutor != null && mListener != null) {
+                mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+            }
         }
     }
 
@@ -135,7 +141,13 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STARTED, mSegmentId, 0);
-        return nativeStartDvr();
+        synchronized (mIsStopped) {
+            int result = nativeStartDvr();
+            if (result == Tuner.RESULT_SUCCESS) {
+                mIsStopped = false;
+            }
+            return result;
+        }
     }
 
     /**
@@ -152,7 +164,13 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STOPPED, mSegmentId, mOverflow);
-        return nativeStopDvr();
+        synchronized (mIsStopped) {
+            int result = nativeStopDvr();
+            if (result == Tuner.RESULT_SUCCESS) {
+                mIsStopped = true;
+            }
+            return result;
+        }
     }
 
     /**
@@ -164,7 +182,13 @@ public class DvrRecorder implements AutoCloseable {
      */
     @Result
     public int flush() {
-        return nativeFlushDvr();
+        synchronized (mIsStopped) {
+            if (mIsStopped) {
+                return nativeFlushDvr();
+            }
+            Log.w(TAG, "Cannot flush non-stopped Record DVR.");
+            return Tuner.RESULT_INVALID_STATE;
+        }
     }
 
     /**

@@ -44,7 +44,7 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class ANDROID_API Matrix4 {
+class Matrix4 {
 public:
     float data[16];
 

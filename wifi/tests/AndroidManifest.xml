@@ -16,7 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="android.net.wifi.test">
+     package="android.net.wifi.nonupdatable.test">
 
     <application>
         <uses-library android:name="android.test.runner"/>
@@ -31,7 +31,7 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-         android:targetPackage="android.net.wifi.test"
+         android:targetPackage="android.net.wifi.nonupdatable.test"
          android:label="Frameworks Wifi Non-updatable API Tests">
     </instrumentation>
 

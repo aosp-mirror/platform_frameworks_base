@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.Pair;
 
 import java.lang.annotation.Retention;
@@ -164,7 +165,7 @@ public final class MicrophoneInfo {
     private int mType;
     private int mDirectionality;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     MicrophoneInfo(String deviceId, int type, String address, int location,
             int group, int indexInTheGroup, Coordinate3F position,
             Coordinate3F orientation, List<Pair<Float, Float>> frequencyResponse,
@@ -268,8 +269,11 @@ public final class MicrophoneInfo {
 
     /**
      * Returns A {@link Coordinate3F} object that represents the geometric location of microphone
-     * in meters, from bottom-left-back corner of appliance. X-axis, Y-axis and Z-axis show
-     * as the x, y, z values.
+     * in meters. X-axis, Y-axis and Z-axis show as the x, y, z values. For mobile devices, the axes
+     * originate from the bottom-left-back corner of the appliance. In devices with
+     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE}, axes are defined with respect
+     * to the vehicle body frame, originating from the center of the vehicle's rear axle.
+     * @see <a href="https://source.android.com/devices/sensors/sensor-types#auto_axes">auto axes</a>
      *
      * @return the geometric location of the microphone or {@link #POSITION_UNKNOWN} if the
      * geometric location is unknown

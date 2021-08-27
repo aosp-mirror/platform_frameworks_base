@@ -22,36 +22,40 @@ import android.app.Notification;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
-import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
-import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * A helper class dealing with the alert interactions between {@link NotificationGroupManager} and
- * {@link HeadsUpManager}. In particular, this class deals with keeping
- * the correct notification in a group alerting based off the group suppression.
+ * A helper class dealing with the alert interactions between {@link NotificationGroupManagerLegacy}
+ * and {@link HeadsUpManager}. In particular, this class deals with keeping
+ * the correct notification in a group alerting based off the group suppression and alertOverride.
  */
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
         StateListener {
 
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
+    private static final String TAG = "NotifGroupAlertTransfer";
+    private static final boolean DEBUG = StatusBar.DEBUG;
+    private static final boolean SPEW = StatusBar.SPEW;
 
     /**
      * The list of entries containing group alert metadata for each group. Keyed by group key.
@@ -66,8 +70,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private HeadsUpManager mHeadsUpManager;
     private final RowContentBindStage mRowContentBindStage;
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
+    private final NotificationGroupManagerLegacy mGroupManager =
+            Dependency.get(NotificationGroupManagerLegacy.class);
 
     private NotificationEntryManager mEntryManager;
 
@@ -83,7 +87,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     /** Causes the TransferHelper to register itself as a listener to the appropriate classes. */
     public void bind(NotificationEntryManager entryManager,
-            NotificationGroupManager groupManager) {
+            NotificationGroupManagerLegacy groupManager) {
         if (mEntryManager != null) {
             throw new IllegalStateException("Already bound.");
         }
@@ -95,7 +99,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         mEntryManager = entryManager;
 
         mEntryManager.addNotificationEntryListener(mNotificationEntryListener);
-        groupManager.addOnGroupChangeListener(mOnGroupChangeListener);
+        groupManager.registerGroupChangeListener(mOnGroupChangeListener);
     }
 
     /**
@@ -128,7 +132,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         mIsDozing = isDozing;
     }
 
-    private final OnGroupChangeListener mOnGroupChangeListener = new OnGroupChangeListener() {
+    private final NotificationGroupManagerLegacy.OnGroupChangeListener mOnGroupChangeListener =
+            new NotificationGroupManagerLegacy.OnGroupChangeListener() {
         @Override
         public void onGroupCreated(NotificationGroup group, String groupKey) {
             mGroupAlertEntries.put(groupKey, new GroupAlertEntry(group));
@@ -141,41 +146,98 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
         @Override
         public void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {
-            if (suppressed) {
-                if (mHeadsUpManager.isAlerting(group.summary.getKey())) {
-                    handleSuppressedSummaryAlerted(group.summary, mHeadsUpManager);
-                }
-            } else {
-                // Group summary can be null if we are no longer suppressed because the summary was
-                // removed. In that case, we don't need to alert the summary.
-                if (group.summary == null) {
-                    return;
-                }
-                GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(mGroupManager.getGroupKey(
-                        group.summary.getSbn()));
-                // Group is no longer suppressed. We should check if we need to transfer the alert
-                // back to the summary now that it's no longer suppressed.
-                if (groupAlertEntry.mAlertSummaryOnNextAddition) {
-                    if (!mHeadsUpManager.isAlerting(group.summary.getKey())) {
-                        alertNotificationWhenPossible(group.summary, mHeadsUpManager);
-                    }
-                    groupAlertEntry.mAlertSummaryOnNextAddition = false;
-                } else {
-                    checkShouldTransferBack(groupAlertEntry);
-                }
+            if (DEBUG) {
+                Log.d(TAG, "!! onGroupSuppressionChanged: group.summary=" + group.summary
+                        + " suppressed=" + suppressed);
             }
+            NotificationEntry oldAlertOverride = group.alertOverride;
+            onGroupChanged(group, oldAlertOverride);
+        }
+
+        @Override
+        public void onGroupAlertOverrideChanged(NotificationGroup group,
+                @Nullable NotificationEntry oldAlertOverride,
+                @Nullable NotificationEntry newAlertOverride) {
+            if (DEBUG) {
+                Log.d(TAG, "!! onGroupAlertOverrideChanged: group.summary=" + group.summary
+                        + " oldAlertOverride=" + oldAlertOverride
+                        + " newAlertOverride=" + newAlertOverride);
+            }
+            onGroupChanged(group, oldAlertOverride);
         }
     };
 
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        onAlertStateChanged(entry, isHeadsUp, mHeadsUpManager);
+    /**
+     * Called when either the suppressed or alertOverride fields of the group changed
+     *
+     * @param group the group which changed
+     * @param oldAlertOverride the previous value of group.alertOverride
+     */
+    private void onGroupChanged(NotificationGroup group,
+            NotificationEntry oldAlertOverride) {
+        // Group summary can be null if we are no longer suppressed because the summary was
+        // removed. In that case, we don't need to alert the summary.
+        if (group.summary == null) {
+            if (DEBUG) {
+                Log.d(TAG, "onGroupChanged: summary is null");
+            }
+            return;
+        }
+        if (group.suppressed || group.alertOverride != null) {
+            checkForForwardAlertTransfer(group.summary, oldAlertOverride);
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "onGroupChanged: maybe transfer back");
+            }
+            GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(mGroupManager.getGroupKey(
+                    group.summary.getSbn()));
+            // Group is no longer suppressed or overridden.
+            // We should check if we need to transfer the alert back to the summary.
+            if (groupAlertEntry.mAlertSummaryOnNextAddition) {
+                if (!mHeadsUpManager.isAlerting(group.summary.getKey())) {
+                    alertNotificationWhenPossible(group.summary);
+                }
+                groupAlertEntry.mAlertSummaryOnNextAddition = false;
+            } else {
+                checkShouldTransferBack(groupAlertEntry);
+            }
+        }
     }
 
-    private void onAlertStateChanged(NotificationEntry entry, boolean isAlerting,
-            AlertingNotificationManager alertManager) {
-        if (isAlerting && mGroupManager.isSummaryOfSuppressedGroup(entry.getSbn())) {
-            handleSuppressedSummaryAlerted(entry, alertManager);
+    @Override
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+        if (DEBUG) {
+            Log.d(TAG, "!! onHeadsUpStateChanged: entry=" + entry + " isHeadsUp=" + isHeadsUp);
+        }
+        if (isHeadsUp && entry.getSbn().getNotification().isGroupSummary()) {
+            // a group summary is alerting; trigger the forward transfer checks
+            checkForForwardAlertTransfer(entry, /* oldAlertOverride */ null);
+        }
+    }
+
+    /**
+     * Handles changes in a group's suppression or alertOverride, but where at least one of those
+     * conditions is still true (either the group is suppressed, the group has an alertOverride,
+     * or both).  The method determined which kind of child needs to receive the alert, finds the
+     * entry currently alerting, and makes the transfer.
+     *
+     * Internally, this is handled with two main cases: the override needs the alert, or there is
+     * no override but the summary is suppressed (so an isolated child needs the alert).
+     *
+     * @param summary the notification entry of the summary of the logical group.
+     * @param oldAlertOverride the former value of group.alertOverride, before whatever event
+     *                         required us to check for for a transfer condition.
+     */
+    private void checkForForwardAlertTransfer(NotificationEntry summary,
+            NotificationEntry oldAlertOverride) {
+        if (DEBUG) {
+            Log.d(TAG, "checkForForwardAlertTransfer: enter");
+        }
+        NotificationGroup group = mGroupManager.getGroupForSummary(summary.getSbn());
+        if (group != null && group.alertOverride != null) {
+            handleOverriddenSummaryAlerted(summary);
+        } else if (mGroupManager.isSummaryOfSuppressedGroup(summary.getSbn())) {
+            handleSuppressedSummaryAlerted(summary, oldAlertOverride);
         }
     }
 
@@ -185,9 +247,16 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         // see as early as we can if we need to abort a transfer.
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
+            if (DEBUG) {
+                Log.d(TAG, "!! onPendingEntryAdded: entry=" + entry);
+            }
             String groupKey = mGroupManager.getGroupKey(entry.getSbn());
             GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(groupKey);
-            if (groupAlertEntry != null) {
+            if (groupAlertEntry != null && groupAlertEntry.mGroup.alertOverride == null) {
+                // new pending group entries require us to transfer back from the child to the
+                // group, but alertOverrides are only present in very limited circumstances, so
+                // while it's possible the group should ALSO alert, the previous detection which set
+                // this alertOverride won't be invalidated by this notification added to this group.
                 checkShouldTransferBack(groupAlertEntry);
             }
         }
@@ -261,43 +330,128 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     }
 
     /**
-     * Handles the scenario where a summary that has been suppressed is alerted.  A suppressed
+     * Handles the scenario where a summary that has been suppressed is itself, or has a former
+     * alertOverride (in the form of an isolated logical child) which was alerted.  A suppressed
      * summary should for all intents and purposes be invisible to the user and as a result should
      * not alert.  When this is the case, it is our responsibility to pass the alert to the
      * appropriate child which will be the representative notification alerting for the group.
      *
-     * @param summary the summary that is suppressed and alerting
-     * @param alertManager the alert manager that manages the alerting summary
+     * @param summary the summary that is suppressed and (potentially) alerting
+     * @param oldAlertOverride the alertOverride before whatever event triggered this method.  If
+     *                         the alert override was removed, this will be the entry that should
+     *                         be transferred back from.
      */
     private void handleSuppressedSummaryAlerted(@NonNull NotificationEntry summary,
-            @NonNull AlertingNotificationManager alertManager) {
-        StatusBarNotification sbn = summary.getSbn();
+            NotificationEntry oldAlertOverride) {
+        if (DEBUG) {
+            Log.d(TAG, "handleSuppressedSummaryAlerted: summary=" + summary);
+        }
         GroupAlertEntry groupAlertEntry =
-                mGroupAlertEntries.get(mGroupManager.getGroupKey(sbn));
+                mGroupAlertEntries.get(mGroupManager.getGroupKey(summary.getSbn()));
+
         if (!mGroupManager.isSummaryOfSuppressedGroup(summary.getSbn())
-                || !alertManager.isAlerting(sbn.getKey())
                 || groupAlertEntry == null) {
+            if (DEBUG) {
+                Log.d(TAG, "handleSuppressedSummaryAlerted: invalid state");
+            }
+            return;
+        }
+        boolean summaryIsAlerting = mHeadsUpManager.isAlerting(summary.getKey());
+        boolean priorityIsAlerting = oldAlertOverride != null
+                && mHeadsUpManager.isAlerting(oldAlertOverride.getKey());
+        if (!summaryIsAlerting && !priorityIsAlerting) {
+            if (DEBUG) {
+                Log.d(TAG, "handleSuppressedSummaryAlerted: no summary or override alerting");
+            }
             return;
         }
 
         if (pendingInflationsWillAddChildren(groupAlertEntry.mGroup)) {
             // New children will actually be added to this group, let's not transfer the alert.
+            if (DEBUG) {
+                Log.d(TAG, "handleSuppressedSummaryAlerted: pending inflations");
+            }
             return;
         }
 
         NotificationEntry child =
                 mGroupManager.getLogicalChildren(summary.getSbn()).iterator().next();
-        if (child != null) {
-            if (child.getRow().keepInParent()
-                    || child.isRowRemoved()
-                    || child.isRowDismissed()) {
-                // The notification is actually already removed. No need to alert it.
-                return;
+        if (summaryIsAlerting) {
+            if (DEBUG) {
+                Log.d(TAG, "handleSuppressedSummaryAlerted: transfer summary -> child");
             }
-            if (!alertManager.isAlerting(child.getKey()) && onlySummaryAlerts(summary)) {
-                groupAlertEntry.mLastAlertTransferTime = SystemClock.elapsedRealtime();
+            tryTransferAlertState(summary, /*from*/ summary, /*to*/ child, groupAlertEntry);
+            return;
+        }
+        // Summary didn't have the alert, so we're in "transfer back" territory.  First, make sure
+        // it's not too late to transfer back, then transfer the alert from the oldAlertOverride to
+        // the isolated child which should receive the alert.
+        if (!canStillTransferBack(groupAlertEntry)) {
+            if (DEBUG) {
+                Log.d(TAG, "handleSuppressedSummaryAlerted: transfer from override: too late");
             }
-            transferAlertState(summary, child, alertManager);
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "handleSuppressedSummaryAlerted: transfer override -> child");
+        }
+        tryTransferAlertState(summary, /*from*/ oldAlertOverride, /*to*/ child, groupAlertEntry);
+    }
+
+    /**
+     * Checks for and handles the scenario where the given entry is the summary of a group which
+     * has an alertOverride, and either the summary itself or one of its logical isolated children
+     * is currently alerting (which happens if the summary is suppressed).
+     */
+    private void handleOverriddenSummaryAlerted(NotificationEntry summary) {
+        if (DEBUG) {
+            Log.d(TAG, "handleOverriddenSummaryAlerted: summary=" + summary);
+        }
+        GroupAlertEntry groupAlertEntry =
+                mGroupAlertEntries.get(mGroupManager.getGroupKey(summary.getSbn()));
+        NotificationGroup group = mGroupManager.getGroupForSummary(summary.getSbn());
+        if (group == null || group.alertOverride == null || groupAlertEntry == null) {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: invalid state");
+            }
+            return;
+        }
+        boolean summaryIsAlerting = mHeadsUpManager.isAlerting(summary.getKey());
+        if (summaryIsAlerting) {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: transfer summary -> override");
+            }
+            tryTransferAlertState(summary, /*from*/ summary, group.alertOverride, groupAlertEntry);
+            return;
+        }
+        // Summary didn't have the alert, so we're in "transfer back" territory.  First, make sure
+        // it's not too late to transfer back, then remove the alert from any of the logical
+        // children, and if one of them was alerting, we can alert the override.
+        if (!canStillTransferBack(groupAlertEntry)) {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: transfer from child: too late");
+            }
+            return;
+        }
+        List<NotificationEntry> children = mGroupManager.getLogicalChildren(summary.getSbn());
+        if (children == null) {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: no children");
+            }
+            return;
+        }
+        children.remove(group.alertOverride); // do not release the alert on our desired destination
+        boolean releasedChild = releaseChildAlerts(children);
+        if (releasedChild) {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: transfer child -> override");
+            }
+            tryTransferAlertState(summary, /*from*/ null, group.alertOverride, groupAlertEntry);
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "handleOverriddenSummaryAlerted: no child alert released");
+            }
         }
     }
 
@@ -306,14 +460,37 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      * immediately to have the incorrect one up as short as possible. The second should alert
      * when possible.
      *
+     * @param summary entry of the summary
      * @param fromEntry entry to transfer alert from
      * @param toEntry entry to transfer to
-     * @param alertManager alert manager for the alert type
      */
-    private void transferAlertState(@NonNull NotificationEntry fromEntry, @NonNull NotificationEntry toEntry,
-            @NonNull AlertingNotificationManager alertManager) {
-        alertManager.removeNotification(fromEntry.getKey(), true /* releaseImmediately */);
-        alertNotificationWhenPossible(toEntry, alertManager);
+    private void tryTransferAlertState(
+            NotificationEntry summary,
+            NotificationEntry fromEntry,
+            NotificationEntry toEntry,
+            GroupAlertEntry groupAlertEntry) {
+        if (toEntry != null) {
+            if (toEntry.getRow().keepInParent()
+                    || toEntry.isRowRemoved()
+                    || toEntry.isRowDismissed()) {
+                // The notification is actually already removed. No need to alert it.
+                return;
+            }
+            if (!mHeadsUpManager.isAlerting(toEntry.getKey()) && onlySummaryAlerts(summary)) {
+                groupAlertEntry.mLastAlertTransferTime = SystemClock.elapsedRealtime();
+            }
+            if (DEBUG) {
+                Log.d(TAG, "transferAlertState: fromEntry=" + fromEntry + " toEntry=" + toEntry);
+            }
+            transferAlertState(fromEntry, toEntry);
+        }
+    }
+    private void transferAlertState(@Nullable NotificationEntry fromEntry,
+            @NonNull NotificationEntry toEntry) {
+        if (fromEntry != null) {
+            mHeadsUpManager.removeNotification(fromEntry.getKey(), true /* releaseImmediately */);
+        }
+        alertNotificationWhenPossible(toEntry);
     }
 
     /**
@@ -325,11 +502,13 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      * more children are coming. Thus, if a child is added within a certain timeframe after we
      * transfer, we back out and alert the summary again.
      *
+     * An alert can only transfer back within a small window of time after a transfer away from the
+     * summary to a child happened.
+     *
      * @param groupAlertEntry group alert entry to check
      */
     private void checkShouldTransferBack(@NonNull GroupAlertEntry groupAlertEntry) {
-        if (SystemClock.elapsedRealtime() - groupAlertEntry.mLastAlertTransferTime
-                < ALERT_TRANSFER_TIMEOUT) {
+        if (canStillTransferBack(groupAlertEntry)) {
             NotificationEntry summary = groupAlertEntry.mGroup.summary;
 
             if (!onlySummaryAlerts(summary)) {
@@ -337,30 +516,17 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             }
             ArrayList<NotificationEntry> children = mGroupManager.getLogicalChildren(
                     summary.getSbn());
-            int numChildren = children.size();
+            int numActiveChildren = children.size();
             int numPendingChildren = getPendingChildrenNotAlerting(groupAlertEntry.mGroup);
-            numChildren += numPendingChildren;
+            int numChildren = numActiveChildren + numPendingChildren;
             if (numChildren <= 1) {
                 return;
             }
-            boolean releasedChild = false;
-            for (int i = 0; i < children.size(); i++) {
-                NotificationEntry entry = children.get(i);
-                if (onlySummaryAlerts(entry) && mHeadsUpManager.isAlerting(entry.getKey())) {
-                    releasedChild = true;
-                    mHeadsUpManager.removeNotification(
-                            entry.getKey(), true /* releaseImmediately */);
-                }
-                if (mPendingAlerts.containsKey(entry.getKey())) {
-                    // This is the child that would've been removed if it was inflated.
-                    releasedChild = true;
-                    mPendingAlerts.get(entry.getKey()).mAbortOnInflation = true;
-                }
-            }
+            boolean releasedChild = releaseChildAlerts(children);
             if (releasedChild && !mHeadsUpManager.isAlerting(summary.getKey())) {
-                boolean notifyImmediately = (numChildren - numPendingChildren) > 1;
+                boolean notifyImmediately = numActiveChildren > 1;
                 if (notifyImmediately) {
-                    alertNotificationWhenPossible(summary, mHeadsUpManager);
+                    alertNotificationWhenPossible(summary);
                 } else {
                     // Should wait until the pending child inflates before alerting.
                     groupAlertEntry.mAlertSummaryOnNextAddition = true;
@@ -370,25 +536,61 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         }
     }
 
+    private boolean canStillTransferBack(@NonNull GroupAlertEntry groupAlertEntry) {
+        return SystemClock.elapsedRealtime() - groupAlertEntry.mLastAlertTransferTime
+                < ALERT_TRANSFER_TIMEOUT;
+    }
+
+    private boolean releaseChildAlerts(List<NotificationEntry> children) {
+        boolean releasedChild = false;
+        if (SPEW) {
+            Log.d(TAG, "releaseChildAlerts: numChildren=" + children.size());
+        }
+        for (int i = 0; i < children.size(); i++) {
+            NotificationEntry entry = children.get(i);
+            if (SPEW) {
+                Log.d(TAG, "releaseChildAlerts: checking i=" + i + " entry=" + entry
+                        + " onlySummaryAlerts=" + onlySummaryAlerts(entry)
+                        + " isAlerting=" + mHeadsUpManager.isAlerting(entry.getKey())
+                        + " isPendingAlert=" + mPendingAlerts.containsKey(entry.getKey()));
+            }
+            if (onlySummaryAlerts(entry) && mHeadsUpManager.isAlerting(entry.getKey())) {
+                releasedChild = true;
+                mHeadsUpManager.removeNotification(
+                        entry.getKey(), true /* releaseImmediately */);
+            }
+            if (mPendingAlerts.containsKey(entry.getKey())) {
+                // This is the child that would've been removed if it was inflated.
+                releasedChild = true;
+                mPendingAlerts.get(entry.getKey()).mAbortOnInflation = true;
+            }
+        }
+        if (SPEW) {
+            Log.d(TAG, "releaseChildAlerts: didRelease=" + releasedChild);
+        }
+        return releasedChild;
+    }
+
     /**
      * Tries to alert the notification. If its content view is not inflated, we inflate and continue
      * when the entry finishes inflating the view.
      *
      * @param entry entry to show
-     * @param alertManager alert manager for the alert type
      */
-    private void alertNotificationWhenPossible(@NonNull NotificationEntry entry,
-            @NonNull AlertingNotificationManager alertManager) {
-        @InflationFlag int contentFlag = alertManager.getContentFlag();
+    private void alertNotificationWhenPossible(@NonNull NotificationEntry entry) {
+        @InflationFlag int contentFlag = mHeadsUpManager.getContentFlag();
         final RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         if ((params.getContentViews() & contentFlag) == 0) {
+            if (DEBUG) {
+                Log.d(TAG, "alertNotificationWhenPossible: async requestRebind entry=" + entry);
+            }
             mPendingAlerts.put(entry.getKey(), new PendingAlertInfo(entry));
             params.requireContentViews(contentFlag);
             mRowContentBindStage.requestRebind(entry, en -> {
                 PendingAlertInfo alertInfo = mPendingAlerts.remove(entry.getKey());
                 if (alertInfo != null) {
                     if (alertInfo.isStillValid()) {
-                        alertNotificationWhenPossible(entry, mHeadsUpManager);
+                        alertNotificationWhenPossible(entry);
                     } else {
                         // The transfer is no longer valid. Free the content.
                         mRowContentBindStage.getStageParams(entry).markContentViewsFreeable(
@@ -399,10 +601,16 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             });
             return;
         }
-        if (alertManager.isAlerting(entry.getKey())) {
-            alertManager.updateNotification(entry.getKey(), true /* alert */);
+        if (mHeadsUpManager.isAlerting(entry.getKey())) {
+            if (DEBUG) {
+                Log.d(TAG, "alertNotificationWhenPossible: continue alerting entry=" + entry);
+            }
+            mHeadsUpManager.updateNotification(entry.getKey(), true /* alert */);
         } else {
-            alertManager.showNotification(entry);
+            if (DEBUG) {
+                Log.d(TAG, "alertNotificationWhenPossible: start alerting entry=" + entry);
+            }
+            mHeadsUpManager.showNotification(entry);
         }
     }
 

@@ -22,7 +22,8 @@
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:label="LowpanTestDummyLabel"
-                  android:name="LowpanTestDummyName">
+                  android:name="LowpanTestDummyName"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER"/>

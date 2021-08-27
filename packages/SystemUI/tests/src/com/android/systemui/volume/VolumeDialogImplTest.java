@@ -21,6 +21,8 @@ import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.KeyguardManager;
@@ -36,6 +38,8 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Prefs;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
@@ -57,6 +61,11 @@ import java.util.function.Predicate;
 public class VolumeDialogImplTest extends SysuiTestCase {
 
     VolumeDialogImpl mDialog;
+    View mActiveRinger;
+    View mDrawerContainer;
+    View mDrawerVibrate;
+    View mDrawerMute;
+    View mDrawerNormal;
 
     @Mock
     VolumeDialogController mController;
@@ -79,6 +88,19 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
+
+        mActiveRinger = mDialog.getDialogView().findViewById(
+                R.id.volume_new_ringer_active_icon_container);
+        mDrawerContainer = mDialog.getDialogView().findViewById(R.id.volume_drawer_container);
+        mDrawerVibrate = mDrawerContainer.findViewById(R.id.volume_drawer_vibrate);
+        mDrawerMute = mDrawerContainer.findViewById(R.id.volume_drawer_mute);
+        mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
+
+        Prefs.putInt(mContext,
+                Prefs.Key.SEEN_RINGER_GUIDANCE_COUNT,
+                VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
+
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
     }
 
     private State createShellState() {
@@ -165,6 +187,87 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
                 VolumeDialogImpl.DIALOG_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
+    @Test
+    public void testVibrateOnRingerChangedToVibrate() {
+        final State initialSilentState = new State();
+        initialSilentState.ringerModeInternal = AudioManager.RINGER_MODE_SILENT;
+
+        final State vibrateState = new State();
+        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
+
+        // change ringer to silent
+        mDialog.onStateChangedH(initialSilentState);
+
+        // expected: shouldn't call vibrate yet
+        verify(mController, never()).vibrate(any());
+
+        // changed ringer to vibrate
+        mDialog.onStateChangedH(vibrateState);
+
+        // expected: vibrate device
+        verify(mController).vibrate(any());
+    }
+
+    @Test
+    public void testNoVibrateOnRingerInitialization() {
+        final State initialUnsetState = new State();
+        initialUnsetState.ringerModeInternal = -1;
+
+        // ringer not initialized yet:
+        mDialog.onStateChangedH(initialUnsetState);
+
+        final State vibrateState = new State();
+        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
+
+        // changed ringer to vibrate
+        mDialog.onStateChangedH(vibrateState);
+
+        // shouldn't call vibrate
+        verify(mController, never()).vibrate(any());
+    }
+
+    @Test
+    public void testSelectVibrateFromDrawer() {
+        final State initialUnsetState = new State();
+        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
+        mDialog.onStateChangedH(initialUnsetState);
+
+        mActiveRinger.performClick();
+        mDrawerVibrate.performClick();
+
+        // Make sure we've actually changed the ringer mode.
+        verify(mController, times(1)).setRingerMode(
+                AudioManager.RINGER_MODE_VIBRATE, false);
+    }
+
+    @Test
+    public void testSelectMuteFromDrawer() {
+        final State initialUnsetState = new State();
+        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
+        mDialog.onStateChangedH(initialUnsetState);
+
+        mActiveRinger.performClick();
+        mDrawerMute.performClick();
+
+        // Make sure we've actually changed the ringer mode.
+        verify(mController, times(1)).setRingerMode(
+                AudioManager.RINGER_MODE_SILENT, false);
+    }
+
+    @Test
+    public void testSelectNormalFromDrawer() {
+        final State initialUnsetState = new State();
+        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
+        mDialog.onStateChangedH(initialUnsetState);
+
+        mActiveRinger.performClick();
+        mDrawerNormal.performClick();
+
+        // Make sure we've actually changed the ringer mode.
+        verify(mController, times(1)).setRingerMode(
+                AudioManager.RINGER_MODE_NORMAL, false);
     }
 
 /*

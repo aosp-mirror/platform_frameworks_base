@@ -1,4 +1,13 @@
 //apks signed by keyset_A
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test_helper_app {
     name: "FrameworksCoreTests_keyset_sa_unone",
     defaults: ["FrameworksCoreTests_apks_defaults"],

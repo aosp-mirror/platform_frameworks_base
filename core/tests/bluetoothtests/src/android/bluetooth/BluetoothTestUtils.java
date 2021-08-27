@@ -56,6 +56,10 @@ public class BluetoothTestUtils extends Assert {
     private static final int CONNECT_PROXY_TIMEOUT = 5000;
     /** Time between polls in ms. */
     private static final int POLL_TIME = 100;
+    /** Timeout to get map message in ms. */
+    private static final int GET_UNREAD_MESSAGE_TIMEOUT = 10000;
+    /** Timeout to set map message status in ms. */
+    private static final int SET_MESSAGE_STATUS_TIMEOUT = 2000;
 
     private abstract class FlagReceiver extends BroadcastReceiver {
         private int mExpectedFlags = 0;
@@ -98,6 +102,8 @@ public class BluetoothTestUtils extends Assert {
         private static final int STATE_TURNING_ON_FLAG = 1 << 6;
         private static final int STATE_ON_FLAG = 1 << 7;
         private static final int STATE_TURNING_OFF_FLAG = 1 << 8;
+        private static final int STATE_GET_MESSAGE_FINISHED_FLAG = 1 << 9;
+        private static final int STATE_SET_MESSAGE_STATUS_FINISHED_FLAG = 1 << 10;
 
         public BluetoothReceiver(int expectedFlags) {
             super(expectedFlags);
@@ -231,6 +237,9 @@ public class BluetoothTestUtils extends Assert {
                 case BluetoothProfile.PAN:
                     mConnectionAction = BluetoothPan.ACTION_CONNECTION_STATE_CHANGED;
                     break;
+                case BluetoothProfile.MAP_CLIENT:
+                    mConnectionAction = BluetoothMapClient.ACTION_CONNECTION_STATE_CHANGED;
+                    break;
                 default:
                     mConnectionAction = null;
             }
@@ -308,6 +317,34 @@ public class BluetoothTestUtils extends Assert {
         }
     }
 
+
+    private class MceSetMessageStatusReceiver extends FlagReceiver {
+        private static final int MESSAGE_RECEIVED_FLAG = 1;
+        private static final int STATUS_CHANGED_FLAG = 1 << 1;
+
+        public MceSetMessageStatusReceiver(int expectedFlags) {
+            super(expectedFlags);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (BluetoothMapClient.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())) {
+                String handle = intent.getStringExtra(BluetoothMapClient.EXTRA_MESSAGE_HANDLE);
+                assertNotNull(handle);
+                setFiredFlag(MESSAGE_RECEIVED_FLAG);
+                mMsgHandle = handle;
+            } else if (BluetoothMapClient.ACTION_MESSAGE_DELETED_STATUS_CHANGED.equals(intent.getAction())) {
+                int result = intent.getIntExtra(BluetoothMapClient.EXTRA_RESULT_CODE, BluetoothMapClient.RESULT_FAILURE);
+                assertEquals(result, BluetoothMapClient.RESULT_SUCCESS);
+                setFiredFlag(STATUS_CHANGED_FLAG);
+            } else if (BluetoothMapClient.ACTION_MESSAGE_READ_STATUS_CHANGED.equals(intent.getAction())) {
+                int result = intent.getIntExtra(BluetoothMapClient.EXTRA_RESULT_CODE, BluetoothMapClient.RESULT_FAILURE);
+                assertEquals(result, BluetoothMapClient.RESULT_SUCCESS);
+                setFiredFlag(STATUS_CHANGED_FLAG);
+            }
+        }
+    }
+
     private BluetoothProfile.ServiceListener mServiceListener =
             new BluetoothProfile.ServiceListener() {
         @Override
@@ -325,6 +362,9 @@ public class BluetoothTestUtils extends Assert {
                         break;
                     case BluetoothProfile.PAN:
                         mPan = (BluetoothPan) proxy;
+                        break;
+                    case BluetoothProfile.MAP_CLIENT:
+                        mMce = (BluetoothMapClient) proxy;
                         break;
                 }
             }
@@ -346,6 +386,9 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.PAN:
                         mPan = null;
                         break;
+                    case BluetoothProfile.MAP_CLIENT:
+                        mMce = null;
+                        break;
                 }
             }
         }
@@ -362,6 +405,8 @@ public class BluetoothTestUtils extends Assert {
     private BluetoothHeadset mHeadset = null;
     private BluetoothHidHost mInput = null;
     private BluetoothPan mPan = null;
+    private BluetoothMapClient mMce = null;
+    private String mMsgHandle = null;
 
     /**
      * Creates a utility instance for testing Bluetooth.
@@ -898,7 +943,7 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      * @param device The remote device.
      * @param profile The profile to connect. One of {@link BluetoothProfile#A2DP},
-     * {@link BluetoothProfile#HEADSET}, or {@link BluetoothProfile#HID_HOST}.
+     * {@link BluetoothProfile#HEADSET}, {@link BluetoothProfile#HID_HOST} or {@link BluetoothProfile#MAP_CLIENT}..
      * @param methodName The method name to printed in the logs.  If null, will be
      * "connectProfile(profile=&lt;profile&gt;, device=&lt;device&gt;)"
      */
@@ -941,6 +986,8 @@ public class BluetoothTestUtils extends Assert {
                     assertTrue(((BluetoothHeadset)proxy).connect(device));
                 } else if (profile == BluetoothProfile.HID_HOST) {
                     assertTrue(((BluetoothHidHost)proxy).connect(device));
+                } else if (profile == BluetoothProfile.MAP_CLIENT) {
+                    assertTrue(((BluetoothMapClient)proxy).connect(device));
                 }
                 break;
             default:
@@ -1016,6 +1063,8 @@ public class BluetoothTestUtils extends Assert {
                     assertTrue(((BluetoothHeadset)proxy).disconnect(device));
                 } else if (profile == BluetoothProfile.HID_HOST) {
                     assertTrue(((BluetoothHidHost)proxy).disconnect(device));
+                } else if (profile == BluetoothProfile.MAP_CLIENT) {
+                    assertTrue(((BluetoothMapClient)proxy).disconnect(device));
                 }
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
@@ -1373,6 +1422,89 @@ public class BluetoothTestUtils extends Assert {
         }
     }
 
+    public void mceGetUnreadMessage(BluetoothAdapter adapter, BluetoothDevice device) {
+        int mask;
+        String methodName = "getUnreadMessage";
+
+        if (!adapter.isEnabled()) {
+            fail(String.format("%s bluetooth not enabled", methodName));
+        }
+
+        if (!adapter.getBondedDevices().contains(device)) {
+            fail(String.format("%s device not paired", methodName));
+        }
+
+        mMce = (BluetoothMapClient) connectProxy(adapter, BluetoothProfile.MAP_CLIENT);
+        assertNotNull(mMce);
+
+        if (mMce.getConnectionState(device) != BluetoothProfile.STATE_CONNECTED) {
+            fail(String.format("%s device is not connected", methodName));
+        }
+
+        mMsgHandle = null;
+        mask = MceSetMessageStatusReceiver.MESSAGE_RECEIVED_FLAG;
+        MceSetMessageStatusReceiver receiver = getMceSetMessageStatusReceiver(device, mask);
+        assertTrue(mMce.getUnreadMessages(device));
+
+        long s = System.currentTimeMillis();
+        while (System.currentTimeMillis() - s < GET_UNREAD_MESSAGE_TIMEOUT) {
+            if ((receiver.getFiredFlags() & mask) == mask) {
+                writeOutput(String.format("%s completed", methodName));
+                removeReceiver(receiver);
+                return;
+            }
+            sleep(POLL_TIME);
+        }
+        int firedFlags = receiver.getFiredFlags();
+        removeReceiver(receiver);
+        fail(String.format("%s timeout: state=%d (expected %d), flags=0x%x (expected 0x%s)",
+                methodName, mMce.getConnectionState(device), BluetoothMapClient.STATE_CONNECTED, firedFlags, mask));
+    }
+
+    /**
+     * Set a message to read/unread/deleted/undeleted
+     */
+    public void mceSetMessageStatus(BluetoothAdapter adapter, BluetoothDevice device, int status) {
+        int mask;
+        String methodName = "setMessageStatus";
+
+        if (!adapter.isEnabled()) {
+            fail(String.format("%s bluetooth not enabled", methodName));
+        }
+
+        if (!adapter.getBondedDevices().contains(device)) {
+            fail(String.format("%s device not paired", methodName));
+        }
+
+        mMce = (BluetoothMapClient) connectProxy(adapter, BluetoothProfile.MAP_CLIENT);
+        assertNotNull(mMce);
+
+        if (mMce.getConnectionState(device) != BluetoothProfile.STATE_CONNECTED) {
+            fail(String.format("%s device is not connected", methodName));
+        }
+
+        assertNotNull(mMsgHandle);
+        mask = MceSetMessageStatusReceiver.STATUS_CHANGED_FLAG;
+        MceSetMessageStatusReceiver receiver = getMceSetMessageStatusReceiver(device, mask);
+
+        assertTrue(mMce.setMessageStatus(device, mMsgHandle, status));
+
+        long s = System.currentTimeMillis();
+        while (System.currentTimeMillis() - s < SET_MESSAGE_STATUS_TIMEOUT) {
+            if ((receiver.getFiredFlags() & mask) == mask) {
+                writeOutput(String.format("%s completed", methodName));
+                removeReceiver(receiver);
+                return;
+            }
+            sleep(POLL_TIME);
+        }
+
+        int firedFlags = receiver.getFiredFlags();
+        removeReceiver(receiver);
+        fail(String.format("%s timeout: state=%d (expected %d), flags=0x%x (expected 0x%s)",
+                methodName, mMce.getConnectionState(device), BluetoothPan.STATE_CONNECTED, firedFlags, mask));
+    }
+
     private void addReceiver(BroadcastReceiver receiver, String[] actions) {
         IntentFilter filter = new IntentFilter();
         for (String action: actions) {
@@ -1408,7 +1540,8 @@ public class BluetoothTestUtils extends Assert {
         String[] actions = {
                 BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED,
                 BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
-                BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED};
+                BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED,
+                BluetoothMapClient.ACTION_CONNECTION_STATE_CHANGED};
         ConnectProfileReceiver receiver = new ConnectProfileReceiver(device, profile,
                 expectedFlags);
         addReceiver(receiver, actions);
@@ -1426,6 +1559,16 @@ public class BluetoothTestUtils extends Assert {
     private StartStopScoReceiver getStartStopScoReceiver(int expectedFlags) {
         String[] actions = {AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED};
         StartStopScoReceiver receiver = new StartStopScoReceiver(expectedFlags);
+        addReceiver(receiver, actions);
+        return receiver;
+    }
+
+    private MceSetMessageStatusReceiver getMceSetMessageStatusReceiver(BluetoothDevice device,
+            int expectedFlags) {
+        String[] actions = {BluetoothMapClient.ACTION_MESSAGE_RECEIVED,
+            BluetoothMapClient.ACTION_MESSAGE_READ_STATUS_CHANGED,
+            BluetoothMapClient.ACTION_MESSAGE_DELETED_STATUS_CHANGED};
+        MceSetMessageStatusReceiver receiver = new MceSetMessageStatusReceiver(expectedFlags);
         addReceiver(receiver, actions);
         return receiver;
     }
@@ -1456,6 +1599,10 @@ public class BluetoothTestUtils extends Assert {
                 if (mPan != null) {
                     return mPan;
                 }
+            case BluetoothProfile.MAP_CLIENT:
+                if (mMce != null) {
+                    return mMce;
+                }
                 break;
             default:
                 return null;
@@ -1483,6 +1630,11 @@ public class BluetoothTestUtils extends Assert {
                     sleep(POLL_TIME);
                 }
                 return mPan;
+            case BluetoothProfile.MAP_CLIENT:
+                while (mMce == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
+                    sleep(POLL_TIME);
+                }
+                return mMce;
             default:
                 return null;
         }

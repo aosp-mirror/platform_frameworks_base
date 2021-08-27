@@ -1,3 +1,23 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-BSD
+    //   legacy_unencumbered
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "framework-core-sources",
+    srcs: [
+        "**/*.java",
+        "**/*.aidl",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
 filegroup {
     name: "IKeyAttestationApplicationIdProvider.aidl",
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
@@ -7,3 +27,393 @@ filegroup {
     name: "IDropBoxManagerService.aidl",
     srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
 }
+
+filegroup {
+    name: "ITracingServiceProxy.aidl",
+    srcs: ["android/tracing/ITracingServiceProxy.aidl"],
+}
+
+// These are subset of framework-core-sources that are needed by the
+// android.test.mock library. The implementation of android.test.mock references
+// private members of various components to allow mocking of classes that cannot
+// be mocked without access to those internal implementation details.
+filegroup {
+    name: "framework-core-sources-for-test-mock",
+    srcs: [
+        "android/accounts/AccountManagerCallback.java",
+        "android/accounts/AccountManagerFuture.java",
+        "android/accounts/AccountManager.java",
+        "android/accounts/AccountsException.java",
+        "android/accounts/AuthenticatorException.java",
+        "android/accounts/OperationCanceledException.java",
+        "android/app/Application.java",
+        "android/app/IApplicationThread.aidl",
+        "android/app/IServiceConnection.aidl",
+        "android/app/PackageDeleteObserver.java",
+        "android/content/ComponentCallbacks2.java",
+        "android/content/ComponentCallbacks.java",
+        "android/content/ContentInterface.java",
+        "android/content/ContentProvider.java",
+        "android/content/ContentProviderNative.java",
+        "android/content/ContentResolver.java",
+        "android/content/Context.java",
+        "android/content/ContextWrapper.java",
+        "android/content/DialogInterface.java",
+        "android/content/IContentProvider.java",
+        "android/content/Intent.java",
+        "android/content/IntentSender.java",
+        "android/content/OperationApplicationException.java",
+        "android/content/pm/ActivityInfo.java",
+        "android/content/pm/ApplicationInfo.java",
+        "android/content/pm/InstantAppInfo.java",
+        "android/content/pm/IPackageDataObserver.aidl",
+        "android/content/pm/KeySet.java",
+        "android/content/pm/PackageManager.java",
+        "android/content/pm/VerifierDeviceIdentity.java",
+        "android/content/res/Resources.java",
+        "android/database/CrossProcessCursor.java",
+        "android/database/CrossProcessCursorWrapper.java",
+        "android/database/Cursor.java",
+        "android/database/CursorWrapper.java",
+        "android/os/Binder.java",
+        "android/os/Bundle.java",
+        "android/os/IBinder.java",
+        "android/os/IInterface.java",
+        "android/os/Parcelable.java",
+        "android/os/ParcelFileDescriptor.java",
+        "android/os/RemoteException.java",
+        "android/os/storage/VolumeInfo.java",
+        "android/util/AndroidException.java",
+        "android/view/DisplayAdjustments.java",
+        "android/view/ViewDebug.java",
+    ],
+    visibility: ["//frameworks/base/test-mock"],
+}
+
+filegroup {
+    name: "libincident_aidl",
+    srcs: [
+        "android/os/IIncidentDumpCallback.aidl",
+        "android/os/IIncidentManager.aidl",
+        "android/os/IIncidentReportStatusListener.aidl",
+    ],
+}
+
+filegroup {
+    name: "libvibrator_aidl",
+    srcs: [
+        "android/os/IExternalVibrationController.aidl",
+        "android/os/IExternalVibratorService.aidl",
+    ],
+}
+
+filegroup {
+    name: "libpowermanager_aidl",
+    srcs: [
+        "android/os/Temperature.aidl",
+        "android/os/CoolingDevice.aidl",
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
+        "android/os/IThermalEventListener.aidl",
+        "android/os/IThermalStatusListener.aidl",
+        "android/os/IThermalService.aidl",
+        "android/os/IPowerManager.aidl",
+    ],
+}
+
+genrule {
+    name: "statslog-framework-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
+        " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
+    out: ["com/android/internal/util/FrameworkStatsLog.java"],
+}
+
+java_library {
+    name: "uieventloggerlib",
+    srcs: [
+        "com/android/internal/logging/UiEvent.java",
+        "com/android/internal/logging/UiEventLogger.java",
+        "com/android/internal/logging/UiEventLoggerImpl.java",
+        "com/android/internal/logging/InstanceId.java",
+        "com/android/internal/logging/InstanceIdSequence.java",
+        ":statslog-framework-java-gen",
+    ],
+}
+
+filegroup {
+    name: "framework-services-net-module-wifi-shared-srcs",
+    srcs: [
+        "android/net/DhcpResults.java",
+        "android/util/LocalLog.java",
+    ],
+}
+
+// keep these files in sync with the package/Tethering/jarjar-rules.txt and
+// package/Connectivity/jarjar-rules.txt for the tethering module and connectivity module.
+filegroup {
+    name: "framework-connectivity-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
+        "android/util/LocalLog.java",
+        // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
+        "com/android/internal/util/IndentingPrintWriter.java",
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/MessageUtils.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+        "com/android/internal/util/WakeupMessage.java",
+    ],
+}
+
+// keep these files in sync with the apex/jobscheduler/service jarjar-rules.txt for
+// the jobscheduler module.
+filegroup {
+    name: "framework-jobscheduler-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "com/android/internal/util/ArrayUtils.java",
+        "com/android/internal/util/BitUtils.java",
+        "com/android/internal/util/CollectionUtils.java",
+        "com/android/internal/util/ConcurrentUtils.java",
+        "com/android/internal/util/DumpUtils.java",
+        "com/android/internal/util/FastPrintWriter.java",
+        "com/android/internal/util/FastXmlSerializer.java",
+        "com/android/internal/util/FunctionalUtils.java",
+        "com/android/internal/util/ParseUtils.java",
+        "com/android/internal/util/RingBufferIndices.java",
+        "com/android/internal/util/StatLogger.java",
+        "com/android/internal/util/XmlUtils.java",
+    ],
+}
+
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "framework-permission-s-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "com/android/internal/infra/AndroidFuture.java",
+        "com/android/internal/infra/ServiceConnector.java",
+        "com/android/internal/infra/AndroidFuture.aidl",
+        "com/android/internal/infra/IAndroidFuture.aidl",
+        "android/os/HandlerExecutor.java",
+    ],
+}
+
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "service-permission-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
+        "com/android/internal/util/dump/DualDumpOutputStream.java",
+    ],
+}
+
+filegroup {
+    name: "incremental_aidl",
+    srcs: [
+        "android/os/incremental/IIncrementalServiceConnector.aidl",
+        "android/os/incremental/IncrementalFileSystemControlParcel.aidl",
+    ],
+}
+
+filegroup {
+    name: "dataloader_aidl",
+    srcs: [
+        "android/content/pm/DataLoaderParamsParcel.aidl",
+        "android/content/pm/DataLoaderType.aidl",
+        "android/content/pm/FileSystemControlParcel.aidl",
+        "android/content/pm/IDataLoader.aidl",
+        "android/content/pm/IDataLoaderManager.aidl",
+        "android/content/pm/InstallationFileParcel.aidl",
+        "android/content/pm/InstallationFileLocation.aidl",
+        "android/content/pm/IDataLoaderStatusListener.aidl",
+        "android/content/pm/IPackageInstallerSessionFileSystemConnector.aidl",
+    ],
+}
+
+filegroup {
+    name: "incremental_manager_aidl",
+    srcs: [
+        "android/os/incremental/IIncrementalService.aidl",
+        "android/os/incremental/IStorageLoadingProgressListener.aidl",
+        "android/os/incremental/IncrementalNewFileParams.aidl",
+        "android/os/incremental/IStorageHealthListener.aidl",
+        "android/os/incremental/PerUidReadTimeouts.aidl",
+        "android/os/incremental/StorageHealthCheckParams.aidl",
+    ],
+}
+
+filegroup {
+    name: "activity_manager_procstate_aidl",
+    srcs: [
+        "android/app/ProcessStateEnum.aidl",
+    ],
+}
+
+cc_defaults {
+    name: "incremental_default",
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Wextra-semi",
+        "-Werror",
+        "-Wzero-as-null-pointer-constant",
+        "-DANDROID_BASE_UNIQUE_FD_DISABLE_IMPLICIT_CONVERSION",
+    ],
+    shared_libs: [
+        "libbinder",
+        "libutils",
+    ],
+    aidl: {
+        include_dirs: [
+            "frameworks/native/aidl/binder",
+        ],
+        export_aidl_headers: true,
+    },
+}
+
+cc_library {
+    name: "libincremental_aidl-cpp",
+    srcs: [
+        ":incremental_aidl",
+    ],
+    defaults: ["incremental_default"],
+}
+
+cc_library {
+    name: "libdataloader_aidl-cpp",
+    srcs: [
+        ":dataloader_aidl",
+    ],
+    defaults: ["incremental_default"],
+    shared_libs: [
+        "libincremental_aidl-cpp",
+    ],
+}
+
+cc_library {
+    name: "libincremental_manager_aidl-cpp",
+    srcs: [
+        ":incremental_manager_aidl",
+    ],
+    defaults: ["incremental_default"],
+    shared_libs: [
+        "libincremental_aidl-cpp",
+        "libdataloader_aidl-cpp",
+    ],
+}
+
+// Build Rust bindings for PermissionController. Needed by keystore2.
+aidl_interface {
+    name: "android.os.permissions_aidl",
+    unstable: true,
+    local_include_dir: ".",
+    srcs: [
+        "android/os/IPermissionController.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the libraries. This is used by telephony-common (frameworks/opt/telephony)
+// and TeleService app (packages/services/Telephony).
+filegroup {
+    name: "framework-telephony-common-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "android/os/RegistrantList.java",
+        "android/os/Registrant.java",
+        "android/util/IndentingPrintWriter.java",
+        "android/util/LocalLog.java",
+        "android/util/TimeUtils.java",
+        "com/android/internal/os/SomeArgs.java",
+        "com/android/internal/util/AsyncChannel.java",
+        "com/android/internal/util/AsyncService.java",
+        "com/android/internal/util/BitwiseInputStream.java",
+        "com/android/internal/util/FastXmlSerializer.java",
+        "com/android/internal/util/HexDump.java",
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/IndentingPrintWriter.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+        "com/android/internal/util/UserIcons.java",
+    ],
+}
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-cellbroadcast-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "android/os/HandlerExecutor.java",
+        "android/util/LocalLog.java",
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+    ],
+}
+
+filegroup {
+    name: "framework-ims-common-shared-srcs",
+    srcs: [
+        ":modules-utils-preconditions-srcs",
+        "android/os/RegistrantList.java",
+        "android/os/Registrant.java",
+        "com/android/internal/os/SomeArgs.java",
+    ],
+}
+
+// utility classes statically linked into wifi-service
+filegroup {
+    name: "framework-wifi-service-shared-srcs",
+    srcs: [
+        "android/net/InterfaceConfiguration.java",
+        "android/util/BackupUtils.java",
+        "android/util/Rational.java",
+        "com/android/internal/util/FastXmlSerializer.java",
+        "com/android/internal/util/HexDump.java",
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/MessageUtils.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+        "com/android/internal/util/WakeupMessage.java",
+    ],
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//packages/modules/Wifi/service",
+    ],
+}
+
+// protolog start
+filegroup {
+    name: "protolog-common-src",
+    srcs: [
+        "com/android/internal/protolog/common/**/*.java",
+    ],
+}
+
+java_library {
+    name: "protolog-lib",
+    platform_apis: true,
+    srcs: [
+        "com/android/internal/protolog/ProtoLogImpl.java",
+        "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
+        ":protolog-common-src",
+    ],
+}
+
+java_library {
+    name: "protolog-groups",
+    srcs: [
+        "com/android/internal/protolog/ProtoLogGroup.java",
+        ":protolog-common-src",
+    ],
+}
+
+// protolog end

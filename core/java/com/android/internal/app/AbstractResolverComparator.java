@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.BadParcelableException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -64,6 +65,7 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
     private static final int WATCHDOG_TIMEOUT_MILLIS = 500;
 
     private final Comparator<ResolveInfo> mAzComparator;
+    private ChooserActivityLogger mChooserActivityLogger;
 
     protected final Handler mHandler = new Handler(Looper.getMainLooper()) {
         public void handleMessage(Message msg) {
@@ -85,6 +87,9 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
                     }
                     mHandler.removeMessages(RANKER_SERVICE_RESULT);
                     afterCompute();
+                    if (mChooserActivityLogger != null) {
+                        mChooserActivityLogger.logSharesheetAppShareRankingTimeout();
+                    }
                     break;
 
                 default:
@@ -105,17 +110,22 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     // get annotations of content from intent.
     private void getContentAnnotations(Intent intent) {
-        ArrayList<String> annotations = intent.getStringArrayListExtra(
-                Intent.EXTRA_CONTENT_ANNOTATIONS);
-        if (annotations != null) {
-            int size = annotations.size();
-            if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
-                size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
+        try {
+            ArrayList<String> annotations = intent.getStringArrayListExtra(
+                    Intent.EXTRA_CONTENT_ANNOTATIONS);
+            if (annotations != null) {
+                int size = annotations.size();
+                if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
+                    size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
+                }
+                mAnnotations = new String[size];
+                for (int i = 0; i < size; i++) {
+                    mAnnotations[i] = annotations.get(i);
+                }
             }
-            mAnnotations = new String[size];
-            for (int i = 0; i < size; i++) {
-                mAnnotations[i] = annotations.get(i);
-            }
+        } catch (BadParcelableException e) {
+            Log.i(TAG, "Couldn't unparcel intent annotations. Ignoring.");
+            mAnnotations = new String[0];
         }
     }
 
@@ -129,6 +139,14 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     void setCallBack(AfterCompute afterCompute) {
         mAfterCompute = afterCompute;
+    }
+
+    void setChooserActivityLogger(ChooserActivityLogger chooserActivityLogger) {
+        mChooserActivityLogger = chooserActivityLogger;
+    }
+
+    ChooserActivityLogger getChooserActivityLogger() {
+        return mChooserActivityLogger;
     }
 
     protected final void afterCompute() {

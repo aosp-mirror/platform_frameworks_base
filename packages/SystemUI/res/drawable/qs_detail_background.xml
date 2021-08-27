@@ -18,15 +18,15 @@ Copyright (C) 2014 The Android Open Source Project
         <inset>
             <shape>
                 <solid android:color="@color/qs_detail_transition"/>
-                <corners android:radius="?android:attr/dialogCornerRadius" />
+                <corners android:radius="@dimen/qs_footer_action_corner_radius" />
             </shape>
         </inset>
     </item>
     <item>
         <inset>
             <shape>
-                <solid android:color="?android:attr/colorPrimary"/>
-                <corners android:radius="?android:attr/dialogCornerRadius" />
+                <solid android:color="?android:attr/colorBackgroundFloating"/>
+                <corners android:radius="@dimen/qs_footer_action_corner_radius" />
             </shape>
         </inset>
     </item>

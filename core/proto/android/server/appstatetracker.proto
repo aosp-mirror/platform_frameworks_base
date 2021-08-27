@@ -41,14 +41,14 @@ message AppStateTrackerProto {
     // UIDs currently in the foreground.
     repeated int32 foreground_uids = 11;
 
-    // App ids that are in power-save whitelist.
-    repeated int32 power_save_whitelist_app_ids = 3;
+    // App ids that are in power-save exemption list.
+    repeated int32 power_save_exempt_app_ids = 3;
 
-    // App ids that are in power-save user whitelist.
-    repeated int32 power_save_user_whitelist_app_ids = 12;
+    // App ids that are in power-save user exemption list.
+    repeated int32 power_save_user_exempt_app_ids = 12;
 
-    // App ids that are in temporary power-save whitelist.
-    repeated int32 temp_power_save_whitelist_app_ids = 4;
+    // App ids that are in temporary power-save exemption list.
+    repeated int32 temp_power_save_exempt_app_ids = 4;
 
     message RunAnyInBackgroundRestrictedPackages {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -79,5 +79,5 @@ message AppStateTrackerProto {
     }
 
     // Packages that are in the EXEMPT bucket.
-    repeated ExemptedPackage exempted_packages = 10;
+    repeated ExemptedPackage exempted_bucket_packages = 10;
 }

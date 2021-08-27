@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"প্যাকেজ ইনস্টলার"</string>
     <string name="install" msgid="711829760615509273">"ইনস্টল করুন"</string>
+    <string name="update" msgid="3932142540719227615">"আপডেট করুন"</string>
     <string name="done" msgid="6632441120016885253">"হয়ে গেছে"</string>
     <string name="cancel" msgid="1018267193425558088">"বাতিল করুন"</string>
     <string name="installing" msgid="4921993079741206516">"ইনস্টল করা হচ্ছে…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ইনস্টল করা হচ্ছে…"</string>
     <string name="install_done" msgid="5987363587661783896">"অ্যাপটি ইনস্টল করা হয়ে গেছে।"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"আপনি কি এই অ্যাপ্লিকেশনটি ইনস্টল করতে চান?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"আগে থেকেই থাকা এই অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকে থাকা ডেটা মুছে যাবে না।"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"এই বিল্ট-ইন অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকে থাকা ডেটা মুছে যাবে না।"</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"আপনি কি এই অ্যাপটি ইনস্টল করতে চান?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"আপনি কি এই অ্যাপটি আপডেট করতে চান?"</string>
     <string name="install_failed" msgid="5777824004474125469">"অ্যাপটি ইনস্টল করা হয়নি।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ইনস্টল হওয়া থেকে প্যাকেজটিকে ব্লক করা হয়েছে।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"আগে থেকেই থাকা একটি প্যাকেজের সাথে প্যাকেজটির সমস্যা সৃষ্টি হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear-এ ইনস্টল/আনইনস্টল করা সমর্থিত নয়।"</string>
     <string name="message_staging" msgid="8032722385658438567">"অ্যাপ স্টেজ করা হচ্ছে…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"অজানা"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"আপনার নিরাপত্তার জন্য, এই অজানা উৎস থেকে আপনার ট্যাবলেটের অ্যাপ ইনস্টল করার অনুমতি নেই।"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"আপনার নিরাপত্তার জন্য, এই অজানা উৎস থেকে আপনার টিভির অ্যাপ ইনস্টল করার অনুমতি নেই।"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"আপনার নিরাপত্তার জন্য, এই অজানা উৎস থেকে আপনার ফোনের অ্যাপ ইনস্টল করার অনুমতি নেই।"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"আপনার নিরাপত্তার জন্য, এই সোর্স থেকে বর্তমানে আপনার ট্যাবে অজানা অ্যাপ ইনস্টল করা যাবে না। আপনি সেটিংস থেকে এটি পরিবর্তন করতে পারবেন।"</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"আপনার নিরাপত্তার জন্য, এই সোর্স থেকে বর্তমানে আপনার টিভিতে অজানা অ্যাপ ইনস্টল করা যাবে না। আপনি সেটিংস থেকে এটি পরিবর্তন করতে পারবেন।"</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"আপনার নিরাপত্তার জন্য, এই সোর্স থেকে বর্তমানে আপনার ফোনে অজানা অ্যাপ ইনস্টল করা যাবে না। আপনি সেটিংস থেকে এটি পরিবর্তন করতে পারবেন।"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"অজানা অ্যাপের দ্বারা আপনার ফোন এবং ব্যক্তিগত ডেটা আক্রান্ত হওয়ার সম্ভাবনা বেশি থাকে। এই অ্যাপটি ইনস্টল করার মাধ্যমে আপনি সম্মত হচ্ছেন যে এটি ব্যবহারের ফলে আপনার ফোনের বা ডেটার কোনও ক্ষতি হলে তার জন্য আপনিই দায়ী থাকবেন।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"অজানা অ্যাপের দ্বারা আপনার ট্যাবলেট এবং ব্যক্তিগত ডেটা আক্রান্ত হওয়ার সম্ভাবনা বেশি থাকে। এই অ্যাপটি ইনস্টল করার মাধ্যমে আপনি সম্মত হচ্ছেন যে এটি ব্যবহারের ফলে আপনার ট্যাবলেটের বা ডেটার কোনও ক্ষতি হলে তার জন্য আপনিই দায়ী থাকবেন।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"অজানা অ্যাপের দ্বারা আপনার টিভি এবং ব্যক্তিগত ডেটা আক্রান্ত হওয়ার সম্ভাবনা বেশি থাকে। এই অ্যাপটি ইনস্টল করার মাধ্যমে আপনি সম্মত হচ্ছেন যে এটি ব্যবহারের ফলে আপনার টিভি বা ডেটার কোনও ক্ষতি হলে তার জন্য আপনিই দায়ী থাকবেন।"</string>

@@ -16,13 +16,13 @@
 
 package com.android.internal.os;
 
+import android.system.suspend.internal.WakeLockInfo;
+
 import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
 import java.nio.charset.Charset;
-
-import android.system.suspend.WakeLockInfo;
 
 public class KernelWakelockReaderTest extends TestCase {
     /**

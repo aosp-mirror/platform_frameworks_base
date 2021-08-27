@@ -1,0 +1,61 @@
+// Signature format: 2.0
+package com.android.server.policy.devicestate.config {
+
+  public class Conditions {
+    ctor public Conditions();
+    method @Nullable public com.android.server.policy.devicestate.config.LidSwitchCondition getLidSwitch();
+    method @Nullable public java.util.List<com.android.server.policy.devicestate.config.SensorCondition> getSensor();
+    method public void setLidSwitch(@Nullable com.android.server.policy.devicestate.config.LidSwitchCondition);
+  }
+
+  public class DeviceState {
+    ctor public DeviceState();
+    method public com.android.server.policy.devicestate.config.Conditions getConditions();
+    method public java.math.BigInteger getIdentifier();
+    method @Nullable public String getName();
+    method public void setConditions(com.android.server.policy.devicestate.config.Conditions);
+    method public void setIdentifier(java.math.BigInteger);
+    method public void setName(@Nullable String);
+  }
+
+  public class DeviceStateConfig {
+    ctor public DeviceStateConfig();
+    method public java.util.List<com.android.server.policy.devicestate.config.DeviceState> getDeviceState();
+  }
+
+  public class LidSwitchCondition {
+    ctor public LidSwitchCondition();
+    method public boolean getOpen();
+    method public void setOpen(boolean);
+  }
+
+  public class NumericRange {
+    ctor public NumericRange();
+    method @Nullable public java.math.BigDecimal getMaxInclusive_optional();
+    method @Nullable public java.math.BigDecimal getMax_optional();
+    method @Nullable public java.math.BigDecimal getMinInclusive_optional();
+    method @Nullable public java.math.BigDecimal getMin_optional();
+    method public void setMaxInclusive_optional(@Nullable java.math.BigDecimal);
+    method public void setMax_optional(@Nullable java.math.BigDecimal);
+    method public void setMinInclusive_optional(@Nullable java.math.BigDecimal);
+    method public void setMin_optional(@Nullable java.math.BigDecimal);
+  }
+
+  public class SensorCondition {
+    ctor public SensorCondition();
+    method public String getName();
+    method public String getType();
+    method public java.util.List<com.android.server.policy.devicestate.config.NumericRange> getValue();
+    method public void setName(String);
+    method public void setType(String);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.policy.devicestate.config.DeviceStateConfig read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

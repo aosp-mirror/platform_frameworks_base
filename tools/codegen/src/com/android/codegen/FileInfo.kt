@@ -272,7 +272,7 @@ class FileInfo(
         /** Debug info */
         fun summary(): String = when(this) {
             is Code -> "${javaClass.simpleName}(${lines.size} lines): ${lines.getOrNull(0)?.take(70) ?: ""}..."
-            is DataClass -> "DataClass ${ast.nameAsString}:\n" +
+            is DataClass -> "DataClass ${ast.nameAsString} nested:${ast.nestedTypes.map { it.nameAsString }}:\n" +
                     chunks.joinToString("\n") { it.summary() } +
                     "\n//end ${ast.nameAsString}"
         }

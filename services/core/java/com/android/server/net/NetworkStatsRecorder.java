@@ -42,7 +42,6 @@ import com.google.android.collect.Sets;
 import libcore.io.IoUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -227,7 +226,7 @@ public class NetworkStatsRecorder {
         for (int i = 0; i < delta.size(); i++) {
             entry = delta.getValues(i, entry);
 
-            // As a last-ditch sanity check, report any negative values and
+            // As a last-ditch check, report any negative values and
             // clamp them so recording below doesn't croak.
             if (entry.isNegative()) {
                 if (mObserver != null) {
@@ -375,7 +374,7 @@ public class NetworkStatsRecorder {
 
         @Override
         public void write(OutputStream out) throws IOException {
-            mCollection.write(new DataOutputStream(out));
+            mCollection.write(out);
             mCollection.reset();
         }
     }
@@ -412,7 +411,7 @@ public class NetworkStatsRecorder {
 
         @Override
         public void write(OutputStream out) throws IOException {
-            mTemp.write(new DataOutputStream(out));
+            mTemp.write(out);
         }
     }
 

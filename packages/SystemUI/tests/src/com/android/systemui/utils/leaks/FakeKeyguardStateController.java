@@ -92,4 +92,49 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     public long calculateGoingToFullShadeDelay() {
         return 0;
     }
+
+    @Override
+    public float getDismissAmount() {
+        return 0;
+    }
+
+    @Override
+    public boolean isDismissingFromSwipe() {
+        return false;
+    }
+
+    @Override
+    public boolean isFlingingToDismissKeyguard() {
+        return false;
+    }
+
+    @Override
+    public boolean isFlingingToDismissKeyguardDuringSwipeGesture() {
+        return false;
+    }
+
+    @Override
+    public boolean isSnappingKeyguardBackAfterSwipe() {
+        return false;
+    }
+
+    @Override
+    public void notifyPanelFlingStart(boolean dismiss) {
+
+    }
+
+    @Override
+    public void notifyPanelFlingEnd() {
+
+    }
+
+    @Override
+    public boolean canPerformSmartSpaceTransition() {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyguardScreenRotationAllowed() {
+        return false;
+    }
 }

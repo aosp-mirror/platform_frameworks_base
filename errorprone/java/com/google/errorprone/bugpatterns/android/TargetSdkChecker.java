@@ -28,8 +28,8 @@ import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.BugChecker.BinaryTreeMatcher;
 import com.google.errorprone.matchers.Description;
-import com.google.errorprone.matchers.FieldMatchers;
 import com.google.errorprone.matchers.Matcher;
+import com.google.errorprone.matchers.android.FieldMatchers;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree.Kind;
@@ -89,7 +89,7 @@ public final class TargetSdkChecker extends BugChecker implements BinaryTreeMatc
         return Description.NO_MATCH;
     }
 
-    private static Matcher<BinaryTree> binaryTreeExact(Matcher<ExpressionTree> left,
+    static Matcher<BinaryTree> binaryTreeExact(Matcher<ExpressionTree> left,
             Matcher<ExpressionTree> right) {
         return new Matcher<BinaryTree>() {
             @Override

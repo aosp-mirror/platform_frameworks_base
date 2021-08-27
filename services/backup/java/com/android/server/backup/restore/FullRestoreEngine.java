@@ -27,6 +27,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERA
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
+import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -49,6 +50,7 @@ import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BytesReadListener;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
 import com.android.server.backup.utils.RestoreUtils;
@@ -129,11 +131,13 @@ public class FullRestoreEngine extends RestoreEngine {
     private final boolean mIsAdbRestore;
     @GuardedBy("mPipesLock")
     private boolean mPipesClosed;
+    private final BackupEligibilityRules mBackupEligibilityRules;
 
     public FullRestoreEngine(UserBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
-            int ephemeralOpToken, boolean isAdbRestore) {
+            int ephemeralOpToken, boolean isAdbRestore,
+            BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
@@ -147,6 +151,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;
         mUserId = backupManagerService.getUserId();
+        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     public IBackupAgent getAgent() {
@@ -223,7 +228,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
                             mBackupManagerService.getPackageManager(), allowApks, info, signatures,
-                            pmi, mUserId);
+                            pmi, mUserId, mBackupEligibilityRules);
                     mManifestSignatures.put(info.packageName, signatures);
                     mPackagePolicies.put(pkg, restorePolicy);
                     mPackageInstallers.put(pkg, info.installerPackageName);
@@ -365,7 +370,8 @@ public class FullRestoreEngine extends RestoreEngine {
                             mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
                                     FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
                                             ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
-                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
+                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
+                                    mBackupEligibilityRules.getOperationType());
                             mAgentPackage = pkg;
                         } catch (IOException | NameNotFoundException e) {
                             // fall through to error handling
@@ -379,7 +385,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
                     }
 
-                    // Sanity check: make sure we never give data to the wrong app.  This
+                    // Make sure we never give data to the wrong app.  This
                     // should never happen but a little paranoia here won't go amiss.
                     if (okay && !pkg.equals(mAgentPackage)) {
                         Slog.e(TAG, "Restoring data for " + pkg
@@ -397,7 +403,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         final boolean isSharedStorage = pkg.equals(SHARED_BACKUP_AGENT_PACKAGE);
                         final long timeout = isSharedStorage ?
                                 mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis() :
-                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
+                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                                        mTargetApp.uid);
                         try {
                             mBackupManagerService.prepareOperationTimeout(token,
                                     timeout,
@@ -628,7 +635,11 @@ public class FullRestoreEngine extends RestoreEngine {
         setRunning(false);
     }
 
-    private static boolean isRestorableFile(FileMetadata info) {
+    private boolean isRestorableFile(FileMetadata info) {
+        if (mBackupEligibilityRules.getOperationType() == BackupManager.OperationType.MIGRATION) {
+            // Everything is eligible for device-to-device migration.
+            return true;
+        }
         if (FullBackup.CACHE_TREE_TOKEN.equals(info.domain)) {
             if (MORE_DEBUG) {
                 Slog.i(TAG, "Dropping cache file path " + info.path);

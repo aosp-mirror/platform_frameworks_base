@@ -54,6 +54,9 @@
     <!-- Bulgarian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_bulgarian">Bulgarian</string>
 
+    <!-- Bulgarian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_bulgarian_phonetic">Bulgarian, Phonetic</string>
+
     <!-- Italian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_italian">Italian</string>
 
@@ -74,6 +77,9 @@
 
     <!-- Czech keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_czech">Czech</string>
+
+    <!-- Czech qwerty keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_czech_qwerty">Czech QWERTY style</string>
 
     <!-- Estonian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_estonian">Estonian</string>
@@ -98,6 +104,9 @@
 
     <!-- Turkish keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_turkish">Turkish</string>
+
+    <!-- Turkish keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_turkish_f">Turkish F</string>
 
     <!-- Ukrainian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_ukrainian">Ukrainian</string>
@@ -128,4 +137,13 @@
 
     <!-- Polish keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_polish">Polish</string>
+
+    <!-- Belarusian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_belarusian">Belarusian</string>
+
+    <!-- Mongolian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_mongolian">Mongolian</string>
+
+    <!-- Georgian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_georgian">Georgian</string>
 </resources>

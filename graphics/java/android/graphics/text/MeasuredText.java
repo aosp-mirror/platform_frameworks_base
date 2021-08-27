@@ -80,11 +80,11 @@ public class MeasuredText {
     public @FloatRange(from = 0.0) @Px float getWidth(
             @IntRange(from = 0) int start, @IntRange(from = 0) int end) {
         Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(" + start + ") must be 0 <= start <= " + mChars.length);
+                "start(%d) must be 0 <= start <= %d", start, mChars.length);
         Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(" + end + ") must be 0 <= end <= " + mChars.length);
+                "end(%d) must be 0 <= end <= %d", end, mChars.length);
         Preconditions.checkArgument(start <= end,
-                "start(" + start + ") is larger than end(" + end + ")");
+                "start(%d) is larger than end(%d)", start, end);
         return nGetWidth(mNativePtr, start, end);
     }
 
@@ -107,11 +107,11 @@ public class MeasuredText {
     public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Rect rect) {
         Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(" + start + ") must be 0 <= start <= " + mChars.length);
+                "start(%d) must be 0 <= start <= %d", start, mChars.length);
         Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(" + end + ") must be 0 <= end <= " + mChars.length);
+                "end(%d) must be 0 <= end <= %d", end, mChars.length);
         Preconditions.checkArgument(start <= end,
-                "start(" + start + ") is larger than end(" + end + ")");
+                "start(%d) is larger than end(%d)", start, end);
         Preconditions.checkNotNull(rect);
         nGetBounds(mNativePtr, mChars, start, end, rect);
     }
@@ -123,7 +123,7 @@ public class MeasuredText {
      */
     public @FloatRange(from = 0.0f) @Px float getCharWidthAt(@IntRange(from = 0) int offset) {
         Preconditions.checkArgument(0 <= offset && offset < mChars.length,
-                "offset(" + offset + ") is larger than text length: " + mChars.length);
+                "offset(%d) is larger than text length %d" + offset, mChars.length);
         return nGetCharWidthAt(mNativePtr, offset);
     }
 

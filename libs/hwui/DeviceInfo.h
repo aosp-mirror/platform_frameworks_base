@@ -16,8 +16,10 @@
 #ifndef DEVICEINFO_H
 #define DEVICEINFO_H
 
-#include <apex/display.h>
 #include <SkImageInfo.h>
+#include <android/data_space.h>
+
+#include <mutex>
 
 #include "utils/Macros.h"
 
@@ -33,19 +35,38 @@ class DeviceInfo {
 
 public:
     static DeviceInfo* get();
-    static float getMaxRefreshRate() { return get()->mMaxRefreshRate; }
     static int32_t getWidth() { return get()->mWidth; }
     static int32_t getHeight() { return get()->mHeight; }
-    static float getDensity() { return get()->mDensity; }
+    // Gets the density in density-independent pixels
+    static float getDensity() { return sDensity.load(); }
     static int64_t getVsyncPeriod() { return get()->mVsyncPeriod; }
-    static int64_t getCompositorOffset() { return get()->mCompositorOffset; }
-    static int64_t getAppOffset() { return get()->mAppOffset; }
+    static int64_t getCompositorOffset() { return get()->getCompositorOffsetInternal(); }
+    static int64_t getAppOffset() { return get()->mAppVsyncOffsetNanos; }
+    // Sets the density in density-independent pixels
+    static void setDensity(float density) { sDensity.store(density); }
+    static void setWidth(int32_t width) { get()->mWidth = width; }
+    static void setHeight(int32_t height) { get()->mHeight = height; }
+    static void setRefreshRate(float refreshRate) {
+        get()->mVsyncPeriod = static_cast<int64_t>(1000000000 / refreshRate);
+    }
+    static void setPresentationDeadlineNanos(int64_t deadlineNanos) {
+        get()->mPresentationDeadlineNanos = deadlineNanos;
+    }
+    static void setAppVsyncOffsetNanos(int64_t offsetNanos) {
+        get()->mAppVsyncOffsetNanos = offsetNanos;
+    }
+    static void setWideColorDataspace(ADataSpace dataspace);
 
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
     int maxTextureSize() const;
     sk_sp<SkColorSpace> getWideColorSpace() const { return mWideColorSpace; }
-    SkColorType getWideColorType() const { return mWideColorType; }
+    SkColorType getWideColorType() {
+        static std::once_flag kFlag;
+        // lazily update display info from SF here, so that the call is performed by RenderThread.
+        std::call_once(kFlag, [&, this]() { updateDisplayInfo(); });
+        return mWideColorType;
+    }
 
     // This method should be called whenever the display refresh rate changes.
     void onRefreshRateChanged(int64_t vsyncPeriod);
@@ -54,24 +75,31 @@ private:
     friend class renderthread::RenderThread;
     static void setMaxTextureSize(int maxTextureSize);
     void updateDisplayInfo();
+    int64_t getCompositorOffsetInternal() const {
+        // Assume that SF takes around a millisecond to latch buffers after
+        // waking up
+        return mVsyncPeriod - (mPresentationDeadlineNanos - 1000000);
+    }
 
     DeviceInfo();
-    ~DeviceInfo();
+    ~DeviceInfo() = default;
 
     int mMaxTextureSize;
     sk_sp<SkColorSpace> mWideColorSpace = SkColorSpace::MakeSRGB();
     SkColorType mWideColorType = SkColorType::kN32_SkColorType;
-    ADisplayConfig* mCurrentConfig = nullptr;
-    ADisplay** mDisplays = nullptr;
     int mDisplaysSize = 0;
     int mPhysicalDisplayIndex = -1;
-    float mMaxRefreshRate = 60.0;
     int32_t mWidth = 1080;
     int32_t mHeight = 1920;
-    float mDensity = 2.0;
     int64_t mVsyncPeriod = 16666666;
-    int64_t mCompositorOffset = 0;
-    int64_t mAppOffset = 0;
+    // Magically corresponds with an sf offset of 0 for a sane default.
+    int64_t mPresentationDeadlineNanos = 17666666;
+    int64_t mAppVsyncOffsetNanos = 0;
+
+    // Density is not retrieved from the ADisplay apis, so this may potentially
+    // be called on multiple threads.
+    // Unit is density-independent pixels
+    static std::atomic<float> sDensity;
 };
 
 } /* namespace uirenderer */

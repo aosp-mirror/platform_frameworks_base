@@ -17,20 +17,20 @@
 package com.android.server.locksettings.recoverablekeystore;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 /**
  * Implementation of {@link KeyStoreProxy} that delegates all method calls to the {@link KeyStore}.
  */
 public class KeyStoreProxyImpl implements KeyStoreProxy {
 
-    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+    public static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+
     private final KeyStore mKeyStore;
 
     /**

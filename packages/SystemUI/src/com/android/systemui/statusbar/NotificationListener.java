@@ -18,10 +18,10 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,6 +34,7 @@ import android.util.Log;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ import java.util.List;
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
+    private static final boolean DEBUG = StatusBar.DEBUG;
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
@@ -159,6 +161,19 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     @Override
+    public void onNotificationChannelModified(
+            String pkgName, UserHandle user, NotificationChannel channel, int modificationType) {
+        if (DEBUG) Log.d(TAG, "onNotificationChannelModified");
+        if (!onPluginNotificationChannelModified(pkgName, user, channel, modificationType)) {
+            mMainHandler.post(() -> {
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationChannelModified(pkgName, user, channel, modificationType);
+                }
+            });
+        }
+    }
+
+    @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         for (NotificationSettingsListener listener : mSettingsListeners) {
             listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
@@ -210,6 +225,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     false,
                     false,
                     null,
+                    0,
                     false
             );
         }
@@ -227,6 +243,14 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
         void onNotificationRankingUpdate(RankingMap rankingMap);
+
+        /** Called after a notification channel is modified. */
+        default void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+        }
 
         /**
          * Called after the listener has connected to NoMan and posted any current notifications.

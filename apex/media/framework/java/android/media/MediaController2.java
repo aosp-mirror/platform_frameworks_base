@@ -594,7 +594,6 @@ public class MediaController2 implements AutoCloseable {
                 if (DEBUG) {
                     Log.d(TAG, "onServiceConnected " + name + " " + this);
                 }
-                // Sanity check
                 if (!mSessionToken.getPackageName().equals(name.getPackageName())) {
                     Log.wtf(TAG, "Expected connection to " + mSessionToken.getPackageName()
                             + " but is connected to " + name);

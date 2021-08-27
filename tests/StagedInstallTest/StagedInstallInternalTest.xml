@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 <configuration description="Runs the internal staged install tests">
-    <option name="test-suite-tag" value="StagedInstallTest" />
+    <option name="test-suite-tag" value="StagedInstallInternalTest" />
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="StagedInstallInternalTestApp.apk" />

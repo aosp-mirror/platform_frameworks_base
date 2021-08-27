@@ -253,6 +253,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setPerson(makePerson("person", "personKey", "personUri"))
                 .setLongLived(true)
                 .setExtras(pb)
+                .setStartingTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -288,6 +289,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getTextResName());
         assertEquals(0, si.getDisabledMessageResourceId());
         assertEquals(null, si.getDisabledMessageResName());
+        assertEquals("android:style/Theme.Black.NoTitleBar.Fullscreen",
+                si.getStartingThemeResName());
     }
 
     public void testShortcutInfoParcel_resId() {
@@ -308,6 +311,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setRank(123)
                 .setExtras(pb)
+                .setStartingTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -339,6 +343,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(456, si.getIconResourceId());
         assertEquals("string/r456", si.getIconResName());
         assertEquals("test_uri", si.getIconUri());
+        assertEquals("android:style/Theme.Black.NoTitleBar.Fullscreen",
+                si.getStartingThemeResName());
     }
 
     public void testShortcutInfoClone() {
@@ -2138,7 +2144,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.reportShortcutUsed("s2");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                     eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_10));
-
         });
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             // Try with a different package.
@@ -2158,7 +2163,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.reportShortcutUsed("s3");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                     eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_10));
-
         });
     }
 
@@ -2212,6 +2216,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 android.R.drawable.alert_dark_frame, true, getTestContext().getPackageName()));
         assertEquals("" + android.R.string.cancel, ShortcutInfo.lookUpResourceName(res,
                 android.R.string.cancel, false, getTestContext().getPackageName()));
+        assertEquals("" + android.R.style.Theme_Black_NoTitleBar_Fullscreen,
+                ShortcutInfo.lookUpResourceName(
+                        res, android.R.style.Theme_Black_NoTitleBar_Fullscreen, true,
+                        getTestContext().getPackageName()));
     }
 
     public void testLookUpResourceName_appResources() {
@@ -2238,6 +2246,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(android.R.drawable.alert_dark_frame, ShortcutInfo.lookUpResourceId(res,
                 "" + android.R.drawable.alert_dark_frame, null,
                 getTestContext().getPackageName()));
+        assertEquals(android.R.style.Theme_Black_NoTitleBar_Fullscreen,
+                ShortcutInfo.lookUpResourceId(
+                        res, "" + android.R.style.Theme_Black_NoTitleBar_Fullscreen,
+                        null, getTestContext().getPackageName()));
     }
 
     // Test for a ShortcutInfo method.

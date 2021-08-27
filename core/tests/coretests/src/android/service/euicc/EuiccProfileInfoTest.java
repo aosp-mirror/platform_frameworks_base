@@ -154,6 +154,29 @@ public class EuiccProfileInfoTest {
     }
 
     @Test
+    public void testBuilder_BasedOnAnotherProfileWithEmptyAccessRules() {
+        EuiccProfileInfo p =
+                new EuiccProfileInfo.Builder("21430000000000006587")
+                        .setNickname("profile nickname")
+                        .setProfileName("profile name")
+                        .setServiceProviderName("service provider")
+                        .setCarrierIdentifier(
+                                new CarrierIdentifier(
+                                        new byte[] {0x23, 0x45, 0x67},
+                                        "123",
+                                        "45"))
+                        .setState(EuiccProfileInfo.PROFILE_STATE_ENABLED)
+                        .setProfileClass(EuiccProfileInfo.PROFILE_CLASS_OPERATIONAL)
+                        .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
+                        .setUiccAccessRule(null)
+                        .build();
+
+        EuiccProfileInfo copied = new EuiccProfileInfo.Builder(p).build();
+
+        assertEquals(null, copied.getUiccAccessRules());
+    }
+
+    @Test
     public void testEqualsHashCode() {
         EuiccProfileInfo p =
                 new EuiccProfileInfo.Builder("21430000000000006587")

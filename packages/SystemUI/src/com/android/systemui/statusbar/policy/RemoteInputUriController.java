@@ -23,17 +23,17 @@ import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles granting and revoking inline URI grants associated with RemoteInputs.
  */
-@Singleton
+@SysUISingleton
 public class RemoteInputUriController {
 
     private final IStatusBarService mStatusBarManagerService;
