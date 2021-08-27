@@ -2990,8 +2990,6 @@
     <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
     <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
 
-    <!-- Provider Model: Title of the airplane mode in the internet dialog. [CHAR LIMIT=50] -->
-    <string name="airplane_mode">Airplane mode</string>
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>
     <!-- Provider Model: Summary text separator for preferences including a short description
