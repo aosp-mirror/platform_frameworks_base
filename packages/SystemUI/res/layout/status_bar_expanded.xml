@@ -113,6 +113,7 @@
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/close_handle_underlap"
+            android:importantForAccessibility="no"
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
         />
