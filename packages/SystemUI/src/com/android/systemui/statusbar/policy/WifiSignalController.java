@@ -163,7 +163,7 @@ public class WifiSignalController extends
         int qsTypeIcon = 0;
         IconState qsIcon = null;
         if (sbVisible) {
-            qsTypeIcon = icons.qsDataType;
+            qsTypeIcon = icons.dataType;
             qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconIdForCarrierWifi(),
                     contentDescription);
         }

@@ -399,7 +399,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             // Only send data sim callbacks to QS.
             if (mCurrentState.dataSim && mCurrentState.isDefault) {
                 qsTypeIcon =
-                        (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
+                        (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
                 qsIcon = new IconState(mCurrentState.enabled
                         && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
                 description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
@@ -435,7 +435,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             if (mProviderModelSetting) {
                 if (mCurrentState.dataSim && mCurrentState.isDefault) {
                     qsTypeIcon =
-                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
+                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
                     qsIcon = new IconState(
                             mCurrentState.enabled && !mCurrentState.isEmergency,
                             getQsCurrentIconId(), contentDescription);
@@ -444,7 +444,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             } else {
                 if (mCurrentState.dataSim) {
                     qsTypeIcon =
-                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
+                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
                     qsIcon = new IconState(
                             mCurrentState.enabled && !mCurrentState.isEmergency,
                             getQsCurrentIconId(), contentDescription);
