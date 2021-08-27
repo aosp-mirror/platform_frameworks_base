@@ -125,7 +125,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"দিব্যাংগসকলৰ বাবে থকা সুবিধাসমূহ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"স্ক্ৰীণ ঘূৰাওক"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"অৱলোকন"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"সন্ধান কৰক"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"কেমেৰা"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফ\'ন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"কণ্ঠধ্বনিৰে সহায়"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"বেটাৰিৰ চ্চাৰ্জ সম্পূর্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME">%s</xliff:g> বাকী"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"চ্চার্জ কৰি থকা নাই"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"নেটৱৰ্ক \nনিৰীক্ষণ কৰা হ\'ব পাৰে"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"সন্ধান কৰক"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>ৰ বাবে ওপৰলৈ শ্লাইড কৰক।"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>ৰ বাবে বাওঁফাললৈ শ্লাইড কৰক।"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
