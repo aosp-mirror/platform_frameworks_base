@@ -129,7 +129,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final KeyguardBypassController mKeyguardBypassController;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final SystemClock mSystemClock;
-    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
+    @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -558,14 +558,6 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
-        mOrientationListener = new BiometricOrientationEventListener(
-                context,
-                () -> {
-                    onOrientationChanged();
-                    return Unit.INSTANCE;
-                },
-                displayManager,
-                mainHandler);
         mKeyguardBypassController = keyguardBypassController;
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
@@ -573,6 +565,15 @@ public class UdfpsController implements DozeReceiver {
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
         checkArgument(mSensorProps != null);
+        mOrientationListener = new BiometricDisplayListener(
+                context,
+                displayManager,
+                mainHandler,
+                new BiometricDisplayListener.SensorType.UnderDisplayFingerprint(mSensorProps),
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                });
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
