@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Test;
+
+import java.util.function.Consumer;
 
 public class ScrollCaptureViewSupportTest {
 
@@ -42,9 +45,10 @@ public class ScrollCaptureViewSupportTest {
 
         @NonNull
         @Override
-        public ScrollResult onScrollRequested(@NonNull View view, @NonNull Rect scrollBounds,
-                @NonNull Rect requestRect) {
-            return new ScrollResult();
+        public void onScrollRequested(@NonNull View view, @NonNull Rect scrollBounds,
+                @NonNull Rect requestRect, CancellationSignal signal,
+                Consumer<ScrollResult> resultConsumer) {
+            resultConsumer.accept(new ScrollResult());
         }
 
         @Override
