@@ -590,7 +590,7 @@ public class DisplayDeviceConfig {
             newIndex = i - newStart;
             final float newBacklightVal;
             final float newNitsVal;
-            isLastValue = mRawBacklight[i] > mBacklightMaximum
+            isLastValue = mRawBacklight[i] >= mBacklightMaximum
                     || i >= mRawBacklight.length - 1;
             // Clamp beginning and end to valid backlight values.
             if (newIndex == 0) {
