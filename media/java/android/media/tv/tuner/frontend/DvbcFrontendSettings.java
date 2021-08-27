@@ -266,7 +266,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
     // Dvbc bandwidth is only supported in Tuner 1.1 or higher.
     private final int mBandwidth;
 
-    private DvbcFrontendSettings(int frequency, int modulation, long innerFec, int symbolRate,
+    private DvbcFrontendSettings(long frequency, int modulation, long innerFec, int symbolRate,
             int outerFec, int annex, int spectralInversion, int interleaveMode, int bandwidth) {
         super(frequency);
         mModulation = modulation;
@@ -347,7 +347,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
      * Builder for {@link DvbcFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
         private long mInnerFec = FEC_UNDEFINED;
         private int mSymbolRate = 0;
@@ -364,10 +364,23 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

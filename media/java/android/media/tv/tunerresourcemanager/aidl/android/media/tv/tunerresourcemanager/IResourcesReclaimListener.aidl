@@ -21,7 +21,7 @@ package android.media.tv.tunerresourcemanager;
  *
  * @hide
  */
-oneway interface IResourcesReclaimListener {
+interface IResourcesReclaimListener {
     /*
      * TRM invokes this method when the client's resources need to be reclaimed.
      *

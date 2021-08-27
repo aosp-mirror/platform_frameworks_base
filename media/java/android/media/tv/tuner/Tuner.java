@@ -53,7 +53,6 @@ import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -354,7 +353,7 @@ public class Tuner implements AutoCloseable  {
         profile.tvInputSessionId = tvInputSessionId;
         profile.useCase = useCase;
         mTunerResourceManager.registerClientProfile(
-                profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
+                profile, Runnable::run, mResourceListener, clientId);
         mClientId = clientId[0];
 
         mUserId = Process.myUid();
@@ -1146,13 +1145,13 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
-    private void onFrequenciesReport(int[] frequency) {
+    private void onFrequenciesReport(long[] frequencies) {
         synchronized (mScanCallbackLock) {
             if (mScanCallbackExecutor != null && mScanCallback != null) {
                 mScanCallbackExecutor.execute(() -> {
                     synchronized (mScanCallbackLock) {
                         if (mScanCallback != null) {
-                            mScanCallback.onFrequenciesReported(frequency);
+                            mScanCallback.onFrequenciesLongReported(frequencies);
                         }
                     }
                 });

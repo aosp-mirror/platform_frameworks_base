@@ -447,7 +447,7 @@ public class FrontendStatus {
     private Boolean mIsLnaOn;
     private boolean[] mIsLayerErrors;
     private Integer mMer;
-    private Integer mFreqOffset;
+    private Long mFreqOffset;
     private Integer mHierarchy;
     private Boolean mIsRfLocked;
     private Atsc3PlpTuningInfo[] mPlpInfo;
@@ -651,8 +651,18 @@ public class FrontendStatus {
      * Gets the current frequency difference in Hz.
      *
      * <p>Difference between tuning frequency and actual locked frequency.
+     * @deprecated Use {@link #getFreqOffsetLong()}
      */
+    @Deprecated
     public int getFreqOffset() {
+        return (int) getFreqOffsetLong();
+    }
+    /**
+     * Gets the current frequency difference in Hz.
+     *
+     * <p>Difference between tuning frequency and actual locked frequency.
+     */
+    public long getFreqOffsetLong() {
         if (mFreqOffset == null) {
             throw new IllegalStateException("FreqOffset status is empty");
         }

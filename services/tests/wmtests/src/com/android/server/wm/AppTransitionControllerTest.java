@@ -48,7 +48,6 @@ import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -94,11 +93,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_UNSET,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null, null, false));
+                        mDisplayContent.mChangingContainers, null, null, false));
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testTranslucentOpen() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
@@ -112,12 +110,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
-                    mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                    null, null, false));
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null, null, false));
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testTranslucentClose() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
@@ -129,11 +126,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null, null, false));
+                        mDisplayContent.mChangingContainers, null, null, false));
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testChangeIsNotOverwritten() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
@@ -144,14 +140,14 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mOpeningApps.add(behind);
         mDisplayContent.mOpeningApps.add(translucentOpening);
+        mDisplayContent.mChangingContainers.add(translucentOpening.getTask());
         assertEquals(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null, null, false));
+                        mDisplayContent.mChangingContainers, null, null, false));
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testTransitWithinTask() {
         final ActivityRecord opening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
@@ -198,7 +194,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        appWindowClosing, null, false));
+                        mDisplayContent.mChangingContainers, appWindowClosing, null, false));
     }
 
     @Test
@@ -229,7 +225,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        appWindowClosing, null, false));
+                        mDisplayContent.mChangingContainers, appWindowClosing, null, false));
     }
 
     @Test

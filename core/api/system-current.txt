@@ -5412,12 +5412,6 @@ package android.media {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
-  public class Spatializer {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
-  }
-
 }
 
 package android.media.audiofx {
@@ -6197,7 +6191,7 @@ package android.media.tv.tuner.filter {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
     method public int flush();
-    method public int getId();
+    method @Deprecated public int getId();
     method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
@@ -6556,7 +6550,8 @@ package android.media.tv.tuner.frontend {
   public static class AnalogFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setAftFlag(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSifStandard(int);
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSignalType(int);
   }
@@ -6624,7 +6619,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setPlpSettings(@NonNull android.media.tv.tuner.frontend.Atsc3PlpSettings[]);
   }
 
@@ -6667,7 +6663,8 @@ package android.media.tv.tuner.frontend {
 
   public static class AtscFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings build();
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
   }
 
@@ -6727,7 +6724,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setCodeRate(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setTimeInterleaveMode(int);
@@ -6791,7 +6789,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setBandwidth(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
@@ -6879,7 +6878,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCanHandleDiseqcRxMessage(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setPilot(int);
@@ -6988,7 +6988,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setConstellation(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
@@ -7007,9 +7008,11 @@ package android.media.tv.tuner.frontend {
   }
 
   public class FrontendInfo {
-    method public int getAcquireRange();
+    method @Deprecated public int getAcquireRange();
+    method public long getAcquireRangeLong();
     method public int getExclusiveGroupId();
-    method @NonNull public android.util.Range<java.lang.Integer> getFrequencyRange();
+    method @Deprecated @NonNull public android.util.Range<java.lang.Integer> getFrequencyRange();
+    method @NonNull public android.util.Range<java.lang.Long> getFrequencyRangeLong();
     method @NonNull public android.media.tv.tuner.frontend.FrontendCapabilities getFrontendCapabilities();
     method public int getId();
     method @NonNull public int[] getStatusCapabilities();
@@ -7018,11 +7021,14 @@ package android.media.tv.tuner.frontend {
   }
 
   public abstract class FrontendSettings {
-    method @IntRange(from=1) public int getEndFrequency();
-    method public int getFrequency();
+    method @Deprecated @IntRange(from=1) public int getEndFrequency();
+    method @IntRange(from=1) public long getEndFrequencyLong();
+    method @Deprecated public int getFrequency();
+    method public long getFrequencyLong();
     method public int getFrontendSpectralInversion();
     method public abstract int getType();
-    method @IntRange(from=1) public void setEndFrequency(int);
+    method @Deprecated @IntRange(from=1) public void setEndFrequency(int);
+    method @IntRange(from=1) public void setEndFrequencyLong(long);
     method public void setSpectralInversion(int);
     field public static final long FEC_11_15 = 4194304L; // 0x400000L
     field public static final long FEC_11_20 = 8388608L; // 0x800000L
@@ -7085,7 +7091,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public int[] getBers();
     method @NonNull public int[] getCodeRates();
     method @NonNull public int[] getExtendedModulations();
-    method public int getFreqOffset();
+    method @Deprecated public int getFreqOffset();
+    method public long getFreqOffsetLong();
     method public int getGuardInterval();
     method public int getHierarchy();
     method public long getInnerFec();
@@ -7201,7 +7208,8 @@ package android.media.tv.tuner.frontend {
   public static class Isdbs3FrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setCodeRate(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setRolloff(int);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setStreamId(int);
@@ -7244,7 +7252,8 @@ package android.media.tv.tuner.frontend {
   public static class IsdbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setCodeRate(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setRolloff(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setStreamId(int);
@@ -7291,7 +7300,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setCodeRate(int);
-    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequency(int);
+    method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequency(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setMode(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setModulation(int);
@@ -7311,7 +7321,8 @@ package android.media.tv.tuner.frontend {
     method public default void onDvbcAnnexReported(int);
     method public void onDvbsStandardReported(int);
     method public void onDvbtStandardReported(int);
-    method public void onFrequenciesReported(@NonNull int[]);
+    method public default void onFrequenciesLongReported(@NonNull long[]);
+    method @Deprecated public void onFrequenciesReported(@NonNull int[]);
     method public void onGroupIdsReported(@NonNull int[]);
     method public void onHierarchyReported(int);
     method public void onInputStreamIdsReported(@NonNull int[]);

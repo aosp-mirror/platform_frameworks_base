@@ -37,8 +37,19 @@ public interface ScanCallback {
     /** scan progress percent (0..100) */
     void onProgress(@IntRange(from = 0, to = 100) int percent);
 
+    /**
+     * @deprecated Use {@link #onFrequenciesLongReported(long[])}
+     */
+    @Deprecated void onFrequenciesReported(@NonNull int[] frequencies);
+
     /** Signal frequencies in Hertz */
-    void onFrequenciesReported(@NonNull int[] frequency);
+    default void onFrequenciesLongReported(@NonNull long[] frequencies) {
+        final int[] intFrequencies = new int[frequencies.length];
+        for (int i = 0; i < frequencies.length; i++) {
+              intFrequencies[i] = (int) frequencies[i];
+        }
+        onFrequenciesReported(intFrequencies);
+    }
 
     /** Symbols per second */
     void onSymbolRatesReported(@NonNull int[] rate);

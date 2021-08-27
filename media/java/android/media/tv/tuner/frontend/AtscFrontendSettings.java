@@ -61,7 +61,7 @@ public class AtscFrontendSettings extends FrontendSettings {
 
     private final int mModulation;
 
-    private AtscFrontendSettings(int frequency, int modulation) {
+    private AtscFrontendSettings(long frequency, int modulation) {
         super(frequency);
         mModulation = modulation;
     }
@@ -86,7 +86,7 @@ public class AtscFrontendSettings extends FrontendSettings {
      * Builder for {@link AtscFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
 
         private Builder() {
@@ -96,10 +96,23 @@ public class AtscFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

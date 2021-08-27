@@ -247,7 +247,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     private final int mGuardInterval;
     private final int mTimeInterleaveMode;
 
-    private DtmbFrontendSettings(int frequency, int modulation, int codeRate, int transmissionMode,
+    private DtmbFrontendSettings(long frequency, int modulation, int codeRate, int transmissionMode,
             int guardInterval, int timeInterleaveMode, int bandwidth) {
         super(frequency);
         mModulation = modulation;
@@ -319,7 +319,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
      * Builder for {@link AtscFrontendSettings}.
      */
     public static final class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_CONSTELLATION_UNDEFINED;
         private int mCodeRate = CODERATE_UNDEFINED;
         private int mTransmissionMode = TRANSMISSION_MODE_UNDEFINED;
@@ -334,11 +334,24 @@ public final class DtmbFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
+         */
+        @NonNull
+        @IntRange(from = 1)
+        @Deprecated
+        public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
         @SuppressLint("MissingGetterMatchingBuilder")
-        public Builder setFrequency(int frequency) {
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

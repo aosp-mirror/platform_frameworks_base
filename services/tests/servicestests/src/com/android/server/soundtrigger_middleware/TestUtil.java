@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
 import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_4.ISoundTriggerHwCallback;
+import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.media.AudioFormat;
 import android.media.MediaFormat;
 import android.media.audio.common.AudioChannelLayout;

@@ -1218,7 +1218,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
 
-        mLetterboxConfiguration = new LetterboxConfiguration(context);
+        mLetterboxConfiguration = new LetterboxConfiguration(
+                // Using SysUI context to have access to Material colors extracted from Wallpaper.
+                ActivityThread.currentActivityThread().getSystemUiContext());
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);

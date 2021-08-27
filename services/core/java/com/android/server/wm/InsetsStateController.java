@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
@@ -137,10 +137,10 @@ class InsetsStateController {
                 return rotatedState;
             }
         }
-        final @WindowingMode int windowingMode = token != null
-                ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        return getInsetsForTarget(type, windowingMode, alwaysOnTop, mState);
+        // Always use windowing mode fullscreen when get insets for window metrics to make sure it
+        // contains all insets types.
+        return getInsetsForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop, mState);
     }
 
     private static @InternalInsetsType

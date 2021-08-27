@@ -333,6 +333,7 @@ public class Filter implements AutoCloseable {
     /**
      * Gets the filter Id in 32-bit. For any Tuner SoC that supports 64-bit filter architecture,
      * use {@link #getIdLong()}.
+     * @deprecated Use {@link #getIdLong()} for both 32-bit and 64-bit filter architectures.
      */
     public int getId() {
         synchronized (mLock) {
@@ -342,8 +343,7 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Gets the 64-bit filter Id. For any Tuner SoC that supports 32-bit filter architecture,
-     * use {@link #getId()}.
+     * Gets the filter Id.
      */
     public long getIdLong() {
         synchronized (mLock) {
