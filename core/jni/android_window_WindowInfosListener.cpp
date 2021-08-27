@@ -27,6 +27,7 @@
 
 namespace android {
 
+using gui::DisplayInfo;
 using gui::WindowInfo;
 
 namespace {
@@ -42,7 +43,8 @@ struct WindowInfosListener : public gui::WindowInfosListener {
     WindowInfosListener(JNIEnv* env, jobject listener)
           : mListener(env->NewWeakGlobalRef(listener)) {}
 
-    void onWindowInfosChanged(const std::vector<WindowInfo>& windowInfos) override {
+    void onWindowInfosChanged(const std::vector<WindowInfo>& windowInfos,
+                              const std::vector<DisplayInfo>& /*displayInfos*/) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onWindowInfoChanged.");
 
