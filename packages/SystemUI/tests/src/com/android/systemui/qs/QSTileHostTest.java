@@ -20,8 +20,8 @@ package com.android.systemui.qs;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -424,7 +424,7 @@ public class QSTileHostTest extends SysuiTestCase {
                     mock(MetricsLogger.class),
                     mock(StatusBarStateController.class),
                     mock(ActivityStarter.class),
-                    mQSLogger
+                    QSTileHostTest.this.mQSLogger
             );
         }
 
