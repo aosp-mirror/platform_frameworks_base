@@ -1103,9 +1103,9 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     /**
-     * Returns the activity with the highest layer, or null if none is found.
+     * Returns the window with the highest layer, or null if none is found.
      */
-    public ActivityRecord getHighestLayerActivity() {
+    public WindowState getHighestLayerWindow() {
         int highestLayer = Integer.MIN_VALUE;
         Task highestLayerTask = null;
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
@@ -1116,7 +1116,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 highestLayerTask = adapter.mTask;
             }
         }
-        return highestLayerTask.getTopMostActivity();
+        return highestLayerTask.getTopMostActivity().getTopChild();
     }
 
     boolean isAnimatingTask(Task task) {
