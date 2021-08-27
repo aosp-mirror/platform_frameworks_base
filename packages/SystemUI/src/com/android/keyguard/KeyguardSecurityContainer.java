@@ -317,7 +317,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mRunningOneHandedAnimator = null;
         }
 
-        int targetTranslation = mIsSecurityViewLeftAligned ? 0 : (int) (getMeasuredWidth() / 2f);
+        int targetTranslation = mIsSecurityViewLeftAligned
+                ? 0 : (int) (getMeasuredWidth() - mSecurityViewFlipper.getWidth());
 
         if (animate) {
             mRunningOneHandedAnimator =
