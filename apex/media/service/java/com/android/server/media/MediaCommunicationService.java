@@ -31,6 +31,7 @@ import android.media.MediaController2;
 import android.media.MediaParceledListSlice;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
+import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import android.os.UserManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
@@ -60,7 +62,7 @@ import java.util.stream.Collectors;
  * @hide
  */
 public class MediaCommunicationService extends SystemService {
-    private static final String TAG = "MediaCommunicationService";
+    private static final String TAG = "MediaCommunicationSrv";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     final Context mContext;
@@ -77,6 +79,7 @@ public class MediaCommunicationService extends SystemService {
     @GuardedBy("mLock")
     final List<CallbackRecord> mCallbackRecords = new ArrayList<>();
     final NotificationManager mNotificationManager;
+    MediaSessionManager mSessionManager;
 
     public MediaCommunicationService(Context context) {
         super(context);
@@ -88,6 +91,17 @@ public class MediaCommunicationService extends SystemService {
     public void onStart() {
         publishBinderService(Context.MEDIA_COMMUNICATION_SERVICE, new Stub());
         updateUser();
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        super.onBootPhase(phase);
+        switch (phase) {
+            // This ensures MediaSessionService is started
+            case PHASE_BOOT_COMPLETED:
+                mSessionManager = mContext.getSystemService(MediaSessionManager.class);
+                break;
+        }
     }
 
     @Override
@@ -267,6 +281,24 @@ public class MediaCommunicationService extends SystemService {
         session.close();
     }
 
+    static boolean isMediaSessionKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                return true;
+        }
+        return false;
+    }
+
     private class Stub extends IMediaCommunicationService.Stub {
         @Override
         public void notifySession2Created(Session2Token sessionToken) {
@@ -345,6 +377,29 @@ public class MediaCommunicationService extends SystemService {
                 MediaParceledListSlice parceledListSlice = new MediaParceledListSlice<>(result);
                 parceledListSlice.setInlineCountLimit(1);
                 return parceledListSlice;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void dispatchMediaKeyEvent(String packageName, KeyEvent keyEvent,
+                boolean asSystemService) {
+            if (keyEvent == null || !isMediaSessionKey(keyEvent.getKeyCode())) {
+                Log.w(TAG, "Attempted to dispatch null or non-media key event.");
+                return;
+            }
+
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                //TODO: Dispatch key event to media session 2 if required
+                if (asSystemService) {
+                    mSessionManager.dispatchMediaKeyEventAsSystemService(keyEvent);
+                } else {
+                    mSessionManager.dispatchMediaKeyEvent(keyEvent, false);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
