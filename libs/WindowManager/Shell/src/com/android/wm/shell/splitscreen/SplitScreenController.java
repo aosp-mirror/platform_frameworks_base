@@ -67,6 +67,8 @@ import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.Executor;
 
 /**
@@ -295,11 +297,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mRootTDAOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, builder);
         SurfaceControl sc = builder.build();
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+
+        // Ensure that we order these in the parent in the right z-order as their previous order
+        Arrays.sort(apps, (a1, a2) -> a1.prefixOrderIndex - a2.prefixOrderIndex);
+        int layer = 1;
         for (RemoteAnimationTarget appTarget : apps) {
-            // TODO(b/195958376) set the correct layer/z-order in transaction for the new surface
             transaction.reparent(appTarget.leash, sc);
             transaction.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
                     appTarget.screenSpaceBounds.top);
+            transaction.setLayer(appTarget.leash, layer++);
         }
         transaction.apply();
         transaction.close();
