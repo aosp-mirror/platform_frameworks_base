@@ -21,6 +21,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
+import static android.companion.DeviceId.TYPE_MAC_ADDRESS;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -60,6 +61,7 @@ import android.bluetooth.le.ScanSettings;
 import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
+import android.companion.DeviceId;
 import android.companion.DeviceNotAssociatedException;
 import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceManager;
@@ -447,9 +449,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((deviceAddress, err) -> {
                 if (err == null) {
-                    Association association = new Association(userId, deviceAddress, callingPackage,
-                            deviceProfile, false, System.currentTimeMillis());
-                    addAssociation(association, userId);
+                    createAssociationInternal(
+                            userId, deviceAddress, callingPackage, deviceProfile);
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);
                     callback.onFailure("No devices found: " + err.getMessage());
@@ -646,16 +647,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             updateAssociations(associations -> map(associations, association -> {
                 if (Objects.equals(association.getPackageName(), packageName)
                         && Objects.equals(association.getDeviceMacAddress(), deviceAddress)) {
-                    return new Association(
-                            association.getUserId(),
-                            association.getDeviceMacAddress(),
-                            association.getPackageName(),
-                            association.getDeviceProfile(),
-                            active /* notifyOnDeviceNearby */,
-                            association.getTimeApprovedMs());
-                } else {
-                    return association;
+                    association.setNotifyOnDeviceNearby(active);
                 }
+                return association;
             }), userId);
 
             restartBleScan();
@@ -673,9 +667,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
 
-            addAssociation(new Association(
-                    userId, macAddress, packageName, null, false,
-                    System.currentTimeMillis()), userId);
+            createAssociationInternal(userId, macAddress, packageName, null);
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
@@ -779,7 +771,20 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return Binder.getCallingUid() == Process.SYSTEM_UID;
     }
 
-    void addAssociation(Association association, int userId) {
+    private void createAssociationInternal(
+            int userId, String deviceMacAddress, String packageName, String deviceProfile) {
+        // TODO: general a valid unique ID.
+        final int associationId = 0;
+        final Association association = new Association(
+                associationId,
+                userId,
+                packageName,
+                Arrays.asList(new DeviceId(TYPE_MAC_ADDRESS, deviceMacAddress)),
+                deviceProfile,
+                /* managedByCompanionApp */false,
+                /* notifyOnDeviceNearby */ false ,
+                System.currentTimeMillis());
+
         updateSpecialAccessPermissionForAssociatedPackage(association);
         recordAssociation(association, userId);
     }
@@ -1144,9 +1149,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
                     if (appPackage == null || deviceAddress == null) continue;
 
-                    result = ArrayUtils.add(result,
-                            new Association(userId, deviceAddress, appPackage,
-                                    profile, persistentGrants, timeApproved));
+                    // TODO: either read or generate a valid ID
+                    final int associationId = 0;
+                    final Association association = new Association(
+                            associationId,
+                            userId,
+                            appPackage,
+                            Arrays.asList(new DeviceId(TYPE_MAC_ADDRESS, deviceAddress)),
+                            profile,
+                            /* managedByCompanionApp */false,
+                            /* notifyOnDeviceNearby */ persistentGrants ,
+                            System.currentTimeMillis());
+
+                    result = ArrayUtils.add(result, association);
                 }
                 return result;
             } catch (XmlPullParserException | IOException e) {
@@ -1504,10 +1519,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
                     case "associate": {
                         int userId = getNextArgInt();
-                        String pkg = getNextArgRequired();
+                        String packageName = getNextArgRequired();
                         String address = getNextArgRequired();
-                        addAssociation(new Association(userId, address, pkg, null, false,
-                                System.currentTimeMillis()), userId);
+                        createAssociationInternal(userId, address, packageName, null);
                     }
                     break;
 
@@ -1547,7 +1561,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             getOutPrintWriter().println(USAGE);
         }
     }
-
 
     private class BluetoothDeviceConnectedListener
             extends BluetoothAdapter.BluetoothConnectionCallback {
