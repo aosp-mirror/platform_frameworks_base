@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -165,6 +166,7 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky, b/189031816")
     public void testModeUpdated_onSoftError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onAuthenticationFailed(TYPE_FACE, "no face");
@@ -181,6 +183,7 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky, b/189031816")
     public void testModeUpdated_onHardError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onError(TYPE_FACE, "oh no!");
