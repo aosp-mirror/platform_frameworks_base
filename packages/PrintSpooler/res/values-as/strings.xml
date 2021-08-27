@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDFৰ জৰিয়তে ছেভ কৰক"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"প্ৰিণ্ট বিকল্পসমূহ বিস্তাৰ কৰা হ’ল"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"প্ৰিণ্ট বিকল্পসমূহ সংকুচিত কৰা হ’ল"</string>
-    <string name="search" msgid="5421724265322228497">"Search"</string>
+    <string name="search" msgid="5421724265322228497">"সন্ধান কৰক"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"সকলো প্ৰিণ্টাৰ"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"সেৱা যোগ কৰক"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"সন্ধান বাকচটো দেখুওৱা হ’ল"</string>
