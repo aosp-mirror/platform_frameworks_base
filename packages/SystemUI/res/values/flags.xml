@@ -34,8 +34,13 @@
     <bool name="flag_lockscreen_animations">true</bool>
 
     <!-- The new swipe to unlock animation, which shows the app/launcher behind the keyguard during
-    the swipe. -->
+         the swipe. -->
     <bool name="flag_new_unlock_swipe_animation">true</bool>
+
+    <!-- Whether the multi-user icon on the lockscreen opens the QS user detail. If false, clicking
+         the multi-user icon will display a list of users directly on the lockscreen. The multi-user
+         icon is only shown if config_keyguardUserSwitcher=false in the frameworks config. -->
+    <bool name="flag_lockscreen_qs_user_detail_shortcut">false</bool>
 
     <!-- The shared-element transition between lockscreen smartspace and launcher smartspace. -->
     <bool name="flag_smartspace_shared_element_transition">false</bool>

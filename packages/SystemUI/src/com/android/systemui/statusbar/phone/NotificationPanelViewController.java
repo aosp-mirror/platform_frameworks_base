@@ -113,6 +113,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.idle.IdleHostViewController;
@@ -279,6 +280,7 @@ public class NotificationPanelViewController extends PanelViewController {
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
     private final LayoutInflater mLayoutInflater;
+    private final FeatureFlags mFeatureFlags;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -712,6 +714,7 @@ public class NotificationPanelViewController extends PanelViewController {
             @Main Resources resources,
             @Main Handler handler,
             LayoutInflater layoutInflater,
+            FeatureFlags featureFlags,
             NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController, FalsingManager falsingManager,
@@ -810,6 +813,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView.setWillNotDraw(!DEBUG);
         mSplitShadeHeaderController = splitShadeHeaderController;
         mLayoutInflater = layoutInflater;
+        mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
@@ -4049,8 +4053,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardUserSwitcherEnabled = mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher);
         mKeyguardQsUserSwitchEnabled =
-                mKeyguardUserSwitcherEnabled && mResources.getBoolean(
-                        R.bool.config_keyguard_user_switch_opens_qs_details);
+                mKeyguardUserSwitcherEnabled
+                        && mFeatureFlags.isKeyguardQsUserDetailsShortcutEnabled();
     }
 
     private void registerSettingsChangeListener() {

@@ -95,6 +95,7 @@ import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.idle.IdleHostViewController;
@@ -198,6 +199,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private NotificationPanelView mView;
     @Mock
     private LayoutInflater mLayoutInflater;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
     @Mock
@@ -464,6 +467,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mResources,
                 new Handler(Looper.getMainLooper()),
                 mLayoutInflater,
+                mFeatureFlags,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
