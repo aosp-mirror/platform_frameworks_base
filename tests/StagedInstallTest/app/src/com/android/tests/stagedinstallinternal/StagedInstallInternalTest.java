@@ -17,12 +17,24 @@
 package com.android.tests.stagedinstallinternal;
 
 import static com.android.cts.install.lib.InstallUtils.getPackageInstaller;
+import static com.android.cts.install.lib.InstallUtils.waitForSessionReady;
+import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 import android.Manifest;
+import android.content.pm.ApexStagedEvent;
+import android.content.pm.IPackageManagerNative;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
+import android.content.pm.StagedApexInfo;
+import android.os.IBinder;
+import android.os.ServiceManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -35,6 +47,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,6 +63,10 @@ import java.util.function.Consumer;
 public class StagedInstallInternalTest {
 
     private static final String TAG = StagedInstallInternalTest.class.getSimpleName();
+
+    private static final TestApp APEX_V2 = new TestApp(
+            "ApexV2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
+            "com.android.apex.cts.shim.v2.apex");
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -107,6 +125,72 @@ public class StagedInstallInternalTest {
             throws Exception {
         InstallUtils.commitExpectingFailure(AssertionError.class, "INSTALL_FAILED_INVALID_APK",
                 Install.multi(TestApp.AIncompleteSplit, TestApp.B1, TestApp.Apex1).setStaged());
+    }
+
+    @Test
+    public void testGetStagedModuleNames() throws Exception {
+        // Before staging a session
+        String[] result = getPackageManagerNative().getStagedApexModuleNames();
+        assertThat(result).hasLength(0);
+        // Stage an apex
+        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        waitForSessionReady(sessionId);
+        result = getPackageManagerNative().getStagedApexModuleNames();
+        assertThat(result).hasLength(1);
+        assertThat(result).isEqualTo(new String[]{SHIM_APEX_PACKAGE_NAME});
+        // Abandon the session
+        InstallUtils.openPackageInstallerSession(sessionId).abandon();
+        result = getPackageManagerNative().getStagedApexModuleNames();
+        assertThat(result).hasLength(0);
+    }
+
+    @Test
+    public void testGetStagedApexInfo() throws Exception {
+        // Ask for non-existing module
+        StagedApexInfo result = getPackageManagerNative().getStagedApexInfo("not found");
+        assertThat(result).isNull();
+        // Stage an apex
+        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        waitForSessionReady(sessionId);
+        // Query proper module name
+        result = getPackageManagerNative().getStagedApexInfo(SHIM_APEX_PACKAGE_NAME);
+        assertThat(result.moduleName).isEqualTo(SHIM_APEX_PACKAGE_NAME);
+        InstallUtils.openPackageInstallerSession(sessionId).abandon();
+    }
+
+    public static class MockStagedApexObserver extends IStagedApexObserver.Stub {
+        @Override
+        public void onApexStaged(ApexStagedEvent event) {
+            assertThat(event).isNotNull();
+        }
+    }
+
+    @Test
+    public void testStagedApexObserver() throws Exception {
+        MockStagedApexObserver realObserver = new MockStagedApexObserver();
+        IStagedApexObserver observer = spy(realObserver);
+        assertThat(observer).isNotNull();
+        getPackageManagerNative().registerStagedApexObserver(observer);
+
+        // Stage an apex and verify observer was called
+        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        waitForSessionReady(sessionId);
+        ArgumentCaptor<ApexStagedEvent> captor = ArgumentCaptor.forClass(ApexStagedEvent.class);
+        verify(observer, timeout(5000)).onApexStaged(captor.capture());
+        assertThat(captor.getValue().stagedApexModuleNames).isEqualTo(
+                new String[] {SHIM_APEX_PACKAGE_NAME});
+
+        // Abandon and verify observer is called
+        Mockito.clearInvocations(observer);
+        InstallUtils.openPackageInstallerSession(sessionId).abandon();
+        verify(observer, timeout(5000)).onApexStaged(captor.capture());
+        assertThat(captor.getValue().stagedApexModuleNames).hasLength(0);
+    }
+
+    private IPackageManagerNative getPackageManagerNative() {
+        IBinder binder = ServiceManager.waitForService("package_native");
+        assertThat(binder).isNotNull();
+        return IPackageManagerNative.Stub.asInterface(binder);
     }
 
     private static void assertSessionReady(int sessionId) {
