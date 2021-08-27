@@ -35,7 +35,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
@@ -1016,7 +1015,7 @@ public class VibratorManagerServiceTest {
         assertEquals(IExternalVibratorService.SCALE_NONE, firstScale);
         assertEquals(IExternalVibratorService.SCALE_NONE, secondScale);
         verify(firstController).mute();
-        verifyNoMoreInteractions(secondController);
+        verify(secondController, never()).mute();
         // Set external control called only once.
         assertEquals(Arrays.asList(true), mVibratorProviders.get(1).getExternalControlStates());
     }

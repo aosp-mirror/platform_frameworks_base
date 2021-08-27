@@ -1355,8 +1355,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // At this point we have an externally controlled vibration playing already.
                     // Since the interface defines that only one externally controlled vibration can
                     // play at a time, we need to first mute the ongoing vibration and then return
-                    // a scale from this function for the new one. Ee can be assured that the
-                    // ongoing it will be muted in favor of the new vibration.
+                    // a scale from this function for the new one, so we can be assured that the
+                    // ongoing will be muted in favor of the new vibration.
                     //
                     // Note that this doesn't support multiple concurrent external controls, as we
                     // would need to mute the old one still if it came from a different controller.
