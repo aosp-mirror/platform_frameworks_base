@@ -3007,7 +3007,7 @@
     <string name="mobile_data_connection_active">Connected</string>
     <!-- Provider Model:
      Summary indicating that a SIM has no mobile data connection [CHAR LIMIT=50] -->
-    <string name="mobile_data_off_summary">Internet won\u0027t auto\u2011connect</string>
+    <string name="mobile_data_off_summary">Mobile data won\u0027t auto\u2011connect</string>
     <!-- Provider Model:
      Summary indicating that a active SIM and no network available [CHAR LIMIT=50] -->
     <string name="mobile_data_no_connection">No connection</string>
