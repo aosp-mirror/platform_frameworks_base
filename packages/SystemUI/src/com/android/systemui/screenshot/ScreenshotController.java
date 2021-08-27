@@ -559,8 +559,8 @@ public class ScreenshotController {
             mScreenshotView.reset();
         }
 
-        mScreenshotView.updateOrientation(mWindowManager.getCurrentWindowMetrics()
-                .getWindowInsets().getDisplayCutout());
+        mScreenshotView.updateOrientation(
+                mWindowManager.getCurrentWindowMetrics().getWindowInsets());
 
         mScreenBitmap = screenshot;
 
@@ -594,9 +594,8 @@ public class ScreenshotController {
                             // Delay scroll capture eval a bit to allow the underlying activity
                             // to set up in the new orientation.
                             mScreenshotHandler.postDelayed(this::requestScrollCapture, 150);
-                            mScreenshotView.updateDisplayCutoutMargins(
-                                    mWindowManager.getCurrentWindowMetrics().getWindowInsets()
-                                            .getDisplayCutout());
+                            mScreenshotView.updateInsets(
+                                    mWindowManager.getCurrentWindowMetrics().getWindowInsets());
                             // screenshot animation calculations won't be valid anymore, so just end
                             if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
                                 mScreenshotAnimation.end();
