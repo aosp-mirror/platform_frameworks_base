@@ -165,7 +165,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
                 /* leftAligned= */false, /* animate= */false);
-        verify(mSecurityViewFlipper).setTranslationX(SCREEN_WIDTH / 2.0f);
+        verify(mSecurityViewFlipper).setTranslationX(
+                mKeyguardSecurityContainer.getWidth() - mSecurityViewFlipper.getWidth());
 
         mKeyguardSecurityContainer.setOneHandedModeLeftAligned(
                 /* leftAligned= */true, /* animate= */false);

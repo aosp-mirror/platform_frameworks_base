@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -72,6 +73,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -1182,6 +1184,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
 
         mService.buzzBeepBlinkLocked(r);
+        verifyDelayedVibrate(mService.getVibratorHelper().createFallbackVibration(false));
 
         // quiet update should stop making noise
         mService.buzzBeepBlinkLocked(s);
@@ -1561,6 +1564,32 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         assertFalse(interrupter.isInterruptive());
         assertEquals(-1, interrupter.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testRingtoneInsistentBeep_canUpdate() throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Uri.fromParts("a", "b", "c"),
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+        mService.addNotification(ringtoneNotification);
+        assertFalse(mService.shouldMuteNotificationLocked(ringtoneNotification));
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+        verifyDelayedVibrateLooped();
+        Mockito.reset(mVibrator);
+        Mockito.reset(mRingtonePlayer);
+
+        assertFalse(mService.shouldMuteNotificationLocked(ringtoneNotification));
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+
+        // beep wasn't reset
+        verifyNeverBeep();
+        verifyNeverVibrate();
+        verify(mRingtonePlayer, never()).stopAsync();
+        verify(mVibrator, never()).cancel();
     }
 
     @Test

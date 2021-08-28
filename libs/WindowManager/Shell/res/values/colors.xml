@@ -17,7 +17,6 @@
  */
 -->
 <resources>
-    <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
     <color name="minimize_dock_shadow_start">#60000000</color>

@@ -7449,15 +7449,21 @@ public class NotificationManagerService extends SystemService {
                         sentAccessibilityEvent = true;
                     }
                     if (DBG) Slog.v(TAG, "Interrupting!");
+                    boolean isInsistentUpdate = isInsistentUpdate(record);
                     if (hasValidSound) {
-                        if (isInCall()) {
-                            playInCallNotification();
+                        if (isInsistentUpdate) {
+                            // don't reset insistent sound, it's jarring
                             beep = true;
                         } else {
-                            beep = playSound(record, soundUri);
-                        }
-                        if(beep) {
-                            mSoundNotificationKey = key;
+                            if (isInCall()) {
+                                playInCallNotification();
+                                beep = true;
+                            } else {
+                                beep = playSound(record, soundUri);
+                            }
+                            if (beep) {
+                                mSoundNotificationKey = key;
+                            }
                         }
                     }
 
@@ -7465,9 +7471,13 @@ public class NotificationManagerService extends SystemService {
                             mAudioManager.getRingerModeInternal()
                                     == AudioManager.RINGER_MODE_SILENT;
                     if (!isInCall() && hasValidVibrate && !ringerModeSilent) {
-                        buzz = playVibration(record, vibration, hasValidSound);
-                        if(buzz) {
-                            mVibrateNotificationKey = key;
+                        if (isInsistentUpdate) {
+                            buzz = true;
+                        } else {
+                            buzz = playVibration(record, vibration, hasValidSound);
+                            if (buzz) {
+                                mVibrateNotificationKey = key;
+                            }
                         }
                     }
                 } else if ((record.getFlags() & Notification.FLAG_INSISTENT) != 0) {
@@ -7571,6 +7581,19 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
+    boolean isInsistentUpdate(final NotificationRecord record) {
+        return (Objects.equals(record.getKey(), mSoundNotificationKey)
+                || Objects.equals(record.getKey(), mVibrateNotificationKey))
+                && isCurrentlyInsistent();
+    }
+
+    @GuardedBy("mNotificationLock")
+    boolean isCurrentlyInsistent() {
+        return isLoopingRingtoneNotification(mNotificationsByKey.get(mSoundNotificationKey))
+                || isLoopingRingtoneNotification(mNotificationsByKey.get(mVibrateNotificationKey));
+    }
+
+    @GuardedBy("mNotificationLock")
     boolean shouldMuteNotificationLocked(final NotificationRecord record) {
         // Suppressed because it's a silent update
         final Notification notification = record.getNotification();
@@ -7609,10 +7632,8 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
-        // A looping ringtone, such as an incoming call is playing
-        if (isLoopingRingtoneNotification(mNotificationsByKey.get(mSoundNotificationKey))
-                || isLoopingRingtoneNotification(
-                        mNotificationsByKey.get(mVibrateNotificationKey))) {
+        // A different looping ringtone, such as an incoming call is playing
+        if (isCurrentlyInsistent() && !isInsistentUpdate(record)) {
             return true;
         }
 
@@ -8756,9 +8777,21 @@ public class NotificationManagerService extends SystemService {
 
     void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
             ManagedServiceInfo listener) {
-        String listenerName = listener == null ? null : listener.component.toShortString();
+        if (listener == null) {
+            return;
+        }
+        String listenerName = listener.component.toShortString();
         if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
             return;
+        }
+        synchronized (mNotificationLock) {
+            final NotificationRecord r = findInCurrentAndSnoozedNotificationByKeyLocked(key);
+            if (r == null) {
+                return;
+            }
+            if (!listener.enabledAndUserMatches(r.getSbn().getNormalizedUserId())){
+                return;
+            }
         }
 
         if (DBG) {
