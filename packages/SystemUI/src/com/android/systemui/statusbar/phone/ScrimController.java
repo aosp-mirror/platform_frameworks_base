@@ -432,7 +432,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
             scheduleUpdate();
-        } else if ((oldState == ScrimState.AOD  // leaving doze
+        } else if (((oldState == ScrimState.AOD || oldState == ScrimState.PULSING)  // leaving doze
                 && (!mDozeParameters.getAlwaysOn() || mState == ScrimState.UNLOCKED))
                 || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
             // Scheduling a frame isn't enough when:
@@ -711,7 +711,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
             if (mUnOcclusionAnimationRunning && mState == ScrimState.KEYGUARD) {
                 // We're unoccluding the keyguard and don't want to have a bright flash.
-                mNotificationsAlpha = 0f;
+                mNotificationsAlpha = KEYGUARD_SCRIM_ALPHA;
+                mNotificationsTint = ScrimState.KEYGUARD.getNotifTint();
             }
         }
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha) || isNaN(mNotificationsAlpha)) {
