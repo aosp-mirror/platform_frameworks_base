@@ -1825,6 +1825,7 @@ public class StatusBar extends SystemUI implements
         mNotificationPanelViewController.setStatusAccessibilityImportance(expanded
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        mNotificationPanelViewController.updateSystemUiStateFlags();
         if (getNavigationBarView() != null) {
             getNavigationBarView().onStatusBarPanelStateChanged();
         }
