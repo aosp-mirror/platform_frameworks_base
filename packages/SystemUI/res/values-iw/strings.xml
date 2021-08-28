@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"הגדלת התצוגה למילוי המסך"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"מתיחה למילוי של המסך"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"צילום מסך"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"‏השבתת את Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"נשלחה תמונה"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"צילום המסך נשמר..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"המערכת שומרת את צילום המסך..."</string>
@@ -1175,4 +1174,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"שימוש בטביעת אצבע כדי לפתוח"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"נדרש אימות. יש לגעת בחיישן טביעות האצבע כדי לבצע אימות."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"מתקיימת שיחה"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"מצב טיסה"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"חבילת גלישה"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"מחובר"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"לא ניתן להתחבר לאינטרנט באופן אוטומטי"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"אין חיבור"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"אין רשתות זמינות אחרות"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"אין רשתות זמינות"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"פרטי הרשת"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"צריך להקיש על רשת כדי להתחבר"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"צריך לבטל את הנעילה כדי להציג את הרשתות"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"בתהליך חיפוש רשתות…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"נכשל הניסיון להתחבר לרשת"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"הצגת הכול"</string>
 </resources>
