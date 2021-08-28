@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्क्रीन भरण्यासाठी झूम करा"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्क्रीन भरण्यासाठी ताणा"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रीनशॉट"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock बंद केले"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"इमेज पाठवली आहे"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रीनशॉट सेव्ह करत आहे…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सेव्ह करत आहे…"</string>
@@ -134,7 +133,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"स्क्रीन फिरवा"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"अवलोकन"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"शोधा"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"कॅमेरा"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"व्हॉइस सहाय्य"</string>
@@ -443,7 +442,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण होईपर्यंत"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"चार्ज होत नाही"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"नेटवर्कचे परीक्षण\nकेले जाऊ शकते"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"शोध"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी वर स्लाइड करा."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी डावीकडे स्लाइड करा."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"अलार्म, रिमाइंडर, इव्‍हेंट आणि तुम्ही निश्चित केलेल्या कॉलर व्यतिरिक्त तुम्हाला कोणत्याही आवाज आणि कंपनांचा व्यत्त्यय आणला जाणार नाही. तरीही तुम्ही प्ले करायचे ठरवलेले कोणतेही संगीत, व्हिडिओ आणि गेमचे आवाज ऐकू शकतात."</string>
@@ -1015,7 +1014,7 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ऑफिस)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"फोन कॉल"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> द्वारे)"</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"कॅमेरा"</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"स्थान"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"मायक्रोफोन"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सर बंद आहेत"</string>
@@ -1163,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"उघडण्यासाठी फिंगरप्रिंट वापरा"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ऑथेंटिकेशन आवश्यक आहे. ऑथेंटिकेट करण्यासाठी फिंगरप्रिंट सेन्सरला स्पर्श करा."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"फोन कॉल सुरू आहे"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"विमान मोड"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट केले आहे"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"इंटरनेट ऑटो-कनेक्ट होणार नाही"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"कोणतेही कनेक्शन नाही"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"इतर कोणतेही नेटवर्क उपलब्ध नाहीत"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"कोणतेही नेटवर्क उपलब्‍ध नाही"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"वाय-फाय"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"नेटवर्कचे तपशील"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"कनेक्ट करण्यासाठी नेटवर्कवर टॅप करा"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"नेटवर्क पाहण्यासाठी स्क्रीन अनलॉक करा"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्क शोधत आहे…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कशी कनेक्‍ट करता आले नाही"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"सर्व पहा"</string>
 </resources>

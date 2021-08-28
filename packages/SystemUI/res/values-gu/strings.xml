@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"સ્ક્રીનશૉટ"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock બંધ કરેલું છે"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"છબી મોકલી"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
@@ -135,7 +134,7 @@
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ઝલક"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"શોધ"</string>
-    <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
+    <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરા"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"વૉલેટ"</string>
@@ -984,7 +983,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> સુધી"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"રાખો"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"બદલો"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"પૃષ્ઠભૂમિમાં ચાલી રહેલ ઍપ્લિકેશનો"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>
@@ -1163,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ખોલવા માટે ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"પ્રમાણીકરણ આવશ્યક છે. પ્રમાણિત કરવા માટે ફિંગરપ્રિન્ટ સેન્સરને ટચ કરો."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ફોન કૉલ ચાલુ છે"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"એરપ્લેન મોડ"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"મોબાઇલ ડેટા"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"કનેક્ટ કરેલું"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ઇન્ટરનેટ ઑટોમૅટિક રીતે કનેક્ટ થશે નહીં"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"કોઈ કનેક્શન નથી"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"બીજાં કોઈ નેટવર્ક ઉપલબ્ધ નથી"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"કોઈ નેટવર્ક ઉપલબ્ધ નથી"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"વાઇ-ફાઇ"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"નેટવર્કની વિગતો"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"કનેક્ટ કરવા માટે નેટવર્ક પર ટૅપ કરો"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"વાઇ-ફાઇ નેટવર્ક જોવા માટે અનલૉક કરો"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"નેટવર્ક શોધી રહ્યાં છીએ…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"નેટવર્ક સાથે કનેક્ટ કરવામાં નિષ્ફળ થયાં"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"બધા જુઓ"</string>
 </resources>
