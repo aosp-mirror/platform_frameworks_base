@@ -313,7 +313,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zoznam hovorov"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"čítať a zapisovať do zoznamu hovorov"</string>
