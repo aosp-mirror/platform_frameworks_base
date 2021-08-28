@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"TTY Mode OFFஐ இணைச் செயல்பாடு கோரியது"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"குரல்"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"தரவு"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"தொலைநகல்"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -815,7 +815,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"பணியிட மொபைல்"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"பணியிட பேஜர்"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"உதவியாளர்"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"பிரத்தியேகம்"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"பிறந்தநாள்"</string>
@@ -848,7 +848,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"மற்றவை"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"பிரத்தியேகம்"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"பிரத்தியேகம்"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"உதவியாளர்"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"சகோதரர்"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"குழந்தை"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"வாழ்வுத் துணை"</string>
