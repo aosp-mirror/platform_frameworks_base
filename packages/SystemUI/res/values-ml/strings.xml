@@ -133,7 +133,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ഉപയോഗസഹായി"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"സ്‌ക്രീൻ തിരിക്കുക"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"അവലോകനം"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"തിരയൽ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ഫോണ്‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"വോയ്‌സ് സഹായം"</string>
@@ -442,7 +442,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"തിരയൽ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
@@ -1162,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. പരിശോധിച്ചുറപ്പിക്കാൻ, വിരലടയാള സെൻസറിൽ സ്‌പർശിക്കുക."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"സജീവമായ ഫോൺ കോൾ"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"ഫ്ലൈറ്റ് മോഡ്"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ഇന്റർനെറ്റ് സ്വയമേവ കണക്‌റ്റ് ചെയ്യില്ല"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"കണക്ഷനില്ല"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"മറ്റ് നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"വൈഫൈ"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"നെറ്റ്‌വർക്ക് വിശദാംശങ്ങൾ"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"കണക്‌റ്റ് ചെയ്യാൻ ഒരു നെറ്റ്‌വർക്കിൽ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"നെറ്റ്‌വർക്കുകൾ കാണാൻ അൺ‌ലോക്ക് ചെയ്യുക"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"നെറ്റ്‌വർക്കുകൾ തിരയുന്നു…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"നെറ്റ്‌വർക്കിൽ കണക്റ്റ് ചെയ്യാനായില്ല"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
 </resources>

@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -134,7 +133,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ಪರದೆಯನ್ನು ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ಸಮಗ್ರ ನೋಟ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"ಹುಡುಕಿ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ಕ್ಯಾಮರಾ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
@@ -443,7 +442,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ಪೂರ್ಣಗೊಳ್ಳುವವರೆಗೆ"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ನೆಟ್‌ವರ್ಕ್\n ವೀಕ್ಷಿಸಬಹುದಾಗಿರುತ್ತದೆ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"ಹುಡುಕಿ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಎಡಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ನೀವು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
@@ -1163,4 +1162,19 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ತೆರೆಯುವುದಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ದೃಢೀಕರಣದ ಅವಶ್ಯಕತೆಯಿದೆ. ದೃಢೀಕರಿಸಲು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಫೋನ್ ಕರೆ"</string>
+    <string name="airplane_mode" msgid="2536350001462130668">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ಇಂಟರ್ನೆಟ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕನೆಕ್ಟ್ ಆಗುವುದಿಲ್ಲ"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"ಯಾವುದೇ ಕನೆಕ್ಷನ್ ಇಲ್ಲ"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ಇತರ ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"ವೈ‑ಫೈ"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"ನೆಟ್‌ವರ್ಕ್ ವಿವರಗಳು"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"ಕನೆಕ್ಟ್ ಮಾಡಲು ಒಂದು ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
 </resources>
