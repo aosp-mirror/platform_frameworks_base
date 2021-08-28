@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -43,7 +42,7 @@ abstract class MovePipShelfHeightTransition(
     /**
      * Checks [pipApp] window remains visible throughout the animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     open fun pipWindowIsAlwaysVisible() {
         testSpec.assertWm {
@@ -54,7 +53,7 @@ abstract class MovePipShelfHeightTransition(
     /**
      * Checks [pipApp] layer remains visible throughout the animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     open fun pipLayerIsAlwaysVisible() {
         testSpec.assertLayers {
@@ -66,7 +65,7 @@ abstract class MovePipShelfHeightTransition(
      * Checks that the pip app window remains inside the display bounds throughout the whole
      * animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     open fun pipWindowRemainInsideVisibleBounds() {
         testSpec.assertWm {
@@ -78,7 +77,7 @@ abstract class MovePipShelfHeightTransition(
      * Checks that the pip app layer remains inside the display bounds throughout the whole
      * animation
      */
-    @Postsubmit
+    @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
         testSpec.assertLayers {

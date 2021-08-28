@@ -287,8 +287,13 @@ public class PhoneStatusBarView extends PanelBar {
     public void panelExpansionChanged(float frac, boolean expanded) {
         super.panelExpansionChanged(frac, expanded);
         updateScrimFraction();
-        if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
-            mBar.getNavigationBarView().onStatusBarPanelStateChanged();
+        if ((frac == 0 || frac == 1)) {
+            if (mBar.getNavigationBarView() != null) {
+                mBar.getNavigationBarView().onStatusBarPanelStateChanged();
+            }
+            if (mBar.getNotificationPanelViewController() != null) {
+                mBar.getNotificationPanelViewController().updateSystemUiStateFlags();
+            }
         }
 
         if (mExpansionChangedListeners != null) {

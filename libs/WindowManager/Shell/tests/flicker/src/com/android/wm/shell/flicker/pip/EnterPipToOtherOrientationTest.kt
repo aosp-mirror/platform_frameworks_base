@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -119,18 +118,19 @@ class EnterPipToOtherOrientationTest(
      * Checks that the [WindowManagerStateHelper.STATUS_BAR_COMPONENT] has the correct position at
      * the start and end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_90, Surface.ROTATION_0)
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
+     *
+     * TODO b/197726599 Prevents all states from being checked
      */
     @Presubmit
     @Test
-    override fun entireScreenCovered() =
-        testSpec.entireScreenCovered(Surface.ROTATION_90, Surface.ROTATION_0, allStates = false)
+    override fun entireScreenCovered() = testSpec.entireScreenCovered(allStates = false)
 
     /**
      * Checks [pipApp] window remains visible and on top throughout the transition

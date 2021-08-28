@@ -111,6 +111,8 @@ public:
         Font progressFont;
          // Controls if dynamic coloring is enabled for the whole animation.
         bool dynamicColoringEnabled = false;
+        int colorTransitionStart = 0; // Start frame of dynamic color transition.
+        int colorTransitionEnd = 0; // End frame of dynamic color transition.
         float startColors[4][3]; // Start colors of dynamic color transition.
         float endColors[4][3];   // End colors of dynamic color transition.
     };

@@ -127,6 +127,7 @@ static const char VERTEX_SHADER_SOURCE[] = R"(
     })";
 static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
     precision mediump float;
+    const float cWhiteMaskThreshold = 0.05f;
     uniform sampler2D uTexture;
     uniform float uFade;
     uniform float uColorProgress;
@@ -141,10 +142,20 @@ static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
     varying highp vec2 vUv;
     void main() {
         vec4 mask = texture2D(uTexture, vUv);
-        vec4 color = mask.r * mix(uStartColor0, uEndColor0, uColorProgress)
-            + mask.g * mix(uStartColor1, uEndColor1, uColorProgress)
-            + mask.b * mix(uStartColor2, uEndColor2, uColorProgress)
-            + mask.a * mix(uStartColor3, uEndColor3, uColorProgress);
+        float r = mask.r;
+        float g = mask.g;
+        float b = mask.b;
+        float a = mask.a;
+        // If all channels have values, render pixel as a shade of white.
+        float useWhiteMask = step(cWhiteMaskThreshold, r)
+            * step(cWhiteMaskThreshold, g)
+            * step(cWhiteMaskThreshold, b)
+            * step(cWhiteMaskThreshold, a);
+        vec4 color = r * mix(uStartColor0, uEndColor0, uColorProgress)
+                + g * mix(uStartColor1, uEndColor1, uColorProgress)
+                + b * mix(uStartColor2, uEndColor2, uColorProgress)
+                + a * mix(uStartColor3, uEndColor3, uColorProgress);
+        color = mix(color, vec4(vec3((r + g + b + a) * 0.25f), 1.0), useWhiteMask);
         gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade)) * color.a;
     })";
 static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
@@ -1076,6 +1087,8 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         int pause = 0;
         int progress = 0;
         int framesToFadeCount = 0;
+        int colorTransitionStart = 0;
+        int colorTransitionEnd = 0;
         char path[ANIM_ENTRY_NAME_MAX];
         char color[7] = "000000"; // default to black if unspecified
         char clockPos1[TEXT_POS_LEN_MAX + 1] = "";
@@ -1101,14 +1114,17 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
             } else {
               animation.progressEnabled = false;
             }
-        } else if (sscanf(l, "dynamic_colors %" STRTO(ANIM_PATH_MAX) "s #%6s #%6s #%6s #%6s",
+        } else if (sscanf(l, "dynamic_colors %" STRTO(ANIM_PATH_MAX) "s #%6s #%6s #%6s #%6s %d %d",
             dynamicColoringPartNameBuffer,
-            start_color_0, start_color_1, start_color_2, start_color_3)) {
+            start_color_0, start_color_1, start_color_2, start_color_3,
+            &colorTransitionStart, &colorTransitionEnd)) {
             animation.dynamicColoringEnabled = true;
             parseColor(start_color_0, animation.startColors[0]);
             parseColor(start_color_1, animation.startColors[1]);
             parseColor(start_color_2, animation.startColors[2]);
             parseColor(start_color_3, animation.startColors[3]);
+            animation.colorTransitionStart = colorTransitionStart;
+            animation.colorTransitionEnd = colorTransitionEnd;
             dynamicColoringPartName = std::string(dynamicColoringPartNameBuffer);
         } else if (sscanf(l, "%c %d %d %" STRTO(ANIM_PATH_MAX) "s%n",
                           &pathType, &count, &pause, path, &nextReadPos) >= 4) {
@@ -1460,11 +1476,16 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
                 // Color progress is
-                // - the normalized animation progress between [0, 1] for the dynamic coloring part,
+                // - the animation progress, normalized from
+                //   [colorTransitionStart,colorTransitionEnd] to [0, 1] for the dynamic coloring
+                //   part.
                 // - 0 for parts that come before,
                 // - 1 for parts that come after.
                 float colorProgress = part.useDynamicColoring
-                    ? (float)j / fcount
+                    ? fmin(fmax(
+                        ((float)j - animation.colorTransitionStart) /
+                            fmax(animation.colorTransitionEnd -
+                                animation.colorTransitionStart, 1.0f), 0.0f), 1.0f)
                     : (part.postDynamicColoring ? 1 : 0);
 
                 processDisplayEvents();

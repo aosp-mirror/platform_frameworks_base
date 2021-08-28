@@ -153,7 +153,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -174,7 +174,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -189,8 +189,8 @@ public class UserLifecycleTests {
             final int userId = createUserNoFlags();
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             mIam.startUserInBackground(userId);
             waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
@@ -198,7 +198,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -211,8 +211,8 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             // Waits for UserState.mUnlockProgress.finish().
             startUserInBackgroundAndWaitForUnlock(userId);
@@ -220,7 +220,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -231,8 +231,8 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int userId = createUserNoFlags();
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             switchUser(userId);
 
@@ -240,7 +240,7 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -253,8 +253,8 @@ public class UserLifecycleTests {
             final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, testUser);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             mAm.switchUser(testUser);
             waitForLatch("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, latch);
@@ -264,7 +264,7 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
             removeUser(testUser);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -275,8 +275,8 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             switchUser(testUser);
 
@@ -284,7 +284,7 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
             removeUser(testUser);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -301,15 +301,15 @@ public class UserLifecycleTests {
             mIam.startUserInBackground(userId);
             waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch1);
             waitForLatch("Failed to achieve ACTION_MEDIA_MOUNTED for user " + userId, latch2);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             stopUser(userId, false);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -322,8 +322,8 @@ public class UserLifecycleTests {
             final int userId = createUserNoFlags();
             final CountDownLatch latch = new CountDownLatch(1);
             registerUserSwitchObserver(null, latch, userId);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             mAm.switchUser(userId);
             waitForLatch("Failed to achieve onLockedBootComplete for user " + userId, latch);
@@ -332,7 +332,7 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -359,8 +359,8 @@ public class UserLifecycleTests {
             }, new IntentFilter(Intent.ACTION_USER_STOPPED));
             final CountDownLatch switchLatch = new CountDownLatch(1);
             registerUserSwitchObserver(switchLatch, null, startUser);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             mAm.switchUser(startUser);
             waitForLatch("Failed to achieve ACTION_USER_STOPPED for user " + userId, latch);
@@ -373,7 +373,7 @@ public class UserLifecycleTests {
                 Log.e(TAG, "Thread interrupted unexpectedly while waiting for switch.", e);
             }
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -390,7 +390,7 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             attestTrue("Failed creating profile " + userId, mUm.isManagedProfile(userId));
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -402,15 +402,15 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             startUserInBackgroundAndWaitForUnlock(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -425,15 +425,15 @@ public class UserLifecycleTests {
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
             startUserInBackgroundAndWaitForUnlock(userId);
             stopUser(userId, true);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             startUserInBackgroundAndWaitForUnlock(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -449,8 +449,8 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
@@ -458,7 +458,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -481,8 +481,8 @@ public class UserLifecycleTests {
             startApp(userId, DUMMY_PACKAGE_NAME);
             stopUser(userId, true);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
@@ -490,7 +490,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -502,15 +502,15 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -525,8 +525,8 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             final int userId = createManagedProfile();
             startUserInBackgroundAndWaitForUnlock(userId);
@@ -536,7 +536,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -552,15 +552,15 @@ public class UserLifecycleTests {
             registerMediaBroadcastReceiver(prelatch, userId);
             startUserInBackgroundAndWaitForUnlock(userId);
             waitForLatch("Failed to achieve ACTION_MEDIA_MOUNTED for user " + userId, prelatch);
-            Log.i(TAG, "Starting timer");
             mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
             stopUser(userId, true);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
-            mRunner.resumeTiming();
+            mRunner.resumeTimingForNextIteration();
         }
     }
 
@@ -577,15 +577,15 @@ public class UserLifecycleTests {
             while (mRunner.keepRunning()) {
                 mRunner.pauseTiming();
                 final int userId = createManagedProfile();
-                Log.i(TAG, "Starting timer");
                 mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
 
                 startUserInBackgroundAndWaitForUnlock(userId);
 
                 mRunner.pauseTiming();
                 Log.i(TAG, "Stopping timer");
                 removeUser(userId);
-                mRunner.resumeTiming();
+                mRunner.resumeTimingForNextIteration();
             }
         } finally {
             setUserTypePackageWhitelistMode(origMode);
@@ -602,15 +602,15 @@ public class UserLifecycleTests {
             while (mRunner.keepRunning()) {
                 mRunner.pauseTiming();
                 final int userId = createManagedProfile();
-                Log.i(TAG, "Starting timer");
                 mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
 
                 startUserInBackgroundAndWaitForUnlock(userId);
 
                 mRunner.pauseTiming();
                 Log.i(TAG, "Stopping timer");
                 removeUser(userId);
-                mRunner.resumeTiming();
+                mRunner.resumeTimingForNextIteration();
             }
         } finally {
             setUserTypePackageWhitelistMode(origMode);

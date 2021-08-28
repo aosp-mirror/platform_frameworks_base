@@ -19,6 +19,7 @@
         <item name="android:layout_width">10dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:background">@color/split_divider_background</item>
     </style>
 
     <style name="DockedDividerHandle">

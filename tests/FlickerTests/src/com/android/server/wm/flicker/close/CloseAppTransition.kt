@@ -123,9 +123,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun entireScreenCovered() {
-        testSpec.entireScreenCovered(testSpec.config.startRotation, Surface.ROTATION_0)
-    }
+    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test
