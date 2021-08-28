@@ -47,7 +47,6 @@ import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -228,8 +227,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private MediaHierarchyManager mMediaHiearchyManager;
     @Mock
     private ConversationNotificationManager mConversationNotificationManager;
-    @Mock
-    private BiometricUnlockController mBiometricUnlockController;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
@@ -416,7 +413,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mMetricsLogger, mActivityManager, mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
-                mBiometricUnlockController, mStatusBarKeyguardViewManager,
+                mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
                 mKeyguardQsUserSwitchComponentFactory,
@@ -509,20 +506,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 0L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
                 0 /* metaState */));
         assertThat(mNotificationPanelViewController.isTrackingBlocked()).isFalse();
-    }
-
-    @Test
-    public void testKeyguardStatusBarVisibility_hiddenForBypass() {
-        when(mUpdateMonitor.shouldListenForFace()).thenReturn(true);
-        mNotificationPanelViewController.mKeyguardUpdateCallback.onBiometricRunningStateChanged(
-                true, BiometricSourceType.FACE);
-        verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
-
-        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
-        mNotificationPanelViewController.mKeyguardUpdateCallback.onFinishedGoingToSleep(0);
-        mNotificationPanelViewController.mKeyguardUpdateCallback.onBiometricRunningStateChanged(
-                true, BiometricSourceType.FACE);
-        verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
     }
 
     @Test

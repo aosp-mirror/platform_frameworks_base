@@ -21,8 +21,7 @@
 
     <View
         style="@style/DockedDividerBackground"
-        android:id="@+id/docked_divider_background"
-        android:background="@color/docked_divider_background"/>
+        android:id="@+id/docked_divider_background"/>
 
     <com.android.wm.shell.common.split.DividerHandleView
         style="@style/DockedDividerHandle"

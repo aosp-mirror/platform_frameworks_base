@@ -71,6 +71,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.qs.tiles.dialog.InternetDialogUtil;
@@ -129,6 +130,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private Config mConfig;
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final FeatureFlags mFeatureFlags;
+    private final DumpManager mDumpManager;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -225,7 +227,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             CarrierConfigTracker carrierConfigTracker,
             FeatureFlags featureFlags,
             @Main Handler handler,
-            InternetDialogFactory internetDialogFactory) {
+            InternetDialogFactory internetDialogFactory,
+            DumpManager dumpManager) {
         this(context, connectivityManager,
                 telephonyManager,
                 telephonyListenerManager,
@@ -243,7 +246,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 broadcastDispatcher,
                 demoModeController,
                 carrierConfigTracker,
-                featureFlags);
+                featureFlags,
+                dumpManager);
         mReceiverHandler.post(mRegisterListeners);
         mMainHandler = handler;
         mInternetDialogFactory = internetDialogFactory;
@@ -265,7 +269,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            DumpManager dumpManager
     ) {
         mContext = context;
         mTelephonyListenerManager = telephonyListenerManager;
@@ -284,6 +289,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mDemoModeController = demoModeController;
         mCarrierConfigTracker = carrierConfigTracker;
         mFeatureFlags = featureFlags;
+        mDumpManager = dumpManager;
 
         // telephony
         mPhone = telephonyManager;
@@ -434,6 +440,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mDemoModeController.addCallback(this);
         mProviderModelBehavior = mFeatureFlags.isCombinedStatusBarSignalIconsEnabled();
         mProviderModelSetting = mFeatureFlags.isProviderModelSettingEnabled();
+
+        mDumpManager.registerDumpable(TAG, this);
     }
 
     private final Runnable mClearForceValidated = () -> {
@@ -793,8 +801,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
             case Settings.Panel.ACTION_INTERNET_CONNECTIVITY:
-                boolean canConfigMobileData = mAccessPoints.canConfigMobileData();
-                mMainHandler.post(() -> mInternetDialogFactory.create(true, canConfigMobileData));
+                mMainHandler.post(() -> mInternetDialogFactory.create(true,
+                        mAccessPoints.canConfigMobileData(), mAccessPoints.canConfigWifi()));
                 break;
             default:
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,

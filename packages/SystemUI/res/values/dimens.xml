@@ -328,11 +328,10 @@
     <dimen name="global_screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_bg_protection_height">242dp</dimen>
     <dimen name="screenshot_preview_elevation">4dp</dimen>
-    <dimen name="screenshot_offset_y">24dp</dimen>
+    <dimen name="screenshot_offset_y">8dp</dimen>
     <dimen name="screenshot_offset_x">16dp</dimen>
     <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
-    <dimen name="screenshot_action_container_offset_y">16dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
     <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
@@ -1602,15 +1601,16 @@
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
     <dimen name="internet_dialog_list_max_height">646dp</dimen>
-    <dimen name="internet_dialog_list_max_width">412dp</dimen>
+    <dimen name="internet_dialog_list_max_width">@dimen/match_parent</dimen>
 
     <!-- Signal icon in internet dialog -->
     <dimen name="signal_strength_icon_size">24dp</dimen>
 
     <!-- Internet dialog related dimensions -->
     <dimen name="internet_dialog_corner_radius">24dp</dimen>
-
-    <!-- Size of internet dialog -->
+    <!-- End margin of network layout -->
+    <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
+    <!-- Size of switch bar in internet dialog -->
     <dimen name="settingslib_switchbar_margin">16dp</dimen>
     <!-- Minimum width of switch -->
     <dimen name="settingslib_min_switch_width">52dp</dimen>

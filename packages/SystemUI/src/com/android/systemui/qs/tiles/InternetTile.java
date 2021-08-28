@@ -122,8 +122,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        boolean canConfigMobileData = mAccessPointController.canConfigMobileData();
-        mHandler.post(() -> mInternetDialogFactory.create(true, canConfigMobileData));
+        mHandler.post(() -> mInternetDialogFactory.create(true,
+                mAccessPointController.canConfigMobileData(),
+                mAccessPointController.canConfigWifi()));
     }
 
     @Override

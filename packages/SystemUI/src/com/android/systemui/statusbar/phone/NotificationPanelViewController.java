@@ -55,7 +55,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -91,7 +90,6 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
@@ -232,7 +230,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @VisibleForTesting final StatusBarStateListener mStatusBarStateListener =
             new StatusBarStateListener();
-    private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
     private final VibratorHelper mVibratorHelper;
     private final MetricsLogger mMetricsLogger;
@@ -270,42 +267,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private static final AnimationProperties
             KEYGUARD_HUN_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-    @VisibleForTesting
-    final KeyguardUpdateMonitorCallback
-            mKeyguardUpdateCallback =
-            new KeyguardUpdateMonitorCallback() {
-
-                @Override
-                public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType,
-                        boolean isStrongBiometric) {
-                    if (mFirstBypassAttempt
-                            && mUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric)) {
-                        mDelayShowingKeyguardStatusBar = true;
-                    }
-                }
-
-                @Override
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    boolean
-                            keyguardOrShadeLocked =
-                            mBarState == KEYGUARD
-                                    || mBarState == StatusBarState.SHADE_LOCKED;
-                    if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing
-                            && !mDelayShowingKeyguardStatusBar
-                            && !mBiometricUnlockController.isBiometricUnlock()) {
-                        mFirstBypassAttempt = false;
-                        mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
-                    }
-                }
-
-                @Override
-                public void onFinishedGoingToSleep(int why) {
-                    mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
-                    mDelayShowingKeyguardStatusBar = false;
-                }
-    };
 
     private final LayoutInflater mLayoutInflater;
     private final PowerManager mPowerManager;
@@ -587,17 +548,6 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private boolean mIsPanelCollapseOnQQS;
 
-    /**
-     * If face auth with bypass is running for the first time after you turn on the screen.
-     * (From aod or screen off)
-     */
-    private boolean mFirstBypassAttempt;
-    /**
-     * If auth happens successfully during {@code mFirstBypassAttempt}, and we should wait until
-     * the keyguard is dismissed to show the status bar.
-     */
-    private boolean mDelayShowingKeyguardStatusBar;
-
     private boolean mAnimatingQS;
 
     /**
@@ -689,17 +639,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     float alphaQsExpansion = 1 - Math.min(1, computeQsExpansionFraction() * 2);
                     float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                             * (1.0f - mKeyguardHeadsUpShowingAmount);
-
-                    boolean hideForBypass =
-                            mFirstBypassAttempt && mUpdateMonitor.shouldListenForFace()
-                                    || mDelayShowingKeyguardStatusBar;
-                    int newVisibility = newAlpha != 0f && !mDozing && !hideForBypass
-                                    ? View.VISIBLE : View.INVISIBLE;
-
-                    return new KeyguardStatusBarViewController.ViewState(
-                            /* shouldAnimate= */ mKeyguardShowing,
-                            newAlpha,
-                            newVisibility);
+                    return new KeyguardStatusBarViewController.ViewState(newAlpha);
                 }
             };
 
@@ -726,7 +666,6 @@ public class NotificationPanelViewController extends PanelViewController {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
-            BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
@@ -812,7 +751,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mDisplayId = displayId;
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
-        mBiometricUnlockController = biometricUnlockController;
         mScrimController = scrimController;
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
@@ -828,21 +766,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mThemeResId = mView.getContext().getThemeResId();
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
-        mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
-        KeyguardStateController.Callback
-                keyguardMonitorCallback =
-                new KeyguardStateController.Callback() {
-                    @Override
-                    public void onKeyguardFadingAwayChanged() {
-                        if (!mKeyguardStateController.isKeyguardFadingAway()) {
-                            mFirstBypassAttempt = false;
-                            mDelayShowingKeyguardStatusBar = false;
-                        }
-                    }
-                };
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         lockscreenShadeTransitionController.setNotificationPanelController(this);
-        mKeyguardStateController.addCallback(keyguardMonitorCallback);
         DynamicPrivacyControlListener
                 dynamicPrivacyControlListener =
                 new DynamicPrivacyControlListener();
@@ -1903,6 +1828,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
 
     private boolean handleQsTouch(MotionEvent event) {
+        if (mShouldUseSplitNotificationShade && touchXOutsideOfQs(event.getX())) {
+            return false;
+        }
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
                 && mBarState != KEYGUARD && !mQsExpanded && isQsExpansionEnabled()) {
@@ -1944,8 +1872,12 @@ public class NotificationPanelViewController extends PanelViewController {
         return false;
     }
 
+    private boolean touchXOutsideOfQs(float touchX) {
+        return touchX < mQsFrame.getX() || touchX > mQsFrame.getX() + mQsFrame.getWidth();
+    }
+
     private boolean isInQsArea(float x, float y) {
-        if (x < mQsFrame.getX() || x > mQsFrame.getX() + mQsFrame.getWidth()) {
+        if (touchXOutsideOfQs(x)) {
             return false;
         }
         // Let's reject anything at the very bottom around the home handle in gesture nav
@@ -3628,6 +3560,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mDozing = dozing;
         mNotificationStackScrollLayoutController.setDozing(mDozing, animate, wakeUpTouchLocation);
         mKeyguardBottomArea.setDozing(mDozing, animate);
+        mKeyguardStatusBarViewController.setDozing(mDozing);
 
         if (dozing) {
             mBottomAreaShadeAlphaAnimator.cancel();
@@ -4094,9 +4027,7 @@ public class NotificationPanelViewController extends PanelViewController {
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
             // in split shade mode we want to expand/collapse QS only when touch happens within QS
-            if (mShouldUseSplitNotificationShade
-                    && (mInitialTouchX < mQsFrame.getX()
-                        || mInitialTouchX > mQsFrame.getX() + mQsFrame.getWidth())) {
+            if (mShouldUseSplitNotificationShade && touchXOutsideOfQs(mInitialTouchX)) {
                 return;
             }
             mLastOverscroll = 0f;
@@ -4508,7 +4439,6 @@ public class NotificationPanelViewController extends PanelViewController {
                             .addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
-            mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so
             // force a call to onThemeChanged
@@ -4525,7 +4455,6 @@ public class NotificationPanelViewController extends PanelViewController {
                             .removeTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.removeCallback(mStatusBarStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
-            mUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
             mFalsingManager.removeTapListener(mFalsingTapListener);
         }
     }

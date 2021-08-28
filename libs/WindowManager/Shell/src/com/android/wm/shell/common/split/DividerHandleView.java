@@ -70,7 +70,8 @@ public class DividerHandleView extends View {
     private final Paint mPaint = new Paint();
     private final int mWidth;
     private final int mHeight;
-    private final int mCircleDiameter;
+    private final int mTouchingWidth;
+    private final int mTouchingHeight;
     private int mCurrentWidth;
     private int mCurrentHeight;
     private AnimatorSet mAnimator;
@@ -80,11 +81,12 @@ public class DividerHandleView extends View {
         super(context, attrs);
         mPaint.setColor(getResources().getColor(R.color.docked_divider_handle, null));
         mPaint.setAntiAlias(true);
-        mWidth = getResources().getDimensionPixelSize(R.dimen.docked_divider_handle_width);
-        mHeight = getResources().getDimensionPixelSize(R.dimen.docked_divider_handle_height);
+        mWidth = getResources().getDimensionPixelSize(R.dimen.split_divider_handle_width);
+        mHeight = getResources().getDimensionPixelSize(R.dimen.split_divider_handle_height);
         mCurrentWidth = mWidth;
         mCurrentHeight = mHeight;
-        mCircleDiameter = (mWidth + mHeight) / 3;
+        mTouchingWidth = mWidth > mHeight ? mWidth / 2 : mWidth;
+        mTouchingHeight = mHeight > mWidth ? mHeight / 2 : mHeight;
     }
 
     /** Sets touching state for this handle view. */
@@ -98,16 +100,16 @@ public class DividerHandleView extends View {
         }
         if (!animate) {
             if (touching) {
-                mCurrentWidth = mCircleDiameter;
-                mCurrentHeight = mCircleDiameter;
+                mCurrentWidth = mTouchingWidth;
+                mCurrentHeight = mTouchingHeight;
             } else {
                 mCurrentWidth = mWidth;
                 mCurrentHeight = mHeight;
             }
             invalidate();
         } else {
-            animateToTarget(touching ? mCircleDiameter : mWidth,
-                    touching ? mCircleDiameter : mHeight, touching);
+            animateToTarget(touching ? mTouchingWidth : mWidth,
+                    touching ? mTouchingHeight : mHeight, touching);
         }
         mTouching = touching;
     }
