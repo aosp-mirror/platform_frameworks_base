@@ -18,20 +18,27 @@ package com.android.systemui.navigationbar;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 
+import android.app.StatusBarManager;
+import android.app.StatusBarManager.WindowVisibleState;
 import android.content.Context;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dependency;
@@ -60,6 +67,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final NavigationBarA11yHelper.NavA11yEventListener mNavA11yEventListener =
             this::updateSysuiFlags;
     private int mDisabledFlags;
+    private @WindowVisibleState int mTaskBarWindowState = WINDOW_STATE_SHOWING;
+    private @Behavior int mBehavior;
 
     @Inject
     public TaskbarDelegate(Context context) {
@@ -114,6 +123,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0)
                 .setFlag(SYSUI_STATE_BACK_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
+                .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isWindowVisible())
+                .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
+                        allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
     }
 
@@ -125,6 +137,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 imeShown, showImeSwitcher);
         if (hints != mNavigationIconHints) {
             mNavigationIconHints = hints;
+            updateSysuiFlags();
+        }
+    }
+
+    @Override
+    public void setWindowState(int displayId, int window, int state) {
+        if (displayId == mDisplayId
+                && window == StatusBarManager.WINDOW_NAVIGATION_BAR
+                && mTaskBarWindowState != state) {
+            mTaskBarWindowState = state;
             updateSysuiFlags();
         }
     }
@@ -146,6 +168,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
             InsetsVisibilities requestedVisibilities, String packageName) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
+        if (mBehavior != behavior) {
+            mBehavior = behavior;
+            updateSysuiFlags();
+        }
     }
 
     @Override
@@ -160,5 +186,13 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void onNavigationModeChanged(int mode) {
         mEdgeBackGestureHandler.onNavigationModeChanged(mode);
+    }
+
+    private boolean isWindowVisible() {
+        return mTaskBarWindowState == WINDOW_STATE_SHOWING;
+    }
+
+    private boolean allowSystemGestureIgnoringBarVisibility() {
+        return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 }
