@@ -94,6 +94,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -626,17 +627,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mNavBarControllerLazy.get().getDefaultNavigationBar();
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
+        final NotificationPanelViewController panelController =
+                mStatusBarOptionalLazy.get().get().getPanelController();
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
-                    + " navBarView=" + navBarView);
+                    + " navBarView=" + navBarView + " panelController=" + panelController);
         }
 
         if (navBarFragment != null) {
             navBarFragment.updateSystemUiStateFlags(-1);
         }
         if (navBarView != null) {
-            navBarView.updatePanelSystemUiStateFlags();
             navBarView.updateDisabledSystemUiStateFlags();
+        }
+        if (panelController != null) {
+            panelController.updateSystemUiStateFlags();
         }
         if (mStatusBarWinController != null) {
             mStatusBarWinController.notifyStateChangedCallbacks();
