@@ -112,22 +112,6 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
-    @Postsubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
     @FlakyTest
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
@@ -138,7 +122,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

@@ -607,7 +607,7 @@ public final class MediaSessionManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEventAsSystemService(@NonNull KeyEvent keyEvent) {
-        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/true, /*needWakeLock=*/false);
+        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/true, /*needWakeLock=*/true);
     }
 
     private void dispatchMediaKeyEventInternal(KeyEvent keyEvent, boolean asSystemService,

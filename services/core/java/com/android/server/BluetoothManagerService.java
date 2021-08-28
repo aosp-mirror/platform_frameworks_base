@@ -25,9 +25,9 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGRO
 import static android.os.UserHandle.USER_SYSTEM;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
-import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -93,7 +93,6 @@ import com.android.server.pm.UserRestrictionsUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -802,35 +801,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     @Override
     public boolean isHearingAidProfileSupported() {
         return mIsHearingAidProfileSupported;
-    }
-
-    @Override
-    /** @hide */
-    public java.util.List<String> getSystemConfigEnabledProfilesForPackage(String packageName) {
-        if (Binder.getCallingUid() != Process.BLUETOOTH_UID) {
-            Slog.w(TAG, "getSystemConfigEnabledProfilesForPackage(): not allowed for non-bluetooth");
-            return null;
-        }
-
-        SystemConfig systemConfig = SystemConfig.getInstance();
-        if (systemConfig == null) {
-            return null;
-        }
-
-        android.util.ArrayMap<String, Boolean> componentEnabledStates =
-                systemConfig.getComponentsEnabledStates(packageName);
-        if (componentEnabledStates == null) {
-            return null;
-        }
-
-        ArrayList enabledProfiles = new ArrayList<String>();
-        for (Map.Entry<String, Boolean> entry : componentEnabledStates.entrySet()) {
-            if (entry.getValue()) {
-                enabledProfiles.add(entry.getKey());
-            }
-        }
-
-        return enabledProfiles;
     }
 
     private boolean isDeviceProvisioned() {

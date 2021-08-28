@@ -143,8 +143,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     // During testing the launcher is always in portrait mode
-    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation,
-        testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test

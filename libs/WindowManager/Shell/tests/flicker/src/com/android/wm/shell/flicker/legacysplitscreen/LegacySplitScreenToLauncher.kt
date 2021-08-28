@@ -104,7 +104,7 @@ class LegacySplitScreenToLauncher(
 
     @Presubmit
     @Test
-    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test

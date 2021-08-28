@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 
@@ -23,19 +24,26 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
 import com.android.keyguard.CarrierTextController;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.ViewController;
 
@@ -58,6 +66,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
     private final BatteryMeterViewController mBatteryMeterViewController;
     private final ViewStateProvider mViewStateProvider;
+    private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardBypassController mKeyguardBypassController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final BiometricUnlockController mBiometricUnlockController;
+    private final SysuiStatusBarStateController mStatusBarStateController;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -115,12 +128,71 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 updateViewState();
             };
 
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onBiometricAuthenticated(
+                        int userId,
+                        BiometricSourceType biometricSourceType,
+                        boolean isStrongBiometric) {
+                    if (mFirstBypassAttempt
+                            && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                                    isStrongBiometric)) {
+                        mDelayShowingKeyguardStatusBar = true;
+                    }
+                }
+
+                @Override
+                public void onBiometricRunningStateChanged(
+                        boolean running,
+                        BiometricSourceType biometricSourceType) {
+                    boolean keyguardOrShadeLocked =
+                            mStatusBarState == KEYGUARD
+                                    || mStatusBarState == StatusBarState.SHADE_LOCKED;
+                    if (!running
+                            && mFirstBypassAttempt
+                            && keyguardOrShadeLocked
+                            && !mDozing
+                            && !mDelayShowingKeyguardStatusBar
+                            && !mBiometricUnlockController.isBiometricUnlock()) {
+                        mFirstBypassAttempt = false;
+                        animateKeyguardStatusBarIn();
+                    }
+                }
+
+                @Override
+                public void onFinishedGoingToSleep(int why) {
+                    mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
+                    mDelayShowingKeyguardStatusBar = false;
+                }
+            };
+
+    private final StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onStateChanged(int newState) {
+                    mStatusBarState = newState;
+                }
+            };
+
     private final List<String> mBlockedIcons;
 
     private boolean mBatteryListening;
     private StatusBarIconController.TintedIconManager mTintedIconManager;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
+    /**
+     * If face auth with bypass is running for the first time after you turn on the screen.
+     * (From aod or screen off)
+     */
+    private boolean mFirstBypassAttempt;
+    /**
+     * If auth happens successfully during {@code mFirstBypassAttempt}, and we should wait until
+     * the keyguard is dismissed to show the status bar.
+     */
+    private boolean mDelayShowingKeyguardStatusBar;
+    private int mStatusBarState;
+    private boolean mDozing;
 
     @Inject
     public KeyguardStatusBarViewController(
@@ -133,7 +205,12 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             StatusBarIconController statusBarIconController,
             StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
             BatteryMeterViewController batteryMeterViewController,
-            ViewStateProvider viewStateProvider) {
+            ViewStateProvider viewStateProvider,
+            KeyguardStateController keyguardStateController,
+            KeyguardBypassController bypassController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            BiometricUnlockController biometricUnlockController,
+            SysuiStatusBarStateController statusBarStateController) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
@@ -144,6 +221,24 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mTintedIconManagerFactory = tintedIconManagerFactory;
         mBatteryMeterViewController = batteryMeterViewController;
         mViewStateProvider = viewStateProvider;
+        mKeyguardStateController = keyguardStateController;
+        mKeyguardBypassController = bypassController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mBiometricUnlockController = biometricUnlockController;
+        mStatusBarStateController = statusBarStateController;
+
+        mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
+        mKeyguardStateController.addCallback(
+                new KeyguardStateController.Callback() {
+                    @Override
+                    public void onKeyguardFadingAwayChanged() {
+                        if (!mKeyguardStateController.isKeyguardFadingAway()) {
+                            mFirstBypassAttempt = false;
+                            mDelayShowingKeyguardStatusBar = false;
+                        }
+                    }
+                }
+        );
 
         Resources r = getResources();
         mBlockedIcons = Collections.unmodifiableList(Arrays.asList(
@@ -164,6 +259,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mConfigurationController.addCallback(mConfigurationListener);
         mAnimationScheduler.addCallback(mAnimationCallback);
         mUserInfoController.addCallback(mOnUserInfoChangedListener);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         if (mTintedIconManager == null) {
             mTintedIconManager =
                     mTintedIconManagerFactory.create(mView.findViewById(R.id.statusIcons));
@@ -178,6 +275,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mConfigurationController.removeCallback(mConfigurationListener);
         mAnimationScheduler.removeCallback(mAnimationCallback);
         mUserInfoController.removeCallback(mOnUserInfoChangedListener);
+        mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         if (mTintedIconManager != null) {
             mStatusBarIconController.removeIconGroup(mTintedIconManager);
         }
@@ -221,6 +320,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.setTopClipping(notificationPanelTop - mView.getTop());
     }
 
+    /** Sets the dozing state. */
+    public void setDozing(boolean dozing) {
+        mDozing = dozing;
+    }
+
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
         mView.setVisibility(View.VISIBLE);
@@ -252,16 +356,23 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /**
      * Updates the {@link KeyguardStatusBarView} state based on what the {@link ViewStateProvider}
-     * provides.
+     * and other controllers provide.
      */
     public void updateViewState() {
         ViewState newViewState = mViewStateProvider.provideViewState();
-        if (!newViewState.mShouldUpdate) {
+        if (!isKeyguardShowing()) {
             return;
         }
-        updateViewState(
-                newViewState.mAlpha * mKeyguardStatusBarAnimateAlpha,
-                newViewState.mVisibility);
+
+        float newAlpha = newViewState.mAlpha * mKeyguardStatusBarAnimateAlpha;
+
+        boolean hideForBypass =
+                mFirstBypassAttempt && mKeyguardUpdateMonitor.shouldListenForFace()
+                        || mDelayShowingKeyguardStatusBar;
+        int newVisibility = newAlpha != 0f && !mDozing && !hideForBypass
+                ? View.VISIBLE : View.INVISIBLE;
+
+        updateViewState(newAlpha, newVisibility);
     }
 
     /**
@@ -270,6 +381,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     public void updateViewState(float alpha, int visibility) {
         mView.setAlpha(alpha);
         mView.setVisibility(visibility);
+    }
+
+    private boolean isKeyguardShowing() {
+        return mStatusBarState == KEYGUARD;
     }
 
     /** */
@@ -287,14 +402,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** A POJO for the desired state of {@link KeyguardStatusBarView}. */
     static class ViewState {
-        final boolean mShouldUpdate;
         final float mAlpha;
-        final int mVisibility;
 
-        ViewState(boolean shouldUpdate, float alpha, int visibility) {
-            this.mShouldUpdate = shouldUpdate;
+        ViewState(float alpha) {
             this.mAlpha = alpha;
-            this.mVisibility = visibility;
         }
     }
 }

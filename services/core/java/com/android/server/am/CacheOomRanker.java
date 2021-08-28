@@ -243,6 +243,7 @@ public class CacheOomRanker {
         float lruWeight;
         float usesWeight;
         float rssWeight;
+        int preserveTopNApps;
         int[] lruPositions;
         RankedProcessRecord[] scoredProcessRecords;
 
@@ -250,6 +251,7 @@ public class CacheOomRanker {
             lruWeight = mLruWeight;
             usesWeight = mUsesWeight;
             rssWeight = mRssWeight;
+            preserveTopNApps = mPreserveTopNApps;
             lruPositions = mLruPositions;
             scoredProcessRecords = mScoredProcessRecords;
         }
@@ -276,19 +278,19 @@ public class CacheOomRanker {
             ++numProcessesEvaluated;
         }
 
-        // Count how many apps we're not re-ranking (up to mPreserveTopNApps).
+        // Count how many apps we're not re-ranking (up to preserveTopNApps).
         int numProcessesNotReRanked = 0;
         while (numProcessesEvaluated < lruProcessServiceStart
-                && numProcessesNotReRanked < mPreserveTopNApps) {
+                && numProcessesNotReRanked < preserveTopNApps) {
             ProcessRecord process = lruList.get(numProcessesEvaluated);
             if (appCanBeReRanked(process)) {
                 numProcessesNotReRanked++;
             }
             numProcessesEvaluated++;
         }
-        // Exclude the top `mPreserveTopNApps` apps from re-ranking.
-        if (numProcessesNotReRanked < mPreserveTopNApps) {
-            numProcessesReRanked -= mPreserveTopNApps - numProcessesNotReRanked;
+        // Exclude the top `preserveTopNApps` apps from re-ranking.
+        if (numProcessesNotReRanked < preserveTopNApps) {
+            numProcessesReRanked -= preserveTopNApps - numProcessesNotReRanked;
             if (numProcessesReRanked < 0) {
                 numProcessesReRanked = 0;
             }

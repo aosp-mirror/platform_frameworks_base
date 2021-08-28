@@ -51,5 +51,10 @@
 
     <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
     <bool name="config_showUserSwitcherByDefault">true</bool>
+
+    <!-- Enable dynamic keyguard positioning for large-width screens. This will cause the keyguard
+         to be aligned to one side of the screen when in landscape mode. -->
+    <bool name="config_enableDynamicKeyguardPositioning">true</bool>
+
 </resources>
 

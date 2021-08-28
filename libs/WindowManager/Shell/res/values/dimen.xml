@@ -76,8 +76,12 @@
     <!-- How high we lift the divider when touching -->
     <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
 
+    <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
+    <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_width">72dp</dimen>
+    <dimen name="split_divider_handle_height">3dp</dimen>
 
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->

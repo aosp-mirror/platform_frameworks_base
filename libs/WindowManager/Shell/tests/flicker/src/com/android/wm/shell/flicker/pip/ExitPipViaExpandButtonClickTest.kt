@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -26,7 +25,6 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.traces.parser.toWindowName
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -77,18 +75,6 @@ class ExitPipViaExpandButtonClickTest(
                 wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
             }
         }
-
-    @Postsubmit
-    @Test
-    override fun pipAppCoversFullScreenAtEnd() = super.pipAppCoversFullScreenAtEnd()
-
-    @Postsubmit
-    @Test
-    override fun showBothAppLayersThenHidePip() = super.showBothAppLayersThenHidePip()
-
-    @Postsubmit
-    @Test
-    override fun showBothAppWindowsThenHidePip() = super.showBothAppWindowsThenHidePip()
 
     companion object {
         /**

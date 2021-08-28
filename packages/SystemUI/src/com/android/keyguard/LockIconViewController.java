@@ -501,8 +501,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     if (!wasClickableOnDownEvent()) {
                         return;
                     }
+                    mDetectedLongPress = true;
 
-                    if (mVibrator != null) {
+                    if (onAffordanceClick() && mVibrator != null) {
+                        // only vibrate if the click went through and wasn't intercepted by falsing
                         mVibrator.vibrate(
                                 Process.myUid(),
                                 getContext().getOpPackageName(),
@@ -510,8 +512,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                                 "lockIcon-onLongPress",
                                 VIBRATION_SONIFICATION_ATTRIBUTES);
                     }
-                    mDetectedLongPress = true;
-                    onAffordanceClick();
                 }
 
                 public boolean onSingleTapUp(MotionEvent e) {
@@ -535,9 +535,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     return mDownDetected;
                 }
 
-                private void onAffordanceClick() {
+                /**
+                 * Whether we tried to launch the affordance.
+                 *
+                 * If falsing intercepts the click, returns false.
+                 */
+                private boolean onAffordanceClick() {
                     if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
-                        return;
+                        return false;
                     }
 
                     // pre-emptively set to true to hide view
@@ -547,6 +552,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     }
                     updateVisibility();
                     mKeyguardViewController.showBouncer(/* scrim */ true);
+                    return true;
                 }
             });
 
