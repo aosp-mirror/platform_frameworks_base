@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रिनसट"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"स्मार्ट लक अफ गरिएको छ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै छवि पठाइयो"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रिनसट बचत गर्दै…"</string>
@@ -1178,10 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्कहरू खोजिँदै छन्…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कमा कनेक्ट गर्न सकिएन"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
-    <!-- no translation found for qs_tile_request_dialog_text (3501359944139877694) -->
-    <skip />
-    <!-- no translation found for qs_tile_request_dialog_add (4888460910694986304) -->
-    <skip />
-    <!-- no translation found for qs_tile_request_dialog_not_add (4168716573114067296) -->
-    <skip />
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> द्रुत सेटिङमा निम्न टाइल हाल्न चाहन्छ"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"टाइल हाल्नुहोस्"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"टाइल नहाल्नुहोस्"</string>
 </resources>

@@ -77,8 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (9097102067802412936) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ਚਿੱਤਰ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -1178,10 +1177,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ਨੈੱਟਵਰਕ ਖੋਜੇ ਜਾ ਰਹੇ ਹਨ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ਸਭ ਦੇਖੋ"</string>
-    <!-- no translation found for qs_tile_request_dialog_text (3501359944139877694) -->
-    <skip />
-    <!-- no translation found for qs_tile_request_dialog_add (4888460910694986304) -->
-    <skip />
-    <!-- no translation found for qs_tile_request_dialog_not_add (4168716573114067296) -->
-    <skip />
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ਅੱਗੇ ਦਿੱਤੀ ਟਾਇਲ ਨੂੰ ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਨਾ ਚਾਹੁੰਦੀ ਹੈ"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ਟਾਇਲ ਸ਼ਾਮਲ ਨਾ ਕਰੋ"</string>
 </resources>
