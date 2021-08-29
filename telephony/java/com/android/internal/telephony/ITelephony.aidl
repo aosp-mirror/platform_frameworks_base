@@ -1961,6 +1961,7 @@ interface ITelephony {
     /**
      * Return the emergency number list from all the active subscriptions.
      */
+    @SuppressWarnings(value={"untyped-collection"})
     Map getEmergencyNumberList(String callingPackage, String callingFeatureId);
 
     /**

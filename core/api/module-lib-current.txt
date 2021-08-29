@@ -132,6 +132,11 @@ package android.os {
     field public static final int VPN_UID = 1016; // 0x3f8
   }
 
+  public final class ServiceManager {
+    method public static boolean isDeclared(@NonNull String);
+    method @Nullable public static android.os.IBinder waitForDeclaredService(@NonNull String);
+  }
+
   public class StatsServiceManager {
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
@@ -153,6 +158,11 @@ package android.telephony {
 
   public abstract class CellSignalStrength {
     method public static int getNumSignalStrengthLevels();
+  }
+
+  public class SubscriptionManager {
+    method public void addSubscriptionInfoRecord(@NonNull String, @Nullable String, int, int);
+    method public void removeSubscriptionInfoRecord(@NonNull String, int);
   }
 
   public class TelephonyManager {
