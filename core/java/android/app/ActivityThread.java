@@ -4911,7 +4911,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 Slog.w(TAG, "Activity top position already set to onTop=" + onTop);
                 return;
             }
-            throw new IllegalStateException("Activity top position already set to onTop=" + onTop);
+            // TODO(b/197484331): Remove this short-term workaround while fixing the binder failure.
+            Slog.e(TAG, "Activity top position already set to onTop=" + onTop);
         }
 
         r.isTopResumedActivity = onTop;
