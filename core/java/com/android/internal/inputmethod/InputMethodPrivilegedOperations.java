@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A utility class to take care of boilerplate code around IPCs.
@@ -156,10 +157,10 @@ public final class InputMethodPrivilegedOperations {
             return null;
         }
         try {
-            final Completable.IInputContentUriToken value =
-                    Completable.createIInputContentUriToken();
-            ops.createInputContentUriToken(contentUri, packageName, ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            final CompletableFuture<IInputContentUriToken> value = new CompletableFuture<>();
+            ops.createInputContentUriToken(contentUri, packageName,
+                    ResultCallbacks.ofIInputContentUriToken(value));
+            return CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             // For historical reasons, this error was silently ignored.
             // Note that the caller already logs error so we do not need additional Log.e() here.
@@ -218,9 +219,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setInputMethod(id, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            final CompletableFuture<Void> value = new CompletableFuture<>();
+            ops.setInputMethod(id, ResultCallbacks.ofVoid(value));
+            CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -241,9 +242,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setInputMethodAndSubtype(id, subtype, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            final CompletableFuture<Void> value = new CompletableFuture<>();
+            ops.setInputMethodAndSubtype(id, subtype, ResultCallbacks.ofVoid(value));
+            CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -263,9 +264,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.hideMySoftInput(flags, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            final CompletableFuture<Void> value = new CompletableFuture<>();
+            ops.hideMySoftInput(flags, ResultCallbacks.ofVoid(value));
+            CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -285,9 +286,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.showMySoftInput(flags, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            final CompletableFuture<Void> value = new CompletableFuture<>();
+            ops.showMySoftInput(flags, ResultCallbacks.ofVoid(value));
+            CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -306,9 +307,9 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.switchToPreviousInputMethod(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            final CompletableFuture<Boolean> value = new CompletableFuture<>();
+            ops.switchToPreviousInputMethod(ResultCallbacks.ofBoolean(value));
+            return CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -329,9 +330,9 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.switchToNextInputMethod(onlyCurrentIme, ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            final CompletableFuture<Boolean> value = new CompletableFuture<>();
+            ops.switchToNextInputMethod(onlyCurrentIme, ResultCallbacks.ofBoolean(value));
+            return CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -350,9 +351,9 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.shouldOfferSwitchingToNextInputMethod(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            final CompletableFuture<Boolean> value = new CompletableFuture<>();
+            ops.shouldOfferSwitchingToNextInputMethod(ResultCallbacks.ofBoolean(value));
+            return CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

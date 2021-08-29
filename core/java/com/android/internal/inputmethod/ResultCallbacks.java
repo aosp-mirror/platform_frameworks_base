@@ -20,12 +20,15 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.SurroundingText;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Defines a set of factory methods to create {@link android.os.IBinder}-based callbacks that are
- * associated with completable objects defined in {@link Completable}.
+ * associated with completable objects defined in {@link CompletableFuture}.
  */
 public final class ResultCallbacks {
 
@@ -33,6 +36,13 @@ public final class ResultCallbacks {
      * Not intended to be instantiated.
      */
     private ResultCallbacks() {
+    }
+
+    private static final class LightweightThrowable extends RuntimeException {
+        LightweightThrowable(@Nullable ThrowableHolder throwableHolder) {
+            super(throwableHolder != null ? throwableHolder.getMessage() : null,
+                    null, false, false);
+        }
     }
 
     @AnyThread
@@ -43,218 +53,222 @@ public final class ResultCallbacks {
     }
 
     /**
-     * Creates {@link IIntResultCallback.Stub} that is to set {@link Completable.Int} when receiving
-     * the result.
+     * Creates {@link IIntResultCallback.Stub} that is to set {@link CompletableFuture<Integer>}
+     * when receiving the result.
      *
-     * @param value {@link Completable.Int} to be set when receiving the result.
+     * @param value {@link CompletableFuture<Integer>} to be set when receiving the result.
      * @return {@link IIntResultCallback.Stub} that can be passed as a binder IPC parameter.
      */
     @AnyThread
-    public static IIntResultCallback.Stub of(@NonNull Completable.Int value) {
-        final AtomicReference<Completable.Int> atomicRef = new AtomicReference<>(value);
+    public static IIntResultCallback.Stub ofInteger(@NonNull CompletableFuture<Integer> value) {
+        final AtomicReference<CompletableFuture<Integer>> atomicRef = new AtomicReference<>(value);
 
         return new IIntResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(int result) {
-                final Completable.Int value = unwrap(atomicRef);
+                final CompletableFuture<Integer> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
 
             @BinderThread
             @Override
             public void onError(ThrowableHolder throwableHolder) {
-                final Completable.Int value = unwrap(atomicRef);
+                final CompletableFuture<Integer> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onError(throwableHolder);
+                value.completeExceptionally(new LightweightThrowable(throwableHolder));
             }
         };
     }
 
     /**
      * Creates {@link ICharSequenceResultCallback.Stub} that is to set
-     * {@link Completable.CharSequence} when receiving the result.
+     * {@link CompletableFuture<CharSequence>} when receiving the result.
      *
-     * @param value {@link Completable.CharSequence} to be set when receiving the result.
+     * @param value {@link CompletableFuture<CharSequence>} to be set when receiving the result.
      * @return {@link ICharSequenceResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
-    public static ICharSequenceResultCallback.Stub of(
-            @NonNull Completable.CharSequence value) {
-        final AtomicReference<Completable.CharSequence> atomicRef = new AtomicReference<>(value);
+    public static ICharSequenceResultCallback.Stub ofCharSequence(
+            @NonNull CompletableFuture<CharSequence> value) {
+        final AtomicReference<CompletableFuture<CharSequence>> atomicRef =
+                new AtomicReference<>(value);
 
         return new ICharSequenceResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(CharSequence result) {
-                final Completable.CharSequence value = unwrap(atomicRef);
+                final CompletableFuture<CharSequence> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
         };
     }
 
     /**
      * Creates {@link IExtractedTextResultCallback.Stub} that is to set
-     * {@link Completable.ExtractedText} when receiving the result.
+     * {@link CompletableFuture<ExtractedText>} when receiving the result.
      *
-     * @param value {@link Completable.ExtractedText} to be set when receiving the result.
+     * @param value {@link CompletableFuture<ExtractedText>} to be set when receiving the result.
      * @return {@link IExtractedTextResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
-    public static IExtractedTextResultCallback.Stub of(
-            @NonNull Completable.ExtractedText value) {
-        final AtomicReference<Completable.ExtractedText> atomicRef = new AtomicReference<>(value);
+    public static IExtractedTextResultCallback.Stub ofExtractedText(
+            @NonNull CompletableFuture<ExtractedText> value) {
+        final AtomicReference<CompletableFuture<ExtractedText>> atomicRef =
+                new AtomicReference<>(value);
 
         return new IExtractedTextResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(android.view.inputmethod.ExtractedText result) {
-                final Completable.ExtractedText value = unwrap(atomicRef);
+                final CompletableFuture<ExtractedText> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
         };
     }
 
     /**
      * Creates {@link ISurroundingTextResultCallback.Stub} that is to set
-     * {@link Completable.SurroundingText} when receiving the result.
+     * {@link CompletableFuture<SurroundingText>} when receiving the result.
      *
-     * @param value {@link Completable.SurroundingText} to be set when receiving the result.
+     * @param value {@link CompletableFuture<SurroundingText>} to be set when receiving the result.
      * @return {@link ISurroundingTextResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
-    public static ISurroundingTextResultCallback.Stub of(
-            @NonNull Completable.SurroundingText value) {
-        final AtomicReference<Completable.SurroundingText> atomicRef = new AtomicReference<>(value);
+    public static ISurroundingTextResultCallback.Stub ofSurroundingText(
+            @NonNull CompletableFuture<SurroundingText> value) {
+        final AtomicReference<CompletableFuture<SurroundingText>> atomicRef =
+                new AtomicReference<>(value);
 
         return new ISurroundingTextResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(android.view.inputmethod.SurroundingText result) {
-                final Completable.SurroundingText value = unwrap(atomicRef);
+                final CompletableFuture<SurroundingText> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
         };
     }
 
     /**
-     * Creates {@link IBooleanResultCallback.Stub} that is to set {@link Completable.Boolean} when
-     * receiving the result.
+     * Creates {@link IBooleanResultCallback.Stub} that is to set {@link CompletableFuture<Boolean>}
+     * when receiving the result.
      *
-     * @param value {@link Completable.Boolean} to be set when receiving the result.
+     * @param value {@link CompletableFuture<Boolean>} to be set when receiving the result.
      * @return {@link IBooleanResultCallback.Stub} that can be passed as a binder IPC parameter.
      */
     @AnyThread
-    public static IBooleanResultCallback.Stub of(@NonNull Completable.Boolean value) {
-        final AtomicReference<Completable.Boolean> atomicRef = new AtomicReference<>(value);
+    public static IBooleanResultCallback.Stub ofBoolean(@NonNull CompletableFuture<Boolean> value) {
+        final AtomicReference<CompletableFuture<Boolean>> atomicRef = new AtomicReference<>(value);
 
         return new IBooleanResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(boolean result) {
-                final Completable.Boolean value = unwrap(atomicRef);
+                final CompletableFuture<Boolean> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
 
             @BinderThread
             @Override
             public void onError(ThrowableHolder throwableHolder) {
-                final Completable.Boolean value = unwrap(atomicRef);
+                final CompletableFuture<Boolean> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onError(throwableHolder);
+                value.completeExceptionally(new LightweightThrowable(throwableHolder));
             }
         };
     }
 
     /**
-     * Creates {@link IVoidResultCallback.Stub} that is to set {@link Completable.Void} when
+     * Creates {@link IVoidResultCallback.Stub} that is to set {@link CompletableFuture<Void>} when
      * receiving the result.
      *
-     * @param value {@link Completable.Void} to be set when receiving the result.
+     * @param value {@link CompletableFuture<Void>} to be set when receiving the result.
      * @return {@link IVoidResultCallback.Stub} that can be passed as a binder IPC parameter.
      */
     @AnyThread
-    public static IVoidResultCallback.Stub of(@NonNull Completable.Void value) {
-        final AtomicReference<Completable.Void> atomicRef = new AtomicReference<>(value);
+    public static IVoidResultCallback.Stub ofVoid(@NonNull CompletableFuture<Void> value) {
+        final AtomicReference<CompletableFuture<Void>> atomicRef = new AtomicReference<>(value);
 
         return new IVoidResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult() {
-                final Completable.Void value = unwrap(atomicRef);
+                final CompletableFuture<Void> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete();
+                value.complete(null);
             }
 
             @BinderThread
             @Override
             public void onError(ThrowableHolder throwableHolder) {
-                final Completable.Void value = unwrap(atomicRef);
+                final CompletableFuture<Void> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onError(throwableHolder);
+                value.completeExceptionally(new LightweightThrowable(throwableHolder));
             }
         };
     }
 
     /**
      * Creates {@link IInputContentUriTokenResultCallback.Stub} that is to set
-     * {@link Completable.IInputContentUriToken} when receiving the result.
+     * {@link CompletableFuture<IInputContentUriToken>} when receiving the result.
      *
-     * @param value {@link Completable.IInputContentUriToken} to be set when receiving the result.
+     * @param value {@link CompletableFuture<IInputContentUriToken>} to be set when receiving the
+     *              result.
      * @return {@link IInputContentUriTokenResultCallback.Stub} that can be passed as a binder IPC
      * parameter.
      */
     @AnyThread
-    public static IInputContentUriTokenResultCallback.Stub of(
-            @NonNull Completable.IInputContentUriToken value) {
-        final AtomicReference<Completable.IInputContentUriToken>
+    public static IInputContentUriTokenResultCallback.Stub ofIInputContentUriToken(
+            @NonNull CompletableFuture<IInputContentUriToken> value) {
+        final AtomicReference<CompletableFuture<IInputContentUriToken>>
                 atomicRef = new AtomicReference<>(value);
 
         return new IInputContentUriTokenResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(IInputContentUriToken result) {
-                final Completable.IInputContentUriToken value = unwrap(atomicRef);
+                final CompletableFuture<IInputContentUriToken> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onComplete(result);
+                value.complete(result);
             }
 
             @BinderThread
             @Override
             public void onError(ThrowableHolder throwableHolder) {
-                final Completable.IInputContentUriToken value = unwrap(atomicRef);
+                final CompletableFuture<IInputContentUriToken> value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
-                value.onError(throwableHolder);
+                value.completeExceptionally(new LightweightThrowable(throwableHolder));
             }
         };
     }
