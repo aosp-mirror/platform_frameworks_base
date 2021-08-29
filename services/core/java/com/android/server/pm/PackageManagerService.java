@@ -10240,7 +10240,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 userId);
         // Find any earlier preferred or last chosen entries and nuke them
         findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, 0, false, true, false, userId);
+                intent, resolvedType, flags, query, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivity(filter, match, null, activity, false, userId,
                 "Setting last chosen", false);
@@ -10256,7 +10256,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, 0, false, false, false, userId);
+                intent, resolvedType, flags, query, false, false, false, userId);
     }
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
@@ -10298,7 +10298,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
-                        flags, query, r0.priority, true, false, debug, userId, queryMayBeFiltered);
+                        flags, query, true, false, debug, userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -10475,17 +10475,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
-            List<ResolveInfo> query, int priority, boolean always,
+            List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
+                intent, resolvedType, flags, query, always, removeMatches, debug, userId,
                 UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
     }
 
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link #mLock}</b> */
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
-            List<ResolveInfo> query, int priority, boolean always,
+            List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
@@ -23468,7 +23468,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
-                intent, null, 0, resolveInfos, 0, true, false, false, userId);
+                intent, null, 0, resolveInfos, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
