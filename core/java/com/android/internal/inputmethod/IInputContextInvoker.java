@@ -23,16 +23,19 @@ import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.view.IInputContext;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A stateless wrapper of {@link com.android.internal.view.IInputContext} to encapsulate boilerplate
- * code around {@link Completable} and {@link RemoteException}.
+ * code around {@link CompletableFuture} and {@link RemoteException}.
  */
 public final class IInputContextInvoker {
 
@@ -60,17 +63,17 @@ public final class IInputContextInvoker {
      *
      * @param length {@code length} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
-     * @return {@link Completable.CharSequence} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<CharSequence>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.CharSequence getTextAfterCursor(int length, int flags) {
-        final Completable.CharSequence value = Completable.createCharSequence();
+    public CompletableFuture<CharSequence> getTextAfterCursor(int length, int flags) {
+        final CompletableFuture<CharSequence> value = new CompletableFuture<>();
         try {
-            mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
+            mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.ofCharSequence(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -80,17 +83,18 @@ public final class IInputContextInvoker {
      *
      * @param length {@code length} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
-     * @return {@link Completable.CharSequence} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<CharSequence>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.CharSequence getTextBeforeCursor(int length, int flags) {
-        final Completable.CharSequence value = Completable.createCharSequence();
+    public CompletableFuture<CharSequence> getTextBeforeCursor(int length, int flags) {
+        final CompletableFuture<CharSequence> value = new CompletableFuture<>();
         try {
-            mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
+            mIInputContext.getTextBeforeCursor(length, flags,
+                    ResultCallbacks.ofCharSequence(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -99,17 +103,17 @@ public final class IInputContextInvoker {
      * Invokes {@link IInputContext#getSelectedText(int, ICharSequenceResultCallback)}.
      *
      * @param flags {@code flags} parameter to be passed.
-     * @return {@link Completable.CharSequence} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<CharSequence>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.CharSequence getSelectedText(int flags) {
-        final Completable.CharSequence value = Completable.createCharSequence();
+    public CompletableFuture<CharSequence> getSelectedText(int flags) {
+        final CompletableFuture<CharSequence> value = new CompletableFuture<>();
         try {
-            mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
+            mIInputContext.getSelectedText(flags, ResultCallbacks.ofCharSequence(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -121,19 +125,19 @@ public final class IInputContextInvoker {
      * @param beforeLength {@code beforeLength} parameter to be passed.
      * @param afterLength {@code afterLength} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
-     * @return {@link Completable.SurroundingText} that can be used to retrieve the invocation
-     *         result. {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<SurroundingText>} that can be used to retrieve the
+     *         invocation result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.SurroundingText getSurroundingText(int beforeLength, int afterLength,
+    public CompletableFuture<SurroundingText> getSurroundingText(int beforeLength, int afterLength,
             int flags) {
-        final Completable.SurroundingText value = Completable.createSurroundingText();
+        final CompletableFuture<SurroundingText> value = new CompletableFuture<>();
         try {
             mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
-                    ResultCallbacks.of(value));
+                    ResultCallbacks.ofSurroundingText(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -142,17 +146,17 @@ public final class IInputContextInvoker {
      * Invokes {@link IInputContext#getCursorCapsMode(int, IIntResultCallback)}.
      *
      * @param reqModes {@code reqModes} parameter to be passed.
-     * @return {@link Completable.Int} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<Integer>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.Int getCursorCapsMode(int reqModes) {
-        final Completable.Int value = Completable.createInt();
+    public CompletableFuture<Integer> getCursorCapsMode(int reqModes) {
+        final CompletableFuture<Integer> value = new CompletableFuture<>();
         try {
-            mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
+            mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.ofInteger(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -163,17 +167,18 @@ public final class IInputContextInvoker {
      *
      * @param request {@code request} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
-     * @return {@link Completable.ExtractedText} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<ExtractedText>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
-        final Completable.ExtractedText value = Completable.createExtractedText();
+    public CompletableFuture<ExtractedText> getExtractedText(ExtractedTextRequest request,
+            int flags) {
+        final CompletableFuture<ExtractedText> value = new CompletableFuture<>();
         try {
-            mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
+            mIInputContext.getExtractedText(request, flags, ResultCallbacks.ofExtractedText(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -474,17 +479,17 @@ public final class IInputContextInvoker {
      * Invokes {@link IInputContext#requestCursorUpdates(int, IIntResultCallback)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
-     * @return {@link Completable.Boolean} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<Boolean>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.Boolean requestCursorUpdates(int cursorUpdateMode) {
-        final Completable.Boolean value = Completable.createBoolean();
+    public CompletableFuture<Boolean> requestCursorUpdates(int cursorUpdateMode) {
+        final CompletableFuture<Boolean> value = new CompletableFuture<>();
         try {
-            mIInputContext.requestCursorUpdates(cursorUpdateMode, ResultCallbacks.of(value));
+            mIInputContext.requestCursorUpdates(cursorUpdateMode, ResultCallbacks.ofBoolean(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
@@ -496,18 +501,19 @@ public final class IInputContextInvoker {
      * @param inputContentInfo {@code inputContentInfo} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
      * @param opts {@code opts} parameter to be passed.
-     * @return {@link Completable.Boolean} that can be used to retrieve the invocation result.
-     *         {@link RemoteException} will be treated as an error.
+     * @return {@link CompletableFuture<Boolean>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public Completable.Boolean commitContent(InputContentInfo inputContentInfo, int flags,
+    public CompletableFuture<Boolean> commitContent(InputContentInfo inputContentInfo, int flags,
             Bundle opts) {
-        final Completable.Boolean value = Completable.createBoolean();
+        final CompletableFuture<Boolean> value = new CompletableFuture<>();
         try {
-            mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
+            mIInputContext.commitContent(inputContentInfo, flags, opts,
+                    ResultCallbacks.ofBoolean(value));
         } catch (RemoteException e) {
-            value.onError(ThrowableHolder.of(e));
+            value.completeExceptionally(e);
         }
         return value;
     }
