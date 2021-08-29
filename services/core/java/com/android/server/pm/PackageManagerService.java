@@ -2921,7 +2921,24 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             allHomeCandidates.addAll(resolveInfos);
 
-            final String packageName = mDefaultAppProvider.getDefaultHome(userId);
+            String packageName = mDefaultAppProvider.getDefaultHome(userId);
+            if (packageName == null) {
+                // Role changes are not and cannot be atomic because its implementation lives inside
+                // a system app, so when the home role changes, there is a window when the previous
+                // role holder is removed and the new role holder is granted the preferred activity,
+                // but hasn't become the role holder yet. However, this case may be easily hit
+                // because the preferred activity change triggers a broadcast and receivers may try
+                // to get the default home activity there. So we need to fix it for this time
+                // window, and an easy workaround is to fallback to the current preferred activity.
+                final int appId = UserHandle.getAppId(Binder.getCallingUid());
+                final boolean filtered = appId >= Process.FIRST_APPLICATION_UID;
+                FindPreferredActivityBodyResult result = findPreferredActivityInternal(
+                        intent, null, 0, resolveInfos, true, false, false, userId, filtered);
+                ResolveInfo preferredResolveInfo =  result.mPreferredResolveInfo;
+                if (preferredResolveInfo != null && preferredResolveInfo.activityInfo != null) {
+                    packageName = preferredResolveInfo.activityInfo.packageName;
+                }
+            }
             if (packageName == null) {
                 return null;
             }
