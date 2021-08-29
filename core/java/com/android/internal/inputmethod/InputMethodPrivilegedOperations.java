@@ -28,9 +28,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A utility class to take care of boilerplate code around IPCs.
@@ -143,7 +143,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String,
-     * IInputContentUriTokenResultCallback)}.
+     * AndroidFuture)}.
      *
      * @param contentUri Content URI to which a temporary read permission should be granted
      * @param packageName Indicates what package needs to have a temporary read permission
@@ -157,10 +157,9 @@ public final class InputMethodPrivilegedOperations {
             return null;
         }
         try {
-            final CompletableFuture<IInputContentUriToken> value = new CompletableFuture<>();
-            ops.createInputContentUriToken(contentUri, packageName,
-                    ResultCallbacks.ofIInputContentUriToken(value));
-            return CompletableFutureUtil.getResult(value);
+            final AndroidFuture<IBinder> future = new AndroidFuture<>();
+            ops.createInputContentUriToken(contentUri, packageName, future);
+            return IInputContentUriToken.Stub.asInterface(CompletableFutureUtil.getResult(future));
         } catch (RemoteException e) {
             // For historical reasons, this error was silently ignored.
             // Note that the caller already logs error so we do not need additional Log.e() here.
@@ -207,7 +206,7 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String, IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String, AndroidFuture)}.
      *
      * @param id IME ID of the IME to switch to
      * @see android.view.inputmethod.InputMethodInfo#getId()
@@ -219,9 +218,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final CompletableFuture<Void> value = new CompletableFuture<>();
-            ops.setInputMethod(id, ResultCallbacks.ofVoid(value));
-            CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Void> future = new AndroidFuture<>();
+            ops.setInputMethod(id, future);
+            CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -229,7 +228,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#setInputMethodAndSubtype(String,
-     * InputMethodSubtype, IVoidResultCallback)}
+     * InputMethodSubtype, AndroidFuture)}
      *
      * @param id IME ID of the IME to switch to
      * @param subtype {@link InputMethodSubtype} to switch to
@@ -242,9 +241,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final CompletableFuture<Void> value = new CompletableFuture<>();
-            ops.setInputMethodAndSubtype(id, subtype, ResultCallbacks.ofVoid(value));
-            CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Void> future = new AndroidFuture<>();
+            ops.setInputMethodAndSubtype(id, subtype, future);
+            CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -264,16 +263,16 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final CompletableFuture<Void> value = new CompletableFuture<>();
-            ops.hideMySoftInput(flags, ResultCallbacks.ofVoid(value));
-            CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Void> future = new AndroidFuture<>();
+            ops.hideMySoftInput(flags, future);
+            CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int, IVoidResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int, AndroidFuture)}
      *
      * @param flags additional operating flags
      * @see android.view.inputmethod.InputMethodManager#SHOW_IMPLICIT
@@ -286,17 +285,16 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final CompletableFuture<Void> value = new CompletableFuture<>();
-            ops.showMySoftInput(flags, ResultCallbacks.ofVoid(value));
-            CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Void> future = new AndroidFuture<>();
+            ops.showMySoftInput(flags, future);
+            CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod(
-     * IBooleanResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod(AndroidFuture)}
      *
      * @return {@code true} if handled
      */
@@ -307,8 +305,8 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final CompletableFuture<Boolean> value = new CompletableFuture<>();
-            ops.switchToPreviousInputMethod(ResultCallbacks.ofBoolean(value));
+            final AndroidFuture<Boolean> value = new AndroidFuture<>();
+            ops.switchToPreviousInputMethod(value);
             return CompletableFutureUtil.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -330,9 +328,9 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final CompletableFuture<Boolean> value = new CompletableFuture<>();
-            ops.switchToNextInputMethod(onlyCurrentIme, ResultCallbacks.ofBoolean(value));
-            return CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            ops.switchToNextInputMethod(onlyCurrentIme, future);
+            return CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -340,7 +338,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod(
-     * IBooleanResultCallback)}
+     * AndroidFuture)}
      *
      * @return {@code true} if the IEM should offer a way to globally switch IME
      */
@@ -351,9 +349,9 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final CompletableFuture<Boolean> value = new CompletableFuture<>();
-            ops.shouldOfferSwitchingToNextInputMethod(ResultCallbacks.ofBoolean(value));
-            return CompletableFutureUtil.getResult(value);
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            ops.shouldOfferSwitchingToNextInputMethod(future);
+            return CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
