@@ -23,11 +23,7 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * Interface from an input method to the application, allowing it to perform
@@ -35,14 +31,14 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
  * {@hide}
  */
  oneway interface IInputContext {
-    void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback);
+    void getTextBeforeCursor(int length, int flags, in AndroidFuture future /* T=CharSequence */);
 
-    void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback);
+    void getTextAfterCursor(int length, int flags, in AndroidFuture future /* T=CharSequence */);
 
-    void getCursorCapsMode(int reqModes, IIntResultCallback callback);
+    void getCursorCapsMode(int reqModes, in AndroidFuture future /* T=Integer */);
 
     void getExtractedText(in ExtractedTextRequest request, int flags,
-            IExtractedTextResultCallback callback);
+            in AndroidFuture future /* T=ExtractedText */);
 
     void deleteSurroundingText(int beforeLength, int afterLength);
     void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
@@ -50,7 +46,7 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
     void setComposingText(CharSequence text, int newCursorPosition);
 
     void finishComposingText();
-    
+
     void commitText(CharSequence text, int newCursorPosition);
 
     void commitCompletion(in CompletionInfo completion);
@@ -58,34 +54,34 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
     void commitCorrection(in CorrectionInfo correction);
 
     void setSelection(int start, int end);
-    
+
     void performEditorAction(int actionCode);
-    
+
     void performContextMenuAction(int id);
-    
+
     void beginBatchEdit();
-    
+
     void endBatchEdit();
 
     void sendKeyEvent(in KeyEvent event);
-    
+
     void clearMetaKeyStates(int states);
-    
+
     void performSpellCheck();
 
     void performPrivateCommand(String action, in Bundle data);
 
     void setComposingRegion(int start, int end);
 
-    void getSelectedText(int flags, ICharSequenceResultCallback callback);
+    void getSelectedText(int flags, in AndroidFuture future /* T=CharSequence */);
 
-    void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback);
+    void requestCursorUpdates(int cursorUpdateMode, in AndroidFuture future /* T=Boolean */);
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
-            IBooleanResultCallback callback);
+            in AndroidFuture future /* T=Boolean */);
 
     void getSurroundingText(int beforeLength, int afterLength, int flags,
-            ISurroundingTextResultCallback callback);
+            in AndroidFuture future /* T=SurroundingText */);
 
     void setImeConsumesInput(boolean imeConsumesInput);
 }
