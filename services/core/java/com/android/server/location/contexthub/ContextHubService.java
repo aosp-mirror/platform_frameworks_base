@@ -636,8 +636,10 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleClientMessageCallback(
             int contextHubId, ContextHubMsg message, List<String> nanoappPermissions,
             List<String> messagePermissions) {
+        NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
         mClientManager.onMessageFromNanoApp(
-                contextHubId, message, nanoappPermissions, messagePermissions);
+                contextHubId, message.hostEndPoint, clientMessage, nanoappPermissions,
+                messagePermissions);
     }
 
     /**

@@ -17,10 +17,13 @@ package com.android.server.location.contexthub;
 
 import android.annotation.Nullable;
 import android.hardware.contexthub.V1_0.ContextHub;
+import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_1.Setting;
 import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.contexthub.V1_2.IContexthubCallback;
 import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubTransaction;
+import android.hardware.location.NanoAppMessage;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
@@ -148,21 +151,55 @@ public abstract class IContextHubWrapper {
     public abstract void onAirplaneModeSettingChanged(boolean enabled);
 
     /**
-     * @return True if this version of the Contexthub HAL supports microphone
-     * disable setting notifications.
+     * @return True if this version of the Contexthub HAL supports microphone disable setting
+     * notifications.
      */
     public abstract boolean supportsMicrophoneDisableSettingNotifications();
 
     /**
-     * Notifies the Contexthub implementation of a microphone disable setting
-     * change.
+     * Notifies the Contexthub implementation of a microphone disable setting change.
      */
     public abstract void onMicrophoneDisableSettingChanged(boolean enabled);
 
-    private static class ContextHubWrapperV1_0 extends IContextHubWrapper {
+    /**
+     * Sends a message to the Context Hub.
+     *
+     * @param hostEndpointId The host endpoint ID of the sender.
+     * @param contextHubId   The ID of the Context Hub to send the message to.
+     * @param message        The message to send.
+     * @return the result of the message sending.
+     */
+    @ContextHubTransaction.Result
+    public abstract int sendMessageToContextHub(
+            short hostEndpointId, int contextHubId, NanoAppMessage message)
+            throws RemoteException;
+
+    /**
+     * An abstract call that defines methods common to all HIDL IContextHubWrappers.
+     */
+    private abstract static class ContextHubWrapperHidl extends IContextHubWrapper {
+        private android.hardware.contexthub.V1_0.IContexthub mHub;
+
+        ContextHubWrapperHidl(android.hardware.contexthub.V1_0.IContexthub hub) {
+            mHub = hub;
+        }
+
+        @ContextHubTransaction.Result
+        public int sendMessageToContextHub(
+                short hostEndpointId, int contextHubId, NanoAppMessage message)
+                throws RemoteException {
+            ContextHubMsg messageToNanoApp =
+                    ContextHubServiceUtil.createHidlContextHubMessage(hostEndpointId, message);
+            return ContextHubServiceUtil.toTransactionResult(
+                    mHub.sendMessageToHub(contextHubId, messageToNanoApp));
+        }
+    }
+
+    private static class ContextHubWrapperV1_0 extends ContextHubWrapperHidl {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
 
         ContextHubWrapperV1_0(android.hardware.contexthub.V1_0.IContexthub hub) {
+            super(hub);
             mHub = hub;
         }
 
@@ -212,10 +249,11 @@ public abstract class IContextHubWrapper {
         }
     }
 
-    private static class ContextHubWrapperV1_1 extends IContextHubWrapper {
+    private static class ContextHubWrapperV1_1 extends ContextHubWrapperHidl {
         private android.hardware.contexthub.V1_1.IContexthub mHub;
 
         ContextHubWrapperV1_1(android.hardware.contexthub.V1_1.IContexthub hub) {
+            super(hub);
             mHub = hub;
         }
 
@@ -271,7 +309,7 @@ public abstract class IContextHubWrapper {
         }
     }
 
-    private static class ContextHubWrapperV1_2 extends IContextHubWrapper
+    private static class ContextHubWrapperV1_2 extends ContextHubWrapperHidl
             implements android.hardware.contexthub.V1_2.IContexthub.getHubs_1_2Callback {
         private final android.hardware.contexthub.V1_2.IContexthub mHub;
 
@@ -279,6 +317,7 @@ public abstract class IContextHubWrapper {
                 new Pair<>(Collections.emptyList(), Collections.emptyList());
 
         ContextHubWrapperV1_2(android.hardware.contexthub.V1_2.IContexthub hub) {
+            super(hub);
             mHub = hub;
         }
 
