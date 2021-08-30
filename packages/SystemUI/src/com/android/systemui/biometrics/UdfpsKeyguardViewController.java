@@ -168,7 +168,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
         pw.println("mStatusBarExpansion=" + mStatusBarExpansion);
-        pw.println("mAlpha=" + mView.getAlpha());
+        pw.println("unpausedAlpha=" + mView.getUnpausedAlpha());
         pw.println("mUdfpsRequested=" + mUdfpsRequested);
         pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
         pw.println("mLaunchTransitionFadingAway=" + mLaunchTransitionFadingAway);
@@ -183,13 +183,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return false;
         }
 
+        boolean udfpsAffordanceWasNotShowing = shouldPauseAuth();
         mShowingUdfpsBouncer = show;
         if (mShowingUdfpsBouncer) {
             mLastUdfpsBouncerShowTime = mSystemClock.uptimeMillis();
         }
-        updatePauseAuth();
         if (mShowingUdfpsBouncer) {
-            if (mStatusBarState == StatusBarState.SHADE_LOCKED) {
+            if (udfpsAffordanceWasNotShowing) {
                 mView.animateInUdfpsBouncer(null);
             }
 
@@ -202,6 +202,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         } else {
             mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
+        updateAlpha();
+        updatePauseAuth();
         return true;
     }
 
@@ -335,6 +337,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 public void requestUdfps(boolean request, int color) {
                     mUdfpsRequested = request;
                     mView.requestUdfps(request, color);
+                    updateAlpha();
                     updatePauseAuth();
                 }
 
