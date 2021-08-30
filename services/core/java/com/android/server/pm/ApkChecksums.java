@@ -64,7 +64,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -724,16 +723,20 @@ public class ApkChecksums {
         }
     }
 
+    static final int MIN_BUFFER_SIZE = 4 * 1024;
+    static final int MAX_BUFFER_SIZE = 128 * 1024;
+
     private static byte[] getApkChecksum(File file, int type) {
-        try (FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
-            byte[] dataBytes = new byte[512 * 1024];
+        final int bufferSize = (int) Math.max(MIN_BUFFER_SIZE,
+                Math.min(MAX_BUFFER_SIZE, file.length()));
+        try (FileInputStream fis = new FileInputStream(file)) {
+            final byte[] buffer = new byte[bufferSize];
             int nread = 0;
 
             final String algo = getMessageDigestAlgoForChecksumKind(type);
             MessageDigest md = MessageDigest.getInstance(algo);
-            while ((nread = bis.read(dataBytes)) != -1) {
-                md.update(dataBytes, 0, nread);
+            while ((nread = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, nread);
             }
 
             return md.digest();
