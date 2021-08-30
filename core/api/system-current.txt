@@ -5386,6 +5386,13 @@ package android.media {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
+  public class Spatializer {
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
+  }
+
 }
 
 package android.media.audiofx {
