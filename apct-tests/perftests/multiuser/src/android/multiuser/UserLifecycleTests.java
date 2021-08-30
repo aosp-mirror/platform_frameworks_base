@@ -88,6 +88,10 @@ import java.util.concurrent.TimeUnit;
 public class UserLifecycleTests {
     private static final String TAG = UserLifecycleTests.class.getSimpleName();
 
+    /** Max runtime for each test (including all runs within that test). */
+    // No point exceeding 10 minutes, since device would likely be considered non-responsive anyway.
+    private static final long TIMEOUT_MAX_TEST_TIME_MS = 9 * 60_000;
+
     private static final int TIMEOUT_IN_SECOND = 30;
     private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
@@ -144,7 +148,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests creating a new user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void createUser() {
         while (mRunner.keepRunning()) {
             Log.i(TAG, "Starting timer");
@@ -158,7 +162,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests creating and starting a new user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void createAndStartUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             Log.i(TAG, "Starting timer");
@@ -182,7 +186,7 @@ public class UserLifecycleTests {
      * Tests starting an uninitialized user.
      * Measures the time until ACTION_USER_STARTED is received.
      */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void startUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -206,7 +210,7 @@ public class UserLifecycleTests {
      * Tests starting & unlocking an uninitialized user.
      * Measures the time until unlock listener is triggered and user is unlocked.
      */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void startAndUnlockUser() {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -225,7 +229,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests switching to an uninitialized user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -245,7 +249,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests switching to a previously-started, but no-longer-running, user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_stopped() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -269,7 +273,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests switching to an already-created already-running non-owner background user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_running() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -289,7 +293,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests stopping a background user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void stopUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -314,7 +318,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests reaching LOOKED_BOOT_COMPLETE when switching to uninitialized user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void lockedBootCompleted() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -337,7 +341,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests stopping an ephemeral foreground user. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void ephemeralUserStopped() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -378,7 +382,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests creating a new profile. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileCreate() {
         assumeTrue(mHasManagedUserFeature);
 
@@ -395,7 +399,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests starting (unlocking) an uninitialized profile. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock() {
         assumeTrue(mHasManagedUserFeature);
 
@@ -415,7 +419,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests starting (unlocking) a previously-started, but no-longer-running, profile. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_stopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -440,7 +444,7 @@ public class UserLifecycleTests {
     /**
      * Tests starting (unlocking) & launching an already-installed app in an uninitialized profile.
      */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlockAndLaunchApp() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -468,7 +472,7 @@ public class UserLifecycleTests {
      * A sort of combination of {@link #managedProfileUnlockAndLaunchApp} and
      * {@link #managedProfileUnlock_stopped}}.
      */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlockAndLaunchApp_stopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -495,7 +499,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests installing a pre-existing app in an uninitialized profile. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileInstall() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -518,7 +522,7 @@ public class UserLifecycleTests {
      * Tests creating a new profile, starting (unlocking) it, installing an app,
      * and launching that app in it.
      */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileCreateUnlockInstallAndLaunchApp() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -541,7 +545,7 @@ public class UserLifecycleTests {
     }
 
     /** Tests stopping a profile. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileStopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
@@ -566,7 +570,7 @@ public class UserLifecycleTests {
 
     // TODO: This is just a POC. Do this properly and add more.
     /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_usingWhitelist() {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
@@ -592,7 +596,7 @@ public class UserLifecycleTests {
         }
     }
     /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
-    @Test
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_notUsingWhitelist() {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
