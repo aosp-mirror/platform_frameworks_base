@@ -132,8 +132,7 @@ public class KeyguardVisibilityHelper {
                         .alpha(1f)
                         .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
                         .start();
-            } else if (mUnlockedScreenOffAnimationController
-                        .isScreenOffLightRevealAnimationPlaying()) {
+            } else if (mUnlockedScreenOffAnimationController.shouldAnimateInKeyguard()) {
                 mKeyguardViewVisibilityAnimating = true;
 
                 // Ask the screen off animation controller to animate the keyguard visibility for us

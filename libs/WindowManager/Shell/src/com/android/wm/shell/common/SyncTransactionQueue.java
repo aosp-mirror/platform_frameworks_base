@@ -68,6 +68,10 @@ public final class SyncTransactionQueue {
      * Queues a sync transaction to be sent serially to WM.
      */
     public void queue(WindowContainerTransaction wct) {
+        if (wct.isEmpty()) {
+            if (DEBUG) Slog.d(TAG, "Skip queue due to transaction change is empty");
+            return;
+        }
         SyncCallback cb = new SyncCallback(wct);
         synchronized (mQueue) {
             if (DEBUG) Slog.d(TAG, "Queueing up " + wct);
@@ -83,6 +87,10 @@ public final class SyncTransactionQueue {
      */
     public void queue(LegacyTransitions.ILegacyTransition transition,
             @WindowManager.TransitionType int type, WindowContainerTransaction wct) {
+        if (wct.isEmpty()) {
+            if (DEBUG) Slog.d(TAG, "Skip queue due to transaction change is empty");
+            return;
+        }
         SyncCallback cb = new SyncCallback(transition, type, wct);
         synchronized (mQueue) {
             if (DEBUG) Slog.d(TAG, "Queueing up legacy transition " + wct);
@@ -99,6 +107,10 @@ public final class SyncTransactionQueue {
      * @return {@code true} if queued, {@code false} if not.
      */
     public boolean queueIfWaiting(WindowContainerTransaction wct) {
+        if (wct.isEmpty()) {
+            if (DEBUG) Slog.d(TAG, "Skip queueIfWaiting due to transaction change is empty");
+            return false;
+        }
         synchronized (mQueue) {
             if (mQueue.isEmpty()) {
                 if (DEBUG) Slog.d(TAG, "Nothing in queue, so skip queueing up " + wct);
