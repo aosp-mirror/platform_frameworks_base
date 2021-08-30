@@ -23,6 +23,7 @@ import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.contexthub.V1_2.IContexthubCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
+import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.os.RemoteException;
 import android.util.Log;
@@ -108,11 +109,6 @@ public abstract class IContextHubWrapper {
             int hubId, IContexthubCallback callback) throws RemoteException;
 
     /**
-     * @return A valid instance of Contexthub HAL 1.0.
-     */
-    public abstract android.hardware.contexthub.V1_0.IContexthub getHub();
-
-    /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
      */
     public abstract boolean supportsLocationSettingNotifications();
@@ -175,6 +171,48 @@ public abstract class IContextHubWrapper {
             throws RemoteException;
 
     /**
+     * Loads a nanoapp on the Context Hub.
+     *
+     * @param contextHubId  The ID of the Context Hub to load the nanoapp to.
+     * @param binary        The nanoapp binary to load.
+     * @param transactionId The transaction ID of this load.
+     * @return the result of this load transaction.
+     */
+    @ContextHubTransaction.Result
+    public abstract int loadNanoapp(int contextHubId, NanoAppBinary binary,
+            int transactionId) throws RemoteException;
+
+    /**
+     * Unloads a nanoapp on the Context Hub. Semantics are similar to loadNanoapp().
+     */
+    @ContextHubTransaction.Result
+    public abstract int unloadNanoapp(int contextHubId, long nanoappId,
+            int transactionId) throws RemoteException;
+
+    /**
+     * Enables a nanoapp on the Context Hub. Semantics are similar to loadNanoapp().
+     */
+    @ContextHubTransaction.Result
+    public abstract int enableNanoapp(int contextHubId, long nanoappId,
+            int transactionId) throws RemoteException;
+
+    /**
+     * Disables a nanoapp on the Context Hub. Semantics are similar to loadNanoapp().
+     */
+    @ContextHubTransaction.Result
+    public abstract int disableNanoapp(int contextHubId, long nanoappId,
+            int transactionId) throws RemoteException;
+
+    /**
+     * Queries a list of nanoapp from the Context hub.
+     *
+     * @param contextHubId The ID of the Context Hub to query.
+     * @return the result of this query transaction.
+     */
+    @ContextHubTransaction.Result
+    public abstract int queryNanoapps(int contextHubId) throws RemoteException;
+
+    /**
      * An abstract call that defines methods common to all HIDL IContextHubWrappers.
      */
     private abstract static class ContextHubWrapperHidl extends IContextHubWrapper {
@@ -192,6 +230,42 @@ public abstract class IContextHubWrapper {
                     ContextHubServiceUtil.createHidlContextHubMessage(hostEndpointId, message);
             return ContextHubServiceUtil.toTransactionResult(
                     mHub.sendMessageToHub(contextHubId, messageToNanoApp));
+        }
+
+        @ContextHubTransaction.Result
+        public int loadNanoapp(int contextHubId, NanoAppBinary binary,
+                int transactionId) throws RemoteException {
+            android.hardware.contexthub.V1_0.NanoAppBinary hidlNanoAppBinary =
+                    ContextHubServiceUtil.createHidlNanoAppBinary(binary);
+            return ContextHubServiceUtil.toTransactionResult(mHub.loadNanoApp(
+                    contextHubId, hidlNanoAppBinary, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int unloadNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return ContextHubServiceUtil.toTransactionResult(mHub.unloadNanoApp(
+                    contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int enableNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return ContextHubServiceUtil.toTransactionResult(mHub.enableNanoApp(
+                    contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int disableNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return ContextHubServiceUtil.toTransactionResult(mHub.disableNanoApp(
+                    contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int queryNanoapps(int contextHubId) throws RemoteException {
+            return ContextHubServiceUtil.toTransactionResult(
+                    mHub.queryApps(contextHubId));
         }
     }
 
@@ -214,10 +288,6 @@ public abstract class IContextHubWrapper {
         public void registerCallback(
                 int hubId, IContexthubCallback callback) throws RemoteException {
             mHub.registerCallback(hubId, callback);
-        }
-
-        public android.hardware.contexthub.V1_0.IContexthub getHub() {
-            return mHub;
         }
 
         public boolean supportsLocationSettingNotifications() {
@@ -268,10 +338,6 @@ public abstract class IContextHubWrapper {
         public void registerCallback(
                 int hubId, IContexthubCallback callback) throws RemoteException {
             mHub.registerCallback(hubId, callback);
-        }
-
-        public android.hardware.contexthub.V1_0.IContexthub getHub() {
-            return mHub;
         }
 
         public boolean supportsLocationSettingNotifications() {
@@ -338,10 +404,6 @@ public abstract class IContextHubWrapper {
         public void registerCallback(
                 int hubId, IContexthubCallback callback) throws RemoteException {
             mHub.registerCallback_1_2(hubId, callback);
-        }
-
-        public android.hardware.contexthub.V1_0.IContexthub getHub() {
-            return mHub;
         }
 
         public boolean supportsLocationSettingNotifications() {
