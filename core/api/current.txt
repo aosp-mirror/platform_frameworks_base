@@ -20232,9 +20232,9 @@ package android.media {
     field public static final int USAGE_GAME = 14; // 0xe
     field public static final int USAGE_MEDIA = 1; // 0x1
     field public static final int USAGE_NOTIFICATION = 5; // 0x5
-    field public static final int USAGE_NOTIFICATION_COMMUNICATION_DELAYED = 9; // 0x9
-    field public static final int USAGE_NOTIFICATION_COMMUNICATION_INSTANT = 8; // 0x8
-    field public static final int USAGE_NOTIFICATION_COMMUNICATION_REQUEST = 7; // 0x7
+    field @Deprecated public static final int USAGE_NOTIFICATION_COMMUNICATION_DELAYED = 9; // 0x9
+    field @Deprecated public static final int USAGE_NOTIFICATION_COMMUNICATION_INSTANT = 8; // 0x8
+    field @Deprecated public static final int USAGE_NOTIFICATION_COMMUNICATION_REQUEST = 7; // 0x7
     field public static final int USAGE_NOTIFICATION_EVENT = 10; // 0xa
     field public static final int USAGE_NOTIFICATION_RINGTONE = 6; // 0x6
     field public static final int USAGE_UNKNOWN = 0; // 0x0
