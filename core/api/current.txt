@@ -9447,6 +9447,7 @@ package android.bluetooth {
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     field public static final int A2DP = 2; // 0x2
+    field public static final int CSIP_SET_COORDINATOR = 25; // 0x19
     field public static final String EXTRA_PREVIOUS_STATE = "android.bluetooth.profile.extra.PREVIOUS_STATE";
     field public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
     field public static final int GATT = 7; // 0x7
