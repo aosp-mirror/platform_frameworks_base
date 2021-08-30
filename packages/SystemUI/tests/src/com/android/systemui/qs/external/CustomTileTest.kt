@@ -270,4 +270,20 @@ class CustomTileTest : SysuiTestCase() {
         verify(customTileStatePersister)
                 .persistState(TileServiceKey(componentName, customTile.user), t)
     }
+
+    @Test
+    fun testAvailableBeforeInitialization() {
+        `when`(packageManager.getApplicationInfo(anyString(), anyInt()))
+                .thenThrow(PackageManager.NameNotFoundException())
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        assertTrue(tile.isAvailable)
+    }
+
+    @Test
+    fun testNotAvailableAfterInitializationWithoutIcon() {
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.initialize()
+        testableLooper.processAllMessages()
+        assertFalse(tile.isAvailable)
+    }
 }
