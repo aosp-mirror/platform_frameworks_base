@@ -972,7 +972,7 @@
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Вобласць узора."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"Вобласць слайда."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"ABC"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="8528261816395508841">"Alt"</string>
     <string name="granularity_label_character" msgid="8903387663153706317">"Знак"</string>
     <string name="granularity_label_word" msgid="3686589158760620518">"слова"</string>
