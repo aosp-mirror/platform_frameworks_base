@@ -9330,6 +9330,31 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns {@code true} if the source package is able to query for details about the
+     * target package. Applications that share details about other applications should
+     * use this API to determine if those details should be withheld from callers that
+     * do not otherwise have visibility of them.
+     * <p>
+     * Note: The caller must be able to query for details about the source and target
+     * package. A {@link NameNotFoundException} is thrown if it isn't.
+     *
+     * @param sourcePackageName The source package that would receive details about the
+     *                          target package.
+     * @param targetPackageName The target package whose details would be shared with the
+     *                          source package.
+     * @return {@code true} if the source package is able to query for details about the
+     * target package.
+     * @throws NameNotFoundException if either a given package can not be found on the
+     * system, or if the caller is not able to query for details about the source or
+     * target package.
+     */
+    public boolean mayPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String targetPackageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "mayPackageQuery not implemented in subclass");
+    }
+
+    /**
      * Grants implicit visibility of the package that provides an authority to a querying UID.
      *
      * @throws SecurityException when called by a package other than the contacts provider
