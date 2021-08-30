@@ -1194,6 +1194,7 @@ package android {
     field public static final int requiredFeature = 16844116; // 0x1010554
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiredNotFeature = 16844117; // 0x1010555
+    field public static final int requiredSplitTypes;
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeClip = 16843983; // 0x10104cf
@@ -1329,6 +1330,7 @@ package android {
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
+    field public static final int splitTypes;
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3

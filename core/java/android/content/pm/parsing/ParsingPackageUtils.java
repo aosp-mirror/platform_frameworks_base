@@ -234,7 +234,7 @@ public class ParsingPackageUtils {
      * For those names would be used as a part of the file name. Limits size to 223 and reserves 32
      * for the OS.
      */
-    private static final int MAX_FILE_NAME_SIZE = 223;
+    static final int MAX_FILE_NAME_SIZE = 223;
 
     /**
      * @see #parseDefault(ParseInput, File, int, List, boolean)
