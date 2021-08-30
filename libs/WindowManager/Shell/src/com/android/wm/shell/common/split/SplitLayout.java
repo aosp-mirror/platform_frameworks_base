@@ -50,6 +50,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
@@ -236,6 +237,8 @@ public final class SplitLayout {
             mBounds1.bottom = position;
             mBounds2.top = mBounds1.bottom + mDividerSize;
         }
+        DockedDividerUtils.sanitizeStackBounds(mBounds1, true /** topLeft */);
+        DockedDividerUtils.sanitizeStackBounds(mBounds2, false /** topLeft */);
         mDismissingParallaxPolicy.applyDividerPosition(position, isLandscape);
     }
 
