@@ -26,6 +26,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -239,7 +240,7 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
-    void setExiting() {
+    void setExiting(boolean animateExit) {
         if (isEmpty()) {
             super.removeImmediately();
             return;
@@ -254,11 +255,12 @@ class WindowToken extends WindowContainer<WindowState> {
 
         final int count = mChildren.size();
         boolean changed = false;
-        final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN);
+        final boolean delayed = isAnimating(TRANSITION | PARENTS)
+                || (isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION) && animateExit);
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
-            changed |= win.onSetAppExiting();
+            changed |= win.onSetAppExiting(animateExit);
         }
 
         final ActivityRecord app = asActivityRecord();
@@ -360,7 +362,7 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     void removeImmediately() {
         if (mDisplayContent != null) {
-            mDisplayContent.removeWindowToken(token);
+            mDisplayContent.removeWindowToken(token, true /* animateExit */);
         }
         // Needs to occur after the token is removed from the display above to avoid attempt at
         // duplicate removal of this window container from it's parent.
