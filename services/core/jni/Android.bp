@@ -178,7 +178,7 @@ cc_defaults {
         "android.frameworks.stats-V1-ndk",
         "android.system.suspend.control-V1-cpp",
         "android.system.suspend.control.internal-cpp",
-        "android.system.suspend@1.0",
+        "android.system.suspend-V1-ndk",
         "service.incremental",
     ],
 
