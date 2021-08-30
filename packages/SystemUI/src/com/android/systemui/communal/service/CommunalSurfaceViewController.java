@@ -17,14 +17,21 @@
 package com.android.systemui.communal.service;
 
 import android.annotation.IntDef;
+import android.content.res.Resources;
+import android.graphics.Region;
 import android.util.Log;
+import android.view.IWindow;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.R;
 import com.android.systemui.communal.CommunalStateController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.util.Utils;
 import com.android.systemui.util.ViewController;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,7 +47,10 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final Executor mMainExecutor;
     private final CommunalStateController mCommunalStateController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final CommunalSourceImpl mSource;
+    private final Resources mResources;
+    private final Region mSurfaceViewTouchableRegion;
 
     @IntDef({STATE_SURFACE_CREATED, STATE_SURFACE_VIEW_ATTACHED})
     private @interface State {}
@@ -73,18 +83,51 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
         }
     };
 
-    protected CommunalSurfaceViewController(SurfaceView view, Executor executor,
-            CommunalStateController communalStateController, CommunalSourceImpl source) {
+    private final View.OnLayoutChangeListener mOnLayoutChangeListener =
+            new View.OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+                int oldTop, int oldRight, int oldBottom) {
+            // The margin for the status bar and keyguard indication are excluded from the tap
+            // exclusion to preserve vertical swipes in this region.
+            final int topMargin = mResources.getDimensionPixelSize(
+                    Utils.shouldUseSplitNotificationShade(mResources)
+                            ? R.dimen.split_shade_header_height
+                            : R.dimen.notification_panel_margin_top);
+            final int bottomMargin = mResources.getDimensionPixelSize(
+                    R.dimen.keyguard_indication_bottom_padding);
+
+            mSurfaceViewTouchableRegion.set(left, top + topMargin, right, bottom - bottomMargin);
+            updateTouchExclusion();
+        }
+    };
+
+    private CommunalStateController.Callback mCommunalStateCallback =
+            new CommunalStateController.Callback() {
+        @Override
+        public void onCommunalViewOccludedChanged() {
+            updateTouchExclusion();
+        }
+    };
+
+    protected CommunalSurfaceViewController(SurfaceView view, Resources resources,
+            Executor executor, CommunalStateController communalStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
+            CommunalSourceImpl source) {
         super(view);
         mCommunalStateController = communalStateController;
         mSource = source;
+        mResources = resources;
         mMainExecutor = executor;
+        mNotificationShadeWindowController = notificationShadeWindowController;
+        mSurfaceViewTouchableRegion = new Region();
     }
 
     @Override
     public void init() {
         super.init();
         mView.getHolder().addCallback(mSurfaceHolderCallback);
+        mView.addOnLayoutChangeListener(mOnLayoutChangeListener);
     }
 
     private void setState(@State int state, boolean enabled) {
@@ -106,6 +149,24 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
         mCurrentState = newState;
 
         showSurface(newState == STATE_CAN_SHOW_SURFACE);
+
+        updateTouchExclusion();
+    }
+
+    private void updateTouchExclusion() {
+        final IWindow window = IWindow.Stub.asInterface(mView.getWindowToken());
+        final boolean excludeTouches = (mCurrentState & STATE_SURFACE_VIEW_ATTACHED) != 0
+                && !mCommunalStateController.getCommunalViewOccluded();
+        if (excludeTouches) {
+            mNotificationShadeWindowController.setTouchExclusionRegion(mSurfaceViewTouchableRegion);
+        } else {
+            final Region emptyRegion = Region.obtain();
+            mNotificationShadeWindowController.setTouchExclusionRegion(emptyRegion);
+            emptyRegion.recycle();
+        }
+        // TODO(b/197036940): This is no longer necessary once the surface view is not on top of the
+        // z-order.
+        mView.setZOrderOnTop(excludeTouches);
     }
 
     private void showSurface(boolean show) {
@@ -163,10 +224,12 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
     @Override
     protected void onViewAttached() {
         setState(STATE_SURFACE_VIEW_ATTACHED, true);
+        mCommunalStateController.addCallback(mCommunalStateCallback);
     }
 
     @Override
     protected void onViewDetached() {
+        mCommunalStateController.removeCallback(mCommunalStateCallback);
         setState(STATE_SURFACE_VIEW_ATTACHED, false);
     }
 }

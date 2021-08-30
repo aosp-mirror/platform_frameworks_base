@@ -17,6 +17,7 @@
 package com.android.systemui.communal.service;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -30,6 +31,7 @@ import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.communal.ICommunalSource;
 import com.android.systemui.shared.communal.ICommunalSurfaceCallback;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 
 import com.google.android.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -47,23 +49,32 @@ import javax.inject.Inject;
  */
 public class CommunalSourceImpl implements CommunalSource {
     private static final String TAG = "CommunalSourceImpl";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final ICommunalSource mSourceProxy;
+    private final Resources mResources;
     private final Executor mMainExecutor;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final CommunalStateController mCommunalStateController;
 
     static class Factory {
         private final Executor mExecutor;
+        private final Resources mResources;
         private final CommunalStateController mCommunalStateController;
+        private final NotificationShadeWindowController mNotificationShadeWindowController;
 
         @Inject
-        Factory(@Main Executor executor, CommunalStateController communalStateController) {
+        Factory(@Main Executor executor, @Main Resources resources,
+                NotificationShadeWindowController notificationShadeWindowController,
+                CommunalStateController communalStateController) {
             mExecutor = executor;
+            mResources = resources;
+            mNotificationShadeWindowController = notificationShadeWindowController;
             mCommunalStateController = communalStateController;
         }
 
         public CommunalSource create(ICommunalSource source) {
-            return new CommunalSourceImpl(mExecutor, mCommunalStateController, source);
+            return new CommunalSourceImpl(mExecutor, mResources, mCommunalStateController,
+                    mNotificationShadeWindowController, source);
         }
     }
 
@@ -75,10 +86,14 @@ public class CommunalSourceImpl implements CommunalSource {
     // A list of {@link Callback} that have registered to receive updates.
     private final ArrayList<WeakReference<Callback>> mCallbacks = Lists.newArrayList();
 
-    public CommunalSourceImpl(Executor mainExecutor,
-            CommunalStateController communalStateController, ICommunalSource sourceProxy) {
+    public CommunalSourceImpl(Executor mainExecutor, Resources resources,
+            CommunalStateController communalStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
+            ICommunalSource sourceProxy) {
         mMainExecutor = mainExecutor;
         mCommunalStateController = communalStateController;
+        mNotificationShadeWindowController = notificationShadeWindowController;
+        mResources = resources;
         mSourceProxy = sourceProxy;
 
         try {
@@ -120,8 +135,9 @@ public class CommunalSourceImpl implements CommunalSource {
                 CallbackToFutureAdapter.getFuture(completer -> {
                     final SurfaceView view = new SurfaceView(context);
                     completer.set(new CommunalViewResult(view,
-                            new CommunalSurfaceViewController(view, mMainExecutor,
-                                    mCommunalStateController, this)));
+                            new CommunalSurfaceViewController(view, mResources, mMainExecutor,
+                                    mCommunalStateController, mNotificationShadeWindowController,
+                                    this)));
                     return "CommunalSourceImpl::requestCommunalSurface::getCommunalSurface";
                 });
 
