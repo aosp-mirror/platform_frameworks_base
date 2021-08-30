@@ -262,7 +262,7 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Returns whehther the playback is active (i.e. playing something)
+     * Returns whether the playback is active (i.e. playing something)
      *
      * @return {@code true} if the playback active, {@code false} otherwise.
      */
