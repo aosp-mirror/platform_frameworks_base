@@ -92,7 +92,6 @@ enum {
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
-constexpr int kCurrentDevelopmentVersion = 10000;
 constexpr int kNeverForLocation = 0x00010000;
 
 /** Retrieves the attribute of the element with the specified attribute resource id. */
@@ -331,7 +330,7 @@ class ManifestExtractor {
     ConfigDescription config;
     config.orientation = android::ResTable_config::ORIENTATION_PORT;
     config.density = android::ResTable_config::DENSITY_MEDIUM;
-    config.sdkVersion = kCurrentDevelopmentVersion; // Very high.
+    config.sdkVersion = SDK_CUR_DEVELOPMENT;  // Very high.
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
@@ -621,7 +620,7 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     // Detect the target sdk of the element
     if  ((min_sdk_name && *min_sdk_name == "Donut")
         || (target_sdk_name && *target_sdk_name == "Donut")) {
-      extractor()->RaiseTargetSdk(4);
+      extractor()->RaiseTargetSdk(SDK_DONUT);
     }
     if (min_sdk) {
       extractor()->RaiseTargetSdk(*min_sdk);
@@ -629,7 +628,7 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     if (target_sdk) {
       extractor()->RaiseTargetSdk(*target_sdk);
     } else if (target_sdk_name) {
-      extractor()->RaiseTargetSdk(kCurrentDevelopmentVersion);
+      extractor()->RaiseTargetSdk(SDK_CUR_DEVELOPMENT);
     }
   }
 
@@ -746,21 +745,23 @@ class SupportsScreen : public ManifestExtractor::Element {
     // the screen size support was introduced, so all default to
     // enabled.
     if (small_screen_temp  > 0) {
-      small_screen_temp  = target_sdk >= 4 ? -1 : 0;
+      small_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
     }
     if (normal_screen_temp  > 0) {
       normal_screen_temp  = -1;
     }
     if (large_screen_temp  > 0) {
-      large_screen_temp  = target_sdk >= 4 ? -1 : 0;
+      large_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
     }
     if (xlarge_screen_temp  > 0) {
       // Introduced in Gingerbread.
-      xlarge_screen_temp  = target_sdk >= 9 ? -1 : 0;
+      xlarge_screen_temp = target_sdk >= SDK_GINGERBREAD ? -1 : 0;
     }
     if (any_density_temp  > 0) {
-      any_density_temp  = (target_sdk >= 4 || requires_smallest_width_dp > 0
-          || compatible_width_limit_dp > 0) ? -1 : 0;
+      any_density_temp = (target_sdk >= SDK_DONUT || requires_smallest_width_dp > 0 ||
+                          compatible_width_limit_dp > 0)
+                             ? -1
+                             : 0;
     }
 
     // Print the formatted screen info
@@ -2030,7 +2031,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   auto write_external_permission = ElementCast<UsesPermission>(
       FindPermission(root.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
 
-  if (target_sdk() < 4) {
+  if (target_sdk() < SDK_DONUT) {
     if (!write_external_permission) {
       PrintPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
       insert_write_external = true;
@@ -2053,7 +2054,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   }
 
   // Pre-JellyBean call log permission compatibility.
-  if (target_sdk() < 16) {
+  if (target_sdk() < SDK_JELLY_BEAN) {
     if (!FindPermission(root.get(), "android.permission.READ_CALL_LOG")
         && FindPermission(root.get(), "android.permission.READ_CONTACTS")) {
       PrintPermission("android.permission.READ_CALL_LOG",
