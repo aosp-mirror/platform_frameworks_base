@@ -30,6 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -40,8 +41,10 @@ import static org.mockito.Mockito.timeout;
 
 import android.app.WaitResult;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.ConditionVariable;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
@@ -188,6 +191,24 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(taskChangeNotifier, never()).notifyActivityForcedResizable(anyInt() /* taskId */,
                 anyInt() /* reason */, anyString() /* packageName */);
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedRootTask();
+    }
+
+    /** Ensures that the calling package name passed to client complies with package visibility. */
+    @Test
+    public void testFilteredReferred() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setLaunchedFromPackage("other.package").setCreateTask(true).build();
+        assertNotNull(activity.launchedFromPackage);
+        try {
+            mSupervisor.realStartActivityLocked(activity, activity.app, false /* andResume */,
+                    false /* checkConfig */);
+        } catch (RemoteException ignored) {
+        }
+        verify(activity).getFilteredReferrer(eq(activity.launchedFromPackage));
+
+        activity.deliverNewIntentLocked(ActivityBuilder.DEFAULT_FAKE_UID,
+                new Intent(), null /* intentGrants */, "other.package2");
+        verify(activity).getFilteredReferrer(eq("other.package2"));
     }
 
     /**
