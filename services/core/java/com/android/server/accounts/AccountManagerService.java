@@ -1820,6 +1820,11 @@ public class AccountManagerService
                                 + ", skipping since the account already exists");
                         return false;
                     }
+                    if (accounts.accountsDb.findAllDeAccounts().size() > 100) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
+                                + ", skipping since more than 50 accounts on device exist");
+                        return false;
+                    }
                     long accountId = accounts.accountsDb.insertCeAccount(account, password);
                     if (accountId < 0) {
                         Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
