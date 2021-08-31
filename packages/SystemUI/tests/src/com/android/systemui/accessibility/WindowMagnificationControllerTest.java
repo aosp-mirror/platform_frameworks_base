@@ -250,7 +250,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Test
     public void onOrientationChanged_enabled_updateDisplayRotationAndCenterStayAtSamePosition() {
         final Display display = Mockito.spy(mContext.getDisplay());
-        when(display.getRotation()).thenReturn(Surface.ROTATION_90);
+        final int currentRotation = display.getRotation();
+        final int newRotation = (currentRotation + 1) % 4;
+        when(display.getRotation()).thenReturn(newRotation);
         when(mContext.getDisplay()).thenReturn(display);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
@@ -259,7 +261,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         final PointF expectedCenter = new PointF(mWindowMagnificationController.getCenterY(),
                 mWindowMagnificationController.getCenterX());
         final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
-        // Rotate the window 90 degrees.
+        // Rotate the window clockwise 90 degree.
         windowBounds.set(windowBounds.top, windowBounds.left, windowBounds.bottom,
                 windowBounds.right);
         mWindowManager.setWindowBounds(windowBounds);
@@ -268,7 +270,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
         });
 
-        assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
+        assertEquals(newRotation, mWindowMagnificationController.mRotation);
         final PointF actualCenter = new PointF(mWindowMagnificationController.getCenterX(),
                 mWindowMagnificationController.getCenterY());
         assertEquals(expectedCenter, actualCenter);
