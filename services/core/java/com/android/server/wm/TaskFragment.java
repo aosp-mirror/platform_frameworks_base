@@ -2095,7 +2095,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     @Nullable
-    @VisibleForTesting
     ITaskFragmentOrganizer getTaskFragmentOrganizer() {
         return mTaskFragmentOrganizer;
     }

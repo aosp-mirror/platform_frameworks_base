@@ -33,6 +33,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -65,10 +66,12 @@ public class SplitTestUtils {
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
                 MainStage mainStage, SideStage sideStage, DisplayImeController imeController,
-                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
+                DisplayInsetsController insetsController, SplitLayout splitLayout,
+                Transitions transitions, TransactionPool transactionPool,
                 SplitscreenEventLogger logger) {
             super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
-                    sideStage, imeController, splitLayout, transitions, transactionPool, logger);
+                    sideStage, imeController, insetsController, splitLayout, transitions,
+                    transactionPool, logger);
 
             // Prepare default TaskDisplayArea for testing.
             mDisplayAreaInfo = new DisplayAreaInfo(
