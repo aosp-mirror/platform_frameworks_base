@@ -62,6 +62,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     final Map<IBinder, Configuration> mFragmentParentConfigs = new ArrayMap<>();
 
     private final TaskFragmentCallback mCallback;
+    private TaskFragmentAnimationController mAnimationController;
 
     /**
      * Callback that notifies the controller about changes to task fragments.
@@ -81,6 +82,25 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     JetpackTaskFragmentOrganizer(@NonNull Executor executor, TaskFragmentCallback callback) {
         super(executor);
         mCallback = callback;
+    }
+
+    @Override
+    public void registerOrganizer() {
+        if (mAnimationController != null) {
+            throw new IllegalStateException("Must unregister the organizer before re-register.");
+        }
+        super.registerOrganizer();
+        mAnimationController = new TaskFragmentAnimationController(this);
+        mAnimationController.registerRemoteAnimations();
+    }
+
+    @Override
+    public void unregisterOrganizer() {
+        if (mAnimationController != null) {
+            mAnimationController.unregisterRemoteAnimations();
+            mAnimationController = null;
+        }
+        super.unregisterOrganizer();
     }
 
     /**
