@@ -85,6 +85,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -136,6 +137,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final Context mContext;
     private final List<SplitScreen.SplitScreenListener> mListeners = new ArrayList<>();
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final SplitScreenTransitions mSplitTransitions;
     private final SplitscreenEventLogger mLogger;
     private boolean mExitSplitScreenOnHide;
@@ -163,7 +165,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
-            DisplayImeController displayImeController, Transitions transitions,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, SplitscreenEventLogger logger) {
         mContext = context;
         mDisplayId = displayId;
@@ -185,6 +188,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSyncQueue,
                 mSurfaceSession);
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mRootTDAOrganizer.registerListener(displayId, this);
         final DeviceStateManager deviceStateManager =
                 mContext.getSystemService(DeviceStateManager.class);
@@ -199,7 +203,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
             MainStage mainStage, SideStage sideStage, DisplayImeController displayImeController,
-            SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
+            DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
+            Transitions transitions, TransactionPool transactionPool,
             SplitscreenEventLogger logger) {
         mContext = context;
         mDisplayId = displayId;
@@ -209,6 +214,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainStage = mainStage;
         mSideStage = sideStage;
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mRootTDAOrganizer.registerListener(displayId, this);
         mSplitLayout = splitLayout;
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
@@ -832,6 +838,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mDisplayAreaInfo.configuration, this,
                     b -> mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b),
                     mDisplayImeController, mTaskOrganizer);
+            mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
     }
 
