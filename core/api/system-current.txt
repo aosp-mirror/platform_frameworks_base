@@ -2107,6 +2107,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid AVRCP_TARGET;
     field @NonNull public static final android.os.ParcelUuid BASE_UUID;
     field @NonNull public static final android.os.ParcelUuid BNEP;
+    field @NonNull public static final android.os.ParcelUuid COORDINATED_SET;
     field @NonNull public static final android.os.ParcelUuid DIP;
     field @NonNull public static final android.os.ParcelUuid GENERIC_MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid HEARING_AID;
@@ -4960,7 +4961,6 @@ package android.location {
   }
 
   public class Location implements android.os.Parcelable {
-    method public boolean isComplete();
     method public void makeComplete();
     method @Deprecated public void setIsFromMockProvider(boolean);
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
@@ -5410,6 +5410,13 @@ package android.media {
 
   public final class RouteDiscoveryPreference implements android.os.Parcelable {
     field public static final android.media.RouteDiscoveryPreference EMPTY;
+  }
+
+  public class Spatializer {
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
   }
 
 }

@@ -105,7 +105,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final FalsingManager mFalsingManager;
-    private final QSLogger mQSLogger;
+    protected final QSLogger mQSLogger;
     private volatile int mReadyState;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();

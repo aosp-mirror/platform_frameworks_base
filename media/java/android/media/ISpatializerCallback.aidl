@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package android.media;
 
-import com.android.internal.inputmethod.ThrowableHolder;
+/**
+ * AIDL for the AudioService to signal Spatializer state changes.
+ *
+ * {@hide}
+ */
+oneway interface ISpatializerCallback {
 
-oneway interface IVoidResultCallback {
-    void onResult();
-    void onError(in ThrowableHolder exception);
+    void dispatchSpatializerEnabledChanged(boolean enabled);
+
+    void dispatchSpatializerAvailableChanged(boolean available);
 }

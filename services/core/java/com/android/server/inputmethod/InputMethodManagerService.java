@@ -152,12 +152,9 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.inputmethod.CallbackUtils;
-import com.android.internal.inputmethod.IBooleanResultCallback;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IInputContentUriToken;
-import com.android.internal.inputmethod.IInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
-import com.android.internal.inputmethod.IVoidResultCallback;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -2587,14 +2584,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (mCurToken != null) {
-            try {
-                if (DEBUG) {
-                    Slog.v(TAG, "Removing window token: " + mCurToken + " for display: "
-                            + mCurTokenDisplayId);
-                }
-                mIWindowManager.removeWindowToken(mCurToken, mCurTokenDisplayId);
-            } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.v(TAG, "Removing window token: " + mCurToken + " for display: "
+                        + mCurTokenDisplayId);
             }
+            mWindowManagerInternal.removeWindowToken(mCurToken, false /* removeWindows */,
+                    false /* animateExit */, mCurTokenDisplayId);
             // Set IME window status as invisible when unbind current method.
             mImeWindowVis = 0;
             mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
@@ -5842,9 +5837,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @BinderThread
         @Override
         public void createInputContentUriToken(Uri contentUri, String packageName,
-                IInputContentUriTokenResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.createInputContentUriToken(mToken, contentUri, packageName));
+                AndroidFuture future /* T=IBinder */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<IBinder> typedFuture = future;
+            try {
+                typedFuture.complete(mImms.createInputContentUriToken(
+                        mToken, contentUri, packageName).asBinder());
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
@@ -5855,28 +5856,55 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void setInputMethod(String id, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.setInputMethod(mToken, id));
+        public void setInputMethod(String id, AndroidFuture future /* T=Void */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Void> typedFuture = future;
+            try {
+                mImms.setInputMethod(mToken, id);
+                typedFuture.complete(null);
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
         @Override
         public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.setInputMethodAndSubtype(mToken, id, subtype));
+                AndroidFuture future /* T=Void */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Void> typedFuture = future;
+            try {
+                mImms.setInputMethodAndSubtype(mToken, id, subtype);
+                typedFuture.complete(null);
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
         @Override
-        public void hideMySoftInput(int flags, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.hideMySoftInput(mToken, flags));
+        public void hideMySoftInput(int flags, AndroidFuture future /* T=Void */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Void> typedFuture = future;
+            try {
+                mImms.hideMySoftInput(mToken, flags);
+                typedFuture.complete(null);
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
         @Override
-        public void showMySoftInput(int flags, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.showMySoftInput(mToken, flags));
+        public void showMySoftInput(int flags, AndroidFuture future /* T=Void */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Void> typedFuture = future;
+            try {
+                mImms.showMySoftInput(mToken, flags);
+                typedFuture.complete(null);
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
@@ -5887,24 +5915,39 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void switchToPreviousInputMethod(IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.switchToPreviousInputMethod(mToken));
+        public void switchToPreviousInputMethod(AndroidFuture future /* T=Boolean */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Boolean> typedFuture = future;
+            try {
+                typedFuture.complete(mImms.switchToPreviousInputMethod(mToken));
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
         @Override
         public void switchToNextInputMethod(boolean onlyCurrentIme,
-                IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.switchToNextInputMethod(mToken, onlyCurrentIme));
+                AndroidFuture future /* T=Boolean */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Boolean> typedFuture = future;
+            try {
+                typedFuture.complete(mImms.switchToNextInputMethod(mToken, onlyCurrentIme));
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread
         @Override
-        public void shouldOfferSwitchingToNextInputMethod(
-                IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.shouldOfferSwitchingToNextInputMethod(mToken));
+        public void shouldOfferSwitchingToNextInputMethod(AndroidFuture future /* T=Boolean */) {
+            @SuppressWarnings("unchecked")
+            final AndroidFuture<Boolean> typedFuture = future;
+            try {
+                typedFuture.complete(mImms.shouldOfferSwitchingToNextInputMethod(mToken));
+            } catch (Throwable e) {
+                typedFuture.completeExceptionally(e);
+            }
         }
 
         @BinderThread

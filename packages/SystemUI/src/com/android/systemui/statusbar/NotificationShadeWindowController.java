@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.graphics.Region;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
@@ -157,6 +158,9 @@ public interface NotificationShadeWindowController extends RemoteInputController
 
     /** Sets the state of whether the notification shade is touchable or not. */
     default void setNotTouchable(boolean notTouchable) {}
+
+    /** Sets the region where touch is excluded from the parent window. */
+    default void setTouchExclusionRegion(Region region) {}
 
     /** Sets a {@link OtherwisedCollapsedListener}. */
     default void setStateListener(OtherwisedCollapsedListener listener) {}

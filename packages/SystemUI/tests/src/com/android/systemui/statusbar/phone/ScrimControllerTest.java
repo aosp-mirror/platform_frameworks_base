@@ -712,7 +712,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void qsExpansion_half_clippingQs() {
         reset(mScrimBehind);
         mScrimController.setClipsQsScrim(true);
-        mScrimController.setQsPosition(0.5f, 999 /* value doesn't matter */);
+        mScrimController.setQsPosition(0.25f, 999 /* value doesn't matter */);
         finishAnimationsImmediately();
 
         assertScrimAlpha(Map.of(
@@ -1138,7 +1138,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimsVisible_whenShadeVisibleOnLockscreen() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.setQsPosition(0.5f, 300);
+        mScrimController.setQsPosition(0.25f, 300);
 
         assertScrimAlpha(Map.of(
                 mScrimBehind, SEMI_TRANSPARENT,

@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -40,6 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.view.IInputContext;
 
 import java.lang.ref.WeakReference;
@@ -220,7 +220,10 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
+    public void getTextAfterCursor(int length, int flags,
+            AndroidFuture future /* T=CharSequence */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<CharSequence> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextAfterCursor");
             try {
@@ -238,12 +241,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getTextAfterCursor", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getTextAfterCursor()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -251,7 +249,10 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback) {
+    public void getTextBeforeCursor(int length, int flags,
+            AndroidFuture future /* T=CharSequence */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<CharSequence> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextBeforeCursor");
             try {
@@ -269,12 +270,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getTextBeforeCursor", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getTextBeforeCursor()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -282,7 +278,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getSelectedText(int flags, ICharSequenceResultCallback callback) {
+    public void getSelectedText(int flags, AndroidFuture future /* T=CharSequence */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<CharSequence> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getSelectedText");
             try {
@@ -300,12 +298,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getSelectedText", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getSelectedText()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -314,7 +307,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     @Override
     public void getSurroundingText(int beforeLength, int afterLength, int flags,
-            ISurroundingTextResultCallback callback) {
+            AndroidFuture future /* T=SurroundingText */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<SurroundingText> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getSurroundingText");
             try {
@@ -332,12 +327,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getSurroundingText", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getSurroundingText()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -345,7 +335,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
+    public void getCursorCapsMode(int reqModes, AndroidFuture future /* T=Integer */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<Integer> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getCursorCapsMode");
             try {
@@ -363,12 +355,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getCursorCapsMode", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getCursorCapsMode()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -377,7 +364,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     @Override
     public void getExtractedText(ExtractedTextRequest request, int flags,
-            IExtractedTextResultCallback callback) {
+            AndroidFuture future /* T=ExtractedText */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<ExtractedText> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getExtractedText");
             try {
@@ -395,12 +384,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     ImeTracing.getInstance().triggerClientDump(
                             TAG + "#getExtractedText", mParentInputMethodManager, icProto);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to getExtractedText()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -710,7 +694,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void requestCursorUpdates(int cursorUpdateMode, IBooleanResultCallback callback) {
+    public void requestCursorUpdates(int cursorUpdateMode, AndroidFuture future /* T=Boolean */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<Boolean> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#requestCursorUpdates");
             try {
@@ -722,12 +708,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 } else {
                     result = ic.requestCursorUpdates(cursorUpdateMode);
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to requestCursorUpdates()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
@@ -736,7 +717,9 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     @Override
     public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
-            IBooleanResultCallback callback) {
+            AndroidFuture future /* T=Boolean */) {
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<Boolean> typedFuture = future;
         dispatch(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#commitContent");
             try {
@@ -754,12 +737,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                         result = ic.commitContent(inputContentInfo, flags, opts);
                     }
                 }
-                try {
-                    callback.onResult(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to return the result to commitContent()."
-                            + " result=" + result, e);
-                }
+                typedFuture.complete(result);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }

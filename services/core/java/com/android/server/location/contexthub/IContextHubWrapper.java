@@ -20,6 +20,7 @@ import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_1.Setting;
 import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.contexthub.V1_2.IContexthubCallback;
+import android.hardware.location.ContextHubInfo;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
@@ -95,7 +96,7 @@ public abstract class IContextHubWrapper {
     /**
      * Calls the appropriate getHubs function depending on the HAL version.
      */
-    public abstract Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException;
+    public abstract Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException;
 
     /**
      * Calls the appropriate registerCallback function depending on the HAL version.
@@ -165,8 +166,12 @@ public abstract class IContextHubWrapper {
             mHub = hub;
         }
 
-        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
-            return new Pair(mHub.getHubs(), new ArrayList<String>());
+        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+            ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
+            for (ContextHub hub : mHub.getHubs()) {
+                hubInfoList.add(new ContextHubInfo(hub));
+            }
+            return new Pair(hubInfoList, new ArrayList<String>());
         }
 
         public void registerCallback(
@@ -214,8 +219,12 @@ public abstract class IContextHubWrapper {
             mHub = hub;
         }
 
-        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
-            return new Pair(mHub.getHubs(), new ArrayList<String>());
+        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+            ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
+            for (ContextHub hub : mHub.getHubs()) {
+                hubInfoList.add(new ContextHubInfo(hub));
+            }
+            return new Pair(hubInfoList, new ArrayList<String>());
         }
 
         public void registerCallback(
@@ -266,7 +275,7 @@ public abstract class IContextHubWrapper {
             implements android.hardware.contexthub.V1_2.IContexthub.getHubs_1_2Callback {
         private final android.hardware.contexthub.V1_2.IContexthub mHub;
 
-        private Pair<List<ContextHub>, List<String>> mHubInfo =
+        private Pair<List<ContextHubInfo>, List<String>> mHubInfo =
                 new Pair<>(Collections.emptyList(), Collections.emptyList());
 
         ContextHubWrapperV1_2(android.hardware.contexthub.V1_2.IContexthub hub) {
@@ -275,10 +284,14 @@ public abstract class IContextHubWrapper {
 
         @Override
         public void onValues(ArrayList<ContextHub> hubs, ArrayList<String> supportedPermissions) {
-            mHubInfo = new Pair(hubs, supportedPermissions);
+            ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
+            for (ContextHub hub : hubs) {
+                hubInfoList.add(new ContextHubInfo(hub));
+            }
+            mHubInfo = new Pair(hubInfoList, supportedPermissions);
         }
 
-        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
+        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
             mHub.getHubs_1_2(this);
             return mHubInfo;
         }

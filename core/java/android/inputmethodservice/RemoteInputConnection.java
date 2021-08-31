@@ -34,7 +34,7 @@ import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.inputmethod.CancellationGroup;
-import com.android.internal.inputmethod.Completable;
+import com.android.internal.inputmethod.CompletableFutureUtil;
 import com.android.internal.inputmethod.IInputContextInvoker;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputConnectionProtoDumper;
@@ -42,6 +42,7 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Takes care of remote method invocations of {@link InputConnection} in the IME side.
@@ -96,8 +97,8 @@ final class RemoteInputConnection implements InputConnection {
             return null;
         }
 
-        final Completable.CharSequence value = mInvoker.getTextAfterCursor(length, flags);
-        final CharSequence result = Completable.getResultOrNull(
+        final CompletableFuture<CharSequence> value = mInvoker.getTextAfterCursor(length, flags);
+        final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -120,8 +121,8 @@ final class RemoteInputConnection implements InputConnection {
             return null;
         }
 
-        final Completable.CharSequence value = mInvoker.getTextBeforeCursor(length, flags);
-        final CharSequence result = Completable.getResultOrNull(
+        final CompletableFuture<CharSequence> value = mInvoker.getTextBeforeCursor(length, flags);
+        final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -144,8 +145,8 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final Completable.CharSequence value = mInvoker.getSelectedText(flags);
-        final CharSequence result = Completable.getResultOrNull(
+        final CompletableFuture<CharSequence> value = mInvoker.getSelectedText(flags);
+        final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -181,9 +182,9 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final Completable.SurroundingText value = mInvoker.getSurroundingText(beforeLength,
+        final CompletableFuture<SurroundingText> value = mInvoker.getSurroundingText(beforeLength,
                 afterLength, flags);
-        final SurroundingText result = Completable.getResultOrNull(
+        final SurroundingText result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -202,8 +203,8 @@ final class RemoteInputConnection implements InputConnection {
             return 0;
         }
 
-        final Completable.Int value = mInvoker.getCursorCapsMode(reqModes);
-        final int result = Completable.getResultOrZero(
+        final CompletableFuture<Integer> value = mInvoker.getCursorCapsMode(reqModes);
+        final int result = CompletableFutureUtil.getResultOrZero(
                 value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -222,8 +223,8 @@ final class RemoteInputConnection implements InputConnection {
             return null;
         }
 
-        final Completable.ExtractedText value = mInvoker.getExtractedText(request, flags);
-        final ExtractedText result = Completable.getResultOrNull(
+        final CompletableFuture<ExtractedText> value = mInvoker.getExtractedText(request, flags);
+        final ExtractedText result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
@@ -371,8 +372,8 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final Completable.Boolean value = mInvoker.requestCursorUpdates(cursorUpdateMode);
-        return Completable.getResultOrFalse(value, TAG, "requestCursorUpdates()",
+        final CompletableFuture<Boolean> value = mInvoker.requestCursorUpdates(cursorUpdateMode);
+        return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
 
@@ -407,8 +408,9 @@ final class RemoteInputConnection implements InputConnection {
             inputMethodService.exposeContent(inputContentInfo, this);
         }
 
-        final Completable.Boolean value = mInvoker.commitContent(inputContentInfo, flags, opts);
-        return Completable.getResultOrFalse(
+        final CompletableFuture<Boolean> value =
+                mInvoker.commitContent(inputContentInfo, flags, opts);
+        return CompletableFutureUtil.getResultOrFalse(
                 value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
 

@@ -27,16 +27,20 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerGlobal;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
@@ -505,6 +509,19 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_TOUCHABLE;
         }
     }
+
+    @Override
+    public void setTouchExclusionRegion(Region region) {
+        try {
+            final IWindowSession session = WindowManagerGlobal.getWindowSession();
+            session.updateTapExcludeRegion(
+                    IWindow.Stub.asInterface(getNotificationShadeView().getWindowToken()),
+                    region);
+        } catch (RemoteException e) {
+            Log.e(TAG, "could not update the tap exclusion region:" + e);
+        }
+    }
+
 
     @Override
     public void setKeyguardShowing(boolean showing) {
