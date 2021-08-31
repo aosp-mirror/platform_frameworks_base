@@ -25,6 +25,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
+import android.util.MathUtils;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -57,6 +61,21 @@ import javax.inject.Inject;
 
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
+    private static final AnimationProperties KEYGUARD_HUN_PROPERTIES =
+            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+
+    private float mKeyguardHeadsUpShowingAmount = 0.0f;
+    private final AnimatableProperty mHeadsUpShowingAmountAnimation = AnimatableProperty.from(
+            "KEYGUARD_HEADS_UP_SHOWING_AMOUNT",
+            (view, aFloat) -> {
+                mKeyguardHeadsUpShowingAmount = aFloat;
+                updateViewState();
+            },
+            view -> mKeyguardHeadsUpShowingAmount,
+            R.id.keyguard_hun_animator_tag,
+            R.id.keyguard_hun_animator_end_tag,
+            R.id.keyguard_hun_animator_start_tag);
+
     private final CarrierTextController mCarrierTextController;
     private final ConfigurationController mConfigurationController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
@@ -65,7 +84,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final StatusBarIconController mStatusBarIconController;
     private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
     private final BatteryMeterViewController mBatteryMeterViewController;
-    private final ViewStateProvider mViewStateProvider;
+    private final NotificationPanelViewController.NotificationPanelViewStateProvider
+            mNotificationPanelViewStateProvider;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -176,6 +196,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             };
 
     private final List<String> mBlockedIcons;
+    private final int mNotificationsHeaderCollideDistance;
 
     private boolean mBatteryListening;
     private StatusBarIconController.TintedIconManager mTintedIconManager;
@@ -193,6 +214,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private boolean mDelayShowingKeyguardStatusBar;
     private int mStatusBarState;
     private boolean mDozing;
+    private boolean mShowingKeyguardHeadsUp;
 
     @Inject
     public KeyguardStatusBarViewController(
@@ -205,7 +227,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             StatusBarIconController statusBarIconController,
             StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
             BatteryMeterViewController batteryMeterViewController,
-            ViewStateProvider viewStateProvider,
+            NotificationPanelViewController.NotificationPanelViewStateProvider
+                    notificationPanelViewStateProvider,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController bypassController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -220,7 +243,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mStatusBarIconController = statusBarIconController;
         mTintedIconManagerFactory = tintedIconManagerFactory;
         mBatteryMeterViewController = batteryMeterViewController;
-        mViewStateProvider = viewStateProvider;
+        mNotificationPanelViewStateProvider = notificationPanelViewStateProvider;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = bypassController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -245,6 +268,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 r.getString(com.android.internal.R.string.status_bar_volume),
                 r.getString(com.android.internal.R.string.status_bar_alarm_clock),
                 r.getString(com.android.internal.R.string.status_bar_call_strength)));
+        mNotificationsHeaderCollideDistance = r.getDimensionPixelSize(
+                R.dimen.header_notifications_collide_distance);
     }
 
     @Override
@@ -355,16 +380,20 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     }
 
     /**
-     * Updates the {@link KeyguardStatusBarView} state based on what the {@link ViewStateProvider}
-     * and other controllers provide.
+     * Updates the {@link KeyguardStatusBarView} state based on what the
+     * {@link NotificationPanelViewController.NotificationPanelViewStateProvider} and other
+     * controllers provide.
      */
     public void updateViewState() {
-        ViewState newViewState = mViewStateProvider.provideViewState();
         if (!isKeyguardShowing()) {
             return;
         }
 
-        float newAlpha = newViewState.mAlpha * mKeyguardStatusBarAnimateAlpha;
+        float alphaQsExpansion = 1 - Math.min(
+                1, mNotificationPanelViewStateProvider.getQsExpansionFraction() * 2);
+        float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
+                * mKeyguardStatusBarAnimateAlpha
+                * (1.0f - mKeyguardHeadsUpShowingAmount);
 
         boolean hideForBypass =
                 mFirstBypassAttempt && mKeyguardUpdateMonitor.shouldListenForFace()
@@ -383,6 +412,54 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.setVisibility(visibility);
     }
 
+    /**
+     * @return the alpha to be used to fade out the contents on Keyguard (status bar, bottom area)
+     * during swiping up.
+     */
+    private float getKeyguardContentsAlpha() {
+        float alpha;
+        if (isKeyguardShowing()) {
+            // When on Keyguard, we hide the header as soon as we expanded close enough to the
+            // header
+            alpha = mNotificationPanelViewStateProvider.getPanelViewExpandedHeight()
+                    / (mView.getHeight() + mNotificationsHeaderCollideDistance);
+        } else {
+            // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
+            // soon as we start translating the stack.
+            alpha = mNotificationPanelViewStateProvider.getPanelViewExpandedHeight()
+                    / mView.getHeight();
+        }
+        alpha = MathUtils.saturate(alpha);
+        alpha = (float) Math.pow(alpha, 0.75);
+        return alpha;
+    }
+
+    /**
+     * Update {@link KeyguardStatusBarView}'s visibility based on whether keyguard is showing and
+     * whether heads up is visible.
+     */
+    public void updateForHeadsUp() {
+        updateForHeadsUp(true);
+    }
+
+    void updateForHeadsUp(boolean animate) {
+        boolean showingKeyguardHeadsUp =
+                isKeyguardShowing() && mNotificationPanelViewStateProvider.shouldHeadsUpBeVisible();
+        if (mShowingKeyguardHeadsUp != showingKeyguardHeadsUp) {
+            mShowingKeyguardHeadsUp = showingKeyguardHeadsUp;
+            if (isKeyguardShowing()) {
+                PropertyAnimator.setProperty(
+                        mView,
+                        mHeadsUpShowingAmountAnimation,
+                        showingKeyguardHeadsUp ? 1.0f : 0.0f,
+                        KEYGUARD_HUN_PROPERTIES,
+                        animate);
+            } else {
+                PropertyAnimator.applyImmediately(mView, mHeadsUpShowingAmountAnimation, 0.0f);
+            }
+        }
+    }
+
     private boolean isKeyguardShowing() {
         return mStatusBarState == KEYGUARD;
     }
@@ -394,18 +471,4 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.dump(fd, pw, args);
     }
 
-    /** An interface that provides the desired state of {@link KeyguardStatusBarView}. */
-    public interface ViewStateProvider {
-        /** Provides the state. */
-        ViewState provideViewState();
-    }
-
-    /** A POJO for the desired state of {@link KeyguardStatusBarView}. */
-    static class ViewState {
-        final float mAlpha;
-
-        ViewState(float alpha) {
-            this.mAlpha = alpha;
-        }
-    }
 }
