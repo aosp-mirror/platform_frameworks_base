@@ -67,6 +67,7 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -100,6 +101,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITransitionPlayer;
 import android.window.StartingWindowInfo;
+import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 
@@ -1135,6 +1137,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mCreateParentTask;
         private boolean mCreateEmbeddedTask;
         private int mCreateActivityCount = 0;
+        @Nullable
+        private TaskFragmentOrganizer mOrganizer;
 
         TaskFragmentBuilder(ActivityTaskManagerService service) {
             mAtm = service;
@@ -1161,11 +1165,16 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskFragmentBuilder setOrganizer(@Nullable TaskFragmentOrganizer organizer) {
+            mOrganizer = organizer;
+            return this;
+        }
+
         TaskFragment build() {
             SystemServicesTestRule.checkHoldsLock(mAtm.mGlobalLock);
 
             final TaskFragment taskFragment = new TaskFragment(mAtm, null /* fragmentToken */,
-                    false /* createdByOrganizer */);
+                    mOrganizer != null);
             if (mParentTask == null && mCreateParentTask) {
                 mParentTask = new TaskBuilder(mAtm.mTaskSupervisor).build();
             }
@@ -1182,6 +1191,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 final ActivityRecord activity = new ActivityBuilder(mAtm).build();
                 taskFragment.addChild(activity);
                 mCreateActivityCount--;
+            }
+            if (mOrganizer != null) {
+                taskFragment.setTaskFragmentOrganizer(
+                        mOrganizer.getOrganizerToken(), 10000 /* pid */);
             }
             return taskFragment;
         }

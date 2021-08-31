@@ -2595,6 +2595,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task != null ? task.getOrganizedTask() : null;
     }
 
+    /** Returns the organized parent {@link TaskFragment}. */
+    @Nullable
+    TaskFragment getOrganizedTaskFragment() {
+        final TaskFragment parent = getTaskFragment();
+        return parent != null ? parent.getOrganizedTaskFragment() : null;
+    }
+
     @Override
     @Nullable
     TaskDisplayArea getDisplayArea() {

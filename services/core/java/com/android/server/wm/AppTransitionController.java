@@ -86,6 +86,7 @@ import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionOldType;
 import android.view.WindowManager.TransitionType;
 import android.view.animation.Animation;
+import android.window.ITaskFragmentOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -233,7 +234,11 @@ public class AppTransitionController {
         final ActivityRecord topChangingApp =
                 getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
-        overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+
+        // Check if there is any override
+        if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
+            overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+        }
 
         final boolean voiceInteraction = containsVoiceInteraction(mDisplayContent.mOpeningApps)
                 || containsVoiceInteraction(mDisplayContent.mOpeningApps);
@@ -483,6 +488,7 @@ public class AppTransitionController {
         return TYPE_NONE;
     }
 
+    @Nullable
     private static WindowManager.LayoutParams getAnimLp(ActivityRecord activity) {
         final WindowState mainWindow = activity != null ? activity.findMainWindow() : null;
         return mainWindow != null ? mainWindow.mAttrs : null;
@@ -506,6 +512,61 @@ public class AppTransitionController {
     }
 
     /**
+     * Overrides the pending transition with the remote animation defined by the
+     * {@link ITaskFragmentOrganizer} if all windows in the transition are children of
+     * {@link TaskFragment} that are organized by the same organizer.
+     *
+     * @return {@code true} if the transition is overridden.
+     */
+    @VisibleForTesting
+    boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
+            ArraySet<Integer> activityTypes) {
+        final ArrayList<WindowContainer> allWindows = new ArrayList<>();
+        allWindows.addAll(mDisplayContent.mClosingApps);
+        allWindows.addAll(mDisplayContent.mOpeningApps);
+        allWindows.addAll(mDisplayContent.mChangingContainers);
+
+        // Find the common TaskFragmentOrganizer of all windows.
+        ITaskFragmentOrganizer organizer = null;
+        for (int i = allWindows.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = getAppFromContainer(allWindows.get(i));
+            if (r == null) {
+                return false;
+            }
+            final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
+            final ITaskFragmentOrganizer curOrganizer = organizedTaskFragment != null
+                    ? organizedTaskFragment.getTaskFragmentOrganizer()
+                    : null;
+            if (curOrganizer == null) {
+                // All windows must below an organized TaskFragment.
+                return false;
+            }
+            if (organizer == null) {
+                organizer = curOrganizer;
+            } else if (!organizer.asBinder().equals(curOrganizer.asBinder())) {
+                // They must be controlled by the same organizer.
+                return false;
+            }
+        }
+
+        final RemoteAnimationDefinition definition = organizer != null
+                ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                    .getRemoteAnimationDefinition(organizer)
+                : null;
+        final RemoteAnimationAdapter adapter = definition != null
+                ? definition.getAdapter(transit, activityTypes)
+                : null;
+        if (adapter == null) {
+            return false;
+        }
+        mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(adapter);
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "Override with TaskFragment remote animation for transit=%s",
+                AppTransition.appTransitionOldToString(transit));
+        return true;
+    }
+
+    /**
      * Overrides the pending transition with the remote animation defined for the transition in the
      * set of defined remote animations in the app window token.
      */
@@ -524,13 +585,14 @@ public class AppTransitionController {
     }
 
     static ActivityRecord getAppFromContainer(WindowContainer wc) {
-        return wc.asTask() != null ? wc.asTask().getTopNonFinishingActivity()
+        return wc.asTaskFragment() != null ? wc.asTaskFragment().getTopNonFinishingActivity()
                 : wc.asActivityRecord();
     }
 
     /**
      * @return The window token that determines the animation theme.
      */
+    @Nullable
     private ActivityRecord findAnimLayoutParamsToken(@TransitionOldType int transit,
             ArraySet<Integer> activityTypes) {
         ActivityRecord result;
@@ -543,7 +605,7 @@ public class AppTransitionController {
                 w -> w.getRemoteAnimationDefinition() != null
                         && w.getRemoteAnimationDefinition().hasTransition(transit, activityTypes));
         if (result != null) {
-            return getAppFromContainer(result);
+            return result;
         }
         result = lookForHighestTokenWithFilter(closingApps, openingApps, changingApps,
                 w -> w.fillsParent() && w.findMainWindow() != null);
