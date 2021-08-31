@@ -26,6 +26,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -70,26 +72,32 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     }
 
     /** Holder for wrapping multiple handlers into a single Callback. */
-    protected static class CompositeCallback implements Callback {
+    public static class CompositeCallback implements Callback {
         @NonNull
-        private final Callback[] mCallbacks;
+        private final List<Callback> mCallbacks;
 
         public CompositeCallback(@NonNull Callback... callbacks) {
-            mCallbacks = callbacks;
+            mCallbacks = new ArrayList<>();
+
+            for (Callback callback : callbacks) {
+                if (callback != null) {
+                    mCallbacks.add(callback);
+                }
+            }
         }
 
         @Override
         public final void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-            for (int i = 0; i < mCallbacks.length; i++) {
-                mCallbacks[i].onClientStarted(clientMonitor);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onClientStarted(clientMonitor);
             }
         }
 
         @Override
         public final void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                 boolean success) {
-            for (int i = mCallbacks.length - 1; i >= 0; i--) {
-                mCallbacks[i].onClientFinished(clientMonitor, success);
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                mCallbacks.get(i).onClientFinished(clientMonitor, success);
             }
         }
     }
@@ -256,7 +264,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         return mToken;
     }
 
-    public final int getSensorId() {
+    public int getSensorId() {
         return mSensorId;
     }
 

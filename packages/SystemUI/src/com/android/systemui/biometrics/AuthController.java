@@ -42,6 +42,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
@@ -76,6 +78,9 @@ import kotlin.Unit;
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
  * appropriate biometric UI (e.g. BiometricDialogView).
+ *
+ * Also coordinates biometric-related things, such as UDFPS, with
+ * {@link com.android.keyguard.KeyguardUpdateMonitor}
  */
 @SysUISingleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
@@ -115,12 +120,29 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
+    @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
             mHandler.post(AuthController.this::handleTaskStackChanged);
         }
     }
+
+    private final FingerprintStateListener mFingerprintStateListener =
+            new FingerprintStateListener() {
+        @Override
+        public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+            Log.d(TAG, "onEnrollmentsChanged, userId: " + userId
+                    + ", sensorId: " + sensorId
+                    + ", hasEnrollments: " + hasEnrollments);
+            for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
+                if (prop.sensorId == sensorId) {
+                    mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                }
+            }
+        }
+    };
 
     @NonNull
     private final IFingerprintAuthenticatorsRegisteredCallback
@@ -436,6 +458,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
+        mUdfpsEnrolledForUser = new SparseBooleanArray();
         mOrientationListener = new BiometricOrientationEventListener(context,
                 () -> {
                     onOrientationChanged();
@@ -474,6 +497,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (mFingerprintManager != null) {
             mFingerprintManager.addAuthenticatorsRegisteredCallback(
                     mFingerprintAuthenticatorsRegisteredCallback);
+            mFingerprintManager.registerFingerprintStateListener(mFingerprintStateListener);
         }
 
         mTaskStackListener = new BiometricTaskStackListener();
@@ -673,7 +697,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             return false;
         }
 
-        return mFingerprintManager.hasEnrolledTemplatesForAnySensor(userId, mUdfpsProps);
+        return mUdfpsEnrolledForUser.get(userId);
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
