@@ -32,6 +32,7 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -44,7 +45,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
