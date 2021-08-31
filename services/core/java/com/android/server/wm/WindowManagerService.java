@@ -4340,13 +4340,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** Registers a hierarchy listener that gets callbacks when the hierarchy changes. */
+    /**
+     * Registers a hierarchy listener that gets callbacks when the hierarchy changes. The listener's
+     * onDisplayAdded() will not be called for the displays returned.
+     *
+     * @return the displayIds for the existing displays
+     */
     @Override
-    public void registerDisplayWindowListener(IDisplayWindowListener listener) {
+    public int[] registerDisplayWindowListener(IDisplayWindowListener listener) {
         mAtmService.enforceTaskPermission("registerDisplayWindowListener");
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDisplayNotificationController.registerListener(listener);
+            return mDisplayNotificationController.registerListener(listener);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
