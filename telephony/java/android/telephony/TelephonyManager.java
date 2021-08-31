@@ -3483,7 +3483,8 @@ public class TelephonyManager {
      */
     private int getLogicalSlotIndex(int physicalSlotIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
-        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length) {
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
+                && slotInfos[physicalSlotIndex] != null) {
             return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
         }
 
