@@ -58,6 +58,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
@@ -79,6 +80,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock private DisplayImeController mDisplayImeController;
+    @Mock private DisplayInsetsController mDisplayInsetsController;
     @Mock private TransactionPool mTransactionPool;
     @Mock private Transitions mTransitions;
     @Mock private SurfaceSession mSurfaceSession;
@@ -107,9 +109,10 @@ public class SplitTransitionTests extends ShellTestCase {
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession);
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
-                    mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                    mDisplayImeController, mSplitLayout, mTransitions, mTransactionPool,
-                    mLogger);
+                mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
+                mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
+                mTransactionPool,
+                mLogger);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());

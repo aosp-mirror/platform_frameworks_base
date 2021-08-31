@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 
 import androidx.test.annotation.UiThreadTest;
@@ -59,7 +60,7 @@ public class SplitWindowManagerTests extends ShellTestCase {
     @Test
     @UiThreadTest
     public void testInitRelease() {
-        mSplitWindowManager.init(mSplitLayout);
+        mSplitWindowManager.init(mSplitLayout, new InsetsState());
         assertThat(mSplitWindowManager.getSurfaceControl()).isNotNull();
         mSplitWindowManager.release();
         assertThat(mSplitWindowManager.getSurfaceControl()).isNull();

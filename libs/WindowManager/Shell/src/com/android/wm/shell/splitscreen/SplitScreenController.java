@@ -42,8 +42,8 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.SurfaceSession;
+import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -56,6 +56,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -68,7 +69,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.concurrent.Executor;
 
 /**
@@ -87,6 +87,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final ShellExecutor mMainExecutor;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
     private final SplitscreenEventLogger mLogger;
@@ -97,6 +98,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
             ShellExecutor mainExecutor, DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
             Transitions transitions, TransactionPool transactionPool) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
@@ -104,6 +106,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
         mLogger = new SplitscreenEventLogger();
@@ -127,8 +130,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController, mTransitions,
-                    mTransactionPool, mLogger);
+                    mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController,
+                    mDisplayInsetsController, mTransitions, mTransactionPool, mLogger);
         }
     }
 

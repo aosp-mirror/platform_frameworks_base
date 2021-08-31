@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.IWindow;
+import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -103,7 +104,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     }
 
     /** Inflates {@link DividerView} on to the root surface. */
-    void init(SplitLayout splitLayout) {
+    void init(SplitLayout splitLayout, InsetsState insetsState) {
         if (mDividerView != null || mViewHost != null) {
             throw new UnsupportedOperationException(
                     "Try to inflate divider view again without release first");
@@ -123,7 +124,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         mViewHost.setView(mDividerView, lp);
-        mDividerView.setup(splitLayout, mViewHost);
+        mDividerView.setup(splitLayout, mViewHost, insetsState);
     }
 
     /**
@@ -168,5 +169,11 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     @Nullable
     SurfaceControl getSurfaceControl() {
         return mLeash;
+    }
+
+    void onInsetsChanged(InsetsState insetsState) {
+        if (mDividerView != null) {
+            mDividerView.onInsetsChanged(insetsState, true /* animate */);
+        }
     }
 }
