@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -28,6 +31,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -138,7 +142,8 @@ final class LetterboxUiController {
                         this::getLetterboxBackgroundColor,
                         this::hasWallpaperBackgroudForLetterbox,
                         this::getLetterboxWallpaperBlurRadius,
-                        this::getLetterboxWallpaperDarkScrimAlpha);
+                        this::getLetterboxWallpaperDarkScrimAlpha,
+                        this::handleDoubleTap);
                 mLetterbox.attachInput(w);
             }
             mActivityRecord.getPosition(mTmpPoint);
@@ -156,6 +161,49 @@ final class LetterboxUiController {
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+    }
+
+    float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
+        // Don't check resolved configuration because it may not be updated yet during
+        // configuration change.
+        return isReachabilityEnabled(parentConfiguration)
+                // Using the last global dynamic position to avoid "jumps" when moving
+                // between apps or activities.
+                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability()
+                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
+    }
+
+    private void handleDoubleTap() {
+        if (!isReachabilityEnabled() || mActivityRecord.isInTransition()) {
+            return;
+        }
+
+        mLetterboxConfiguration.flipHorizontalMultiplierForReachability();
+
+        // TODO(197549949): Add animation for transition.
+        mActivityRecord.recomputeConfiguration();
+    }
+
+    /**
+     * Whether reachability is enabled for an activity in the curren configuration.
+     *
+     * <p>Conditions that needs to be met:
+     * <ul>
+     *   <li>Activity is portrait-only.
+     *   <li>Fullscreen window in landscape device orientation.
+     *   <li>Reachability is enabled.
+     * </ul>
+     */
+    private boolean isReachabilityEnabled(Configuration parentConfiguration) {
+        return mLetterboxConfiguration.getIsReachabilityEnabled()
+                && parentConfiguration.windowConfiguration.getWindowingMode()
+                        == WINDOWING_MODE_FULLSCREEN
+                && parentConfiguration.orientation == ORIENTATION_LANDSCAPE
+                && mActivityRecord.getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
+    }
+
+    private boolean isReachabilityEnabled() {
+        return isReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
     @VisibleForTesting
@@ -308,8 +356,10 @@ final class LetterboxUiController {
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
                     + getLetterboxWallpaperBlurRadius());
         }
+
+        pw.println(prefix + "  isReachabilityEnabled=" + isReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier());
+                + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
     }
 
     /**
