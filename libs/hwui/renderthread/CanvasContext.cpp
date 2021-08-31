@@ -219,7 +219,7 @@ void CanvasContext::setupPipelineSurface() {
 
     }
 
-    mFrameNumber = -1;
+    mFrameNumber = 0;
 
     if (mNativeSurface != nullptr && hasSurface) {
         mHaveNewSurface = true;
@@ -581,7 +581,7 @@ nsecs_t CanvasContext::draw() {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
         mHaveNewSurface = false;
-        mFrameNumber = -1;
+        mFrameNumber = 0;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
@@ -891,8 +891,8 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
 }
 
 uint64_t CanvasContext::getFrameNumber() {
-    // mFrameNumber is reset to -1 when the surface changes or we swap buffers
-    if (mFrameNumber == -1 && mNativeSurface.get()) {
+    // mFrameNumber is reset to 0 when the surface changes or we swap buffers
+    if (mFrameNumber == 0 && mNativeSurface.get()) {
         mFrameNumber = ANativeWindow_getNextFrameId(mNativeSurface->getNativeWindow());
     }
     return mFrameNumber;

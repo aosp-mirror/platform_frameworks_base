@@ -281,7 +281,8 @@ private:
 
     // Need at least 4 because we do quad buffer. Add a 5th for good measure.
     RingBuffer<SwapHistory, 5> mSwapHistory;
-    uint64_t mFrameNumber = -1;
+    // Frame numbers start at 1, 0 means uninitialized
+    uint64_t mFrameNumber = 0;
     int64_t mDamageId = 0;
 
     // last vsync for a dropped frame due to stuffed queue
