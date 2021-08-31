@@ -163,6 +163,31 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
   return true;
 }
 
+static bool AutoGenerateIsSplitRequired(xml::Element* el, SourcePathDiagnostics* diag) {
+  constexpr const char* kRequiredSplitTypes = "requiredSplitTypes";
+  constexpr const char* kIsSplitRequired = "isSplitRequired";
+
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kRequiredSplitTypes);
+  if (attr != nullptr) {
+    // Now inject the android:isSplitRequired="true" attribute.
+    xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kIsSplitRequired);
+    if (attr != nullptr) {
+      if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
+        // The isFeatureSplit attribute is false, which conflicts with the use
+        // of "featureSplit".
+        diag->Error(DiagMessage(el->line_number)
+                    << "attribute 'requiredSplitTypes' used in <manifest> but "
+                       "'android:isSplitRequired' is not 'true'");
+        return false;
+      }
+      // The attribute is already there and set to true, nothing to do.
+    } else {
+      el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, kIsSplitRequired, "true"});
+    }
+  }
+  return true;
+}
+
 static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy,
                            SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
@@ -329,6 +354,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
   manifest_action.Action(AutoGenerateIsFeatureSplit);
+  manifest_action.Action(AutoGenerateIsSplitRequired);
   manifest_action.Action(VerifyManifest);
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {

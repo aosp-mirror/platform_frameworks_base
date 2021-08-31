@@ -38,6 +38,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.Slog;
@@ -58,6 +59,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /** @hide */
 public class ApkLiteParseUtils {
@@ -104,8 +106,11 @@ public class ApkLiteParseUtils {
             final ApkLite baseApk = result.getResult();
             final String packagePath = packageFile.getAbsolutePath();
             return input.success(
-                    new PackageLite(packagePath, baseApk.getPath(), baseApk, null,
-                            null, null, null, null, null, baseApk.getTargetSdkVersion()));
+                    new PackageLite(packagePath, baseApk.getPath(), baseApk, null /* splitNames */,
+                            null /* isFeatureSplits */, null /* usesSplitNames */,
+                            null /* configForSplit */, null /* splitApkPaths */,
+                            null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
+                            null /* requiredSplitTypes */, null /* splitTypes */));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -209,6 +214,8 @@ public class ApkLiteParseUtils {
         final int size = ArrayUtils.size(splitApks);
 
         String[] splitNames = null;
+        Set<String>[] requiredSplitTypes = null;
+        Set<String>[] splitTypes = null;
         boolean[] isFeatureSplits = null;
         String[] usesSplitNames = null;
         String[] configForSplits = null;
@@ -216,6 +223,8 @@ public class ApkLiteParseUtils {
         int[] splitRevisionCodes = null;
         if (size > 0) {
             splitNames = new String[size];
+            requiredSplitTypes = new Set[size];
+            splitTypes = new Set[size];
             isFeatureSplits = new boolean[size];
             usesSplitNames = new String[size];
             configForSplits = new String[size];
@@ -227,6 +236,8 @@ public class ApkLiteParseUtils {
 
             for (int i = 0; i < size; i++) {
                 final ApkLite apk = splitApks.get(splitNames[i]);
+                requiredSplitTypes[i] = apk.getRequiredSplitTypes();
+                splitTypes[i] = apk.getSplitTypes();
                 usesSplitNames[i] = apk.getUsesSplitName();
                 isFeatureSplits[i] = apk.isFeatureSplit();
                 configForSplits[i] = apk.getConfigForSplit();
@@ -242,7 +253,7 @@ public class ApkLiteParseUtils {
         return input.success(
                 new PackageLite(codePath, baseCodePath, baseApk, splitNames, isFeatureSplits,
                         usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes,
-                        baseApk.getTargetSdkVersion()));
+                        baseApk.getTargetSdkVersion(), requiredSplitTypes, splitTypes));
     }
 
     /**
@@ -345,8 +356,14 @@ public class ApkLiteParseUtils {
         if (result.isError()) {
             return input.error(result);
         }
-
         Pair<String, String> packageSplit = result.getResult();
+
+        final ParseResult<Pair<Set<String>, Set<String>>> requiredSplitTypesResult =
+                parseRequiredSplitTypes(input, parser);
+        if (requiredSplitTypesResult.isError()) {
+            return input.error(result);
+        }
+        Pair<Set<String>, Set<String>> requiredSplitTypes = requiredSplitTypesResult.getResult();
 
         int installLocation = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE,
                 "installLocation", PARSE_DEFAULT_INSTALL_LOCATION);
@@ -522,7 +539,7 @@ public class ApkLiteParseUtils {
                         coreApp, debuggable, profilableByShell, multiArch, use32bitAbi,
                         useEmbeddedDex, extractNativeLibs, isolatedSplits, targetPackage,
                         overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion,
-                        rollbackDataPolicy));
+                        rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second));
     }
 
     public static ParseResult<Pair<String, String>> parsePackageSplitNames(ParseInput input,
@@ -565,6 +582,54 @@ public class ApkLiteParseUtils {
 
         return input.success(Pair.create(packageName.intern(),
                 (splitName != null) ? splitName.intern() : splitName));
+    }
+
+    /**
+     * Utility method that parses attributes android:requiredSplitTypes and android:splitTypes.
+     */
+    public static ParseResult<Pair<Set<String>, Set<String>>> parseRequiredSplitTypes(
+            ParseInput input, XmlResourceParser parser) {
+        Set<String> requiredSplitTypes = null;
+        Set<String> splitTypes = null;
+        String value = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "requiredSplitTypes");
+        if (!TextUtils.isEmpty(value)) {
+            final ParseResult<Set<String>> result = separateAndValidateSplitTypes(input, value);
+            if (result.isError()) {
+                return input.error(result);
+            }
+            requiredSplitTypes = result.getResult();
+        }
+
+        value = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "splitTypes");
+        if (!TextUtils.isEmpty(value)) {
+            final ParseResult<Set<String>> result = separateAndValidateSplitTypes(input, value);
+            if (result.isError()) {
+                return input.error(result);
+            }
+            splitTypes = result.getResult();
+        }
+
+        return input.success(Pair.create(requiredSplitTypes, splitTypes));
+    }
+
+    private static ParseResult<Set<String>> separateAndValidateSplitTypes(ParseInput input,
+            String values) {
+        final Set<String> ret = new ArraySet<>();
+        for (String value : values.trim().split(",")) {
+            final String type = value.trim();
+            // Using requireFilename as true because it limits length of the name to the
+            // {@link #MAX_FILE_NAME_SIZE}.
+            final ParseResult<?> nameResult = validateName(input, type,
+                    false /* requireSeparator */, true /* requireFilename */);
+            if (nameResult.isError()) {
+                return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                        "Invalid manifest split types: " + nameResult.getErrorMessage());
+            }
+            if (!ret.add(type)) {
+                Slog.w(TAG, type + " was defined multiple times");
+            }
+        }
+        return input.success(ret);
     }
 
     public static VerifierInfo parseVerifier(AttributeSet attrs) {

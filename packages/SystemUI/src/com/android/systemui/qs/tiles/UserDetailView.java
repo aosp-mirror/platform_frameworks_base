@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -150,6 +151,7 @@ public class UserDetailView extends PseudoGridView {
                 return;
             }
 
+            Trace.beginSection("UserDetailView.Adapter#onClick");
             UserSwitcherController.UserRecord tag =
                     (UserSwitcherController.UserRecord) view.getTag();
             if (tag.isDisabledByAdmin) {
@@ -167,6 +169,7 @@ public class UserDetailView extends PseudoGridView {
                 }
                 onUserListItemClicked(tag);
             }
+            Trace.endSection();
         }
     }
 }

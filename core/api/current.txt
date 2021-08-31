@@ -1194,6 +1194,7 @@ package android {
     field public static final int requiredFeature = 16844116; // 0x1010554
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiredNotFeature = 16844117; // 0x1010555
+    field public static final int requiredSplitTypes;
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
     field public static final int resizeClip = 16843983; // 0x10104cf
@@ -1329,6 +1330,7 @@ package android {
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
+    field public static final int splitTypes;
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
@@ -9455,6 +9457,7 @@ package android.bluetooth {
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     field public static final int A2DP = 2; // 0x2
+    field public static final int CSIP_SET_COORDINATOR = 25; // 0x19
     field public static final String EXTRA_PREVIOUS_STATE = "android.bluetooth.profile.extra.PREVIOUS_STATE";
     field public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
     field public static final int GATT = 7; // 0x7
@@ -19927,29 +19930,32 @@ package android.location {
   }
 
   public class Location implements android.os.Parcelable {
-    ctor public Location(String);
-    ctor public Location(android.location.Location);
-    method public float bearingTo(android.location.Location);
-    method public static String convert(double, int);
-    method public static double convert(String);
+    ctor public Location(@Nullable String);
+    ctor public Location(@NonNull android.location.Location);
+    method public float bearingTo(@NonNull android.location.Location);
+    method @NonNull public static String convert(@FloatRange double, int);
+    method @FloatRange public static double convert(@NonNull String);
     method public int describeContents();
-    method public static void distanceBetween(double, double, double, double, float[]);
-    method public float distanceTo(android.location.Location);
-    method public void dump(android.util.Printer, String);
-    method public float getAccuracy();
-    method public double getAltitude();
-    method public float getBearing();
-    method public float getBearingAccuracyDegrees();
-    method public long getElapsedRealtimeNanos();
-    method public double getElapsedRealtimeUncertaintyNanos();
-    method public android.os.Bundle getExtras();
-    method public double getLatitude();
-    method public double getLongitude();
-    method public String getProvider();
-    method public float getSpeed();
-    method public float getSpeedAccuracyMetersPerSecond();
-    method public long getTime();
-    method public float getVerticalAccuracyMeters();
+    method public static void distanceBetween(@FloatRange double, @FloatRange double, @FloatRange double, @FloatRange double, float[]);
+    method @FloatRange public float distanceTo(@NonNull android.location.Location);
+    method public void dump(@NonNull android.util.Printer, @Nullable String);
+    method @FloatRange public float getAccuracy();
+    method @FloatRange public double getAltitude();
+    method @FloatRange(from=0.0f, to=360.0f, toInclusive=false) public float getBearing();
+    method @FloatRange public float getBearingAccuracyDegrees();
+    method @IntRange public long getElapsedRealtimeAgeMillis();
+    method @IntRange public long getElapsedRealtimeAgeMillis(@IntRange long);
+    method @IntRange public long getElapsedRealtimeMillis();
+    method @IntRange public long getElapsedRealtimeNanos();
+    method @FloatRange public double getElapsedRealtimeUncertaintyNanos();
+    method @Nullable public android.os.Bundle getExtras();
+    method @FloatRange public double getLatitude();
+    method @FloatRange public double getLongitude();
+    method @Nullable public String getProvider();
+    method @FloatRange public float getSpeed();
+    method @FloatRange public float getSpeedAccuracyMetersPerSecond();
+    method @IntRange public long getTime();
+    method @FloatRange public float getVerticalAccuracyMeters();
     method public boolean hasAccuracy();
     method public boolean hasAltitude();
     method public boolean hasBearing();
@@ -19958,30 +19964,35 @@ package android.location {
     method public boolean hasSpeed();
     method public boolean hasSpeedAccuracy();
     method public boolean hasVerticalAccuracy();
+    method public boolean isComplete();
     method @Deprecated public boolean isFromMockProvider();
     method public boolean isMock();
-    method @Deprecated public void removeAccuracy();
-    method @Deprecated public void removeAltitude();
-    method @Deprecated public void removeBearing();
-    method @Deprecated public void removeSpeed();
+    method public void removeAccuracy();
+    method public void removeAltitude();
+    method public void removeBearing();
+    method public void removeBearingAccuracy();
+    method public void removeElapsedRealtimeUncertaintyNanos();
+    method public void removeSpeed();
+    method public void removeSpeedAccuracy();
+    method public void removeVerticalAccuracy();
     method public void reset();
-    method public void set(android.location.Location);
-    method public void setAccuracy(float);
-    method public void setAltitude(double);
-    method public void setBearing(float);
-    method public void setBearingAccuracyDegrees(float);
-    method public void setElapsedRealtimeNanos(long);
-    method public void setElapsedRealtimeUncertaintyNanos(double);
+    method public void set(@NonNull android.location.Location);
+    method public void setAccuracy(@FloatRange float);
+    method public void setAltitude(@FloatRange double);
+    method public void setBearing(@FloatRange(fromInclusive=false, toInclusive=false) float);
+    method public void setBearingAccuracyDegrees(@FloatRange float);
+    method public void setElapsedRealtimeNanos(@IntRange long);
+    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange double);
     method public void setExtras(@Nullable android.os.Bundle);
-    method public void setLatitude(double);
-    method public void setLongitude(double);
+    method public void setLatitude(@FloatRange double);
+    method public void setLongitude(@FloatRange double);
     method public void setMock(boolean);
-    method public void setProvider(String);
-    method public void setSpeed(float);
-    method public void setSpeedAccuracyMetersPerSecond(float);
-    method public void setTime(long);
-    method public void setVerticalAccuracyMeters(float);
-    method public void writeToParcel(android.os.Parcel, int);
+    method public void setProvider(@Nullable String);
+    method public void setSpeed(@FloatRange float);
+    method public void setSpeedAccuracyMetersPerSecond(@FloatRange float);
+    method public void setTime(@IntRange long);
+    method public void setVerticalAccuracyMeters(@FloatRange float);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.Location> CREATOR;
     field public static final int FORMAT_DEGREES = 0; // 0x0
     field public static final int FORMAT_MINUTES = 1; // 0x1
@@ -20209,8 +20220,10 @@ package android.media {
     method public int getAllowedCapturePolicy();
     method public int getContentType();
     method public int getFlags();
+    method public int getSpatializationBehavior();
     method public int getUsage();
     method public int getVolumeControlStream();
+    method public boolean isContentSpatialized();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALLOW_CAPTURE_BY_ALL = 1; // 0x1
     field public static final int ALLOW_CAPTURE_BY_NONE = 3; // 0x3
@@ -20224,6 +20237,8 @@ package android.media {
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
     field @Deprecated public static final int FLAG_LOW_LATENCY = 256; // 0x100
+    field public static final int SPATIALIZATION_BEHAVIOR_AUTO = 0; // 0x0
+    field public static final int SPATIALIZATION_BEHAVIOR_NEVER = 1; // 0x1
     field public static final int USAGE_ALARM = 4; // 0x4
     field public static final int USAGE_ASSISTANCE_ACCESSIBILITY = 11; // 0xb
     field public static final int USAGE_ASSISTANCE_NAVIGATION_GUIDANCE = 12; // 0xc
@@ -20250,7 +20265,9 @@ package android.media {
     method public android.media.AudioAttributes.Builder setContentType(int);
     method public android.media.AudioAttributes.Builder setFlags(int);
     method @NonNull public android.media.AudioAttributes.Builder setHapticChannelsMuted(boolean);
+    method @NonNull public android.media.AudioAttributes.Builder setIsContentSpatialized(boolean);
     method public android.media.AudioAttributes.Builder setLegacyStreamType(int);
+    method @NonNull public android.media.AudioAttributes.Builder setSpatializationBehavior(int);
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
@@ -20475,6 +20492,7 @@ package android.media {
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
+    method @Nullable public android.media.Spatializer getSpatializer();
     method public int getStreamMaxVolume(int);
     method public int getStreamMinVolume(int);
     method public int getStreamVolume(int);
@@ -23885,6 +23903,19 @@ package android.media {
 
   public static interface SoundPool.OnLoadCompleteListener {
     method public void onLoadComplete(android.media.SoundPool, int, int);
+  }
+
+  public class Spatializer {
+    method public void addOnSpatializerStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
+    method public boolean canBeSpatialized(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioFormat);
+    method public boolean isAvailable();
+    method public boolean isEnabled();
+    method public void removeOnSpatializerStateChangedListener(@NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
+  }
+
+  public static interface Spatializer.OnSpatializerStateChangedListener {
+    method public void onSpatializerAvailableChanged(@NonNull android.media.Spatializer, boolean);
+    method public void onSpatializerEnabledChanged(@NonNull android.media.Spatializer, boolean);
   }
 
   public final class SubtitleData {

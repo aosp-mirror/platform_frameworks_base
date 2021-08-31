@@ -817,7 +817,7 @@ public class AudioManager {
     }
 
     @UnsupportedAppUsage
-    private static IAudioService getService()
+    static IAudioService getService()
     {
         if (sService != null) {
             return sService;
@@ -2450,6 +2450,25 @@ public class AudioManager {
             throw new NullPointerException("Illegal null AudioAttributes");
         }
         return AudioSystem.getOffloadSupport(format, attributes);
+    }
+
+    //====================================================================
+    // Immersive audio
+
+    /**
+     * Return a handle to the optional platform's {@link Spatializer}
+     * @return {@code null} if spatialization is not supported, the {@code Spatializer} instance
+     *         otherwise.
+     */
+    public @Nullable Spatializer getSpatializer() {
+        int level = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+        try {
+            level = getService().getSpatializerImmersiveAudioLevel();
+        } catch (Exception e) { /* using NONE */ }
+        if (level == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE) {
+            return null;
+        }
+        return new Spatializer(this);
     }
 
     //====================================================================

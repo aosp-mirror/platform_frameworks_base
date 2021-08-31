@@ -2220,11 +2220,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    boolean onSetAppExiting() {
+    boolean onSetAppExiting(boolean animateExit) {
         final DisplayContent displayContent = getDisplayContent();
         boolean changed = false;
 
-        if (isVisibleNow()) {
+        if (!animateExit) {
+            // Hide the window permanently if no window exist animation is performed, so we can
+            // avoid the window surface becoming visible again unexpectedly during the next
+            // relayout.
+            mPermanentlyHidden = true;
+            hide(false /* doAnimation */, false /* requestAnim */);
+        }
+        if (isVisibleNow() && animateExit) {
             mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
             if (mWmService.mAccessibilityController != null) {
                 mWmService.mAccessibilityController.onWindowTransition(this, TRANSIT_EXIT);
@@ -2237,7 +2244,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState c = mChildren.get(i);
-            changed |= c.onSetAppExiting();
+            changed |= c.onSetAppExiting(animateExit);
         }
 
         return changed;
