@@ -160,6 +160,21 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
                 statusBarState, keyguardFadingAway, goingToFullShade, oldStatusBarState);
     }
 
+    /**
+     * Set keyguard status view alpha.
+     */
+    public void setAlpha(float alpha) {
+        if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
+            mView.setAlpha(alpha);
+
+            // Some communal view implementations, such as SurfaceViews, do not behave correctly
+            // inheriting the alpha of their parent. Directly set child alpha here to work around
+            // this.
+            for (int i = mView.getChildCount() - 1; i >= 0; --i) {
+                mView.getChildAt(i).setAlpha(alpha);
+            }
+        }
+    }
     @Override
     public void init() {
         super.init();
