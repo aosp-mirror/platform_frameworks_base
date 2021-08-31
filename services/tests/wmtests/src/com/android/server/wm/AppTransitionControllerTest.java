@@ -26,15 +26,19 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.verify;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -47,6 +51,8 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -736,5 +742,39 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(adapter1,
                 mAppTransitionController.getRemoteAnimationOverride(
                         activity, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideTaskFragmentOrganizer() {
+        // TaskFragmentOrganizer registers remote animation.
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final ITaskFragmentOrganizer iOrganizer =
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(createTask(mDisplayContent))
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        activity.allDrawn = true;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition for TaskFragment.
+        mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CHANGE, 0);
+        mDisplayContent.mOpeningApps.add(activity);
+        mDisplayContent.mChangingContainers.add(taskFragment);
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+
+        // Check if the transition has been overridden.
+        verify(mDisplayContent.mAppTransition)
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
     }
 }
