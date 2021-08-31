@@ -466,11 +466,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public int hashCode() {
-            return hashCode(authority, userId);
-        }
-
-        public static int hashCode(final String auth, final int userIdent) {
-            return ((auth != null) ? auth.hashCode() : 0) ^ userIdent;
+            return ((authority != null) ? authority.hashCode() : 0) ^ userId;
         }
     }
 
@@ -492,7 +488,7 @@ public final class ActivityThread extends ClientTransactionHandler
     // Note we never removes items from this map but that's okay because there are only so many
     // users and so many authorities.
     @GuardedBy("mGetProviderKeys")
-    final SparseArray<ProviderKey> mGetProviderKeys = new SparseArray<>();
+    final ArrayMap<ProviderKey, ProviderKey> mGetProviderKeys = new ArrayMap<>();
 
     final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
@@ -6991,11 +6987,11 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private ProviderKey getGetProviderKey(String auth, int userId) {
-        final int key = ProviderKey.hashCode(auth, userId);
+        final ProviderKey key = new ProviderKey(auth, userId);
         synchronized (mGetProviderKeys) {
             ProviderKey lock = mGetProviderKeys.get(key);
             if (lock == null) {
-                lock = new ProviderKey(auth, userId);
+                lock = key;
                 mGetProviderKeys.put(key, lock);
             }
             return lock;
