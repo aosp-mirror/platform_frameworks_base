@@ -2778,7 +2778,9 @@ class ActivityStarter {
             // request. If the task was resolved and different than mInTaskFragment, reparent the
             // task to mInTaskFragment for embedding.
             if (mInTaskFragment.getTask() != task) {
-                task.reparent(mInTaskFragment, POSITION_TOP);
+                if (shouldReparentInTaskFragment(task)) {
+                    task.reparent(mInTaskFragment, POSITION_TOP);
+                }
             } else {
                 newParent = mInTaskFragment;
             }
@@ -2795,6 +2797,18 @@ class ActivityStarter {
         } else {
             mStartActivity.reparent(newParent, newParent.getChildCount() /* top */, reason);
         }
+    }
+
+    private boolean shouldReparentInTaskFragment(Task task) {
+        // The task has not been embedded. We should reparent the task to TaskFragment.
+        if (!task.isEmbedded()) {
+            return true;
+        }
+        WindowContainer<?> parent = task.getParent();
+        // If the Activity is going to launch on top of embedded Task in the same TaskFragment,
+        // we don't need to reparent the Task. Otherwise, the embedded Task should reparent to
+        // another TaskFragment.
+        return parent.asTaskFragment() != mInTaskFragment;
     }
 
     private int adjustLaunchFlagsToDocumentMode(ActivityRecord r, boolean launchSingleInstance,
