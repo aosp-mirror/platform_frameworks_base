@@ -15,16 +15,20 @@
  */
 package com.android.server.location.contexthub;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
+import android.hardware.contexthub.V1_0.TransactionResult;
 import android.hardware.contexthub.V1_1.Setting;
 import android.hardware.contexthub.V1_1.SettingValue;
+import android.hardware.contexthub.V1_2.HubAppInfo;
 import android.hardware.contexthub.V1_2.IContexthubCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
+import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
@@ -39,6 +43,45 @@ import java.util.NoSuchElementException;
  */
 public abstract class IContextHubWrapper {
     private static final String TAG = "IContextHubWrapper";
+
+    /**
+     * The callback interface to use in registerCallback.
+     */
+    public interface ICallback {
+        /**
+         * @param transactionId The ID of the transaction that completed.
+         * @param success       true if the transaction succeeded.
+         */
+        void handleTransactionResult(int transactionId, boolean success);
+
+        /**
+         * @param eventType The Context Hub event type defined by ContextHubService
+         *                  .CONTEXT_HUB_EVENT_*.
+         */
+        void handleContextHubEvent(int eventType);
+
+        /**
+         * @param nanoappId The ID of the nanoapp that aborted.
+         * @param abortCode The nanoapp-defined abort code.
+         */
+        void handleNanoappAbort(long nanoappId, int abortCode);
+
+        /**
+         * @param nanoappStateList The list of loaded nanoapps on the Context Hub.
+         */
+        void handleNanoappInfo(List<NanoAppState> nanoappStateList);
+
+        /**
+         * Handles a message from a nanoapp to a ContextHubClient.
+         *
+         * @param hostEndpointId     The host endpoint ID of the recipient.
+         * @param message            The message from the nanoapp.
+         * @param nanoappPermissions The list of permissions held by the nanoapp.
+         * @param messagePermissions The list of permissions required to receive the message.
+         */
+        void handleNanoappMessage(short hostEndpointId, NanoAppMessage message,
+                List<String> nanoappPermissions, List<String> messagePermissions);
+    }
 
     /**
      * Attempts to connect to the Contexthub HAL 1.0 service, if it exists.
@@ -101,12 +144,6 @@ public abstract class IContextHubWrapper {
      * Calls the appropriate getHubs function depending on the HAL version.
      */
     public abstract Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException;
-
-    /**
-     * Calls the appropriate registerCallback function depending on the HAL version.
-     */
-    public abstract void registerCallback(
-            int hubId, IContexthubCallback callback) throws RemoteException;
 
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
@@ -213,10 +250,74 @@ public abstract class IContextHubWrapper {
     public abstract int queryNanoapps(int contextHubId) throws RemoteException;
 
     /**
+     * Registers a callback with the Context Hub.
+     *
+     * @param contextHubId The ID of the Context Hub to register the callback with.
+     * @param callback     The callback to register.
+     */
+    public abstract void registerCallback(int contextHubId, @NonNull ICallback callback)
+            throws RemoteException;
+
+    /**
      * An abstract call that defines methods common to all HIDL IContextHubWrappers.
      */
     private abstract static class ContextHubWrapperHidl extends IContextHubWrapper {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
+
+        protected ICallback mCallback = null;
+
+        protected final ContextHubWrapperHidlCallback mHidlCallback =
+                new ContextHubWrapperHidlCallback();
+
+        protected class ContextHubWrapperHidlCallback extends IContexthubCallback.Stub {
+            @Override
+            public void handleClientMsg(ContextHubMsg message) {
+                mCallback.handleNanoappMessage(
+                        message.hostEndPoint,
+                        ContextHubServiceUtil.createNanoAppMessage(message),
+                        Collections.emptyList() /* nanoappPermissions */,
+                        Collections.emptyList() /* messagePermissions */);
+            }
+
+            @Override
+            public void handleTxnResult(int transactionId, int result) {
+                mCallback.handleTransactionResult(transactionId,
+                        result == TransactionResult.SUCCESS);
+            }
+
+            @Override
+            public void handleHubEvent(int eventType) {
+                mCallback.handleContextHubEvent(
+                        ContextHubServiceUtil.toContextHubEvent(eventType));
+            }
+
+            @Override
+            public void handleAppAbort(long nanoAppId, int abortCode) {
+                mCallback.handleNanoappAbort(nanoAppId, abortCode);
+            }
+
+            @Override
+            public void handleAppsInfo(
+                    ArrayList<android.hardware.contexthub.V1_0.HubAppInfo> nanoAppInfoList) {
+                handleAppsInfo_1_2(ContextHubServiceUtil.toHubAppInfo_1_2(nanoAppInfoList));
+            }
+
+            @Override
+            public void handleClientMsg_1_2(android.hardware.contexthub.V1_2.ContextHubMsg message,
+                    ArrayList<String> messagePermissions) {
+                mCallback.handleNanoappMessage(
+                        message.msg_1_0.hostEndPoint,
+                        ContextHubServiceUtil.createNanoAppMessage(message.msg_1_0),
+                        message.permissions, messagePermissions);
+            }
+
+            @Override
+            public void handleAppsInfo_1_2(ArrayList<HubAppInfo> nanoAppInfoList) {
+                List<NanoAppState> nanoAppStateList =
+                        ContextHubServiceUtil.createNanoAppStateList(nanoAppInfoList);
+                mCallback.handleNanoappInfo(nanoAppStateList);
+            }
+        }
 
         ContextHubWrapperHidl(android.hardware.contexthub.V1_0.IContexthub hub) {
             mHub = hub;
@@ -267,6 +368,11 @@ public abstract class IContextHubWrapper {
             return ContextHubServiceUtil.toTransactionResult(
                     mHub.queryApps(contextHubId));
         }
+
+        public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
+            mCallback = callback;
+            mHub.registerCallback(contextHubId, mHidlCallback);
+        }
     }
 
     private static class ContextHubWrapperV1_0 extends ContextHubWrapperHidl {
@@ -283,11 +389,6 @@ public abstract class IContextHubWrapper {
                 hubInfoList.add(new ContextHubInfo(hub));
             }
             return new Pair(hubInfoList, new ArrayList<String>());
-        }
-
-        public void registerCallback(
-                int hubId, IContexthubCallback callback) throws RemoteException {
-            mHub.registerCallback(hubId, callback);
         }
 
         public boolean supportsLocationSettingNotifications() {
@@ -333,11 +434,6 @@ public abstract class IContextHubWrapper {
                 hubInfoList.add(new ContextHubInfo(hub));
             }
             return new Pair(hubInfoList, new ArrayList<String>());
-        }
-
-        public void registerCallback(
-                int hubId, IContexthubCallback callback) throws RemoteException {
-            mHub.registerCallback(hubId, callback);
         }
 
         public boolean supportsLocationSettingNotifications() {
@@ -401,11 +497,6 @@ public abstract class IContextHubWrapper {
             return mHubInfo;
         }
 
-        public void registerCallback(
-                int hubId, IContexthubCallback callback) throws RemoteException {
-            mHub.registerCallback_1_2(hubId, callback);
-        }
-
         public boolean supportsLocationSettingNotifications() {
             return true;
         }
@@ -443,6 +534,11 @@ public abstract class IContextHubWrapper {
             // With this in mind, we flip the argument before piping it to CHRE.
             sendSettingChanged(android.hardware.contexthub.V1_2.Setting.MICROPHONE,
                     enabled ? SettingValue.DISABLED : SettingValue.ENABLED);
+        }
+
+        public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
+            mCallback = callback;
+            mHub.registerCallback_1_2(contextHubId, mHidlCallback);
         }
 
         private void sendSettingChanged(byte setting, byte newValue) {
