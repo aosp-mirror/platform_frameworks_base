@@ -31,6 +31,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -85,6 +86,12 @@ public class Account implements Parcelable {
         }
         if (TextUtils.isEmpty(type)) {
             throw new IllegalArgumentException("the type must not be empty: " + type);
+        }
+        if (name.length() > 200) {
+            throw new IllegalArgumentException("account name is longer than 200 characters");
+        }
+        if (type.length() > 200) {
+            throw new IllegalArgumentException("account type is longer than 200 characters");
         }
         this.name = name;
         this.type = type;
