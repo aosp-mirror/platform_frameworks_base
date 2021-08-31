@@ -72,7 +72,6 @@ cc_defaults {
         "libidmap2_policies",
     ],
     stl: "libc++_static",
-    group_static_libs: true,
 }
 
 // ==========================================================
