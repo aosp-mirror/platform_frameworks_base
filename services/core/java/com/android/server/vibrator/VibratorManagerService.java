@@ -219,7 +219,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         // fresh boot.
         mNativeWrapper.cancelSynced();
         for (int i = 0; i < mVibrators.size(); i++) {
-            mVibrators.valueAt(i).off();
+            mVibrators.valueAt(i).reset();
         }
 
         IntentFilter filter = new IntentFilter();
