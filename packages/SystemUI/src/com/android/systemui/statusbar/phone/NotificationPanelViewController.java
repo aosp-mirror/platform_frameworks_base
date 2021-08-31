@@ -180,7 +180,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -260,17 +259,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private static final Rect M_DUMMY_DIRTY_RECT = new Rect(0, 0, 1, 1);
     private static final Rect EMPTY_RECT = new Rect();
-
-    private final AnimatableProperty KEYGUARD_HEADS_UP_SHOWING_AMOUNT = AnimatableProperty.from(
-            "KEYGUARD_HEADS_UP_SHOWING_AMOUNT",
-            (notificationPanelView, aFloat) -> setKeyguardHeadsUpShowingAmount(aFloat),
-            (Function<NotificationPanelView, Float>) notificationPanelView ->
-                    getKeyguardHeadsUpShowingAmount(),
-            R.id.keyguard_hun_animator_tag, R.id.keyguard_hun_animator_end_tag,
-            R.id.keyguard_hun_animator_start_tag);
-    private static final AnimationProperties
-            KEYGUARD_HUN_PROPERTIES =
-            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
     private final LayoutInflater mLayoutInflater;
     private final PowerManager mPowerManager;
@@ -360,7 +348,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
     private int mStatusBarHeaderHeightKeyguard;
-    private int mNotificationsHeaderCollideDistance;
     private float mOverStretchAmount;
     private float mDownX;
     private float mDownY;
@@ -494,8 +481,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mDarkIconSize;
     private int mHeadsUpInset;
     private boolean mHeadsUpPinnedMode;
-    private float mKeyguardHeadsUpShowingAmount = 0.0f;
-    private boolean mShowingKeyguardHeadsUp;
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
 
@@ -634,17 +619,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_STRENGTH_MEDIUM);
         }
     };
-
-    private final KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider =
-            new KeyguardStatusBarViewController.ViewStateProvider() {
-                @Override
-                public KeyguardStatusBarViewController.ViewState provideViewState() {
-                    float alphaQsExpansion = 1 - Math.min(1, computeQsExpansionFraction() * 2);
-                    float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
-                            * (1.0f - mKeyguardHeadsUpShowingAmount);
-                    return new KeyguardStatusBarViewController.ViewState(newAlpha);
-                }
-            };
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -836,7 +810,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusBarViewController =
                 mKeyguardStatusBarViewComponentFactory.build(
                         mKeyguardStatusBar,
-                        mViewStateProvider)
+                        mNotificationPanelViewStateProvider)
                         .getKeyguardStatusBarViewController();
         mKeyguardStatusBarViewController.init();
 
@@ -870,7 +844,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mWakeUpCoordinator.addListener(new NotificationWakeUpCoordinator.WakeUpListener() {
             @Override
             public void onFullyHiddenChanged(boolean isFullyHidden) {
-                updateKeyguardStatusBarForHeadsUp();
+                mKeyguardStatusBarViewController.updateForHeadsUp();
             }
 
             @Override
@@ -907,8 +881,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mStatusBarHeaderHeightKeyguard = mResources.getDimensionPixelSize(
                 R.dimen.status_bar_header_height_keyguard);
         mQsPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
-        mNotificationsHeaderCollideDistance = mResources.getDimensionPixelSize(
-                R.dimen.header_notifications_collide_distance);
         mClockPositionAlgorithm.loadDimens(mResources);
         mQsFalsingThreshold = mResources.getDimensionPixelSize(R.dimen.qs_falsing_threshold);
         mPositionMinSideMargin = mResources.getDimensionPixelSize(
@@ -2916,30 +2888,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return Math.min(0, translation);
     }
 
-    /**
-     * @return the alpha to be used to fade out the contents on Keyguard (status bar, bottom area)
-     * during swiping up
-     */
-    private float getKeyguardContentsAlpha() {
-        float alpha;
-        if (mBarState == KEYGUARD) {
-
-            // When on Keyguard, we hide the header as soon as we expanded close enough to the
-            // header
-            alpha =
-                    getExpandedHeight() / (mKeyguardStatusBar.getHeight()
-                            + mNotificationsHeaderCollideDistance);
-        } else {
-
-            // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
-            // soon as we start translating the stack.
-            alpha = getExpandedHeight() / mKeyguardStatusBar.getHeight();
-        }
-        alpha = MathUtils.saturate(alpha);
-        alpha = (float) Math.pow(alpha, 0.75);
-        return alpha;
-    }
-
     private void updateKeyguardBottomAreaAlpha() {
         // There are two possible panel expansion behaviors:
         // • User dragging up to unlock: we want to fade out as quick as possible
@@ -3233,31 +3181,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void setPanelAlphaEndAction(Runnable r) {
         mPanelAlphaEndAction = r;
-    }
-
-    private void updateKeyguardStatusBarForHeadsUp() {
-        boolean
-                showingKeyguardHeadsUp =
-                mKeyguardShowing && mHeadsUpAppearanceController.shouldBeVisible();
-        if (mShowingKeyguardHeadsUp != showingKeyguardHeadsUp) {
-            mShowingKeyguardHeadsUp = showingKeyguardHeadsUp;
-            if (mKeyguardShowing) {
-                PropertyAnimator.setProperty(mView, KEYGUARD_HEADS_UP_SHOWING_AMOUNT,
-                        showingKeyguardHeadsUp ? 1.0f : 0.0f, KEYGUARD_HUN_PROPERTIES,
-                        true /* animate */);
-            } else {
-                PropertyAnimator.applyImmediately(mView, KEYGUARD_HEADS_UP_SHOWING_AMOUNT, 0.0f);
-            }
-        }
-    }
-
-    private void setKeyguardHeadsUpShowingAmount(float amount) {
-        mKeyguardHeadsUpShowingAmount = amount;
-        mKeyguardStatusBarViewController.updateViewState();
-    }
-
-    private float getKeyguardHeadsUpShowingAmount() {
-        return mKeyguardHeadsUpShowingAmount;
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
@@ -4237,7 +4160,7 @@ public class NotificationPanelViewController extends PanelViewController {
             updateGestureExclusionRect();
             mHeadsUpPinnedMode = inPinnedMode;
             updateHeadsUpVisibility();
-            updateKeyguardStatusBarForHeadsUp();
+            mKeyguardStatusBarViewController.updateForHeadsUp();
         }
 
         @Override
@@ -4396,7 +4319,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     }
                 }
             }
-            updateKeyguardStatusBarForHeadsUp();
+            mKeyguardStatusBarViewController.updateForHeadsUp();
             if (keyguardShowing) {
                 updateDozingVisibilities(false /* animate */);
             }
@@ -4420,6 +4343,43 @@ public class NotificationPanelViewController extends PanelViewController {
             positionClockAndNotifications();
         }
     }
+
+    /**
+     * An interface that provides the current state of the notification panel and related views,
+     * which is needed to calculate {@link KeyguardStatusBarView}'s state in
+     * {@link KeyguardStatusBarViewController}.
+     */
+    public interface NotificationPanelViewStateProvider {
+        /** Returns the expanded height of the panel view. */
+        float getPanelViewExpandedHeight();
+        /** Returns the fraction of QS that's expanded. */
+        float getQsExpansionFraction();
+        /**
+         * Returns true if heads up should be visible.
+         *
+         * TODO(b/138786270): If HeadsUpAppearanceController was injectable, we could inject it into
+         * {@link KeyguardStatusBarViewController} and remove this method.
+         */
+        boolean shouldHeadsUpBeVisible();
+    }
+
+    private final NotificationPanelViewStateProvider mNotificationPanelViewStateProvider =
+            new NotificationPanelViewStateProvider() {
+                @Override
+                public float getPanelViewExpandedHeight() {
+                    return getExpandedHeight();
+                }
+
+                @Override
+                public float getQsExpansionFraction() {
+                    return computeQsExpansionFraction();
+                }
+
+                @Override
+                public boolean shouldHeadsUpBeVisible() {
+                    return mHeadsUpAppearanceController.shouldBeVisible();
+                }
+            };
 
     /**
      * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
