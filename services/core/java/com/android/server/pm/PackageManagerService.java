@@ -7637,7 +7637,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             List<String> deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
-                    true /* onlyCoreApps */);
+                    true /* onlyCoreApps */, null);
             mPrepareAppDataFuture = SystemServerInitThreadPool.submit(() -> {
                 TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                         Trace.TRACE_TAG_PACKAGE_MANAGER);
@@ -21636,7 +21636,8 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
                 synchronized (mInstallLock) {
-                    reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
+                    reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */,
+                            null);
                 }
             } catch (IllegalStateException e) {
                 // Device was probably ejected, and we'll process that event momentarily
@@ -21825,21 +21826,32 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps on all mounted volumes.
+     *
+     * @param reconciledPackages A set that will be populated with package names that have
+     *                           successfully had their data reconciled. Any package names already
+     *                           contained will be skipped. Because this must be mutable when
+     *                           non-null, it is typed {@link ArraySet} to prevent accidental
+     *                           usage of {@link Collections#emptySet()}. Null can be passed if the
+     *                           caller doesn't need this functionality.
      */
-    void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
+    @NonNull
+    void reconcileAppsData(int userId, int flags, boolean migrateAppsData,
+            @Nullable ArraySet<String> reconciledPackages) {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
             synchronized (mInstallLock) {
-                reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData);
+                reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData,
+                        reconciledPackages);
             }
         }
     }
 
     @GuardedBy("mInstallLock")
     private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData) {
-        reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
+            boolean migrateAppData, @Nullable ArraySet<String> reconciledPackages) {
+        reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */,
+                reconciledPackages);
     }
 
     /**
@@ -21854,7 +21866,8 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @GuardedBy("mInstallLock")
     private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData, boolean onlyCoreApps) {
+            boolean migrateAppData, boolean onlyCoreApps,
+            @Nullable ArraySet<String> reconciledPackages) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
         List<String> result = onlyCoreApps ? new ArrayList<>() : null;
@@ -21917,6 +21930,9 @@ public class PackageManagerService extends IPackageManager.Stub
         int preparedCount = 0;
         for (PackageSetting ps : packages) {
             final String packageName = ps.name;
+            if (reconciledPackages != null && reconciledPackages.contains(packageName)) {
+                continue;
+            }
             if (ps.pkg == null) {
                 Slog.w(TAG, "Odd, missing scanned package " + packageName);
                 // TODO: might be due to legacy ASEC apps; we should circle back
@@ -21932,6 +21948,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps.getInstalled(userId)) {
                 prepareAppDataAndMigrate(batch, ps.pkg, userId, flags, migrateAppData);
                 preparedCount++;
+
+                if (reconciledPackages != null) {
+                    reconciledPackages.add(packageName);
+                }
             }
         }
         executeBatchLI(batch);
