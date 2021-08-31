@@ -72,6 +72,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.KeyguardController.KEYGUARD_SLEEP_TOKEN_TAG;
+import static com.android.server.wm.RootWindowContainerProto.DEFAULT_MIN_SIZE_RESIZABLE_TASK;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
@@ -1253,6 +1254,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         pw.println(mTopFocusedDisplayId);
     }
 
+    void dumpDefaultMinSizeOfResizableTask(PrintWriter pw) {
+        pw.print("  mDefaultMinSizeOfResizeableTaskDp=");
+        pw.println(mDefaultMinSizeOfResizeableTaskDp);
+    }
+
     void dumpLayoutNeededDisplayIds(PrintWriter pw) {
         if (!isLayoutNeeded()) {
             return;
@@ -1299,7 +1305,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mTaskSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-
+        proto.write(DEFAULT_MIN_SIZE_RESIZABLE_TASK, mDefaultMinSizeOfResizeableTaskDp);
         proto.end(token);
     }
 

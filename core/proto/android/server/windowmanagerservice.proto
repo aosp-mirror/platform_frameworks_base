@@ -69,6 +69,7 @@ message RootWindowContainerProto {
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
     repeated IdentifierProto pending_activities = 7 [deprecated=true];
+    optional int32 default_min_size_resizable_task = 8;
 }
 
 message BarControllerProto {
