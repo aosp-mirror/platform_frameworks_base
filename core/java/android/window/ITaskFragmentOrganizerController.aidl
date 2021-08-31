@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
 
 /** @hide */
@@ -30,4 +31,17 @@ interface ITaskFragmentOrganizerController {
      * Unregisters a previously registered TaskFragmentOrganizer.
      */
     void unregisterOrganizer(in ITaskFragmentOrganizer organizer);
+
+    /**
+     * Registers remote animations per transition type for the organizer. It will override the
+     * animations if the transition only contains windows that belong to the organized
+     * TaskFragments.
+     */
+    void registerRemoteAnimations(in ITaskFragmentOrganizer organizer,
+        in RemoteAnimationDefinition definition);
+
+    /**
+     * Unregisters remote animations per transition type for the organizer.
+     */
+    void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer);
 }
