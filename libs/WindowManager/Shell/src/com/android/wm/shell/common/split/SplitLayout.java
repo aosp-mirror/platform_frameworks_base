@@ -40,6 +40,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -54,12 +56,13 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
  * divide position changes.
  */
-public final class SplitLayout {
+public final class SplitLayout implements DisplayInsetsController.OnInsetsChangedListener {
     /**
      * Split position isn't specified normally meaning to use what ever it is currently set to.
      */
@@ -102,6 +105,7 @@ public final class SplitLayout {
     private final ImePositionProcessor mImePositionProcessor;
     private final DismissingParallaxPolicy mDismissingParallaxPolicy;
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final InsetsState mInsetsState = new InsetsState();
 
     private Context mContext;
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
@@ -249,7 +253,7 @@ public final class SplitLayout {
     public void init() {
         if (mInitialized) return;
         mInitialized = true;
-        mSplitWindowManager.init(this);
+        mSplitWindowManager.init(this, mInsetsState);
         mDisplayImeController.addPositionProcessor(mImePositionProcessor);
     }
 
@@ -260,6 +264,23 @@ public final class SplitLayout {
         mSplitWindowManager.release();
         mDisplayImeController.removePositionProcessor(mImePositionProcessor);
         mImePositionProcessor.reset();
+    }
+
+    @Override
+    public void insetsChanged(InsetsState insetsState) {
+        mInsetsState.set(insetsState);
+        if (!mInitialized) {
+            return;
+        }
+        mSplitWindowManager.onInsetsChanged(insetsState);
+    }
+
+    @Override
+    public void insetsControlChanged(InsetsState insetsState,
+            InsetsSourceControl[] activeControls) {
+        if (!mInsetsState.equals(insetsState)) {
+            insetsChanged(insetsState);
+        }
     }
 
     /**
@@ -506,7 +527,7 @@ public final class SplitLayout {
         /**
          * Applies a parallax to the task to hint dismissing progress.
          *
-         * @param position the split position to apply dismissing parallax effect
+         * @param position    the split position to apply dismissing parallax effect
          * @param isLandscape indicates whether it's splitting horizontally or vertically
          */
         void applyDividerPosition(int position, boolean isLandscape) {
@@ -518,11 +539,11 @@ public final class SplitLayout {
             if (position <= mDividerSnapAlgorithm.getFirstSplitTarget().position) {
                 mDismissingSide = isLandscape ? DOCKED_LEFT : DOCKED_TOP;
                 totalDismissingDistance = mDividerSnapAlgorithm.getDismissStartTarget().position
-                                - mDividerSnapAlgorithm.getFirstSplitTarget().position;
+                        - mDividerSnapAlgorithm.getFirstSplitTarget().position;
             } else if (position >= mDividerSnapAlgorithm.getLastSplitTarget().position) {
                 mDismissingSide = isLandscape ? DOCKED_RIGHT : DOCKED_BOTTOM;
                 totalDismissingDistance = mDividerSnapAlgorithm.getLastSplitTarget().position
-                                - mDividerSnapAlgorithm.getDismissEndTarget().position;
+                        - mDividerSnapAlgorithm.getDismissEndTarget().position;
             }
 
             if (mDismissingSide != DOCKED_INVALID) {

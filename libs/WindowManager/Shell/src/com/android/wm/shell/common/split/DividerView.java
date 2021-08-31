@@ -19,15 +19,23 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Property;
+import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControlViewHost;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -44,6 +52,23 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
+    // TODO(b/191269755): use the value defined in InsetsController.
+    private static final Interpolator RESIZE_INTERPOLATOR = Interpolators.LINEAR;
+
+    // TODO(b/191269755): use the value defined in InsetsController.
+    private static final int ANIMATION_DURATION_RESIZE = 300;
+
+    /**
+     * The task bar height defined in launcher. Used to determine whether to insets divider bounds
+     * or not.
+     */
+    private static final int EXPANDED_TASK_BAR_HEIGHT_IN_DP = 60;
+
+    /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
+    private final float mExpandedTaskBarHeight = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, EXPANDED_TASK_BAR_HEIGHT_IN_DP,
+            getResources().getDisplayMetrics());
+
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private SplitLayout mSplitLayout;
@@ -57,6 +82,31 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private int mStartPos;
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
+
+    /**
+     * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
+     * insets.
+     */
+    private final Rect mDividerBounds = new Rect();
+    private final Rect mTempRect = new Rect();
+    private FrameLayout mDividerBar;
+
+
+    static final Property<DividerView, Integer> DIVIDER_HEIGHT_PROPERTY =
+            new Property<DividerView, Integer>(Integer.class, "height") {
+                @Override
+                public Integer get(DividerView object) {
+                    return object.mDividerBar.getLayoutParams().height;
+                }
+
+                @Override
+                public void set(DividerView object, Integer value) {
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)
+                            object.mDividerBar.getLayoutParams();
+                    lp.height = value;
+                    object.mDividerBar.setLayoutParams(lp);
+                }
+            };
 
     public DividerView(@NonNull Context context) {
         super(context);
@@ -79,14 +129,42 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     /** Sets up essential dependencies of the divider bar. */
     public void setup(
             SplitLayout layout,
-            SurfaceControlViewHost viewHost) {
+            SurfaceControlViewHost viewHost,
+            InsetsState insetsState) {
         mSplitLayout = layout;
         mViewHost = viewHost;
+        mDividerBounds.set(layout.getDividerBounds());
+        onInsetsChanged(insetsState, false /* animate */);
+    }
+
+    void onInsetsChanged(InsetsState insetsState, boolean animate) {
+        mTempRect.set(mSplitLayout.getDividerBounds());
+        final InsetsSource taskBarInsetsSource =
+                insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        // Only insets the divider bar with task bar when it's expanded so that the rounded corners
+        // will be drawn against task bar.
+        if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+            mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
+        }
+
+        if (!mTempRect.equals(mDividerBounds)) {
+            if (animate) {
+                ObjectAnimator animator = ObjectAnimator.ofInt(this,
+                        DIVIDER_HEIGHT_PROPERTY, mDividerBounds.height(), mTempRect.height());
+                animator.setInterpolator(RESIZE_INTERPOLATOR);
+                animator.setDuration(ANIMATION_DURATION_RESIZE);
+                animator.start();
+            } else {
+                DIVIDER_HEIGHT_PROPERTY.set(this, mTempRect.height());
+            }
+            mDividerBounds.set(mTempRect);
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
         mTouchElevation = getResources().getDimensionPixelSize(
