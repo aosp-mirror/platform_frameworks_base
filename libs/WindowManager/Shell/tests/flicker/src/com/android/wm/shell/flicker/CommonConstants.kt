@@ -17,8 +17,8 @@
 @file:JvmName("CommonConstants")
 package com.android.wm.shell.flicker
 
-import android.content.ComponentName
+import com.android.server.wm.traces.common.FlickerComponentName
 
 const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
-val APP_PAIR_SPLIT_DIVIDER_COMPONENT = ComponentName("", "AppPairSplitDivider#")
-val DOCKED_STACK_DIVIDER_COMPONENT = ComponentName("", "DockedStackDivider#")
+val APP_PAIR_SPLIT_DIVIDER_COMPONENT = FlickerComponentName("", "AppPairSplitDivider#")
+val DOCKED_STACK_DIVIDER_COMPONENT = FlickerComponentName("", "DockedStackDivider#")

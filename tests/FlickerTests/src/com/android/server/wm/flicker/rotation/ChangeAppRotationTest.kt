@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.ROTATION_COMPONENT
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,7 +72,7 @@ class ChangeAppRotationTest(
         testSpec.assertLayers {
             this.isVisible(testApp.component)
                 .then()
-                .isVisible(ROTATION_COMPONENT)
+                .isVisible(FlickerComponentName.ROTATION)
                 .then()
                 .isVisible(testApp.component)
         }
