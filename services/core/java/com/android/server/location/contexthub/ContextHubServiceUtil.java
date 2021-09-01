@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.content.Context;
+import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.Result;
@@ -255,5 +256,22 @@ import java.util.List;
             newAppInfo.add(newInfo);
         }
         return newAppInfo;
+    }
+
+    /**
+     * Converts a HIDL AsyncEventType to the corresponding ContextHubService.CONTEXT_HUB_EVENT_*.
+     *
+     * @param hidlEventType The AsyncEventType value.
+     * @return The converted event type.
+     */
+    /* package */
+    static int toContextHubEvent(int hidlEventType) {
+        switch (hidlEventType) {
+            case AsyncEventType.RESTARTED:
+                return ContextHubService.CONTEXT_HUB_EVENT_RESTARTED;
+            default:
+                Log.e(TAG, "toContextHubEvent: Unknown event type: " + hidlEventType);
+                return ContextHubService.CONTEXT_HUB_EVENT_UNKNOWN;
+        }
     }
 }
