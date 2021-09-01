@@ -2995,8 +2995,6 @@
     <!-- URL for more information about changes in global actions -->
     <string name="global_actions_change_url" translatable="false"></string>
 
-    <!-- Provider Model: Title of the airplane mode in the internet dialog. [CHAR LIMIT=50] -->
-    <string name="airplane_mode">Airplane mode</string>
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>
     <!-- Provider Model: Summary text separator for preferences including a short description
