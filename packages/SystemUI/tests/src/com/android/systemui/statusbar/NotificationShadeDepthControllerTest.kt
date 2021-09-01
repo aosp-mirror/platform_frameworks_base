@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
@@ -178,10 +179,21 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun setQsPanelExpansion_appliesBlur() {
+        statusBarState = StatusBarState.KEYGUARD
         notificationShadeDepthController.qsPanelExpansion = 1f
-        notificationShadeDepthController.onPanelExpansionChanged(0.5f, tracking = false)
+        notificationShadeDepthController.onPanelExpansionChanged(1f, tracking = false)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), anyInt(), eq(false))
+        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
+    fun setQsPanelExpansion_easing() {
+        statusBarState = StatusBarState.KEYGUARD
+        notificationShadeDepthController.qsPanelExpansion = 0.25f
+        notificationShadeDepthController.onPanelExpansionChanged(1f, tracking = false)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(wallpaperManager).setWallpaperZoomOut(any(),
+                eq(Interpolators.getNotificationScrimAlpha(0.25f, false /* notifications */)))
     }
 
     @Test
