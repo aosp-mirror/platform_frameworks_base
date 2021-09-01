@@ -28,6 +28,7 @@ import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
 import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
+import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -460,8 +461,9 @@ class Agent {
                 Math.min(ongoingEvent.reward.maxDailyReward - rewardSum, computedDelta));
     }
 
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void recordTransactionLocked(final int userId, @NonNull final String pkgName,
+    void recordTransactionLocked(final int userId, @NonNull final String pkgName,
             @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction,
             final boolean notifyOnAffordabilityChange) {
         if (transaction.delta == 0) {
@@ -476,12 +478,14 @@ class Agent {
         final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
         final long newArcsInCirculation = mCurrentNarcsInCirculation + transaction.delta;
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
-            final long newDelta = maxCirculationAllowed - mCurrentNarcsInCirculation;
+            // Set lower bound at 0 so we don't accidentally take away credits when we were trying
+            // to _give_ the app credits.
+            final long newDelta = Math.max(0, maxCirculationAllowed - mCurrentNarcsInCirculation);
             Slog.i(TAG, "Would result in too many credits in circulation. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for " + appToString(userId, pkgName)
-                    + " by " + (transaction.delta - newDelta));
+                    + " by " + narcToString(transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
                     transaction.eventId, transaction.tag, newDelta);
@@ -490,12 +494,15 @@ class Agent {
         if (transaction.delta > 0
                 && originalBalance + transaction.delta
                 > mCompleteEconomicPolicy.getMaxSatiatedBalance()) {
-            final long newDelta = mCompleteEconomicPolicy.getMaxSatiatedBalance() - originalBalance;
+            // Set lower bound at 0 so we don't accidentally take away credits when we were trying
+            // to _give_ the app credits.
+            final long newDelta =
+                    Math.max(0, mCompleteEconomicPolicy.getMaxSatiatedBalance() - originalBalance);
             Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for " + appToString(userId, pkgName)
-                    + " by " + (transaction.delta - newDelta));
+                    + " by " + narcToString(transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
                     transaction.eventId, transaction.tag, newDelta);
