@@ -433,12 +433,27 @@ public class AutoclickController extends BaseEventStreamTransformation {
                     MotionEvent.BUTTON_PRIMARY, 1.0f, 1.0f, mLastMotionEvent.getDeviceId(), 0,
                     mLastMotionEvent.getSource(), mLastMotionEvent.getFlags());
 
-            // The only real difference between these two events is the action flag.
+            MotionEvent pressEvent = MotionEvent.obtain(downEvent);
+            pressEvent.setAction(MotionEvent.ACTION_BUTTON_PRESS);
+            pressEvent.setActionButton(MotionEvent.BUTTON_PRIMARY);
+
+            MotionEvent releaseEvent = MotionEvent.obtain(downEvent);
+            releaseEvent.setAction(MotionEvent.ACTION_BUTTON_RELEASE);
+            releaseEvent.setActionButton(MotionEvent.BUTTON_PRIMARY);
+            releaseEvent.setButtonState(0);
+
             MotionEvent upEvent = MotionEvent.obtain(downEvent);
             upEvent.setAction(MotionEvent.ACTION_UP);
+            upEvent.setButtonState(0);
 
             AutoclickController.super.onMotionEvent(downEvent, downEvent, mEventPolicyFlags);
             downEvent.recycle();
+
+            AutoclickController.super.onMotionEvent(pressEvent, pressEvent, mEventPolicyFlags);
+            pressEvent.recycle();
+
+            AutoclickController.super.onMotionEvent(releaseEvent, releaseEvent, mEventPolicyFlags);
+            releaseEvent.recycle();
 
             AutoclickController.super.onMotionEvent(upEvent, upEvent, mEventPolicyFlags);
             upEvent.recycle();
