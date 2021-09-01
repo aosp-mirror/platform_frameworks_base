@@ -23,11 +23,8 @@ import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPH
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
 
-import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -935,11 +932,12 @@ final class HotwordDetectionConnection {
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
     private void enforcePermissionsForDataDelivery() {
         Binder.withCleanCallingIdentity(() -> {
-            enforcePermissionForPreflight(mContext, mVoiceInteractorIdentity, RECORD_AUDIO);
-            int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-            mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp,
-                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE);
+            // Hack to make sure we show the mic privacy-indicator since the Trusted Hotword
+            // requirement isn't being enforced for now. Normally, we would note the HOTWORD op here
+            // instead.
+            enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
+                    RECORD_AUDIO, OP_MESSAGE);
+
             enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                     CAPTURE_AUDIO_HOTWORD, OP_MESSAGE);
         });
