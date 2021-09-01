@@ -20,7 +20,6 @@ import android.app.Service;
 
 import com.android.systemui.ImageWallpaper;
 import com.android.systemui.SystemUIService;
-import com.android.systemui.communal.service.CommunalService;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
 import com.android.systemui.keyguard.KeyguardService;
@@ -36,12 +35,6 @@ import dagger.multibindings.IntoMap;
  */
 @Module
 public abstract class DefaultServiceBinder {
-    /** */
-    @Binds
-    @IntoMap
-    @ClassKey(CommunalService.class)
-    public abstract Service bindCommunalService(CommunalService service);
-
     /** */
     @Binds
     @IntoMap
