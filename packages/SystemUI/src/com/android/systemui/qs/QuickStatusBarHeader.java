@@ -140,6 +140,10 @@ public class QuickStatusBarHeader extends FrameLayout {
         mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
 
         updateResources();
+        Configuration config = mContext.getResources().getConfiguration();
+        setDatePrivacyContainersWidth(config.orientation == Configuration.ORIENTATION_LANDSCAPE);
+        setSecurityHeaderContainerVisibility(
+                config.orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
@@ -189,6 +193,8 @@ public class QuickStatusBarHeader extends FrameLayout {
         super.onConfigurationChanged(newConfig);
         updateResources();
         setDatePrivacyContainersWidth(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
+        setSecurityHeaderContainerVisibility(
+                newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -207,6 +213,10 @@ public class QuickStatusBarHeader extends FrameLayout {
         lp.width = landscape ? WRAP_CONTENT : 0;
         lp.weight = landscape ? 0f : 1f;
         mPrivacyContainer.setLayoutParams(lp);
+    }
+
+    private void setSecurityHeaderContainerVisibility(boolean landscape) {
+        mSecurityHeaderView.setVisibility(landscape ? VISIBLE : GONE);
     }
 
     private void updateBatteryMode() {
