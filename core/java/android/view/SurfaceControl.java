@@ -239,6 +239,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetGPUContextPriority();
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
+    private static native int nativeGetLayerId(long nativeObject);
 
     @Nullable
     @GuardedBy("mLock")
@@ -353,8 +354,6 @@ public final class SurfaceControl implements Parcelable {
     private int mWidth;
     @GuardedBy("mLock")
     private int mHeight;
-
-    private int mTransformHint;
 
     private WeakReference<View> mLocalOwnerView;
 
@@ -3651,5 +3650,16 @@ public final class SurfaceControl implements Parcelable {
      */
     public void setTransformHint(@Surface.Rotation int transformHint) {
         nativeSetTransformHint(mNativeObject, transformHint);
+    }
+
+    /**
+     * @hide
+     */
+    public int getLayerId() {
+        if (mNativeObject != 0) {
+            return nativeGetLayerId(mNativeObject);
+        }
+
+        return -1;
     }
 }
