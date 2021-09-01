@@ -248,8 +248,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
-    protected Intent getWifiDetailsSettingsIntent() {
-        String key = mConnectedEntry == null ? null : mConnectedEntry.getKey();
+    protected Intent getWifiDetailsSettingsIntent(String key) {
         if (TextUtils.isEmpty(key)) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry's key is empty");
@@ -557,8 +556,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
     }
 
-    void launchWifiNetworkDetailsSetting() {
-        Intent intent = getWifiDetailsSettingsIntent();
+    void launchWifiNetworkDetailsSetting(String key) {
+        Intent intent = getWifiDetailsSettingsIntent(key);
         if (intent != null) {
             mCallback.dismissDialog();
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
