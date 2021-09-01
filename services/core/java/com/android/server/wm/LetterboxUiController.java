@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import static com.android.server.wm.ActivityRecord.computeAspectRatio;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
@@ -32,6 +33,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -40,6 +42,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
@@ -171,6 +174,31 @@ final class LetterboxUiController {
                 // between apps or activities.
                 ? mLetterboxConfiguration.getHorizontalMultiplierForReachability()
                 : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
+    }
+
+    float getFixedOrientationLetterboxAspectRatio(Configuration parentConfiguration) {
+        // Don't check resolved windowing mode because it may not be updated yet during
+        // configuration change.
+        if (!isReachabilityEnabled(parentConfiguration)) {
+            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+        }
+
+        int dividerWindowWidth =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
+        int dividerInsets =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
+        int dividerSize = dividerWindowWidth - dividerInsets * 2;
+
+        // Getting the same aspect ratio that apps get in split screen.
+        Rect bounds = new Rect(parentConfiguration.windowConfiguration.getAppBounds());
+        bounds.inset(dividerSize, /* dy */ 0);
+        bounds.right = bounds.centerX();
+
+        return computeAspectRatio(bounds);
+    }
+
+    Resources getResources() {
+        return mActivityRecord.mWmService.mContext.getResources();
     }
 
     private void handleDoubleTap() {
@@ -333,7 +361,7 @@ final class LetterboxUiController {
         }
 
         pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
-        pw.println(prefix + "  letterboxAspectRatio="
+        pw.println(prefix + "  activityAspectRatio="
                 + mActivityRecord.computeAspectRatio(mActivityRecord.getBounds()));
 
         boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
@@ -360,6 +388,9 @@ final class LetterboxUiController {
         pw.println(prefix + "  isReachabilityEnabled=" + isReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
                 + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
+                + getFixedOrientationLetterboxAspectRatio(
+                        mActivityRecord.getParent().getConfiguration()));
     }
 
     /**
