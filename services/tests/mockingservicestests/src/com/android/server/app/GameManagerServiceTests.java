@@ -182,7 +182,14 @@ public class GameManagerServiceTests {
     }
 
     private void mockDeviceConfigPerformance() {
-        String configString = "mode=2,downscaleFactor=0.5";
+        String configString = "mode=2,downscaleFactor=0.5,useAngle=false";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+    }
+
+    // ANGLE will be disabled for most apps, so treat enabling ANGLE as a special case.
+    private void mockDeviceConfigPerformanceEnableAngle() {
+        String configString = "mode=2,downscaleFactor=0.5,useAngle=true";
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configString);
     }
@@ -212,7 +219,8 @@ public class GameManagerServiceTests {
     }
 
     private void mockGameModeOptInAll() throws Exception {
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
         Bundle metaDataBundle = new Bundle();
         metaDataBundle.putBoolean(
                 GameManagerService.GamePackageConfiguration.METADATA_PERFORMANCE_MODE_ENABLE, true);
@@ -224,7 +232,8 @@ public class GameManagerServiceTests {
     }
 
     private void mockGameModeOptInPerformance() throws Exception {
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
         Bundle metaDataBundle = new Bundle();
         metaDataBundle.putBoolean(
                 GameManagerService.GamePackageConfiguration.METADATA_PERFORMANCE_MODE_ENABLE, true);
@@ -234,7 +243,8 @@ public class GameManagerServiceTests {
     }
 
     private void mockGameModeOptInBattery() throws Exception {
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
         Bundle metaDataBundle = new Bundle();
         metaDataBundle.putBoolean(
                 GameManagerService.GamePackageConfiguration.METADATA_BATTERY_MODE_ENABLE, true);
@@ -244,7 +254,8 @@ public class GameManagerServiceTests {
     }
 
     private void mockInterventionAllowDownscaleTrue() throws Exception {
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
         Bundle metaDataBundle = new Bundle();
         metaDataBundle.putBoolean(
                 GameManagerService.GamePackageConfiguration.METADATA_WM_ALLOW_DOWNSCALE, true);
@@ -254,10 +265,32 @@ public class GameManagerServiceTests {
     }
 
     private void mockInterventionAllowDownscaleFalse() throws Exception {
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
         Bundle metaDataBundle = new Bundle();
         metaDataBundle.putBoolean(
                 GameManagerService.GamePackageConfiguration.METADATA_WM_ALLOW_DOWNSCALE, false);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockInterventionAllowAngleTrue() throws Exception {
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_ANGLE_ALLOW_ANGLE, true);
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockInterventionAllowAngleFalse() throws Exception {
+        final ApplicationInfo applicationInfo = mMockPackageManager.getApplicationInfoAsUser(
+                mPackageName, PackageManager.GET_META_DATA, USER_ID_1);
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_ANGLE_ALLOW_ANGLE, false);
         applicationInfo.metaData = metaDataBundle;
         when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
@@ -427,6 +460,19 @@ public class GameManagerServiceTests {
         assertEquals(config.getGameModeConfiguration(gameMode).getScaling(), scaling);
     }
 
+    private void checkAngleEnabled(GameManagerService gameManagerService, int gameMode,
+            boolean angleEnabled) {
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+
+        // Validate GamePackageConfiguration returns the correct value.
+        GameManagerService.GamePackageConfiguration config =
+                gameManagerService.getConfig(mPackageName);
+        assertEquals(config.getGameModeConfiguration(gameMode).getUseAngle(), angleEnabled);
+
+        // Validate GameManagerService.getAngleEnabled() returns the correct value.
+        assertEquals(gameManagerService.getAngleEnabled(mPackageName, USER_ID_1), angleEnabled);
+    }
+
     /**
      * Phenotype device config exists, but is only propagating the default value.
      */
@@ -589,6 +635,50 @@ public class GameManagerServiceTests {
         mockInterventionAllowDownscaleTrue();
         mockModifyGameModeGranted();
         checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "0.5");
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app hasn't specified any metadata.
+     */
+    @Test
+    public void testInterventionAllowAngleDefault() throws Exception {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, false);
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app has opted-out of ANGLE.
+     */
+    @Test
+    public void testInterventionAllowAngleFalse() throws Exception {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        mockDeviceConfigPerformanceEnableAngle();
+        mockInterventionAllowAngleFalse();
+        mockModifyGameModeGranted();
+        checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, false);
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app has redundantly specified
+     * the ANGLE metadata default value of "true".
+     */
+    @Test
+    public void testInterventionAllowAngleTrue() throws Exception {
+        mockDeviceConfigPerformanceEnableAngle();
+        mockInterventionAllowAngleTrue();
+
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        mockModifyGameModeGranted();
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+
+        checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, true);
     }
 
     /**
