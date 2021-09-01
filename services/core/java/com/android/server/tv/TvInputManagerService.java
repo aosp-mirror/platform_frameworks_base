@@ -2304,10 +2304,9 @@ public final class TvInputManagerService extends SystemService {
         public void requestChannelBrowsable(Uri channelUri, int userId)
                 throws RemoteException {
             final String callingPackageName = getCallingPackageName();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "requestChannelBrowsable");
             final long identity = Binder.clearCallingIdentity();
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                userId, "requestChannelBrowsable");
             try {
                 Intent intent = new Intent(TvContract.ACTION_CHANNEL_BROWSABLE_REQUESTED);
                 List<ResolveInfo> list = getContext().getPackageManager()
