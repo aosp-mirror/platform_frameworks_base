@@ -8111,9 +8111,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean animateStarting = false;
             while (timeoutRemaining > 0) {
                 // Waiting until all starting windows has finished animating.
-                animateStarting = mRoot.forAllActivities(a -> {
-                    return a.hasStartingWindow();
-                });
+                animateStarting = !mAtmService.getTransitionController().isShellTransitionsEnabled()
+                        && mRoot.forAllActivities(ActivityRecord::hasStartingWindow);
                 boolean isAnimating = mAnimator.isAnimationScheduled()
                         || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL)
                         || animateStarting;
