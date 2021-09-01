@@ -337,7 +337,7 @@ public:
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) override;
     bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid, int32_t injectorUid) override;
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
-    void setPointerCapture(bool enabled) override;
+    void setPointerCapture(const PointerCaptureRequest& request) override;
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
@@ -372,8 +372,8 @@ private:
         // Show touches feature enable/disable.
         bool showTouches;
 
-        // Pointer capture feature enable/disable.
-        bool pointerCapture;
+        // The latest request to enable or disable Pointer Capture.
+        PointerCaptureRequest pointerCaptureRequest;
 
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
@@ -417,7 +417,6 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
-        mLocked.pointerCapture = false;
         mLocked.pointerDisplayId = ADISPLAY_ID_DEFAULT;
     }
     mInteractive = true;
@@ -446,7 +445,9 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                 toString(mLocked.pointerGesturesEnabled));
         dump += StringPrintf(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
-        dump += StringPrintf(INDENT "Pointer Capture Enabled: %s\n", toString(mLocked.pointerCapture));
+        dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
+                             mLocked.pointerCaptureRequest.enable ? "Enabled" : "Disabled",
+                             mLocked.pointerCaptureRequest.seq);
     }
     dump += "\n";
 
@@ -634,7 +635,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->showTouches = mLocked.showTouches;
 
-        outConfig->pointerCapture = mLocked.pointerCapture;
+        outConfig->pointerCaptureRequest = mLocked.pointerCaptureRequest;
 
         outConfig->setDisplayViewports(mLocked.viewports);
 
@@ -1383,16 +1384,16 @@ void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedTok
     checkAndClearExceptionFromCallback(env, "onPointerDownOutsideFocus");
 }
 
-void NativeInputManager::setPointerCapture(bool enabled) {
+void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request) {
     { // acquire lock
         AutoMutex _l(mLock);
 
-        if (mLocked.pointerCapture == enabled) {
+        if (mLocked.pointerCaptureRequest == request) {
             return;
         }
 
-        ALOGV("%s pointer capture.", enabled ? "Enabling" : "Disabling");
-        mLocked.pointerCapture = enabled;
+        ALOGV("%s pointer capture.", request.enable ? "Enabling" : "Disabling");
+        mLocked.pointerCaptureRequest = request;
     } // release lock
 
     mInputManager->getReader()->requestRefreshConfiguration(
