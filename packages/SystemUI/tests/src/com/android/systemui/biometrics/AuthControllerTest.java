@@ -565,8 +565,9 @@ public class AuthControllerTest extends SysuiTestCase {
                 credentialAllowed,
                 true /* requireConfirmation */,
                 0 /* userId */,
-                "testPackage",
                 0 /* operationId */,
+                "testPackage",
+                1 /* requestId */,
                 BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT);
     }
 
@@ -612,7 +613,7 @@ public class AuthControllerTest extends SysuiTestCase {
         @Override
         protected AuthDialog buildDialog(PromptInfo promptInfo,
                 boolean requireConfirmation, int userId, int[] sensorIds, boolean credentialAllowed,
-                String opPackageName, boolean skipIntro, long operationId,
+                String opPackageName, boolean skipIntro, long operationId, long requestId,
                 @BiometricManager.BiometricMultiSensorMode int multiSensorConfig) {
 
             mLastBiometricPromptInfo = promptInfo;
