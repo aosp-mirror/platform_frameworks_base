@@ -360,6 +360,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private boolean mCallingFadingAwayAfterReveal;
 
     public interface ExpansionChangedListener {
         void onExpansionChanged(float expansion, boolean expanded);
@@ -639,7 +640,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         + "mStatusBarKeyguardViewManager was null");
                 return;
             }
-            if (mKeyguardStateController.isKeyguardFadingAway()) {
+            if (mKeyguardStateController.isKeyguardFadingAway() && !mCallingFadingAwayAfterReveal) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }
         }
@@ -3583,8 +3584,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void fadeKeyguardWhilePulsing() {
         mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
                 ()-> {
-                hideKeyguard();
-                mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+                Runnable finishFading = () -> {
+                    mCallingFadingAwayAfterReveal = false;
+                    hideKeyguard();
+                    mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+                };
+                if (mLightRevealScrim.getRevealAmount() != 1.0f) {
+                    mCallingFadingAwayAfterReveal = true;
+                    // we're still revealing the Light reveal, let's only go to keyguard once
+                    // Going there introduces lots of jank
+                    mLightRevealScrim.setFullyRevealedRunnable(finishFading);
+                } else {
+                    finishFading.run();
+                }
             }).start();
     }
 
