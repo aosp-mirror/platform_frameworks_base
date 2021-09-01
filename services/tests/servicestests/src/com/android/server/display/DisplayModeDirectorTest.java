@@ -56,7 +56,11 @@ import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Handler;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.Temperature;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -116,6 +120,8 @@ public class DisplayModeDirectorTest {
     public SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     public DisplayManagerInternal mDisplayManagerInternalMock;
+    @Mock
+    public IThermalService mThermalServiceMock;
 
     @Before
     public void setUp() throws Exception {
@@ -124,6 +130,7 @@ public class DisplayModeDirectorTest {
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContext);
         when(mContext.getContentResolver()).thenReturn(resolver);
         mInjector = spy(new FakesInjector());
+        when(mInjector.getThermalService()).thenReturn(mThermalServiceMock);
         mHandler = new Handler(Looper.getMainLooper());
 
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
@@ -1547,9 +1554,49 @@ public class DisplayModeDirectorTest {
         assertNull(vote);
     }
 
+    @Test
+    public void testSkinTemperature() throws RemoteException {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.0f, 90.0f}, 0);
+        director.start(createMockSensorManager());
+
+        ArgumentCaptor<IThermalEventListener> thermalEventListener =
+                ArgumentCaptor.forClass(IThermalEventListener.class);
+
+        verify(mThermalServiceMock).registerThermalEventListenerWithType(
+            thermalEventListener.capture(), eq(Temperature.TYPE_SKIN));
+        final IThermalEventListener listener = thermalEventListener.getValue();
+
+        // Verify that there is no skin temperature vote initially.
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
+        assertNull(vote);
+
+        // Set the skin temperature to critical and verify that we added a vote.
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_CRITICAL));
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
+        assertVoteForRefreshRateRange(vote, 0f, 60.f);
+
+        // Set the skin temperature to severe and verify that the vote is gone.
+        listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_SEVERE));
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
+        assertNull(vote);
+    }
+
+    private Temperature getSkinTemp(@Temperature.ThrottlingStatus int status) {
+        return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
+    }
+
     private void assertVoteForRefreshRate(Vote vote, float refreshRate) {
         assertThat(vote).isNotNull();
         final RefreshRateRange expectedRange = new RefreshRateRange(refreshRate, refreshRate);
+        assertThat(vote.refreshRateRange).isEqualTo(expectedRange);
+    }
+
+    private void assertVoteForRefreshRateRange(
+            Vote vote, float refreshRateLow, float refreshRateHigh) {
+        assertThat(vote).isNotNull();
+        final RefreshRateRange expectedRange =
+                new RefreshRateRange(refreshRateLow, refreshRateHigh);
         assertThat(vote.refreshRateRange).isEqualTo(expectedRange);
     }
 
@@ -1746,6 +1793,11 @@ public class DisplayModeDirectorTest {
         @Override
         public boolean isDozeState(Display d) {
             return false;
+        }
+
+        @Override
+        public IThermalService getThermalService() {
+            return null;
         }
 
         void notifyPeakRefreshRateChanged() {

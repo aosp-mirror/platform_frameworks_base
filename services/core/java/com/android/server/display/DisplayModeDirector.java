@@ -36,9 +36,14 @@ import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Temperature;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -108,6 +113,7 @@ public class DisplayModeDirector {
     private final UdfpsObserver mUdfpsObserver;
     private final SensorObserver mSensorObserver;
     private final HbmObserver mHbmObserver;
+    private final SkinThermalStatusObserver mSkinThermalStatusObserver;
     private final DeviceConfigInterface mDeviceConfig;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
@@ -156,6 +162,7 @@ public class DisplayModeDirector {
         };
         mSensorObserver = new SensorObserver(context, ballotBox, injector);
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler());
+        mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, ballotBox);
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
         mAlwaysRespectAppRequest = false;
@@ -174,6 +181,7 @@ public class DisplayModeDirector {
         mBrightnessObserver.observe(sensorManager);
         mSensorObserver.observe();
         mHbmObserver.observe();
+        mSkinThermalStatusObserver.observe();
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
@@ -606,6 +614,7 @@ public class DisplayModeDirector {
             mUdfpsObserver.dumpLocked(pw);
             mSensorObserver.dumpLocked(pw);
             mHbmObserver.dumpLocked(pw);
+            mSkinThermalStatusObserver.dumpLocked(pw);
         }
     }
 
@@ -713,7 +722,6 @@ public class DisplayModeDirector {
     UdfpsObserver getUdpfsObserver() {
         return mUdfpsObserver;
     }
-
 
     @VisibleForTesting
     DesiredDisplayModeSpecs getDesiredDisplayModeSpecsWithInjectedFpsSettings(
@@ -950,16 +958,19 @@ public class DisplayModeDirector {
         // user seeing the display flickering when the switches occur.
         public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 8;
 
+        // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
+        public static final int PRIORITY_SKIN_TEMPERATURE = 9;
+
         // High-brightness-mode may need a specific range of refresh-rates to function properly.
-        public static final int PRIORITY_HIGH_BRIGHTNESS_MODE = 9;
+        public static final int PRIORITY_HIGH_BRIGHTNESS_MODE = 10;
 
         // The proximity sensor needs the refresh rate to be locked in order to function, so this is
         // set to a high priority.
-        public static final int PRIORITY_PROXIMITY = 10;
+        public static final int PRIORITY_PROXIMITY = 11;
 
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 11;
+        public static final int PRIORITY_UDFPS = 12;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -1054,6 +1065,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_PROXIMITY";
                 case PRIORITY_LOW_POWER_MODE:
                     return "PRIORITY_LOW_POWER_MODE";
+                case PRIORITY_SKIN_TEMPERATURE:
+                    return "PRIORITY_SKIN_TEMPERATURE";
                 case PRIORITY_UDFPS:
                     return "PRIORITY_UDFPS";
                 case PRIORITY_USER_SETTING_MIN_REFRESH_RATE:
@@ -2309,6 +2322,52 @@ public class DisplayModeDirector {
         }
     }
 
+    private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {
+        private final BallotBox mBallotBox;
+        private final Injector mInjector;
+
+        private @Temperature.ThrottlingStatus int mStatus = -1;
+
+        SkinThermalStatusObserver(Injector injector, BallotBox ballotBox) {
+            mInjector = injector;
+            mBallotBox = ballotBox;
+        }
+
+        @Override
+        public void notifyThrottling(Temperature temp) {
+            mStatus = temp.getStatus();
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "New thermal throttling status "
+                        + ", current thermal status = " + mStatus);
+            }
+            final Vote vote;
+            if (mStatus >= Temperature.THROTTLING_CRITICAL) {
+                vote = Vote.forRefreshRates(0f, 60f);
+            } else {
+                vote = null;
+            }
+            mBallotBox.vote(GLOBAL_ID, Vote.PRIORITY_SKIN_TEMPERATURE, vote);
+        }
+
+        public void observe() {
+            IThermalService thermalService = mInjector.getThermalService();
+            if (thermalService == null) {
+                Slog.w(TAG, "Could not observe thermal status. Service not available");
+                return;
+            }
+            try {
+                thermalService.registerThermalEventListenerWithType(this, Temperature.TYPE_SKIN);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register thermal status listener", e);
+            }
+        }
+
+        void dumpLocked(PrintWriter writer) {
+            writer.println("  SkinThermalStatusObserver:");
+            writer.println("    mStatus: " + mStatus);
+        }
+    }
+
     private class DeviceConfigDisplaySettings implements DeviceConfig.OnPropertiesChangedListener {
         public DeviceConfigDisplaySettings() {
         }
@@ -2470,6 +2529,8 @@ public class DisplayModeDirector {
         BrightnessInfo getBrightnessInfo(int displayId);
 
         boolean isDozeState(Display d);
+
+        IThermalService getThermalService();
     }
 
     @VisibleForTesting
@@ -2528,6 +2589,12 @@ public class DisplayModeDirector {
                 return false;
             }
             return Display.isDozeState(d.getState());
+        }
+
+        @Override
+        public IThermalService getThermalService() {
+            return IThermalService.Stub.asInterface(
+                    ServiceManager.getService(Context.THERMAL_SERVICE));
         }
 
         private DisplayManager getDisplayManager() {
