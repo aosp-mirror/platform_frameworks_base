@@ -91,6 +91,7 @@ LIBANDROID {
     AInputQueue_attachLooper;
     AInputQueue_detachLooper;
     AInputQueue_finishEvent;
+    AInputQueue_fromJava; # introduced=Tiramisu
     AInputQueue_getEvent;
     AInputQueue_hasEvents;
     AInputQueue_preDispatchEvent;
