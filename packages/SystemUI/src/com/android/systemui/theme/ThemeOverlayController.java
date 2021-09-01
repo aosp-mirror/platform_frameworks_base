@@ -521,16 +521,16 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     .map(key -> key + " -> " + categoryToPackage.get(key)).collect(
                             Collectors.joining(", ")));
         }
+        Runnable overlaysAppliedRunnable = () -> onOverlaysApplied();
         if (mNeedsOverlayCreation) {
             mNeedsOverlayCreation = false;
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, new FabricatedOverlay[] {
                     mSecondaryOverlay, mNeutralOverlay
-            }, currentUser, managedProfiles);
+            }, currentUser, managedProfiles, overlaysAppliedRunnable);
         } else {
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, currentUser,
-                    managedProfiles);
+                    managedProfiles, overlaysAppliedRunnable);
         }
-        onOverlaysApplied();
     }
 
     protected void onOverlaysApplied() {

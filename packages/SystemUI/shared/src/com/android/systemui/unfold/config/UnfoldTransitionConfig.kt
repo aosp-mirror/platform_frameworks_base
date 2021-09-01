@@ -19,6 +19,7 @@ import android.annotation.IntDef
 
 interface UnfoldTransitionConfig {
     val isEnabled: Boolean
+    val isHingeAngleEnabled: Boolean
 
     @AnimationMode
     val mode: Int

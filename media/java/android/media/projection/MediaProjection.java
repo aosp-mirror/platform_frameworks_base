@@ -50,6 +50,13 @@ public final class MediaProjection {
     private final Context mContext;
     private final Map<Callback, CallbackRecord> mCallbacks;
 
+    /**
+     * Store the WindowContext in a field. If it is a local variable, and it is garbage collected
+     * during a MediaProjection session, the WindowContainer listener no longer exists.
+     */
+    @Nullable
+    private Context mWindowContext;
+
     /** @hide */
     public MediaProjection(Context context, IMediaProjection impl) {
         mCallbacks = new ArrayMap<Callback, CallbackRecord>();
@@ -162,11 +169,11 @@ public final class MediaProjection {
      */
     private VirtualDisplayConfig.Builder buildMirroredVirtualDisplay(@NonNull String name,
             int width, int height, int dpi) {
-        Context windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
+        mWindowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
                 TYPE_APPLICATION, null /* options */);
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, dpi);
-        builder.setWindowTokenClientToMirror(windowContext.getWindowContextToken());
+        builder.setWindowTokenClientToMirror(mWindowContext.getWindowContextToken());
         return builder;
     }
 
