@@ -16,6 +16,8 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingUtils.NOT_SET;
+
 import android.annotation.NonNull;
 import android.content.pm.PermissionInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -163,7 +165,7 @@ public class ParsedPermissionUtils {
             result = ParsedComponentUtils.parseComponent(
                     permission, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermissionTree_banner,
-                    null /*descriptionAttr*/,
+                    NOT_SET /*descriptionAttr*/,
                     R.styleable.AndroidManifestPermissionTree_icon,
                     R.styleable.AndroidManifestPermissionTree_label,
                     R.styleable.AndroidManifestPermissionTree_logo,

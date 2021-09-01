@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
 import android.app.Activity;
@@ -1368,8 +1369,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setMaxAspectRatio(float maxAspectRatio) {
-        this.mMaxAspectRatio = maxAspectRatio;
+    public void setMaxAspectRatio(@FloatRange(from = 0f) float maxAspectRatio) {
+        this.mMaxAspectRatio = maxAspectRatio >= 0f ? maxAspectRatio : 0f;
     }
 
     /** @hide */
@@ -1378,8 +1379,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setMinAspectRatio(float minAspectRatio) {
-        this.mMinAspectRatio = minAspectRatio;
+    public void setMinAspectRatio(@FloatRange(from = 0f) float minAspectRatio) {
+        this.mMinAspectRatio = minAspectRatio >= 0f ? minAspectRatio : 0f;
     }
 
     /**

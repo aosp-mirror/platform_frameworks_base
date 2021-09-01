@@ -16,8 +16,9 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingUtils.NOT_SET;
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.parsing.ParsingPackage;
@@ -41,9 +42,8 @@ class ParsedComponentUtils {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     static <Component extends ParsedComponent> ParseResult<Component> parseComponent(
             Component component, String tag, ParsingPackage pkg, TypedArray array,
-            boolean useRoundIcon, ParseInput input, int bannerAttr,
-            @Nullable Integer descriptionAttr, int iconAttr, int labelAttr, int logoAttr,
-            int nameAttr, int roundIconAttr) {
+            boolean useRoundIcon, ParseInput input, int bannerAttr, int descriptionAttr,
+            int iconAttr, int labelAttr, int logoAttr, int nameAttr, int roundIconAttr) {
         String name = array.getNonConfigurationString(nameAttr, 0);
         if (TextUtils.isEmpty(name)) {
             return input.error(tag + " does not specify android:name");
@@ -81,7 +81,7 @@ class ParsedComponentUtils {
             component.setBanner(bannerVal);
         }
 
-        if (descriptionAttr != null) {
+        if (descriptionAttr != NOT_SET) {
             component.setDescriptionRes(array.getResourceId(descriptionAttr, 0));
         }
 
