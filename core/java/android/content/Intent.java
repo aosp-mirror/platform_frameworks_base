@@ -4918,6 +4918,12 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_LAUNCHER = "android.intent.category.CAR_LAUNCHER";
     /**
+     * Used to indicate that the activity can be used in communal mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_COMMUNAL_MODE = "android.intent.category.COMMUNAL_MODE";
+    /**
      * Indicates a Leanback settings activity to be displayed in the Leanback launcher.
      * @hide
      */
