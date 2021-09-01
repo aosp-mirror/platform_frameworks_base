@@ -463,6 +463,7 @@
         <!-- started from SensoryPrivacyService -->
         <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
                   android:exported="true"
+                  android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/BottomSheet"
                   android:finishOnCloseSystemDialogs="true">

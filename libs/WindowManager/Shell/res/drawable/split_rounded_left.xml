@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
@@ -14,10 +13,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="@dimen/split_divider_corner_size"
+        android:height="@dimen/split_divider_corner_size"
+        android:viewportWidth="42"
+        android:viewportHeight="42">
 
-<!-- This is a view that shows general status information in Keyguard. -->
-<com.android.systemui.communal.CommunalHostView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/communal_host"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    <group android:pivotX="21"
+           android:pivotY="21"
+           android:rotation="-90">
+        <path
+            android:fillColor="@color/split_divider_background"
+            android:pathData="m 0 0 c 8 0 16 8 16 16 h 10 c 0 -8 8 -16 16 -16 z" />
+    </group>
+
+</vector>

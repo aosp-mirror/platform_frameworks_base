@@ -117,6 +117,7 @@ public class StartingSurfaceDrawer {
     final SplashscreenContentDrawer mSplashscreenContentDrawer;
     private Choreographer mChoreographer;
     private final WindowManagerGlobal mWindowManagerGlobal;
+    private StartingSurface.SysuiProxy mSysuiProxy;
 
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
@@ -151,6 +152,11 @@ public class StartingSurfaceDrawer {
                 : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
                         : com.android.internal.R.style.Theme_DeviceDefault_DayNight;
     }
+
+    void setSysuiProxy(StartingSurface.SysuiProxy sysuiProxy) {
+        mSysuiProxy = sysuiProxy;
+    }
+
     /**
      * Called when a task need a splash screen starting window.
      *
@@ -317,6 +323,9 @@ public class StartingSurfaceDrawer {
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         };
+        if (mSysuiProxy != null) {
+            mSysuiProxy.requestTopUi(true, TAG);
+        }
         mSplashscreenContentDrawer.createContentView(context, suggestType, activityInfo, taskId,
                 viewSupplier::setView);
         try {
@@ -573,6 +582,9 @@ public class StartingSurfaceDrawer {
     }
 
     private void removeWindowInner(View decorView, boolean hideView) {
+        if (mSysuiProxy != null) {
+            mSysuiProxy.requestTopUi(false, TAG);
+        }
         if (hideView) {
             decorView.setVisibility(View.GONE);
         }

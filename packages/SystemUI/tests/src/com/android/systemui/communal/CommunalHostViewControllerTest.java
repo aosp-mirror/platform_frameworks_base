@@ -77,6 +77,9 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     @Mock
     private CommunalSource mCommunalSource;
 
+    @Mock
+    private View mChildView;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -210,5 +213,17 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
 
         // Verify state controller is notified communal view is hidden.
         verify(mCommunalStateController).setCommunalViewShowing(false);
+    }
+
+    @Test
+    public void testAlphaPropagation() {
+        final float alpha = 0.8f;
+
+        // Ensure alpha setting is propagated to children.
+        when(mCommunalView.getChildCount()).thenReturn(1);
+        when(mCommunalView.getChildAt(0)).thenReturn(mChildView);
+        mController.setAlpha(alpha);
+        verify(mChildView).setAlpha(alpha);
+        verify(mCommunalView).setAlpha(alpha);
     }
 }

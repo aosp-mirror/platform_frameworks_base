@@ -30,8 +30,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.contexthub.V1_0.ContextHubMsg;
-import android.hardware.contexthub.V1_0.Result;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubTransaction;
@@ -383,23 +381,20 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 checkNanoappPermsAsync();
             }
 
-            ContextHubMsg messageToNanoApp =
-                    ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
-
-            int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                result = mContextHubProxy.getHub().sendMessageToHub(contextHubId, messageToNanoApp);
+                result = mContextHubProxy.sendMessageToContextHub(
+                    mHostEndPointId, mAttachedContextHubInfo.getId(), message);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
-                        + contextHubId + ")", e);
-                result = Result.UNKNOWN_FAILURE;
+                        + mAttachedContextHubInfo.getId() + ")", e);
+                result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         } else {
             Log.e(TAG, "Failed to send message to nanoapp: client connection is closed");
-            result = Result.UNKNOWN_FAILURE;
+            result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
         }
 
-        return ContextHubServiceUtil.toTransactionResult(result);
+        return result;
     }
 
     /**
