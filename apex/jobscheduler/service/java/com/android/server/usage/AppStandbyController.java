@@ -264,6 +264,11 @@ public class AppStandbyController
     // get the cached value
     private static final long NETWORK_SCORER_CACHE_DURATION_MILLIS = 5000L;
 
+    // Cache the device provisioning package queried from resource config_deviceProvisioningPackage.
+    // Note that there is no synchronization on this method which is okay since in the worst case
+    // scenario, they might be a few extra reads from resources.
+    private String mCachedDeviceProvisioningPackage = null;
+
     // Messages for the handler
     static final int MSG_INFORM_LISTENERS = 3;
     static final int MSG_FORCE_IDLE_STATE = 4;
@@ -1641,9 +1646,11 @@ public class AppStandbyController
      * returns {@code false}.
      */
     private boolean isDeviceProvisioningPackage(String packageName) {
-        String deviceProvisioningPackage = mContext.getResources().getString(
-                com.android.internal.R.string.config_deviceProvisioningPackage);
-        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+        if (mCachedDeviceProvisioningPackage == null) {
+            mCachedDeviceProvisioningPackage = mContext.getResources().getString(
+                    com.android.internal.R.string.config_deviceProvisioningPackage);
+        }
+        return mCachedDeviceProvisioningPackage.equals(packageName);
     }
 
     private boolean isCarrierApp(String packageName) {
