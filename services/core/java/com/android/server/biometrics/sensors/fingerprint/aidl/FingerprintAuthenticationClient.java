@@ -61,7 +61,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     private boolean mIsPointerDown;
 
     FingerprintAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
             int sensorId, boolean isStrongBiometric, int statsClient,
@@ -74,6 +75,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
                 false /* isKeyguardBypassEnabled */);
+        setRequestId(requestId);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
         mSensorProps = sensorProps;

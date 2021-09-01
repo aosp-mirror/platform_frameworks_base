@@ -643,22 +643,18 @@ public class BiometricScheduler {
     /**
      * Requests to cancel authentication or detection.
      * @param token from the caller, should match the token passed in when requesting authentication
+     * @param requestId the id returned when requesting authentication
      */
-    public void cancelAuthenticationOrDetection(IBinder token) {
-        if (mCurrentOperation == null) {
-            Slog.e(getTag(), "Unable to cancel authentication, null operation");
-            return;
-        }
-        final boolean isCorrectClient = isAuthenticationOrDetectionOperation(mCurrentOperation);
-        final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
+    public void cancelAuthenticationOrDetection(IBinder token, long requestId) {
+        Slog.d(getTag(), "cancelAuthenticationOrDetection, requestId: " + requestId
+                + " current: " + mCurrentOperation
+                + " stack size: " + mPendingOperations.size());
 
-        Slog.d(getTag(), "cancelAuthenticationOrDetection, isCorrectClient: " + isCorrectClient
-                + ", tokenMatches: " + tokenMatches);
-
-        if (isCorrectClient && tokenMatches) {
+        if (mCurrentOperation != null
+                && canCancelAuthOperation(mCurrentOperation, token, requestId)) {
             Slog.d(getTag(), "Cancelling: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);
-        } else if (!isCorrectClient) {
+        } else {
             // Look through the current queue for all authentication clients for the specified
             // token, and mark them as STATE_WAITING_IN_QUEUE_CANCELING. Note that we're marking
             // all of them, instead of just the first one, since the API surface currently doesn't
@@ -666,8 +662,7 @@ public class BiometricScheduler {
             // process. However, this generally does not happen anyway, and would be a class of
             // bugs on its own.
             for (Operation operation : mPendingOperations) {
-                if (isAuthenticationOrDetectionOperation(operation)
-                        && operation.mClientMonitor.getToken() == token) {
+                if (canCancelAuthOperation(operation, token, requestId)) {
                     Slog.d(getTag(), "Marking " + operation
                             + " as STATE_WAITING_IN_QUEUE_CANCELING");
                     operation.mState = Operation.STATE_WAITING_IN_QUEUE_CANCELING;
@@ -676,10 +671,26 @@ public class BiometricScheduler {
         }
     }
 
-    private boolean isAuthenticationOrDetectionOperation(@NonNull Operation operation) {
-        final boolean isAuthentication = operation.mClientMonitor
-                instanceof AuthenticationConsumer;
-        final boolean isDetection = operation.mClientMonitor instanceof DetectionConsumer;
+    private static boolean canCancelAuthOperation(Operation operation, IBinder token,
+            long requestId) {
+        // TODO: restrict callers that can cancel without requestId (negative value)?
+        return isAuthenticationOrDetectionOperation(operation)
+                && operation.mClientMonitor.getToken() == token
+                && isMatchingRequestId(operation, requestId);
+    }
+
+    // By default, monitors are not associated with a request id to retain the original
+    // behavior (i.e. if no requestId is explicitly set then assume it matches)
+    private static boolean isMatchingRequestId(Operation operation, long requestId) {
+        return !operation.mClientMonitor.hasRequestId()
+                || operation.mClientMonitor.getRequestId() == requestId;
+    }
+
+    private static boolean isAuthenticationOrDetectionOperation(@NonNull Operation operation) {
+        final boolean isAuthentication =
+                operation.mClientMonitor instanceof AuthenticationConsumer;
+        final boolean isDetection =
+                operation.mClientMonitor instanceof DetectionConsumer;
         return isAuthentication || isDetection;
     }
 
