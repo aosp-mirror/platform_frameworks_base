@@ -126,7 +126,8 @@ public class VisibilityStoreImpl implements VisibilityStore {
                     /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                     /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                     /*forceOverride=*/ false,
-                    /*version=*/ SCHEMA_VERSION);
+                    /*version=*/ SCHEMA_VERSION,
+                    /*setSchemaStatsBuilder=*/ null);
         }
 
         // Populate visibility settings set
