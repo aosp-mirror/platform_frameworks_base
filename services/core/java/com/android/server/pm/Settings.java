@@ -3089,8 +3089,7 @@ public final class Settings implements Watchable, Snappable {
         // Read preferred apps from .../etc/preferred-apps directories.
         int size = PackageManagerService.SYSTEM_PARTITIONS.size();
         for (int index = 0; index < size; index++) {
-            PackageManagerService.ScanPartition partition =
-                    PackageManagerService.SYSTEM_PARTITIONS.get(index);
+            ScanPartition partition = PackageManagerService.SYSTEM_PARTITIONS.get(index);
 
             File preferredDir = new File(partition.getFolder(), "etc/preferred-apps");
             if (!preferredDir.exists() || !preferredDir.isDirectory()) {

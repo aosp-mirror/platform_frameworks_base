@@ -3432,7 +3432,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             mConnectionId = service.mId;
 
-            mClient = AccessibilityInteractionClient.getInstance(mContext);
+            mClient = AccessibilityInteractionClient.getInstance(/* initializeCache= */false,
+                    mContext);
             mClient.addConnection(mConnectionId, service);
 
             //TODO: (multi-display) We need to support multiple displays.

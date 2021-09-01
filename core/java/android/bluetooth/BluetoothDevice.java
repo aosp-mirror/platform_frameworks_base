@@ -1331,7 +1331,10 @@ public final class BluetoothDevice implements Parcelable, Attributable {
             if (alias == null) {
                 return getName();
             }
-            return alias;
+            return alias
+                    .replace('\t', ' ')
+                    .replace('\n', ' ')
+                    .replace('\r', ' ');
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

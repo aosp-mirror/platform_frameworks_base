@@ -151,7 +151,8 @@ public class ContextHubService extends IContextHubService.Stub {
 
         @Override
         public void handleTxnResult(int transactionId, int result) {
-            handleTransactionResultCallback(mContextHubId, transactionId, result);
+            handleTransactionResultCallback(mContextHubId, transactionId,
+                    result == TransactionResult.SUCCESS);
         }
 
         @Override
@@ -213,7 +214,7 @@ public class ContextHubService extends IContextHubService.Stub {
         mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
         mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
         mTransactionManager = new ContextHubTransactionManager(
-                mContextHubWrapper.getHub(), mClientManager, mNanoAppStateManager);
+                mContextHubWrapper, mClientManager, mNanoAppStateManager);
         mSensorPrivacyManagerInternal =
                 LocalServices.getService(SensorPrivacyManagerInternal.class);
 
@@ -260,7 +261,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 public void onReceive(Context context, Intent intent) {
                     if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
                             || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
-                                intent.getAction())) {
+                            intent.getAction())) {
                         sendWifiSettingUpdate(false /* forceUpdate */);
                     }
                 }
@@ -303,7 +304,7 @@ public class ContextHubService extends IContextHubService.Stub {
                             Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
                             sendMicrophoneDisableSettingUpdate(enabled);
                         }
-                });
+                    });
 
         }
     }
@@ -559,7 +560,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * Performs a query at the specified hub.
-     *
+     * <p>
      * This method should only be invoked internally by the service, either to update the service
      * cache or as a result of an explicit query requested by a client through the sendMessage API.
      *
@@ -636,8 +637,10 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleClientMessageCallback(
             int contextHubId, ContextHubMsg message, List<String> nanoappPermissions,
             List<String> messagePermissions) {
+        NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
         mClientManager.onMessageFromNanoApp(
-                contextHubId, message, nanoappPermissions, messagePermissions);
+                contextHubId, message.hostEndPoint, clientMessage, nanoappPermissions,
+                messagePermissions);
     }
 
     /**
@@ -662,7 +665,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * A helper function to handle an unload response from the Context Hub for the old API.
-     *
+     * <p>
      * TODO(b/69270990): Remove this once the old APIs are obsolete.
      */
     private void handleUnloadResponseOldApi(int contextHubId, int result) {
@@ -676,10 +679,11 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * @param contextHubId  the ID of the hub the response came from
      * @param transactionId the ID of the transaction
-     * @param result        the result of the transaction reported by the hub
+     * @param success       true if the transaction succeeded
      */
-    private void handleTransactionResultCallback(int contextHubId, int transactionId, int result) {
-        mTransactionManager.onTransactionResponse(transactionId, result);
+    private void handleTransactionResultCallback(int contextHubId, int transactionId,
+            boolean success) {
+        mTransactionManager.onTransactionResponse(transactionId, success);
     }
 
     /**
@@ -770,9 +774,9 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * Creates and registers a PendingIntent client at the service for the specified Context Hub.
      *
-     * @param contextHubId  the ID of the hub this client is attached to
-     * @param pendingIntent the PendingIntent associated with this client
-     * @param nanoAppId     the ID of the nanoapp PendingIntent events will be sent for
+     * @param contextHubId   the ID of the hub this client is attached to
+     * @param pendingIntent  the PendingIntent associated with this client
+     * @param nanoAppId      the ID of the nanoapp PendingIntent events will be sent for
      * @param attributionTag an optional attribution tag within the given package
      * @return the generated client interface
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub
@@ -1092,8 +1096,8 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * Obtains the latest microphone disabled setting for the current user
-     * and notifies the Context Hub.
+     * Obtains the latest microphone disabled setting for the current user and notifies the Context
+     * Hub.
      */
     private void sendMicrophoneDisableSettingUpdateForCurrentUser() {
         boolean isEnabled = mSensorPrivacyManagerInternal.isSensorPrivacyEnabled(
@@ -1120,9 +1124,9 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * Send a microphone disable settings update whenever the foreground user changes.
-     * We always send a settings update regardless of the previous state for the same user
-     * since the CHRE framework is expected to handle repeated identical setting update.
+     * Send a microphone disable settings update whenever the foreground user changes. We always
+     * send a settings update regardless of the previous state for the same user since the CHRE
+     * framework is expected to handle repeated identical setting update.
      */
     public void onUserChanged() {
         Log.d(TAG, "User changed to id: " + getCurrentUserId());

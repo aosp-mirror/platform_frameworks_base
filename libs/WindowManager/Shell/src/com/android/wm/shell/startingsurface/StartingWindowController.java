@@ -217,6 +217,11 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
             return color != Color.TRANSPARENT
                     ? color : SplashscreenContentDrawer.getSystemBGColor();
         }
+
+        @Override
+        public void setSysuiProxy(SysuiProxy proxy) {
+            mSplashScreenExecutor.execute(() -> mStartingSurfaceDrawer.setSysuiProxy(proxy));
+        }
     }
 
     /**

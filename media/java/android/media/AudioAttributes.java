@@ -139,19 +139,28 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int USAGE_NOTIFICATION_RINGTONE = 6;
     /**
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      * Usage value to use when the usage is a request to enter/end a
      * communication, such as a VoIP communication or video-conference.
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_REQUEST = 7;
     /**
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      * Usage value to use when the usage is notification for an "instant"
      * communication such as a chat, or SMS.
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_INSTANT = 8;
     /**
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      * Usage value to use when the usage is notification for a
      * non-immediate type of communication such as e-mail.
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_DELAYED = 9;
     /**
      * Usage value to use when the usage is to attract the user's attention,
@@ -786,6 +795,17 @@ public final class AudioAttributes implements Parcelable {
                 }
             }
 
+            // handle deprecation of notification usages by remapping to USAGE_NOTIFICATION
+            switch (aa.mUsage) {
+                case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
+                case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+                case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
+                    aa.mUsage = USAGE_NOTIFICATION;
+                    break;
+                default:
+                    break;
+            }
+
             aa.mSource = mSource;
             aa.mFlags = mFlags;
             if (mMuteHapticChannels) {
@@ -823,7 +843,6 @@ public final class AudioAttributes implements Parcelable {
                     && (mFlags & FLAG_HW_HOTWORD) == FLAG_HW_HOTWORD) {
                 aa.mFlags &= ~FLAG_HW_HOTWORD;
             }
-
             return aa;
         }
 
@@ -836,9 +855,6 @@ public final class AudioAttributes implements Parcelable {
          *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
          *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
          *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
          *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
          *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
          *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},

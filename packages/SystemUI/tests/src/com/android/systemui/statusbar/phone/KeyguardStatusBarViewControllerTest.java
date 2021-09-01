@@ -86,15 +86,14 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
 
+    private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
 
-    private float mAlpha = 0.5f;
-    private final KeyguardStatusBarViewController.ViewStateProvider mViewStateProvider =
-            () -> new KeyguardStatusBarViewController.ViewState(mAlpha);
-
     @Before
     public void setup() throws Exception {
+        mNotificationPanelViewStateProvider = new TestNotificationPanelViewStateProvider();
+
         MockitoAnnotations.initMocks(this);
 
         allowTestableLooperAsMainThread();
@@ -114,7 +113,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
                 mBatteryMeterViewController,
-                mViewStateProvider,
+                mNotificationPanelViewStateProvider,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
@@ -210,7 +209,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
     @Test
     public void updateViewState_notKeyguardState_nothingUpdated() {
-        mAlpha = 0.255f;
         mController.onViewAttached();
         updateStateToNotKeyguard();
 
@@ -264,7 +262,58 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
+    @Test
+    public void updateViewState_panelExpandedHeightZero_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mNotificationPanelViewStateProvider.setPanelViewExpandedHeight(0);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_qsExpansionOne_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mNotificationPanelViewStateProvider.setQsExpansionFraction(1f);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
     // TODO(b/195442899): Add more tests for #updateViewState once CLs are finalized.
+
+    @Test
+    public void updateForHeadsUp_headsUpShouldBeVisible_viewHidden() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        mKeyguardStatusBarView.setVisibility(View.VISIBLE);
+
+        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(true);
+        mController.updateForHeadsUp(/* animate= */ false);
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateForHeadsUp_headsUpShouldNotBeVisible_viewShown() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        // Start with the opposite state.
+        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(true);
+        mController.updateForHeadsUp(/* animate= */ false);
+
+        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(false);
+        mController.updateForHeadsUp(/* animate= */ false);
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
 
     private void updateStateToNotKeyguard() {
         updateStatusBarState(SHADE);
@@ -294,5 +343,42 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         KeyguardUpdateMonitorCallback callback = keyguardUpdateCallbackCaptor.getValue();
 
         callback.onFinishedGoingToSleep(0);
+    }
+
+    private static class TestNotificationPanelViewStateProvider
+            implements NotificationPanelViewController.NotificationPanelViewStateProvider {
+
+        TestNotificationPanelViewStateProvider() {}
+
+        private float mPanelViewExpandedHeight = 100f;
+        private float mQsExpansionFraction = 0f;
+        private boolean mShouldHeadsUpBeVisible = false;
+
+        @Override
+        public float getPanelViewExpandedHeight() {
+            return mPanelViewExpandedHeight;
+        }
+
+        @Override
+        public float getQsExpansionFraction() {
+            return mQsExpansionFraction;
+        }
+
+        @Override
+        public boolean shouldHeadsUpBeVisible() {
+            return mShouldHeadsUpBeVisible;
+        }
+
+        public void setPanelViewExpandedHeight(float panelViewExpandedHeight) {
+            this.mPanelViewExpandedHeight = panelViewExpandedHeight;
+        }
+
+        public void setQsExpansionFraction(float qsExpansionFraction) {
+            this.mQsExpansionFraction = qsExpansionFraction;
+        }
+
+        public void setShouldHeadsUpBeVisible(boolean shouldHeadsUpBeVisible) {
+            this.mShouldHeadsUpBeVisible = shouldHeadsUpBeVisible;
+        }
     }
 }

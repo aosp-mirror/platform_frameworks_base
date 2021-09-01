@@ -124,8 +124,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
     }
 
     @Override
-    public void init() {
-        super.init();
+    protected void onInit() {
         mView.getHolder().addCallback(mSurfaceHolderCallback);
         mView.addOnLayoutChangeListener(mOnLayoutChangeListener);
     }
@@ -164,9 +163,6 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
             mNotificationShadeWindowController.setTouchExclusionRegion(emptyRegion);
             emptyRegion.recycle();
         }
-        // TODO(b/197036940): This is no longer necessary once the surface view is not on top of the
-        // z-order.
-        mView.setZOrderOnTop(excludeTouches);
     }
 
     private void showSurface(boolean show) {
@@ -208,7 +204,6 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
                     if (surfacePackage != null) {
                         mView.setChildSurfacePackage(surfacePackage);
-                        mView.setZOrderOnTop(true);
                         mView.postInvalidate();
                         mCommunalStateController.setCommunalViewShowing(true);
                     } else {

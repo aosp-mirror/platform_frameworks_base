@@ -22,6 +22,7 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILIT
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
@@ -114,8 +115,7 @@ public final class AccessibilityInteractionClient
         from a window, mapping from windowId -> timestamp. */
     private static final SparseLongArray sScrollingWindows = new SparseLongArray();
 
-    private static AccessibilityCache sAccessibilityCache =
-            new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
+    private static AccessibilityCache sAccessibilityCache;
 
     private final AtomicInteger mInteractionIdCounter = new AtomicInteger();
 
@@ -150,7 +150,7 @@ public final class AccessibilityInteractionClient
     @UnsupportedAppUsage()
     public static AccessibilityInteractionClient getInstance() {
         final long threadId = Thread.currentThread().getId();
-        return getInstanceForThread(threadId);
+        return getInstanceForThread(threadId, true);
     }
 
     /**
@@ -161,11 +161,17 @@ public final class AccessibilityInteractionClient
      *
      * @return The client for a given <code>threadId</code>.
      */
-    public static AccessibilityInteractionClient getInstanceForThread(long threadId) {
+    public static AccessibilityInteractionClient getInstanceForThread(long threadId,
+            boolean initializeCache) {
         synchronized (sStaticLock) {
             AccessibilityInteractionClient client = sClients.get(threadId);
             if (client == null) {
-                client = new AccessibilityInteractionClient();
+                if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                    // Don't initialize a cache for the system process
+                    client = new AccessibilityInteractionClient(false);
+                } else {
+                    client = new AccessibilityInteractionClient(initializeCache);
+                }
                 sClients.put(threadId, client);
             }
             return client;
@@ -176,11 +182,20 @@ public final class AccessibilityInteractionClient
      * @return The client for the current thread.
      */
     public static AccessibilityInteractionClient getInstance(Context context) {
+        return getInstance(/* initializeCache= */true, context);
+    }
+
+    /**
+     * @param initializeCache whether to initialize the cache in a new client instance
+     * @return The client for the current thread.
+     */
+    public static AccessibilityInteractionClient getInstance(boolean initializeCache,
+            Context context) {
         final long threadId = Thread.currentThread().getId();
         if (context != null) {
-            return getInstanceForThread(threadId, context);
+            return getInstanceForThread(threadId, initializeCache, context);
         }
-        return getInstanceForThread(threadId);
+        return getInstanceForThread(threadId, initializeCache);
     }
 
     /**
@@ -189,14 +204,19 @@ public final class AccessibilityInteractionClient
      * We do not have a thread local variable since other threads should be able to
      * look up the correct client knowing a thread id. See ViewRootImpl for details.
      *
+     * @param initializeCache whether to initialize the cache in a new client instance
      * @return The client for a given <code>threadId</code>.
      */
     public static AccessibilityInteractionClient getInstanceForThread(
-            long threadId, Context context) {
+            long threadId, boolean initializeCache, Context context) {
         synchronized (sStaticLock) {
             AccessibilityInteractionClient client = sClients.get(threadId);
             if (client == null) {
-                client = new AccessibilityInteractionClient(context);
+                if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                    client = new AccessibilityInteractionClient(false, context);
+                } else {
+                    client = new AccessibilityInteractionClient(initializeCache, context);
+                }
                 sClients.put(threadId, client);
             }
             return client;
@@ -249,11 +269,24 @@ public final class AccessibilityInteractionClient
 
     private AccessibilityInteractionClient() {
         /* reducing constructor visibility */
+        this(true);
+    }
+
+    private AccessibilityInteractionClient(boolean initializeCache) {
+        initializeCache(initializeCache);
         mAccessibilityManager = null;
     }
 
-    private AccessibilityInteractionClient(Context context) {
+    private AccessibilityInteractionClient(boolean initializeCache, Context context) {
+        initializeCache(initializeCache);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+    }
+
+    private static void initializeCache(boolean initialize) {
+        if (initialize && sAccessibilityCache == null) {
+            sAccessibilityCache = new AccessibilityCache(
+                    new AccessibilityCache.AccessibilityNodeRefresher());
+        }
     }
 
     /**
@@ -311,7 +344,7 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 AccessibilityWindowInfo window;
-                if (!bypassCache) {
+                if (!bypassCache && sAccessibilityCache != null) {
                     window = sAccessibilityCache.getWindow(accessibilityWindowId);
                     if (window != null) {
                         if (DEBUG) {
@@ -341,7 +374,7 @@ public final class AccessibilityInteractionClient
                             + bypassCache);
                 }
 
-                if (window != null) {
+                if (window != null && sAccessibilityCache != null) {
                     if (!bypassCache) {
                         sAccessibilityCache.addWindow(window);
                     }
@@ -384,21 +417,24 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                SparseArray<List<AccessibilityWindowInfo>> windows =
-                        sAccessibilityCache.getWindowsOnAllDisplays();
-                if (windows != null) {
+                SparseArray<List<AccessibilityWindowInfo>> windows;
+                if (sAccessibilityCache != null) {
+                    windows = sAccessibilityCache.getWindowsOnAllDisplays();
+                    if (windows != null) {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Windows cache hit");
+                        }
+                        if (shouldTraceClient()) {
+                            logTraceClient(
+                                    connection, "getWindows cache", "connectionId=" + connectionId);
+                        }
+                        return windows;
+                    }
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "Windows cache hit");
+                        Log.i(LOG_TAG, "Windows cache miss");
                     }
-                    if (shouldTraceClient()) {
-                        logTraceClient(
-                                connection, "getWindows cache", "connectionId=" + connectionId);
-                    }
-                    return windows;
                 }
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Windows cache miss");
-                }
+
                 final long identityToken = Binder.clearCallingIdentity();
                 try {
                     windows = connection.getWindows();
@@ -409,7 +445,9 @@ public final class AccessibilityInteractionClient
                     logTraceClient(connection, "getWindows", "connectionId=" + connectionId);
                 }
                 if (windows != null) {
-                    sAccessibilityCache.setWindowsOnAllDisplays(windows);
+                    if (sAccessibilityCache != null) {
+                        sAccessibilityCache.setWindowsOnAllDisplays(windows);
+                    }
                     return windows;
                 }
             } else {
@@ -493,7 +531,7 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                if (!bypassCache) {
+                if (!bypassCache && sAccessibilityCache != null) {
                     AccessibilityNodeInfo cachedInfo = sAccessibilityCache.getNode(
                             accessibilityWindowId, accessibilityNodeId);
                     if (cachedInfo != null) {
@@ -725,7 +763,9 @@ public final class AccessibilityInteractionClient
      * @param connectionId The id of a connection for interacting with the system.
      * @param accessibilityWindowId A unique window id. Use
      *     {@link android.view.accessibility.AccessibilityWindowInfo#ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
+     *     to query the currently active window. Use
+     *     {@link android.view.accessibility.AccessibilityWindowInfo#ANY_WINDOW_ID} to query all
+     *     windows
      * @param accessibilityNodeId A unique view id or virtual descendant id from
      *     where to start the search. Use
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
@@ -733,11 +773,28 @@ public final class AccessibilityInteractionClient
      * @param focusType The focus type.
      * @return The accessibility focused {@link AccessibilityNodeInfo}.
      */
+    @SuppressLint("LongLogTag")
     public AccessibilityNodeInfo findFocus(int connectionId, int accessibilityWindowId,
             long accessibilityNodeId, int focusType) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
+                if (sAccessibilityCache != null) {
+                    AccessibilityNodeInfo cachedInfo = sAccessibilityCache.getFocus(focusType,
+                            accessibilityNodeId, accessibilityWindowId);
+                    if (cachedInfo != null) {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Focused node cache hit retrieved"
+                                    + idToString(cachedInfo.getWindowId(),
+                                    cachedInfo.getSourceNodeId()));
+                        }
+                        return cachedInfo;
+                    }
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Focused node cache miss with "
+                                + idToString(accessibilityWindowId, accessibilityNodeId));
+                    }
+                }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 if (shouldTraceClient()) {
                     logTraceClient(connection, "findFocus",
@@ -901,7 +958,9 @@ public final class AccessibilityInteractionClient
      */
     @UnsupportedAppUsage()
     public void clearCache() {
-        sAccessibilityCache.clear();
+        if (sAccessibilityCache != null) {
+            sAccessibilityCache.clear();
+        }
     }
 
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -917,7 +976,9 @@ public final class AccessibilityInteractionClient
             default:
                 break;
         }
-        sAccessibilityCache.onAccessibilityEvent(event);
+        if (sAccessibilityCache != null) {
+            sAccessibilityCache.onAccessibilityEvent(event);
+        }
     }
 
     /**
@@ -1153,7 +1214,7 @@ public final class AccessibilityInteractionClient
                 }
             }
             info.setSealed(true);
-            if (!bypassCache) {
+            if (!bypassCache && sAccessibilityCache != null) {
                 sAccessibilityCache.add(info);
             }
         }

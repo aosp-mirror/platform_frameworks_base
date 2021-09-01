@@ -594,7 +594,8 @@ class UserController implements Handler.Callback {
 
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             t.traceBegin("UM.onBeforeUnlockUser-" + userId);
-            mInjector.getUserManager().onBeforeUnlockUser(userId);
+            final ArraySet<String> reconciledPackages =
+                    mInjector.getUserManager().onBeforeUnlockUser(userId);
             t.traceEnd();
             synchronized (mLock) {
                 // Do not proceed if unexpected state
@@ -603,6 +604,9 @@ class UserController implements Handler.Callback {
                 }
             }
             mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+            t.traceBegin("UM.onUserStateRunningUnlocking-" + userId);
+            mInjector.getUserManager().onUserStateRunningUnlocking(userId, reconciledPackages);
+            t.traceEnd();
 
             uss.mUnlockProgress.setProgress(20);
 

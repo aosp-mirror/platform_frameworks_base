@@ -83,6 +83,9 @@
     <dimen name="split_divider_handle_width">72dp</dimen>
     <dimen name="split_divider_handle_height">3dp</dimen>
 
+    <dimen name="split_divider_bar_width">10dp</dimen>
+    <dimen name="split_divider_corner_size">42dp</dimen>
+
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
     <dimen name="gestures_onehanded_drag_threshold">20dp</dimen>

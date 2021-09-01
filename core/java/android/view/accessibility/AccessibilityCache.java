@@ -16,6 +16,9 @@
 
 package android.view.accessibility;
 
+
+import static android.view.accessibility.AccessibilityNodeInfo.FOCUS_ACCESSIBILITY;
+
 import android.os.Build;
 import android.util.ArraySet;
 import android.util.Log;
@@ -70,6 +73,7 @@ public class AccessibilityCache {
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
     private int mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+    private int mInputFocusWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
 
     private boolean mIsAllWindowsCached;
 
@@ -190,6 +194,7 @@ public class AccessibilityCache {
                         removeCachedNodeLocked(event.getWindowId(), mInputFocus);
                     }
                     mInputFocus = event.getSourceNodeId();
+                    mInputFocusWindow = event.getWindowId();
                     nodeToRefresh = removeCachedNodeLocked(event.getWindowId(), mInputFocus);
                 } break;
 
@@ -439,6 +444,7 @@ public class AccessibilityCache {
             }
             if (clone.isFocused()) {
                 mInputFocus = sourceId;
+                mInputFocusWindow = windowId;
             }
         }
     }
@@ -462,6 +468,7 @@ public class AccessibilityCache {
             mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
             mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            mInputFocusWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
     }
 
@@ -483,6 +490,87 @@ public class AccessibilityCache {
             }
         }
         mIsAllWindowsCached = false;
+    }
+
+    /**
+     * Gets a cached {@link AccessibilityNodeInfo} with focus according to focus type.
+     *
+     * Note: {@link android.view.accessibility.AccessibilityWindowInfo#ACTIVE_WINDOW_ID} will return
+     * null.
+     *
+     * @param focusType The focus type.
+     * @param windowId A unique window id.
+     * @param initialNodeId A unique view id or virtual descendant id from where to start the
+     *                      search.
+     * @return The cached {@link AccessibilityNodeInfo} if it has a11y focus or null if such not
+     * found.
+     */
+    public AccessibilityNodeInfo getFocus(int focusType, long initialNodeId, int windowId) {
+        synchronized (mLock) {
+            int currentFocusWindowId;
+            long currentFocusId;
+            if (focusType == FOCUS_ACCESSIBILITY) {
+                currentFocusWindowId = mAccessibilityFocusedWindow;
+                currentFocusId = mAccessibilityFocus;
+            } else {
+                currentFocusWindowId = mInputFocusWindow;
+                currentFocusId = mInputFocus;
+            }
+
+            if (currentFocusWindowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+                return null;
+            }
+
+            if (windowId != AccessibilityWindowInfo.ANY_WINDOW_ID
+                    && windowId != currentFocusWindowId) {
+                return null;
+            }
+
+            LongSparseArray<AccessibilityNodeInfo> nodes =
+                    mNodeCache.get(currentFocusWindowId);
+            if (nodes == null) {
+                return null;
+            }
+
+            final AccessibilityNodeInfo currentFocusedNode = nodes.get(currentFocusId);
+            if (currentFocusedNode == null) {
+                return null;
+            }
+
+            if (initialNodeId == currentFocusId || (isCachedNodeOrDescendantLocked(
+                    currentFocusedNode.getParentNodeId(), initialNodeId, nodes))) {
+                if (VERBOSE) {
+                    Log.i(LOG_TAG, "getFocus(0x" + Long.toHexString(currentFocusId) + ") = "
+                            + currentFocusedNode + " with type: "
+                            + (focusType == FOCUS_ACCESSIBILITY
+                            ? "FOCUS_ACCESSIBILITY"
+                            : "FOCUS_INPUT"));
+                }
+                // Return a copy since the client calls to AccessibilityNodeInfo#recycle()
+                // will wipe the data of the cached info.
+                return new AccessibilityNodeInfo(currentFocusedNode);
+            }
+
+            if (VERBOSE) {
+                Log.i(LOG_TAG, "getFocus is null with type: "
+                        + (focusType == FOCUS_ACCESSIBILITY
+                        ? "FOCUS_ACCESSIBILITY"
+                        : "FOCUS_INPUT"));
+            }
+            return null;
+        }
+    }
+
+    private boolean isCachedNodeOrDescendantLocked(long nodeId, long ancestorId,
+            LongSparseArray<AccessibilityNodeInfo> nodes) {
+        if (ancestorId == nodeId) {
+            return true;
+        }
+        AccessibilityNodeInfo node = nodes.get(nodeId);
+        if (node == null) {
+            return false;
+        }
+        return isCachedNodeOrDescendantLocked(node.getParentNodeId(), ancestorId,  nodes);
     }
 
     /**

@@ -375,7 +375,7 @@ class KeyguardController {
         // TODO(b/113840485): Handle app transition for individual display, and apply occluded
         // state change to secondary displays.
         // For now, only default display fully supports occluded change. Other displays only
-        // updates keygaurd sleep token on that display.
+        // updates keyguard sleep token on that display.
         if (displayId != DEFAULT_DISPLAY) {
             updateKeyguardSleepToken(displayId);
             return;
@@ -390,15 +390,6 @@ class KeyguardController {
                                 isDisplayOccluded(DEFAULT_DISPLAY)
                                         ? TRANSIT_KEYGUARD_OCCLUDE
                                         : TRANSIT_KEYGUARD_UNOCCLUDE, 0 /* flags */);
-                // When the occluding activity also turns on the display, visibility of the activity
-                // can be committed before KEYGUARD_OCCLUDE transition is handled.
-                // Set mRequestForceTransition flag to make sure that the app transition animation
-                // is applied for such case.
-                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
-                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
-                        && topActivity != null) {
-                    topActivity.mRequestForceTransition = true;
-                }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
                 mWindowManager.executeAppTransition();
             } finally {

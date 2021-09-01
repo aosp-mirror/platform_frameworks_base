@@ -151,7 +151,7 @@ public class PackageManagerServiceTest {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
-            final PackageManagerService.ScanPartition scanPartition =
+            final ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
                 File path = new File(String.format("%s/%s/A.apk", partitions[i], appdir[j]));

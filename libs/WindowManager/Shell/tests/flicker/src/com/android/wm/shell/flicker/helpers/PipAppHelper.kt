@@ -129,7 +129,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     }
 
     /**
-     * Expands the pip window and dismisses it by clicking on the X button.
+     * Taps the pip window and dismisses it by clicking on the X button.
      */
     fun closePipWindow(wmHelper: WindowManagerStateHelper) {
         if (isTelevision) {
@@ -137,9 +137,12 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         } else {
             val windowRect = getWindowRect(wmHelper)
             uiDevice.click(windowRect.centerX(), windowRect.centerY())
-            val exitPipObject = uiDevice.findObject(By.res(SYSTEMUI_PACKAGE, "dismiss"))
+            // search and interact with the dismiss button
+            val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
+            uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
+            val dismissPipObject = uiDevice.findObject(dismissSelector)
                     ?: error("PIP window dismiss button not found")
-            val dismissButtonBounds = exitPipObject.visibleBounds
+            val dismissButtonBounds = dismissPipObject.visibleBounds
             uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
         }
 
