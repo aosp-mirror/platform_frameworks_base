@@ -1476,6 +1476,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.USE_OPEN_WIFI_PACKAGE,
                 GlobalSettingsProto.USE_OPEN_WIFI_PACKAGE);
         dumpSetting(s, p,
+                Settings.Global.UWB_ENABLED,
+                GlobalSettingsProto.UWB_ENABLED);
+        dumpSetting(s, p,
                 Settings.Global.VT_IMS_ENABLED,
                 GlobalSettingsProto.VT_IMS_ENABLED);
         dumpSetting(s, p,
