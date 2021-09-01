@@ -68,16 +68,25 @@ internal class DeviceFoldStateProvider(
         outputListeners.remove(listener)
     }
 
+    override val isFullyOpened: Boolean
+        get() = !isFolded && lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN
+
     private fun onHingeAngle(angle: Float) {
         when (lastFoldUpdate) {
             FOLD_UPDATE_FINISH_FULL_OPEN -> {
-                if (FULLY_OPEN_DEGREES - angle > MOVEMENT_THRESHOLD_DEGREES) {
+                if (FULLY_OPEN_DEGREES - angle > START_CLOSING_THRESHOLD_DEGREES) {
                     lastFoldUpdate = FOLD_UPDATE_START_CLOSING
                     outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_START_CLOSING) }
                 }
             }
-            FOLD_UPDATE_START_OPENING, FOLD_UPDATE_START_CLOSING -> {
+            FOLD_UPDATE_START_OPENING -> {
                 if (FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES) {
+                    lastFoldUpdate = FOLD_UPDATE_FINISH_FULL_OPEN
+                    outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) }
+                }
+            }
+            FOLD_UPDATE_START_CLOSING -> {
+                if (FULLY_OPEN_DEGREES - angle < START_CLOSING_THRESHOLD_DEGREES) {
                     lastFoldUpdate = FOLD_UPDATE_FINISH_FULL_OPEN
                     outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) }
                 }
@@ -120,5 +129,5 @@ internal class DeviceFoldStateProvider(
     }
 }
 
-private const val MOVEMENT_THRESHOLD_DEGREES = 10f
-private const val FULLY_OPEN_THRESHOLD_DEGREES = 10f
+private const val START_CLOSING_THRESHOLD_DEGREES = 95f
+private const val FULLY_OPEN_THRESHOLD_DEGREES = 15f
