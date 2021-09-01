@@ -223,7 +223,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    private void updateRegionForNotch(Region touchableRegion) {
+    void updateRegionForNotch(Region touchableRegion) {
         WindowInsets windowInsets = mNotificationShadeWindowView.getRootWindowInsets();
         if (windowInsets == null) {
             Log.w(TAG, "StatusBarWindowView is not attached.");

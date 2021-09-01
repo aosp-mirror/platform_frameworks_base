@@ -20,7 +20,9 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.media.AudioFormat;
+import android.media.permission.Identity;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -111,8 +113,10 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         if (DEBUG) {
             Slog.d(TAG, "updateStateLocked()");
         }
+        Identity identity = new Identity();
+        identity.packageName = ActivityThread.currentOpPackageName();
         try {
-            mManagerService.updateState(options, sharedMemory, callback);
+            mManagerService.updateState(identity, options, sharedMemory, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

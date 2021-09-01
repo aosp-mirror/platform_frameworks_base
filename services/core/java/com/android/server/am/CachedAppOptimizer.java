@@ -41,6 +41,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.ProcLocksReader;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ServiceThread;
 
@@ -100,7 +101,7 @@ public final class CachedAppOptimizer {
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
-    @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = false;
+    @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
@@ -203,7 +204,22 @@ public final class CachedAppOptimizer {
                                 updateMinOomAdjThrottle();
                             } else if (KEY_COMPACT_THROTTLE_MAX_OOM_ADJ.equals(name)) {
                                 updateMaxOomAdjThrottle();
-                            } else if (KEY_FREEZER_DEBOUNCE_TIMEOUT.equals(name)) {
+                            }
+                        }
+                    }
+                    if (mTestCallback != null) {
+                        mTestCallback.onPropertyChanged();
+                    }
+                }
+            };
+
+    private final OnPropertiesChangedListener mOnNativeBootFlagsChangedListener =
+            new OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(Properties properties) {
+                    synchronized (mPhenotypeFlagLock) {
+                        for (String name : properties.getKeyset()) {
+                            if (KEY_FREEZER_DEBOUNCE_TIMEOUT.equals(name)) {
                                 updateFreezerDebounceTimeout();
                             }
                         }
@@ -260,7 +276,7 @@ public final class CachedAppOptimizer {
             DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
-    private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
+    private volatile boolean mUseFreezer = false; // set to DEFAULT in init()
     @GuardedBy("this")
     private int mFreezerDisableCount = 1; // Freezer is initially disabled, until enabled
     private final Random mRandom = new Random();
@@ -304,6 +320,7 @@ public final class CachedAppOptimizer {
     private int mPersistentCompactionCount;
     private int mBfgsCompactionCount;
     private final ProcessDependencies mProcessDependencies;
+    private final ProcLocksReader mProcLocksReader;
 
     public CachedAppOptimizer(ActivityManagerService am) {
         this(am, null, new DefaultProcessDependencies());
@@ -320,6 +337,7 @@ public final class CachedAppOptimizer {
         mProcessDependencies = processDependencies;
         mTestCallback = callback;
         mSettingsObserver = new SettingsContentObserver();
+        mProcLocksReader = new ProcLocksReader();
     }
 
     /**
@@ -330,6 +348,10 @@ public final class CachedAppOptimizer {
         // TODO: initialize flags to default and only update them if values are set in DeviceConfig
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mOnFlagsChangedListener);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mOnNativeBootFlagsChangedListener);
         mAm.mContext.getContentResolver().registerContentObserver(
                 CACHED_APP_FREEZER_ENABLED_URI, false, mSettingsObserver);
         synchronized (mPhenotypeFlagLock) {
@@ -344,7 +366,6 @@ public final class CachedAppOptimizer {
             updateUseFreezer();
             updateMinOomAdjThrottle();
             updateMaxOomAdjThrottle();
-            updateFreezerDebounceTimeout();
         }
     }
 
@@ -656,6 +677,9 @@ public final class CachedAppOptimizer {
                 || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
             mUseFreezer = isFreezerSupported();
+            updateFreezerDebounceTimeout();
+        } else {
+            mUseFreezer = false;
         }
 
         final boolean useFreezer = mUseFreezer;
@@ -834,7 +858,8 @@ public final class CachedAppOptimizer {
 
     @GuardedBy("mPhenotypeFlagLock")
     private void updateFreezerDebounceTimeout() {
-        mFreezerDebounceTimeout = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        mFreezerDebounceTimeout = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 KEY_FREEZER_DEBOUNCE_TIMEOUT, DEFAULT_FREEZER_DEBOUNCE_TIMEOUT);
 
         if (mFreezerDebounceTimeout < 0) {
@@ -972,9 +997,7 @@ public final class CachedAppOptimizer {
         }
 
         if (!opt.isFrozen()) {
-            if (DEBUG_FREEZER) {
-                Slog.d(TAG_AM, "sync unfroze " + pid + " " + app.processName);
-            }
+            Slog.d(TAG_AM, "sync unfroze " + pid + " " + app.processName);
 
             mFreezeHandler.sendMessage(
                     mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
@@ -1294,7 +1317,7 @@ public final class CachedAppOptimizer {
 
             try {
                 // pre-check for locks to avoid unnecessary freeze/unfreeze operations
-                if (Process.hasFileLocks(pid)) {
+                if (mProcLocksReader.hasFileLocks(pid)) {
                     if (DEBUG_FREEZER) {
                         Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, not freezing");
                     }
@@ -1366,9 +1389,7 @@ public final class CachedAppOptimizer {
                 return;
             }
 
-            if (DEBUG_FREEZER) {
-                Slog.d(TAG_AM, "froze " + pid + " " + name);
-            }
+            Slog.d(TAG_AM, "froze " + pid + " " + name);
 
             EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
 
@@ -1383,7 +1404,7 @@ public final class CachedAppOptimizer {
 
             try {
                 // post-check to prevent races
-                if (Process.hasFileLocks(pid)) {
+                if (mProcLocksReader.hasFileLocks(pid)) {
                     if (DEBUG_FREEZER) {
                         Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, reverting freeze");
                     }

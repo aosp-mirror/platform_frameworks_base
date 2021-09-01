@@ -18,11 +18,26 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
+import android.graphics.drawable.AnimatedImageDrawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.preference.PreferenceViewHolder;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.airbnb.lottie.LottieAnimationView;
 
@@ -33,47 +48,111 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(RobolectricTestRunner.class)
 public class IllustrationPreferenceTest {
 
     @Mock
-    LottieAnimationView mAnimationView;
-
-    private Context mContext;
+    private ViewGroup mRootView;
+    private Uri mImageUri;
+    private LottieAnimationView mAnimationView;
     private IllustrationPreference mPreference;
+    private PreferenceViewHolder mViewHolder;
+    private FrameLayout mMiddleGroundLayout;
+    private final Context mContext = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+
+        mImageUri = new Uri.Builder().build();
+        mAnimationView = spy(new LottieAnimationView(mContext));
+        mMiddleGroundLayout = new FrameLayout(mContext);
+        final FrameLayout illustrationFrame = new FrameLayout(mContext);
+        illustrationFrame.setLayoutParams(
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+        doReturn(mMiddleGroundLayout).when(mRootView).findViewById(R.id.middleground_layout);
+        doReturn(mAnimationView).when(mRootView).findViewById(R.id.lottie_view);
+        doReturn(illustrationFrame).when(mRootView).findViewById(R.id.illustration_frame);
+        mViewHolder = spy(PreferenceViewHolder.createInstanceForTests(mRootView));
+
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
         mPreference = new IllustrationPreference(mContext, attributeSet);
-        ReflectionHelpers.setField(mPreference, "mIllustrationView", mAnimationView);
     }
 
     @Test
     public void setMiddleGroundView_middleGroundView_shouldVisible() {
         final View view = new View(mContext);
-        final FrameLayout layout = new FrameLayout(mContext);
-        layout.setVisibility(View.GONE);
-        ReflectionHelpers.setField(mPreference, "mMiddleGroundView", view);
-        ReflectionHelpers.setField(mPreference, "mMiddleGroundLayout", layout);
+        mMiddleGroundLayout.setVisibility(View.GONE);
 
         mPreference.setMiddleGroundView(view);
+        mPreference.onBindViewHolder(mViewHolder);
 
-        assertThat(layout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mMiddleGroundLayout.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
     public void enableAnimationAutoScale_shouldChangeScaleType() {
-        final LottieAnimationView animationView = new LottieAnimationView(mContext);
-        ReflectionHelpers.setField(mPreference, "mIllustrationView", animationView);
-
         mPreference.enableAnimationAutoScale(true);
+        mPreference.onBindViewHolder(mViewHolder);
 
-        assertThat(animationView.getScaleType()).isEqualTo(ImageView.ScaleType.CENTER_CROP);
+        assertThat(mAnimationView.getScaleType()).isEqualTo(ImageView.ScaleType.CENTER_CROP);
+    }
+
+    @Test
+    public void playAnimationWithUri_animatedImageDrawable_success() {
+        final AnimatedImageDrawable drawable = mock(AnimatedImageDrawable.class);
+        doReturn(drawable).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(drawable).start();
+    }
+
+    @Test
+    public void playAnimationWithUri_animatedVectorDrawable_success() {
+        final AnimatedVectorDrawable drawable = mock(AnimatedVectorDrawable.class);
+        doReturn(drawable).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(drawable).start();
+    }
+
+    @Test
+    public void playAnimationWithUri_animationDrawable_success() {
+        final AnimationDrawable drawable = mock(AnimationDrawable.class);
+        doReturn(drawable).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(drawable).start();
+    }
+
+    @Test
+    public void playLottieAnimationWithUri_verifyFailureListener() {
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    public void playLottieAnimationWithResource_verifyFailureListener() {
+        // fake the valid lottie image
+        final int fakeValidResId = 111;
+        doNothing().when(mAnimationView).setImageResource(fakeValidResId);
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setLottieAnimationResId(fakeValidResId);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
     }
 }

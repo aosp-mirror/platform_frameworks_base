@@ -671,20 +671,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void collapsePanels() {
-        int uid = Binder.getCallingUid();
-        int pid = Binder.getCallingPid();
-        if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, uid)) {
-            enforceStatusBar();
-        } else {
-            if (mContext.checkPermission(Manifest.permission.STATUS_BAR, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                enforceExpandStatusBar();
-                if (!mActivityTaskManager.canCloseSystemDialogs(pid, uid)) {
-                    Slog.e(TAG, "Permission Denial: Method collapsePanels() requires permission "
-                            + Manifest.permission.STATUS_BAR + ", ignoring call.");
-                    return;
-                }
-            }
+        if (!checkCanCollapseStatusBar("collapsePanels")) {
+            return;
         }
 
         if (mBar != null) {
@@ -697,7 +685,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void togglePanel() {
-        enforceExpandStatusBar();
+        if (!checkCanCollapseStatusBar("togglePanel")) {
+            return;
+        }
 
         if (isDisable2FlagSet(DISABLE2_NOTIFICATION_SHADE)) {
             return;
@@ -758,7 +748,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void handleSystemKey(int key) throws RemoteException {
-        enforceExpandStatusBar();
+        if (!checkCanCollapseStatusBar("handleSystemKey")) {
+            return;
+        }
 
         if (mBar != null) {
             try {
@@ -1199,6 +1191,29 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_BIOMETRIC_DIALOG,
                 "StatusBarManagerService");
+    }
+
+    /**
+     *  For targetSdk S+ we require STATUS_BAR. For targetSdk < S, we only require EXPAND_STATUS_BAR
+     *  but also require that it falls into one of the allowed use-cases to lock down abuse vector.
+     */
+    private boolean checkCanCollapseStatusBar(String method) {
+        int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingUid();
+        if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, uid)) {
+            enforceStatusBar();
+        } else {
+            if (mContext.checkPermission(Manifest.permission.STATUS_BAR, pid, uid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                enforceExpandStatusBar();
+                if (!mActivityTaskManager.canCloseSystemDialogs(pid, uid)) {
+                    Slog.e(TAG, "Permission Denial: Method " + method + "() requires permission "
+                            + Manifest.permission.STATUS_BAR + ", ignoring call.");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // ================================================================================

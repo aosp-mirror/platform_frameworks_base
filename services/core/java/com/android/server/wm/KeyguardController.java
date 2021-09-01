@@ -66,13 +66,14 @@ class KeyguardController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_ATM;
 
+    static final String KEYGUARD_SLEEP_TOKEN_TAG = "keyguard";
+
     private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
     private boolean mKeyguardShowing;
     private boolean mAodShowing;
     private boolean mKeyguardGoingAway;
     private boolean mDismissalRequested;
-    private int mBeforeUnoccludeTransit;
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
@@ -83,7 +84,7 @@ class KeyguardController {
             ActivityTaskSupervisor taskSupervisor) {
         mService = service;
         mTaskSupervisor = taskSupervisor;
-        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl("keyguard");
+        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl(KEYGUARD_SLEEP_TOKEN_TAG);
     }
 
     void setWindowManager(WindowManagerService windowManager) {
@@ -191,14 +192,11 @@ class KeyguardController {
             // Irrelevant to AOD.
             dismissMultiWindowModeForTaskIfNeeded(null /* currentTaskControllsingOcclusion */,
                     false /* turningScreenOn */);
-            setKeyguardGoingAway(false);
+            mKeyguardGoingAway = false;
             if (keyguardShowing) {
                 mDismissalRequested = false;
             }
         }
-        // TODO(b/113840485): Check usage for non-default display
-        mWindowManager.setKeyguardOrAodShowingOnDefaultDisplay(
-                isKeyguardOrAodShowing(DEFAULT_DISPLAY));
 
         // Update the sleep token first such that ensureActivitiesVisible has correct sleep token
         // state when evaluating visibilities.
@@ -219,8 +217,8 @@ class KeyguardController {
         }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "keyguardGoingAway");
         mService.deferWindowLayout();
+        mKeyguardGoingAway = true;
         try {
-            setKeyguardGoingAway(true);
             EventLogTags.writeWmSetKeyguardShown(
                     1 /* keyguardShowing */,
                     mAodShowing ? 1 : 0,
@@ -256,11 +254,6 @@ class KeyguardController {
         }
 
         mWindowManager.dismissKeyguard(callback, message);
-    }
-
-    private void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        mKeyguardGoingAway = keyguardGoingAway;
-        mWindowManager.setKeyguardGoingAway(keyguardGoingAway);
     }
 
     private void failCallback(IKeyguardDismissCallback callback) {
@@ -381,7 +374,9 @@ class KeyguardController {
                 // can be committed before KEYGUARD_OCCLUDE transition is handled.
                 // Set mRequestForceTransition flag to make sure that the app transition animation
                 // is applied for such case.
-                if (topActivity != null) {
+                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
+                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && topActivity != null) {
                     topActivity.mRequestForceTransition = true;
                 }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);

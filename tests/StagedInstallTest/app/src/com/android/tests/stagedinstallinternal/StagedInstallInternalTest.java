@@ -23,7 +23,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.Manifest;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -52,8 +55,11 @@ public class StagedInstallInternalTest {
     private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
             APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
     private static final TestApp APEX_WRONG_SHA_V2 = new TestApp(
-            "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /*isApex*/true,
+            "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
             "com.android.apex.cts.shim.v2_wrong_sha.apex");
+    private static final TestApp APEX_V2 = new TestApp(
+            "ApexV2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
+            "com.android.apex.cts.shim.v2.apex");
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -177,6 +183,244 @@ public class StagedInstallInternalTest {
         PackageInstaller.SessionInfo info =
                 InstallUtils.getPackageInstaller().getSessionInfo(sessionId);
         assertThat(info.isStagedSessionFailed()).isTrue();
+    }
+
+    @Test
+    public void testApexActivationFailureIsCapturedInSession_Commit() throws Exception {
+        int sessionId = Install.single(TestApp.Apex1).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testApexActivationFailureIsCapturedInSession_Verify() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailedWithMessage(sessionId, "has unexpected SHA512 hash");
+    }
+
+    @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_Prepare() throws Exception {
+        int sessionId = Install.single(TestApp.Apex2).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_Commit() throws Exception {
+        // Verify apex installed during preparation was successful
+        int sessionId = retrieveLastSessionId();
+        assertSessionApplied(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(2);
+        // Commit a new staged session
+        sessionId = Install.single(TestApp.Apex3).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testActiveApexIsRevertedOnCheckpointRollback_VerifyPostReboot() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailed(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(2);
+    }
+
+    @Test
+    public void testApexIsNotActivatedIfNotInCheckpointMode_Commit() throws Exception {
+        int sessionId = Install.single(TestApp.Apex2).setStaged().commit();
+        assertSessionReady(sessionId);
+        storeSessionId(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+    }
+
+    @Test
+    public void testApexIsNotActivatedIfNotInCheckpointMode_VerifyPostReboot() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        assertSessionFailed(sessionId);
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+    }
+
+    @Test
+    public void testApexInstallerNotInAllowListCanNotInstall_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+        // We don't really care which APEX we are trying to install here, since the session creation
+        // should fail immediately.
+        InstallUtils.commitExpectingFailure(
+                SecurityException.class,
+                "Installer not allowed to commit staged install",
+                Install.single(APEX_WRONG_SHA_V2).setBypassStangedInstallerCheck(false)
+                        .setStaged());
+    }
+
+    @Test
+    public void testApexInstallerNotInAllowListCanNotInstall_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+        // We don't really care which APEX we are trying to install here, since the session creation
+        // should fail immediately.
+        InstallUtils.commitExpectingFailure(
+                SecurityException.class,
+                "Installer not allowed to commit non-staged APEX install",
+                Install.single(APEX_WRONG_SHA_V2).setBypassStangedInstallerCheck(false));
+    }
+
+    @Test
+    public void testApexNotInAllowListCanNotInstall_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged());
+    }
+
+    @Test
+    public void testApexNotInAllowListCanNotInstall_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false));
+    }
+
+    @Test
+    public void testVendorApexWrongInstaller_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged());
+    }
+
+    @Test
+    public void testVendorApexWrongInstaller_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Update of APEX package test.apex.rebootless is not allowed "
+                        + "for com.android.tests.stagedinstallinternal",
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false));
+    }
+
+    @Test
+    public void testVendorApexCorrectInstaller_staged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        int sessionId =
+                Install.single(apex).setBypassAllowedApexUpdateCheck(false).setStaged().commit();
+        InstallUtils.getPackageInstaller().abandonSession(sessionId);
+    }
+
+    @Test
+    public void testVendorApexCorrectInstaller_nonStaged() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(1);
+        TestApp apex = new TestApp("apex", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex).setBypassAllowedApexUpdateCheck(false).commit();
+        assertThat(InstallUtils.getInstalledVersion("test.apex.rebootless")).isEqualTo(2);
+    }
+
+    @Test
+    public void testRebootlessUpdates() throws Exception {
+        InstallUtils.dropShellPermissionIdentity();
+        InstallUtils.adoptShellPermissionIdentity(Manifest.permission.INSTALL_PACKAGE_UPDATES);
+
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
+        }
+
+        TestApp apex1 = new TestApp("TestRebootlessApexV1", "test.apex.rebootless", 1,
+                /* isApex= */ true, "test.rebootless_apex_v1.apex");
+        Install.single(apex1).commit();
+
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
+        }
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless",
+                    PackageManager.MATCH_APEX | PackageManager.MATCH_FACTORY_ONLY);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
+        }
+
+        TestApp apex2 = new TestApp("TestRebootlessApexV1", "test.apex.rebootless", 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex2).commit();
+
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
+            assertThat(apex.getLongVersionCode()).isEqualTo(2);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
+        }
+        {
+            PackageInfo apex = pm.getPackageInfo("test.apex.rebootless",
+                    PackageManager.MATCH_APEX | PackageManager.MATCH_FACTORY_ONLY);
+            assertThat(apex.getLongVersionCode()).isEqualTo(1);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                    .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
+        }
+    }
+
+    @Test
+    public void testRebootlessUpdate_hasStagedSessionWithSameApex_fails() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(SHIM_APEX_PACKAGE_NAME)).isEqualTo(1);
+
+        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        assertSessionReady(sessionId);
+        InstallUtils.commitExpectingFailure(
+                AssertionError.class,
+                "Staged session " + sessionId + " already contains " + SHIM_APEX_PACKAGE_NAME,
+                Install.single(APEX_V2));
+
+    }
+
+    private static void assertSessionApplied(int sessionId) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionApplied()).isTrue();
+        });
+    }
+
+    private static void assertSessionFailed(int sessionId) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionFailed()).isTrue();
+        });
+    }
+
+    private static void assertSessionFailedWithMessage(int sessionId, String msg) {
+        assertSessionState(sessionId, (session) -> {
+            assertThat(session.isStagedSessionFailed()).isTrue();
+            assertThat(session.getStagedSessionErrorMessage()).contains(msg);
+        });
     }
 
     private static void assertSessionReady(int sessionId) {

@@ -158,14 +158,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
-            final boolean isBubbleNotificationSuppressedFromShade = mBubblesOptional.isPresent()
-                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
-                            ent.getKey(), ent.getSbn().getGroupKey());
-            if (ent.isRowDismissed() || ent.isRowRemoved()
-                    || isBubbleNotificationSuppressedFromShade
-                    || mFgsSectionController.hasEntry(ent)) {
-                // we don't want to update removed notifications because they could
-                // temporarily become children if they were isolated before.
+            if (shouldSuppressActiveNotification(ent)) {
                 continue;
             }
 
@@ -254,9 +247,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         }
 
         for (ExpandableNotificationRow viewToRemove : viewsToRemove) {
-            if (mEntryManager.getPendingOrActiveNotif(viewToRemove.getEntry().getKey()) != null) {
+            NotificationEntry entry = viewToRemove.getEntry();
+            if (mEntryManager.getPendingOrActiveNotif(entry.getKey()) != null
+                && !shouldSuppressActiveNotification(entry)) {
                 // we are only transferring this notification to its parent, don't generate an
-                // animation
+                // animation. If the notification is suppressed, this isn't a transfer.
                 mListContainer.setChildTransferInProgress(true);
             }
             if (viewToRemove.isSummaryWithChildren()) {
@@ -323,6 +318,23 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mListContainer.onNotificationViewUpdateFinished();
 
         endUpdate();
+    }
+
+    /**
+     * Should a notification entry from the active list be suppressed and not show?
+     */
+    private boolean shouldSuppressActiveNotification(NotificationEntry ent) {
+        final boolean isBubbleNotificationSuppressedFromShade = mBubblesOptional.isPresent()
+                && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
+                        ent.getKey(), ent.getSbn().getGroupKey());
+        if (ent.isRowDismissed() || ent.isRowRemoved()
+                || isBubbleNotificationSuppressedFromShade
+                || mFgsSectionController.hasEntry(ent)) {
+            // we want to suppress removed notifications because they could
+            // temporarily become children if they were isolated before.
+            return true;
+        }
+        return false;
     }
 
     private void addNotificationChildrenAndSort() {
@@ -423,7 +435,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = mListContainer.getContainerChildCount();
 
         int visibleNotifications = 0;
-        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean onKeyguard =
+                mStatusBarStateController.getCurrentOrUpcomingState() == StatusBarState.KEYGUARD;
         Stack<ExpandableNotificationRow> stack = new Stack<>();
         for (int i = N - 1; i >= 0; i--) {
             View child = mListContainer.getContainerChildAt(i);

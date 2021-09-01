@@ -2111,28 +2111,28 @@ public class PackageInstaller {
          * <p>
          * Defaults to {@link #USER_ACTION_UNSPECIFIED} unless otherwise set. When unspecified for
          * installers using the
-         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
-         * #REQUEST_INSTALL_PACKAGES} permission will behave as if set to
-         * {@link #USER_ACTION_REQUIRED}, and {@link #USER_ACTION_NOT_REQUIRED} otherwise.
-         * When {@code requireUserAction} is set to {@link #USER_ACTION_REQUIRED}, installers will
-         * receive a {@link #STATUS_PENDING_USER_ACTION} callback once the session is committed,
-         * indicating that user action is required for the install to proceed.
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
+         * permission will behave as if set to {@link #USER_ACTION_REQUIRED}, and
+         * {@link #USER_ACTION_NOT_REQUIRED} otherwise. When {@code requireUserAction} is set to
+         * {@link #USER_ACTION_REQUIRED}, installers will receive a
+         * {@link #STATUS_PENDING_USER_ACTION} callback once the session is committed, indicating
+         * that user action is required for the install to proceed.
          * <p>
          * For installers that have been granted the
-         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
-         * .REQUEST_INSTALL_PACKAGES} permission, user action will not be required when all of
-         * the following conditions are met:
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
+         * permission, user action will not be required when all of the following conditions are
+         * met:
          *
          * <ul>
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
          *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
          *     or higher.</li>
          *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
-         *     installer of record} of an existing version of the app (i.e.: this install session
-         *     is an app update) or the installer is updating itself.</li>
+         *     installer of record} of an existing version of the app (in other words, this install
+         *     session is an app update) or the installer is updating itself.</li>
          *     <li>The installer declares the
-         *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION android
-         *     .permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
+         *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
+         *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
          * </ul>
          * <p>
          * Note: The target API level requirement will advance in future Android versions.

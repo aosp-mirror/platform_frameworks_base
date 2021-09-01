@@ -182,6 +182,12 @@ public interface NotificationShadeWindowController extends RemoteInputController
     default void setFaceAuthDisplayBrightness(float brightness) {}
 
     /**
+     * How much {@link LightRevealScrim} obscures the UI.
+     * @param amount 0 when opaque, 1 when not transparent
+     */
+    default void setLightRevealScrimAmount(float amount) {}
+
+    /**
      * Custom listener to pipe data back to plugins about whether or not the status bar would be
      * collapsed if not for the plugin.
      * TODO: Find cleaner way to do this.

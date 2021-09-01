@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
@@ -109,6 +110,7 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -215,10 +217,12 @@ public interface StatusBarPhoneModule {
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            StatusBarIconController statusBarIconController,
             LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Optional<StartingSurface> startingSurfaceOptional) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -303,9 +307,11 @@ public interface StatusBarPhoneModule {
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,
+                statusBarIconController,
                 transitionController,
                 featureFlags,
                 keyguardUnlockAnimationController,
-                unlockedScreenOffAnimationController);
+                unlockedScreenOffAnimationController,
+                startingSurfaceOptional);
     }
 }

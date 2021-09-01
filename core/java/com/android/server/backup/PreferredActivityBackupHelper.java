@@ -95,7 +95,7 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
                     Slog.w(TAG, "Unexpected backup key " + key);
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to store payload " + key);
+            Slog.e(TAG, "Unable to store payload " + key, e);
         }
         return null;
     }
@@ -124,7 +124,7 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
                     Slog.w(TAG, "Unexpected restore key " + key);
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Unable to restore key " + key);
+            Slog.e(TAG, "Unable to restore key " + key, e);
         }
     }
 }

@@ -19,16 +19,18 @@ package com.android.systemui.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -42,9 +44,15 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     private static final String TAG = "BiometricPrompt/AuthBiometricFaceToFingerprintView";
 
     protected static class UdfpsIconController extends IconController {
+        @BiometricState private int mIconState = STATE_IDLE;
+
         protected UdfpsIconController(
                 @NonNull Context context, @NonNull ImageView iconView, @NonNull TextView textView) {
             super(context, iconView, textView);
+        }
+
+        void updateState(@BiometricState int newState) {
+            updateState(mIconState, newState);
         }
 
         @Override
@@ -84,14 +92,16 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
             }
 
             mState = newState;
+            mIconState = newState;
         }
     }
 
-    @Modality
-    private int mActiveSensorType = TYPE_FACE;
+    @Modality private int mActiveSensorType = TYPE_FACE;
+    @Nullable private ModalityListener mModalityListener;
+    @Nullable private FingerprintSensorPropertiesInternal mFingerprintSensorProps;
+    @Nullable private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
+    @Nullable @VisibleForTesting UdfpsIconController mUdfpsIconController;
 
-    @Nullable
-    private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
 
     public AuthBiometricFaceToFingerprintView(Context context) {
         super(context);
@@ -106,14 +116,27 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
         super(context, attrs, injector);
     }
 
-    void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
-        if (!sensorProps.isAnyUdfpsType()) {
-            return;
-        }
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mUdfpsIconController = new UdfpsIconController(mContext, mIconView, mIndicatorView);
+    }
 
-        if (mUdfpsMeasureAdapter == null || mUdfpsMeasureAdapter.getSensorProps() != sensorProps) {
-            mUdfpsMeasureAdapter = new UdfpsDialogMeasureAdapter(this, sensorProps);
-        }
+    @Modality
+    int getActiveSensorType() {
+        return mActiveSensorType;
+    }
+
+    boolean isFingerprintUdfps() {
+        return mFingerprintSensorProps.isAnyUdfpsType();
+    }
+
+    void setModalityListener(@NonNull ModalityListener listener) {
+        mModalityListener = listener;
+    }
+
+    void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
+        mFingerprintSensorProps = sensorProps;
     }
 
     @Override
@@ -160,30 +183,26 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
-    @NonNull
-    protected IconController getIconController() {
-        if (mActiveSensorType == TYPE_FINGERPRINT) {
-            if (!(mIconController instanceof UdfpsIconController)) {
-                mIconController = createUdfpsIconController();
-            }
-            return mIconController;
-        }
-        return super.getIconController();
-    }
-
-    @NonNull
-    protected IconController createUdfpsIconController() {
-        return new UdfpsIconController(getContext(), mIconView, mIndicatorView);
-    }
-
-    @Override
     public void updateState(@BiometricState int newState) {
-        if (mState == STATE_HELP || mState == STATE_ERROR) {
-            mActiveSensorType = TYPE_FINGERPRINT;
+        if (mActiveSensorType == TYPE_FACE) {
+            if (newState == STATE_HELP || newState == STATE_ERROR) {
+                mActiveSensorType = TYPE_FINGERPRINT;
 
-            setRequireConfirmation(false);
-            mConfirmButton.setEnabled(false);
-            mConfirmButton.setVisibility(View.GONE);
+                setRequireConfirmation(false);
+                mConfirmButton.setEnabled(false);
+                mConfirmButton.setVisibility(View.GONE);
+
+                if (mModalityListener != null) {
+                    mModalityListener.onModalitySwitched(TYPE_FACE, mActiveSensorType);
+                }
+
+                // Deactivate the face icon controller so it stops drawing to the view
+                mFaceIconController.deactivate();
+                // Then, activate this icon controller. We need to start in the "idle" state
+                mUdfpsIconController.updateState(STATE_IDLE);
+            }
+        } else { // Fingerprint
+            mUdfpsIconController.updateState(newState);
         }
 
         super.updateState(newState);
@@ -193,8 +212,34 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @NonNull
     AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         final AuthDialog.LayoutParams layoutParams = super.onMeasureInternal(width, height);
-        return mUdfpsMeasureAdapter != null
-                ? mUdfpsMeasureAdapter.onMeasureInternal(width, height, layoutParams)
+        return isFingerprintUdfps()
+                ? getUdfpsMeasureAdapter().onMeasureInternal(width, height, layoutParams)
                 : layoutParams;
+    }
+
+    @NonNull
+    private UdfpsDialogMeasureAdapter getUdfpsMeasureAdapter() {
+        if (mUdfpsMeasureAdapter == null
+                || mUdfpsMeasureAdapter.getSensorProps() != mFingerprintSensorProps) {
+            mUdfpsMeasureAdapter = new UdfpsDialogMeasureAdapter(this, mFingerprintSensorProps);
+        }
+        return mUdfpsMeasureAdapter;
+    }
+
+    @Override
+    public void onSaveState(@NonNull Bundle outState) {
+        super.onSaveState(outState);
+        outState.putInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE, mActiveSensorType);
+        outState.putParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS, mFingerprintSensorProps);
+    }
+
+    @Override
+    public void restoreState(@Nullable Bundle savedState) {
+        super.restoreState(savedState);
+        if (savedState != null) {
+            mActiveSensorType = savedState.getInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE, TYPE_FACE);
+            mFingerprintSensorProps =
+                    savedState.getParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS);
+        }
     }
 }

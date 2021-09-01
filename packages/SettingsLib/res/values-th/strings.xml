@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"รีเซ็ตผู้เข้าร่วม"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"รีเซ็ตผู้เข้าร่วมไหม"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"รีเซ็ต"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"กำลังรีเซ็ตผู้เข้าร่วม…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"เลือกรูปภาพ"</string>

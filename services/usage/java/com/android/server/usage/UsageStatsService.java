@@ -2226,7 +2226,14 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public long getLastTimeAnyComponentUsed(String packageName) {
+        public long getLastTimeAnyComponentUsed(String packageName, String callingPackage) {
+            if (!hasPermissions(
+                    callingPackage, android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+                throw new SecurityException("Caller doesn't have INTERACT_ACROSS_USERS permission");
+            }
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException("Don't have permission to query usage stats");
+            }
             synchronized (mLock) {
                 // Truncate the returned milliseconds to the boundary of the last day before exact
                 // time for privacy reasons.

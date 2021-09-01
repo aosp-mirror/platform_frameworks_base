@@ -745,9 +745,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (Binder.getCallingPid() == Process.myPid()) {
             return PermissionChecker.PERMISSION_GRANTED;
         }
-        if (!attributionSource.checkCallingUid()) {
-            return PermissionChecker.PERMISSION_HARD_DENIED;
-        }
         return PermissionChecker.checkPermissionForDataDeliveryFromDataSource(getContext(),
                 permission, -1, new AttributionSource(getContext().getAttributionSource(),
                         attributionSource), /*message*/ null);

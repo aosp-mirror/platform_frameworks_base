@@ -260,7 +260,7 @@
     <item msgid="6506681373060736204">"बढीमा ४ प्रक्रियाहरू"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="3358668781763928157">"चार्ज हुँदै"</item>
+    <item msgid="3358668781763928157">"चार्ज हुँदै छ"</item>
     <item msgid="7804797564616858506">"MTP (मिडिया स्थानान्तरण प्रोटोकल)"</item>
     <item msgid="910925519184248772">"PTP (चित्र स्थानान्तरण प्रोटोकल)"</item>
     <item msgid="3825132913289380004">"RNDIS (USB इथरनेट)"</item>

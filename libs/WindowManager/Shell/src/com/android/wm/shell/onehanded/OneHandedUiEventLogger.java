@@ -50,6 +50,10 @@ public class OneHandedUiEventLogger {
     public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4 = 15;
     public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8 = 16;
     public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12 = 17;
+    public static final int EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON = 18;
+    public static final int EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_OFF = 19;
+    public static final int EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_ON = 20;
+    public static final int EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_OFF = 21;
 
     private static final String[] EVENT_TAGS = {
             "one_handed_trigger_gesture_in",
@@ -69,7 +73,11 @@ public class OneHandedUiEventLogger {
             "one_handed_settings_timeout_seconds_never",
             "one_handed_settings_timeout_seconds_4",
             "one_handed_settings_timeout_seconds_8",
-            "one_handed_settings_timeout_seconds_12"
+            "one_handed_settings_timeout_seconds_12",
+            "one_handed_settings_show_notification_enabled_on",
+            "one_handed_settings_show_notification_enabled_off",
+            "one_handed_settings_shortcut_enabled_on",
+            "one_handed_settings_shortcut_enabled_off"
     };
 
     public OneHandedUiEventLogger(UiEventLogger uiEventLogger) {
@@ -152,7 +160,19 @@ public class OneHandedUiEventLogger {
         ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_8(364),
 
         @UiEvent(doc = "One-Handed mode timeout value changed to 12 seconds")
-        ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_12(365);
+        ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_12(365),
+
+        @UiEvent(doc = "One-Handed mode show notification toggle on")
+        ONE_HANDED_SETTINGS_TOGGLES_SHOW_NOTIFICATION_ENABLED_ON(847),
+
+        @UiEvent(doc = "One-Handed mode show notification toggle off")
+        ONE_HANDED_SETTINGS_TOGGLES_SHOW_NOTIFICATION_ENABLED_OFF(848),
+
+        @UiEvent(doc = "One-Handed mode shortcut toggle on")
+        ONE_HANDED_SETTINGS_TOGGLES_SHORTCUT_ENABLED_ON(870),
+
+        @UiEvent(doc = "One-Handed mode shortcut toggle off")
+        ONE_HANDED_SETTINGS_TOGGLES_SHORTCUT_ENABLED_OFF(871);
 
         private final int mId;
 
@@ -246,6 +266,22 @@ public class OneHandedUiEventLogger {
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12:
                 mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_12);
+                break;
+            case EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON:
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
+                        .ONE_HANDED_SETTINGS_TOGGLES_SHOW_NOTIFICATION_ENABLED_ON);
+                break;
+            case EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_OFF:
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
+                        .ONE_HANDED_SETTINGS_TOGGLES_SHOW_NOTIFICATION_ENABLED_OFF);
+                break;
+            case EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_ON:
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
+                        .ONE_HANDED_SETTINGS_TOGGLES_SHORTCUT_ENABLED_ON);
+                break;
+            case EVENT_ONE_HANDED_SETTINGS_SHORTCUT_ENABLED_OFF:
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
+                        .ONE_HANDED_SETTINGS_TOGGLES_SHORTCUT_ENABLED_OFF);
                 break;
             default:
                 // Do nothing

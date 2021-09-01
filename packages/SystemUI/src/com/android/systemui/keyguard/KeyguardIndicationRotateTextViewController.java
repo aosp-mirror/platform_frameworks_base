@@ -23,7 +23,6 @@ import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -164,15 +163,14 @@ public class KeyguardIndicationRotateTextViewController extends
      * Transient messages:
      * - show immediately
      * - will continue to be in the rotation of messages shown until hideTransient is called.
-     * - can be presented with an "error" color if isError is true
      */
-    public void showTransient(CharSequence newIndication, boolean isError) {
+    public void showTransient(CharSequence newIndication) {
+        final long inAnimationDuration = 600L; // see KeyguardIndicationTextView.getYInDuration
         updateIndication(INDICATION_TYPE_TRANSIENT,
                 new KeyguardIndication.Builder()
                         .setMessage(newIndication)
-                        .setTextColor(isError
-                                ? Utils.getColorError(getContext())
-                                : mInitialTextColorState)
+                        .setMinVisibilityMillis(2000L + inAnimationDuration)
+                        .setTextColor(mInitialTextColorState)
                         .build(),
                 /* showImmediately */true);
     }

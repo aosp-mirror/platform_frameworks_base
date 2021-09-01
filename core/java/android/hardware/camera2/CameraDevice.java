@@ -807,6 +807,23 @@ public abstract class CameraDevice implements AutoCloseable {
      * The same logic applies to other hardware levels and capabilities.
      * </p>
      *
+     * <p> Devices with the ULTRA_HIGH_RESOLUTION_SENSOR capability have some additional guarantees
+     * which clients can take advantage of : </p>
+     * <table>
+     * <tr><th colspan="10">Additional guaranteed combinations for ULTRA_HIGH_RESOLUTION sensors</th></tr>
+     * <tr> <th colspan="3" id="rb">Target 1</th> <th colspan="3" id="rb">Target 2</th>  <th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code YUV / JPEG / RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td colspan="3" id="rb"></td> <td>Ultra high res still image capture with preview</td> </tr>
+     * <tr> <td>{@code YUV / JPEG / RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code RECORD}</td> <td>Ultra high res still capture with preview + app based RECORD size analysis</td> </tr>
+     * <tr> <td>{@code YUV / JPEG / RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG / YUV / RAW}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code MAX}</td> <td>Ultra high res still image capture with preview + default sensor pixel mode analysis stream</td> </tr>
+     * </table><br>
+     *
+     * <p> Here, SC Map, refers to the {@link StreamConfigurationMap}, the target stream sizes must
+     * be chosen from. {@code DEFAULT} refers to the default sensor pixel mode {@link
+     * StreamConfigurationMap} and {@code MAX_RES} refers to the maximum resolution {@link
+     * StreamConfigurationMap}. The same capture request must not mix targets from
+     * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes.
+     *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
      * by calling {@link #isSessionConfigurationSupported} or attempting to create a session with
@@ -988,6 +1005,16 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>Maximum-resolution ZSL in-app processing with regular preview.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>Maximum-resolution two-input ZSL in-app processing.</td> </tr>
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>ZSL still capture and in-app processing.</td> </tr>
+     * </table><br>
+     * <p> Devices with the ULTRA_HIGH_RESOLUTION_SENSOR capability have some additional guarantees
+     * which clients can take advantage of : </p>
+     * <table>
+     * <tr><th colspan="13">Additional guaranteed combinations for ULTRA_HIGH_RESOLUTION sensors (YUV / PRIV inputs are guaranteed only if YUV / PRIVATE reprocessing are supported)</th></tr>
+     * <tr> <th colspan="3" id="rb">Input</th> <th colspan="3" id="rb">Target 1</th> <th colspan="3" id="rb">Target 2</th>  <th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th><th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td colspan="3" id="rb"></td> <td>RAW remosaic reprocessing with seperate preview</td> </tr>
+     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG / YUV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td>Ultra high res RAW -> JPEG / YUV with seperate preview</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code YUV / PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG }</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td> Ultra high res PRIV / YUV -> YUV / JPEG reprocessing with seperate preview</td> </tr>
      * </table><br>
      * No additional mandatory stream combinations for RAW capability and LEVEL-3 hardware level.
      * </p>

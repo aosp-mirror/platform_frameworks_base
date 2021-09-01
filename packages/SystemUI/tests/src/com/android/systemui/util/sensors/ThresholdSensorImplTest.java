@@ -16,10 +16,15 @@
 
 package com.android.systemui.util.sensors;
 
+import static android.hardware.Sensor.TYPE_ALL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.hardware.Sensor;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
@@ -32,6 +37,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -57,6 +64,79 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
                 .setSensor(mFakeProximitySensor.getSensor())
                 .setThresholdValue(mFakeProximitySensor.getSensor().getMaximumRange())
                 .build();
+    }
+
+    @Test
+    public void testRegistersWakeUpProxSensor_givenWakeUpExistsAfterNonWakeup() {
+        // GIVEN sensor manager with two prox sensors (one non-wakeup, one wakeup)
+        final String sensorTypeProx = "prox";
+        AsyncSensorManager mockSensorManager = mock(AsyncSensorManager.class);
+
+        Sensor mockNonWakeupProx = mock(Sensor.class);
+        when(mockNonWakeupProx.isWakeUpSensor()).thenReturn(false);
+        when(mockNonWakeupProx.getStringType()).thenReturn(sensorTypeProx);
+
+        Sensor mockWakeupProx = mock(Sensor.class);
+        when(mockWakeupProx.isWakeUpSensor()).thenReturn(true);
+        when(mockWakeupProx.getStringType()).thenReturn(sensorTypeProx);
+
+        when(mockSensorManager.getSensorList(TYPE_ALL)).thenReturn(
+                List.of(mockNonWakeupProx, mockWakeupProx));
+
+        // WHEN we build a threshold sensor by type
+        ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
+                null, mockSensorManager, new FakeExecution());
+        Sensor proxSensor = thresholdSensorBuilder.findSensorByType(sensorTypeProx, true);
+
+        // THEN the prox sensor used is the wakeup sensor
+        assertEquals(mockWakeupProx, proxSensor);
+    }
+
+    @Test
+    public void testRegistersWakeUpProxSensor_givenNonWakeUpExistsAfterWakeup() {
+        // GIVEN sensor manager with two prox sensors (one wakeup, one non-wakeup)
+        final String sensorTypeProx = "prox";
+        AsyncSensorManager mockSensorManager = mock(AsyncSensorManager.class);
+
+        Sensor mockNonWakeupProx = mock(Sensor.class);
+        when(mockNonWakeupProx.isWakeUpSensor()).thenReturn(false);
+        when(mockNonWakeupProx.getStringType()).thenReturn(sensorTypeProx);
+
+        Sensor mockWakeupProx = mock(Sensor.class);
+        when(mockWakeupProx.isWakeUpSensor()).thenReturn(true);
+        when(mockWakeupProx.getStringType()).thenReturn(sensorTypeProx);
+
+        when(mockSensorManager.getSensorList(TYPE_ALL)).thenReturn(
+                List.of(mockWakeupProx, mockNonWakeupProx));
+
+        // WHEN we build a threshold sensor by type
+        ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
+                null, mockSensorManager, new FakeExecution());
+        Sensor proxSensor = thresholdSensorBuilder.findSensorByType(sensorTypeProx, true);
+
+        // THEN the prox sensor used is the wakeup sensor
+        assertEquals(mockWakeupProx, proxSensor);
+    }
+
+    @Test
+    public void testRegistersNonWakeUpProxSensor_givenNonWakeUpOnly() {
+        // GIVEN sensor manager with one non-wakeup prox sensor
+        final String sensorTypeProx = "prox";
+        AsyncSensorManager mockSensorManager = mock(AsyncSensorManager.class);
+
+        Sensor mockNonWakeupProx = mock(Sensor.class);
+        when(mockNonWakeupProx.isWakeUpSensor()).thenReturn(false);
+        when(mockNonWakeupProx.getStringType()).thenReturn(sensorTypeProx);
+
+        when(mockSensorManager.getSensorList(TYPE_ALL)).thenReturn(List.of(mockNonWakeupProx));
+
+        // WHEN we build a threshold sensor by type
+        ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
+                null, mockSensorManager, new FakeExecution());
+        Sensor proxSensor = thresholdSensorBuilder.findSensorByType(sensorTypeProx, true);
+
+        // THEN the prox sensor used is the one available (non-wakeup)
+        assertEquals(mockNonWakeupProx, proxSensor);
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package android.os;
 
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
@@ -903,9 +902,9 @@ public abstract class BatteryStats implements Parcelable {
          * is not attributed to any non-critical process states.
          */
         public static final int[] CRITICAL_PROC_STATES = {
-                PROCESS_STATE_TOP,
-                PROCESS_STATE_BOUND_TOP, PROCESS_STATE_FOREGROUND_SERVICE,
-                PROCESS_STATE_FOREGROUND
+                Uid.PROCESS_STATE_TOP,
+                Uid.PROCESS_STATE_FOREGROUND_SERVICE,
+                Uid.PROCESS_STATE_FOREGROUND
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);

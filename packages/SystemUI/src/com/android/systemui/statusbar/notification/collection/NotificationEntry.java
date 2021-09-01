@@ -51,6 +51,7 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -126,8 +127,12 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    // Mimetype and Uri used to display the image in the notification *after* it has been sent.
     public String remoteInputMimeType;
     public Uri remoteInputUri;
+    // ContentInfo used to keep the attachment permission alive until RemoteInput is sent or
+    // cancelled.
+    public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
     private ShortcutInfo mShortcutInfo;
 
@@ -178,6 +183,7 @@ public final class NotificationEntry extends ListEntry {
     private boolean mIsMarkedForUserTriggeredMovement;
     private boolean mIsAlerting;
 
+    public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
     private boolean mExpandAnimationRunning;
 

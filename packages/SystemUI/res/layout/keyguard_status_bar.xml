@@ -30,6 +30,7 @@
         android:id="@+id/status_icon_area"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingEnd="@dimen/system_icons_keyguard_padding_end"
         android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_alignParentEnd="true"
         android:gravity="center_vertical|end" >
@@ -38,11 +39,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginStart="@dimen/system_icons_super_container_margin_start"
-            android:gravity="center_vertical|end"
-            android:paddingEnd="@dimen/system_icons_keyguard_padding_end" >
+            android:gravity="center_vertical|end">
             <include layout="@layout/system_icons" />
         </FrameLayout>
-
 
         <ImageView android:id="@+id/multi_user_avatar"
             android:layout_width="@dimen/multi_user_avatar_keyguard_size"

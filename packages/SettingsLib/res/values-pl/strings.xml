@@ -235,8 +235,8 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sparuj urządzenia przez Wi-Fi, skanując kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Połącz się z siecią Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Skrót do zgłoszenia błędu"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Pokaż w menu zasilania przycisk zgłaszania błędu"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Skrót do zgłaszania błędów"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Pokazuj w menu zasilania przycisk zgłaszania błędów"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Pozostaw włączony ekran"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran nie będzie gaszony podczas ładowania telefonu"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Włącz dziennik snoop Bluetooth HCI"</string>
@@ -249,7 +249,7 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nie ustawiono aplikacji do pozorowania lokalizacji"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacja do pozorowania lokalizacji: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sieci"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Wyświetlacz bezprzewodowy"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certyfikacja wyświetlacza bezprzewodowego"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Szczegółowy dziennik Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ograniczanie skanowania Wi-Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nietrwała randomizacja adresów MAC w sieci Wi-Fi"</string>
@@ -281,7 +281,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nazwa hosta dostawcy prywatnego DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Wpisz nazwę hosta dostawcy DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nie udało się połączyć"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaż opcje certyfikacji wyświetlacza bezprzewodowego"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokazuj opcje certyfikacji wyświetlacza bezprzewodowego"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zwiększ poziom rejestrowania Wi‑Fi, pokazuj według RSSI SSID w selektorze Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmniejsza zużycie baterii i zwiększa wydajność sieci"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kiedy ten tryb jest włączony, to adres MAC tego urządzenia może zmieniać się za każdym razem, kiedy urządzenie połączy się z siecią, która ma włączoną opcję randomizacji MAC"</string>
@@ -297,9 +297,9 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Wybierz konfigurację USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Pozorowanie lokalizacji"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Zezwalaj na pozorowanie lokalizacji"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Inspekcja wyświetlania atrybutu"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Inspekcja atrybutu wyświetlania"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Nie wyłączaj transmisji danych przez sieć komórkową, nawet gdy aktywne jest połączenie Wi-Fi (aby szybko przełączać sieci)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Użyj akceleracji sprzętowej tetheringu, jeśli jest dostępna"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Używaj akceleracji sprzętowej tetheringu, jeśli jest dostępna"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Czy zezwalać na debugowanie USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Debugowanie USB jest przeznaczone wyłącznie do celów programistycznych. Może służyć do kopiowania danych między komputerem a urządzeniem, instalowania aplikacji na urządzeniu bez powiadamiania, a także odczytu danych dziennika."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Zezwalać na debugowanie bezprzewodowe?"</string>
@@ -307,8 +307,8 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Odwołać dostęp wszystkich poprzednio autoryzowanych komputerów do debugowania USB?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Zezwolić na ustawienia programistyczne?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Te ustawienia są przeznaczone wyłącznie dla programistów. Ich użycie może spowodować uszkodzenie lub nieprawidłowe działanie urządzenia i zainstalowanych na nim aplikacji."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Zweryfikuj aplikacje przez USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Sprawdź, czy aplikacje zainstalowane przez ADB/ADT nie zachowują się w szkodliwy sposób"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Weryfikuj aplikacje przez USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Sprawdzaj, czy aplikacje zainstalowane przez ADB/ADT nie zachowują się w szkodliwy sposób"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Urządzenia Bluetooth będą wyświetlane bez nazw (tylko adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Wyłącza Głośność bezwzględną Bluetooth, jeśli występują problemy z urządzeniami zdalnymi, np. zbyt duża głośność lub brak kontroli"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Włącza funkcje Bluetooth Gabeldorsche"</string>
@@ -349,17 +349,17 @@
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Włącz śledzenie OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Wyłącz kierowanie dźwiękowe USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Wyłącz autokierowanie do urządzeń peryferyjnych audio USB"</string>
-    <string name="debug_layout" msgid="1659216803043339741">"Pokaż granice układu"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaż granice przycięcia, marginesy itd."</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Pokazuj granice układu"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Pokazuj granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Wymuś wszędzie układ ekranu od prawej do lewej"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Wymuszaj układ ekranu od prawej do lewej dla wszystkich języków"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Zezwól na rozmycie na poziomie okna"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"Wymuś 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"Włącz 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Wymuszaj 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"Włączaj 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debuguj operacje przycinania nieprostokątnego"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profil renderowania HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Warstwy debugowania GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Zezwól na ładowanie warstw debugowania GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Zezwalaj na ładowanie warstw debugowania GPU"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Włącz szczegółowe rejestrowanie dostawcy"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animacji okna"</string>
@@ -443,8 +443,8 @@
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria może się wyczerpać do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Pozostało mniej niż <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Pozostało mniej niż <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Pozostało ponad <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Pozostało ponad <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Wkrótce telefon może się wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet może się wkrótce wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Urządzenie może się wkrótce wyłączyć"</string>
@@ -570,6 +570,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Usuń gościa"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetuj sesję gościa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gość"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Zresetować sesję gościa?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Resetuję sesję gościa…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Wybierz obraz"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Wybierz zdjęcie"</string>

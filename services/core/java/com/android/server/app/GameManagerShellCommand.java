@@ -16,18 +16,34 @@
 
 package com.android.server.app;
 
+import static com.android.server.wm.CompatModePackages.DOWNSCALED;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_30;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_35;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_40;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_45;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_50;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_55;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_60;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_65;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_70;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_75;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_80;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_85;
+import static com.android.server.wm.CompatModePackages.DOWNSCALE_90;
+
 import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.IGameManagerService;
 import android.compat.Compatibility;
 import android.content.Context;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.ArraySet;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.wm.CompatModePackages;
 
 import java.io.PrintWriter;
 import java.util.Set;
@@ -43,12 +59,21 @@ public class GameManagerShellCommand extends ShellCommand {
     public GameManagerShellCommand() {}
 
     private static final ArraySet<Long> DOWNSCALE_CHANGE_IDS = new ArraySet<>(new Long[]{
-            CompatModePackages.DOWNSCALED,
-            CompatModePackages.DOWNSCALE_90,
-            CompatModePackages.DOWNSCALE_80,
-            CompatModePackages.DOWNSCALE_70,
-            CompatModePackages.DOWNSCALE_60,
-            CompatModePackages.DOWNSCALE_50});
+            DOWNSCALED,
+            DOWNSCALE_90,
+            DOWNSCALE_85,
+            DOWNSCALE_80,
+            DOWNSCALE_75,
+            DOWNSCALE_70,
+            DOWNSCALE_65,
+            DOWNSCALE_60,
+            DOWNSCALE_55,
+            DOWNSCALE_50,
+            DOWNSCALE_45,
+            DOWNSCALE_40,
+            DOWNSCALE_35,
+            DOWNSCALE_30,
+    });
 
     @Override
     public int onCommand(String cmd) {
@@ -62,32 +87,9 @@ public class GameManagerShellCommand extends ShellCommand {
                     final String ratio = getNextArgRequired();
                     final String packageName = getNextArgRequired();
 
-                    final long changeId;
-                    switch (ratio) {
-                        case "0.5":
-                            changeId = CompatModePackages.DOWNSCALE_50;
-                            break;
-                        case "0.6":
-                            changeId = CompatModePackages.DOWNSCALE_60;
-                            break;
-                        case "0.7":
-                            changeId = CompatModePackages.DOWNSCALE_70;
-                            break;
-                        case "0.8":
-                            changeId = CompatModePackages.DOWNSCALE_80;
-                            break;
-                        case "0.9":
-                            changeId = CompatModePackages.DOWNSCALE_90;
-                            break;
-                        case "disable":
-                            changeId = 0;
-                            break;
-                        default:
-                            changeId = -1;
-                            pw.println("Invalid scaling ratio '" + ratio + "'");
-                            break;
-                    }
-                    if (changeId == -1) {
+                    final long changeId = GameManagerService.getCompatChangeId(ratio);
+                    if (changeId == 0 && !ratio.equals("disable")) {
+                        pw.println("Invalid scaling ratio '" + ratio + "'");
                         break;
                     }
 
@@ -96,10 +98,10 @@ public class GameManagerShellCommand extends ShellCommand {
                     if (changeId == 0) {
                         disabled = DOWNSCALE_CHANGE_IDS;
                     } else {
-                        enabled.add(CompatModePackages.DOWNSCALED);
+                        enabled.add(DOWNSCALED);
                         enabled.add(changeId);
                         disabled = DOWNSCALE_CHANGE_IDS.stream()
-                          .filter(it -> it != CompatModePackages.DOWNSCALED && it != changeId)
+                          .filter(it -> it != DOWNSCALED && it != changeId)
                           .collect(Collectors.toSet());
                     }
 
@@ -116,7 +118,7 @@ public class GameManagerShellCommand extends ShellCommand {
                         pw.println("Enable downscaling ratio for " + packageName + " to " + ratio);
                     }
 
-                    break;
+                    return 0;
                 }
                 case "mode": {
                     /** The "mode" command allows setting a package's current game mode outside of
@@ -128,65 +130,7 @@ public class GameManagerShellCommand extends ShellCommand {
                      *          <PACKAGE_NAME> <CONFIG_STRING>`
                      * see: {@link GameManagerServiceTests#mockDeviceConfigAll()}
                      */
-                    final String option = getNextOption();
-                    String userIdStr = null;
-                    if (option != null && option.equals("--user")) {
-                        userIdStr = getNextArgRequired();
-                    }
-
-                    final String gameMode = getNextArgRequired();
-                    final String packageName = getNextArgRequired();
-                    final IGameManagerService service = IGameManagerService.Stub.asInterface(
-                            ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
-                    boolean batteryModeSupported = false;
-                    boolean perfModeSupported = false;
-                    int[] modes = service.getAvailableGameModes(packageName);
-                    for (int mode : modes) {
-                        if (mode == GameManager.GAME_MODE_PERFORMANCE) {
-                            perfModeSupported = true;
-                        } else if (mode == GameManager.GAME_MODE_BATTERY) {
-                            batteryModeSupported = true;
-                        }
-                    }
-                    int userId = userIdStr != null ? Integer.parseInt(userIdStr)
-                            : ActivityManager.getCurrentUser();
-                    switch (gameMode.toLowerCase()) {
-                        case "1":
-                        case "standard":
-                            // Standard should only be available if other game modes are.
-                            if (batteryModeSupported || perfModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        case "2":
-                        case "performance":
-                            if (perfModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_PERFORMANCE,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        case "3":
-                        case "battery":
-                            if (batteryModeSupported) {
-                                service.setGameMode(packageName, GameManager.GAME_MODE_BATTERY,
-                                        userId);
-                            } else {
-                                pw.println("Game mode: " + gameMode + " not supported by "
-                                        + packageName);
-                            }
-                            break;
-                        default:
-                            pw.println("Invalid game mode: " + gameMode);
-                            break;
-                    }
-                    break;
+                    return runGameMode(pw);
                 }
                 default:
                     return handleDefaultCommands(cmd);
@@ -197,6 +141,71 @@ public class GameManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private int runGameMode(PrintWriter pw) throws ServiceNotFoundException, RemoteException {
+        final String option = getNextOption();
+        String userIdStr = null;
+        if (option != null && option.equals("--user")) {
+            userIdStr = getNextArgRequired();
+        }
+
+        final String gameMode = getNextArgRequired();
+        final String packageName = getNextArgRequired();
+        final IGameManagerService service = IGameManagerService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
+        boolean batteryModeSupported = false;
+        boolean perfModeSupported = false;
+        int[] modes = service.getAvailableGameModes(packageName);
+        for (int mode : modes) {
+            if (mode == GameManager.GAME_MODE_PERFORMANCE) {
+                perfModeSupported = true;
+            } else if (mode == GameManager.GAME_MODE_BATTERY) {
+                batteryModeSupported = true;
+            }
+        }
+        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                : ActivityManager.getCurrentUser();
+        switch (gameMode.toLowerCase()) {
+            case "1":
+            case "standard":
+                // Standard should only be available if other game modes are.
+                if (batteryModeSupported || perfModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_STANDARD,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            case "2":
+            case "performance":
+                if (perfModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_PERFORMANCE,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            case "3":
+            case "battery":
+                if (batteryModeSupported) {
+                    service.setGameMode(packageName, GameManager.GAME_MODE_BATTERY,
+                            userId);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
+                break;
+            default:
+                pw.println("Invalid game mode: " + gameMode);
+                return -1;
+        }
+        return 0;
+    }
+
 
     @Override
     public void onHelp() {
@@ -204,7 +213,7 @@ public class GameManagerShellCommand extends ShellCommand {
         pw.println("Game manager (game) commands:");
         pw.println("  help");
         pw.println("      Print this help text.");
-        pw.println("  downscale [0.5|0.6|0.7|0.8|0.9|disable] <PACKAGE_NAME>");
+        pw.println("  downscale [0.3|0.35|0.4|0.45|0.5|0.55|0.6|0.65|0.7|0.75|0.8|0.85|0.9|disable] <PACKAGE_NAME>");
         pw.println("      Force app to run at the specified scaling ratio.");
         pw.println("  mode [--user <USER_ID>] [1|2|3|standard|performance|battery] <PACKAGE_NAME>");
         pw.println("      Force app to run in the specified game mode, if supported.");

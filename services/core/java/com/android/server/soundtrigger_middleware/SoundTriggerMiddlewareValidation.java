@@ -318,6 +318,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
          */
         private Map<Integer, ModelParameterRange> parameterSupport = new HashMap<>();
 
+        private RecognitionConfig mConfig;
+
         /**
          * Check that the given parameter is known to be supported for this model.
          *
@@ -368,6 +370,14 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         void setActivityState(Activity activity) {
             mActivityState.set(activity.ordinal());
+        }
+
+        void setRecognitionConfig(@NonNull RecognitionConfig config) {
+            mConfig = config;
+        }
+
+        RecognitionConfig getRecognitionConfig() {
+            return mConfig;
         }
     }
 
@@ -502,6 +512,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     // Normally, we would set the state after the operation succeeds. However, since
                     // the activity state may be reset outside of the lock, we set it here first,
                     // and reset it in case of exception.
+                    modelState.setRecognitionConfig(config);
                     modelState.setActivityState(ModelState.Activity.ACTIVE);
                     mDelegate.startRecognition(modelHandle, config);
                 } catch (Exception e) {
@@ -538,6 +549,27 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     modelState.setActivityState(ModelState.Activity.LOADED);
                 } catch (Exception e) {
                     throw handleException(e);
+                }
+            }
+        }
+
+        private void restartIfIntercepted(int modelHandle) {
+            synchronized (SoundTriggerMiddlewareValidation.this) {
+                // State validation.
+                if (mState == ModuleStatus.DETACHED) {
+                    return;
+                }
+                ModelState modelState = mLoadedModels.get(modelHandle);
+                if (modelState == null
+                        || modelState.getActivityState() != ModelState.Activity.INTERCEPTED) {
+                    return;
+                }
+                try {
+                    mDelegate.startRecognition(modelHandle, modelState.getRecognitionConfig());
+                    modelState.setActivityState(ModelState.Activity.ACTIVE);
+                    Log.i(TAG, "Restarted intercepted model " + modelHandle);
+                } catch (Exception e) {
+                    Log.i(TAG, "Failed to restart intercepted model " + modelHandle, e);
                 }
             }
         }
@@ -753,6 +785,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     Log.e(TAG, "Client callback exception.", e);
                     if (event.status != RecognitionStatus.FORCED) {
                         modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                        // If we failed to deliver an actual event to the client, they would never
+                        // know to restart it whenever circumstances change. Thus, we restart it
+                        // here. We do this from a separate thread to avoid any race conditions.
+                        new Thread(() -> restartIfIntercepted(modelHandle)).start();
                     }
                 }
             }
@@ -780,6 +816,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     Log.e(TAG, "Client callback exception.", e);
                     if (event.common.status != RecognitionStatus.FORCED) {
                         modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                        // If we failed to deliver an actual event to the client, they would never
+                        // know to restart it whenever circumstances change. Thus, we restart it
+                        // here. We do this from a separate thread to avoid any race conditions.
+                        new Thread(() -> restartIfIntercepted(modelHandle)).start();
                     }
                 }
             }

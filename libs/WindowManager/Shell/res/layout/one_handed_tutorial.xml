@@ -31,7 +31,7 @@
         android:layout_marginTop="6dp"
         android:layout_marginBottom="0dp"
         android:gravity="center_horizontal"
-        android:src="@drawable/one_handed_tutorial"
+        android:src="@drawable/one_handed_tutorial_icon"
         android:scaleType="centerInside" />
 
     <TextView
@@ -45,7 +45,6 @@
         android:fontFamily="google-sans-medium"
         android:text="@string/one_handed_tutorial_title"
         android:textSize="16sp"
-        android:textStyle="bold"
         android:textColor="@android:color/white"/>
 
     <TextView
@@ -54,8 +53,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="0dp"
-        android:layout_marginStart="46dp"
-        android:layout_marginEnd="46dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
         android:gravity="center_horizontal"
         android:fontFamily="roboto-regular"
         android:text="@string/one_handed_tutorial_description"

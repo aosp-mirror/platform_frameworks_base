@@ -33,6 +33,7 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 
@@ -146,4 +147,8 @@ public interface QSFragmentModule {
         return useQsMediaPlayer(context);
     }
 
+    /** */
+    @Binds
+    QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
+            QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
 }

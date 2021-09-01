@@ -71,12 +71,6 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
         }
     }
 
-    @Override
-    protected void onViewDetached() {
-        super.onViewDetached();
-        mEnrollHelper.setListener(null);
-    }
-
     @NonNull
     @Override
     public PointF getTouchTranslation() {

@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -33,6 +32,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
@@ -41,6 +42,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+
+import java.util.List;
 
 /**
  * View that contains the top-most bits of the QS panel (primarily the status bar with date, time,
@@ -79,7 +82,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private TintedIconManager mTintedIconManager;
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
 
-    private int mStatusBarPaddingTop = 0;
     private int mRoundedCornerPadding = 0;
     private int mWaterfallTopInset;
     private int mCutOutPaddingLeft;
@@ -89,22 +91,15 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
 
-    private final String mMobileSlotName;
-    private final String mNoCallingSlotName;
-    private final String mCallStrengthSlotName;
-    private final boolean mProviderModel;
+    @NonNull
+    private List<String> mRssiIgnoredSlots;
+    private boolean mIsSingleCarrier;
+
+    private boolean mHasCenterCutout;
+    private boolean mConfigShowBatteryEstimate;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_mobile);
-        mNoCallingSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
-        mCallStrengthSlotName =
-                context.getString(com.android.internal.R.string.status_bar_call_strength);
-        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-            mProviderModel = true;
-        } else {
-            mProviderModel = false;
-        }
     }
 
     /**
@@ -154,8 +149,10 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     void onAttach(TintedIconManager iconManager,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            List<String> rssiIgnoredSlots) {
         mTintedIconManager = iconManager;
+        mRssiIgnoredSlots = rssiIgnoredSlots;
         int fillColor = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.textColorPrimary);
 
@@ -164,6 +161,11 @@ public class QuickStatusBarHeader extends FrameLayout {
 
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         updateAnimators();
+    }
+
+    void setIsSingleCarrier(boolean isSingleCarrier) {
+        mIsSingleCarrier = isSingleCarrier;
+        updateAlphaAnimator();
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -204,12 +206,21 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyContainer.setLayoutParams(lp);
     }
 
+    private void updateBatteryMode() {
+        if (mConfigShowBatteryEstimate && !mHasCenterCutout) {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+        } else {
+            mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+        }
+    }
+
     void updateResources() {
         Resources resources = mContext.getResources();
 
+        mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
+
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-        mStatusBarPaddingTop = resources.getDimensionPixelSize(R.dimen.status_bar_padding_top);
 
         int qsOffsetHeight = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
@@ -248,6 +259,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
+        updateBatteryMode();
         updateHeadersPadding();
         updateAnimators();
     }
@@ -273,39 +285,26 @@ public class QuickStatusBarHeader extends FrameLayout {
                 .setListener(new TouchAnimator.ListenerAdapter() {
                     @Override
                     public void onAnimationAtEnd() {
-                        // TODO(b/185580157): Remove the mProviderModel if the mobile slot can be
-                        // hidden in Provider model.
-                        if (mProviderModel) {
-                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.addIgnoredSlot(mMobileSlotName);
+                        super.onAnimationAtEnd();
+                        if (!mIsSingleCarrier) {
+                            mIconContainer.addIgnoredSlots(mRssiIgnoredSlots);
                         }
                     }
 
                     @Override
                     public void onAnimationStarted() {
-                        if (mProviderModel) {
-                            mIconContainer.addIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.addIgnoredSlot(mMobileSlotName);
-                        }
-
                         setSeparatorVisibility(false);
+                        if (!mIsSingleCarrier) {
+                            mIconContainer.addIgnoredSlots(mRssiIgnoredSlots);
+                        }
                     }
 
                     @Override
                     public void onAnimationAtStart() {
                         super.onAnimationAtStart();
-                        if (mProviderModel) {
-                            mIconContainer.removeIgnoredSlot(mNoCallingSlotName);
-                            mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
-                        } else {
-                            mIconContainer.removeIgnoredSlot(mMobileSlotName);
-                        }
-
                         setSeparatorVisibility(mShowClockIconsSeparator);
+                        // In QQS we never ignore RSSI.
+                        mIconContainer.removeIgnoredSlots(mRssiIgnoredSlots);
                     }
                 });
         mAlphaAnimator = builder.build();
@@ -399,14 +398,14 @@ public class QuickStatusBarHeader extends FrameLayout {
                 mClockIconsSeparatorLayoutParams.width = 0;
                 setSeparatorVisibility(false);
                 mShowClockIconsSeparator = false;
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+                mHasCenterCutout = false;
             } else {
                 datePrivacySeparatorLayoutParams.width = topCutout.width();
                 mDatePrivacySeparator.setVisibility(View.VISIBLE);
                 mClockIconsSeparatorLayoutParams.width = topCutout.width();
                 mShowClockIconsSeparator = true;
                 setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
-                mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ON);
+                mHasCenterCutout = true;
             }
         }
         mDatePrivacySeparator.setLayoutParams(datePrivacySeparatorLayoutParams);
@@ -414,6 +413,8 @@ public class QuickStatusBarHeader extends FrameLayout {
         mCutOutPaddingLeft = padding.first;
         mCutOutPaddingRight = padding.second;
         mWaterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
+
+        updateBatteryMode();
         updateHeadersPadding();
         return super.onApplyWindowInsets(insets);
     }
@@ -469,11 +470,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         mDatePrivacyView.setPadding(paddingLeft,
-                mWaterfallTopInset + mStatusBarPaddingTop,
+                mWaterfallTopInset,
                 paddingRight,
                 0);
         mClockIconsView.setPadding(paddingLeft,
-                mWaterfallTopInset + mStatusBarPaddingTop,
+                mWaterfallTopInset,
                 paddingRight,
                 0);
     }

@@ -155,8 +155,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Хэрэглэгч: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Зарим үндсэн тохиргоонуудыг суулгасан"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Ямар ч үндсэн тохиргоог суулгаагүй байна"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Текст-ярианы тохиргоо"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Текстийг яриа болгон гаргах"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Бичвэрийг ярианд хувиргах тохиргоо"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Бичвэрийг ярианд хувиргах"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ярианы түвшин"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Текстийг унших хурд"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Авиа тон"</string>
@@ -170,7 +170,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Хоолойн өгөгдлийг суулгах"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Яриа үүсгэхэд шаардлагатай дууны өгөгдлийг суулгах"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Энэ яриа үүсгүүр нь нууц үг, зээлийн картын дугаар гэх мэт таны хувийн мэдээллийг оруулан унших бүх текстийг цуглуулах боломжтой. Үүнийг <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> үүсгүүрээс нийлүүлдэг. Энэ яриа үүсгүүрийн ашиглалтыг идэвхжүүлэх үү?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Энэ хэл нь текстээс дуунд хөрвүүлэхэд ажлын сүлжээний холболтыг шаарддаг."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Энэ хэл нь бичвэрийг ярианд хувиргахад ажлын сүлжээний холболт шаардана."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Энэ бол яриа үүсгэх жишээ юм."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Үндсэн хэлний статус"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> бүрэн дэмжигдсэн"</string>
@@ -426,7 +426,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомаль (цэнхэр-шар)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулах"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Таны төхөөрөмж дээр өнгийг хэрхэн үзүүлэхийг тохируулна уу. Энэ нь танд дараахыг хийхийг хүссэн үед хэрэг болж магадгүй:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;Өнгийг илүү оновчтой харах&lt;/li&gt; &lt;li&gt;Танд төвлөрөхөд туслахын тулд өнгийг хасах&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Таны төхөөрөмж дээр өнгийг хэрхэн үзүүлэхийг тохируулна уу. Энэ нь танд дараахыг хийхийг хүссэн үед хэрэг болж магадгүй:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Өнгийг илүү оновчтой харах&lt;/li&gt; &lt;li&gt;&amp;nbsp;Танд төвлөрөхөд туслахын тулд өнгийг хасах&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ойролцоогоор <xliff:g id="TIME_REMAINING">%1$s</xliff:g> үлдсэн"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Зочин хасах"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Зочныг шинэчлэх"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Зочин"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Зочныг шинэчлэх үү?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Шинэчлэх"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Зочныг шинэчилж байна…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зураг авах"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Зураг сонгох"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Зураг сонгох"</string>

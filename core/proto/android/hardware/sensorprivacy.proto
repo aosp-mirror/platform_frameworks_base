@@ -66,3 +66,21 @@ message SensorPrivacyIndividualEnabledSensorProto {
     // If sensor privacy is enabled for this sensor
     optional bool is_enabled = 2;
 }
+
+message SensorPrivacyToggleSourceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Source {
+        UNKNOWN = 0;
+
+        QS_TILE = 1;
+        SETTINGS = 2;
+        DIALOG = 3;
+        SHELL = 4;
+        OTHER = 5;
+    }
+
+    // Source for which sensor privacy was toggled.
+    optional Source source = 1;
+
+}

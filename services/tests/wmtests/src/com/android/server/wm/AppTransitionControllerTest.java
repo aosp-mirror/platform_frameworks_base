@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -27,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -75,6 +77,24 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Ensure that ActivityRecord#setOccludesParent takes effect.
         doCallRealMethod().when(r).fillsParent();
         return r;
+    }
+
+    @Test
+    public void testSkipOccludedActivityCloseTransition() {
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord topOpening = createActivityRecord(behind.getTask());
+        topOpening.setOccludesParent(true);
+        topOpening.setVisible(true);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(behind);
+
+        assertEquals(WindowManager.TRANSIT_OLD_UNSET,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        null, null, false));
     }
 
     @Test
@@ -147,6 +167,69 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         task.addChild(closing, 0);
         assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_OLD_ACTIVITY_OPEN, task));
         assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_OLD_TASK_OPEN, task));
+    }
+
+
+    @Test
+    public void testIntraWallpaper_open() {
+        final ActivityRecord opening = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        opening.setVisible(false);
+        final WindowManager.LayoutParams attrOpening = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrOpening.setTitle("WallpaperOpening");
+        attrOpening.flags |= FLAG_SHOW_WALLPAPER;
+        final TestWindowState appWindowOpening = createWindowState(attrOpening, opening);
+        opening.addWindow(appWindowOpening);
+
+        final ActivityRecord closing = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowManager.LayoutParams attrClosing = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrOpening.setTitle("WallpaperClosing");
+        attrClosing.flags |= FLAG_SHOW_WALLPAPER;
+        final TestWindowState appWindowClosing = createWindowState(attrClosing, closing);
+        closing.addWindow(appWindowClosing);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.mOpeningApps.add(opening);
+        mDisplayContent.mClosingApps.add(closing);
+
+        assertEquals(WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        appWindowClosing, null, false));
+    }
+
+    @Test
+    public void testIntraWallpaper_toFront() {
+        final ActivityRecord opening = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        opening.setVisible(false);
+        final WindowManager.LayoutParams attrOpening = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrOpening.setTitle("WallpaperOpening");
+        attrOpening.flags |= FLAG_SHOW_WALLPAPER;
+        final TestWindowState appWindowOpening = createWindowState(attrOpening, opening);
+        opening.addWindow(appWindowOpening);
+
+        final ActivityRecord closing = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowManager.LayoutParams attrClosing = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrOpening.setTitle("WallpaperClosing");
+        attrClosing.flags |= FLAG_SHOW_WALLPAPER;
+        final TestWindowState appWindowClosing = createWindowState(attrClosing, closing);
+        closing.addWindow(appWindowClosing);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_TO_FRONT);
+        mDisplayContent.mOpeningApps.add(opening);
+        mDisplayContent.mClosingApps.add(closing);
+
+        assertEquals(WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        appWindowClosing, null, false));
     }
 
     @Test

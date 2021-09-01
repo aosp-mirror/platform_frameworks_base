@@ -32,6 +32,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -78,6 +79,7 @@ public class SensorTest {
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
+                BiometricScheduler.SENSOR_TYPE_FP_OTHER,
                 null /* gestureAvailabilityDispatcher */,
                 () -> USER_ID,
                 mUserSwitchCallback);

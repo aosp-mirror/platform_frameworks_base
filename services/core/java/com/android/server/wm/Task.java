@@ -61,6 +61,8 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -177,14 +179,12 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1437,7 +1437,7 @@ class Task extends WindowContainer<WindowContainer> {
                     && (newParent == null || !newParent.inPinnedWindowingMode())) {
                 // Notify if a task from the root pinned task is being removed
                 // (or moved depending on the mode).
-                mRootWindowContainer.notifyActivityPipModeChanged(null);
+                mRootWindowContainer.notifyActivityPipModeChanged(this, null);
             }
         }
 
@@ -1464,12 +1464,6 @@ class Task extends WindowContainer<WindowContainer> {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
-
-        // Resume next focusable root task after reparenting to another display if we aren't
-        // removing the prevous display.
-        if (oldDisplay != null && oldDisplay.isRemoving()) {
-            postReparent();
-        }
     }
 
     void cleanUpActivityReferences(ActivityRecord r) {
@@ -4111,11 +4105,9 @@ class Task extends WindowContainer<WindowContainer> {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
+        info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
-                : null;
-        info.topActivityToken = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.appToken
                 : null;
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
@@ -4148,6 +4140,17 @@ class Task extends WindowContainer<WindowContainer> {
                 ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
     }
 
+    Rect getDisplayCutoutInsets() {
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+        final WindowState w = getTopVisibleAppMainWindow();
+        final int displayCutoutMode = w == null
+                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                : w.getAttrs().layoutInDisplayCutoutMode;
+        return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
+                ? null : getDisplayInfo().displayCutout.getSafeInsets();
+    }
+
     /**
      * Returns a {@link TaskInfo} with information from this task.
      */
@@ -4157,26 +4160,27 @@ class Task extends WindowContainer<WindowContainer> {
         return info;
     }
 
-    StartingWindowInfo getStartingWindowInfo() {
+    /**
+     * Returns a {@link StartingWindowInfo} with information from this task and the target activity.
+     * @param activity Target activity which to show the starting window.
+     */
+    StartingWindowInfo getStartingWindowInfo(ActivityRecord activity) {
         final StartingWindowInfo info = new StartingWindowInfo();
         info.taskInfo = getTaskInfo();
-
+        info.targetActivityInfo = info.taskInfo.topActivityInfo != null
+                && activity.info != info.taskInfo.topActivityInfo
+                ? activity.info : null;
         info.isKeyguardOccluded =
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
-        final ActivityRecord topActivity = getTopMostActivity();
-        if (topActivity != null) {
-            info.startingWindowTypeParameter =
-                    topActivity.mStartingData != null
-                            ? topActivity.mStartingData.mTypeParams
-                            : 0;
-            final WindowState mainWindow = topActivity.findMainWindow();
-            if (mainWindow != null) {
-                info.mainWindowLayoutParams = mainWindow.getAttrs();
-            }
-            // If the developer has persist a different configuration, we need to override it to the
-            // starting window because persisted configuration does not effect to Task.
-            info.taskInfo.configuration.setTo(topActivity.getConfiguration());
+
+        info.startingWindowTypeParameter = activity.mStartingData.mTypeParams;
+        final WindowState mainWindow = activity.findMainWindow();
+        if (mainWindow != null) {
+            info.mainWindowLayoutParams = mainWindow.getAttrs();
         }
+        // If the developer has persist a different configuration, we need to override it to the
+        // starting window because persisted configuration does not effect to Task.
+        info.taskInfo.configuration.setTo(activity.getConfiguration());
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
         if (topFullscreenActivity != null) {
             final WindowState topFullscreenOpaqueWindow =
@@ -5392,7 +5396,7 @@ class Task extends WindowContainer<WindowContainer> {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
-            mRootWindowContainer.notifyActivityPipModeChanged(null);
+            mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
             // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
@@ -5462,8 +5466,7 @@ class Task extends WindowContainer<WindowContainer> {
         mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
-    /** Resume next focusable root task after reparenting to another display. */
-    void postReparent() {
+    void resumeNextFocusAfterReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
                 true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -6686,33 +6689,8 @@ class Task extends WindowContainer<WindowContainer> {
                     }
                 }
 
-                // Find the splash screen theme. User can override the persisted theme by
-                // ActivityOptions.
-                String splashScreenThemeResName = options != null
-                        ? options.getSplashScreenThemeResName() : null;
-                if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
-                    try {
-                        splashScreenThemeResName = mAtmService.getPackageManager()
-                                .getSplashScreenTheme(r.packageName, r.mUserId);
-                    } catch (RemoteException ignore) {
-                        // Just use the default theme
-                    }
-                }
-                int splashScreenThemeResId = 0;
-                if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
-                    try {
-                        final Context packageContext = mAtmService.mContext
-                                .createPackageContext(r.packageName, 0);
-                        splashScreenThemeResId = packageContext.getResources()
-                                .getIdentifier(splashScreenThemeResName, null, null);
-                    } catch (PackageManager.NameNotFoundException
-                            | Resources.NotFoundException ignore) {
-                        // Just use the default theme
-                    }
-                }
-
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
-                        splashScreenThemeResId, sourceRecord);
+                        true /* startActivity */, sourceRecord);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
@@ -7649,13 +7627,16 @@ class Task extends WindowContainer<WindowContainer> {
         mLastRecentsAnimationOverlay = overlay;
     }
 
-    void clearLastRecentsAnimationTransaction() {
+    void clearLastRecentsAnimationTransaction(boolean forceRemoveOverlay) {
+        if (forceRemoveOverlay && mLastRecentsAnimationOverlay != null) {
+            getPendingTransaction().remove(mLastRecentsAnimationOverlay);
+        }
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
         // reset also the crop and transform introduced by mLastRecentsAnimationTransaction
-        Rect bounds = getBounds();
         getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9])
-                .setWindowCrop(mSurfaceControl, bounds.width(), bounds.height());
+                .setWindowCrop(mSurfaceControl, null)
+                .setCornerRadius(mSurfaceControl, 0);
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {

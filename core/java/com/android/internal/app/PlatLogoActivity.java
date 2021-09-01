@@ -16,9 +16,9 @@
 
 package com.android.internal.app;
 
+import static android.graphics.PixelFormat.TRANSLUCENT;
+
 import android.animation.ObjectAnimator;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -26,22 +26,21 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.PathInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.AnalogClock;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -49,17 +48,22 @@ import com.android.internal.R;
 
 import org.json.JSONObject;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 /**
  * @hide
  */
 public class PlatLogoActivity extends Activity {
-    private static final boolean WRITE_SETTINGS = true;
+    private static final String TAG = "PlatLogoActivity";
 
-    private static final String R_EGG_UNLOCK_SETTING = "egg_mode_r";
+    private static final String S_EGG_UNLOCK_SETTING = "egg_mode_s";
 
-    private static final int UNLOCK_TRIES = 3;
-
-    BigDialView mDialView;
+    private SettableAnalogClock mClock;
+    private ImageView mLogo;
+    private BubblesDrawable mBg;
 
     @Override
     protected void onPause() {
@@ -69,42 +73,81 @@ public class PlatLogoActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final float dp = getResources().getDisplayMetrics().density;
 
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         getWindow().setNavigationBarColor(0);
         getWindow().setStatusBarColor(0);
 
         final ActionBar ab = getActionBar();
         if (ab != null) ab.hide();
 
-        mDialView = new BigDialView(this, null);
-        if (Settings.System.getLong(getContentResolver(),
-                R_EGG_UNLOCK_SETTING, 0) == 0) {
-            mDialView.setUnlockTries(UNLOCK_TRIES);
-        } else {
-            mDialView.setUnlockTries(0);
-        }
-
         final FrameLayout layout = new FrameLayout(this);
-        layout.setBackgroundColor(0xFFFF0000);
-        layout.addView(mDialView, FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT);
+
+        mClock = new SettableAnalogClock(this);
+
+        final DisplayMetrics dm = getResources().getDisplayMetrics();
+        final float dp = dm.density;
+        final int minSide = Math.min(dm.widthPixels, dm.heightPixels);
+        final int widgetSize = (int) (minSide * 0.75);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(widgetSize, widgetSize);
+        lp.gravity = Gravity.CENTER;
+        layout.addView(mClock, lp);
+
+        mLogo = new ImageView(this);
+        mLogo.setVisibility(View.GONE);
+        mLogo.setImageResource(R.drawable.platlogo);
+        layout.addView(mLogo, lp);
+
+        mBg = new BubblesDrawable();
+        mBg.setLevel(0);
+        mBg.avoid = widgetSize / 2;
+        mBg.padding = 0.5f * dp;
+        mBg.minR = 1 * dp;
+        layout.setBackground(mBg);
+
         setContentView(layout);
     }
 
+    private boolean shouldWriteSettings() {
+        return getPackageName().equals("android");
+    }
+
     private void launchNextStage(boolean locked) {
+        mClock.animate()
+                .alpha(0f).scaleX(0.5f).scaleY(0.5f)
+                .withEndAction(() -> mClock.setVisibility(View.GONE))
+                .start();
+
+        mLogo.setAlpha(0f);
+        mLogo.setScaleX(0.5f);
+        mLogo.setScaleY(0.5f);
+        mLogo.setVisibility(View.VISIBLE);
+        mLogo.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setInterpolator(new OvershootInterpolator())
+                .start();
+
+        mLogo.postDelayed(() -> {
+                    final ObjectAnimator anim = ObjectAnimator.ofInt(mBg, "level", 0, 10000);
+                    anim.setInterpolator(new DecelerateInterpolator(1f));
+                    anim.start();
+                },
+                500
+        );
+
         final ContentResolver cr = getContentResolver();
 
         try {
-            if (WRITE_SETTINGS) {
+            if (shouldWriteSettings()) {
+                Log.v(TAG, "Saving egg unlock=" + locked);
+                syncTouchPressure();
                 Settings.System.putLong(cr,
-                        R_EGG_UNLOCK_SETTING,
+                        S_EGG_UNLOCK_SETTING,
                         locked ? 0 : System.currentTimeMillis());
             }
         } catch (RuntimeException e) {
-            Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
+            Log.e(TAG, "Can't write settings", e);
         }
 
         try {
@@ -151,7 +194,7 @@ public class PlatLogoActivity extends Activity {
             if (mPressureMax >= 0) {
                 touchData.put("min", mPressureMin);
                 touchData.put("max", mPressureMax);
-                if (WRITE_SETTINGS) {
+                if (shouldWriteSettings()) {
                     Settings.System.putString(getContentResolver(), TOUCH_STATS,
                             touchData.toString());
                 }
@@ -173,44 +216,35 @@ public class PlatLogoActivity extends Activity {
         super.onStop();
     }
 
-    class BigDialView extends ImageView {
-        private static final int COLOR_GREEN = 0xff3ddc84;
-        private static final int COLOR_BLUE = 0xff4285f4;
-        private static final int COLOR_NAVY = 0xff073042;
-        private static final int COLOR_ORANGE = 0xfff86734;
-        private static final int COLOR_CHARTREUSE = 0xffeff7cf;
-        private static final int COLOR_LIGHTBLUE = 0xffd7effe;
+    /**
+     * Subclass of AnalogClock that allows the user to flip up the glass and adjust the hands.
+     */
+    public class SettableAnalogClock extends AnalogClock {
+        private int mOverrideHour = -1;
+        private int mOverrideMinute = -1;
+        private boolean mOverride = false;
 
-        private static final int STEPS = 11;
-        private static final float VALUE_CHANGE_MAX = 1f / STEPS;
-
-        private BigDialDrawable mDialDrawable;
-        private boolean mWasLocked;
-
-        BigDialView(Context context, @Nullable AttributeSet attrs) {
-            super(context, attrs);
-            init();
-        }
-
-        BigDialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
-            init();
-        }
-
-        BigDialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-                int defStyleRes) {
-            super(context, attrs, defStyleAttr, defStyleRes);
-            init();
-        }
-
-        private void init() {
-            mDialDrawable = new BigDialDrawable();
-            setImageDrawable(mDialDrawable);
+        public SettableAnalogClock(Context context) {
+            super(context);
         }
 
         @Override
-        public void onDraw(Canvas c) {
-            super.onDraw(c);
+        protected Instant now() {
+            final Instant realNow = super.now();
+            final ZoneId tz = Clock.systemDefaultZone().getZone();
+            final ZonedDateTime zdTime = realNow.atZone(tz);
+            if (mOverride) {
+                if (mOverrideHour < 0) {
+                    mOverrideHour = zdTime.getHour();
+                }
+                return Clock.fixed(zdTime
+                        .withHour(mOverrideHour)
+                        .withMinute(mOverrideMinute)
+                        .withSecond(0)
+                        .toInstant(), tz).instant();
+            } else {
+                return realNow;
+            }
         }
 
         double toPositiveDegrees(double rad) {
@@ -221,226 +255,174 @@ public class PlatLogoActivity extends Activity {
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    mWasLocked = mDialDrawable.isLocked();
+                    mOverride = true;
                     // pass through
                 case MotionEvent.ACTION_MOVE:
+                    measureTouchPressure(ev);
+
                     float x = ev.getX();
                     float y = ev.getY();
-                    float cx = (getLeft() + getRight()) / 2f;
-                    float cy = (getTop() + getBottom()) / 2f;
+                    float cx = getWidth() / 2f;
+                    float cy = getHeight() / 2f;
                     float angle = (float) toPositiveDegrees(Math.atan2(x - cx, y - cy));
-                    final int oldLevel = mDialDrawable.getUserLevel();
-                    mDialDrawable.touchAngle(angle);
-                    final int newLevel = mDialDrawable.getUserLevel();
-                    if (oldLevel != newLevel) {
-                        performHapticFeedback(newLevel == STEPS
-                                ? HapticFeedbackConstants.CONFIRM
-                                : HapticFeedbackConstants.CLOCK_TICK);
+
+                    int minutes = (75 - (int) (angle / 6)) % 60;
+                    int minuteDelta = minutes - mOverrideMinute;
+                    if (minuteDelta != 0) {
+                        if (Math.abs(minuteDelta) > 45 && mOverrideHour >= 0) {
+                            int hourDelta = (minuteDelta < 0) ? 1 : -1;
+                            mOverrideHour = (mOverrideHour + 24 + hourDelta) % 24;
+                        }
+                        mOverrideMinute = minutes;
+                        if (mOverrideMinute == 0) {
+                            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            if (getScaleX() == 1f) {
+                                setScaleX(1.05f);
+                                setScaleY(1.05f);
+                                animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                            }
+                        } else {
+                            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                        }
+
+                        onTimeChanged();
+                        postInvalidate();
                     }
+
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (mWasLocked != mDialDrawable.isLocked()) {
-                        launchNextStage(mDialDrawable.isLocked());
+                    if (mOverrideMinute == 0 && (mOverrideHour % 12) == 0) {
+                        Log.v(TAG, "12:00 let's gooooo");
+                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                        launchNextStage(false);
                     }
                     return true;
             }
             return false;
         }
+    }
+
+    static class Bubble {
+        public float x, y, r;
+        public int color;
+    }
+
+    class BubblesDrawable extends Drawable {
+        private static final int MAX_BUBBS = 2000;
+
+        private final int[] mColorIds = {
+                android.R.color.system_accent1_400,
+                android.R.color.system_accent1_500,
+                android.R.color.system_accent1_600,
+
+                android.R.color.system_accent2_400,
+                android.R.color.system_accent2_500,
+                android.R.color.system_accent2_600,
+        };
+
+        private int[] mColors = new int[mColorIds.length];
+
+        private final Bubble[] mBubbs = new Bubble[MAX_BUBBS];
+        private int mNumBubbs;
+
+        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        public float avoid = 0f;
+        public float padding = 0f;
+        public float minR = 0f;
+
+        BubblesDrawable() {
+            for (int i = 0; i < mColorIds.length; i++) {
+                mColors[i] = getColor(mColorIds[i]);
+            }
+            for (int j = 0; j < mBubbs.length; j++) {
+                mBubbs[j] = new Bubble();
+            }
+        }
 
         @Override
-        public boolean performClick() {
-            if (mDialDrawable.getUserLevel() < STEPS - 1) {
-                mDialDrawable.setUserLevel(mDialDrawable.getUserLevel() + 1);
-                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        public void draw(Canvas canvas) {
+            final float f = getLevel() / 10000f;
+            mPaint.setStyle(Paint.Style.FILL);
+            int drawn = 0;
+            for (int j = 0; j < mNumBubbs; j++) {
+                if (mBubbs[j].color == 0 || mBubbs[j].r == 0) continue;
+                mPaint.setColor(mBubbs[j].color);
+                canvas.drawCircle(mBubbs[j].x, mBubbs[j].y, mBubbs[j].r * f, mPaint);
+                drawn++;
             }
+        }
+
+        @Override
+        protected boolean onLevelChange(int level) {
+            invalidateSelf();
             return true;
         }
 
-        void setUnlockTries(int tries) {
-            mDialDrawable.setUnlockTries(tries);
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            super.onBoundsChange(bounds);
+            randomize();
         }
 
-        private class BigDialDrawable extends Drawable {
-            public final int STEPS = 10;
-            private int mUnlockTries = 0;
-            final Paint mPaint = new Paint();
-            final Drawable mEleven;
-            private boolean mNightMode;
-            private float mValue = 0f;
-            float mElevenAnim = 0f;
-            ObjectAnimator mElevenShowAnimator = ObjectAnimator.ofFloat(this, "elevenAnim", 0f,
-                    1f).setDuration(300);
-            ObjectAnimator mElevenHideAnimator = ObjectAnimator.ofFloat(this, "elevenAnim", 1f,
-                    0f).setDuration(500);
-
-            BigDialDrawable() {
-                mNightMode = getContext().getResources().getConfiguration().isNightModeActive();
-                mEleven = getContext().getDrawable(R.drawable.ic_number11);
-                mElevenShowAnimator.setInterpolator(new PathInterpolator(0.4f, 0f, 0.2f, 1f));
-                mElevenHideAnimator.setInterpolator(new PathInterpolator(0.8f, 0.2f, 0.6f, 1f));
+        private void randomize() {
+            final float w = getBounds().width();
+            final float h = getBounds().height();
+            final float maxR = Math.min(w, h) / 3f;
+            mNumBubbs = 0;
+            if (avoid > 0f) {
+                mBubbs[mNumBubbs].x = w / 2f;
+                mBubbs[mNumBubbs].y = h / 2f;
+                mBubbs[mNumBubbs].r = avoid;
+                mBubbs[mNumBubbs].color = 0;
+                mNumBubbs++;
             }
+            for (int j = 0; j < MAX_BUBBS; j++) {
+                // a simple but time-tested bubble-packing algorithm:
+                // 1. pick a spot
+                // 2. shrink the bubble until it is no longer overlapping any other bubble
+                // 3. if the bubble hasn't popped, keep it
+                int tries = 5;
+                while (tries-- > 0) {
+                    float x = (float) Math.random() * w;
+                    float y = (float) Math.random() * h;
+                    float r = Math.min(Math.min(x, w - x), Math.min(y, h - y));
 
-            public void setUnlockTries(int count) {
-                if (mUnlockTries != count) {
-                    mUnlockTries = count;
-                    setValue(getValue());
-                    invalidateSelf();
-                }
-            }
-
-            boolean isLocked() {
-                return mUnlockTries > 0;
-            }
-
-            public void setValue(float v) {
-                // until the dial is "unlocked", you can't turn it all the way to 11
-                final float max = isLocked() ? 1f - 1f / STEPS : 1f;
-                mValue = v < 0f ? 0f : v > max ? max : v;
-                invalidateSelf();
-            }
-
-            public float getValue() {
-                return mValue;
-            }
-
-            public int getUserLevel() {
-                return Math.round(getValue() * STEPS - 0.25f);
-            }
-
-            public void setUserLevel(int i) {
-                setValue(getValue() + ((float) i) / STEPS);
-            }
-
-            public float getElevenAnim() {
-                return mElevenAnim;
-            }
-
-            public void setElevenAnim(float f) {
-                if (mElevenAnim != f) {
-                    mElevenAnim = f;
-                    invalidateSelf();
-                }
-            }
-
-            @Override
-            public void draw(@NonNull Canvas canvas) {
-                final Rect bounds = getBounds();
-                final int w = bounds.width();
-                final int h = bounds.height();
-                final float w2 = w / 2f;
-                final float h2 = h / 2f;
-                final float radius = w / 4f;
-
-                canvas.drawColor(mNightMode ? COLOR_NAVY : COLOR_LIGHTBLUE);
-
-                canvas.save();
-                canvas.rotate(45, w2, h2);
-                canvas.clipRect(w2, h2 - radius, Math.min(w, h), h2 + radius);
-                final int gradientColor = mNightMode ? 0x60000020 : (0x10FFFFFF & COLOR_NAVY);
-                mPaint.setShader(
-                        new LinearGradient(w2, h2, Math.min(w, h), h2, gradientColor,
-                                0x00FFFFFF & gradientColor, Shader.TileMode.CLAMP));
-                mPaint.setColor(Color.BLACK);
-                canvas.drawPaint(mPaint);
-                mPaint.setShader(null);
-                canvas.restore();
-
-                mPaint.setStyle(Paint.Style.FILL);
-                mPaint.setColor(COLOR_GREEN);
-
-                canvas.drawCircle(w2, h2, radius, mPaint);
-
-                mPaint.setColor(mNightMode ? COLOR_LIGHTBLUE : COLOR_NAVY);
-                final float cx = w * 0.85f;
-                for (int i = 0; i < STEPS; i++) {
-                    final float f = (float) i / STEPS;
-                    canvas.save();
-                    final float angle = valueToAngle(f);
-                    canvas.rotate(-angle, w2, h2);
-                    canvas.drawCircle(cx, h2, (i <= getUserLevel()) ? 20 : 5, mPaint);
-                    canvas.restore();
-                }
-
-                if (mElevenAnim > 0f) {
-                    final int color = COLOR_ORANGE;
-                    final int size2 = (int) ((0.5 + 0.5f * mElevenAnim) * w / 14);
-                    final float cx11 = cx + size2 / 4f;
-                    mEleven.setBounds((int) cx11 - size2, (int) h2 - size2,
-                            (int) cx11 + size2, (int) h2 + size2);
-                    final int alpha = 0xFFFFFF | ((int) clamp(0xFF * 2 * mElevenAnim, 0, 0xFF)
-                            << 24);
-                    mEleven.setTint(alpha & color);
-                    mEleven.draw(canvas);
-                }
-
-                // don't want to use the rounded value here since the quantization will be visible
-                final float angle = valueToAngle(mValue);
-
-                // it's easier to draw at far-right and rotate backwards
-                canvas.rotate(-angle, w2, h2);
-                mPaint.setColor(Color.WHITE);
-                final float dimple = w2 / 12f;
-                canvas.drawCircle(w - radius - dimple * 2, h2, dimple, mPaint);
-            }
-
-            float clamp(float x, float a, float b) {
-                return x < a ? a : x > b ? b : x;
-            }
-
-            float angleToValue(float a) {
-                return 1f - clamp(a / (360 - 45), 0f, 1f);
-            }
-
-            // rotation: min is at 4:30, max is at 3:00
-            float valueToAngle(float v) {
-                return (1f - v) * (360 - 45);
-            }
-
-            public void touchAngle(float a) {
-                final int oldUserLevel = getUserLevel();
-                final float newValue = angleToValue(a);
-                // this is how we prevent the knob from snapping from max back to min, or from
-                // jumping around wherever the user presses. The new value must be pretty close
-                // to the
-                // previous one.
-                if (Math.abs(newValue - getValue()) < VALUE_CHANGE_MAX) {
-                    setValue(newValue);
-
-                    if (isLocked() && oldUserLevel != STEPS - 1 && getUserLevel() == STEPS - 1) {
-                        mUnlockTries--;
-                    } else if (!isLocked() && getUserLevel() == 0) {
-                        mUnlockTries = UNLOCK_TRIES;
+                    // shrink radius to fit other bubbs
+                    for (int i = 0; i < mNumBubbs; i++) {
+                        r = (float) Math.min(r,
+                                Math.hypot(x - mBubbs[i].x, y - mBubbs[i].y) - mBubbs[i].r
+                                        - padding);
+                        if (r < minR) break;
                     }
 
-                    if (!isLocked()) {
-                        if (getUserLevel() == STEPS && mElevenAnim != 1f
-                                && !mElevenShowAnimator.isRunning()) {
-                            mElevenHideAnimator.cancel();
-                            mElevenShowAnimator.start();
-                        } else if (getUserLevel() != STEPS && mElevenAnim == 1f
-                                && !mElevenHideAnimator.isRunning()) {
-                            mElevenShowAnimator.cancel();
-                            mElevenHideAnimator.start();
-                        }
+                    if (r >= minR) {
+                        // we have found a spot for this bubble to live, let's save it and move on
+                        r = Math.min(maxR, r);
+
+                        mBubbs[mNumBubbs].x = x;
+                        mBubbs[mNumBubbs].y = y;
+                        mBubbs[mNumBubbs].r = r;
+                        mBubbs[mNumBubbs].color = mColors[(int) (Math.random() * mColors.length)];
+                        mNumBubbs++;
+                        break;
                     }
                 }
             }
+            Log.v(TAG, String.format("successfully placed %d bubbles (%d%%)",
+                    mNumBubbs, (int) (100f * mNumBubbs / MAX_BUBBS)));
+        }
 
-            @Override
-            public void setAlpha(int i) {
-            }
+        @Override
+        public void setAlpha(int alpha) { }
 
-            @Override
-            public void setColorFilter(@Nullable ColorFilter colorFilter) {
-            }
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) { }
 
-            @Override
-            public int getOpacity() {
-                return PixelFormat.TRANSLUCENT;
-            }
+        @Override
+        public int getOpacity() {
+            return TRANSLUCENT;
         }
     }
+
 }
-
-
-

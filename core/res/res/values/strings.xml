@@ -444,12 +444,6 @@
     <string name="sensor_notification_service">Sensor Notification Service</string>
     <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
-    <!-- Attribution for the Offline LocationTimeZoneProvider service, i.e. the service capable of
-         performing time zone detection using time zone geospatial information held on the device.
-         This text is shown in UIs related to an application name to help users and developers to
-         understand which sub-unit of an application is requesting permissions and using power.
-         [CHAR LIMIT=NONE]-->
-    <string name="offline_location_time_zone_detection_service_attribution">Time Zone Detector (No connectivity)</string>
     <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
     <string name="gnss_time_update_service">GNSS Time Update Service</string>
 
@@ -1638,8 +1632,8 @@
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
     <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
-    <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=50] -->
-    <string name="fingerprint_error_bad_calibration">Sensor needs calibration</string>
+    <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
+    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1663,9 +1657,9 @@
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_title">Re-enroll your face</string>
+    <string name="face_recalibrate_notification_title">Issue with Face Unlock</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
+    <string name="face_recalibrate_notification_content">Tap to delete your face model, then add your face again</string>
     <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
     <string name="face_setup_notification_title">Set up Face Unlock</string>
     <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
@@ -1674,6 +1668,13 @@
     <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
     <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
+
+    <!-- Notification name shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_name">Fingerprint Unlock</string>
+    <!-- Notification title shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_title">Can\u2019t use fingerprint sensor</string>
+    <!-- Notification content shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_content">Visit a repair provider.</string>
 
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
     <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
@@ -3957,6 +3958,8 @@
     <string name="deny">Deny</string>
     <string name="permission_request_notification_title">Permission requested</string>
     <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
+     <!-- Title and subtitle for notification shown when app request account access (two lines) [CHAR LIMIT=NONE] -->
+    <string name="permission_request_notification_for_app_with_subtitle">Permission requested by <xliff:g id="app" example="Gmail">%1$s</xliff:g>\nfor account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g>.</string>
 
     <!-- Message to show when an intent automatically switches users into the personal profile. -->
     <string name="forward_intent_to_owner">You\'re using this app outside of your work profile</string>

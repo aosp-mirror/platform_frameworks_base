@@ -257,7 +257,7 @@ public class CachingIconView extends ImageView {
         boolean hasColor = color != ColoredIconHelper.COLOR_INVALID;
         if (background == null) {
             // This is the pre-S style -- colored icon with no background.
-            if (hasColor) {
+            if (hasColor && icon != null) {
                 icon.mutate().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             }
         } else {
@@ -265,7 +265,9 @@ public class CachingIconView extends ImageView {
             // colorize the icon itself with the background color, creating an inverted effect.
             if (hasColor) {
                 background.mutate().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-                icon.mutate().setColorFilter(mBackgroundColor, PorterDuff.Mode.SRC_ATOP);
+                if (icon != null) {
+                    icon.mutate().setColorFilter(mBackgroundColor, PorterDuff.Mode.SRC_ATOP);
+                }
             } else {
                 background.mutate().setColorFilter(mBackgroundColor, PorterDuff.Mode.SRC_ATOP);
             }

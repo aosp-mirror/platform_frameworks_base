@@ -129,12 +129,14 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -199,6 +201,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Handler mHandler;
     private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
+    private final UserTracker mUserTracker;
+    private final NotificationShadeDepthController mNotificationShadeDepthController;
 
     private Bundle mSavedState;
     private NavigationBarView mNavigationBarView;
@@ -232,7 +236,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private boolean mTransientShown;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
-    private int mA11yBtnMode;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -437,6 +440,25 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 }
             };
 
+    private final NotificationShadeDepthController.DepthListener mDepthListener =
+            new NotificationShadeDepthController.DepthListener() {
+                boolean mHasBlurs;
+
+                @Override
+                public void onWallpaperZoomOutChanged(float zoomOut) {
+                }
+
+                @Override
+                public void onBlurRadiusChanged(int radius) {
+                    boolean hasBlurs = radius != 0;
+                    if (hasBlurs == mHasBlurs) {
+                        return;
+                    }
+                    mHasBlurs = hasBlurs;
+                    mNavigationBarView.setWindowHasBlurs(hasBlurs);
+                }
+            };
+
     public NavigationBar(Context context,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
@@ -456,10 +478,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
+            NotificationShadeDepthController notificationShadeDepthController,
             SystemActions systemActions,
             @Main Handler mainHandler,
             NavigationBarOverlayController navbarOverlayController,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
@@ -484,10 +508,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
+        mUserTracker = userTracker;
+        mNotificationShadeDepthController = notificationShadeDepthController;
 
         mNavBarMode = mNavigationModeController.addListener(this);
         mAccessibilityButtonModeObserver.addListener(this);
-        mA11yBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
     }
 
     public NavigationBarView getView() {
@@ -568,6 +593,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         mDeviceProvisionedController.addCallback(mUserSetupListener);
+        mNotificationShadeDepthController.addListener(mDepthListener);
 
         setAccessibilityFloatingMenuModeIfNeeded();
 
@@ -584,6 +610,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
         mDeviceProvisionedController.removeCallback(mUserSetupListener);
+        mNotificationShadeDepthController.removeListener(mDepthListener);
 
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
@@ -1020,10 +1047,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     // Returns true if the bar mode is changed.
     private boolean updateBarMode(int barMode) {
         if (mNavigationBarMode != barMode) {
-            if (mNavigationBarMode == MODE_TRANSPARENT
-                    || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
-                mNavigationBarView.hideRecentsOnboarding();
-            }
             mNavigationBarMode = barMode;
             checkNavBarModes();
             if (mAutoHideController != null) {
@@ -1375,8 +1398,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private void setAccessibilityFloatingMenuModeIfNeeded() {
         if (QuickStepContract.isGesturalMode(mNavBarMode)) {
-            Settings.Secure.putInt(mContentResolver, Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+            Settings.Secure.putIntForUser(mContentResolver,
+                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU, UserHandle.USER_CURRENT);
         }
     }
 
@@ -1437,7 +1461,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         // If accessibility button is floating menu mode, click and long click state should be
         // disabled.
-        if (mA11yBtnMode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+        if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
+                == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
             return 0;
         }
 
@@ -1450,12 +1475,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
-        mLongPressHomeEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0) != 0;
+        mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
+                mUserTracker.getUserId()) != 0;
         boolean gestureDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
-        mAssistantTouchGestureEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0) != 0;
+        mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0,
+                mUserTracker.getUserId()) != 0;
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(mAssistantAvailable
@@ -1546,7 +1573,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onAccessibilityButtonModeChanged(int mode) {
-        mA11yBtnMode = mode;
         updateAccessibilityServicesState(mAccessibilityManager);
     }
 
@@ -1590,6 +1616,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // TODO(193941146): Currently unregistering a receiver through BroadcastDispatcher is
+            // async, but we've already cleared the fields. Just return early in this case.
+            if (mNavigationBarView == null) {
+                return;
+            }
             String action = intent.getAction();
             if (Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {

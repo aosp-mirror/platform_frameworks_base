@@ -99,7 +99,7 @@ JankTracker::JankTracker(ProfileDataContainer* globalData)
     mFrameIntervalLegacy = frameIntervalNanos;
 }
 
-void JankTracker::calculateLegacyJank(FrameInfo& frame) {
+void JankTracker::calculateLegacyJank(FrameInfo& frame) REQUIRES(mDataMutex) {
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::SwapBuffersCompleted);
     if (mDequeueTimeForgivenessLegacy && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
@@ -257,7 +257,7 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
     }
 }
 
-void JankTracker::recomputeThresholds(int64_t frameBudget) {
+void JankTracker::recomputeThresholds(int64_t frameBudget) REQUIRES(mDataMutex) {
     if (mThresholdsFrameBudget == frameBudget) {
         return;
     }
@@ -308,7 +308,7 @@ void JankTracker::dumpFrames(int fd) {
     dprintf(fd, "\n---PROFILEDATA---\n\n");
 }
 
-void JankTracker::reset() {
+void JankTracker::reset() REQUIRES(mDataMutex) {
     mFrames.clear();
     mData->reset();
     (*mGlobalData)->reset();

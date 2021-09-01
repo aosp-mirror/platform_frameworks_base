@@ -316,7 +316,7 @@ class DragState {
         final int myPid = Process.myPid();
         final IBinder clientToken = touchedWin.mClient.asBinder();
         final DragEvent event = obtainDragEvent(DragEvent.ACTION_DROP, x, y,
-                true /* includeData */, targetInterceptsGlobalDrag(touchedWin),
+                mData, targetInterceptsGlobalDrag(touchedWin),
                 dragAndDropPermissions);
         try {
             touchedWin.mClient.dispatchDragEvent(event);
@@ -462,8 +462,10 @@ class DragState {
             boolean containsAppExtras) {
         final boolean interceptsGlobalDrag = targetInterceptsGlobalDrag(newWin);
         if (mDragInProgress && isValidDropTarget(newWin, containsAppExtras, interceptsGlobalDrag)) {
+            // Only allow the extras to be dispatched to a global-intercepting drag target
+            ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
-                    interceptsGlobalDrag, false /* includeDragSurface */,
+                    data, false /* includeDragSurface */,
                     null /* dragAndDropPermission */);
             try {
                 newWin.mClient.dispatchDragEvent(event);
@@ -614,11 +616,11 @@ class DragState {
         return mDragInProgress;
     }
 
-    private DragEvent obtainDragEvent(int action, float x, float y, boolean includeData,
+    private DragEvent obtainDragEvent(int action, float x, float y, ClipData data,
             boolean includeDragSurface, IDragAndDropPermissions dragAndDropPermissions) {
         return DragEvent.obtain(action, x, y, mThumbOffsetX, mThumbOffsetY,
-                null  /* localState */, mDataDescription,
-                includeData ? mData : null, includeDragSurface ? mSurfaceControl : null,
+                null  /* localState */, mDataDescription, data,
+                includeDragSurface ? mSurfaceControl : null,
                 dragAndDropPermissions, false /* result */);
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.tests.gating;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.LOG_COMPAT_CHANGE;
 import static android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG;
 import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
@@ -261,13 +262,15 @@ public final class PlatformCompatPermissionsTest {
     public void clearOverrides_noOverridesPermission_throwsSecurityException()
             throws Throwable {
         thrown.expect(SecurityException.class);
+        mUiAutomation.adoptShellPermissionIdentity(INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverrides("foo.bar");
     }
     @Test
     public void clearOverrides_overridesPermission_noThrow()
             throws Throwable {
-        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG);
+        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG,
+                INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverrides("foo.bar");
     }
@@ -276,13 +279,15 @@ public final class PlatformCompatPermissionsTest {
     public void clearOverridesForTest_noOverridesPermission_throwsSecurityException()
             throws Throwable {
         thrown.expect(SecurityException.class);
+        mUiAutomation.adoptShellPermissionIdentity(INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverridesForTest("foo.bar");
     }
     @Test
     public void clearOverridesForTest_overridesPermission_noThrow()
             throws Throwable {
-        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG);
+        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG,
+                INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverridesForTest("foo.bar");
     }
@@ -291,13 +296,15 @@ public final class PlatformCompatPermissionsTest {
     public void clearOverride_noOverridesPermission_throwsSecurityException()
             throws Throwable {
         thrown.expect(SecurityException.class);
+        mUiAutomation.adoptShellPermissionIdentity(INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverride(1, "foo.bar");
     }
     @Test
     public void clearOverride_overridesPermission_noThrow()
             throws Throwable {
-        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG);
+        mUiAutomation.adoptShellPermissionIdentity(OVERRIDE_COMPAT_CHANGE_CONFIG,
+                INTERACT_ACROSS_USERS_FULL);
 
         mPlatformCompat.clearOverride(1, "foo.bar");
     }

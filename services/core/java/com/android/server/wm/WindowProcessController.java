@@ -812,7 +812,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     void updateNightModeForAllActivities(int nightMode) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            r.setOverrideNightMode(nightMode);
+            if (r.setOverrideNightMode(nightMode) && r.mVisibleRequested) {
+                r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
+            }
         }
     }
 
@@ -1594,12 +1596,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         updateRunningRemoteOrRecentsAnimation();
     }
 
-    private void updateRunningRemoteOrRecentsAnimation() {
-
+    void updateRunningRemoteOrRecentsAnimation() {
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::setRunningRemoteAnimation, mListener,
                 mRunningRecentsAnimation || mRunningRemoteAnimation));
+    }
+
+    /** Adjusts scheduling group for animation. This method MUST NOT be called inside WM lock. */
+    void setRunningAnimationUnsafe() {
+        mListener.setRunningRemoteAnimation(true);
     }
 
     @Override

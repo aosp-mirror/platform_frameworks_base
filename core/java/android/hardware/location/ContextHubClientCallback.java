@@ -68,8 +68,11 @@ public class ContextHubClientCallback {
 
     /**
      * Callback invoked when a nanoapp is dynamically loaded at the attached Context Hub through
-     * the {@link android.hardware.location.ContextHubManager}. This callback is not invoked for a
-     * nanoapp that is loaded internally by CHRE (e.g. nanoapps that are preloaded by the system).
+     * the {@link android.hardware.location.ContextHubManager}.
+     *
+     * NOTE: This callback is <b>not</b> invoked for a nanoapp that is loaded internally by CHRE
+     * (e.g. nanoapps that are preloaded by the system). To check the availability of these
+     * nanoapps, use the {@link ContextHubManager#queryNanoApps(ContextHubInfo)} API.
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been loaded

@@ -5736,12 +5736,20 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
 
     /**
-     * Used as an int extra field in {@link android.app.AlarmManager} intents
+     * Used as an int extra field in {@link android.app.AlarmManager} pending intents
      * to tell the application being invoked how many pending alarms are being
-     * delievered with the intent.  For one-shot alarms this will always be 1.
+     * delivered with the intent.  For one-shot alarms this will always be 1.
      * For recurring alarms, this might be greater than 1 if the device was
      * asleep or powered off at the time an earlier alarm would have been
      * delivered.
+     *
+     * <p>Note: You must supply a <b>mutable</b> {@link android.app.PendingIntent} to
+     * {@code AlarmManager} while setting your alarms to be able to read this value on receiving
+     * them. <em>Mutability of pending intents must be explicitly specified by apps targeting
+     * {@link Build.VERSION_CODES#S} or higher</em>.
+     *
+     * @see android.app.PendingIntent#FLAG_MUTABLE
+     *
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
 

@@ -20,11 +20,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/item"
+        android:id="@android:id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:background="@drawable/people_space_tile_view_card"
+        android:clipToOutline="true"
         android:orientation="vertical"
         android:paddingHorizontal="4dp"
         android:paddingTop="6dp"
@@ -43,7 +44,7 @@
             android:tint="?android:attr/textColorSecondary"
             android:layout_gravity="center"
             android:layout_width="18dp"
-            android:layout_height="22dp" />
+            android:layout_height="18dp" />
 
         <TextView
             android:id="@+id/messages_count"

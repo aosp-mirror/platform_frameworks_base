@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"મીડિયા ઑડિયો"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ફોન કૉલ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ફાઇલ સ્થાનાંતરણ"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ઇનપુટ ઉપકરણ"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ઇનપુટ ડિવાઇસ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ઇન્ટરનેટ ઍક્સેસ"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"સંપર્ક શેરિંગ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"સંપર્ક શેરિંગ માટે ઉપયોગ કરો"</string>
@@ -102,7 +102,7 @@
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"નકશા સાથે કનેક્ટ થયું"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP થી કનેક્ટ કરેલ"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"ફાઇલ સ્થાનાંતરણ સેવાથી કનેક્ટ થયેલ નથી"</string>
-    <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"ઇનપુટ ઉપકરણ સાથે કનેક્ટ થયાં"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"ઇનપુટ ડિવાઇસ સાથે કનેક્ટ થયાં"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"ઇન્ટરનેટ ઍક્સેસ માટે ઉપકરણથી કનેક્ટેડ છીએ"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"ઉપકરણ સાથે સ્થાનિક ઇન્ટરનેટ કનેક્શન શેર કરી રહ્યાં છીએ"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"ઇન્ટરનેટ ઍક્સેસ માટે ઉપયોગ કરો"</string>
@@ -155,7 +155,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"વપરાશકર્તા: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"કેટલાંક ડિફોલ્ટ્સ સેટ કરેલ છે"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"કોઈ ડિફૉલ્ટ સેટ કરેલા નથી"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"ટેક્સ્ટ-ટુ-સ્પીચ સેટિંગ્સ"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"ટેક્સ્ટ ટૂ સ્પીચ સેટિંગ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"વાણી દર"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ટેક્સ્ટ બોલાયેલ છે તે ઝડપ"</string>
@@ -177,8 +177,8 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> નેટવર્ક કનેક્શનની આવશ્યકતા છે"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> સમર્થિત નથી"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"તપાસી રહ્યું છે..."</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> માટેની સેટિંગ્સ"</string>
-    <string name="tts_engine_settings_button" msgid="477155276199968948">"એન્જિન સેટિંગ્સ લોંચ કરો"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> માટેના સેટિંગ"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"એન્જિન સેટિંગ લૉન્ચ કરો"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"મનપસંદ એન્જિન"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"સામાન્ય"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"સ્પીચની પિચ ફરીથી સેટ કરો"</string>
@@ -201,9 +201,9 @@
     <string name="development_settings_enable" msgid="4285094651288242183">"વિકાસકર્તાનાં વિકલ્પો સક્ષમ કરો"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ઍપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"આ વપરાશકર્તા માટે વિકાસકર્તા વિકલ્પો ઉપલબ્ધ નથી"</string>
-    <string name="vpn_settings_not_available" msgid="2894137119965668920">"આ વપરાશકર્તા માટે VPN સેટિંગ્સ ઉપલબ્ધ નથી"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"આ વપરાશકર્તા માટે ટિથરિંગ સેટિંગ્સ ઉપલબ્ધ નથી"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"અ‍ૅક્સેસ પોઇન્ટનું નામ સેટિંગ્સ આ વપરાશકર્તા માટે ઉપલબ્ધ નથી"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"આ વપરાશકર્તા માટે VPN સેટિંગ ઉપલબ્ધ નથી"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"આ વપરાશકર્તા માટે ટિથરિંગ સેટિંગ ઉપલબ્ધ નથી"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"અ‍ૅક્સેસ પૉઇન્ટનું નામ સેટિંગ આ વપરાશકર્તા માટે ઉપલબ્ધ નથી"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ડિબગીંગ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"જ્યારે USB કનેક્ટ કરેલું હોય ત્યારે ડિબગ મોડ"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ડીબગિંગ પ્રમાણીકરણોને રદબાતલ કરો"</string>
@@ -259,7 +259,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ચોક્કસ વૉલ્યૂમને બંધ કરો"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ચાલુ કરો"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"બ્લૂટૂથ AVRCP વર્ઝન"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"બ્લૂટૂથ AVRCP સંસ્કરણ પસંદ કરો"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"બ્લૂટૂથ AVRCP વર્ઝન પસંદ કરો"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"બ્લૂટૂથ MAP વર્ઝન"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"બ્લૂટૂથ MAP વર્ઝન પસંદ કરો"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"બ્લૂટૂથ ઑડિયો કોડેક"</string>
@@ -301,12 +301,12 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"વાઇ-ફાઇ  સક્રિય હોય ત્યારે પણ, હંમેશા મોબાઇલ ડેટાને સક્રિય રાખો (ઝડપી નેટવર્ક સ્વિચિંગ માટે)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"જો ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ ઉપલબ્ધ હોય તો તેનો ઉપયોગ કરો"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, નોટિફિકેશન વગર તમારા ઉપકરણ પર ઍપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ડિવાઇસ વચ્ચે ડેટાને કૉપિ કરવા, નોટિફિકેશન વગર તમારા ડિવાઇસ પર ઍપ ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"વાયરલેસ ડિબગીંગને મંજૂરી આપીએ?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"વાયરલેસ ડિબગીંગ ફક્ત ડેવલપમેન્ટના હેતુઓ માટે જ બનાવાયું છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ડિવાઇસ વચ્ચે ડેટાને કૉપિ કરવા, નોટિફિકેશન વગર તમારા ડિવાઇસ પર ઍપને ઇન્સ્ટૉલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"તમે અગાઉ અધિકૃત કરેલા તમામ કમ્પ્યુટર્સમાંથી USB ડિબગિંગ પરની અ‍ૅક્સેસ રદબાતલ કરીએ?"</string>
-    <string name="dev_settings_warning_title" msgid="8251234890169074553">"વિકાસ સેટિંગ્સને મંજૂરી આપીએ?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"આ સેટિંગ્સ ફક્ત વિકાસનાં ઉપયોગ માટે જ હેતુબદ્ધ છે. તે તમારા ઉપકરણ અને તેના પરની એપ્લિકેશન્સનાં ભંગ થવા અથવા ખરાબ વર્તનનું કારણ બની શકે છે."</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"ડેવલપમેન્ટ સેટિંગને મંજૂરી આપીએ?"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"આ સેટિંગ ફક્ત વિકાસનાં ઉપયોગ માટે જ હેતુબદ્ધ છે. તે તમારા ડિવાઇસ અને તેના પરની ઍપના ભંગ થવા અથવા ખરાબ વર્તનનું કારણ બની શકે છે."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB પર ઍપ ચકાસો"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"હાનિકારક વર્તણૂંક માટે ADB/ADT મારફતે ઇન્સ્ટોલ કરવામાં આવેલી ઍપ તપાસો."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"નામ વગરના (ફક્ત MAC ઍડ્રેસવાળા) બ્લૂટૂથ ડિવાઇસ બતાવવામાં આવશે"</string>
@@ -454,7 +454,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%1$s</xliff:g> બાકી છે"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%2$s</xliff:g> બાકી છે"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જિંગ હંગામી રૂપે પ્રતિબંધિત કરવામાં આવ્યું છે"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જિંગ હંગામીરૂપે પ્રતિબંધિત કરવામાં આવ્યું છે"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"અજાણ્યું"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ઝડપથી ચાર્જ થાય છે"</string>
@@ -468,7 +468,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"મંજૂરી નથી"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"અજાણી ઍપ ઇન્સ્ટૉલ કરો"</string>
-    <string name="home" msgid="973834627243661438">"સેટિંગ્સ હોમ"</string>
+    <string name="home" msgid="973834627243661438">"સેટિંગ હોમ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
     <item msgid="8894873528875953317">"50%"</item>
@@ -488,7 +488,7 @@
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"પાસવર્ડ આવશ્યક છે"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"ઇનપુટ પદ્ધતિઓ સક્રિય કરો"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"સિસ્ટમ ભાષાઓનો ઉપયોગ કરો"</string>
-    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> માટેની સેટિંગ્સ ખોલવામાં નિષ્ફળ"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> માટેના સેટિંગ ખોલવામાં નિષ્ફળ"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"આ ઇનપુટ પદ્ધતિ પાસવર્ડ્સ અને ક્રેડિટ કાર્ડ નંબર જેવી વ્યક્તિગત માહિતી સહિત તમે લખો છો તે તમામ ટેક્સ્ટ એકત્રિત કરવા માટે સક્ષમ હોઈ શકે છે. તે ઍપ્લિકેશન <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> માંથી આવે છે. આ ઇનપુટ પદ્ધતિ વાપરીએ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"નોંધ: રીબૂટ કર્યાં પછી, જ્યાં સુધી તમે તમારો ફોન અનલૉક કરશો નહીં ત્યાં સુધી આ ઍપ્લિકેશન શરૂ થઈ શકશે નહીં"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS રજિસ્ટ્રેશનની સ્થિતિ"</string>
@@ -566,9 +566,11 @@
     <string name="user_nickname" msgid="262624187455825083">"ઉપનામ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>
-    <!-- no translation found for guest_reset_guest (6110013010356013758) -->
-    <skip />
+    <string name="guest_reset_guest" msgid="6110013010356013758">"અતિથિને રીસેટ કરો"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"અતિથિ"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"અતિથિને રીસેટ કરીએ?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"રીસેટ કરો"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"અતિથિને રીસેટ કરી રહ્યાં છીએ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ફોટો લો"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"છબી પસંદ કરો"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ફોટો પસંદ કરો"</string>

@@ -676,7 +676,7 @@ public class Watchdog {
             final UUID errorId;
             if (mTraceErrorLogger.isAddErrorIdEnabled()) {
                 errorId = mTraceErrorLogger.generateErrorId();
-                mTraceErrorLogger.addErrorIdToTrace(errorId);
+                mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
             } else {
                 errorId = null;
             }

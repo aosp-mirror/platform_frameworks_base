@@ -23,6 +23,8 @@ import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.qs.QS.HeightListener;
 
+import java.util.function.Consumer;
+
 /**
  * Fragment that contains QS in the notification shade.  Most of the interface is for
  * handling the expand/collapsing of the view interaction.
@@ -33,7 +35,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 9;
+    int VERSION = 11;
 
     String TAG = "QS";
 
@@ -50,13 +52,6 @@ public interface QS extends FragmentBase {
     void setListening(boolean listening);
     boolean isShowingDetail();
     void closeDetail();
-
-    /**
-     * Set that we're currently pulse expanding
-     *
-     * @param pulseExpanding if we're currently expanding during pulsing
-     */
-    default void setPulseExpanding(boolean pulseExpanding) {}
     void animateHeaderSlidingOut();
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);
@@ -99,6 +94,25 @@ public interface QS extends FragmentBase {
      */
     default boolean isFullyCollapsed() {
         return true;
+    }
+
+    /**
+     * Add a listener for when the collapsed media visibility changes.
+     */
+    void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener);
+
+    /**
+     * Set a scroll listener for the QSPanel container
+     */
+    default void setScrollListener(ScrollListener scrollListener) {}
+
+    /**
+     * Callback for when QSPanel container is scrolled
+     */
+    @ProvidesInterface(version = ScrollListener.VERSION)
+    interface ScrollListener {
+        int VERSION = 1;
+        void onQsPanelScrollChanged(int scrollY);
     }
 
     @ProvidesInterface(version = HeightListener.VERSION)

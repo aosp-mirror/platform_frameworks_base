@@ -47,6 +47,14 @@ public final class ConstrainDisplayApisConfig {
             "never_constrain_display_apis_all_packages";
 
     /**
+     * A string flag whose value holds a comma separated list of package entries in the format
+     * '<package-name>:<min-version-code>?:<max-version-code>?' for which Display APIs should
+     * always be constrained.
+     */
+    private static final String FLAG_ALWAYS_CONSTRAIN_DISPLAY_APIS =
+            "always_constrain_display_apis";
+
+    /**
      * Returns true if either the flag 'never_constrain_display_apis_all_packages' is true or the
      * flag 'never_constrain_display_apis' contains a package entry that matches the given {@code
      * applicationInfo}.
@@ -58,8 +66,30 @@ public final class ConstrainDisplayApisConfig {
                 FLAG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES, /* defaultValue= */ false)) {
             return true;
         }
+
+        return flagHasMatchingPackageEntry(FLAG_NEVER_CONSTRAIN_DISPLAY_APIS, applicationInfo);
+    }
+
+    /**
+     * Returns true if the flag 'always_constrain_display_apis' contains a package entry that
+     * matches the given {@code applicationInfo}.
+     *
+     * @param applicationInfo Information about the application/package.
+     */
+    public static boolean alwaysConstrainDisplayApis(ApplicationInfo applicationInfo) {
+        return flagHasMatchingPackageEntry(FLAG_ALWAYS_CONSTRAIN_DISPLAY_APIS, applicationInfo);
+    }
+
+    /**
+     * Returns true if the flag with the given {@code flagName} contains a package entry that
+     * matches the given {@code applicationInfo}.
+     *
+     * @param applicationInfo Information about the application/package.
+     */
+    private static boolean flagHasMatchingPackageEntry(String flagName,
+            ApplicationInfo applicationInfo) {
         String configStr = DeviceConfig.getString(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
-                FLAG_NEVER_CONSTRAIN_DISPLAY_APIS, /* defaultValue= */ "");
+                flagName, /* defaultValue= */ "");
 
         // String#split returns a non-empty array given an empty string.
         if (configStr.isEmpty()) {

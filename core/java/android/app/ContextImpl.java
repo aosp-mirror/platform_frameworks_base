@@ -48,7 +48,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.CompatResources;
@@ -2494,13 +2493,6 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
-        return createPackageContextAsUser(packageName, flags, user, 0 /* packageFlags */);
-    }
-
-    @Override
-    public Context createPackageContextAsUser(
-            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user,
-            @ApplicationInfoFlags int packageFlags) throws PackageManager.NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
@@ -2511,7 +2503,7 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
-                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier(), packageFlags);
+                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mParams,
                     mAttributionSource.getAttributionTag(),
@@ -3128,6 +3120,7 @@ class ContextImpl extends Context {
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
+            mContentCaptureOptions = container.mContentCaptureOptions;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
@@ -3157,7 +3150,8 @@ class ContextImpl extends Context {
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {
-            getSystemService(PermissionManager.class).registerAttributionSource(attributionSource);
+            attributionSource = getSystemService(PermissionManager.class)
+                    .registerAttributionSource(attributionSource);
         }
         return attributionSource;
     }

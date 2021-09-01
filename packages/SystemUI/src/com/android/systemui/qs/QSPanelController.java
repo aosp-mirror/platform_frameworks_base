@@ -45,8 +45,6 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 
-import java.util.function.Consumer;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -149,14 +147,14 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
         }
 
-        ((PagedTileLayout) mView.createRegularTileLayout())
+        ((PagedTileLayout) mView.getOrCreateTileLayout())
                 .setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
     protected QSTileRevealController createTileRevealController() {
         return mQsTileRevealControllerFactory.create(
-                this, (PagedTileLayout) mView.createRegularTileLayout());
+                this, (PagedTileLayout) mView.getOrCreateTileLayout());
     }
 
     @Override
@@ -287,11 +285,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setPageListener(PagedTileLayout.PageListener listener) {
         mView.setPageListener(listener);
-    }
-
-    /** */
-    public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
-        mView.setMediaVisibilityChangedListener(visibilityChangedListener);
     }
 
     public boolean isShown() {

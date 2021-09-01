@@ -1127,7 +1127,12 @@ public class VolumeDialogImpl implements VolumeDialog,
                     .alpha(0.f)
                     .setStartDelay(0)
                     .setDuration(mDialogHideAnimationDurationMs)
-                    .withEndAction(() -> mODICaptionsTooltipView.setVisibility(INVISIBLE))
+                    .withEndAction(() -> {
+                        // It might have been nulled out by tryToRemoveCaptionsTooltip.
+                        if (mODICaptionsTooltipView != null) {
+                            mODICaptionsTooltipView.setVisibility(INVISIBLE);
+                        }
+                    })
                     .start();
         }
     }
@@ -1738,7 +1743,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mContext, android.R.attr.colorBackgroundFloating);
 
         final ColorStateList inverseTextTint = Utils.getColorAttr(
-                mContext, com.android.internal.R.attr.textColorPrimaryInverse);
+                mContext, com.android.internal.R.attr.textColorOnAccent);
 
         row.sliderProgressSolid.setTintList(colorTint);
         if (row.sliderBgIcon != null) {
@@ -2243,6 +2248,11 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         @Override
         public void onClick(View view) {
+            // If the ringer drawer isn't open, don't let anything in it be clicked.
+            if (!mIsRingerDrawerOpen) {
+                return;
+            }
+
             setRingerMode(mClickedRingerMode);
 
             mRingerDrawerIconAnimatingSelected = getDrawerIconViewForMode(mClickedRingerMode);

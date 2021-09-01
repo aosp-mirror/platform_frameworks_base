@@ -29,18 +29,20 @@ import android.app.appsearch.exceptions.AppSearchException;
 
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
-import com.android.server.appsearch.proto.DeleteStatsProto;
-import com.android.server.appsearch.proto.DocumentProto;
-import com.android.server.appsearch.proto.InitializeStatsProto;
-import com.android.server.appsearch.proto.PutDocumentStatsProto;
-import com.android.server.appsearch.proto.PutResultProto;
-import com.android.server.appsearch.proto.QueryStatsProto;
-import com.android.server.appsearch.proto.ScoringSpecProto;
-import com.android.server.appsearch.proto.StatusProto;
-import com.android.server.appsearch.proto.TermMatchType;
+import com.android.server.appsearch.icing.proto.DeleteStatsProto;
+import com.android.server.appsearch.icing.proto.DocumentProto;
+import com.android.server.appsearch.icing.proto.InitializeStatsProto;
+import com.android.server.appsearch.icing.proto.OptimizeStatsProto;
+import com.android.server.appsearch.icing.proto.PutDocumentStatsProto;
+import com.android.server.appsearch.icing.proto.PutResultProto;
+import com.android.server.appsearch.icing.proto.QueryStatsProto;
+import com.android.server.appsearch.icing.proto.ScoringSpecProto;
+import com.android.server.appsearch.icing.proto.StatusProto;
+import com.android.server.appsearch.icing.proto.TermMatchType;
 
 import com.google.common.collect.ImmutableList;
 
@@ -67,7 +69,10 @@ public class AppSearchLoggerTest {
     public void setUp() throws Exception {
         mAppSearchImpl =
                 AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                        mTemporaryFolder.newFolder(),
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
         mLogger = new TestLogger();
     }
 
@@ -78,6 +83,7 @@ public class AppSearchLoggerTest {
         @Nullable InitializeStats mInitializeStats;
         @Nullable SearchStats mSearchStats;
         @Nullable RemoveStats mRemoveStats;
+        @Nullable OptimizeStats mOptimizeStats;
 
         @Override
         public void logStats(@NonNull CallStats stats) {
@@ -102,6 +108,11 @@ public class AppSearchLoggerTest {
         @Override
         public void logStats(@NonNull RemoveStats stats) {
             mRemoveStats = stats;
+        }
+
+        @Override
+        public void logStats(@NonNull OptimizeStats stats) {
+            mOptimizeStats = stats;
         }
     }
 
@@ -283,6 +294,48 @@ public class AppSearchLoggerTest {
         assertThat(rStats.getDeletedDocumentCount()).isEqualTo(nativeNumDocumentDeleted);
     }
 
+    @Test
+    public void testAppSearchLoggerHelper_testCopyNativeStats_optimize() {
+        int nativeLatencyMillis = 1;
+        int nativeDocumentStoreOptimizeLatencyMillis = 2;
+        int nativeIndexRestorationLatencyMillis = 3;
+        int nativeNumOriginalDocuments = 4;
+        int nativeNumDeletedDocuments = 5;
+        int nativeNumExpiredDocuments = 6;
+        long nativeStorageSizeBeforeBytes = Integer.MAX_VALUE + 1;
+        long nativeStorageSizeAfterBytes = Integer.MAX_VALUE + 2;
+        long nativeTimeSinceLastOptimizeMillis = Integer.MAX_VALUE + 3;
+        OptimizeStatsProto optimizeStatsProto =
+                OptimizeStatsProto.newBuilder()
+                        .setLatencyMs(nativeLatencyMillis)
+                        .setDocumentStoreOptimizeLatencyMs(nativeDocumentStoreOptimizeLatencyMillis)
+                        .setIndexRestorationLatencyMs(nativeIndexRestorationLatencyMillis)
+                        .setNumOriginalDocuments(nativeNumOriginalDocuments)
+                        .setNumDeletedDocuments(nativeNumDeletedDocuments)
+                        .setNumExpiredDocuments(nativeNumExpiredDocuments)
+                        .setStorageSizeBefore(nativeStorageSizeBeforeBytes)
+                        .setStorageSizeAfter(nativeStorageSizeAfterBytes)
+                        .setTimeSinceLastOptimizeMs(nativeTimeSinceLastOptimizeMillis)
+                        .build();
+        OptimizeStats.Builder oBuilder = new OptimizeStats.Builder();
+
+        AppSearchLoggerHelper.copyNativeStats(optimizeStatsProto, oBuilder);
+
+        OptimizeStats oStats = oBuilder.build();
+        assertThat(oStats.getNativeLatencyMillis()).isEqualTo(nativeLatencyMillis);
+        assertThat(oStats.getDocumentStoreOptimizeLatencyMillis())
+                .isEqualTo(nativeDocumentStoreOptimizeLatencyMillis);
+        assertThat(oStats.getIndexRestorationLatencyMillis())
+                .isEqualTo(nativeIndexRestorationLatencyMillis);
+        assertThat(oStats.getOriginalDocumentCount()).isEqualTo(nativeNumOriginalDocuments);
+        assertThat(oStats.getDeletedDocumentCount()).isEqualTo(nativeNumDeletedDocuments);
+        assertThat(oStats.getExpiredDocumentCount()).isEqualTo(nativeNumExpiredDocuments);
+        assertThat(oStats.getStorageSizeBeforeBytes()).isEqualTo(nativeStorageSizeBeforeBytes);
+        assertThat(oStats.getStorageSizeAfterBytes()).isEqualTo(nativeStorageSizeAfterBytes);
+        assertThat(oStats.getTimeSinceLastOptimizeMillis())
+                .isEqualTo(nativeTimeSinceLastOptimizeMillis);
+    }
+
     //
     // Testing actual logging
     //
@@ -290,7 +343,11 @@ public class AppSearchLoggerTest {
     public void testLoggingStats_initializeWithoutDocuments_success() throws Exception {
         // Create an unused AppSearchImpl to generated an InitializeStats.
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(mTemporaryFolder.newFolder(), initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(
+                mTemporaryFolder.newFolder(),
+                new UnlimitedLimitConfig(),
+                initStatsBuilder,
+                ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         assertThat(iStats).isNotNull();
@@ -314,7 +371,11 @@ public class AppSearchLoggerTest {
         final File folder = mTemporaryFolder.newFolder();
 
         AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(folder, /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                AppSearchImpl.create(
+                        folder,
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
         List<AppSearchSchema> schemas =
                 ImmutableList.of(
                         new AppSearchSchema.Builder("Type1").build(),
@@ -336,7 +397,7 @@ public class AppSearchLoggerTest {
 
         // Create another appsearchImpl on the same folder
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(folder, initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(folder, new UnlimitedLimitConfig(), initStatsBuilder, ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         assertThat(iStats).isNotNull();
@@ -360,7 +421,11 @@ public class AppSearchLoggerTest {
         final File folder = mTemporaryFolder.newFolder();
 
         AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(folder, /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+                AppSearchImpl.create(
+                        folder,
+                        new UnlimitedLimitConfig(),
+                        /*initStatsBuilder=*/ null,
+                        ALWAYS_OPTIMIZE);
 
         List<AppSearchSchema> schemas =
                 ImmutableList.of(
@@ -393,7 +458,7 @@ public class AppSearchLoggerTest {
 
         // Create another appsearchImpl on the same folder
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
-        AppSearchImpl.create(folder, initStatsBuilder, ALWAYS_OPTIMIZE);
+        AppSearchImpl.create(folder, new UnlimitedLimitConfig(), initStatsBuilder, ALWAYS_OPTIMIZE);
         InitializeStats iStats = initStatsBuilder.build();
 
         // Some of other fields are already covered by AppSearchImplTest#testReset()
@@ -484,11 +549,13 @@ public class AppSearchLoggerTest {
                         .setPropertyString("nonExist", "testPut example1")
                         .build();
 
-        // We mainly want to check the status code in stats. So we don't need to inspect the
-        // exception here.
-        Assert.assertThrows(
-                AppSearchException.class,
-                () -> mAppSearchImpl.putDocument(testPackageName, testDatabase, document, mLogger));
+        AppSearchException exception =
+                Assert.assertThrows(
+                        AppSearchException.class,
+                        () ->
+                                mAppSearchImpl.putDocument(
+                                        testPackageName, testDatabase, document, mLogger));
+        assertThat(exception.getResultCode()).isEqualTo(AppSearchResult.RESULT_NOT_FOUND);
 
         PutDocumentStats pStats = mLogger.mPutDocumentStats;
         assertThat(pStats).isNotNull();
@@ -676,17 +743,17 @@ public class AppSearchLoggerTest {
 
         RemoveStats.Builder rStatsBuilder = new RemoveStats.Builder(testPackageName, testDatabase);
 
-        // We mainly want to check the status code in stats. So we don't need to inspect the
-        // exception here.
-        Assert.assertThrows(
-                AppSearchException.class,
-                () ->
-                        mAppSearchImpl.remove(
-                                testPackageName,
-                                testDatabase,
-                                testNamespace,
-                                "invalidId",
-                                rStatsBuilder));
+        AppSearchException exception =
+                Assert.assertThrows(
+                        AppSearchException.class,
+                        () ->
+                                mAppSearchImpl.remove(
+                                        testPackageName,
+                                        testDatabase,
+                                        testNamespace,
+                                        "invalidId",
+                                        rStatsBuilder));
+        assertThat(exception.getResultCode()).isEqualTo(AppSearchResult.RESULT_NOT_FOUND);
 
         RemoveStats rStats = rStatsBuilder.build();
         assertThat(rStats.getPackageName()).isEqualTo(testPackageName);

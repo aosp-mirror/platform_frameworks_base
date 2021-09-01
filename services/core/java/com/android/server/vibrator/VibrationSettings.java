@@ -67,10 +67,12 @@ final class VibrationSettings {
     @VisibleForTesting
     final UserObserver mUserReceiver;
 
-
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
     private final SparseArray<VibrationEffect> mFallbackEffects;
+
+    private final int mRampStepDuration;
+    private final int mRampDownDuration;
 
     @GuardedBy("mLock")
     @Nullable
@@ -97,10 +99,24 @@ final class VibrationSettings {
     private boolean mLowPowerMode;
 
     VibrationSettings(Context context, Handler handler) {
+        this(context, handler,
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampDownDuration),
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampStepDuration));
+    }
+
+    @VisibleForTesting
+    VibrationSettings(Context context, Handler handler, int rampDownDuration,
+            int rampStepDuration) {
         mContext = context;
         mSettingObserver = new SettingsObserver(handler);
         mUidObserver = new UidObserver();
         mUserReceiver = new UserObserver();
+
+        // TODO(b/191150049): move these to vibrator static config file
+        mRampDownDuration = rampDownDuration;
+        mRampStepDuration = rampStepDuration;
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);
@@ -190,6 +206,23 @@ final class VibrationSettings {
         synchronized (mLock) {
             mListeners.remove(listener);
         }
+    }
+
+    /**
+     * The duration, in milliseconds, that should be applied to convert vibration effect's
+     * {@link android.os.vibrator.RampSegment} to a {@link android.os.vibrator.StepSegment} on
+     * devices without PWLE support.
+     */
+    public int getRampStepDuration() {
+        return mRampStepDuration;
+    }
+
+    /**
+     * The duration, in milliseconds, that should be applied to the ramp to turn off the vibrator
+     * when a vibration is cancelled or finished at non-zero amplitude.
+     */
+    public int getRampDownDuration() {
+        return mRampDownDuration;
     }
 
     /**
@@ -354,6 +387,8 @@ final class VibrationSettings {
                 + ", mZenMode=" + Settings.Global.zenModeToString(mZenMode)
                 + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
                 + ", mHapticChannelMaxVibrationAmplitude=" + getHapticChannelMaxVibrationAmplitude()
+                + ", mRampStepDuration=" + mRampStepDuration
+                + ", mRampDownDuration=" + mRampDownDuration
                 + ", mHapticFeedbackIntensity="
                 + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_TOUCH))
                 + ", mHapticFeedbackDefaultIntensity="

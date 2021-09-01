@@ -191,6 +191,7 @@ android.app.ActivityOptions$1
 android.app.ActivityOptions$2
 android.app.ActivityOptions
 android.app.ActivityTaskManager$1
+android.app.ActivityTaskManager$RootTaskInfo
 android.app.ActivityTaskManager
 android.app.ActivityThread$1
 android.app.ActivityThread$ActivityClientRecord
@@ -589,6 +590,7 @@ android.app.SystemServiceRegistry$119
 android.app.SystemServiceRegistry$11
 android.app.SystemServiceRegistry$120
 android.app.SystemServiceRegistry$121
+android.app.SystemServiceRegistry$123
 android.app.SystemServiceRegistry$12
 android.app.SystemServiceRegistry$13
 android.app.SystemServiceRegistry$14
@@ -1624,7 +1626,6 @@ android.content.pm.parsing.component.ParsedComponent
 android.content.pm.parsing.component.ParsedInstrumentation$1
 android.content.pm.parsing.component.ParsedInstrumentation
 android.content.pm.parsing.component.ParsedInstrumentationUtils
-android.content.pm.parsing.component.ParsedIntentInfo$1
 android.content.pm.parsing.component.ParsedIntentInfo$ListParceler
 android.content.pm.parsing.component.ParsedIntentInfo$Parceler
 android.content.pm.parsing.component.ParsedIntentInfo
@@ -2325,6 +2326,7 @@ android.hardware.contexthub.V1_0.IContexthubCallback
 android.hardware.contexthub.V1_0.MemRange
 android.hardware.contexthub.V1_0.NanoAppBinary
 android.hardware.contexthub.V1_0.PhysicalSensor
+android.hardware.devicestate.DeviceStateManager
 android.hardware.display.AmbientBrightnessDayStats$1
 android.hardware.display.AmbientBrightnessDayStats
 android.hardware.display.AmbientDisplayConfiguration
@@ -9477,8 +9479,6 @@ com.android.internal.telephony.NitzData
 com.android.internal.telephony.NitzStateMachine$DeviceState
 com.android.internal.telephony.NitzStateMachine$DeviceStateImpl
 com.android.internal.telephony.NitzStateMachine
-com.android.internal.telephony.OemHookIndication
-com.android.internal.telephony.OemHookResponse
 com.android.internal.telephony.OperatorInfo$1
 com.android.internal.telephony.OperatorInfo$State
 com.android.internal.telephony.OperatorInfo
@@ -10454,22 +10454,6 @@ com.android.internal.telephony.util.SMSDispatcherUtil
 com.android.internal.telephony.util.TelephonyUtils
 com.android.internal.telephony.util.VoicemailNotificationSettingsUtil
 com.android.internal.telephony.util.XmlUtils
-com.android.internal.telephony.vendor.VendorGsmCdmaPhone
-com.android.internal.telephony.vendor.VendorMultiSimSettingController
-com.android.internal.telephony.vendor.VendorPhoneSwitcher$1
-com.android.internal.telephony.vendor.VendorPhoneSwitcher$2
-com.android.internal.telephony.vendor.VendorPhoneSwitcher$DdsSwitchState
-com.android.internal.telephony.vendor.VendorPhoneSwitcher
-com.android.internal.telephony.vendor.VendorServiceStateTracker
-com.android.internal.telephony.vendor.VendorSubscriptionController
-com.android.internal.telephony.vendor.VendorSubscriptionInfoUpdater
-com.android.internal.telephony.vendor.dataconnection.VendorDataResetEventTracker$1
-com.android.internal.telephony.vendor.dataconnection.VendorDataResetEventTracker$2
-com.android.internal.telephony.vendor.dataconnection.VendorDataResetEventTracker$3
-com.android.internal.telephony.vendor.dataconnection.VendorDataResetEventTracker$ResetEventListener
-com.android.internal.telephony.vendor.dataconnection.VendorDataResetEventTracker
-com.android.internal.telephony.vendor.dataconnection.VendorDcTracker$1
-com.android.internal.telephony.vendor.dataconnection.VendorDcTracker
 com.android.internal.textservice.ISpellCheckerService$Stub$Proxy
 com.android.internal.textservice.ISpellCheckerService$Stub
 com.android.internal.textservice.ISpellCheckerService

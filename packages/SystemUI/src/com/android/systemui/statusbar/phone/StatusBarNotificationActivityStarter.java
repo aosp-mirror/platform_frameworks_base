@@ -514,7 +514,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                     InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
                             );
                     ActivityLaunchAnimator.Controller animationController =
-                            new StatusBarLaunchAnimatorController(viewController, mStatusBar,
+                            viewController == null ? null
+                                : new StatusBarLaunchAnimatorController(viewController, mStatusBar,
                                     true /* isActivityIntent */);
 
                     mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,

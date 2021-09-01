@@ -19,9 +19,9 @@ package com.android.keyguard;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.icu.text.DateTimePatternGenerator;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import kotlin.Unit;
@@ -41,8 +42,6 @@ import kotlin.Unit;
 public class AnimatableClockView extends TextView {
     private static final CharSequence DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm";
     private static final CharSequence DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm";
-    private static final CharSequence SINGLE_LINE_FORMAT_12_HOUR = "h:mm";
-    private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "HH:mm";
     private static final long DOZE_ANIM_DURATION = 300;
     private static final long APPEAR_ANIM_DURATION = 350;
     private static final long CHARGE_ANIM_DURATION_PHASE_0 = 500;
@@ -196,20 +195,20 @@ public class AnimatableClockView extends TextView {
                 null /* onAnimationEnd */);
     }
 
-    void animateCharge(boolean isDozing) {
+    void animateCharge(DozeStateGetter dozeStateGetter) {
         if (mTextAnimator == null || mTextAnimator.isRunning()) {
             // Skip charge animation if dozing animation is already playing.
             return;
         }
         Runnable startAnimPhase2 = () -> setTextStyle(
-                isDozing ? mDozingWeight : mLockScreenWeight/* weight */,
+                dozeStateGetter.isDozing() ? mDozingWeight : mLockScreenWeight/* weight */,
                 -1,
                 null,
                 true /* animate */,
                 CHARGE_ANIM_DURATION_PHASE_1,
                 0 /* delay */,
                 null /* onAnimationEnd */);
-        setTextStyle(isDozing ? mLockScreenWeight : mDozingWeight/* weight */,
+        setTextStyle(dozeStateGetter.isDozing() ? mLockScreenWeight : mDozingWeight/* weight */,
                 -1,
                 null,
                 true /* animate */,
@@ -259,24 +258,50 @@ public class AnimatableClockView extends TextView {
     }
 
     void refreshFormat() {
+        Patterns.update(mContext);
+
         final boolean use24HourFormat = DateFormat.is24HourFormat(getContext());
         if (mIsSingleLine && use24HourFormat) {
-            mFormat = SINGLE_LINE_FORMAT_24_HOUR;
+            mFormat = Patterns.sClockView24;
         } else if (!mIsSingleLine && use24HourFormat) {
             mFormat = DOUBLE_LINE_FORMAT_24_HOUR;
         } else if (mIsSingleLine && !use24HourFormat) {
-            mFormat = SINGLE_LINE_FORMAT_12_HOUR;
+            mFormat = Patterns.sClockView12;
         } else {
             mFormat = DOUBLE_LINE_FORMAT_12_HOUR;
         }
 
-        mDescFormat = getBestDateTimePattern(getContext(), use24HourFormat ? "Hm" : "hm");
+        mDescFormat = use24HourFormat ? Patterns.sClockView24 : Patterns.sClockView12;
         refreshTime();
     }
 
-    private static String getBestDateTimePattern(Context context, String skeleton) {
-        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
-                context.getResources().getConfiguration().locale);
-        return dtpg.getBestPattern(skeleton);
+    // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
+    // This is an optimization to ensure we only recompute the patterns when the inputs change.
+    private static final class Patterns {
+        static String sClockView12;
+        static String sClockView24;
+        static String sCacheKey;
+
+        static void update(Context context) {
+            final Locale locale = Locale.getDefault();
+            final Resources res = context.getResources();
+            final String clockView12Skel = res.getString(R.string.clock_12hr_format);
+            final String clockView24Skel = res.getString(R.string.clock_24hr_format);
+            final String key = locale.toString() + clockView12Skel + clockView24Skel;
+            if (key.equals(sCacheKey)) return;
+            sClockView12 = DateFormat.getBestDateTimePattern(locale, clockView12Skel);
+
+            // CLDR insists on adding an AM/PM indicator even though it wasn't in the skeleton
+            // format.  The following code removes the AM/PM indicator if we didn't want it.
+            if (!clockView12Skel.contains("a")) {
+                sClockView12 = sClockView12.replaceAll("a", "").trim();
+            }
+            sClockView24 = DateFormat.getBestDateTimePattern(locale, clockView24Skel);
+            sCacheKey = key;
+        }
+    }
+
+    interface DozeStateGetter {
+        boolean isDozing();
     }
 }

@@ -20,6 +20,8 @@
         <shape android:shape="rectangle">
             <solid android:color="@color/settingslib_protection_color"/>
             <corners android:radius="28dp"/>
+            <size android:width="@dimen/settingslib_illustration_width"
+                  android:height="@dimen/settingslib_illustration_height"/>
         </shape>
     </item>
 </layer-list>

@@ -670,8 +670,6 @@ public class SystemSettingsHelper extends SettingsHelper {
         }
     }
 
-
-
     private static class PackageTagsListSetting extends DeviceConfigSetting {
 
         private final Supplier<ArrayMap<String, ArraySet<String>>> mBaseValuesSupplier;

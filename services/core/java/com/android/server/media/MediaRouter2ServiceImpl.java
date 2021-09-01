@@ -903,9 +903,9 @@ class MediaRouter2ServiceImpl {
         userRecord.mManagerRecords.add(managerRecord);
         mAllManagerRecords.put(binder, managerRecord);
 
-        userRecord.mHandler.sendMessage(obtainMessage(UserHandler::notifyRoutesToManager,
-                userRecord.mHandler, manager));
-
+        // Note: Features should be sent first before the routes. If not, the
+        // RouteCallback#onRoutesAdded() for system MR2 will never be called with initial routes
+        // due to the lack of features.
         for (RouterRecord routerRecord : userRecord.mRouterRecords) {
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
@@ -913,6 +913,9 @@ class MediaRouter2ServiceImpl {
                     obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManager,
                         routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
+
+        userRecord.mHandler.sendMessage(obtainMessage(UserHandler::notifyRoutesToManager,
+                userRecord.mHandler, manager));
     }
 
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {

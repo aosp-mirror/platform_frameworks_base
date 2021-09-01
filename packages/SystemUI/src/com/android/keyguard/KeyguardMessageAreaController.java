@@ -28,7 +28,7 @@ import javax.inject.Inject;
 public class KeyguardMessageAreaController extends ViewController<KeyguardMessageArea> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
-
+    private boolean mAltBouncerShowing;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -79,6 +79,13 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
+    }
+
+    /**
+     * Set whether alt bouncer is showing
+     */
+    public void setAltBouncerShowing(boolean showing) {
+        mView.setAltBouncerShowing(showing);
     }
 
     public void setMessage(CharSequence s) {

@@ -127,7 +127,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleType="matrix"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="@id/global_screenshot_preview"
         app:layout_constraintTop_toTopOf="@id/global_screenshot_preview"
         android:elevation="@dimen/screenshot_preview_elevation"/>
+    <View
+        android:id="@+id/screenshot_transition_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@id/global_screenshot_preview"
+        app:layout_constraintTop_toTopOf="@id/global_screenshot_preview"
+        app:layout_constraintEnd_toEndOf="@id/global_screenshot_preview"
+        app:layout_constraintBottom_toBottomOf="@id/global_screenshot_preview"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

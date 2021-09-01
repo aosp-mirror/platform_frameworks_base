@@ -75,6 +75,7 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -91,12 +92,14 @@ import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerC
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.util.LogUtils;
 import com.android.server.vcn.util.MtuUtils;
+import com.android.server.vcn.util.OneWayBoolean;
 
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -192,6 +195,7 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int SAFEMODE_TIMEOUT_SECONDS = 30;
+    private static final int SAFEMODE_TIMEOUT_SECONDS_TEST_MODE = 10;
 
     private interface EventInfo {}
 
@@ -549,8 +553,13 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>This variable is false for the lifecycle of the VcnGatewayConnection, until a command to
      * teardown has been received. This may be flipped due to events such as the Network becoming
      * unwanted, the owning VCN entering safe mode, or an irrecoverable internal failure.
+     *
+     * <p>WARNING: Assignments to this MUST ALWAYS (except for testing) use the or operator ("|="),
+     * otherwise the flag may be flipped back to false after having been set to true. This could
+     * lead to a case where the Vcn parent instance has commanded a teardown, but a spurious
+     * non-quitting disconnect request could flip this back to true.
      */
-    private boolean mIsQuitting = false;
+    private OneWayBoolean mIsQuitting = new OneWayBoolean();
 
     /**
      * Whether the VcnGatewayConnection is in safe mode.
@@ -714,6 +723,18 @@ public class VcnGatewayConnection extends StateMachine {
     protected void onQuitting() {
         logDbg("Quitting VcnGatewayConnection");
 
+        if (mNetworkAgent != null) {
+            logWtf("NetworkAgent was non-null in onQuitting");
+            mNetworkAgent.unregister();
+            mNetworkAgent = null;
+        }
+
+        if (mIkeSession != null) {
+            logWtf("IkeSession was non-null in onQuitting");
+            mIkeSession.kill();
+            mIkeSession = null;
+        }
+
         // No need to call setInterfaceDown(); the IpSecInterface is being fully torn down.
         if (mTunnelIface != null) {
             mTunnelIface.close();
@@ -780,7 +801,7 @@ public class VcnGatewayConnection extends StateMachine {
     private void acquireWakeLock() {
         mVcnContext.ensureRunningOnLooperThread();
 
-        if (!mIsQuitting) {
+        if (!mIsQuitting.getValue()) {
             mWakeLock.acquire();
 
             logVdbg("Wakelock acquired: " + mWakeLock);
@@ -925,6 +946,14 @@ public class VcnGatewayConnection extends StateMachine {
 
     private WakeupMessage createScheduledAlarm(
             @NonNull String cmdName, Message delayedMessage, long delay) {
+        final Handler handler = getHandler();
+        if (handler == null) {
+            logWarn(
+                    "Attempted to schedule alarm after StateMachine has quit",
+                    new IllegalStateException());
+            return null; // StateMachine has already quit.
+        }
+
         // WakeupMessage uses Handler#dispatchMessage() to immediately handle the specified Runnable
         // at the scheduled time. dispatchMessage() immediately executes and there may be queued
         // events that resolve the scheduled alarm pending in the queue. So, use the Runnable to
@@ -933,7 +962,7 @@ public class VcnGatewayConnection extends StateMachine {
         final WakeupMessage alarm =
                 mDeps.newWakeupMessage(
                         mVcnContext,
-                        getHandler(),
+                        handler,
                         cmdName,
                         () -> sendMessageAndAcquireWakeLock(delayedMessage));
         alarm.schedule(mDeps.getElapsedRealTime() + delay);
@@ -1054,7 +1083,9 @@ public class VcnGatewayConnection extends StateMachine {
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
-                        TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
+                        mVcnContext.isInTestMode()
+                                ? TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS_TEST_MODE)
+                                : TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
     }
 
     private void cancelSafeModeAlarm() {
@@ -1275,7 +1306,9 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180526152): notify VcnStatusCallback for Network loss
 
             logDbg("Tearing down. Cause: " + info.reason);
-            mIsQuitting = info.shouldQuit;
+            if (info.shouldQuit) {
+                mIsQuitting.setTrue();
+            }
 
             teardownNetwork();
 
@@ -1319,7 +1352,7 @@ public class VcnGatewayConnection extends StateMachine {
     private class DisconnectedState extends BaseState {
         @Override
         protected void enterState() {
-            if (mIsQuitting) {
+            if (mIsQuitting.getValue()) {
                 quitNow(); // Ignore all queued events; cleanup is complete.
             }
 
@@ -1343,7 +1376,7 @@ public class VcnGatewayConnection extends StateMachine {
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
                     if (((EventDisconnectRequestedInfo) msg.obj).shouldQuit) {
-                        mIsQuitting = true;
+                        mIsQuitting.setTrue();
 
                         quitNow();
                     }
@@ -1429,7 +1462,10 @@ public class VcnGatewayConnection extends StateMachine {
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
                     EventDisconnectRequestedInfo info = ((EventDisconnectRequestedInfo) msg.obj);
-                    mIsQuitting = info.shouldQuit;
+                    if (info.shouldQuit) {
+                        mIsQuitting.setTrue();
+                    }
+
                     teardownNetwork();
 
                     if (info.reason.equals(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST)) {
@@ -1445,7 +1481,7 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_SESSION_CLOSED:
                     mIkeSession = null;
 
-                    if (!mIsQuitting && mUnderlying != null) {
+                    if (!mIsQuitting.getValue() && mUnderlying != null) {
                         transitionTo(mSkipRetryTimeout ? mConnectingState : mRetryTimeoutState);
                     } else {
                         teardownNetwork();
@@ -1560,6 +1596,9 @@ public class VcnGatewayConnection extends StateMachine {
 
             agent.sendNetworkCapabilities(caps);
             agent.sendLinkProperties(lp);
+
+            agent.setUnderlyingNetworks(
+                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
         }
 
         protected VcnNetworkAgent buildNetworkAgent(
@@ -1601,6 +1640,10 @@ public class VcnGatewayConnection extends StateMachine {
                                 teardownAsynchronously();
                             } /* networkUnwantedCallback */,
                             (status) -> {
+                                if (mIsQuitting.getValue()) {
+                                    return; // Ignore; VcnGatewayConnection quitting or already quit
+                                }
+
                                 switch (status) {
                                     case NetworkAgent.VALIDATION_STATUS_VALID:
                                         clearFailedAttemptCounterAndSafeModeAlarm();
@@ -1620,6 +1663,8 @@ public class VcnGatewayConnection extends StateMachine {
                             } /* validationStatusCallback */);
 
             agent.register();
+            agent.setUnderlyingNetworks(
+                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
             agent.markConnected();
 
             return agent;
@@ -1863,6 +1908,7 @@ public class VcnGatewayConnection extends StateMachine {
 
             if (mUnderlying == null) {
                 logWtf("Underlying network was null in retry state");
+                teardownNetwork();
                 transitionTo(mDisconnectedState);
             } else {
                 // Safe to blindly set up, as it is cancelled and cleared on exiting this state
@@ -1879,6 +1925,7 @@ public class VcnGatewayConnection extends StateMachine {
 
                     // If new underlying is null, all networks were lost; go back to disconnected.
                     if (mUnderlying == null) {
+                        teardownNetwork();
                         transitionTo(mDisconnectedState);
                         return;
                     } else if (oldUnderlying != null
@@ -1958,7 +2005,7 @@ public class VcnGatewayConnection extends StateMachine {
             final int[] underlyingAdminUids = underlyingCaps.getAdministratorUids();
             Arrays.sort(underlyingAdminUids); // Sort to allow contains check below.
 
-            final int[] adminUids;
+            int[] adminUids;
             if (underlyingCaps.getOwnerUid() > 0 // No owner UID specified
                     && 0 > Arrays.binarySearch(// Owner UID not found in admin UID list.
                             underlyingAdminUids, underlyingCaps.getOwnerUid())) {
@@ -1968,6 +2015,11 @@ public class VcnGatewayConnection extends StateMachine {
             } else {
                 adminUids = underlyingAdminUids;
             }
+
+            // Set owner & administrator UID
+            builder.setOwnerUid(Process.myUid());
+            adminUids = Arrays.copyOf(adminUids, adminUids.length + 1);
+            adminUids[adminUids.length - 1] = Process.myUid();
             builder.setAdministratorUids(adminUids);
 
             builder.setLinkUpstreamBandwidthKbps(underlyingCaps.getLinkUpstreamBandwidthKbps());
@@ -2134,24 +2186,33 @@ public class VcnGatewayConnection extends StateMachine {
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + mConnectionConfig.getGatewayConnectionName()
+                + "-"
+                + System.identityHashCode(this)
                 + "] ";
     }
 
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, getLogPrefix() + msg);
-            LOCAL_LOG.log(getLogPrefix() + "VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
+    }
+
+    private void logWarn(String msg) {
+        Slog.w(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg);
+    }
+
+    private void logWarn(String msg, Throwable tr) {
+        Slog.w(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg + tr);
     }
 
     private void logErr(String msg) {
@@ -2188,7 +2249,7 @@ public class VcnGatewayConnection extends StateMachine {
                         + (getCurrentState() == null
                                 ? null
                                 : getCurrentState().getClass().getSimpleName()));
-        pw.println("mIsQuitting: " + mIsQuitting);
+        pw.println("mIsQuitting: " + mIsQuitting.getValue());
         pw.println("mIsInSafeMode: " + mIsInSafeMode);
         pw.println("mCurrentToken: " + mCurrentToken);
         pw.println("mFailedAttempts: " + mFailedAttempts);
@@ -2225,12 +2286,12 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     boolean isQuitting() {
-        return mIsQuitting;
+        return mIsQuitting.getValue();
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void setIsQuitting(boolean isQuitting) {
-        mIsQuitting = isQuitting;
+    void setQuitting() {
+        mIsQuitting.setTrue();
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -2529,6 +2590,11 @@ public class VcnGatewayConnection extends StateMachine {
         /** Sends new LinkProperties for the underlying NetworkAgent */
         public void sendLinkProperties(@NonNull LinkProperties lp) {
             mImpl.sendLinkProperties(lp);
+        }
+
+        /** Sends new NetworkCapabilities for the underlying NetworkAgent */
+        public void setUnderlyingNetworks(@Nullable List<Network> underlyingNetworks) {
+            mImpl.setUnderlyingNetworks(underlyingNetworks);
         }
 
         /** Retrieves the Network for the underlying NetworkAgent */

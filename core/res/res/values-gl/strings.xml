@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Servizo GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizo de notificacións dos sensores"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizo Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de fuso horario (non require conexión)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servizo de actualización horaria mediante o GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Servizo de xestión de recoñecemento musical"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Borrarase o teu dispositivo"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proba con outra impresión dixital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hai demasiada luz"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Proba a axustar a impresión dixital"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia lixeiramente a posición do dedo en cada intento"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autenticouse a impresión dixital"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Non se rexistraron impresións dixitais."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo non ten sensor de impresión dixital."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Desactivouse o sensor temporalmente."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Non se puido usar o sensor de impresión dixital. Visita un provedor de reparacións"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilizar impresión dixital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utilizar impresión dixital ou credencial do dispositivo"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona de impresión dixital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Volve inscribir a túa cara"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mellorar o recoñecemento, inscribe de novo a túa cara"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Produciuse un problema co desbloqueo facial"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca para eliminar o teu modelo facial e despois engade de novo a cara"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira o teléfono para desbloquealo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura máis maneiras de desbloquear o dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para engadir unha impresión dixital"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo mediante impresión dixital"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Non se puido usar o sensor de impresión dixital"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un provedor de reparacións."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Sen datos faciais exactos. Téntao de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Hai demasiada iluminación. Proba cunha máis suave."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Hai demasiada escuridade. Proba con máis luz."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Rexeitar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permiso solicitado\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> solicitou permiso\npara acceder á conta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estás usando esta aplicación fóra do teu perfil de traballo"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Estás usando esta aplicación no teu perfil de traballo"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de introdución de texto"</string>
@@ -1946,7 +1949,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximizar"</string>
     <string name="close_button_text" msgid="10603510034455258">"Pechar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"Resposta"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Contestar"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vídeo"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rexeitar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Colgar"</string>

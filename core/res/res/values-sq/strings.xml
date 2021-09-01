@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Shërbimi GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Shërbimi i njoftimeve të sensorit"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Shërbimi i muzgut"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zbuluesi i brezit orar (nuk nevojitet lidhja)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Shërbimi i përditësimit të kohës GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Shërbimi i menaxherit të njohjes së muzikës"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Pajisja do të spastrohet"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Lejon aplikacionin të zgjerojë ose shpalosë shiritin e statusit."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"shfaq njoftimet si aktivitete në ekran të plotë në një pajisje të kyçur"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Lejon që aplikacioni t\'i shfaqë njoftimet si aktivitete në ekran të plotë në një pajisje të kyçur"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalo shkurtore"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalimi i shkurtoreve"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Lejon një aplikacion për të shtuar shkurtore në ekranin bazë pa ndërhyrjen e përdoruesit."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"çinstalo shkurtore"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Lejon aplikacionin të heqë shkurtore në ekranin bazë, pa ndërhyrjen e përdoruesit."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Provo një gjurmë gishti tjetër"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Me shumë ndriçim"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Provo ta rregullosh"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ndrysho pak pozicionin e gishtit çdo herë"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Gjurma e gishtit u vërtetua"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kjo pajisje nuk ka sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensori është çaktivizuar përkohësisht."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Sensori i gjurmës së gishtit nuk mund të përdoret. Vizito një ofrues të shërbimit të riparimit"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Përdor gjurmën e gishtit"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Përdor gjurmën e gishtit ose kyçjen e ekranit"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Shkyçja me fytyrë"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Regjistro përsëri fytyrën tënde"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem me \"Shkyçjen me fytyrë\""</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Trokit për të fshirë modelin tënd të fytyrës, pastaj shtoje përsëri fytyrën tënde"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguro \"Shkyçjen me fytyrë\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Shkyçe telefonin duke parë tek ai"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguri më shumë mënyra për të shkyçur"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trokit për të shtuar një gjurmë gishti"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Shkyçja me gjurmën e gishtit"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sensori i gjurmës së gishtit nuk mund të përdoret"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizito një ofrues të shërbimit të riparimit."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Shumë i errët. Provo një ndriçim më të fortë."</string>
@@ -956,7 +958,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zgjero zonën e shkyçjes."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Rrëshqit shkyçjen."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Shkyçje me motiv."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Shkyçja me fytyrë"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Shkyçja me fytyrë."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Shkyçje me PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Shkyçja e kartës SIM me kodin PIN"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Shkyçja e kartës SIM me kodin PUK"</string>
@@ -1195,7 +1197,7 @@
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Redakto me %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Redakto"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Ndaj"</string>
-    <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Shpërnda publikisht me %1$s"</string>
+    <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Shpërndaj me %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Ndaj"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Dërgo me"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Dërgo me %1$s"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Moho"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Kërkohet leje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Kërkohet leje\npër llogarinë <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Kërkohet leja nga <xliff:g id="APP">%1$s</xliff:g>\npër llogarinë <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Po e përdor këtë aplikacion jashtë profilit tënd të punës"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Këtë aplikacion po e përdor në profilin tënd të punës"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metoda e hyrjeve"</string>
@@ -1562,8 +1565,8 @@
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Zgjidh një aplikacion"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Nuk mundi ta hapte <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Shpërnda publikisht me"</string>
-    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Shpërnda me <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Shpërndaj me"</string>
+    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Shpërndaj me <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Dorezë me rrëshqitje. Preke dhe mbaje të shtypur."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Rrëshqit për të shkyçur."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Orientohu për në shtëpi"</string>
@@ -1607,7 +1610,7 @@
     <string name="sha1_fingerprint" msgid="2339915142825390774">"Gjurma e gishtit SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Shikoji të gjitha"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Zgjidh aktivitetin"</string>
-    <string name="share_action_provider_share_with" msgid="1904096863622941880">"Shpërnda publikisht me"</string>
+    <string name="share_action_provider_share_with" msgid="1904096863622941880">"Shpërndaj me"</string>
     <string name="sending" msgid="206925243621664438">"Po dërgon…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Të hapet shfletuesi?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Dëshiron ta pranosh telefonatën?"</string>

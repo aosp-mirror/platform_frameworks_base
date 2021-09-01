@@ -37,6 +37,7 @@ import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IIntegerConsumer;
@@ -444,11 +445,17 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.getImsMmTelRegistrationState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> stateCallback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> stateCallback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting registration state: " + e);
+            executor.execute(() -> stateCallback.accept(REGISTRATION_STATE_NOT_REGISTERED));
         }
     }
 
@@ -485,11 +492,18 @@ public class ImsMmTelManager implements RegistrationManager {
                     new IIntegerConsumer.Stub() {
                         @Override
                         public void accept(int result) {
-                            executor.execute(() -> transportTypeCallback.accept(result));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> transportTypeCallback.accept(result));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting transport type: " + e);
+            executor.execute(() -> transportTypeCallback.accept(
+                    AccessNetworkConstants.TRANSPORT_TYPE_INVALID));
         }
     }
 
@@ -803,7 +817,12 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> callback.accept(result == 1));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.accept(result == 1));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             }, capability, transportType);
         } catch (ServiceSpecificException sse) {
@@ -1448,7 +1467,12 @@ public class ImsMmTelManager implements RegistrationManager {
             iTelephony.getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> callback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
         } catch (ServiceSpecificException sse) {

@@ -240,10 +240,10 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    /** Set the current expand animation parameters. */
-    public void setExpandAnimationParams(ExpandAnimationParameters params) {
-        mActualHeight = params.getHeight();
-        mActualWidth = params.getWidth();
+    /** Set the current expand animation size. */
+    public void setExpandAnimationSize(int actualWidth, int actualHeight) {
+        mActualHeight = actualHeight;
+        mActualWidth = actualWidth;
         invalidate();
     }
 

@@ -227,6 +227,7 @@ public class Filter implements AutoCloseable {
     private long mNativeContext;
     private FilterCallback mCallback;
     private Executor mExecutor;
+    private final Object mCallbackLock = new Object();
     private final long mId;
     private int mMainType;
     private int mSubtype;
@@ -253,14 +254,18 @@ public class Filter implements AutoCloseable {
     }
 
     private void onFilterStatus(int status) {
-        if (mCallback != null && mExecutor != null) {
-            mExecutor.execute(() -> mCallback.onFilterStatusChanged(this, status));
+        synchronized (mCallbackLock) {
+            if (mCallback != null && mExecutor != null) {
+                mExecutor.execute(() -> mCallback.onFilterStatusChanged(this, status));
+            }
         }
     }
 
     private void onFilterEvent(FilterEvent[] events) {
-        if (mCallback != null && mExecutor != null) {
-            mExecutor.execute(() -> mCallback.onFilterEvent(this, events));
+        synchronized (mCallbackLock) {
+            if (mCallback != null && mExecutor != null) {
+                mExecutor.execute(() -> mCallback.onFilterEvent(this, events));
+            }
         }
     }
 
@@ -272,13 +277,17 @@ public class Filter implements AutoCloseable {
 
     /** @hide */
     public void setCallback(FilterCallback cb, Executor executor) {
-        mCallback = cb;
-        mExecutor = executor;
+        synchronized (mCallbackLock) {
+            mCallback = cb;
+            mExecutor = executor;
+        }
     }
 
     /** @hide */
     public FilterCallback getCallback() {
-        return mCallback;
+        synchronized (mCallbackLock) {
+            return mCallback;
+        }
     }
 
     /**

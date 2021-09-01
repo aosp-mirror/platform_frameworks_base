@@ -211,6 +211,12 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     @Override
+    public boolean isWorkProfileOn() {
+        final UserHandle userHandle = UserHandle.of(getWorkProfileUserId(mCurrentUserId));
+        return userHandle != null && !mUserManager.isQuietModeEnabled(userHandle);
+    }
+
+    @Override
     public boolean isProfileOwnerOfOrganizationOwnedDevice() {
         return mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile();
     }

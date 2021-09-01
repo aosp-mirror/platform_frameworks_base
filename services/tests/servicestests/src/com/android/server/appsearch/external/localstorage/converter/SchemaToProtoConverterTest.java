@@ -20,10 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.appsearch.AppSearchSchema;
 
-import com.android.server.appsearch.proto.PropertyConfigProto;
-import com.android.server.appsearch.proto.SchemaTypeConfigProto;
-import com.android.server.appsearch.proto.StringIndexingConfig;
-import com.android.server.appsearch.proto.TermMatchType;
+import com.android.server.appsearch.icing.proto.PropertyConfigProto;
+import com.android.server.appsearch.icing.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.icing.proto.StringIndexingConfig;
+import com.android.server.appsearch.icing.proto.TermMatchType;
 
 import org.junit.Test;
 

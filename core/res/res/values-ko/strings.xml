@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 서비스"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"센서 알림 서비스"</string>
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"시간대 감지(연결되지 않음)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"음악 인식 관리자 서비스"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
@@ -580,11 +579,12 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"센서 닦기"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 오래 기다려 주세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"조금 더 길게 터치하세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"등록된 지문이 없습니다."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"센서가 일시적으로 사용 중지되었습니다."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"지문 센서를 사용할 수 없습니다. 수리업체에 방문하세요."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"지문 사용"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"지문 또는 화면 잠금 사용"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"지문 아이콘"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"얼굴 인식 잠금 해제"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"얼굴 재등록 필요"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"얼굴 인식 잠금 해제 문제"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"탭하여 얼굴 모델을 삭제한 후 다시 얼굴을 추가하세요"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"얼굴 인식 잠금 해제 설정"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"휴대전화의 화면을 응시하여 잠금 해제할 수 있습니다."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"다른 잠금 해제 방법 설정"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"지문을 추가하려면 탭하세요."</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"지문 잠금 해제"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"지문 센서를 사용할 수 없음"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"수리업체에 방문하세요."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"너무 어둡습니다. 조명을 밝게 해 보세요."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"거부"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"권한 요청됨"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해\n권한 요청"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정에 대한\n권한을 요청했습니다"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"직장 프로필 외부에서 이 앱을 사용 중입니다."</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"직장 프로필에서 이 앱을 사용 중입니다."</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"입력 방법"</string>
@@ -1946,7 +1949,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"최대화"</string>
     <string name="close_button_text" msgid="10603510034455258">"닫기"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"답변"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"통화"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"동영상"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"거절"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"전화 끊기"</string>

@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -33,6 +34,17 @@ import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
  * Helper class meant to set up the "Learn more" button in the action disabled dialog.
  */
 public abstract class ActionDisabledLearnMoreButtonLauncher {
+
+    public static ResolveActivityChecker DEFAULT_RESOLVE_ACTIVITY_CHECKER =
+            (packageManager, url, userHandle) -> packageManager.resolveActivityAsUser(
+                    createLearnMoreIntent(url),
+                    PackageManager.MATCH_DEFAULT_ONLY,
+                    userHandle.getIdentifier()) != null;
+
+    interface ResolveActivityChecker {
+        boolean canResolveActivityAsUser(
+                PackageManager packageManager, String url, UserHandle userHandle);
+    }
 
     /**
      * Sets up a "learn more" button which shows a screen with device policy settings
@@ -54,11 +66,12 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
     /**
      * Sets up a "learn more" button which launches a help page
      */
-    public final void setupLearnMoreButtonToLaunchHelpPage(Context context, String url) {
+    public final void setupLearnMoreButtonToLaunchHelpPage(
+            Context context, String url, UserHandle userHandle) {
         requireNonNull(context, "context cannot be null");
         requireNonNull(url, "url cannot be null");
 
-        setLearnMoreButton(() -> showHelpPage(context, url));
+        setLearnMoreButton(() -> showHelpPage(context, url, userHandle));
     }
 
     /**
@@ -105,9 +118,17 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
      * Shows the help page using the given {@code url}.
      */
     @VisibleForTesting
-    public void showHelpPage(Context context, String url) {
-        context.startActivityAsUser(createLearnMoreIntent(url), UserHandle.of(context.getUserId()));
+    public void showHelpPage(Context context, String url, UserHandle userHandle) {
+        context.startActivityAsUser(createLearnMoreIntent(url), userHandle);
         finishSelf();
+    }
+
+    protected final boolean canLaunchHelpPage(
+            PackageManager packageManager,
+            String url,
+            UserHandle userHandle,
+            ResolveActivityChecker resolveActivityChecker) {
+        return resolveActivityChecker.canResolveActivityAsUser(packageManager, url, userHandle);
     }
 
     private void showAdminPolicies(Context context, EnforcedAdmin enforcedAdmin) {

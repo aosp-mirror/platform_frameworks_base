@@ -110,6 +110,7 @@ public:
     GrDirectContext* getGrContext() const { return mRenderThread.getGrContext(); }
 
     ASurfaceControl* getSurfaceControl() const { return mSurfaceControl; }
+    int32_t getSurfaceControlGenerationId() const { return mSurfaceControlGenerationId; }
 
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
@@ -159,6 +160,7 @@ public:
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter.get() == nullptr) {
             mFrameMetricsReporter.reset(new FrameMetricsReporter());
         }
@@ -167,10 +169,10 @@ public:
     }
 
     void removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter.get() != nullptr) {
             mFrameMetricsReporter->removeObserver(observer);
             if (!mFrameMetricsReporter->hasObservers()) {
-                std::lock_guard lock(mFrameMetricsReporterMutex);
                 mFrameMetricsReporter.reset(nullptr);
             }
         }
@@ -206,7 +208,7 @@ public:
             ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
-            const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+            const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
         mASurfaceTransactionCallback = callback;
     }
 
@@ -244,6 +246,8 @@ private:
      */
     void reportMetricsWithPresentTime();
 
+    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber);
+
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
     int32_t mLastFrameHeight = 0;
@@ -253,6 +257,9 @@ private:
     // The SurfaceControl reference is passed from ViewRootImpl, can be set to
     // NULL to remove the reference
     ASurfaceControl* mSurfaceControl = nullptr;
+    // id to track surface control changes and WebViewFunctor uses it to determine
+    // whether reparenting is needed
+    int32_t mSurfaceControlGenerationId = 0;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
@@ -301,7 +308,8 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
-    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter
+            GUARDED_BY(mFrameMetricsReporterMutex);
     std::mutex mFrameMetricsReporterMutex;
 
     std::set<RenderNode*> mPrefetchedLayers;
@@ -317,7 +325,7 @@ private:
     // If set to true, we expect that callbacks into onSurfaceStatsAvailable
     bool mExpectSurfaceStats = false;
 
-    std::function<void(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
+    std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
 
     void cleanupResources();

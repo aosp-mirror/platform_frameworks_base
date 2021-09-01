@@ -71,7 +71,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
-import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -103,7 +102,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
 
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationShadeDepthController mDepthController;
     private final SysUiState mSysUiState;
     private final ActivityStarter mActivityStarter;
     private final SysuiColorExtractor mSysuiColorExtractor;
@@ -164,7 +162,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             IActivityManager iActivityManager,
             @Nullable TelecomManager telecomManager,
             MetricsLogger metricsLogger,
-            NotificationShadeDepthController depthController,
             SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -196,7 +193,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 iActivityManager,
                 telecomManager,
                 metricsLogger,
-                depthController,
                 colorExtractor,
                 statusBarService,
                 notificationShadeWindowController,
@@ -212,7 +208,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
 
         mLockPatternUtils = lockPatternUtils;
         mKeyguardStateController = keyguardStateController;
-        mDepthController = depthController;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -267,9 +262,8 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     protected ActionsDialogLite createDialog() {
         initDialogItems();
 
-        mDepthController.setShowingHomeControls(true);
         ActionsDialog dialog = new ActionsDialog(getContext(), mAdapter, mOverflowAdapter,
-                this::getWalletViewController, mDepthController, mSysuiColorExtractor,
+                this::getWalletViewController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 mSysUiState, this::onRotate, isKeyguardShowing(), mPowerAdapter, getEventLogger(),
                 getStatusBar());
@@ -336,16 +330,15 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
 
         ActionsDialog(Context context, MyAdapter adapter, MyOverflowAdapter overflowAdapter,
                 Provider<GlobalActionsPanelPlugin.PanelViewController> walletFactory,
-                NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
                 StatusBar statusBar) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions,
-                    adapter, overflowAdapter, depthController, sysuiColorExtractor,
-                    statusBarService, notificationShadeWindowController, sysuiState,
-                    onRotateCallback, keyguardShowing, powerAdapter, uiEventLogger, null,
+                    adapter, overflowAdapter, sysuiColorExtractor, statusBarService,
+                    notificationShadeWindowController, sysuiState, onRotateCallback,
+                    keyguardShowing, powerAdapter, uiEventLogger, null,
                     statusBar);
             mWalletFactory = walletFactory;
 
@@ -494,8 +487,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 float animatedValue = animation.getAnimatedFraction();
                 int alpha = (int) (animatedValue * mScrimAlpha * 255);
                 mBackgroundDrawable.setAlpha(alpha);
-                mDepthController.updateGlobalDialogVisibility(animatedValue,
-                        mGlobalActionsLayout);
             });
 
             ObjectAnimator xAnimator =

@@ -21,20 +21,16 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.ActivityClient;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
@@ -66,7 +62,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
     private static final int TASK_ID = 1;
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
-    @Mock private IBinder mActivityToken;
+    @Mock private SizeCompatUIController.SizeCompatUICallback mCallback;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private DisplayLayout mDisplayLayout;
     @Mock private SizeCompatRestartButton mButton;
@@ -80,8 +76,9 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mTaskConfig = new Configuration();
 
-        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mContext, new Configuration(),
-                TASK_ID, mActivityToken, mTaskListener, mDisplayLayout, false /* hasShownHint*/);
+        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mCallback, mContext,
+                new Configuration(), TASK_ID, mTaskListener, mDisplayLayout,
+                false /* hasShownHint */);
 
         spyOn(mLayout);
         spyOn(mLayout.mButtonWindowManager);
@@ -145,7 +142,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
         // No diff
         clearInvocations(mLayout);
-        mLayout.updateSizeCompatInfo(mTaskConfig, mActivityToken, mTaskListener,
+        mLayout.updateSizeCompatInfo(mTaskConfig, mTaskListener,
                 false /* isImeShowing */);
 
         verify(mLayout, never()).updateButtonSurfacePosition();
@@ -156,7 +153,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         clearInvocations(mLayout);
         final ShellTaskOrganizer.TaskListener newTaskListener = mock(
                 ShellTaskOrganizer.TaskListener.class);
-        mLayout.updateSizeCompatInfo(mTaskConfig, mActivityToken, newTaskListener,
+        mLayout.updateSizeCompatInfo(mTaskConfig, newTaskListener,
                 false /* isImeShowing */);
 
         verify(mLayout).release();
@@ -166,7 +163,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         clearInvocations(mLayout);
         final Configuration newTaskConfiguration = new Configuration();
         newTaskConfiguration.windowConfiguration.setBounds(new Rect(0, 1000, 0, 2000));
-        mLayout.updateSizeCompatInfo(newTaskConfiguration, mActivityToken, newTaskListener,
+        mLayout.updateSizeCompatInfo(newTaskConfiguration, newTaskListener,
                 false /* isImeShowing */);
 
         verify(mLayout).updateButtonSurfacePosition();
@@ -228,12 +225,9 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testOnRestartButtonClicked() {
-        spyOn(ActivityClient.getInstance());
-        doNothing().when(ActivityClient.getInstance()).restartActivityProcessIfVisible(any());
-
         mLayout.onRestartButtonClicked();
 
-        verify(ActivityClient.getInstance()).restartActivityProcessIfVisible(mActivityToken);
+        verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
     }
 
     @Test

@@ -465,6 +465,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
+    boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
+        return !isActiveRemoteDevice(device);
+    }
+
     private final MediaController.Callback mCb = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {

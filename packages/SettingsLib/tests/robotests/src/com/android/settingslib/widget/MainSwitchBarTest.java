@@ -19,6 +19,7 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -59,13 +60,13 @@ public class MainSwitchBarTest {
     }
 
     @Test
-    public void setTitle_switchShouldHasContentDescription() {
+    public void setTitle_switchShouldNotHasContentDescription() {
         final String title = "title";
 
         mBar.setTitle(title);
 
         final Switch switchObj = mBar.getSwitch();
-        assertThat(switchObj.getContentDescription()).isEqualTo(title);
+        assertThat(TextUtils.isEmpty(switchObj.getContentDescription())).isTrue();
     }
 
     @Test

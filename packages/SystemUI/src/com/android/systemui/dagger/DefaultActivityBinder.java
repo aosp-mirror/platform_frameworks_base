@@ -25,6 +25,7 @@ import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
+import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
@@ -120,4 +121,10 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(SensorUseStartedActivity.class)
     public abstract Activity bindSensorUseStartedActivity(SensorUseStartedActivity activity);
+
+    /** Inject into TvUnblockSensorActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvUnblockSensorActivity.class)
+    public abstract Activity bindTvUnblockSensorActivity(TvUnblockSensorActivity activity);
 }

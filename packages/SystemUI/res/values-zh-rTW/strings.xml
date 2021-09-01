@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"無法辨識臉孔，請改用指紋完成驗證。"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"使用指紋完成驗證才能繼續操作"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"無法辨識指紋，請改用螢幕鎖定完成驗證。"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在尋找你的臉孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"臉孔圖示"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"相容性縮放按鈕。"</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"這麼做可允許所有應用程式和服務使用相機。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"這麼做可允許所有應用程式和服務使用相機或麥克風。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"裝置"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑動即可切換應用程式"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖曳即可快速切換應用程式"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換總覽"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"已充飽"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"充電中"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次輕觸即可開啟"</string>
     <string name="tap_again" msgid="1315420114387908655">"再輕觸一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"按下即可開啟"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑動即可重試"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"如要使用 NFC，請先解鎖"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"這部裝置的擁有者為貴機構"</string>
@@ -480,12 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"移除訪客？"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會遭到刪除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"訪客你好，歡迎回來！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"你要繼續這個工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新開始"</string>
@@ -673,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"完成相關設定之後，就能以更快速安全的方式透過手機消費"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"顯示全部"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"解鎖裝置才能付款"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"未設定"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"新增卡片"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"更新中"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解鎖即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"擷取卡片時發生問題，請稍後再試"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"螢幕鎖定設定"</string>
@@ -1047,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"移到邊緣並隱藏"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"從邊緣移出並顯示"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切換"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"居家控制系統"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">已新增 <xliff:g id="NUMBER_1">%s</xliff:g> 個控制項。</item>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"開放式對話"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"對話小工具"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"輕觸對話即可新增至主畫面"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"等你收到一些訊息後再回來這裡看看"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"最近的對話會顯示在這裡"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"優先對話"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"最近的對話"</string>
     <string name="okay" msgid="6490552955618608554">"確定"</string>
@@ -1148,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"查看最近的訊息、未接來電和狀態更新"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"對話"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>傳送了一則訊息"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"零打擾模式已將通知暫停"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g>傳送了一則訊息：<xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>傳送了一張圖片"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>更新了狀態：<xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"線上"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未設定鬧鐘"</string>

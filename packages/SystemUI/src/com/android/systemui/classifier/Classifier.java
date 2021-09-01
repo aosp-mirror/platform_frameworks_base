@@ -41,7 +41,7 @@ public abstract class Classifier {
     public static final int SHADE_DRAG = 11;
     public static final int QS_COLLAPSE = 12;
     public static final int UDFPS_AUTHENTICATION = 13;
-    public static final int DISABLED_UDFPS_AFFORDANCE = 14;
+    public static final int LOCK_ICON = 14;
     public static final int QS_SWIPE = 15;
     public static final int BACK_GESTURE = 16;
 
@@ -61,7 +61,7 @@ public abstract class Classifier {
             QS_COLLAPSE,
             BRIGHTNESS_SLIDER,
             UDFPS_AUTHENTICATION,
-            DISABLED_UDFPS_AFFORDANCE,
+            LOCK_ICON,
             QS_SWIPE,
             BACK_GESTURE
     })

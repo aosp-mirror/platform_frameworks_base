@@ -146,6 +146,7 @@ cc_library_shared {
                 "android_os_MemoryFile.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
+                "android_os_PerformanceHintManager.cpp",
                 "android_os_SELinux.cpp",
                 "android_os_ServiceManager.cpp",
                 "android_os_SharedMemory.cpp",
@@ -237,7 +238,6 @@ cc_library_shared {
             ],
 
             shared_libs: [
-                "android.hardware.memtrack-V1-ndk_platform",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "av-types-aidl-cpp",

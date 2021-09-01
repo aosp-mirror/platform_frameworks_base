@@ -62,16 +62,15 @@ public class ThumbnailData {
     }
 
     private static Bitmap makeThumbnail(TaskSnapshot snapshot) {
-        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
         Bitmap thumbnail = null;
-        try {
+        try (final HardwareBuffer buffer = snapshot.getHardwareBuffer()) {
             if (buffer != null) {
                 thumbnail = Bitmap.wrapHardwareBuffer(buffer, snapshot.getColorSpace());
             }
         } catch (IllegalArgumentException ex) {
             // TODO(b/157562905): Workaround for a crash when we get a snapshot without this state
             Log.e("ThumbnailData", "Unexpected snapshot without USAGE_GPU_SAMPLED_IMAGE: "
-                    + buffer, ex);
+                    + snapshot.getHardwareBuffer(), ex);
         }
         if (thumbnail == null) {
             Point taskSize = snapshot.getTaskSize();

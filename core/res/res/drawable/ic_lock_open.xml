@@ -14,14 +14,16 @@ Copyright (C) 2019 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="32dp"
-        android:height="32dp"
-        android:viewportWidth="32.0"
-        android:viewportHeight="32.0">
-    <path
-        android:fillColor="#FF000000"
-        android:pathData="M16,20m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0"/>
-    <path
-        android:fillColor="#FF000000"
-        android:pathData="M25.3,1.7c-3.1,0 -5.7,2.5 -5.7,5.7V11H8c-1.3,0 -2.3,1 -2.3,2.3v13.3c0,1.3 1,2.3 2.3,2.3h16c1.3,0 2.3,-1 2.3,-2.3V13.3c0,-1.3 -1,-2.3 -2.3,-2.3h-2.3V7.3c0,-2 1.6,-3.7 3.7,-3.7c2,0 3.7,1.6 3.7,3.7V8h2V7.3C31,4.2 28.5,1.7 25.3,1.7zM24.3,13.3v13.3c0,0.2 -0.1,0.3 -0.3,0.3H8c-0.2,0 -0.3,-0.1 -0.3,-0.3V13.3C7.7,13.1 7.8,13 8,13h16C24.2,13 24.3,13.1 24.3,13.3z"/>
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <group>
+        <clip-path
+            android:pathData="M0,0h32v32h-32z"/>
+        <path
+            android:pathData="M22.25,6.8889C22.25,4.9055 23.9023,3.25 26,3.25C28.0977,3.25 29.75,4.9055 29.75,6.8889V12H32.25V6.8889C32.25,3.4721 29.4251,0.75 26,0.75C22.5749,0.75 19.75,3.4721 19.75,6.8889V10.75H9C7.2051,10.75 5.75,12.2051 5.75,14V26C5.75,27.7949 7.2051,29.25 9,29.25H23C24.7949,29.25 26.25,27.7949 26.25,26V14C26.25,12.2051 24.7949,10.75 23,10.75H22.25V6.8889ZM9,13.25C8.5858,13.25 8.25,13.5858 8.25,14V26C8.25,26.4142 8.5858,26.75 9,26.75H23C23.4142,26.75 23.75,26.4142 23.75,26V14C23.75,13.5858 23.4142,13.25 23,13.25H9ZM16,22C17.1046,22 18,21.1046 18,20C18,18.8954 17.1046,18 16,18C14.8954,18 14,18.8954 14,20C14,21.1046 14.8954,22 16,22Z"
+            android:fillColor="#FF000000"
+            android:fillType="evenOdd"/>
+    </group>
 </vector>

@@ -21,7 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -60,22 +63,23 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
 
+    private FakeSystemClock mClock = new FakeSystemClock();
     private QuickAccessWalletController mController;
-    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTestableLooper = TestableLooper.get(this);
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
+        mClock.setElapsedRealtime(100L);
 
         mController = new QuickAccessWalletController(
                 mContext,
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
-                mQuickAccessWalletClient);
+                mQuickAccessWalletClient,
+                mClock);
     }
 
     @Test
@@ -125,6 +129,23 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void queryWalletCards_avoidStale_recreateClient() {
+        // advance current time by 100 seconds, should not recreate the client.
+        mClock.setElapsedRealtime(100100L);
+
+        mController.queryWalletCards(mCardsRetriever);
+
+        assertSame(mQuickAccessWalletClient, mController.getWalletClient());
+
+        // advance current time by another 501 seconds, should recreate the client.
+        mClock.setElapsedRealtime(601100L);
+
+        mController.queryWalletCards(mCardsRetriever);
+
+        assertNotSame(mQuickAccessWalletClient, mController.getWalletClient());
+    }
+
+    @Test
     public void queryWalletCards_walletEnabled_queryCards() {
         mController.queryWalletCards(mCardsRetriever);
 
@@ -142,5 +163,14 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         assertEquals(
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
                 request.getCardHeightPx());
+    }
+
+    @Test
+    public void queryWalletCards_walletFeatureNotAvailable_noQuery() {
+        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
+
+        mController.queryWalletCards(mCardsRetriever);
+
+        verify(mQuickAccessWalletClient, never()).getWalletCards(any(), any(), any());
     }
 }

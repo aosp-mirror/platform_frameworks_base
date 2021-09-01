@@ -402,6 +402,64 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         assertBoundsInclusionWithMargin("useDefaultBounds", defaultBounds, actualBounds);
     }
 
+    @Test
+    public void adjustNormalBoundsToFitMenu_alreadyFits() {
+        final Rect normalBounds = new Rect(0, 0, 400, 711);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(normalBounds, bounds);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_widthTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 297, 528);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getWidth(), bounds.width());
+        assertEquals(minMenuSize.getWidth() / mPipBoundsState.getAspectRatio(),
+                bounds.height(), 0.3f);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_heightTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 400, 280);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getHeight(), bounds.height());
+        assertEquals(minMenuSize.getHeight() * mPipBoundsState.getAspectRatio(),
+                bounds.width(), 0.3f);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_widthAndHeightTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 350, 280);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getWidth(), bounds.width());
+        assertEquals(minMenuSize.getWidth() / mPipBoundsState.getAspectRatio(),
+                bounds.height(), 0.3f);
+    }
+
     private void overrideDefaultAspectRatio(float aspectRatio) {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(

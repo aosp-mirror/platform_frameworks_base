@@ -109,7 +109,7 @@ final class RotationResolverManagerPerUserService extends
         ensureRemoteServiceInitiated();
 
         // Cancel the previous on-going request.
-        if (mCurrentRequest != null) {
+        if (mCurrentRequest != null && !mCurrentRequest.mIsFulfilled) {
             cancelLocked();
         }
 

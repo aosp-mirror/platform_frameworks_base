@@ -122,16 +122,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return mTaskOrganizer.asBinder();
         }
 
-        void addStartingWindow(Task task, IBinder appToken, int launchTheme,
+        void addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
                 TaskSnapshot taskSnapshot) {
-            final StartingWindowInfo info = task.getStartingWindowInfo();
+            final StartingWindowInfo info = task.getStartingWindowInfo(activity);
             if (launchTheme != 0) {
                 info.splashScreenThemeResId = launchTheme;
             }
             info.mTaskSnapshot = taskSnapshot;
             // make this happen prior than prepare surface
             try {
-                mTaskOrganizer.addStartingWindow(info, appToken);
+                mTaskOrganizer.addStartingWindow(info, activity.token);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Exception sending onTaskStart callback", e);
             }
@@ -197,6 +197,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 ANIMATION_TYPE_STARTING_REVEAL);
                         windowAnimationLeash = adaptor.mAnimationLeash;
                         mainFrame = mainWindow.getRelativeFrame();
+                        t.setPosition(windowAnimationLeash, mainFrame.left, mainFrame.top);
                     }
                 }
             }
@@ -310,9 +311,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             mUid = uid;
         }
 
-        void addStartingWindow(Task t, IBinder appToken, int launchTheme,
+        void addStartingWindow(Task t, ActivityRecord activity, int launchTheme,
                 TaskSnapshot taskSnapshot) {
-            mOrganizer.addStartingWindow(t, appToken, launchTheme, taskSnapshot);
+            mOrganizer.addStartingWindow(t, activity, launchTheme, taskSnapshot);
         }
 
         void removeStartingWindow(Task t, boolean prepareAnimation) {
@@ -546,15 +547,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
     }
 
-    boolean addStartingWindow(Task task, IBinder appToken, int launchTheme,
+    boolean addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
             TaskSnapshot taskSnapshot) {
         final Task rootTask = task.getRootTask();
-        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+        if (rootTask == null || rootTask.mTaskOrganizer == null || activity.mStartingData == null) {
             return false;
         }
         final TaskOrganizerState state =
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.addStartingWindow(task, appToken, launchTheme, taskSnapshot);
+        state.addStartingWindow(task, activity, launchTheme, taskSnapshot);
         return true;
     }
 
@@ -915,6 +916,34 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     mInterceptBackPressedOnRootTasks.add(task.mTaskId);
                 } else {
                     mInterceptBackPressedOnRootTasks.remove(task.mTaskId);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void restartTaskTopActivityProcessIfVisible(WindowContainerToken token) {
+        enforceTaskPermission("restartTopActivityProcessIfVisible()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    Slog.w(TAG, "Could not resolve window from token");
+                    return;
+                }
+                final Task task = wc.asTask();
+                if (task == null) {
+                    Slog.w(TAG, "Could not resolve task from token");
+                    return;
+                }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                        "Restart top activity process of Task taskId=%d", task.mTaskId);
+                final ActivityRecord activity = task.getTopNonFinishingActivity();
+                if (activity != null) {
+                    activity.restartProcessIfVisible();
                 }
             }
         } finally {

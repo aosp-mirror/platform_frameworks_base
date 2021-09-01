@@ -21,14 +21,13 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:paddingHorizontal="8dp"
-    android:orientation="horizontal"
-    android:background="@drawable/settingslib_rounded_background">
+    android:orientation="horizontal">
 
     <Button
         android:id="@+id/button1"
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 
     <View
@@ -43,7 +42,7 @@
         android:id="@+id/button2"
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 
     <View
@@ -58,7 +57,7 @@
         android:id="@+id/button3"
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 
     <View
@@ -73,6 +72,6 @@
         android:id="@+id/button4"
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"/>
 </LinearLayout>

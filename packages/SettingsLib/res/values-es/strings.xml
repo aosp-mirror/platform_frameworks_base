@@ -452,16 +452,16 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Es posible que el tablet se apague pronto (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Es posible que el dispositivo se apague pronto (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> hasta que esté completamente cargada"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> hasta que esté completamente cargada"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> hasta la carga completa"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> hasta la carga completa"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga limitada temporalmente"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rápidamente"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Cargando lentamente"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carga rápida"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carga lenta"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Cargando sin cables"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No se está cargando"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectado, no se carga"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectado pero sin cargar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir la programación de alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación programe alarmas y otras acciones de carácter temporal. Este permite sirve para que la aplicación siga activa en segundo plano, lo que puede usar más batería.\n\nSi este permiso está desactivados, no funcionarán las alarmas ni los eventos con carácter temporal programados por esta aplicación."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación programe alarmas y otras acciones que se llevan a cabo a una hora determinada. Esto hace que la aplicación siga activa en segundo plano, lo que puede usar más batería.\n\nSi este permiso está desactivado, no funcionarán las alarmas ni los eventos que se activan a una hora determinada que programe esta aplicación."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar el modo No molestar"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Restablecer invitado"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invitado"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"¿Restablecer invitado?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restablecer"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Hacer foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Seleccionar una imagen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>

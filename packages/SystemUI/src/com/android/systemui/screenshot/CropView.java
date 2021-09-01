@@ -44,6 +44,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.customview.widget.ExploreByTouchHelper;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -95,7 +96,9 @@ public class CropView extends View {
         TypedArray t = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.CropView, 0, 0);
         mShadePaint = new Paint();
-        mShadePaint.setColor(t.getColor(R.styleable.CropView_scrimColor, Color.TRANSPARENT));
+        int alpha = t.getInteger(R.styleable.CropView_scrimAlpha, 255);
+        int scrimColor = t.getColor(R.styleable.CropView_scrimColor, Color.TRANSPARENT);
+        mShadePaint.setColor(ColorUtils.setAlphaComponent(scrimColor, alpha));
         mContainerBackgroundPaint = new Paint();
         mContainerBackgroundPaint.setColor(t.getColor(R.styleable.CropView_containerBackgroundColor,
                 Color.TRANSPARENT));

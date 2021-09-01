@@ -22,8 +22,7 @@ package {
 
 android_app {
     name: "StatementService",
-    // Removed because Errorprone doesn't work with Kotlin, can fix up in the future
-    // defaults: ["platform_app_defaults"],
+    defaults: ["platform_app_defaults"],
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",

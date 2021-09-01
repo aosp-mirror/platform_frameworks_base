@@ -92,7 +92,7 @@
         android:layout_height="wrap_content"
         app:layout_constrainedWidth="true"
         android:layout_marginTop="@dimen/qs_media_info_spacing"
-        app:layout_constraintTop_toTopOf="@id/center_horizontal_guideline"
+        app:layout_constraintTop_toBottomOf="@id/center_horizontal_guideline"
         app:layout_constraintStart_toStartOf="@id/header_title"
         app:layout_constraintEnd_toStartOf="@id/media_action_barrier"
         app:layout_constraintHorizontal_bias="0"/>
@@ -123,7 +123,7 @@
     <Constraint
         android:id="@+id/action0"
         android:layout_width="48dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:visibility="gone"
@@ -139,7 +139,7 @@
     <Constraint
         android:id="@+id/action1"
         android:layout_width="48dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         app:layout_constraintTop_toBottomOf="@id/center_horizontal_guideline"
@@ -152,7 +152,7 @@
     <Constraint
         android:id="@+id/action2"
         android:layout_width="48dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         app:layout_constraintTop_toBottomOf="@id/center_horizontal_guideline"
@@ -165,7 +165,7 @@
     <Constraint
         android:id="@+id/action3"
         android:layout_width="48dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         app:layout_constraintTop_toBottomOf="@id/center_horizontal_guideline"
@@ -178,7 +178,7 @@
     <Constraint
         android:id="@+id/action4"
         android:layout_width="48dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:visibility="gone"

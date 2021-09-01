@@ -46,6 +46,10 @@ void CanvasOpBuffer::syncContents(const WebViewSyncData& data) {
     LOG_ALWAYS_FATAL("TODO");
 }
 
+void CanvasOpBuffer::onRemovedFromTree() {
+    LOG_ALWAYS_FATAL("TODO");
+}
+
 void CanvasOpBuffer::applyColorTransform(ColorTransform transform) {
     LOG_ALWAYS_FATAL("TODO");
 }

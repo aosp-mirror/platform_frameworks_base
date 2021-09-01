@@ -204,12 +204,27 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     public void testTappableView_profileOwnerOfOrgOwnedDevice_networkLoggingEnabled() {
         when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
         when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(true);
+        when(mSecurityController.hasWorkProfile()).thenReturn(true);
 
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
         assertTrue(mRootView.isClickable());
         assertEquals(View.VISIBLE, mRootView.findViewById(R.id.footer_icon).getVisibility());
+    }
+
+    @Test
+    public void testUntappableView_profileOwnerOfOrgOwnedDevice_workProfileOff() {
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(false);
+
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mRootView.isClickable());
+        assertEquals(View.GONE, mRootView.findViewById(R.id.footer_icon).getVisibility());
     }
 
     @Test
@@ -237,15 +252,27 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNetworkLoggingEnabled_managedProfileOwner() {
+    public void testNetworkLoggingEnabled_managedProfileOwner_workProfileOn() {
         when(mSecurityController.hasWorkProfile()).thenReturn(true);
         when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(true);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(
                 R.string.quick_settings_disclosure_managed_profile_network_activity),
                 mFooterText.getText());
+    }
+
+    @Test
+    public void testNetworkLoggingEnabled_managedProfileOwner_workProfileOff() {
+        when(mSecurityController.hasWorkProfile()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(false);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertEquals("", mFooterText.getText());
     }
 
     @Test
@@ -326,9 +353,10 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWorkProfileCACertsInstalled() {
+    public void testWorkProfileCACertsInstalled_workProfileOn() {
         when(mSecurityController.isDeviceManaged()).thenReturn(false);
         when(mSecurityController.hasCACertInWorkProfile()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(true);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
@@ -347,6 +375,17 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                              R.string.quick_settings_disclosure_named_managed_profile_monitoring,
                              MANAGING_ORGANIZATION),
                      mFooterText.getText());
+    }
+
+    @Test
+    public void testWorkProfileCACertsInstalled_workProfileOff() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(false);
+        when(mSecurityController.hasCACertInWorkProfile()).thenReturn(true);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(false);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertEquals("", mFooterText.getText());
     }
 
     @Test
@@ -375,9 +414,10 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWorkProfileVpnEnabled() {
+    public void testWorkProfileVpnEnabled_workProfileOn() {
         when(mSecurityController.isVpnEnabled()).thenReturn(true);
         when(mSecurityController.getWorkProfileVpnName()).thenReturn(VPN_PACKAGE_2);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(true);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
@@ -386,6 +426,17 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                              R.string.quick_settings_disclosure_managed_profile_named_vpn,
                              VPN_PACKAGE_2),
                      mFooterText.getText());
+    }
+
+    @Test
+    public void testWorkProfileVpnEnabled_workProfileOff() {
+        when(mSecurityController.isVpnEnabled()).thenReturn(true);
+        when(mSecurityController.getWorkProfileVpnName()).thenReturn(VPN_PACKAGE_2);
+        when(mSecurityController.isWorkProfileOn()).thenReturn(false);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertEquals("", mFooterText.getText());
     }
 
     @Test

@@ -72,7 +72,8 @@ public interface DetailAdapter {
     }
 
     /**
-     * @return if detail panel should animate when shown or closed
+     * Indicates whether the detail view wants to animate when shown. This has no affect over the
+     * closing animation. Detail panels will always animate when closed.
      */
     default boolean shouldAnimate() {
         return true;

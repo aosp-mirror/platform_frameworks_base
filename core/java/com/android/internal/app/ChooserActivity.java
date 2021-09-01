@@ -464,8 +464,8 @@ public class ChooserActivity extends ResolverActivity implements
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
         private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
 
-        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 10000;
-        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 3000;
+        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 1000;
+        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 300;
 
         private boolean mMinTimeoutPassed = false;
 
@@ -1186,7 +1186,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         final DisplayResolveInfo dri = new DisplayResolveInfo(
                 originalIntent, ri, getString(R.string.screenshot_edit), "", resolveIntent, null);
-        dri.setDisplayIcon(getDrawable(R.drawable.ic_menu_edit));
+        dri.setDisplayIcon(getDrawable(R.drawable.ic_screenshot_edit));
         return dri;
     }
 
@@ -1269,7 +1269,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_NEARBY,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
@@ -1290,7 +1291,8 @@ public class ChooserActivity extends ResolverActivity implements
                             SELECTION_TYPE_EDIT,
                             "",
                             -1);
-                    safelyStartActivity(ti);
+                    // Action bar is user-independent, always start as primary
+                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
                 }
         );
@@ -2120,10 +2122,10 @@ public class ChooserActivity extends ResolverActivity implements
                     + " resultList.size()=" + resultList.size()
                     + " appTargets.size()=" + appTargets.size());
         }
-
+        Context selectedProfileContext = createContextAsUser(userHandle, 0 /* flags */);
         for (int i = resultList.size() - 1; i >= 0; i--) {
             final String packageName = resultList.get(i).getTargetComponent().getPackageName();
-            if (!isPackageEnabled(packageName)) {
+            if (!isPackageEnabled(selectedProfileContext, packageName)) {
                 resultList.remove(i);
                 if (appTargets != null) {
                     appTargets.remove(i);
@@ -2175,13 +2177,13 @@ public class ChooserActivity extends ResolverActivity implements
         mChooserHandler.sendMessage(msg);
     }
 
-    private boolean isPackageEnabled(String packageName) {
+    private boolean isPackageEnabled(Context context, String packageName) {
         if (TextUtils.isEmpty(packageName)) {
             return false;
         }
         ApplicationInfo appInfo;
         try {
-            appInfo = getPackageManager().getApplicationInfo(packageName, 0);
+            appInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
         } catch (NameNotFoundException e) {
             return false;
         }
@@ -3452,8 +3454,6 @@ public class ChooserActivity extends ResolverActivity implements
 
         private View createProfileView(ViewGroup parent) {
             View profileRow = mLayoutInflater.inflate(R.layout.chooser_profile_row, parent, false);
-            profileRow.setBackground(
-                    getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             mProfileView = profileRow.findViewById(R.id.profile_button);
             mProfileView.setOnClickListener(ChooserActivity.this::onProfileClick);
             updateProfileViewButton();
@@ -3599,10 +3599,6 @@ public class ChooserActivity extends ResolverActivity implements
             final ViewGroup viewGroup = (ViewGroup) holder.itemView;
             int start = getListPosition(position);
             int startType = getRowType(start);
-            if (viewGroup.getForeground() == null && position > 0) {
-                viewGroup.setForeground(
-                        getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
-            }
 
             int columnCount = holder.getColumnCount();
             int end = start + columnCount - 1;

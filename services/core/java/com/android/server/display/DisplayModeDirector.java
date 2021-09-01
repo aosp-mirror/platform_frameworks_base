@@ -52,6 +52,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -153,7 +154,7 @@ public class DisplayModeDirector {
                 updateVoteLocked(displayId, priority, vote);
             }
         };
-        mSensorObserver = new SensorObserver(context, ballotBox);
+        mSensorObserver = new SensorObserver(context, ballotBox, injector);
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
@@ -913,10 +914,12 @@ public class DisplayModeDirector {
         // It votes [MIN_REFRESH_RATE, Float.POSITIVE_INFINITY]
         public static final int PRIORITY_USER_SETTING_MIN_REFRESH_RATE = 2;
 
-        // APP_REQUEST_MAX_REFRESH_RATE is used to for internal apps to limit the refresh
+        // APP_REQUEST_REFRESH_RATE_RANGE is used to for internal apps to limit the refresh
         // rate in certain cases, mostly to preserve power.
-        // It votes to [0, APP_REQUEST_MAX_REFRESH_RATE].
-        public static final int PRIORITY_APP_REQUEST_MAX_REFRESH_RATE = 3;
+        // @see android.view.WindowManager.LayoutParams#preferredMinRefreshRate
+        // @see android.view.WindowManager.LayoutParams#preferredMaxRefreshRate
+        // It votes to [preferredMinRefreshRate, preferredMaxRefreshRate].
+        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE = 3;
 
         // We split the app request into different priorities in case we can satisfy one desire
         // without the other.
@@ -967,7 +970,7 @@ public class DisplayModeDirector {
         // The cutoff for the app request refresh rate range. Votes with priorities lower than this
         // value will not be considered when constructing the app request refresh rate range.
         public static final int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
-                PRIORITY_APP_REQUEST_MAX_REFRESH_RATE;
+                PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE;
 
         /**
          * A value signifying an invalid width or height in a vote.
@@ -1035,8 +1038,8 @@ public class DisplayModeDirector {
             switch (priority) {
                 case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:
                     return "PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE";
-                case PRIORITY_APP_REQUEST_MAX_REFRESH_RATE:
-                    return "PRIORITY_APP_REQUEST_MAX_REFRESH_RATE";
+                case PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE:
+                    return "PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE";
                 case PRIORITY_APP_REQUEST_SIZE:
                     return "PRIORITY_APP_REQUEST_SIZE";
                 case PRIORITY_DEFAULT_REFRESH_RATE:
@@ -1233,17 +1236,19 @@ public class DisplayModeDirector {
 
     final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
-        private final SparseArray<Float> mAppPreferredMaxRefreshRateByDisplay;
+        private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
 
         AppRequestObserver() {
             mAppRequestedModeByDisplay = new SparseArray<>();
-            mAppPreferredMaxRefreshRateByDisplay = new SparseArray<>();
+            mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
         }
 
-        public void setAppRequest(int displayId, int modeId, float requestedMaxRefreshRate) {
+        public void setAppRequest(int displayId, int modeId, float requestedMinRefreshRateRange,
+                float requestedMaxRefreshRateRange) {
             synchronized (mLock) {
                 setAppRequestedModeLocked(displayId, modeId);
-                setAppPreferredMaxRefreshRateLocked(displayId, requestedMaxRefreshRate);
+                setAppPreferredRefreshRateRangeLocked(displayId, requestedMinRefreshRateRange,
+                        requestedMaxRefreshRateRange);
             }
         }
 
@@ -1272,26 +1277,36 @@ public class DisplayModeDirector {
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
         }
 
-        private void setAppPreferredMaxRefreshRateLocked(int displayId,
-                float requestedMaxRefreshRate) {
+        private void setAppPreferredRefreshRateRangeLocked(int displayId,
+                float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
             final Vote vote;
-            final Float requestedMaxRefreshRateVote =
-                    requestedMaxRefreshRate > 0
-                            ? new Float(requestedMaxRefreshRate) : null;
-            if (Objects.equals(requestedMaxRefreshRateVote,
-                    mAppPreferredMaxRefreshRateByDisplay.get(displayId))) {
+
+            RefreshRateRange refreshRateRange = null;
+            if (requestedMinRefreshRateRange > 0 || requestedMaxRefreshRateRange > 0) {
+                float min = requestedMinRefreshRateRange;
+                float max = requestedMaxRefreshRateRange > 0
+                        ? requestedMaxRefreshRateRange : Float.POSITIVE_INFINITY;
+                refreshRateRange = new RefreshRateRange(min, max);
+                if (refreshRateRange.min == 0 && refreshRateRange.max == 0) {
+                    // requestedMinRefreshRateRange/requestedMaxRefreshRateRange were invalid
+                    refreshRateRange = null;
+                }
+            }
+
+            if (Objects.equals(refreshRateRange,
+                    mAppPreferredRefreshRateRangeByDisplay.get(displayId))) {
                 return;
             }
 
-            if (requestedMaxRefreshRate > 0) {
-                mAppPreferredMaxRefreshRateByDisplay.put(displayId, requestedMaxRefreshRateVote);
-                vote = Vote.forRefreshRates(0, requestedMaxRefreshRate);
+            if (refreshRateRange != null) {
+                mAppPreferredRefreshRateRangeByDisplay.put(displayId, refreshRateRange);
+                vote = Vote.forRefreshRates(refreshRateRange.min, refreshRateRange.max);
             } else {
-                mAppPreferredMaxRefreshRateByDisplay.remove(displayId);
+                mAppPreferredRefreshRateRangeByDisplay.remove(displayId);
                 vote = null;
             }
             synchronized (mLock) {
-                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE, vote);
+                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE_RANGE, vote);
             }
         }
 
@@ -1316,11 +1331,12 @@ public class DisplayModeDirector {
                 final Display.Mode mode = mAppRequestedModeByDisplay.valueAt(i);
                 pw.println("    " + id + " -> " + mode);
             }
-            pw.println("    mAppPreferredMaxRefreshRateByDisplay:");
-            for (int i = 0; i < mAppPreferredMaxRefreshRateByDisplay.size(); i++) {
-                final int id = mAppPreferredMaxRefreshRateByDisplay.keyAt(i);
-                final Float refreshRate = mAppPreferredMaxRefreshRateByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + refreshRate);
+            pw.println("    mAppPreferredRefreshRateRangeByDisplay:");
+            for (int i = 0; i < mAppPreferredRefreshRateRangeByDisplay.size(); i++) {
+                final int id = mAppPreferredRefreshRateRangeByDisplay.keyAt(i);
+                final RefreshRateRange refreshRateRange =
+                        mAppPreferredRefreshRateRangeByDisplay.valueAt(i);
+                pw.println("    " + id + " -> " + refreshRateRange);
             }
         }
     }
@@ -2112,27 +2128,36 @@ public class DisplayModeDirector {
         }
     }
 
-    private static class SensorObserver implements ProximityActiveListener {
-        private static final String PROXIMITY_SENSOR_NAME = null;
-        private static final String PROXIMITY_SENSOR_TYPE = Sensor.STRING_TYPE_PROXIMITY;
+    private static final class SensorObserver implements ProximityActiveListener,
+            DisplayManager.DisplayListener {
+        private final String mProximitySensorName = null;
+        private final String mProximitySensorType = Sensor.STRING_TYPE_PROXIMITY;
 
         private final BallotBox mBallotBox;
         private final Context mContext;
+        private final Injector mInjector;
+        @GuardedBy("mSensorObserverLock")
+        private final SparseBooleanArray mDozeStateByDisplay = new SparseBooleanArray();
+        private final Object mSensorObserverLock = new Object();
 
         private DisplayManager mDisplayManager;
         private DisplayManagerInternal mDisplayManagerInternal;
+        @GuardedBy("mSensorObserverLock")
         private boolean mIsProxActive = false;
 
-        SensorObserver(Context context, BallotBox ballotBox) {
+        SensorObserver(Context context, BallotBox ballotBox, Injector injector) {
             mContext = context;
             mBallotBox = ballotBox;
+            mInjector = injector;
         }
 
         @Override
         public void onProximityActive(boolean isActive) {
-            if (mIsProxActive != isActive) {
-                mIsProxActive = isActive;
-                recalculateVotes();
+            synchronized (mSensorObserverLock) {
+                if (mIsProxActive != isActive) {
+                    mIsProxActive = isActive;
+                    recalculateVotesLocked();
+                }
             }
         }
 
@@ -2143,17 +2168,27 @@ public class DisplayModeDirector {
             final SensorManagerInternal sensorManager =
                     LocalServices.getService(SensorManagerInternal.class);
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
+
+            synchronized (mSensorObserverLock) {
+                for (Display d : mDisplayManager.getDisplays()) {
+                    mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
+                }
+            }
+            mInjector.registerDisplayListener(this, BackgroundThread.getHandler(),
+                    DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
         }
 
-        private void recalculateVotes() {
+        private void recalculateVotesLocked() {
             final Display[] displays = mDisplayManager.getDisplays();
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
-                if (mIsProxActive) {
+                if (mIsProxActive && !mDozeStateByDisplay.get(displayId)) {
                     final RefreshRateRange rate =
                             mDisplayManagerInternal.getRefreshRateForDisplayAndSensor(
-                                    displayId, PROXIMITY_SENSOR_NAME, PROXIMITY_SENSOR_TYPE);
+                                    displayId, mProximitySensorName, mProximitySensorType);
                     if (rate != null) {
                         vote = Vote.forRefreshRates(rate.min, rate.max);
                     }
@@ -2164,7 +2199,44 @@ public class DisplayModeDirector {
 
         void dumpLocked(PrintWriter pw) {
             pw.println("  SensorObserver");
-            pw.println("    mIsProxActive=" + mIsProxActive);
+            synchronized (mSensorObserverLock) {
+                pw.println("    mIsProxActive=" + mIsProxActive);
+                pw.println("    mDozeStateByDisplay:");
+                for (int i = 0; i < mDozeStateByDisplay.size(); i++) {
+                    final int id = mDozeStateByDisplay.keyAt(i);
+                    final boolean dozed = mDozeStateByDisplay.valueAt(i);
+                    pw.println("      " + id + " -> " + dozed);
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            boolean isDozeState = mInjector.isDozeState(mDisplayManager.getDisplay(displayId));
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.put(displayId, isDozeState);
+                recalculateVotesLocked();
+            }
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            boolean wasDozeState = mDozeStateByDisplay.get(displayId);
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.put(displayId,
+                        mInjector.isDozeState(mDisplayManager.getDisplay(displayId)));
+                if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
+                    recalculateVotesLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            synchronized (mSensorObserverLock) {
+                mDozeStateByDisplay.delete(displayId);
+                recalculateVotesLocked();
+            }
         }
     }
 
@@ -2396,6 +2468,8 @@ public class DisplayModeDirector {
                 Handler handler, long flags);
 
         BrightnessInfo getBrightnessInfo(int displayId);
+
+        boolean isDozeState(Display d);
     }
 
     @VisibleForTesting
@@ -2446,6 +2520,14 @@ public class DisplayModeDirector {
                 return display.getBrightnessInfo();
             }
             return null;
+        }
+
+        @Override
+        public boolean isDozeState(Display d) {
+            if (d == null) {
+                return false;
+            }
+            return Display.isDozeState(d.getState());
         }
 
         private DisplayManager getDisplayManager() {

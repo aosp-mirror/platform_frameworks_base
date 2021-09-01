@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не се препознава ликот. Користете отпечаток."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Употребете го отпечатокот за да продолжите"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Не се препознава отпечатокот. Користете заклучување екран."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Ве бараме вас…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Икона за лице"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Копче за компатибилност на зум."</string>
@@ -243,7 +245,7 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
-    <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Известувањето е отфрлено."</string>
+    <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Известувањето е отфрлено"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панел за известување"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брзи поставки."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучи екран."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата или микрофонот."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Уред"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Повлечете нагоре за да се префрлите од една на друга апликација"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Повлечете надесно за брзо префрлање меѓу апликациите"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Вклучи/исклучи преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Наполнета"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Се полни"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="tap_again" msgid="1315420114387908655">"Допрете повторно"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Притиснете за да отворите"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отклучете за да користите NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Уредов е во сопственост на организацијата"</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Додај корисник"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов корисник"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се отстрани гостинот?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Да се ресетира гостинот?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Отстрани"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Ресетирај"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Поставете за да купувате побрзо и побезбедно преку вашиот телефон"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Прикажи ги сите"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отклучете за да платите"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не е поставено"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Додајте картичка"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Се ажурира"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отклучете за да користите"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Имаше проблем при преземањето на картичките. Обидете се повторно подоцна"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Поставки за заклучен екран"</string>
@@ -736,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволете системот да определи дали известувањево треба да испушти звук или да вибрира"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; поставено на „Стандардно“"</string>
@@ -745,8 +745,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; рангирано пониско"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, ја прекинува „Не вознемирувај“"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, ја прекинува „Не вознемирувај“"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, го прекинува „Не вознемирувај“"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, го прекинува „Не вознемирувај“"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и сокриј"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести над работ и прикажи"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"вклучување/исклучување"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Контроли за домот"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за уредите"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација за да додадете контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Додадена е <xliff:g id="NUMBER_1">%s</xliff:g> контрола.</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Вратете се тука кога ќе добиете пораки"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Вашите неодамнешни разговори ќе се прикажуваат тука"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетни разговори"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Неодамнешни разговори"</string>
     <string name="okay" msgid="6490552955618608554">"Во ред"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Видете ги неодамнешните пораки, пропуштени повици и промени на статусот"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> испрати порака"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Паузирано од „Не вознемирувај“"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> испрати порака: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> испрати слика"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> има ажурирање на статусот: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Достапен"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Допрете за повеќе информации"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Не е поставен аларм"</string>

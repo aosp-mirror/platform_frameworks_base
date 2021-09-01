@@ -158,21 +158,21 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Slutför genom att trycka på Bekräfta"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentiserad"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Använd pinkod"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd grafiskt lösenord"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Använd mönster"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Använd lösenord"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Fel pinkod"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel grafiskt lösenord"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Fel mönster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Fel lösenord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"För många felaktiga försök.\nFörsök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Försök igen. Försök <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> av <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Din data raderas."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Enhetens data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Enhetens data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Enhetens data raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Användaren raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Användaren raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Den här användaren raderas om du anger fel lösenord vid nästa försök."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du anger fel grafiskt lösenord vid nästa försök."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Jobbprofilen och dess data raderas om du ritar fel mönster vid nästa försök."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jobbprofilen och dess data raderas om du anger fel pinkod vid nästa försök."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Din jobbprofil och dess data raderas om du anger fel lösenord vid nästa försök."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"För många felaktiga försök. Enhetens data raderas."</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Fortsätt med hjälp av ditt fingeravtryck"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingeravtrycket kändes inte igen. Använd låsskärmen i stället."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Håller utkik efter dig …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ansiktsikon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Knapp för kompatibilitetszoom."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran eller mikrofonen."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Enhet"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Byt appar genom att svepa uppåt"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktivera och inaktivera översikten"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Laddar"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryck igen för att öppna"</string>
     <string name="tap_again" msgid="1315420114387908655">"Tryck igen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Tryck för att öppna"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Vill du återställa gästsessionen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Återställ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka som gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lägg till en betalningsmetod för att betala snabbare och säkrare med telefonen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Visa alla"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lås upp för att betala"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Har inte konfigurerats"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Lägg till ett kort"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Uppdaterar"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås upp för att använda"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det gick inte att hämta dina kort. Försök igen senare."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Inställningar för låsskärm"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Flytta till kanten och dölj"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Flytta från kanten och visa"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"aktivera och inaktivera"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Hemstyrning"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyrning"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Välj en app om du vill lägga till snabbkontroller"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller har lagts till.</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Konversationswidgetar"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryck på en konversation för att lägga till den på startskärmen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Besök den här sidan igen när du har fått meddelanden"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"De senaste konversationerna visas här"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterade konversationer"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Senaste konversationerna"</string>
     <string name="okay" msgid="6490552955618608554">"Okej"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"över <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se de senaste meddelandena, missade samtal och statusuppdateringar"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konversation"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> skickade ett meddelande"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pausad av Stör ej"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> skickade ett meddelande: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> skickade en bild"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> har gjort en statusuppdatering: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Tillgänglig"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Inget inställt alarm"</string>

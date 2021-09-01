@@ -19,7 +19,6 @@ package android.content.pm.parsing.component;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Pair;
 
 import com.android.internal.util.Parcelling;
@@ -166,19 +165,6 @@ public final class ParsedIntentInfo extends IntentFilter {
                 + Integer.toHexString(System.identityHashCode(this))
                 + '}';
     }
-
-    public static final Parcelable.Creator<ParsedIntentInfo> CREATOR =
-            new Parcelable.Creator<ParsedIntentInfo>() {
-                @Override
-                public ParsedIntentInfo createFromParcel(Parcel source) {
-                    return new ParsedIntentInfo(source);
-                }
-
-                @Override
-                public ParsedIntentInfo[] newArray(int size) {
-                    return new ParsedIntentInfo[size];
-                }
-            };
 
     public boolean isHasDefault() {
         return hasDefault;

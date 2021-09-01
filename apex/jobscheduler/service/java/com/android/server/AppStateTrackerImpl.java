@@ -60,10 +60,8 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Class to keep track of the information related to "force app standby", which includes:
@@ -162,44 +160,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
     @GuardedBy("mLock")
     boolean mForcedAppStandbyEnabled;
 
-    /**
-     * A lock-free set of (uid, packageName) pairs in forced app standby mode.
-     *
-     * <p>
-     * It's bascially shadowing the {@link #mRunAnyRestrictedPackages} together with
-     * the {@link #mForcedAppStandbyEnabled} and the {@link #mForceAllAppsStandby} - mutations on
-     * them would result in copy-on-write.
-     *
-     * Note: when {@link #mForcedAppStandbyEnabled} is {@code false}, it'll be set to an empty set.
-     *       when {@link #mForceAllAppsStandby} is {@code true}, it'll be set to null;
-     * </p>
-     */
-    volatile Set<Pair<Integer, String>> mForcedAppStandbyUidPackages = Collections.emptySet();
-
     @Override
-    public void addForcedAppStandbyListener(@NonNull ForcedAppStandbyListener listener) {
+    public void addServiceStateListener(@NonNull ServiceStateListener listener) {
         addListener(new Listener() {
             @Override
-            public void updateForceAppStandbyForUidPackage(int uid, String packageName,
-                    boolean standby) {
-                listener.updateForceAppStandbyForUidPackage(uid, packageName, standby);
-            }
-
-            @Override
-            public void updateForcedAppStandbyForAllApps() {
-                listener.updateForcedAppStandbyForAllApps();
+            public void stopForegroundServicesForUidPackage(int uid, String packageName) {
+                listener.stopForegroundServicesForUidPackage(uid, packageName);
             }
         });
-    }
-
-    @Override
-    public boolean isAppInForcedAppStandby(int uid, @NonNull String packageName) {
-        final Set<Pair<Integer, String>> fasUidPkgs = mForcedAppStandbyUidPackages;
-        if (fasUidPkgs == null) {
-            // Meaning the mForceAllAppsStandby is true.
-            return true;
-        }
-        return fasUidPkgs.contains(Pair.create(uid, packageName));
     }
 
     interface Stats {
@@ -265,7 +233,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         return;
                     }
                     mForcedAppStandbyEnabled = enabled;
-                    updateForcedAppStandbyUidPackagesLocked();
                     if (DEBUG) {
                         Slog.d(TAG, "Forced app standby feature flag changed: "
                                 + mForcedAppStandbyEnabled);
@@ -310,11 +277,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             if (!sender.isRunAnyInBackgroundAppOpsAllowed(uid, packageName)) {
                 Slog.v(TAG, "Package " + packageName + "/" + uid
                         + " toggled into fg service restriction");
-                updateForceAppStandbyForUidPackage(uid, packageName, true);
-            } else {
-                Slog.v(TAG, "Package " + packageName + "/" + uid
-                        + " toggled out of fg service restriction");
-                updateForceAppStandbyForUidPackage(uid, packageName, false);
+                stopForegroundServicesForUidPackage(uid, packageName);
             }
         }
 
@@ -379,7 +342,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private void onForceAllAppsStandbyChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
             updateAllAlarms();
-            updateForcedAppStandbyForAllApps();
         }
 
         /**
@@ -404,17 +366,10 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         /**
-         * Called when an app goes in/out of forced app standby.
+         * Called when an app goes into forced app standby and its foreground
+         * services need to be removed from that state.
          */
-        public void updateForceAppStandbyForUidPackage(int uid, String packageName,
-                boolean standby) {
-        }
-
-        /**
-         * Called when all apps' forced-app-standby states need to be re-evaluated due to changes of
-         * feature flags such as {@link #mForcedAppStandbyEnabled} or {@link #mForceAllAppsStandby}.
-         */
-        public void updateForcedAppStandbyForAllApps() {
+        public void stopForegroundServicesForUidPackage(int uid, String packageName) {
         }
 
         /**
@@ -483,12 +438,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                         // No need to notify for state change as all the alarms and jobs should be
                         // removed too.
-                        synchronized (mLock) {
-                            mExemptedBucketPackages.remove(userId, pkgName);
-                            mRunAnyRestrictedPackages.remove(Pair.create(uid, pkgName));
-                            updateForcedAppStandbyUidPackagesLocked();
-                            mActiveUids.delete(uid);
-                        }
+                        mExemptedBucketPackages.remove(userId, pkgName);
+                        mRunAnyRestrictedPackages.remove(Pair.create(uid, pkgName));
+                        mActiveUids.delete(uid);
                     }
                     break;
             }
@@ -628,29 +580,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 }
             }
         }
-        updateForcedAppStandbyUidPackagesLocked();
-    }
-
-    /**
-     * Update the {@link #mForcedAppStandbyUidPackages} upon mutations on
-     * {@link #mRunAnyRestrictedPackages}, {@link #mForcedAppStandbyEnabled} or
-     * {@link #mForceAllAppsStandby}.
-     */
-    @GuardedBy("mLock")
-    private void updateForcedAppStandbyUidPackagesLocked() {
-        if (!mForcedAppStandbyEnabled) {
-            mForcedAppStandbyUidPackages = Collections.emptySet();
-            return;
-        }
-        if (mForceAllAppsStandby) {
-            mForcedAppStandbyUidPackages = null;
-            return;
-        }
-        Set<Pair<Integer, String>> fasUidPkgs = new ArraySet<>();
-        for (int i = 0, size = mRunAnyRestrictedPackages.size(); i < size; i++) {
-            fasUidPkgs.add(mRunAnyRestrictedPackages.valueAt(i));
-        }
-        mForcedAppStandbyUidPackages = Collections.unmodifiableSet(fasUidPkgs);
     }
 
     private void updateForceAllAppStandbyState() {
@@ -672,7 +601,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
             return;
         }
         mForceAllAppsStandby = enable;
-        updateForcedAppStandbyUidPackagesLocked();
 
         mHandler.notifyForceAllAppsStandbyChanged();
     }
@@ -717,7 +645,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         } else {
             mRunAnyRestrictedPackages.removeAt(index);
         }
-        updateForcedAppStandbyUidPackagesLocked();
         return true;
     }
 
@@ -969,7 +896,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         if (unblockAlarms) {
                             l.unblockAllUnrestrictedAlarms();
                         }
-                        l.updateForcedAppStandbyForAllApps();
                     }
                     mStatLogger.logDurationStat(
                             Stats.FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED, start);
@@ -1040,7 +966,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     mRunAnyRestrictedPackages.removeAt(i);
                 }
             }
-            updateForcedAppStandbyUidPackagesLocked();
             cleanUpArrayForUser(mActiveUids, removedUserId);
             mExemptedBucketPackages.remove(removedUserId);
         }

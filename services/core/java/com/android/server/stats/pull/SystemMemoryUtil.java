@@ -28,7 +28,7 @@ final class SystemMemoryUtil {
     static Metrics getMetrics() {
         int totalIonKb = (int) Debug.getDmabufHeapTotalExportedKb();
         int gpuTotalUsageKb = (int) Debug.getGpuTotalUsageKb();
-        int gpuDmaBufUsageKb = (int) Debug.getGpuDmaBufUsageKb();
+        int gpuPrivateAllocationsKb = (int) Debug.getGpuPrivateMemoryKb();
         int dmaBufTotalExportedKb = (int) Debug.getDmabufTotalExportedKb();
 
         long[] mInfos = new long[Debug.MEMINFO_COUNT];
@@ -58,10 +58,6 @@ final class SystemMemoryUtil {
             accountedKb += mInfos[Debug.MEMINFO_KERNEL_STACK];
         }
 
-        int gpuPrivateAllocationsKb = -1;
-        if (gpuTotalUsageKb >= 0 && gpuDmaBufUsageKb >= 0) {
-            gpuPrivateAllocationsKb = gpuTotalUsageKb - gpuDmaBufUsageKb;
-        }
         // If we can distinguish gpu private allocs it means the dmabuf metrics
         // are supported already.
         if (dmaBufTotalExportedKb >= 0 && gpuPrivateAllocationsKb >= 0) {

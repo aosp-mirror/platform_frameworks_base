@@ -387,6 +387,13 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * <p>This mode makes sense for things that will be explicitly started
      * and stopped to run for arbitrary periods of time, such as a service
      * performing background music playback.
+     *
+     * <p>Since Android version {@link Build.VERSION_CODES#S}, apps
+     * targeting {@link Build.VERSION_CODES#S} or above are disallowed
+     * to start a foreground service from the background, but the restriction
+     * doesn't impact <em>restarts</em> of a sticky foreground service. However,
+     * when apps start a sticky foreground service from the background,
+     * the same restriction still applies.
      */
     public static final int START_STICKY = 1;
     

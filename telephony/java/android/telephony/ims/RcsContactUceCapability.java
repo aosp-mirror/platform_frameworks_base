@@ -331,7 +331,7 @@ public final class RcsContactUceCapability implements Parcelable {
             return null;
         }
         for (RcsContactPresenceTuple tuple : mPresenceTuples) {
-            if (tuple.getServiceId().equals(serviceId)) {
+            if (tuple.getServiceId() != null && tuple.getServiceId().equals(serviceId)) {
                 return tuple;
             }
         }

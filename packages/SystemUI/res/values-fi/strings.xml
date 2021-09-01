@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kasvoja ei voi tunnistaa. Käytä sormenjälkeä."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Jatka sormenjäljen avulla"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Sormenjälkeä ei voi tunnistaa. Käytä sen sijaan näytön lukitusta."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Etsitään kasvoja…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Kasvokuvake"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Yhteensopivuuszoomaus-painike."</string>
@@ -431,10 +433,8 @@
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kumotaanko laitteen kameran ja mikrofonin esto?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää mikrofoniasi."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tämä kumoaa kaikkien sellaisten sovellusten ja palveluiden eston, joilla on lupa käyttää kameraasi tai mikrofoniasi."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tämä kumoaa eston kaikkien sellaisten sovellusten ja palveluiden osalta, joilla on lupa käyttää kameraasi tai mikrofoniasi."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Laite"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Vaihda sovellusta pyyhkäisemällä ylös"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Vaihda sovellusta nopeasti vetämällä oikealle"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Näytä/piilota viimeisimmät"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Ladattu"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Ladataan"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Avaa napauttamalla uudelleen"</string>
     <string name="tap_again" msgid="1315420114387908655">"Napauta uudelleen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Avaa pyyhkäisemällä ylös"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Avaa painamalla"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Organisaatiosi omistaa tämän laitteen"</string>
@@ -480,12 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Lisää käyttäjä"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Uusi käyttäjä"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Poistetaaanko vieras?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Kaikki sovellukset ja tämän istunnon tiedot poistetaan."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Poista"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Tervetuloa takaisin!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Haluatko jatkaa istuntoa?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Aloita alusta"</string>
@@ -673,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lisää maksutapa, niin voit maksaa nopeasti ja turvallisesti puhelimella"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Näytä kaikki"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Avaa lukitus ja maksa"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ei otettu käyttöön"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Lisää kortti"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Päivitetään"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Avaa lukitus ja käytä"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Korttien noutamisessa oli ongelma, yritä myöhemmin uudelleen"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lukitusnäytön asetukset"</string>
@@ -1047,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Siirrä reunaan ja piilota"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Siirrä pois reunasta ja näytä"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"vaihda"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Kodin ohjaus"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Laitteiden hallinta"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valitse sovellus lisätäksesi säätimiä"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> säädintä lisätty</item>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Avaa keskustelu"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Keskusteluwidgetit"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Lisää keskustelu aloitusnäytölle napauttamalla sitä"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Palaa taas tänne, kun olet saanut viestejä"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Viimeaikaiset keskustelusi näkyvät täällä"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Tärkeät keskustelut"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Uusimmat keskustelut"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1148,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Yli <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Katso viimeaikaiset viestit, vastaamattomat puhelut ja tilapäivitykset"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Keskustelu"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> lähetti viestin"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Älä häiritse ‑tilan keskeyttämä"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> lähetti viestin: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> lähetti kuvan"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> on päivittänyt tilansa: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Saatavilla"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ongelma akkumittarin lukemisessa"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Saat lisätietoja napauttamalla"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ei herätyksiä"</string>

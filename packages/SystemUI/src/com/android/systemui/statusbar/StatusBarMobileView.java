@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.FeatureFlagUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,13 +59,21 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     private int mVisibleState = -1;
     private DualToneHandler mDualToneHandler;
     private boolean mForceHidden;
+    private boolean mProviderModel;
 
-    public static StatusBarMobileView fromContext(Context context, String slot) {
+    /**
+     * Designated constructor
+     */
+    public static StatusBarMobileView fromContext(
+            Context context,
+            String slot,
+            boolean providerModel
+    ) {
         LayoutInflater inflater = LayoutInflater.from(context);
         StatusBarMobileView v = (StatusBarMobileView)
                 inflater.inflate(R.layout.status_bar_mobile_signal_group, null);
         v.setSlot(slot);
-        v.init();
+        v.init(providerModel);
         v.setVisibleState(STATE_ICON);
         return v;
     }
@@ -99,12 +106,13 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         outRect.bottom += translationY;
     }
 
-    private void init() {
+    private void init(boolean providerModel) {
+        mProviderModel = providerModel;
         mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_group);
         mMobile = findViewById(R.id.mobile_signal);
         mMobileType = findViewById(R.id.mobile_type);
-        if (FeatureFlagUtils.isEnabled(getContext(), FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+        if (mProviderModel) {
             mMobileRoaming = findViewById(R.id.mobile_roaming_large);
         } else {
             mMobileRoaming = findViewById(R.id.mobile_roaming);

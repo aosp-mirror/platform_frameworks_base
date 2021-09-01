@@ -63,6 +63,7 @@ import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.view.CrossWindowBlurListeners;
 import android.view.IWindowManager;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -136,6 +137,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DevicePolicyManager provideDevicePolicyManager(Context context) {
         return context.getSystemService(DevicePolicyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static CrossWindowBlurListeners provideCrossWindowBlurListeners() {
+        return CrossWindowBlurListeners.getInstance();
     }
 
     @Provides

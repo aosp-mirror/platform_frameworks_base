@@ -57,7 +57,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -99,7 +98,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private TrustManager mTrustManager;
     @Mock private IActivityManager mActivityManager;
     @Mock private MetricsLogger mMetricsLogger;
-    @Mock private NotificationShadeDepthController mDepthController;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private IStatusBarService mStatusBarService;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
@@ -147,7 +145,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mActivityManager,
                 null,
                 mMetricsLogger,
-                mDepthController,
                 mColorExtractor,
                 mStatusBarService,
                 mNotificationShadeWindowController,

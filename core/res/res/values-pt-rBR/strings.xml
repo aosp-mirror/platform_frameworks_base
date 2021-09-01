@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Serviço de GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serviço de notificações do sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serviço de crepúsculo"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de fuso horário (sem conectividade)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviço de atualização de horário do Sistema Global de Navegação por Satélites (GNSS, na sigla em inglês)"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serviço de gerenciamento do reconhecimento de música"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seu dispositivo será limpo"</string>
@@ -305,7 +304,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Local"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acesse o local do dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que o app expanda ou recolha a barra de status."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"exibir notificações como atividades em tela cheia em um dispositivo bloqueado"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permite que o app exiba notificações como atividades em tela cheia em um dispositivo bloqueado"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar atalhos"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que um app adicione atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atalhos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que o app remova atalhos da tela inicial sem a intervenção do usuário."</string>
@@ -438,9 +437,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acessar localização precisa apenas em primeiro plano"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar seu local exato por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar sua localização exata com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acessar local aproximado apenas em primeiro plano"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar seu local aproximado por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar sua localização aproximada com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acessar a localização em segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esse app poderá acessar o local a qualquer momento, mesmo quando não estiver sendo usado."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"alterar as suas configurações de áudio"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Use outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impressão digital autenticada"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registrada."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem um sensor de impressão digital."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor desativado temporariamente."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não foi possível usar o sensor de impressão digital. Entre em contato com uma assistência técnica"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar impressão digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar impressão digital ou bloqueio de tela"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícone de impressão digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueio facial"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registre seu rosto novamente"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para melhorar o reconhecimento, registre seu rosto novamente"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o desbloqueio facial"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema com o Desbloqueio facial"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para excluir seu modelo de rosto e crie um novo"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o Desbloqueio facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o smartphone olhando para ele"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear a tela"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Não foi possível usar o sensor de impressão digital"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Entre em contato com uma assistência técnica."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Dados precisos não capturados. Tente novamente."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Muito iluminado. Diminua a iluminação."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Muito escuro. Use uma iluminação mais clara."</string>
@@ -641,7 +643,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Impossível verificar rosto. Hardware indisponível."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Tente usar o desbloqueio facial novamente"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Tente usar o Desbloqueio facial novamente"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Não é possível salvar dados faciais. Exclua dados antigos."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operação facial cancelada."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Desbloqueio facial cancelado pelo usuário"</string>
@@ -649,11 +651,11 @@
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Muitas tentativas. Desbloqueio facial desativado."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Muitas tentativas. Como alternativa, use o bloqueio de tela."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível verificar o rosto. Tente novamente."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"O desbloqueio facial não foi configurado"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"O dispositivo não é compatível com o desbloqueio facial"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"O Desbloqueio facial não foi configurado"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"O dispositivo não é compatível com o Desbloqueio facial"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor desativado temporariamente."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Usar o desbloqueio facial"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Usar o Desbloqueio facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar reconhecimento facial ou bloqueio de tela"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Use seu rosto para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use seu rosto ou o bloqueio de tela para continuar"</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Negar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permissão solicitada"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permissão solicitada\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permissão solicitada pelo app <xliff:g id="APP">%1$s</xliff:g>\npara a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Este app está sendo usado fora de seu perfil de trabalho"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Você está usando este app em seu perfil de trabalho"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de entrada"</string>

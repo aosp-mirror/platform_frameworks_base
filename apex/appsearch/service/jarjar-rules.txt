@@ -1,5 +1,8 @@
+# Rename all icing classes to match our module name. OEMs could start using icing lib for some other
+# purpose in system service, which would cause class collisions when loading our apex into the
+# system service.
 rule com.google.protobuf.** com.android.server.appsearch.protobuf.@1
-rule com.google.android.icing.proto.** com.android.server.appsearch.proto.@1
+rule com.google.android.icing.proto.** com.android.server.appsearch.icing.proto.@1
 
 # Rename all com.android.internal.util classes to prevent class name collisions
 # between this module and the other versions of the utility classes linked into
