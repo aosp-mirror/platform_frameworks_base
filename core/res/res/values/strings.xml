@@ -4554,7 +4554,7 @@
     <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
 
     <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+    <string name="accessibility_shortcut_multiple_service_list">\u0020• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
 
     <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g> shortcut?</string>
