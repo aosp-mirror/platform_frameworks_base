@@ -8418,7 +8418,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 startFreezingScreenLocked(globalChanges);
             }
             forceNewConfig = false;
-            preserveWindow &= isResizeOnlyChange(changes);
+            // Do not preserve window if it is freezing screen because the original window won't be
+            // able to update drawn state that causes freeze timeout.
+            preserveWindow &= isResizeOnlyChange(changes) && !mFreezingScreen;
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
                 final boolean isDragResizing = task.isDragResizing();

@@ -987,6 +987,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mDisplayContent != null && mDisplayContent.mChangingContainers.contains(this);
     }
 
+    boolean inTransition() {
+        return mWmService.mAtmService.getTransitionController().inTransition(this);
+    }
+
     void sendAppVisibilityToClients() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
