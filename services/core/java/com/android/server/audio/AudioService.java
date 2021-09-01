@@ -5271,6 +5271,10 @@ public class AudioService extends IAudioService.Stub
     // TODO investigate internal users due to deprecation of SDK API
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
+        if (!checkAudioSettingsPermission("setBluetoothA2dpOn()")) {
+            return;
+        }
+
         // for logging only
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -5296,6 +5300,10 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#startBluetoothSco() */
     public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
+        if (!checkAudioSettingsPermission("startBluetoothSco()")) {
+            return;
+        }
+
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int scoAudioMode =
@@ -5318,6 +5326,10 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#startBluetoothScoVirtualCall() */
     public void startBluetoothScoVirtualCall(IBinder cb) {
+        if (!checkAudioSettingsPermission("startBluetoothScoVirtualCall()")) {
+            return;
+        }
+
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("startBluetoothScoVirtualCall()")
