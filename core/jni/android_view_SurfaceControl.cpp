@@ -1827,6 +1827,12 @@ static jint nativeGetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfac
     return toRotationInt(ui::Transform::toRotation((transformHintRotationFlags)));
 }
 
+static jint nativeGetLayerId(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
+
+    return surface->getLayerId();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -2026,6 +2032,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetTrustedOverlay },
     {"nativeSetDropInputMode", "(JJI)V",
              (void*)nativeSetDropInputMode },
+    {"nativeGetLayerId", "(J)I",
+            (void*)nativeGetLayerId },
         // clang-format on
 };
 
