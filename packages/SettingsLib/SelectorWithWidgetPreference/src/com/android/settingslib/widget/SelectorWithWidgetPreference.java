@@ -191,6 +191,13 @@ public class SelectorWithWidgetPreference extends CheckBoxPreference {
                 ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Returns whether this preference is a checkbox.
+     */
+    public boolean isCheckBox() {
+        return mIsCheckBox;
+    }
+
     private void init() {
         if (mIsCheckBox) {
             setWidgetLayoutResource(R.layout.preference_widget_checkbox);
