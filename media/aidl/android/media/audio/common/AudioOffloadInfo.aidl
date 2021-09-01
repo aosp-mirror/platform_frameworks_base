@@ -16,8 +16,8 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioChannelLayout;
-import android.media.audio.common.AudioFormatDescription;
+import android.media.audio.common.AudioConfigBase;
+import android.media.audio.common.AudioEncapsulationMode;
 import android.media.audio.common.AudioStreamType;
 import android.media.audio.common.AudioUsage;
 
@@ -29,15 +29,28 @@ import android.media.audio.common.AudioUsage;
 @JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable AudioOffloadInfo {
-    int sampleRateHz;
-    AudioChannelLayout channelMask;
-    AudioFormatDescription format;
+    /** Base audio configuration. */
+    AudioConfigBase base;
+    /** Stream type. Intended for use by the system only. */
     AudioStreamType streamType = AudioStreamType.INVALID;
+    /** Bit rate in bits per second. */
     int bitRatePerSecond;
-    long durationMicroseconds;
+    /** Duration in microseconds, -1 if unknown. */
+    long durationUs;
+    /** True if the stream is tied to a video stream. */
     boolean hasVideo;
+    /** True if streaming, false if local playback. */
     boolean isStreaming;
-    int bitWidth;
-    int bufferSize;
+    /** Sample bit width. */
+    int bitWidth = 16;
+    /** Offload fragment size. */
+    int offloadBufferSize;
+    /** See the documentation of AudioUsage. */
     AudioUsage usage = AudioUsage.INVALID;
+    /** See the documentation of AudioEncapsulationMode. */
+    AudioEncapsulationMode encapsulationMode = AudioEncapsulationMode.INVALID;
+    /** Content id from tuner HAL (0 if none). */
+    int contentId;
+    /** Sync id from tuner HAL (0 if none). */
+    int syncId;
 }

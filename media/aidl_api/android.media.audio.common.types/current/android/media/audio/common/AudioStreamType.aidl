@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */// This file has been semi-automatically generated using hidl2aidl from its counterpart in
-// hardware/interfaces/audio/common/5.0/types.hal
+ */
 ///////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +37,6 @@ package android.media.audio.common;
 enum AudioStreamType {
   INVALID = -2,
   DEFAULT = -1,
-  MIN = 0,
   VOICE_CALL = 0,
   SYSTEM = 1,
   RING = 2,
@@ -50,4 +48,8 @@ enum AudioStreamType {
   DTMF = 8,
   TTS = 9,
   ACCESSIBILITY = 10,
+  ASSISTANT = 11,
+  SYS_RESERVED_REROUTING = 12,
+  SYS_RESERVED_PATCH = 13,
+  CALL_ASSISTANT = 14,
 }

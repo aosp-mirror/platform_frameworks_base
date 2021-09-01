@@ -16,19 +16,19 @@
 
 package android.media.audio.common;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
+import android.media.AudioTrack;
 import android.media.MediaFormat;
 import android.platform.test.annotations.Presubmit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import androidx.test.runner.AndroidJUnit4;
+
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AidlConversion utilities.
@@ -36,10 +36,15 @@ import org.junit.runners.JUnit4;
  * Run with "atest AidlConversionUnitTests".
  */
 @Presubmit
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 public final class AidlConversionUnitTests {
 
     private static final String TAG = "AidlConvTests";
+    // Negative values are considered to be "invalid" as a general rule.
+    // However, '-1' is sometimes used as "system invalid" value, and thus
+    // does not cause an exception to be thrown during conversion.
+    private static int sInvalidValue = -2;
+    private static byte sInvalidValueByte = -2;
 
     @Test
     public void testAudioChannelConversionApiDefault() {
@@ -92,11 +97,12 @@ public final class AidlConversionUnitTests {
     }
 
     @Test
-    public void testAudioConfigConfersionApiIndex() {
+    public void testAudioConfigConversionApiIndex() {
         final AudioConfig aidl = new AudioConfig();
-        aidl.sampleRateHz = 8000;
-        aidl.channelMask = AudioChannelLayout.indexMask(AudioChannelLayout.INDEX_MASK_1);
-        aidl.format = createPcm16FormatAidl();
+        aidl.base = new AudioConfigBase();
+        aidl.base.sampleRate = 8000;
+        aidl.base.channelMask = AudioChannelLayout.indexMask(AudioChannelLayout.INDEX_MASK_1);
+        aidl.base.format = createPcm16FormatAidl();
         // Other fields in AudioConfig are irrelevant.
         final AudioFormat api = AidlConversion.aidl2api_AudioConfig_AudioFormat(
                 aidl, false /*isInput*/);
@@ -109,11 +115,12 @@ public final class AidlConversionUnitTests {
     }
 
     @Test
-    public void testAudioConfigConfersionApiLayout() {
+    public void testAudioConfigConversionApiLayout() {
         final AudioConfig aidl = new AudioConfig();
-        aidl.sampleRateHz = 8000;
-        aidl.channelMask = AudioChannelLayout.layoutMask(AudioChannelLayout.LAYOUT_MONO);
-        aidl.format = createPcm16FormatAidl();
+        aidl.base = new AudioConfigBase();
+        aidl.base.sampleRate = 8000;
+        aidl.base.channelMask = AudioChannelLayout.layoutMask(AudioChannelLayout.LAYOUT_MONO);
+        aidl.base.format = createPcm16FormatAidl();
         // Other fields in AudioConfig are irrelevant.
         final AudioFormat api = AidlConversion.aidl2api_AudioConfig_AudioFormat(
                 aidl, false /*isInput*/);
@@ -121,6 +128,40 @@ public final class AidlConversionUnitTests {
         assertEquals(AudioFormat.CHANNEL_OUT_MONO, api.getChannelMask());
         assertEquals(AudioFormat.ENCODING_PCM_16BIT, api.getEncoding());
         final AudioFormat apiInput = AidlConversion.aidl2api_AudioConfig_AudioFormat(
+                aidl, true /*isInput*/);
+        assertEquals(8000, apiInput.getSampleRate());
+        assertEquals(AudioFormat.CHANNEL_IN_MONO, apiInput.getChannelMask());
+        assertEquals(AudioFormat.ENCODING_PCM_16BIT, apiInput.getEncoding());
+    }
+
+    @Test
+    public void testAudioConfigBaseConversionApiIndex() {
+        final AudioConfigBase aidl = new AudioConfigBase();
+        aidl.sampleRate = 8000;
+        aidl.channelMask = AudioChannelLayout.indexMask(AudioChannelLayout.INDEX_MASK_1);
+        aidl.format = createPcm16FormatAidl();
+        final AudioFormat api = AidlConversion.aidl2api_AudioConfigBase_AudioFormat(
+                aidl, false /*isInput*/);
+        final AudioFormat apiInput = AidlConversion.aidl2api_AudioConfigBase_AudioFormat(
+                aidl, true /*isInput*/);
+        assertEquals(api, apiInput);
+        assertEquals(8000, api.getSampleRate());
+        assertEquals(1, api.getChannelIndexMask());
+        assertEquals(AudioFormat.ENCODING_PCM_16BIT, api.getEncoding());
+    }
+
+    @Test
+    public void testAudioConfigBaseConversionApiLayout() {
+        final AudioConfigBase aidl = new AudioConfigBase();
+        aidl.sampleRate = 8000;
+        aidl.channelMask = AudioChannelLayout.layoutMask(AudioChannelLayout.LAYOUT_MONO);
+        aidl.format = createPcm16FormatAidl();
+        final AudioFormat api = AidlConversion.aidl2api_AudioConfigBase_AudioFormat(
+                aidl, false /*isInput*/);
+        assertEquals(8000, api.getSampleRate());
+        assertEquals(AudioFormat.CHANNEL_OUT_MONO, api.getChannelMask());
+        assertEquals(AudioFormat.ENCODING_PCM_16BIT, api.getEncoding());
+        final AudioFormat apiInput = AidlConversion.aidl2api_AudioConfigBase_AudioFormat(
                 aidl, true /*isInput*/);
         assertEquals(8000, apiInput.getSampleRate());
         assertEquals(AudioFormat.CHANNEL_IN_MONO, apiInput.getChannelMask());
@@ -236,6 +277,22 @@ public final class AidlConversionUnitTests {
     }
 
     @Test
+    public void testAudioChannelConversionLegacyInvalid() {
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioChannelLayout_audio_channel_mask_t(
+                        AudioChannelLayout.voiceMask(sInvalidValue), false /*isInput*/));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioChannelLayout_audio_channel_mask_t(
+                        AudioChannelLayout.voiceMask(sInvalidValue), true /*isInput*/));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
+                        sInvalidValue, false /*isInput*/));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
+                        sInvalidValue, true /*isInput*/));
+    }
+
+    @Test
     public void testAudioFormatConversionLegacyDefault() {
         final int legacy = AudioSystem.AUDIO_FORMAT_DEFAULT;
         final AudioFormatDescription aidl =
@@ -273,7 +330,67 @@ public final class AidlConversionUnitTests {
         assertEquals(legacy, legacyBack);
     }
 
-    private AudioFormatDescription createPcm16FormatAidl() {
+    @Test
+    public void testAudioFormatConversionLegacyInvalid() {
+        final AudioFormatDescription aidl = new AudioFormatDescription();
+        aidl.type = sInvalidValueByte;
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioFormatDescription_audio_format_t(aidl));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_format_t_AudioFormatDescription(
+                        sInvalidValue));
+    }
+
+    @Test
+    public void testAudioEncapsulationModeConversionLegacy() {
+        // AIDL values are synchronized with SDK, so we can use the SDK values as AIDL.
+        final int aidl = AudioTrack.ENCAPSULATION_MODE_ELEMENTARY_STREAM;
+        final int legacy =
+                AidlConversion.aidl2legacy_AudioEncapsulationMode_audio_encapsulation_mode_t(aidl);
+        final int aidlBack =
+                AidlConversion.legacy2aidl_audio_encapsulation_mode_t_AudioEncapsulationMode(
+                        legacy);
+        assertEquals(aidl, aidlBack);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioEncapsulationMode_audio_encapsulation_mode_t(
+                        sInvalidValue));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_encapsulation_mode_t_AudioEncapsulationMode(
+                        sInvalidValue));
+    }
+
+    @Test
+    public void testAudioStreamTypeConversionLegacy() {
+        // AIDL values are synchronized with SDK, so we can use the SDK values as AIDL.
+        final int aidl = AudioSystem.STREAM_MUSIC;
+        final int legacy = AidlConversion.aidl2legacy_AudioStreamType_audio_stream_type_t(aidl);
+        final int aidlBack = AidlConversion.legacy2aidl_audio_stream_type_t_AudioStreamType(legacy);
+        assertEquals(aidl, aidlBack);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioStreamType_audio_stream_type_t(
+                        sInvalidValue));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_stream_type_t_AudioStreamType(
+                        sInvalidValue));
+    }
+
+    @Test
+    public void testAudioUsageConversionLegacy() {
+        // AIDL values are synchronized with SDK, so we can use the SDK values as AIDL.
+        final int aidl = AudioAttributes.USAGE_MEDIA;
+        final int legacy = AidlConversion.aidl2legacy_AudioUsage_audio_usage_t(aidl);
+        final int aidlBack = AidlConversion.legacy2aidl_audio_usage_t_AudioUsage(legacy);
+        assertEquals(aidl, aidlBack);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.aidl2legacy_AudioUsage_audio_usage_t(sInvalidValue));
+        assertThrows(IllegalArgumentException.class,
+                () -> AidlConversion.legacy2aidl_audio_usage_t_AudioUsage(sInvalidValue));
+    }
+
+    private static AudioFormatDescription createPcm16FormatAidl() {
         final AudioFormatDescription aidl = new AudioFormatDescription();
         aidl.type = AudioFormatType.PCM;
         aidl.pcm = PcmType.INT_16_BIT;
