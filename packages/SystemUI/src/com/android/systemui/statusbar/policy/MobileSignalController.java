@@ -91,8 +91,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private int mImsType = IMS_TYPE_WWAN;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
-    // @VisibleForDemoMode
-    Map<String, MobileIconGroup> mNetworkToIconLookup;
+    private Map<String, MobileIconGroup> mNetworkToIconLookup;
 
     // Since some pieces of the phone state are interdependent we store it locally,
     // this could potentially become part of MobileState for simplification/complication
@@ -385,9 +384,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
-        final boolean dataDisabled = (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA))
-                && mCurrentState.userSetup;
+
+        final boolean dataDisabled = mCurrentState.isDataDisabledOrNotDefault();
 
         if (mProviderModelBehavior) {
             // Show icon in QS when we are connected or data is disabled.
@@ -404,12 +402,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                         && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
                 description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
             }
-            boolean activityIn = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityIn;
-            boolean activityOut = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityOut;
+
             showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault;
             boolean showTriangle = showDataIcon && !mCurrentState.airplaneMode;
             int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
@@ -417,10 +410,18 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             IconState statusIcon = new IconState(showDataIcon && !mCurrentState.airplaneMode,
                     getCurrentIconId(), contentDescription);
             MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
-                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming, showTriangle);
+                    statusIcon,
+                    qsIcon,
+                    typeIcon,
+                    qsTypeIcon,
+                    mCurrentState.hasActivityIn(),
+                    mCurrentState.hasActivityOut(),
+                    dataContentDescription,
+                    dataContentDescriptionHtml,
+                    description,
+                    mSubscriptionInfo.getSubscriptionId(),
+                    mCurrentState.roaming,
+                    showTriangle);
             callback.setMobileDataIndicators(mobileDataIndicators);
         } else {
             boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
@@ -452,20 +453,22 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 }
             }
 
-            boolean activityIn = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityIn;
-            boolean activityOut = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityOut;
             showDataIcon &= mCurrentState.isDefault || dataDisabled;
             int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
             boolean showTriangle = mCurrentState.enabled && !mCurrentState.airplaneMode;
             MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
-                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming, showTriangle);
+                    statusIcon,
+                    qsIcon,
+                    typeIcon,
+                    qsTypeIcon,
+                    mCurrentState.hasActivityIn(),
+                    mCurrentState.hasActivityOut(),
+                    dataContentDescription,
+                    dataContentDescriptionHtml,
+                    description,
+                    mSubscriptionInfo.getSubscriptionId(),
+                    mCurrentState.roaming,
+                    showTriangle);
             callback.setMobileDataIndicators(mobileDataIndicators);
         }
     }
