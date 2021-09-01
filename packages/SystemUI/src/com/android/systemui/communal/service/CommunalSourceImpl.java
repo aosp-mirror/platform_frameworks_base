@@ -38,6 +38,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -75,6 +76,45 @@ public class CommunalSourceImpl implements CommunalSource {
         public CommunalSource create(ICommunalSource source) {
             return new CommunalSourceImpl(mExecutor, mResources, mCommunalStateController,
                     mNotificationShadeWindowController, source);
+        }
+    }
+
+    static class Request {
+        private final int mWidth;
+        private final int mHeight;
+        private final int mDisplayId;
+        private final IBinder mHostToken;
+
+        Request(int width, int height, int displayId, IBinder hostToken) {
+            mWidth = width;
+            mHeight = height;
+            mDisplayId = displayId;
+            mHostToken = hostToken;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Request)) return false;
+            Request request = (Request) o;
+            return mWidth == request.mWidth && mHeight == request.mHeight
+                    && mDisplayId == request.mDisplayId && Objects.equals(mHostToken,
+                    request.mHostToken);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mWidth, mHeight, mDisplayId, mHostToken);
+        }
+
+        @Override
+        public String toString() {
+            return "Request{"
+                    + "mWidth=" + mWidth
+                    + ", mHeight=" + mHeight
+                    + ", mDisplayId=" + mDisplayId
+                    + ", mHostToken=" + mHostToken
+                    + '}';
         }
     }
 
@@ -148,18 +188,15 @@ public class CommunalSourceImpl implements CommunalSource {
      * Called internally to request a new {@link android.view.SurfaceControlViewHost.SurfacePackage}
      * for showing communal content.
      *
-     * @param hostToken The HostToken necessary to generate a {@link SurfaceControlViewHost}.
-     * @param displayId The id of the display the surface will be shown on.
-     * @param width     The width of the surface.
-     * @param height    The height of the surface.
+     * @param request A request with the parameters for the new communal surface.
      * @return A future that returns the resulting
      * {@link android.view.SurfaceControlViewHost.SurfacePackage}.
      */
     protected ListenableFuture<SurfaceControlViewHost.SurfacePackage> requestCommunalSurface(
-            IBinder hostToken, int displayId, int width, int height) {
+            Request request) {
         return CallbackToFutureAdapter.getFuture(completer -> {
-            mSourceProxy.getCommunalSurface(hostToken, width, height, displayId,
-                    new ICommunalSurfaceCallback.Stub() {
+            mSourceProxy.getCommunalSurface(request.mHostToken, request.mWidth, request.mHeight,
+                    request.mDisplayId, new ICommunalSurfaceCallback.Stub() {
                         @Override
                         public void onSurface(
                                 SurfaceControlViewHost.SurfacePackage surfacePackage) {
