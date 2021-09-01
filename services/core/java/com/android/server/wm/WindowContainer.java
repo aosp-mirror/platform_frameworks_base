@@ -51,6 +51,7 @@ import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER
 import static com.android.server.wm.WindowContainerProto.IDENTIFIER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.WindowContainerProto.SURFACE_CONTROL;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -2392,6 +2393,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         writeIdentifierToProto(proto, IDENTIFIER);
         if (mSurfaceAnimator.isAnimating()) {
             mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
+        }
+        if (mSurfaceControl != null) {
+            mSurfaceControl.dumpDebug(proto, SURFACE_CONTROL);
         }
 
         // add children to proto

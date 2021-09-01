@@ -480,6 +480,7 @@ message WindowContainerProto {
     optional SurfaceAnimatorProto surface_animator = 4;
     repeated WindowContainerChildProto children = 5;
     optional IdentifierProto identifier = 6;
+    optional .android.view.SurfaceControlProto surface_control = 7;
 }
 
 /* represents a generic child of a WindowContainer */
