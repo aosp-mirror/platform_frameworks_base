@@ -5286,7 +5286,7 @@ public final class ActiveServices {
                 psr.updateBoundClientUids();
             }
 
-            // Sanity check: if the service listed for the app is not one
+            // Check: if the service listed for the app is not one
             // we actually are maintaining, just let it drop.
             final ServiceRecord curRec = smap.mServicesByInstanceName.get(sr.instanceName);
             if (curRec != sr) {
