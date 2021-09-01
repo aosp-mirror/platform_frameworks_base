@@ -26,13 +26,10 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.PathInterpolator
-import com.android.internal.R.attr.interpolator
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.charging.RippleShader
 
-private const val RIPPLE_ANIMATION_DURATION: Long = 1533
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
 /**
@@ -250,7 +247,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     /**
      * Ripple that bursts outwards from the position of the sensor to the edges of the screen
      */
-    fun startUnlockedRipple(onAnimationEnd: Runnable?, lightReveal: LightRevealScrim?) {
+    fun startUnlockedRipple(onAnimationEnd: Runnable?) {
         if (unlockedRippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
@@ -266,21 +263,13 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
         val rippleAnimator = ValueAnimator.ofFloat(rippleStart, 1f).apply {
             interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-            duration = RIPPLE_ANIMATION_DURATION
+            duration = AuthRippleController.RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
                 rippleShader.progress = animator.animatedValue as Float
                 rippleShader.time = now.toFloat()
 
                 invalidate()
-            }
-        }
-
-        val revealAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
-            interpolator = rippleAnimator.interpolator
-            duration = rippleAnimator.duration
-            addUpdateListener { animator ->
-                lightReveal?.revealAmount = animator.animatedValue as Float
             }
         }
 
@@ -298,7 +287,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         val animatorSet = AnimatorSet().apply {
             playTogether(
                 rippleAnimator,
-                revealAnimator,
                 alphaInAnimator
             )
             addListener(object : AnimatorListenerAdapter() {
