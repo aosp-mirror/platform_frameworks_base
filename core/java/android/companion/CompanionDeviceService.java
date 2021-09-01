@@ -20,6 +20,7 @@ package android.companion;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -86,6 +87,36 @@ public abstract class CompanionDeviceService extends Service {
     @MainThread
     public abstract void onDeviceDisappeared(@NonNull String address);
 
+    /**
+     * Called by system whenever the system tries to send a message to an associated device.
+     *
+     * @param messageId system assigned id of the message to be sent
+     * @param associationId association id of the associated device
+     * @param message message to be sent
+     */
+    @MainThread
+    public void onSendMessage(int messageId, int associationId, @NonNull byte[] message) {
+        // do nothing. Companion apps can override this function for system to send messages.
+    }
+
+    /**
+     * Called when there's message received from an associated device, which needs to be dispatched
+     * to system for processing.
+     *
+     * <p>Calling app must declare uses-permission
+     * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
+     *
+     * @param messageId id of the message
+     * @param associationId id of the associated device
+     * @param message messaged received from the associated device
+     */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
+    public final void receiveMessage(int messageId, int associationId, @NonNull byte[] message) {
+        CompanionDeviceManager companionDeviceManager =
+                getSystemService(CompanionDeviceManager.class);
+        companionDeviceManager.receiveMessage(messageId, associationId, message);
+    }
+
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
@@ -111,6 +142,19 @@ public abstract class CompanionDeviceService extends Service {
             Handler.getMain().sendMessage(PooledLambda.obtainMessage(
                     CompanionDeviceService::onDeviceDisappeared,
                     CompanionDeviceService.this, address));
+        }
+
+        public void onSendMessage(int messageId, int associationId, @NonNull byte[] message) {
+            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
+                    CompanionDeviceService::onSendMessage,
+                    CompanionDeviceService.this, messageId, associationId, message));
+        }
+
+        public final void receiveMessage(int messageId, int associationId,
+                @NonNull byte[] message) {
+            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
+                    CompanionDeviceService::receiveMessage,
+                    CompanionDeviceService.this, messageId, associationId, message));
         }
     }
 }
