@@ -25,6 +25,9 @@ internal class ResourceUnfoldTransitionConfig(
     override val isEnabled: Boolean
         get() = readIsEnabled() && mode != ANIMATION_MODE_DISABLED
 
+    override val isHingeAngleEnabled: Boolean
+        get() = readIsHingeAngleEnabled()
+
     @AnimationMode
     override val mode: Int
         get() = SystemProperties.getInt(UNFOLD_TRANSITION_MODE_PROPERTY_NAME,
@@ -32,6 +35,9 @@ internal class ResourceUnfoldTransitionConfig(
 
     private fun readIsEnabled(): Boolean = context.resources
         .getBoolean(com.android.internal.R.bool.config_unfoldTransitionEnabled)
+
+    private fun readIsHingeAngleEnabled(): Boolean = context.resources
+        .getBoolean(com.android.internal.R.bool.config_unfoldTransitionHingeAngle)
 }
 
 /**
