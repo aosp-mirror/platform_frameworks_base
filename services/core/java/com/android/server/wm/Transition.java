@@ -978,7 +978,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             // Wallpaper must be the top (regardless of how nested it is in DisplayAreas).
             boolean skipIntermediateReports = isWallpaper(wc);
             for (WindowContainer p = wc.getParent(); p != null; p = p.getParent()) {
-                if (!p.isAttached() || !changes.get(p).hasChanged(p)) {
+                if (!p.isAttached() || changes.get(p) == null || !changes.get(p).hasChanged(p)) {
                     // Again, we're skipping no-ops
                     break;
                 }

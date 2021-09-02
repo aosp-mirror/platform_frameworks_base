@@ -233,7 +233,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.clipRect = new Rect(clipRect);
         this.contentInsets = new Rect(contentInsets);
         this.prefixOrderIndex = prefixOrderIndex;
-        this.position = new Point(position);
+        this.position = position == null ? new Point() : new Point(position);
         this.localBounds = new Rect(localBounds);
         this.sourceContainerBounds = new Rect(screenSpaceBounds);
         this.screenSpaceBounds = new Rect(screenSpaceBounds);
