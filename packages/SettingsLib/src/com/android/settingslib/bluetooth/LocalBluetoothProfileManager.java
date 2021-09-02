@@ -101,6 +101,7 @@ public class LocalBluetoothProfileManager {
     private PbapServerProfile mPbapProfile;
     private HearingAidProfile mHearingAidProfile;
     private SapProfile mSapProfile;
+    private VolumeControlProfile mVolumeControlProfile;
 
     /**
      * Mapping from profile name, e.g. "HEADSET" to profile object.
@@ -220,6 +221,16 @@ public class LocalBluetoothProfileManager {
             mSapProfile = new SapProfile(mContext, mDeviceManager, this);
             addProfile(mSapProfile, SapProfile.NAME, BluetoothSap.ACTION_CONNECTION_STATE_CHANGED);
         }
+        if (mVolumeControlProfile == null
+                && supportedList.contains(BluetoothProfile.VOLUME_CONTROL)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local Volume Control profile");
+            }
+            mVolumeControlProfile = new VolumeControlProfile();
+            // Note: no event handler for VCP, only for being connectable.
+            mProfileNameMap.put(VolumeControlProfile.NAME, mVolumeControlProfile);
+        }
+
         mEventManager.registerProfileIntentReceiver();
     }
 
@@ -567,6 +578,12 @@ public class LocalBluetoothProfileManager {
         if (mSapProfile != null && ArrayUtils.contains(uuids, BluetoothUuid.SAP)) {
             profiles.add(mSapProfile);
             removedProfiles.remove(mSapProfile);
+        }
+
+        if (mVolumeControlProfile != null
+                && ArrayUtils.contains(uuids, BluetoothUuid.VOLUME_CONTROL)) {
+            profiles.add(mVolumeControlProfile);
+            removedProfiles.remove(mVolumeControlProfile);
         }
 
         if (DEBUG) {
