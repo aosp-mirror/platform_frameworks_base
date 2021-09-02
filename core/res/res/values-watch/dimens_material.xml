@@ -44,6 +44,7 @@
     <dimen name="progress_bar_size_small">16dip</dimen>
     <dimen name="progress_bar_size_medium">32dip</dimen>
     <dimen name="progress_bar_size_large">64dip</dimen>
+    <dimen name="progress_bar_height">24dp</dimen>
 
     <!-- Progress bar message dimens -->
     <dimen name="message_progress_dialog_text_size">18sp</dimen>
