@@ -135,7 +135,8 @@ public class AppSearchImplPlatformTest {
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         // "schema1" is platform hidden now and package visible to package1
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
@@ -167,7 +168,8 @@ public class AppSearchImplPlatformTest {
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         // Check that "schema1" still has the same visibility settings
         SystemUtil.runWithShellPermissionIdentity(() -> assertThat(
@@ -241,7 +243,8 @@ public class AppSearchImplPlatformTest {
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         // "schema1" is platform hidden now and package accessible
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
@@ -269,7 +272,8 @@ public class AppSearchImplPlatformTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ true,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         // Check that "schema1" is no longer considered platform hidden or package accessible
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
@@ -298,7 +302,8 @@ public class AppSearchImplPlatformTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
                 "package",
@@ -333,7 +338,8 @@ public class AppSearchImplPlatformTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
                 "package",
@@ -361,7 +367,8 @@ public class AppSearchImplPlatformTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.singletonList("Schema"),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
 
         assertThat(mVisibilityStore.isSchemaSearchableByCaller(
                 "package",
@@ -390,7 +397,8 @@ public class AppSearchImplPlatformTest {
                 /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
                 /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
         assertThat(mVisibilityStore
                                 .isSchemaSearchableByCaller(
                                         "package",
@@ -431,7 +439,8 @@ public class AppSearchImplPlatformTest {
                         "Schema",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
-                /*schemaVersion=*/ 0);
+                /*schemaVersion=*/ 0,
+                /*setSchemaStatsBuilder=*/ null);
         assertThat(mVisibilityStore
                                 .isSchemaSearchableByCaller(
                                         "package",

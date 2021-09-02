@@ -189,22 +189,30 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     private class OnAuthenticationCancelListener implements OnCancelListener {
-        private android.hardware.biometrics.CryptoObject mCrypto;
+        private final long mAuthRequestId;
 
-        public OnAuthenticationCancelListener(android.hardware.biometrics.CryptoObject crypto) {
-            mCrypto = crypto;
+        OnAuthenticationCancelListener(long id) {
+            mAuthRequestId = id;
         }
 
         @Override
         public void onCancel() {
-            cancelAuthentication(mCrypto);
+            Slog.d(TAG, "Cancel fingerprint authentication requested for: " + mAuthRequestId);
+            cancelAuthentication(mAuthRequestId);
         }
     }
 
     private class OnFingerprintDetectionCancelListener implements OnCancelListener {
+        private final long mAuthRequestId;
+
+        OnFingerprintDetectionCancelListener(long id) {
+            mAuthRequestId = id;
+        }
+
         @Override
         public void onCancel() {
-            cancelFingerprintDetect();
+            Slog.d(TAG, "Cancel fingerprint detect requested for: " + mAuthRequestId);
+            cancelFingerprintDetect(mAuthRequestId);
         }
     }
 
@@ -552,13 +560,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
 
-        if (cancel != null) {
-            if (cancel.isCanceled()) {
-                Slog.w(TAG, "authentication already canceled");
-                return;
-            } else {
-                cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
-            }
+        if (cancel != null && cancel.isCanceled()) {
+            Slog.w(TAG, "authentication already canceled");
+            return;
         }
 
         if (mService != null) {
@@ -567,8 +571,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
-                mService.authenticate(mToken, operationId, sensorId, userId, mServiceReceiver,
-                        mContext.getOpPackageName());
+                final long authId = mService.authenticate(mToken, operationId, sensorId, userId,
+                        mServiceReceiver, mContext.getOpPackageName());
+                if (cancel != null) {
+                    cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
@@ -595,15 +602,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (cancel.isCanceled()) {
             Slog.w(TAG, "Detection already cancelled");
             return;
-        } else {
-            cancel.setOnCancelListener(new OnFingerprintDetectionCancelListener());
         }
 
         mFingerprintDetectionCallback = callback;
 
         try {
-            mService.detectFingerprint(mToken, userId, mServiceReceiver,
+            final long authId = mService.detectFingerprint(mToken, userId, mServiceReceiver,
                     mContext.getOpPackageName());
+            cancel.setOnCancelListener(new OnFingerprintDetectionCancelListener(authId));
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception when requesting finger detect", e);
         }
@@ -1320,21 +1326,21 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-    private void cancelAuthentication(android.hardware.biometrics.CryptoObject cryptoObject) {
+    private void cancelAuthentication(long requestId) {
         if (mService != null) try {
-            mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+            mService.cancelAuthentication(mToken, mContext.getOpPackageName(), requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    private void cancelFingerprintDetect() {
+    private void cancelFingerprintDetect(long requestId) {
         if (mService == null) {
             return;
         }
 
         try {
-            mService.cancelFingerprintDetect(mToken, mContext.getOpPackageName());
+            mService.cancelFingerprintDetect(mToken, mContext.getOpPackageName(), requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1390,9 +1396,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         // This is used as a last resort in case a vendor string is missing
         // It should not happen for anything other than FINGERPRINT_ERROR_VENDOR, but
         // warn and use the default if all else fails.
-        // TODO(b/196639965): update string
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
-        return "";
+        return context.getString(
+                com.android.internal.R.string.fingerprint_error_vendor_unknown);
     }
 
     /**

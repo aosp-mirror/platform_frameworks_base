@@ -206,7 +206,7 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void authenticate(IBinder token, long sessionId, int userId,
+        public long authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo)
                 throws RemoteException {
             // Only allow internal clients to authenticate with a different userId.
@@ -223,18 +223,18 @@ public class AuthService extends SystemService {
 
             if (!checkAppOps(callingUid, opPackageName, "authenticate()")) {
                 authenticateFastFail("Denied by app ops: " + opPackageName, receiver);
-                return;
+                return -1;
             }
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 authenticateFastFail(
                         "Unable to authenticate, one or more null arguments", receiver);
-                return;
+                return -1;
             }
 
             if (!Utils.isForeground(callingUid, callingPid)) {
                 authenticateFastFail("Caller is not foreground: " + opPackageName, receiver);
-                return;
+                return -1;
             }
 
             if (promptInfo.containsTestConfigurations()) {
@@ -251,7 +251,7 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.authenticate(
+                return mBiometricService.authenticate(
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -270,7 +270,7 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void cancelAuthentication(IBinder token, String opPackageName)
+        public void cancelAuthentication(IBinder token, String opPackageName, long requestId)
                 throws RemoteException {
             checkPermission();
 
@@ -281,7 +281,7 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.cancelAuthentication(token, opPackageName);
+                mBiometricService.cancelAuthentication(token, opPackageName, requestId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

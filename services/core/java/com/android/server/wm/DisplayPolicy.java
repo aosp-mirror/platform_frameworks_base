@@ -377,6 +377,8 @@ public class DisplayPolicy {
 
     private PointerLocationView mPointerLocationView;
 
+    private int mDisplayCutoutTouchableRegionSize;
+
     /**
      * The area covered by system windows which belong to another display. Forwarded insets is set
      * in case this is a virtual display, this is displayed on another display that has insets, and
@@ -1109,8 +1111,21 @@ public class DisplayPolicy {
                                 rect.bottom = rect.top + getStatusBarHeight(displayFrames);
                             }
                         };
+                final TriConsumer<DisplayFrames, WindowState, Rect> gestureFrameProvider =
+                        (displayFrames, windowState, rect) -> {
+                            rect.bottom = rect.top + getStatusBarHeight(displayFrames);
+                            final DisplayCutout cutout =
+                                    displayFrames.mInsetsState.getDisplayCutout();
+                            if (cutout != null) {
+                                final Rect top = cutout.getBoundingRectTop();
+                                if (!top.isEmpty()) {
+                                    rect.bottom = rect.bottom + mDisplayCutoutTouchableRegionSize;
+                                }
+                            }
+                        };
                 mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, win, frameProvider);
-                mDisplayContent.setInsetProvider(ITYPE_TOP_MANDATORY_GESTURES, win, frameProvider);
+                mDisplayContent.setInsetProvider(
+                        ITYPE_TOP_MANDATORY_GESTURES, win, gestureFrameProvider);
                 mDisplayContent.setInsetProvider(ITYPE_TOP_TAPPABLE_ELEMENT, win, frameProvider);
                 break;
             case TYPE_NAVIGATION_BAR:
@@ -2091,11 +2106,14 @@ public class DisplayPolicy {
             mStatusBarHeightForRotation[landscapeRotation] =
                     mStatusBarHeightForRotation[seascapeRotation] =
                             res.getDimensionPixelSize(R.dimen.status_bar_height_landscape);
+            mDisplayCutoutTouchableRegionSize = res.getDimensionPixelSize(
+                    R.dimen.display_cutout_touchable_region_size);
         } else {
             mStatusBarHeightForRotation[portraitRotation] =
                     mStatusBarHeightForRotation[upsideDownRotation] =
                             mStatusBarHeightForRotation[landscapeRotation] =
                                     mStatusBarHeightForRotation[seascapeRotation] = 0;
+            mDisplayCutoutTouchableRegionSize = 0;
         }
 
         // Height of the navigation bar when presented horizontally at bottom

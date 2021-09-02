@@ -5959,9 +5959,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outSurfaceInsets.set(getAttrs().surfaceInsets);
         final InsetsState state = getInsetsStateWithVisibilityOverride();
         outInsets.set(state.calculateInsets(outFrame, systemBars(),
-                false /* ignoreVisibility */));
+                false /* ignoreVisibility */).toRect());
         outStableInsets.set(state.calculateInsets(outFrame, systemBars(),
-                true /* ignoreVisibility */));
+                true /* ignoreVisibility */).toRect());
     }
 
     void setViewVisibility(int viewVisibility) {

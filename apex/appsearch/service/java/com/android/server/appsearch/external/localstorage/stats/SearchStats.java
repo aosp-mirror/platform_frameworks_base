@@ -40,6 +40,7 @@ public final class SearchStats {
                 VISIBILITY_SCOPE_LOCAL,
                 // Searches the global documents. Including platform surfaceable and 3p-access.
                 VISIBILITY_SCOPE_GLOBAL,
+                VISIBILITY_SCOPE_UNKNOWN,
                 // TODO(b/173532925) Add THIRD_PARTY_ACCESS once we can distinguish platform
                 //  surfaceable from 3p access(right both of them are categorized as
                 //  VISIBILITY_SCOPE_GLOBAL)
@@ -51,6 +52,7 @@ public final class SearchStats {
     public static final int VISIBILITY_SCOPE_LOCAL = 1;
     // Searches the global documents. Including platform surfaceable and 3p-access.
     public static final int VISIBILITY_SCOPE_GLOBAL = 2;
+    public static final int VISIBILITY_SCOPE_UNKNOWN = 3;
 
     // TODO(b/173532925): Add a field searchType to indicate where the search is used(normal
     //  query vs in removeByQuery vs during migration)
