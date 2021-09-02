@@ -239,6 +239,11 @@ public class SignalIcon {
             return dataConnected && !carrierNetworkChangeMode && activityOut;
         }
 
+        /** @return true if this state should show a RAT icon in quick settings */
+        public boolean showQuickSettingsRatIcon() {
+            return dataConnected || isDataDisabledOrNotDefault();
+        }
+
         @Override
         protected void toString(StringBuilder builder) {
             super.toString(builder);
@@ -254,7 +259,8 @@ public class SignalIcon {
             builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
                     .append(',');
             builder.append("userSetup=").append(userSetup).append(',');
-            builder.append("defaultDataOff=").append(defaultDataOff);
+            builder.append("defaultDataOff=").append(defaultDataOff).append(',');
+            builder.append("showQuickSettingsRatIcon=").append(showQuickSettingsRatIcon());
         }
 
         @Override
