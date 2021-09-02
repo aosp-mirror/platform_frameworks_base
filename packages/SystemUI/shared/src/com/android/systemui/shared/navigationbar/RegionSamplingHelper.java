@@ -72,6 +72,8 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private boolean mWindowVisible;
     private boolean mWindowHasBlurs;
     private SurfaceControl mRegisteredStopLayer = null;
+    // A copy of mRegisteredStopLayer where we own the life cycle and can access from a bg thread.
+    private SurfaceControl mWrappedStopLayer = null;
     private ViewTreeObserver.OnDrawListener mUpdateOnDraw = new ViewTreeObserver.OnDrawListener() {
         @Override
         public void onDraw() {
@@ -184,16 +186,21 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
             }
             if (!mSamplingRequestBounds.equals(mRegisteredSamplingBounds)
                     || mRegisteredStopLayer != stopLayerControl) {
-                // We only want to reregister if something actually changed
+                // We only want to re-register if something actually changed
                 unregisterSamplingListener();
                 mSamplingListenerRegistered = true;
-                SurfaceControl registeredStopLayer = stopLayerControl;
+                SurfaceControl wrappedStopLayer = stopLayerControl == null
+                        ? null : new SurfaceControl(stopLayerControl, "regionSampling");
                 mBackgroundExecutor.execute(() -> {
+                    if (wrappedStopLayer != null && !wrappedStopLayer.isValid()) {
+                        return;
+                    }
                     CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
-                            registeredStopLayer, mSamplingRequestBounds);
+                            wrappedStopLayer, mSamplingRequestBounds);
                 });
                 mRegisteredSamplingBounds.set(mSamplingRequestBounds);
-                mRegisteredStopLayer = registeredStopLayer;
+                mRegisteredStopLayer = stopLayerControl;
+                mWrappedStopLayer = wrappedStopLayer;
             }
             mFirstSamplingAfterStart = false;
         } else {
@@ -204,10 +211,14 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     private void unregisterSamplingListener() {
         if (mSamplingListenerRegistered) {
             mSamplingListenerRegistered = false;
+            SurfaceControl wrappedStopLayer = mWrappedStopLayer;
             mRegisteredStopLayer = null;
             mRegisteredSamplingBounds.setEmpty();
             mBackgroundExecutor.execute(() -> {
                 CompositionSamplingListener.unregister(mSamplingListener);
+                if (wrappedStopLayer != null && wrappedStopLayer.isValid()) {
+                    wrappedStopLayer.release();
+                }
             });
         }
     }
@@ -262,6 +273,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         pw.println("  mWindowHasBlurs: " + mWindowHasBlurs);
         pw.println("  mWaitingOnDraw: " + mWaitingOnDraw);
         pw.println("  mRegisteredStopLayer: " + mRegisteredStopLayer);
+        pw.println("  mWrappedStopLayer: " + mWrappedStopLayer);
         pw.println("  mIsDestroyed: " + mIsDestroyed);
     }
 
