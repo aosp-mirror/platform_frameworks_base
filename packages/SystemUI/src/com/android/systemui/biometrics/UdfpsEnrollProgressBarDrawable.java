@@ -41,7 +41,6 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     private static final float PROGRESS_BAR_THICKNESS_DP = 12;
 
     @NonNull private final Context mContext;
-    @NonNull private final UdfpsEnrollDrawable mParent;
     @NonNull private final Paint mBackgroundCirclePaint;
     @NonNull private final Paint mProgressPaint;
 
@@ -50,10 +49,8 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     private int mRotation; // After last step, rotate the progress bar once
     private boolean mLastStepAcquired;
 
-    public UdfpsEnrollProgressBarDrawable(@NonNull Context context,
-            @NonNull UdfpsEnrollDrawable parent) {
+    public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
         mContext = context;
-        mParent = parent;
 
         mBackgroundCirclePaint = new Paint();
         mBackgroundCirclePaint.setStrokeWidth(Utils.dpToPixels(context, PROGRESS_BAR_THICKNESS_DP));
@@ -101,7 +98,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
             rotationAnimator.addUpdateListener(animation -> {
                 Log.d(TAG, "Rotation: " + mRotation);
                 mRotation = (int) animation.getAnimatedValue();
-                mParent.invalidateSelf();
+                invalidateSelf();
             });
             rotationAnimator.start();
         }
@@ -114,11 +111,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         mProgressAnimator.setDuration(animationDuration);
         mProgressAnimator.addUpdateListener(animation -> {
             mProgress = (float) animation.getAnimatedValue();
-            // Use the parent to invalidate, since it's the one that's attached as the view's
-            // drawable and has its callback set automatically. Invalidating via
-            // `this.invalidateSelf` actually does not invoke draw(), since this drawable's callback
-            // is not really set.
-            mParent.invalidateSelf();
+            invalidateSelf();
         });
         mProgressAnimator.start();
     }
