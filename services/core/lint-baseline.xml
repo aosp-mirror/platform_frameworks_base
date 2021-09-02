@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                   ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/biometrics/BiometricService.java"
+            line="1106"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                   ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/biometrics/BiometricService.java"
+            line="1111"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            return Settings.Secure.getString(mContentResolver, mKey);"
+        errorLine2="                                   ~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/CertBlacklister.java"
+            line="73"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        }"
+        errorLine2="      ^">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/clipboard/ClipboardService.java"
+            line="973"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            boolean accessibilityEnabled = Settings.Secure.getInt(cr,"
+        errorLine2="                                                           ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/DockObserver.java"
+            line="176"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            String mediaButtonReceiverInfo = Settings.Secure.getString(mContentResolver,"
+        errorLine2="                                             ~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/media/MediaSessionService.java"
+            line="928"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final boolean isSecureFrpEnabled ="
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java"
+            line="1959"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="    private int getUnknownSourcesSettings() {"
+        errorLine2="                                      ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java"
+            line="16741"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            String inputMethodComponent = Settings.Secure.getString(mContext.getContentResolver(),"
+        errorLine2="                                  ~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/SensorPrivacyService.java"
+            line="489"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            return Settings.Secure.getString(getContentResolverAsUser(userId), key);"
+        errorLine2="           ~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/connectivity/Vpn.java"
+            line="1994"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            return Settings.Secure.getInt(getContentResolverAsUser(userId), key, def);"
+        errorLine2="           ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/connectivity/Vpn.java"
+            line="2001"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="                        if (Settings.Secure.getInt(mContext.getContentResolver(),"
+        errorLine2="                                            ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="980"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="                &amp;&amp; Settings.Secure.getInt(mContext.getContentResolver(),"
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="1442"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="                &amp;&amp; Settings.Secure.getInt(mContext.getContentResolver(),"
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="1444"
+            column="36"/>
+    </issue>
+
+</issues>
