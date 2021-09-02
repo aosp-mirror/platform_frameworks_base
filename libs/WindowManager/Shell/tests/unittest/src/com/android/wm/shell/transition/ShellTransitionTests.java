@@ -731,24 +731,12 @@ public class ShellTransitionTests {
         IWindowManager mockWM = mock(IWindowManager.class);
         final IDisplayWindowListener[] displayListener = new IDisplayWindowListener[1];
         try {
-            doAnswer(new Answer() {
-                @Override
-                public Object answer(InvocationOnMock invocation) {
-                    displayListener[0] = invocation.getArgument(0);
-                    return null;
-                }
-            }).when(mockWM).registerDisplayWindowListener(any());
+            doReturn(new int[] {DEFAULT_DISPLAY}).when(mockWM).registerDisplayWindowListener(any());
         } catch (RemoteException e) {
             // No remote stuff happening, so this can't be hit
         }
         DisplayController out = new DisplayController(mContext, mockWM, mMainExecutor);
         out.initialize();
-        try {
-            displayListener[0].onDisplayAdded(DEFAULT_DISPLAY);
-            mMainExecutor.flushAll();
-        } catch (RemoteException e) {
-            // Again, no remote stuff
-        }
         return out;
     }
 

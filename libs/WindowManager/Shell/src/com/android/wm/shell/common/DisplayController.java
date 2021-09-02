@@ -67,7 +67,10 @@ public class DisplayController {
      */
     public void initialize() {
         try {
-            mWmService.registerDisplayWindowListener(mDisplayContainerListener);
+            int[] displayIds = mWmService.registerDisplayWindowListener(mDisplayContainerListener);
+            for (int i = 0; i < displayIds.length; i++) {
+                onDisplayAdded(displayIds[i]);
+            }
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register display controller");
         }
