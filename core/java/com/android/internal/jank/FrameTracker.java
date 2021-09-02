@@ -51,6 +51,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class that allows the app to get the frame metrics from HardwareRendererObserver.
@@ -108,6 +109,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private boolean mCancelled = false;
     private FrameTrackerListener mListener;
     private boolean mTracingStarted = false;
+    private Runnable mWaitForFinishTimedOut;
 
     private static class JankInfo {
         long frameVsyncId;
@@ -174,52 +176,51 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             // If the surface isn't valid yet, wait until it's created.
             if (mViewRoot.getSurfaceControl().isValid()) {
                 mSurfaceControl = mViewRoot.getSurfaceControl();
-                mSurfaceChangedCallback = null;
-            } else {
-                mSurfaceChangedCallback = new ViewRootImpl.SurfaceChangedCallback() {
-                    @Override
-                    public void surfaceCreated(SurfaceControl.Transaction t) {
-                        synchronized (FrameTracker.this) {
-                            if (mSurfaceControl == null) {
-                                mSurfaceControl = mViewRoot.getSurfaceControl();
-                                if (mBeginVsyncId != INVALID_ID) {
-                                    mSurfaceControlWrapper.addJankStatsListener(
-                                            FrameTracker.this, mSurfaceControl);
-                                    postTraceStartMarker();
-                                }
+            }
+
+            mSurfaceChangedCallback = new ViewRootImpl.SurfaceChangedCallback() {
+                @Override
+                public void surfaceCreated(SurfaceControl.Transaction t) {
+                    synchronized (FrameTracker.this) {
+                        if (mSurfaceControl == null) {
+                            mSurfaceControl = mViewRoot.getSurfaceControl();
+                            if (mBeginVsyncId != INVALID_ID) {
+                                mSurfaceControlWrapper.addJankStatsListener(
+                                        FrameTracker.this, mSurfaceControl);
+                                postTraceStartMarker();
                             }
                         }
                     }
+                }
 
-                    @Override
-                    public void surfaceReplaced(SurfaceControl.Transaction t) {
-                    }
+                @Override
+                public void surfaceReplaced(SurfaceControl.Transaction t) {
+                }
 
-                    @Override
-                    public void surfaceDestroyed() {
+                @Override
+                public void surfaceDestroyed() {
 
-                        // Wait a while to give the system a chance for the remaining
-                        // frames to arrive, then force finish the session.
-                        mHandler.postDelayed(() -> {
-                            synchronized (FrameTracker.this) {
-                                if (DEBUG) {
-                                    Log.d(TAG, "surfaceDestroyed: " + mSession.getName()
-                                            + ", finalized=" + mMetricsFinalized
-                                            + ", info=" + mJankInfos.size()
-                                            + ", vsync=" + mBeginVsyncId + "-" + mEndVsyncId);
-                                }
-                                if (!mMetricsFinalized) {
-                                    end(REASON_END_SURFACE_DESTROYED);
-                                    finish(mJankInfos.size() - 1);
-                                }
+                    // Wait a while to give the system a chance for the remaining
+                    // frames to arrive, then force finish the session.
+                    mHandler.postDelayed(() -> {
+                        synchronized (FrameTracker.this) {
+                            if (DEBUG) {
+                                Log.d(TAG, "surfaceDestroyed: " + mSession.getName()
+                                        + ", finalized=" + mMetricsFinalized
+                                        + ", info=" + mJankInfos.size()
+                                        + ", vsync=" + mBeginVsyncId + "-" + mEndVsyncId);
                             }
-                        }, 50);
-                    }
-                };
-                // This callback has a reference to FrameTracker,
-                // remember to remove it to avoid leakage.
-                mViewRoot.addSurfaceChangedCallback(mSurfaceChangedCallback);
-            }
+                            if (!mMetricsFinalized) {
+                                end(REASON_END_SURFACE_DESTROYED);
+                                finish(mJankInfos.size() - 1);
+                            }
+                        }
+                    }, 50);
+                }
+            };
+            // This callback has a reference to FrameTracker,
+            // remember to remove it to avoid leakage.
+            mViewRoot.addSurfaceChangedCallback(mSurfaceChangedCallback);
         }
     }
 
@@ -283,10 +284,17 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (mListener != null) {
                 mListener.onCujEvents(mSession, ACTION_SESSION_END);
             }
+
+            // We don't remove observer here,
+            // will remove it when all the frame metrics in this duration are called back.
+            // See onFrameMetricsAvailable for the logic of removing the observer.
+            // Let's wait for all callbacks to finish for at most a minute.
+            mWaitForFinishTimedOut = () -> {
+                Log.e(TAG, "force finish cuj because of time out:" + mSession.getName());
+                finish(mJankInfos.size() - 1);
+            };
+            mHandler.postDelayed(mWaitForFinishTimedOut, TimeUnit.MINUTES.toMillis(1));
         }
-        // We don't remove observer here,
-        // will remove it when all the frame metrics in this duration are called back.
-        // See onFrameMetricsAvailable for the logic of removing the observer.
     }
 
     /**
@@ -423,7 +431,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     }
 
     private void finish(int indexOnOrAfterEnd) {
-
+        mHandler.removeCallbacks(mWaitForFinishTimedOut);
+        mWaitForFinishTimedOut = null;
         mMetricsFinalized = true;
 
         // The tracing has been ended, remove the observer, see if need to trigger perfetto.
@@ -509,7 +518,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
         }
         if (DEBUG) {
-            Log.i(TAG, "FrameTracker: CUJ=" + mSession.getName()
+            Log.i(TAG, "finish: CUJ=" + mSession.getName()
                     + " (" + mBeginVsyncId + "," + mEndVsyncId + ")"
                     + " totalFrames=" + totalFramesCount
                     + " missedAppFrames=" + missedAppFramesCount
