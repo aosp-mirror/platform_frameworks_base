@@ -173,6 +173,10 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_new_unlock_swipe_animation);
     }
 
+    public boolean isKeyguardQsUserDetailsShortcutEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_lockscreen_qs_user_detail_shortcut);
+    }
+
     public boolean isSmartSpaceSharedElementTransitionEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_smartspace_shared_element_transition);
     }
