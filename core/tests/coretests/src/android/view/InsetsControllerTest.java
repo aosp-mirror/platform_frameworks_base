@@ -19,13 +19,17 @@ package android.view;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
+import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
+import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
+import static android.view.InsetsState.FIRST_TYPE;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.LAST_TYPE;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
@@ -657,6 +661,97 @@ public class InsetsControllerTest {
                     mController.getState().getSource(ITYPE_IME).getFrame());
             assertEquals(new Rect(4, 5, 6, 7),
                     mController.getState().getSource(ITYPE_IME).getVisibleFrame());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testResizeAnimation_insetsTypes() {
+        for (@InternalInsetsType int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            final @AnimationType int expectedAnimationType =
+                    (InsetsState.toPublicType(type) & Type.systemBars()) != 0
+                            ? ANIMATION_TYPE_RESIZE
+                            : ANIMATION_TYPE_NONE;
+            doTestResizeAnimation_insetsTypes(type, expectedAnimationType);
+        }
+    }
+
+    private void doTestResizeAnimation_insetsTypes(@InternalInsetsType int type,
+            @AnimationType int expectedAnimationType) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final InsetsState state1 = new InsetsState();
+            state1.getSource(type).setVisible(true);
+            state1.getSource(type).setFrame(0, 0, 500, 50);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.getSource(type).setFrame(0, 0, 500, 60);
+            final String message = "Animation type of " + InsetsState.typeToString(type) + ":";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame might cause the resize animation. This depends on the insets type.
+            mController.onStateChanged(state2);
+            assertEquals(message, expectedAnimationType, mController.getAnimationType(type));
+
+            // Cancel the existing animations for the next iteration.
+            mController.cancelExistingAnimations();
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testResizeAnimation_displayFrame() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final @InternalInsetsType int type = ITYPE_STATUS_BAR;
+            final InsetsState state1 = new InsetsState();
+            state1.setDisplayFrame(new Rect(0, 0, 500, 1000));
+            state1.getSource(type).setFrame(0, 0, 500, 50);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.setDisplayFrame(new Rect(0, 0, 500, 1010));
+            state2.getSource(type).setFrame(0, 0, 500, 60);
+            final String message = "There must not be resize animation.";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame won't cause the resize animation if the display frame is also changed.
+            mController.onStateChanged(state2);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testResizeAnimation_visibility() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final @InternalInsetsType int type = ITYPE_STATUS_BAR;
+            final InsetsState state1 = new InsetsState();
+            state1.getSource(type).setVisible(true);
+            state1.getSource(type).setFrame(0, 0, 500, 50);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.getSource(type).setVisible(false);
+            state2.getSource(type).setFrame(0, 0, 500, 60);
+            final InsetsState state3 = new InsetsState(state2, true /* copySources */);
+            state3.getSource(type).setVisible(true);
+            state3.getSource(type).setFrame(0, 0, 500, 70);
+            final String message = "There must not be resize animation.";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing source visibility (visible --> invisible) won't cause the resize animation.
+            // The previous source and the current one must be both visible.
+            mController.onStateChanged(state2);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing source visibility (invisible --> visible) won't cause the resize animation.
+            // The previous source and the current one must be both visible.
+            mController.onStateChanged(state3);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }

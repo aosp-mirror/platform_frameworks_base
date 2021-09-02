@@ -343,7 +343,7 @@ public class TaskSnapshotWindow {
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
         return state.calculateInsets(frame, WindowInsets.Type.systemBars(),
-                false /* ignoreVisibility */);
+                false /* ignoreVisibility */).toRect();
     }
 
     private void drawSnapshot() {

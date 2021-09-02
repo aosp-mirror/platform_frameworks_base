@@ -6965,7 +6965,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         Rect appRect;
         if (win != null) {
             insets = win.getInsetsStateWithVisibilityOverride().calculateInsets(
-                    win.getFrame(), Type.systemBars(), false /* ignoreVisibility */);
+                    win.getFrame(), Type.systemBars(), false /* ignoreVisibility */).toRect();
             appRect = new Rect(win.getFrame());
             appRect.inset(insets);
         } else {
@@ -9233,7 +9233,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return null;
         }
         final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                task.getBounds(), Type.systemBars(), false /* ignoreVisibility */);
+                task.getBounds(), Type.systemBars(), false /* ignoreVisibility */).toRect();
         InsetUtils.addInsets(insets, getLetterboxInsets());
 
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
