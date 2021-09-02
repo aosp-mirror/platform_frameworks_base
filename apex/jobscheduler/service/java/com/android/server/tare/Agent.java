@@ -34,7 +34,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -614,8 +613,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void grantBirthrightsLocked(final int userId) {
-        PackageManager packageManager = mIrs.getContext().getPackageManager();
-        List<PackageInfo> pkgs = packageManager.getInstalledPackagesAsUser(0, userId);
+        final List<PackageInfo> pkgs = mIrs.getInstalledPackages(userId);
         final long maxBirthright =
                 mIrs.getMaxCirculationLocked() / mIrs.getInstalledPackages().size();
         final long now = getCurrentTimeMillis();
