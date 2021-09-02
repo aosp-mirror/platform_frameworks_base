@@ -537,6 +537,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                         mContext.getContentResolver(), mUserId);
         setSwipeToNotificationEnabled(enabled);
+        notifyShortcutStateChanged(mState.getState());
 
         mOneHandedUiEventLogger.writeEvent(enabled
                 ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON
