@@ -143,6 +143,10 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         mProgressDrawable.onLastStepAcquired();
     }
 
+    void onEnrollmentHelp() {
+        mProgressDrawable.onEnrollmentHelp();
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         mProgressDrawable.draw(canvas);

@@ -17,6 +17,7 @@
 package android.os;
 
 import android.app.Activity;
+import android.app.GameManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -113,6 +114,7 @@ public class GraphicsEnvironment {
     private ClassLoader mClassLoader;
     private String mLibrarySearchPaths;
     private String mLibraryPermittedPaths;
+    private GameManager mGameManager;
 
     private int mAngleOptInIndex = -1;
 
@@ -124,6 +126,8 @@ public class GraphicsEnvironment {
         final String packageName = context.getPackageName();
         final ApplicationInfo appInfoWithMetaData =
                 getAppInfoWithMetadata(context, pm, packageName);
+
+        mGameManager = context.getSystemService(GameManager.class);
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupGpuLayers");
         setupGpuLayers(context, coreSettings, pm, packageName, appInfoWithMetaData);
@@ -140,6 +144,23 @@ public class GraphicsEnvironment {
                     getVulkanVersion(pm));
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+    }
+
+    /**
+     * Query to determine if the Game Mode has enabled ANGLE.
+     */
+    private boolean isAngleEnabledByGameMode(Context context, String packageName) {
+        try {
+            final boolean gameModeEnabledAngle =
+                    (mGameManager != null) && mGameManager.isAngleEnabled(packageName);
+            Log.v(TAG, "ANGLE GameManagerService for " + packageName + ": " + gameModeEnabledAngle);
+            return gameModeEnabledAngle;
+        } catch (SecurityException e) {
+            Log.e(TAG, "Caught exception while querying GameManagerService if ANGLE is enabled "
+                    + "for package: " + packageName);
+        }
+
+        return false;
     }
 
     /**
@@ -163,7 +184,9 @@ public class GraphicsEnvironment {
             Log.v(TAG, "ANGLE developer option for " + packageName + ": " + devOptIn);
         }
 
-        return requested;
+        final boolean gameModeEnabledAngle = isAngleEnabledByGameMode(context, packageName);
+
+        return requested || gameModeEnabledAngle;
     }
 
     private int getVulkanVersion(PackageManager pm) {
@@ -521,16 +544,20 @@ public class GraphicsEnvironment {
 
         if (DEBUG) Log.v(TAG, "ANGLE package libs: " + paths);
 
-        // If the user has set the developer option to something other than default,
-        // we need to call setAngleInfo() with the package name and the developer
-        // option value (native/angle/other). Then later when we are actually trying to
-        // load a driver, GraphicsEnv::getShouldUseAngle() has seen the package name before
-        // and can confidently answer yes/no based on the previously set developer
-        // option value.
-        final String devOptIn = getDriverForPackage(context, bundle, packageName);
+        // We need to call setAngleInfo() with the package name and the developer option value
+        //(native/angle/other). Then later when we are actually trying to load a driver,
+        //GraphicsEnv::getShouldUseAngle() has seen the package name before and can confidently
+        //answer yes/no based on the previously set developer option value.
+        final String devOptIn;
         final String[] features = getAngleEglFeatures(context, bundle);
-
+        final boolean gameModeEnabledAngle = isAngleEnabledByGameMode(context, packageName);
+        if (gameModeEnabledAngle) {
+            devOptIn = ANGLE_GL_DRIVER_CHOICE_ANGLE;
+        } else {
+            devOptIn = getDriverForPackage(context, bundle, packageName);
+        }
         setAngleInfo(paths, packageName, devOptIn, features);
+
         return true;
     }
 
