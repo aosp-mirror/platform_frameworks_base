@@ -35,15 +35,16 @@ package android.media.audio.common;
 /* @hide */
 @JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioOffloadInfo {
-  int sampleRateHz;
-  android.media.audio.common.AudioChannelLayout channelMask;
-  android.media.audio.common.AudioFormatDescription format;
+  android.media.audio.common.AudioConfigBase base;
   android.media.audio.common.AudioStreamType streamType = android.media.audio.common.AudioStreamType.INVALID;
   int bitRatePerSecond;
-  long durationMicroseconds;
+  long durationUs;
   boolean hasVideo;
   boolean isStreaming;
-  int bitWidth;
-  int bufferSize;
+  int bitWidth = 16;
+  int offloadBufferSize;
   android.media.audio.common.AudioUsage usage = android.media.audio.common.AudioUsage.INVALID;
+  android.media.audio.common.AudioEncapsulationMode encapsulationMode = android.media.audio.common.AudioEncapsulationMode.INVALID;
+  int contentId;
+  int syncId;
 }

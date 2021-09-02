@@ -391,7 +391,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             level += 1;
             numLevels += 1;
         }
-        return getSignalStrengthIcon(mContext, level, numLevels, NO_CELL_DATA_TYPE_ICON, false);
+        return getSignalStrengthIcon(mContext, level, numLevels, NO_CELL_DATA_TYPE_ICON,
+                !isMobileDataEnabled());
     }
 
     Drawable getSignalStrengthIcon(Context context, int level, int numLevels,

@@ -206,6 +206,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -300,7 +301,6 @@ import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
-import com.android.server.utils.DeviceConfigInterface;
 import com.android.server.utils.PriorityDump;
 
 import java.io.BufferedWriter;
@@ -8113,9 +8113,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean animateStarting = false;
             while (timeoutRemaining > 0) {
                 // Waiting until all starting windows has finished animating.
-                animateStarting = mRoot.forAllActivities(a -> {
-                    return a.hasStartingWindow();
-                });
+                animateStarting = !mAtmService.getTransitionController().isShellTransitionsEnabled()
+                        && mRoot.forAllActivities(ActivityRecord::hasStartingWindow);
                 boolean isAnimating = mAnimator.isAnimationScheduled()
                         || mRoot.isAnimating(TRANSITION | CHILDREN, ANIMATION_TYPE_ALL)
                         || animateStarting;

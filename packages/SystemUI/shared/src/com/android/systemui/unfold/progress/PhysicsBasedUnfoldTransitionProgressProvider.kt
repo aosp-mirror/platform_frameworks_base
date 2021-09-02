@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.progress
 
 import android.os.Handler
+import android.util.MathUtils.saturate
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -24,6 +25,7 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
@@ -33,7 +35,6 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
  * Maps fold updates to unfold transition progress using DynamicAnimation.
  *
  * TODO(b/193793338) Current limitations:
- *  - doesn't handle folding transition
  *  - doesn't handle postures
  */
 internal class PhysicsBasedUnfoldTransitionProgressProvider(
@@ -75,14 +76,20 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 
     override fun onHingeAngleUpdate(angle: Float) {
         if (!isTransitionRunning || isAnimatedCancelRunning) return
-        springAnimation.animateToFinalPosition(angle / 180f)
+        val progress = saturate(angle / FINAL_HINGE_ANGLE_POSITION)
+        springAnimation.animateToFinalPosition(progress)
     }
 
     override fun onFoldUpdate(@FoldUpdate update: Int) {
         when (update) {
             FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> {
-                onStartTransition()
                 startTransition(startValue = 0f)
+
+                // Stop the animation if the device has already opened by the time when
+                // the display is available as we won't receive the full open event anymore
+                if (foldStateProvider.isFullyOpened) {
+                    cancelTransition(endValue = 1f, animate = true)
+                }
             }
             FOLD_UPDATE_FINISH_FULL_OPEN -> {
                 cancelTransition(endValue = 1f, animate = true)
@@ -90,13 +97,16 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             FOLD_UPDATE_FINISH_CLOSED -> {
                 cancelTransition(endValue = 0f, animate = false)
             }
+            FOLD_UPDATE_START_CLOSING -> {
+                startTransition(startValue = 1f)
+            }
         }
     }
 
     private fun cancelTransition(endValue: Float, animate: Boolean) {
         handler.removeCallbacks(timeoutRunnable)
 
-        if (animate) {
+        if (isTransitionRunning && animate) {
             isAnimatedCancelRunning = true
             springAnimation.animateToFinalPosition(endValue)
         } else {
@@ -182,3 +192,4 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 private const val TRANSITION_TIMEOUT_MILLIS = 2000L
 private const val SPRING_STIFFNESS = 200.0f
 private const val MINIMAL_VISIBLE_CHANGE = 0.001f
+private const val FINAL_HINGE_ANGLE_POSITION = 165f

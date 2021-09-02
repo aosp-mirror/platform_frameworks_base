@@ -35,18 +35,25 @@ import com.android.internal.annotations.VisibleForTesting;
  *  aidl2api_AIDL-type-name_SDK-type-name
  *  api2aidl_SDK-type-name_AIDL-type-name
  *
+ * Since the range of the SDK values is generally narrower than
+ * the range of AIDL values, when a match can't be found, the
+ * conversion function returns a corresponding 'INVALID' value.
+ *
  * Methods that convert between AIDL and legacy types are called
  * using the following pattern:
  *
  *  aidl2legacy_AIDL-type-name_native-type-name
  *  legacy2aidl_native-type-name_AIDL-type-name
  *
+ * In general, there is a 1:1 mapping between AIDL and framework
+ * types, and a failure to convert a value indicates a programming
+ * error. Thus, the conversion functions may throw an IllegalArgumentException.
+ *
  * @hide
  */
 @VisibleForTesting
 public class AidlConversion {
     /** Convert from AIDL AudioChannelLayout to legacy audio_channel_mask_t. */
-    @VisibleForTesting
     public static int /*audio_channel_mask_t*/ aidl2legacy_AudioChannelLayout_audio_channel_mask_t(
             @NonNull AudioChannelLayout aidl, boolean isInput) {
         Parcel out = Parcel.obtain();
@@ -60,7 +67,6 @@ public class AidlConversion {
     }
 
     /** Convert from legacy audio_channel_mask_t to AIDL AudioChannelLayout. */
-    @VisibleForTesting
     public static AudioChannelLayout legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
             int /*audio_channel_mask_t*/ legacy, boolean isInput) {
         Parcel in = legacy2aidl_audio_channel_mask_t_AudioChannelLayout_Parcel(legacy, isInput);
@@ -71,12 +77,11 @@ public class AidlConversion {
                 in.recycle();
             }
         }
-        throw new IllegalArgumentException("Invalid legacy audio "
-                + (isInput ? "input" : "output") + " channel mask: " + legacy);
+        throw new IllegalArgumentException("Failed to convert legacy audio "
+                + (isInput ? "input" : "output") + " audio_channel_mask_t " + legacy + " value");
     }
 
     /** Convert from AIDL AudioFormatDescription to legacy audio_format_t. */
-    @VisibleForTesting
     public static int /*audio_format_t*/ aidl2legacy_AudioFormatDescription_audio_format_t(
             @NonNull AudioFormatDescription aidl) {
         Parcel out = Parcel.obtain();
@@ -90,7 +95,6 @@ public class AidlConversion {
     }
 
     /** Convert from legacy audio_format_t to AIDL AudioFormatDescription. */
-    @VisibleForTesting
     public static @NonNull AudioFormatDescription legacy2aidl_audio_format_t_AudioFormatDescription(
             int /*audio_format_t*/ legacy) {
         Parcel in = legacy2aidl_audio_format_t_AudioFormatDescription_Parcel(legacy);
@@ -101,28 +105,33 @@ public class AidlConversion {
                 in.recycle();
             }
         }
-        throw new IllegalArgumentException("Invalid legacy audio format: " + legacy);
+        throw new IllegalArgumentException(
+                "Failed to convert legacy audio_format_t value " + legacy);
     }
+
+    /** Convert from AIDL AudioEncapsulationMode to legacy audio_encapsulation_mode_t. */
+    public static native int aidl2legacy_AudioEncapsulationMode_audio_encapsulation_mode_t(
+            int /*AudioEncapsulationMode.* */ aidl);
+
+    /** Convert from legacy audio_encapsulation_mode_t to AIDL AudioEncapsulationMode. */
+    public static native int legacy2aidl_audio_encapsulation_mode_t_AudioEncapsulationMode(
+            int /*audio_encapsulation_mode_t*/ legacy);
+
+    /** Convert from AIDL AudioStreamType to legacy audio_stream_type_t. */
+    public static native int aidl2legacy_AudioStreamType_audio_stream_type_t(
+            int /*AudioStreamType.* */ aidl);
 
     /** Convert from legacy audio_stream_type_t to AIDL AudioStreamType. */
-    @VisibleForTesting
-    public static int legacy2aidl_audio_stream_type_t_AudioStreamType(
-            int /*audio_stream_type_t*/ legacy) {
-        // Relies on the fact that AudioStreamType was converted from
-        // the HIDL definition which uses the same constant values as system/audio.h
-        return legacy;
-    }
+    public static native int legacy2aidl_audio_stream_type_t_AudioStreamType(
+            int /*audio_stream_type_t*/ legacy);
+
+    /** Convert from AIDL AudioUsage to legacy audio_usage_t. */
+    public static native int aidl2legacy_AudioUsage_audio_usage_t(int /*AudioUsage.* */ aidl);
 
     /** Convert from legacy audio_usage_t to AIDL AudioUsage. */
-    @VisibleForTesting
-    public static int legacy2aidl_audio_usage_t_AudioUsage(int /*audio_usage_t*/ legacy) {
-        // Relies on the fact that AudioUsage was converted from
-        // the HIDL definition which uses the same constant values as system/audio.h
-        return legacy;
-    }
+    public static native int legacy2aidl_audio_usage_t_AudioUsage(int /*audio_usage_t*/ legacy);
 
     /** Convert from AIDL AudioChannelLayout to SDK AudioFormat.CHANNEL_*. */
-    @VisibleForTesting
     public static int aidl2api_AudioChannelLayout_AudioFormatChannelMask(
             @NonNull AudioChannelLayout aidlMask, boolean isInput) {
         switch (aidlMask.getTag()) {
@@ -283,29 +292,34 @@ public class AidlConversion {
     }
 
     /** Convert from AIDL AudioConfig to SDK AudioFormat. */
-    @VisibleForTesting
     public static @NonNull AudioFormat aidl2api_AudioConfig_AudioFormat(
-            @NonNull AudioConfig audioConfig, boolean isInput) {
+            @NonNull AudioConfig aidl, boolean isInput) {
+        // Only information from the encapsulated AudioConfigBase is used.
+        return aidl2api_AudioConfigBase_AudioFormat(aidl.base, isInput);
+    }
+
+    /** Convert from AIDL AudioConfigBase to SDK AudioFormat. */
+    public static @NonNull AudioFormat aidl2api_AudioConfigBase_AudioFormat(
+            @NonNull AudioConfigBase aidl, boolean isInput) {
         AudioFormat.Builder apiBuilder = new AudioFormat.Builder();
-        apiBuilder.setSampleRate(audioConfig.sampleRateHz);
-        if (audioConfig.channelMask.getTag() != AudioChannelLayout.indexMask) {
+        apiBuilder.setSampleRate(aidl.sampleRate);
+        if (aidl.channelMask.getTag() != AudioChannelLayout.indexMask) {
             apiBuilder.setChannelMask(aidl2api_AudioChannelLayout_AudioFormatChannelMask(
-                            audioConfig.channelMask, isInput));
+                            aidl.channelMask, isInput));
         } else {
             apiBuilder.setChannelIndexMask(aidl2api_AudioChannelLayout_AudioFormatChannelMask(
-                            audioConfig.channelMask, isInput));
+                            aidl.channelMask, isInput));
         }
-        apiBuilder.setEncoding(aidl2api_AudioFormat_AudioFormatEncoding(audioConfig.format));
+        apiBuilder.setEncoding(aidl2api_AudioFormat_AudioFormatEncoding(aidl.format));
         return apiBuilder.build();
     }
 
     /** Convert from AIDL AudioFormat to SDK AudioFormat.ENCODING_*. */
-    @VisibleForTesting
     public static int aidl2api_AudioFormat_AudioFormatEncoding(
-            @NonNull AudioFormatDescription aidlFormat) {
-        switch (aidlFormat.type) {
+            @NonNull AudioFormatDescription aidl) {
+        switch (aidl.type) {
             case AudioFormatType.PCM:
-                switch (aidlFormat.pcm) {
+                switch (aidl.pcm) {
                     case PcmType.UINT_8_BIT:
                         return AudioFormat.ENCODING_PCM_8BIT;
                     case PcmType.INT_16_BIT:
@@ -321,54 +335,54 @@ public class AidlConversion {
                         return AudioFormat.ENCODING_INVALID;
                 }
             case AudioFormatType.NON_PCM: // same as DEFAULT
-                if (aidlFormat.encoding != null && !aidlFormat.encoding.isEmpty()) {
-                    if (MediaFormat.MIMETYPE_AUDIO_AC3.equals(aidlFormat.encoding)) {
+                if (aidl.encoding != null && !aidl.encoding.isEmpty()) {
+                    if (MediaFormat.MIMETYPE_AUDIO_AC3.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AC3;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_EAC3.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_EAC3.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_E_AC3;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_DTS;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS_HD.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS_HD.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_DTS_HD;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEG.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEG.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MP3;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_LC.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_LC.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AAC_LC;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_HE_V1.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_HE_V1.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AAC_HE_V1;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_HE_V2.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_HE_V2.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AAC_HE_V2;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_IEC61937.equals(aidlFormat.encoding)
-                            && aidlFormat.pcm == PcmType.INT_16_BIT) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_IEC61937.equals(aidl.encoding)
+                            && aidl.pcm == PcmType.INT_16_BIT) {
                         return AudioFormat.ENCODING_IEC61937;
                     } else if (MediaFormat.MIMETYPE_AUDIO_DOLBY_TRUEHD.equals(
-                                    aidlFormat.encoding)) {
+                                    aidl.encoding)) {
                         return AudioFormat.ENCODING_DOLBY_TRUEHD;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_ELD.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_ELD.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AAC_ELD;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_XHE.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AAC_XHE.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AAC_XHE;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_AC4.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_AC4.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_AC4;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_EAC3_JOC.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_EAC3_JOC.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_E_AC3_JOC;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_DOLBY_MAT.equals(aidlFormat.encoding)
-                            || aidlFormat.encoding.startsWith(
+                    } else if (MediaFormat.MIMETYPE_AUDIO_DOLBY_MAT.equals(aidl.encoding)
+                            || aidl.encoding.startsWith(
                                     MediaFormat.MIMETYPE_AUDIO_DOLBY_MAT + ".")) {
                         return AudioFormat.ENCODING_DOLBY_MAT;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_OPUS.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_OPUS.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_OPUS;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_BL_L3.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_BL_L3.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MPEGH_BL_L3;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_BL_L4.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_BL_L4.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MPEGH_BL_L4;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_LC_L3.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_LC_L3.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MPEGH_LC_L3;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_LC_L4.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_LC_L4.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MPEGH_LC_L4;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS_UHD.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_DTS_UHD.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_DTS_UHD;
-                    } else if (MediaFormat.MIMETYPE_AUDIO_DRA.equals(aidlFormat.encoding)) {
+                    } else if (MediaFormat.MIMETYPE_AUDIO_DRA.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_DRA;
                     } else {
                         return AudioFormat.ENCODING_INVALID;

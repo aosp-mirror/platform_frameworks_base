@@ -363,6 +363,7 @@ public class AppSearchManagerService extends SystemService {
                         schemasVisibleToPackages.put(entry.getKey(), packageIdentifiers);
                     }
                     instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
+                    // TODO(b/173532925): Implement logging for statsBuilder
                     SetSchemaResponse setSchemaResponse = instance.getAppSearchImpl().setSchema(
                             packageName,
                             databaseName,
@@ -371,7 +372,8 @@ public class AppSearchManagerService extends SystemService {
                             schemasNotDisplayedBySystem,
                             schemasVisibleToPackages,
                             forceOverride,
-                            schemaVersion);
+                            schemaVersion,
+                            /*setSchemaStatsBuilder=*/ null);
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback,
                             AppSearchResult.newSuccessfulResult(setSchemaResponse.getBundle()));
@@ -816,8 +818,10 @@ public class AppSearchManagerService extends SystemService {
 
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(targetUser);
+                    // TODO(b/173532925): Implement logging for statsBuilder
                     SearchResultPage searchResultPage =
-                            instance.getAppSearchImpl().getNextPage(packageName, nextPageToken);
+                            instance.getAppSearchImpl().getNextPage(
+                                    packageName, nextPageToken, /*statsBuilder=*/ null);
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -898,8 +902,11 @@ public class AppSearchManagerService extends SystemService {
                                         outputStream, searchResultPage.getResults().get(i)
                                                 .getGenericDocument().getBundle());
                             }
+                            // TODO(b/173532925): Implement logging for statsBuilder
                             searchResultPage = instance.getAppSearchImpl().getNextPage(
-                                    packageName, searchResultPage.getNextPageToken());
+                                    packageName,
+                                    searchResultPage.getNextPageToken(),
+                                    /*statsBuilder=*/ null);
                         }
                     }
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));

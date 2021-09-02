@@ -16,8 +16,7 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioChannelLayout;
-import android.media.audio.common.AudioFormatDescription;
+import android.media.audio.common.AudioConfigBase;
 import android.media.audio.common.AudioOffloadInfo;
 
 /**
@@ -28,9 +27,8 @@ import android.media.audio.common.AudioOffloadInfo;
 @JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable AudioConfig {
-    int sampleRateHz;
-    AudioChannelLayout channelMask;
-    AudioFormatDescription format;
+    AudioConfigBase base;
     AudioOffloadInfo offloadInfo;
+    /** I/O buffer size in frames. */
     long frameCount;
 }

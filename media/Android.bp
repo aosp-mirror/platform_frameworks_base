@@ -54,6 +54,8 @@ aidl_interface {
     srcs: [
         "aidl/android/media/audio/common/AudioChannelLayout.aidl",
         "aidl/android/media/audio/common/AudioConfig.aidl",
+        "aidl/android/media/audio/common/AudioConfigBase.aidl",
+        "aidl/android/media/audio/common/AudioEncapsulationMode.aidl",
         "aidl/android/media/audio/common/AudioFormatDescription.aidl",
         "aidl/android/media/audio/common/AudioFormatType.aidl",
         "aidl/android/media/audio/common/AudioOffloadInfo.aidl",

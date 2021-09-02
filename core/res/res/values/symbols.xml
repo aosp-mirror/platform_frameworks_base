@@ -2528,6 +2528,7 @@
   <java-symbol type="string" name="fingerprint_error_no_space" />
   <java-symbol type="string" name="fingerprint_error_timeout" />
   <java-symbol type="array" name="fingerprint_error_vendor" />
+  <java-symbol type="string" name="fingerprint_error_vendor_unknown" />
   <java-symbol type="string" name="fingerprint_acquired_partial" />
   <java-symbol type="string" name="fingerprint_acquired_insufficient" />
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
@@ -2567,6 +2568,7 @@
   <java-symbol type="string" name="face_error_no_space" />
   <java-symbol type="string" name="face_error_timeout" />
   <java-symbol type="array" name="face_error_vendor" />
+  <java-symbol type="string" name="face_error_vendor_unknown" />
   <java-symbol type="string" name="face_error_canceled" />
   <java-symbol type="string" name="face_error_user_canceled" />
   <java-symbol type="string" name="face_error_lockout" />
@@ -3844,6 +3846,7 @@
   <java-symbol type="string" name="config_foldedArea" />
   <java-symbol type="bool" name="config_supportsConcurrentInternalDisplays" />
   <java-symbol type="bool" name="config_unfoldTransitionEnabled" />
+  <java-symbol type="bool" name="config_unfoldTransitionHingeAngle" />
   <java-symbol type="array" name="config_perDeviceStateRotationLockDefaults" />
 
 

@@ -40,6 +40,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -47,6 +48,7 @@ import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
@@ -71,6 +73,7 @@ public class PolicyWarningUIController {
     @VisibleForTesting
     protected static final String ACTION_DISMISS_NOTIFICATION =
             TAG + ".ACTION_DISMISS_NOTIFICATION";
+    private static final String EXTRA_TIME_FOR_LOGGING = "start_time_to_log_a11y_tool";
     private static final int SEND_NOTIFICATION_DELAY_HOURS = 24;
 
     /** Current enabled accessibility services. */
@@ -179,7 +182,8 @@ public class PolicyWarningUIController {
         intent.setPackage(context.getPackageName())
                 .setIdentifier(serviceComponentName.flattenToShortString())
                 .putExtra(Intent.EXTRA_COMPONENT_NAME, serviceComponentName)
-                .putExtra(Intent.EXTRA_USER_ID, userId);
+                .putExtra(Intent.EXTRA_USER_ID, userId)
+                .putExtra(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
         return intent;
     }
 
@@ -214,11 +218,24 @@ public class PolicyWarningUIController {
             if (TextUtils.isEmpty(action) || componentName == null) {
                 return;
             }
+            final long startTimeMills = intent.getLongExtra(Intent.EXTRA_TIME, 0);
+            final long durationMills =
+                    startTimeMills > 0 ? SystemClock.elapsedRealtime() - startTimeMills : 0;
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_SYSTEM);
             if (ACTION_SEND_NOTIFICATION.equals(action)) {
-                trySendNotification(userId, componentName);
+                if (trySendNotification(userId, componentName)) {
+                    AccessibilityStatsLogUtils.logNonA11yToolServiceWarningReported(
+                            componentName.getPackageName(),
+                            AccessibilityStatsLogUtils.ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN,
+                            durationMills);
+                }
             } else if (ACTION_A11Y_SETTINGS.equals(action)) {
-                launchSettings(userId, componentName);
+                if (tryLaunchSettings(userId, componentName)) {
+                    AccessibilityStatsLogUtils.logNonA11yToolServiceWarningReported(
+                            componentName.getPackageName(),
+                            AccessibilityStatsLogUtils.ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED,
+                            durationMills);
+                }
                 mNotificationManager.cancel(componentName.flattenToShortString(),
                         NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
                 onNotificationCanceled(userId, componentName);
@@ -240,12 +257,12 @@ public class PolicyWarningUIController {
             }
         }
 
-        private void trySendNotification(int userId, ComponentName componentName) {
+        private boolean trySendNotification(int userId, ComponentName componentName) {
             if (!AccessibilitySecurityPolicy.POLICY_WARNING_ENABLED) {
-                return;
+                return false;
             }
             if (userId != mCurrentUserId) {
-                return;
+                return false;
             }
 
             List<AccessibilityServiceInfo> enabledServiceInfos = getEnabledServiceInfos();
@@ -264,23 +281,27 @@ public class PolicyWarningUIController {
                                 android.R.dimen.app_icon_size);
                         sendNotification(userId, componentName, displayName,
                                 ImageUtils.buildScaledBitmap(drawable, size, size));
+                        return true;
                     }
                     break;
                 }
             }
+            return false;
         }
 
-        private void launchSettings(int userId, ComponentName componentName) {
+        private boolean tryLaunchSettings(int userId, ComponentName componentName) {
             if (userId != mCurrentUserId) {
-                return;
+                return false;
             }
             final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.putExtra(Intent.EXTRA_COMPONENT_NAME, componentName.flattenToShortString());
+            intent.putExtra(EXTRA_TIME_FOR_LOGGING, SystemClock.elapsedRealtime());
             final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(
                     mContext.getDisplayId()).toBundle();
             mContext.startActivityAsUser(intent, bundle, UserHandle.of(userId));
             mContext.getSystemService(StatusBarManager.class).collapsePanels();
+            return true;
         }
 
         protected void onNotificationCanceled(int userId, ComponentName componentName) {

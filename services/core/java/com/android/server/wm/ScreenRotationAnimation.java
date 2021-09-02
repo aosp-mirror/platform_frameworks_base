@@ -729,7 +729,12 @@ class ScreenRotationAnimation {
                 mScreenshotRotationAnimator = null;
                 mRotateScreenAnimator = null;
                 mService.mAnimator.mBulkUpdateParams |= WindowSurfacePlacer.SET_UPDATE_ROTATION;
-                kill();
+                if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
+                    // It also invokes kill().
+                    mDisplayContent.setRotationAnimation(null);
+                } else {
+                    kill();
+                }
                 mService.updateRotation(false, false);
             }
         }

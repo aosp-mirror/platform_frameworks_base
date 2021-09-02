@@ -3133,6 +3133,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mScreenRotationAnimation;
     }
 
+    /** If the display is in transition, there should be a screenshot covering it. */
+    @Override
+    boolean inTransition() {
+        return mScreenRotationAnimation != null || super.inTransition();
+    }
+
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
