@@ -422,8 +422,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     // Capture the animation surface control for activity's main window
-    private static class StartingWindowAnimationAdaptor implements AnimationAdapter {
-        private SurfaceControl mAnimationLeash;
+    static class StartingWindowAnimationAdaptor implements AnimationAdapter {
+        SurfaceControl mAnimationLeash;
         @Override
         public boolean getShowWallpaper() {
             return false;
@@ -462,6 +462,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void dumpDebug(ProtoOutputStream proto) {
         }
+    }
+
+    static SurfaceControl applyStartingWindowAnimation(WindowContainer window) {
+        final StartingWindowAnimationAdaptor adaptor = new StartingWindowAnimationAdaptor();
+        window.startAnimation(window.getPendingTransaction(), adaptor, false,
+                ANIMATION_TYPE_STARTING_REVEAL);
+        return adaptor.mAnimationLeash;
     }
 
     boolean addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
@@ -510,12 +517,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 final WindowState mainWindow =
                         topActivity.findMainWindow(false/* includeStartingApp */);
                 if (mainWindow != null) {
-                    final StartingWindowAnimationAdaptor adaptor =
-                            new StartingWindowAnimationAdaptor();
                     final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
-                    mainWindow.startAnimation(t, adaptor, false,
-                            ANIMATION_TYPE_STARTING_REVEAL);
-                    removalInfo.windowAnimationLeash = adaptor.mAnimationLeash;
+                    removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                     removalInfo.mainFrame = mainWindow.getRelativeFrame();
                     t.setPosition(removalInfo.windowAnimationLeash,
                             removalInfo.mainFrame.left, removalInfo.mainFrame.top);
