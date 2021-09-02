@@ -274,7 +274,7 @@ public class NavigationBarView extends FrameLayout implements
     };
 
     private final Consumer<Boolean> mRotationButtonListener = (visible) -> {
-        if (visible) {
+        if (visible && mAutoHideController != null) {
             // If the button will actually become visible and the navbar is about to hide,
             // tell the statusbar to keep it around for longer
             mAutoHideController.touchAutoHide();
