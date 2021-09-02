@@ -196,9 +196,11 @@ public class DependencyProvider {
     @SysUISingleton
     @Provides
     static ThemeOverlayApplier provideThemeOverlayManager(Context context,
-            @Background Executor bgExecutor, OverlayManager overlayManager,
+            @Background Executor bgExecutor,
+            @Main Executor mainExecutor,
+            OverlayManager overlayManager,
             DumpManager dumpManager) {
-        return new ThemeOverlayApplier(overlayManager, bgExecutor,
+        return new ThemeOverlayApplier(overlayManager, bgExecutor, mainExecutor,
                 context.getString(R.string.launcher_overlayable_package),
                 context.getString(R.string.themepicker_overlayable_package), dumpManager);
     }

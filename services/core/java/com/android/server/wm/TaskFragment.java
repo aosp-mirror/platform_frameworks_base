@@ -2014,6 +2014,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 || mDisplayContent == null
                 || mTaskFragmentOrganizer == null
                 || getSurfaceControl() == null
+                // The change transition will be covered by display.
+                || mDisplayContent.inTransition()
                 || !isVisible()) {
             return false;
         }

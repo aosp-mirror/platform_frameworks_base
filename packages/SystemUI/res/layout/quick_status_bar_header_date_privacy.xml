@@ -49,6 +49,11 @@
         />
     </FrameLayout>
 
+    <!-- We want this to be centered (to align with notches). In order to do that, the following
+         has to hold (in portrait):
+         * date_container and privacy_container must have the same width and weight
+         * header_text_container must be gone
+         -->
     <android.widget.Space
         android:id="@+id/space"
         android:layout_width="0dp"
@@ -75,7 +80,7 @@
         android:layout_weight="1"
         android:gravity="center_vertical|end" >
 
-    <include layout="@layout/ongoing_privacy_chip" />
+        <include layout="@layout/ongoing_privacy_chip" />
 
     </FrameLayout>
 </LinearLayout>

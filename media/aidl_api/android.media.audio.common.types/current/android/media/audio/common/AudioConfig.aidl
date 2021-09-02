@@ -35,9 +35,7 @@ package android.media.audio.common;
 /* @hide */
 @JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioConfig {
-  int sampleRateHz;
-  android.media.audio.common.AudioChannelLayout channelMask;
-  android.media.audio.common.AudioFormatDescription format;
+  android.media.audio.common.AudioConfigBase base;
   android.media.audio.common.AudioOffloadInfo offloadInfo;
   long frameCount;
 }

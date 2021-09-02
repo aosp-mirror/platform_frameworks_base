@@ -24,6 +24,7 @@ import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.external.localstorage.stats.SetSchemaStats;
 
 /**
  * An interface for implementing client-defined logging AppSearch operations stats.
@@ -53,6 +54,9 @@ public interface AppSearchLogger {
 
     /** Logs {@link OptimizeStats} */
     void logStats(@NonNull OptimizeStats stats);
+
+    /** Logs {@link SetSchemaStats} */
+    void logStats(@NonNull SetSchemaStats stats);
 
     // TODO(b/173532925) Add remaining logStats once we add all the stats.
 }

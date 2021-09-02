@@ -1889,10 +1889,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     public void setChildSurfacePackage(@NonNull SurfaceControlViewHost.SurfacePackage p) {
         final SurfaceControl lastSc = mSurfacePackage != null ?
                 mSurfacePackage.getSurfaceControl() : null;
-        if (mSurfaceControl != null && lastSc != null) {
-            mTmpTransaction.reparent(lastSc, null).apply();
-            mSurfacePackage.release();
-        } else if (mSurfaceControl != null) {
+        if (mSurfaceControl != null) {
+            if (lastSc != null) {
+                mTmpTransaction.reparent(lastSc, null);
+                mSurfacePackage.release();
+            }
+
             reparentSurfacePackage(mTmpTransaction, p);
             mTmpTransaction.apply();
         }

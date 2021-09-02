@@ -2739,6 +2739,22 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGES_UNSUSPENDED = "android.intent.action.PACKAGES_UNSUSPENDED";
+    /**
+     * Broadcast Action: One of the suspend conditions have been modified for the packages.
+     * <p>Includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been modified
+     * <li> {@link #EXTRA_CHANGED_UID_LIST} is the set of uids which have been modified
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. It is only sent to registered receivers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGES_SUSPENSION_CHANGED =
+            "android.intent.action.PACKAGES_SUSPENSION_CHANGED";
 
     /**
      * Broadcast Action: Distracting packages have been changed.
@@ -4917,6 +4933,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_LAUNCHER = "android.intent.category.CAR_LAUNCHER";
+    /**
+     * Used to indicate that the activity can be used in communal mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_COMMUNAL_MODE = "android.intent.category.COMMUNAL_MODE";
     /**
      * Indicates a Leanback settings activity to be displayed in the Leanback launcher.
      * @hide

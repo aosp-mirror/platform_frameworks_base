@@ -62,18 +62,4 @@ public class GenericDocumentTest {
         assertThat(outDoc.getPropertyDocument("propDocument").getPropertyBytesArray("propBytes"))
                 .isEqualTo(new byte[][] {{3, 4}});
     }
-
-    @Test
-    public void testPutLargeDocument_exceedLimit() throws Exception {
-        // Create a String property that has a very large property.
-        char[] chars = new char[10_000_000];
-        String property = new StringBuilder().append(chars).append("the end.").toString();
-
-        GenericDocument doc =
-                new GenericDocument.Builder<>("namespace", "id1", "schema1")
-                        .setPropertyString("propString", property)
-                        .build();
-
-        assertThat(doc.getPropertyString("propString")).isEqualTo(property);
-    }
 }

@@ -27,6 +27,7 @@ import android.media.AudioFormat;
 import android.media.MediaFormat;
 import android.media.audio.common.AudioChannelLayout;
 import android.media.audio.common.AudioConfig;
+import android.media.audio.common.AudioConfigBase;
 import android.media.audio.common.AudioFormatDescription;
 import android.media.audio.common.AudioFormatType;
 import android.media.soundtrigger.AudioCapabilities;
@@ -340,10 +341,11 @@ class TestUtil {
         event.capturePreambleMs = 345;
         event.triggerInData = true;
         event.audioConfig = new AudioConfig();
-        event.audioConfig.sampleRateHz = 456;
-        event.audioConfig.channelMask = AudioChannelLayout.layoutMask(
+        event.audioConfig.base = new AudioConfigBase();
+        event.audioConfig.base.sampleRate = 456;
+        event.audioConfig.base.channelMask = AudioChannelLayout.layoutMask(
                 AudioChannelLayout.LAYOUT_MONO);
-        event.audioConfig.format = createAudioFormatMp3();
+        event.audioConfig.base.format = createAudioFormatMp3();
         //event.audioConfig.offloadInfo is irrelevant.
         event.data = new byte[]{31, 32, 33};
         return event;
@@ -367,10 +369,10 @@ class TestUtil {
         assertEquals(234, event.captureDelayMs);
         assertEquals(345, event.capturePreambleMs);
         assertTrue(event.triggerInData);
-        assertEquals(456, event.audioConfig.sampleRateHz);
+        assertEquals(456, event.audioConfig.base.sampleRate);
         assertEquals(AudioChannelLayout.layoutMask(AudioChannelLayout.LAYOUT_MONO),
-                event.audioConfig.channelMask);
-        assertEquals(createAudioFormatMp3(), event.audioConfig.format);
+                event.audioConfig.base.channelMask);
+        assertEquals(createAudioFormatMp3(), event.audioConfig.base.format);
         assertArrayEquals(new byte[]{31, 32, 33}, event.data);
     }
 

@@ -4617,7 +4617,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
             final String packageName = dumpState.getTargetPackageName();
+            final PackageSetting setting = mSettings.getPackageLPr(packageName);
             final boolean checkin = dumpState.isCheckIn();
+
+            // Return if the package doesn't exist.
+            if (packageName != null && setting == null) {
+                return;
+            }
 
             switch (type) {
                 case DumpState.DUMP_VERSION:
@@ -4711,8 +4717,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 case DumpState.DUMP_QUERIES:
                 {
-                    final PackageSetting setting = mSettings.getPackageLPr(packageName);
-                    Integer filteringAppId = setting == null ? null : setting.appId;
+                    final Integer filteringAppId = setting == null ? null : setting.appId;
                     mAppsFilter.dumpQueries(
                             pw, filteringAppId, dumpState, mUserManager.getUserIds(),
                             this::getPackagesForUidInternalBody);
@@ -4723,8 +4728,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 {
                     final android.util.IndentingPrintWriter writer =
                             new android.util.IndentingPrintWriter(pw);
-                    if (dumpState.onTitlePrinted()) pw.println();
-
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
                     writer.println("Domain verification status:");
                     writer.increaseIndent();
                     try {
@@ -4741,18 +4747,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 case DumpState.DUMP_DEXOPT:
                 {
                     final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                    ipw.println();
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
                     ipw.println("Dexopt state:");
                     ipw.increaseIndent();
                     Collection<PackageSetting> pkgSettings;
-                    if (packageName != null) {
-                        PackageSetting targetPkgSetting = mSettings.getPackageLPr(packageName);
-                        if (targetPkgSetting != null) {
-                            pkgSettings = Collections.singletonList(targetPkgSetting);
-                        } else {
-                            ipw.println("Unable to find package: " + packageName);
-                            return;
-                        }
+                    if (setting != null) {
+                        pkgSettings = Collections.singletonList(setting);
                     } else {
                         pkgSettings = mSettings.getPackagesLocked().values();
                     }
@@ -4762,10 +4764,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (pkg == null) {
                             continue;
                         }
-                        ipw.println("[" + pkgSetting.name + "]");
+                        final String pkgName = pkg.getPackageName();
+                        ipw.println("[" + pkgName + "]");
                         ipw.increaseIndent();
+
                         mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                                mDexManager.getPackageUseInfoOrDefault(pkg.getPackageName()));
+                                mDexManager.getPackageUseInfoOrDefault(pkgName));
                         ipw.decreaseIndent();
                     }
                     break;
@@ -4774,28 +4778,29 @@ public class PackageManagerService extends IPackageManager.Stub
                 case DumpState.DUMP_COMPILER_STATS:
                 {
                     final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                    ipw.println();
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
                     ipw.println("Compiler stats:");
                     ipw.increaseIndent();
-                    Collection<AndroidPackage> packages;
-                    if (packageName != null) {
-                        AndroidPackage targetPackage = mPackages.get(packageName);
-                        if (targetPackage != null) {
-                            packages = Collections.singletonList(targetPackage);
-                        } else {
-                            ipw.println("Unable to find package: " + packageName);
-                            return;
-                        }
+                    Collection<PackageSetting> pkgSettings;
+                    if (setting != null) {
+                        pkgSettings = Collections.singletonList(setting);
                     } else {
-                        packages = mPackages.values();
+                        pkgSettings = mSettings.getPackagesLocked().values();
                     }
 
-                    for (AndroidPackage pkg : packages) {
+                    for (PackageSetting pkgSetting : pkgSettings) {
+                        final AndroidPackage pkg = pkgSetting.getPkg();
+                        if (pkg == null) {
+                            continue;
+                        }
                         final String pkgName = pkg.getPackageName();
                         ipw.println("[" + pkgName + "]");
                         ipw.increaseIndent();
 
-                        CompilerStats.PackageStats stats = mCompilerStats.getPackageStats(pkgName);
+                        final CompilerStats.PackageStats stats =
+                                mCompilerStats.getPackageStats(pkgName);
                         if (stats == null) {
                             ipw.println("(No recorded stats)");
                         } else {
@@ -14271,8 +14276,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
-            boolean suspended) {
+    void sendPackagesSuspendedForUser(String intent, String[] pkgList, int[] uidList, int userId) {
         final List<List<String>> pkgsToSend = new ArrayList(pkgList.length);
         final List<IntArray> uidsToSend = new ArrayList(pkgList.length);
         final List<SparseArray<int[]>> allowListsToSend = new ArrayList(pkgList.length);
@@ -14313,11 +14317,8 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidsToSend.get(i).toArray());
             final SparseArray<int[]> allowList = allowListsToSend.get(i).size() == 0
                     ? null : allowListsToSend.get(i);
-            sendPackageBroadcast(
-                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
-                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                    userIds, null, allowList, null);
+            sendPackageBroadcast(intent, null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null,
+                    null, userIds, null, allowList, null);
         }
     }
 
@@ -14631,6 +14632,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
+        final List<String> modifiedPackagesList = new ArrayList<>(packageNames.length);
+        final IntArray modifiedUids = new IntArray(packageNames.length);
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
         final boolean[] canSuspend = suspended ? canSuspendPackageForUserInternal(packageNames,
                 userId) : null;
@@ -14658,13 +14661,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 unactionedPackages.add(packageName);
                 continue;
             }
-            boolean packageUnsuspended;
+            final boolean packageUnsuspended;
+            final boolean packageModified;
             synchronized (mLock) {
                 if (suspended) {
-                    pkgSetting.addOrUpdateSuspension(callingPackage, dialogInfo, appExtras,
-                            launcherExtras, userId);
+                    packageModified = pkgSetting.addOrUpdateSuspension(callingPackage,
+                            dialogInfo, appExtras, launcherExtras, userId);
                 } else {
-                    pkgSetting.removeSuspension(callingPackage, userId);
+                    packageModified = pkgSetting.removeSuspension(callingPackage, userId);
                 }
                 packageUnsuspended = !suspended && !pkgSetting.getSuspended(userId);
             }
@@ -14672,18 +14676,29 @@ public class PackageManagerService extends IPackageManager.Stub
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
             }
+            if (packageModified) {
+                modifiedPackagesList.add(packageName);
+                modifiedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+            }
         }
 
         if (!changedPackagesList.isEmpty()) {
-            final String[] changedPackages = changedPackagesList.toArray(
-                    new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(changedPackages, changedUids.toArray(), userId, suspended);
+            final String[] changedPackages = changedPackagesList.toArray(new String[0]);
+            sendPackagesSuspendedForUser(
+                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                              : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    changedPackages, changedUids.toArray(), userId);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-        return unactionedPackages.toArray(new String[unactionedPackages.size()]);
+        // Send the suspension changed broadcast to ensure suspension state is not stale.
+        if (!modifiedPackagesList.isEmpty()) {
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
+                    modifiedPackagesList.toArray(new String[0]), modifiedUids.toArray(), userId);
+        }
+        return unactionedPackages.toArray(new String[0]);
     }
 
     @Override
@@ -14812,7 +14827,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final String[] packageArray = unsuspendedPackages.toArray(
                     new String[unsuspendedPackages.size()]);
             sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
-            sendPackagesSuspendedForUser(packageArray, unsuspendedUids.toArray(), userId, false);
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    packageArray, unsuspendedUids.toArray(), userId);
         }
     }
 
@@ -19329,15 +19345,24 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final String packageName = dumpState.getTargetPackageName();
         final boolean checkin = dumpState.isCheckIn();
+
+        // Return if the package doesn't exist.
+        if (packageName != null
+                && getPackageSetting(packageName) == null
+                && !mApexManager.isApexPackage(packageName)) {
+            pw.println("Unable to find package: " + packageName);
+            return;
+        }
+
         if (checkin) {
             pw.println("vers,1");
         }
 
         // reader
-        if (dumpState.isDumping(DumpState.DUMP_VERSION) && packageName == null) {
-            if (!checkin) {
-                dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
-            }
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_VERSION)
+                && packageName == null) {
+            dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
         }
 
         if (!checkin
@@ -19368,7 +19393,8 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS)
+                && packageName == null) {
             final String requiredVerifierPackage = mRequiredVerifierPackage;
             if (!checkin) {
                 if (dumpState.onTitlePrinted()) {
@@ -19389,14 +19415,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER)
+                && packageName == null) {
             final DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
             final ComponentName verifierComponent = proxy.getComponentName();
             if (verifierComponent != null) {
                 String verifierPackageName = verifierComponent.getPackageName();
                 if (!checkin) {
-                    if (dumpState.onTitlePrinted())
+                    if (dumpState.onTitlePrinted()) {
                         pw.println();
+                    }
                     pw.println("Domain Verifier:");
                     pw.print("  Using: ");
                     pw.print(verifierPackageName);
@@ -19416,11 +19444,13 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_LIBS)
+                && packageName == null) {
             dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_FEATURES)
+                && packageName == null) {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
@@ -19430,12 +19460,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             synchronized (mAvailableFeatures) {
                 for (FeatureInfo feat : mAvailableFeatures.values()) {
-                    if (checkin) {
-                        pw.print("feat,");
-                        pw.print(feat.name);
-                        pw.print(",");
-                        pw.println(feat.version);
-                    } else {
+                    if (!checkin) {
                         pw.print("  ");
                         pw.print(feat.name);
                         if (feat.version > 0) {
@@ -19443,55 +19468,73 @@ public class PackageManagerService extends IPackageManager.Stub
                             pw.print(feat.version);
                         }
                         pw.println();
+                    } else {
+                        pw.print("feat,");
+                        pw.print(feat.name);
+                        pw.print(",");
+                        pw.println(feat.version);
                     }
                 }
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
             }
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
             dump(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)
+                && packageName == null) {
             dump(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
             dump(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
-            mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
+            synchronized (mLock) {
+                mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+            }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
             synchronized (mLock) {
                 mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
             synchronized (mLock) {
                 mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
             }
@@ -19506,7 +19549,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_QUERIES)) {
             dump(DumpState.DUMP_QUERIES, fd, pw, dumpState);
         }
 
@@ -19518,8 +19562,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_CHANGES)) {
-            if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_CHANGES)
+                && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             pw.println("Package Changes:");
             synchronized (mLock) {
                 pw.print("  Sequence number="); pw.println(mChangedPackagesSequenceNumber);
@@ -19545,11 +19593,14 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_FROZEN)
+                && packageName == null) {
             // XXX should handle packageName != null by dumping only install data that
             // the given package is involved with.
-            if (dumpState.onTitlePrinted()) pw.println();
-
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
             ipw.println();
             ipw.println("Frozen packages:");
@@ -19566,9 +19617,12 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
-            if (dumpState.onTitlePrinted()) pw.println();
-
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_VOLUMES)
+                && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
             ipw.println();
             ipw.println("Loaded volumes:");
@@ -19585,52 +19639,65 @@ public class PackageManagerService extends IPackageManager.Stub
             ipw.decreaseIndent();
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
                 && packageName == null) {
             synchronized (mLock) {
                 mComponentResolver.dumpServicePermissions(pw, dumpState);
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
-            if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
             dump(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
-            if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
             dump(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
-            if (dumpState.onTitlePrinted()) pw.println();
-            synchronized (mLock) {
-                mSettings.dumpReadMessagesLPr(pw, dumpState);
+        if (dumpState.isDumping(DumpState.DUMP_MESSAGES)
+                && packageName == null) {
+            if (!checkin) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                synchronized (mLock) {
+                    mSettings.dumpReadMessagesLPr(pw, dumpState);
+                }
+                pw.println();
+                pw.println("Package warning messages:");
+                dumpCriticalInfo(pw, null);
+            } else {
+                dumpCriticalInfo(pw, "msg,");
             }
-            pw.println();
-            pw.println("Package warning messages:");
-            dumpCriticalInfo(pw, null);
-        }
-
-        if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
-            dumpCriticalInfo(pw, "msg,");
         }
 
         // PackageInstaller should be called outside of mPackages lock
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_INSTALLS)
+                && packageName == null) {
             // XXX should handle packageName != null by dumping only install data that
             // the given package is involved with.
-            if (dumpState.onTitlePrinted()) pw.println();
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_APEX)
+                && (packageName == null || mApexManager.isApexPackage(packageName))) {
             mApexManager.dump(pw, packageName);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PER_UID_READ_TIMEOUTS)
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PER_UID_READ_TIMEOUTS)
                 && packageName == null) {
-            pw.println();
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             pw.println("Per UID read timeouts:");
             pw.println("    Default timeouts flag: " + getDefaultTimeouts());
             pw.println("    Known digesters list flag: " + getKnownDigestersList());
@@ -19647,7 +19714,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SNAPSHOT_STATISTICS)) {
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SNAPSHOT_STATISTICS)
+                && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
             pw.println("Snapshot statistics");
             if (!mSnapshotEnabled) {
                 pw.println("  Snapshots disabled");

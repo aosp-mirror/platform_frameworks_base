@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,57 +14,103 @@
  * limitations under the License.
  */
 
-package com.android.server.utils;
+package android.provider;
+
+import static android.provider.Settings.ResetMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.BadConfigException;
+import android.provider.DeviceConfig.Properties;
 
 import java.util.concurrent.Executor;
 
 /**
  * Abstraction around {@link DeviceConfig} to allow faking device configuration in tests.
+ *
+ * @hide
  */
 public interface DeviceConfigInterface {
+
     /**
+     * @hide
      * @see DeviceConfig#getProperty
      */
     @Nullable
     String getProperty(@NonNull String namespace, @NonNull String name);
 
     /**
+     * @hide
+     * @see DeviceConfig#getProperties
+     */
+    @NonNull
+    Properties getProperties(@NonNull String namespace, @NonNull String... names);
+
+    /**
+     * @hide
+     * @see DeviceConfig#setProperty
+     */
+    boolean setProperty(@NonNull String namespace, @NonNull String name, @Nullable String value,
+            boolean makeDefault);
+
+    /**
+     * @hide
+     * @see DeviceConfig#setProperties
+     */
+    boolean setProperties(@NonNull Properties properties) throws BadConfigException;
+
+    /**
+     * @hide
+     * @see DeviceConfig#deleteProperty
+     */
+    boolean deleteProperty(@NonNull String namespace, @NonNull String name);
+
+    /**
+     * @hide
+     * @see DeviceConfig#resetToDefaults
+     */
+    void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace);
+
+    /**
+     * @hide
      * @see DeviceConfig#getString
      */
     @NonNull
     String getString(@NonNull String namespace, @NonNull String name, @NonNull String defaultValue);
 
     /**
+     * @hide
      * @see DeviceConfig#getInt
      */
     int getInt(@NonNull String namespace, @NonNull String name, int defaultValue);
 
     /**
+     * @hide
      * @see DeviceConfig#getLong
      */
     long getLong(@NonNull String namespace, @NonNull String name, long defaultValue);
 
     /**
+     * @hide
      * @see DeviceConfig#getBoolean
      */
     boolean getBoolean(@NonNull String namespace, @NonNull String name, boolean defaultValue);
 
     /**
+     * @hide
      * @see DeviceConfig#getFloat
      */
     float getFloat(@NonNull String namespace, @NonNull String name, float defaultValue);
 
     /**
+     * @hide
      * @see DeviceConfig#addOnPropertiesChangedListener
      */
     void addOnPropertiesChangedListener(@NonNull String namespace, @NonNull Executor executor,
             @NonNull DeviceConfig.OnPropertiesChangedListener listener);
 
     /**
+     * @hide
      * @see DeviceConfig#removeOnPropertiesChangedListener
      */
     void removeOnPropertiesChangedListener(
@@ -72,11 +118,44 @@ public interface DeviceConfigInterface {
 
     /**
      * Calls through to the real {@link DeviceConfig}.
+     *
+     * @hide
      */
+    @NonNull
     DeviceConfigInterface REAL = new DeviceConfigInterface() {
         @Override
         public String getProperty(String namespace, String name) {
             return DeviceConfig.getProperty(namespace, name);
+        }
+
+        @Override
+        public DeviceConfig.Properties getProperties(@NonNull String namespace,
+                @NonNull String... names) {
+            return DeviceConfig.getProperties(namespace, names);
+        }
+
+        @Override
+        public boolean setProperty(@NonNull String namespace,
+                @NonNull String name,
+                @Nullable String value, boolean makeDefault) {
+            return DeviceConfig.setProperty(namespace, name, value, makeDefault);
+        }
+
+        @Override
+        public boolean setProperties(@NonNull Properties properties)
+                throws BadConfigException {
+            return DeviceConfig.setProperties(properties);
+        }
+
+        @Override
+        public boolean deleteProperty(@NonNull String namespace,
+                @NonNull String name) {
+            return DeviceConfig.deleteProperty(namespace, name);
+        }
+
+        @Override
+        public void resetToDefaults(int resetMode, @Nullable String namespace) {
+            DeviceConfig.resetToDefaults(resetMode, namespace);
         }
 
         @Override

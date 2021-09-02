@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.media.audio.common;
 
-import android.media.audio.common.AudioConfigBase;
-import android.media.audio.common.AudioOffloadInfo;
-
 /**
- * Commonly used audio stream configuration parameters.
+ * Encapsulation mode used for sending audio compressed data.
  *
  * {@hide}
  */
-@JavaDerive(equals = true, toString = true)
 @VintfStability
-parcelable AudioConfig {
-    AudioConfigBase base;
-    AudioOffloadInfo offloadInfo;
-    /** I/O buffer size in frames. */
-    long frameCount;
+@Backing(type="byte")
+enum AudioEncapsulationMode {
+    /**
+     * Used as default value in parcelables to indicate that a value was not
+     * set. Should never be considered a valid setting, except for backward
+     * compatibility scenarios.
+     */
+    INVALID = -1,
+    /** No encapsulation mode for metadata. */
+    NONE = 0,
+    /** Elementary stream payload with metadata. */
+    ELEMENTARY_STREAM = 1,
+    /** Handle-based payload with metadata. */
+    HANDLE = 2,
 }

@@ -18,6 +18,7 @@ package com.android.systemui.communal.service;
 
 import android.annotation.IntDef;
 import android.content.res.Resources;
+import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.util.Log;
 import android.view.IWindow;
@@ -36,6 +37,7 @@ import com.android.systemui.util.ViewController;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -62,6 +64,8 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
             STATE_SURFACE_CREATED | STATE_SURFACE_VIEW_ATTACHED;
 
     private int mCurrentState;
+
+    private Optional<CommunalSourceImpl.Request> mLastRequest = Optional.empty();
 
     // The current in-flight request for a surface package.
     private ListenableFuture<SurfaceControlViewHost.SurfacePackage> mCurrentSurfaceFuture;
@@ -99,6 +103,9 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
             mSurfaceViewTouchableRegion.set(left, top + topMargin, right, bottom - bottomMargin);
             updateTouchExclusion();
+
+            // Trigger showing (or hiding) surface based on new dimensions.
+            showSurface();
         }
     };
 
@@ -125,6 +132,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
     @Override
     protected void onInit() {
+        mView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         mView.getHolder().addCallback(mSurfaceHolderCallback);
         mView.addOnLayoutChangeListener(mOnLayoutChangeListener);
     }
@@ -147,7 +155,7 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
 
         mCurrentState = newState;
 
-        showSurface(newState == STATE_CAN_SHOW_SURFACE);
+        showSurface();
 
         updateTouchExclusion();
     }
@@ -165,25 +173,34 @@ public class CommunalSurfaceViewController extends ViewController<SurfaceView> {
         }
     }
 
-    private void showSurface(boolean show) {
+    private void showSurface() {
         mView.setWillNotDraw(false);
 
-        if (!show) {
+        if (mCurrentState != STATE_CAN_SHOW_SURFACE) {
             // If the surface is no longer showing, cancel any in-flight requests.
             if (mCurrentSurfaceFuture != null) {
                 mCurrentSurfaceFuture.cancel(true);
                 mCurrentSurfaceFuture = null;
             }
 
+            mLastRequest = Optional.empty();
             mView.setWillNotDraw(true);
             return;
         }
 
+        final CommunalSourceImpl.Request request = new CommunalSourceImpl.Request(
+                mView.getMeasuredWidth(), mView.getMeasuredHeight(),
+                mView.getDisplay().getDisplayId(), mView.getHostToken());
+
+        if (mLastRequest.isPresent() && mLastRequest.get().equals(request)) {
+            return;
+        }
+
+        mLastRequest = Optional.of(request);
+
         // Since this method is only called when the state has changed, mCurrentSurfaceFuture should
         // be null here.
-        mCurrentSurfaceFuture = mSource.requestCommunalSurface(mView.getHostToken(),
-                        mView.getDisplay().getDisplayId(), mView.getMeasuredWidth(),
-                        mView.getMeasuredHeight());
+        mCurrentSurfaceFuture = mSource.requestCommunalSurface(request);
 
         mCurrentSurfaceFuture.addListener(new Runnable() {
             @Override

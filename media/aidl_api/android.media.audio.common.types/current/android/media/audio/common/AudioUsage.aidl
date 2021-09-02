@@ -12,8 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */// This file has been semi-automatically generated using hidl2aidl from its counterpart in
-// hardware/interfaces/audio/common/5.0/types.hal
+ */
 ///////////////////////////////////////////////////////////////////////////////
 // THIS FILE IS IMMUTABLE. DO NOT EDIT IN ANY CASE.                          //
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,10 +43,19 @@ enum AudioUsage {
   ALARM = 4,
   NOTIFICATION = 5,
   NOTIFICATION_TELEPHONY_RINGTONE = 6,
+  SYS_RESERVED_NOTIFICATION_COMMUNICATION_REQUEST = 7,
+  SYS_RESERVED_NOTIFICATION_COMMUNICATION_INSTANT = 8,
+  SYS_RESERVED_NOTIFICATION_COMMUNICATION_DELAYED = 9,
+  NOTIFICATION_EVENT = 10,
   ASSISTANCE_ACCESSIBILITY = 11,
   ASSISTANCE_NAVIGATION_GUIDANCE = 12,
   ASSISTANCE_SONIFICATION = 13,
   GAME = 14,
   VIRTUAL_SOURCE = 15,
   ASSISTANT = 16,
+  CALL_ASSISTANT = 17,
+  EMERGENCY = 1000,
+  SAFETY = 1001,
+  VEHICLE_STATUS = 1002,
+  ANNOUNCEMENT = 1003,
 }

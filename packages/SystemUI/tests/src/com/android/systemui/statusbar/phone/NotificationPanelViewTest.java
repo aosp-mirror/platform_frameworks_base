@@ -851,9 +851,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testCommunalhostViewControllerInit() {
+        verify(mCommunalHostViewController, times(1)).init();
         clearInvocations(mCommunalHostViewController);
         givenViewAttached();
-        verify(mCommunalHostViewController).init();
+        verify(mCommunalHostViewController, never()).init();
     }
 
     @Test
@@ -874,8 +875,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         clearInvocations(mCommunalHostViewController);
         givenViewDetached();
         verify(mCommunalSourceMonitor).removeCallback(any());
-        verify(mCommunalHostViewController).show(sourceCapture.capture());
-        assertThat(sourceCapture.getValue()).isEqualTo(null);
     }
 
     @Test
@@ -908,6 +907,20 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         // checked since an interpolation is applied to the incoming value.
         mNotificationPanelViewController.setKeyguardOnlyContentAlpha(0.8f);
         verify(mCommunalHostViewController).setAlpha(anyFloat());
+    }
+
+    @Test
+    public void testCommunalPositionUpdate() {
+        // Verify that the communal position is updated on interaction with the
+        // NotificationPanelViewController. Note that there a number of paths where the position
+        // might be updated and therefore the check isn't strictly on a single invocation.
+        clearInvocations(mCommunalHostViewController);
+        final View.OnLayoutChangeListener layoutChangeListener =
+                mNotificationPanelViewController.createLayoutChangeListener();
+        mNotificationPanelViewController.mStatusBarStateController.setState(KEYGUARD);
+        layoutChangeListener.onLayoutChange(mView, 0, 0, 200, 200, 0, 0, 200, 200);
+        verify(mCommunalHostViewController, atLeast(1))
+                .updatePosition(anyInt(), anyBoolean());
     }
 
     private void triggerPositionClockAndNotifications() {
