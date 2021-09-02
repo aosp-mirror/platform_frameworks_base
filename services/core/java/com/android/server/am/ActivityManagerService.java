@@ -12432,7 +12432,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Dynamic receivers are exported by default for versions prior to T
         final boolean exported =
                 ((flags & Context.RECEIVER_EXPORTED) != 0
-                        || (!Compatibility.isChangeEnabled(161145287)));
+                        || (!Compatibility.isChangeEnabled(
+                                DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)));
 
         int callingUid;
         int callingPid;
@@ -12502,7 +12503,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // If the change is enabled, but neither exported or not exported is set, we need to log
             // an error so the consumer can know to explicitly set the value for their flag
-            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(161145287)
+            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(
+                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)
                     && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
                     == 0)) {
                 Slog.e(TAG,
