@@ -2467,7 +2467,7 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
             mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
             mAttachInfo.mVisibleInsets.set(mInsetsController.calculateVisibleInsets(
-                    mWindowAttributes.softInputMode));
+                    mWindowAttributes.softInputMode).toRect());
         }
         return mLastWindowInsets;
     }
