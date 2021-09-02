@@ -23,12 +23,15 @@ import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.external.localstorage.stats.SetSchemaStats;
 
+import com.google.android.icing.proto.DeleteByQueryStatsProto;
 import com.google.android.icing.proto.DeleteStatsProto;
 import com.google.android.icing.proto.InitializeStatsProto;
 import com.google.android.icing.proto.OptimizeStatsProto;
 import com.google.android.icing.proto.PutDocumentStatsProto;
 import com.google.android.icing.proto.QueryStatsProto;
+import com.google.android.icing.proto.SetSchemaResultProto;
 
 import java.util.Objects;
 
@@ -142,6 +145,26 @@ public final class AppSearchLoggerHelper {
     }
 
     /**
+     * Copies native DeleteByQuery stats to builder.
+     *
+     * @param fromNativeStats Stats copied from.
+     * @param toStatsBuilder Stats copied to.
+     */
+    static void copyNativeStats(
+            @NonNull DeleteByQueryStatsProto fromNativeStats,
+            @NonNull RemoveStats.Builder toStatsBuilder) {
+        Objects.requireNonNull(fromNativeStats);
+        Objects.requireNonNull(toStatsBuilder);
+
+        @SuppressWarnings("deprecation")
+        int deleteType = DeleteStatsProto.DeleteType.Code.DEPRECATED_QUERY.getNumber();
+        toStatsBuilder
+                .setNativeLatencyMillis(fromNativeStats.getLatencyMs())
+                .setDeleteType(deleteType)
+                .setDeletedDocumentCount(fromNativeStats.getNumDocumentsDeleted());
+    }
+
+    /**
      * Copies native {@link OptimizeStatsProto} to builder.
      *
      * @param fromNativeStats Stats copied from.
@@ -163,5 +186,26 @@ public final class AppSearchLoggerHelper {
                 .setStorageSizeBeforeBytes(fromNativeStats.getStorageSizeBefore())
                 .setStorageSizeAfterBytes(fromNativeStats.getStorageSizeAfter())
                 .setTimeSinceLastOptimizeMillis(fromNativeStats.getTimeSinceLastOptimizeMs());
+    }
+
+    /*
+     * Copy SetSchema result stats to builder.
+     *
+     * @param fromProto Stats copied from.
+     * @param toStatsBuilder Stats copied to.
+     */
+    static void copyNativeStats(
+            @NonNull SetSchemaResultProto fromProto,
+            @NonNull SetSchemaStats.Builder toStatsBuilder) {
+        Objects.requireNonNull(fromProto);
+        Objects.requireNonNull(toStatsBuilder);
+        toStatsBuilder
+                .setNewTypeCount(fromProto.getNewSchemaTypesCount())
+                .setDeletedTypeCount(fromProto.getDeletedSchemaTypesCount())
+                .setCompatibleTypeChangeCount(fromProto.getFullyCompatibleChangedSchemaTypesCount())
+                .setIndexIncompatibleTypeChangeCount(
+                        fromProto.getIndexIncompatibleChangedSchemaTypesCount())
+                .setBackwardsIncompatibleTypeChangeCount(
+                        fromProto.getIncompatibleSchemaTypesCount());
     }
 }

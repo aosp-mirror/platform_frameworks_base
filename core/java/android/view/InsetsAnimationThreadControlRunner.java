@@ -54,8 +54,8 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
         @Override
         @UiThread
-        public void startAnimation(InsetsAnimationControlImpl controller,
-                WindowInsetsAnimationControlListener listener, int types,
+        public <T extends InsetsAnimationControlRunner & WindowInsetsAnimationController>
+        void startAnimation(T runner, WindowInsetsAnimationControlListener listener, int types,
                 WindowInsetsAnimation animation, Bounds bounds) {
             // Animation will be started in constructor already.
         }

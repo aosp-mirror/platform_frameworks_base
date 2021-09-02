@@ -47,13 +47,15 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
     @Nullable private ICancellationSignal mCancellationSignal;
 
     FingerprintDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull IBinder token, long requestId,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId,
             @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric,
             int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+        setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
         mUdfpsOverlayController = udfpsOverlayController;
     }

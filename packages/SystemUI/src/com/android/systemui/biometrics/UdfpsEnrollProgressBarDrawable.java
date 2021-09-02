@@ -16,7 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -46,6 +48,11 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @NonNull private final Paint mProgressPaint;
 
     @Nullable private ValueAnimator mProgressAnimator;
+    @Nullable private ValueAnimator mProgressShowingHelpAnimator;
+    @Nullable private ValueAnimator mProgressHidingHelpAnimator;
+    @ColorInt private final int mProgressColor;
+    @ColorInt private final int mProgressHelpColor;
+    private final int mShortAnimationDuration;
     private float mProgress;
     private int mRotation; // After last step, rotate the progress bar once
     private boolean mLastStepAcquired;
@@ -54,6 +61,11 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
             @NonNull UdfpsEnrollDrawable parent) {
         mContext = context;
         mParent = parent;
+
+        mShortAnimationDuration = context.getResources()
+                .getInteger(com.android.internal.R.integer.config_shortAnimTime);
+        mProgressColor = context.getColor(R.color.udfps_enroll_progress);
+        mProgressHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
 
         mBackgroundCirclePaint = new Paint();
         mBackgroundCirclePaint.setStrokeWidth(Utils.dpToPixels(context, PROGRESS_BAR_THICKNESS_DP));
@@ -74,7 +86,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         // Progress should not be color extracted
         mProgressPaint = new Paint();
         mProgressPaint.setStrokeWidth(Utils.dpToPixels(context, PROGRESS_BAR_THICKNESS_DP));
-        mProgressPaint.setColor(context.getColor(R.color.udfps_enroll_progress));
+        mProgressPaint.setColor(mProgressColor);
         mProgressPaint.setAntiAlias(true);
         mProgressPaint.setStyle(Paint.Style.STROKE);
         mProgressPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -92,7 +104,9 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
             return;
         }
 
-        long animationDuration = 150;
+        long animationDuration = mShortAnimationDuration;
+
+        hideEnrollmentHelp();
 
         if (progress == 1.f) {
             animationDuration = 400;
@@ -126,6 +140,47 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     void onLastStepAcquired() {
         setEnrollmentProgress(1.f);
         mLastStepAcquired = true;
+    }
+
+    void onEnrollmentHelp() {
+        if (mProgressShowingHelpAnimator != null || mProgressAnimator == null) {
+            return; // already showing or at 0% (no progress bar visible)
+        }
+
+        if (mProgressHidingHelpAnimator != null && mProgressHidingHelpAnimator.isRunning()) {
+            mProgressHidingHelpAnimator.cancel();
+        }
+        mProgressHidingHelpAnimator = null;
+
+        mProgressShowingHelpAnimator = getProgressColorAnimator(
+                mProgressPaint.getColor(), mProgressHelpColor);
+        mProgressShowingHelpAnimator.start();
+    }
+
+    private void hideEnrollmentHelp() {
+        if (mProgressHidingHelpAnimator != null || mProgressShowingHelpAnimator == null) {
+            return; // already hidden or help never shown
+        }
+
+        if (mProgressShowingHelpAnimator != null && mProgressShowingHelpAnimator.isRunning()) {
+            mProgressShowingHelpAnimator.cancel();
+        }
+        mProgressShowingHelpAnimator = null;
+
+        mProgressHidingHelpAnimator = getProgressColorAnimator(
+                mProgressPaint.getColor(), mProgressColor);
+        mProgressHidingHelpAnimator.start();
+    }
+
+    private ValueAnimator getProgressColorAnimator(@ColorInt int from, @ColorInt int to) {
+        final ValueAnimator animator = ValueAnimator.ofObject(
+                ArgbEvaluator.getInstance(), from, to);
+        animator.setDuration(mShortAnimationDuration);
+        animator.addUpdateListener(animation -> {
+            mProgressPaint.setColor((int) animation.getAnimatedValue());
+            mParent.invalidateSelf();
+        });
+        return animator;
     }
 
     @Override

@@ -1354,14 +1354,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                // If the activity is in stopping or stopped state, for instance, it's in the
-                // split screen task and not the top one, the last configuration it should keep
-                // is the one before multi-window mode change.
-                final State state = getState();
-                if (state != STOPPED && state != STOPPING) {
-                    ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
-                            true /* ignoreVisibility */);
-                }
+                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                        false /* ignoreVisibility */);
             }
         }
     }
@@ -4900,6 +4894,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // getting visible so we also wait for them.
             forAllWindows(mWmService::makeWindowFreezingScreenIfNeededLocked, true);
         }
+        // dispatchTaskInfoChangedIfNeeded() right after ActivityRecord#setVisibility() can report
+        // the stale visible state, because the state will be updated after the app transition.
+        // So tries to report the actual visible state again where the state is changed.
+        if (task != null) task.dispatchTaskInfoChangedIfNeeded(false /* force */);
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,
                 isVisible(), mVisibleRequested);
@@ -6965,7 +6963,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         Rect appRect;
         if (win != null) {
             insets = win.getInsetsStateWithVisibilityOverride().calculateInsets(
-                    win.getFrame(), Type.systemBars(), false /* ignoreVisibility */);
+                    win.getFrame(), Type.systemBars(), false /* ignoreVisibility */).toRect();
             appRect = new Rect(win.getFrame());
             appRect.inset(insets);
         } else {
@@ -9233,7 +9231,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return null;
         }
         final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                task.getBounds(), Type.systemBars(), false /* ignoreVisibility */);
+                task.getBounds(), Type.systemBars(), false /* ignoreVisibility */).toRect();
         InsetUtils.addInsets(insets, getLetterboxInsets());
 
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
