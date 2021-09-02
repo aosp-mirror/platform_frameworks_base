@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.componentalias.tests.app.s;
+package android.content.componentalias.tests.s;
 
-public class Target05 extends BaseService {
+public class Target02 extends BaseService {
 }

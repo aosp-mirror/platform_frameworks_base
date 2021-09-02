@@ -17,18 +17,21 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="ComponentAliasTests.apk" />
-        <option name="test-file-name" value="ComponentAliasAppMain.apk" />
-        <option name="test-file-name" value="ComponentAliasAppSub1.apk" />
-        <option name="test-file-name" value="ComponentAliasAppSub2.apk" />
+        <option name="test-file-name" value="ComponentAliasTests1.apk" />
+        <option name="test-file-name" value="ComponentAliasTests2.apk" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <!-- Exempt the helper APKs from the BG restriction, so they can start BG services. -->
-        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.app" />
-        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.app.sub1" />
-        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.app.sub2" />
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests" />
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.sub1" />
+        <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.sub2" />
+
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests" />
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests.sub1" />
+        <option name="teardown-command" value="cmd deviceidle whitelist -android.content.componentalias.tests.sub2" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="android.content.componentalias.tests" />
+        <option name="package" value="{PACKAGE}" />
         <option name="runtime-hint" value="2m" />
         <option name="isolated-storage" value="false" />
     </test>

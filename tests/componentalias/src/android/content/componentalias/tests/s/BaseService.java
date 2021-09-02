@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.componentalias.tests.app.s;
+package android.content.componentalias.tests.s;
 
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.TAG;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.TEST_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.TAG;
 
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.componentalias.tests.common.ComponentAliasMessage;
+import android.content.componentalias.tests.ComponentAliasMessage;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -41,7 +40,7 @@ public class BaseService extends Service {
                 .setSenderIdentity(getMyIdentity())
                 .setMethodName("onStartCommand")
                 .setIntent(intent);
-        BroadcastMessenger.send(this, TEST_PACKAGE, m);
+        BroadcastMessenger.send(this, TAG, m);
 
         return START_NOT_STICKY;
     }
@@ -53,7 +52,7 @@ public class BaseService extends Service {
         ComponentAliasMessage m = new ComponentAliasMessage()
                 .setSenderIdentity(getMyIdentity())
                 .setMethodName("onDestroy");
-        BroadcastMessenger.send(this, TEST_PACKAGE, m);
+        BroadcastMessenger.send(this, TAG, m);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class BaseService extends Service {
                 .setSenderIdentity(getMyIdentity())
                 .setMethodName("onBind")
                 .setIntent(intent);
-        BroadcastMessenger.send(this, TEST_PACKAGE, m);
+        BroadcastMessenger.send(this, TAG, m);
 
         return new Binder();
     }

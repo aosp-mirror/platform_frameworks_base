@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.componentalias.tests.common;
+package android.content.componentalias.tests;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,7 +28,7 @@ import com.android.internal.util.DataClass;
  * Parcelabe containing a "message" that's meant to be delivered via BroadcastMessenger.
  *
  * To add a new field, just add a private member field, and run:
- * codegen $ANDROID_BUILD_TOP/frameworks/base/tests/componentalias/common/android/content/componentalias/tests/common/ComponentAliasMessage.java
+ * codegen $ANDROID_BUILD_TOP/frameworks/base/tests/componentalias/src/android/content/componentalias/tests/ComponentAliasMessage.java
  */
 @DataClass(
         genConstructor = false,
@@ -62,7 +62,7 @@ public final class ComponentAliasMessage implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/tests/componentalias/common/android/content/componentalias/tests/common/ComponentAliasMessage.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/tests/componentalias/src/android/content/componentalias/tests/ComponentAliasMessage.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -201,9 +201,9 @@ public final class ComponentAliasMessage implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1629137098129L,
+            time = 1630098801203L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/tests/componentalias/common/android/content/componentalias/tests/common/ComponentAliasMessage.java",
+            sourceFile = "frameworks/base/tests/componentalias/src/android/content/componentalias/tests/ComponentAliasMessage.java",
             inputSignatures = "private @android.annotation.Nullable java.lang.String mMessage\nprivate @android.annotation.Nullable java.lang.String mMethodName\nprivate @android.annotation.Nullable java.lang.String mSenderIdentity\nprivate @android.annotation.Nullable android.content.Intent mIntent\nprivate @android.annotation.Nullable android.content.ComponentName mComponent\nclass ComponentAliasMessage extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genSetters=true, genToString=true, genAidl=false)")
     @Deprecated
     private void __metadata() {}

@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.content.componentalias.tests.app" >
-
+    package="android.content.componentalias.tests" >
     <application>
-        <!-- Only contain the target components -->
-
+        <service android:name=".s.Target00" android:exported="true" android:enabled="true" >
+        </service>
         <service android:name=".s.Target01" android:exported="true" android:enabled="true" >
         </service>
         <service android:name=".s.Target02" android:exported="true" android:enabled="true" >
@@ -28,8 +26,6 @@
         <service android:name=".s.Target03" android:exported="true" android:enabled="true" >
         </service>
         <service android:name=".s.Target04" android:exported="true" android:enabled="true" >
-        </service>
-        <service android:name=".s.Target05" android:exported="true" android:enabled="true" >
         </service>
     </application>
 </manifest>
