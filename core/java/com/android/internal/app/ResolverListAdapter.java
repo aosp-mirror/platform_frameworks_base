@@ -838,6 +838,12 @@ public class ResolverListAdapter extends BaseAdapter {
             // check if subLabel matches label before final display
             return mRi.loadLabel(mPm).toString();
         }
+
+        @Override
+        String getAppLabelForSubstitutePermission() {
+            // Will default to app name if no activity label set
+            return mRi.getComponentInfo().loadLabel(mPm).toString();
+        }
     }
 
     /**
@@ -877,6 +883,11 @@ public class ResolverListAdapter extends BaseAdapter {
             // matches label before final display
             return (String) mActivityInfo.loadLabel(mPm);
         }
+
+        @Override
+        String getAppLabelForSubstitutePermission() {
+            return getAppSubLabelInternal();
+        }
     }
 
     /**
@@ -889,6 +900,7 @@ public class ResolverListAdapter extends BaseAdapter {
     private abstract static class TargetPresentationGetter {
         @Nullable abstract Drawable getIconSubstituteInternal();
         @Nullable abstract String getAppSubLabelInternal();
+        @Nullable abstract String getAppLabelForSubstitutePermission();
 
         private Context mCtx;
         private final int mIconDpi;
@@ -940,9 +952,10 @@ public class ResolverListAdapter extends BaseAdapter {
 
         public String getLabel() {
             String label = null;
-            // Apps with the substitute permission will always show the sublabel as their label
+            // Apps with the substitute permission will always show the activity label as the
+            // app label if provided
             if (mHasSubstitutePermission) {
-                label = getAppSubLabelInternal();
+                label = getAppLabelForSubstitutePermission();
             }
 
             if (label == null) {
@@ -953,8 +966,17 @@ public class ResolverListAdapter extends BaseAdapter {
         }
 
         public String getSubLabel() {
-            // Apps with the substitute permission will never have a sublabel
-            if (mHasSubstitutePermission) return null;
+            // Apps with the substitute permission will always show the resolve info label as the
+            // sublabel if provided
+            if (mHasSubstitutePermission){
+                String appSubLabel = getAppSubLabelInternal();
+                // Use the resolve info label as sublabel if it is set
+                if(!TextUtils.isEmpty(appSubLabel)
+                    && !TextUtils.equals(appSubLabel, getLabel())){
+                    return appSubLabel;
+                }
+                return null;
+            }
             return getAppSubLabelInternal();
         }
 
