@@ -160,6 +160,11 @@ package android.telephony {
     method public static int getNumSignalStrengthLevels();
   }
 
+  public class SubscriptionManager {
+    method public void addSubscriptionInfoRecord(@NonNull String, @Nullable String, int, int);
+    method public void removeSubscriptionInfoRecord(@NonNull String, int);
+  }
+
   public class TelephonyManager {
     method @NonNull public static int[] getAllNetworkTypes();
   }

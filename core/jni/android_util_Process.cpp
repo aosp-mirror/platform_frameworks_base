@@ -263,8 +263,12 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         sprintf(proc_path, "/proc/%d/cmdline", pid);
         fd = open(proc_path, O_RDONLY | O_CLOEXEC);
         if (fd >= 0) {
-            int rc = read(fd, cmdline, sizeof(cmdline)-1);
-            cmdline[rc] = 0;
+            ssize_t rc = read(fd, cmdline, sizeof(cmdline) - 1);
+            if (rc < 0) {
+                ALOGE("read /proc/%d/cmdline (%s)", pid, strerror(errno));
+            } else {
+                cmdline[rc] = 0;
+            }
             close(fd);
         }
 
