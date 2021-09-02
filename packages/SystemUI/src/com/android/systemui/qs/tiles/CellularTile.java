@@ -275,7 +275,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription = indicators.description != null
+            mInfo.dataContentDescription = indicators.qsDescription != null
                     ? indicators.typeContentDescriptionHtml : null;
             mInfo.activityIn = indicators.activityIn;
             mInfo.activityOut = indicators.activityOut;
