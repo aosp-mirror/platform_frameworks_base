@@ -615,6 +615,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Чтобы продолжить, используйте отпечаток пальца или данные для разблокировки экрана."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок отпечатка пальца"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Ошибка фейсконтроля"</string>
@@ -667,6 +669,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Чтобы продолжить, посмотрите на экран или используйте данные для разблокировки."</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Значок лица"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>

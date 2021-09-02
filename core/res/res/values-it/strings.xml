@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Per continuare devi usare la tua impronta o il tuo blocco schermo"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Si è verificato un errore. Riprova."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Sblocco con il volto"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Sblocco con il volto"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Per continuare devi usare il tuo volto o il tuo blocco schermo"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Si è verificato un errore. Riprova."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona volto"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>
