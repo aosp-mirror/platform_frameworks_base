@@ -66,8 +66,8 @@ public class DeviceChooserActivity extends Activity {
             final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
             setTitle(Html.fromHtml(getString(
                     R.string.confirmation_title,
-                    getCallingAppName(),
-                    selectedDevice.getDisplayName()), 0));
+                    Html.escapeHtml(getCallingAppName()),
+                    Html.escapeHtml(selectedDevice.getDisplayName())), 0));
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
             getService().mSelectedDevice = selectedDevice;
@@ -76,7 +76,8 @@ public class DeviceChooserActivity extends Activity {
             setContentView(R.layout.device_chooser);
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setVisibility(View.GONE);
-            setTitle(Html.fromHtml(getString(R.string.chooser_title, getCallingAppName()), 0));
+            setTitle(Html.fromHtml(getString(R.string.chooser_title,
+                    Html.escapeHtml(getCallingAppName())), 0));
             mDeviceListView = findViewById(R.id.device_list);
             final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
             mDeviceListView.setAdapter(adapter);
