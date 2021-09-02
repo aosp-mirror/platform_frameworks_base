@@ -89,7 +89,22 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                     HdmiControlManager
-                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
     }
 
     @Test
@@ -112,7 +127,22 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                     HdmiControlManager
-                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
     }
 
     @Test
@@ -135,7 +165,22 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                     HdmiControlManager
-                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
     }
 
     @Test
