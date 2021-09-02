@@ -16,9 +16,13 @@
 
 package com.android.server.wm;
 
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.util.ArraySet;
 import android.util.Slog;
+
+import java.util.Optional;
 
 /**
  * An implementation of {@link ActivityTaskManagerInternal.PackageConfigurationUpdater}.
@@ -26,14 +30,24 @@ import android.util.Slog;
 final class PackageConfigurationUpdaterImpl implements
         ActivityTaskManagerInternal.PackageConfigurationUpdater {
     private static final String TAG = "PackageConfigurationUpdaterImpl";
-    private final int mPid;
+    private final Optional<Integer> mPid;
     private Integer mNightMode;
     private LocaleList mLocales;
+    private String mPackageName;
+    private int mUserId;
     private ActivityTaskManagerService mAtm;
 
     PackageConfigurationUpdaterImpl(int pid, ActivityTaskManagerService atm) {
-        mPid = pid;
+        mPid = Optional.of(pid);
         mAtm = atm;
+    }
+
+    PackageConfigurationUpdaterImpl(String packageName, int userId,
+            ActivityTaskManagerService atm) {
+        mPackageName = packageName;
+        mUserId = userId;
+        mAtm = atm;
+        mPid = Optional.empty();
     }
 
     @Override
@@ -59,20 +73,46 @@ final class PackageConfigurationUpdaterImpl implements
             synchronized (mAtm.mGlobalLock) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    final WindowProcessController wpc = mAtm.mProcessMap.getProcess(mPid);
-                    if (wpc == null) {
-                        Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
-                        return;
+                    final int uid;
+                    if (mPid.isPresent()) {
+                        WindowProcessController wpc = mAtm.mProcessMap.getProcess(mPid.get());
+                        if (wpc == null) {
+                            Slog.w(TAG, "commit: Override application configuration failed: "
+                                    + "cannot find pid " + mPid);
+                            return;
+                        }
+                        uid = wpc.mUid;
+                        mUserId = wpc.mUserId;
+                        mPackageName = wpc.mInfo.packageName;
+                    } else {
+                        uid = mAtm.getPackageManagerInternalLocked().getPackageUid(mPackageName,
+                                /* flags = */ PackageManager.MATCH_ALL, mUserId);
+                        if (uid < 0) {
+                            Slog.w(TAG, "commit: update of application configuration failed: "
+                                    + "userId or packageName not valid " + mUserId);
+                            return;
+                        }
                     }
-                    LocaleList localesOverride = LocaleOverlayHelper.combineLocalesIfOverlayExists(
-                            mLocales, mAtm.getGlobalConfiguration().getLocales());
-                    wpc.applyAppSpecificConfig(mNightMode, localesOverride);
-                    wpc.updateAppSpecificSettingsForAllActivities(mNightMode, localesOverride);
-                    mAtm.mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
+                    updateConfig(uid, mPackageName);
+                    mAtm.mPackageConfigPersister.updateFromImpl(mPackageName, mUserId, this);
+
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
+        }
+    }
+
+    private void updateConfig(int uid, String packageName) {
+        final ArraySet<WindowProcessController> processes = mAtm.mProcessMap.getProcesses(uid);
+        if (processes == null) return;
+        for (int i = processes.size() - 1; i >= 0; i--) {
+            final WindowProcessController wpc = processes.valueAt(i);
+            if (!wpc.mInfo.packageName.equals(packageName)) continue;
+            LocaleList localesOverride = LocaleOverlayHelper.combineLocalesIfOverlayExists(
+                    mLocales, mAtm.getGlobalConfiguration().getLocales());
+            wpc.applyAppSpecificConfig(mNightMode, localesOverride);
+            wpc.updateAppSpecificSettingsForAllActivities(mNightMode, localesOverride);
         }
     }
 
