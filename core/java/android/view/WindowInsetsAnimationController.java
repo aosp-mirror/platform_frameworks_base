@@ -188,20 +188,4 @@ public interface WindowInsetsAnimationController {
      *  fullscreen or non-overlapping).
      */
     boolean hasZeroInsetsIme();
-
-    /**
-     * Flags whether {@link WindowInsetsAnimationControlListener#onReady(
-     * WindowInsetsAnimationController, int)} has been invoked.
-     * @hide
-     */
-    void setReadyDispatched(boolean dispatched);
-
-    /**
-     * Returns the {@link InsetsState} based on the current animation progress.
-     *
-     * @param outState the insets state which matches the current animation progress.
-     * @return {@code true} if the animation has been finished; {@code false} otherwise.
-     * @hide
-     */
-    boolean applyChangeInsets(InsetsState outState);
 }
