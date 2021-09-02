@@ -6546,6 +6546,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_REASON = "android.intent.extra.REASON";
 
     /**
+     * Intent extra: Whether to show the wipe progress UI or to skip it.
+     *
+     * <p>Type: boolean
+     * @hide
+     */
+    public static final String EXTRA_SHOW_WIPE_PROGRESS = "android.intent.extra.SHOW_WIPE_PROGRESS";
+
+    /**
      * {@hide}
      * This extra will be send together with {@link #ACTION_FACTORY_RESET}
      */
