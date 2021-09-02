@@ -2357,7 +2357,7 @@ class ActivityStarter {
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
         mDoResume = doResume;
-        if (!doResume || !r.okToShowLocked() || mLaunchTaskBehind) {
+        if (!doResume || !r.showToCurrentUser() || mLaunchTaskBehind) {
             r.delayedResume = true;
             mDoResume = false;
         }
