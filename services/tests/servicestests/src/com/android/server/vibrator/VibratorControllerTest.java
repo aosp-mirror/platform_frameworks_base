@@ -259,6 +259,21 @@ public class VibratorControllerTest {
     }
 
     @Test
+    public void reset_turnsOffVibratorAndDisablesExternalControl() {
+        mockVibratorCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
+        VibratorController controller = createController();
+
+        controller.on(100, 1);
+        assertTrue(controller.isVibrating());
+
+        controller.reset();
+        assertFalse(controller.isVibrating());
+        verify(mNativeWrapperMock).setExternalControl(eq(false));
+        verify(mNativeWrapperMock).off();
+    }
+
+    @Test
     public void registerVibratorStateListener_callbacksAreTriggered() throws Exception {
         when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
