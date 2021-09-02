@@ -103,7 +103,7 @@ public class KeyguardUserSwitcherListView extends AlphaOptimizedLinearLayout {
             }
         }
 
-        if (animate) {
+        if (animate && userItemViews.length > 1) {
             // AnimationUtils will immediately hide/show the first item in the array. Since the
             // first view is the current user, we want to manage its visibility separately.
             // Set first item to null so AnimationUtils ignores it.
