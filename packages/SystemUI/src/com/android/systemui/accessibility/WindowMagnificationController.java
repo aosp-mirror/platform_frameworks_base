@@ -499,9 +499,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void setMagnificationFrameWith(Rect windowBounds, int centerX, int centerY) {
-        // Sets the initial frame area for the mirror and places it in the center of the display.
-        final int initSize = Math.min(windowBounds.width(), windowBounds.height()) / 2
-                + 2 * mMirrorSurfaceMargin;
+        // Sets the initial frame area for the mirror and place it to the given center on the
+        // display.
+        int initSize = Math.min(windowBounds.width(), windowBounds.height()) / 2;
+        initSize = Math.min(mResources.getDimensionPixelSize(R.dimen.magnification_max_frame_size),
+                initSize);
+        initSize += 2 * mMirrorSurfaceMargin;
         final int initX = centerX - initSize / 2;
         final int initY = centerY - initSize / 2;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
