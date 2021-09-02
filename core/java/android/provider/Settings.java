@@ -15470,9 +15470,27 @@ public final class Settings {
          */
         public static int getInt(ContentResolver cr, String name, int def) {
             String v = getString(cr, name);
+            final boolean isQueryForDeviceProvision = name.equals(DEVICE_PROVISIONED);
             try {
-                return v != null ? Integer.parseInt(v) : def;
+                // TODO(b/197879371): remove the extra logging after bug is fixed
+                final int result;
+                if (v != null) {
+                    result = Integer.parseInt(v);
+                    if (isQueryForDeviceProvision) {
+                        Log.w(TAG, "Found settings value for provision. Returning " + result);
+                    }
+                } else {
+                    result = def;
+                    if (isQueryForDeviceProvision) {
+                        Log.w(TAG, "Missing settings value for provision. Returning " + result);
+                    }
+                }
+                return result;
             } catch (NumberFormatException e) {
+                if (isQueryForDeviceProvision) {
+                    Log.w(TAG, "Wrong settings value for provision. Found: " + v
+                            + ". Returning " + v);
+                }
                 return def;
             }
         }
