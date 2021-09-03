@@ -7736,6 +7736,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                         } else {
                             killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                                     "Too many Binders sent to SYSTEM");
+                            // We need to run a GC here, because killing the processes involved
+                            // actually isn't guaranteed to free up the proxies; in fact, if the
+                            // GC doesn't run for a long time, we may even exceed the global
+                            // proxy limit for a process (20000), resulting in system_server itself
+                            // being killed.
+                            // Note that the GC here might not actually clean up all the proxies,
+                            // because the binder reference decrements will come in asynchronously;
+                            // but if new processes belonging to the UID keep adding proxies, we
+                            // will get another callback here, and run the GC again - this time
+                            // cleaning up the old proxies.
+                            VMRuntime.getRuntime().requestConcurrentGC();
                         }
                     }, mHandler);
             t.traceEnd(); // setBinderProxies
