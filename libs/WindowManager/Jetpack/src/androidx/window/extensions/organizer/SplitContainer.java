@@ -40,7 +40,15 @@ class SplitContainer {
         mSplitRule = splitRule;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
-            mSecondaryContainer.addActivityToFinishOnExit(primaryActivity);
+            if (mPrimaryContainer.getRunningActivityCount() == 1
+                    && mPrimaryContainer.hasActivity(primaryActivity.getActivityToken())) {
+                mSecondaryContainer.addContainerToFinishOnExit(mPrimaryContainer);
+            } else {
+                // Only adding the activity to be finished vs. the entire TaskFragment while
+                // the secondary container exits because there are other unrelated activities in the
+                // primary TaskFragment.
+                mSecondaryContainer.addActivityToFinishOnExit(primaryActivity);
+            }
         }
         if (shouldFinishSecondaryWithPrimary(splitRule)) {
             mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
