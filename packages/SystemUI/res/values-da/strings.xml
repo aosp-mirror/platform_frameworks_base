@@ -384,7 +384,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Manglende Wi-Fi-forbindelse"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Byt om på farver"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Ombyt farver"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Flere indstillinger"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Brugerindstillinger"</string>
@@ -678,8 +678,8 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lås skærmindstillinger"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Arbejdsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flytilstand"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Tilføj et felt"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-ikon"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Tilføj felt"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-felt"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>, medmindre du slår funktionen fra inden da"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -911,15 +911,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Vis ikoner for notifikationer med lav prioritet"</string>
     <string name="other" msgid="429768510980739978">"Andet"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern kortet"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj kortet til slutningen"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt kortet"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj et kort"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern felt"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj feltet til slutningen"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt felt"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj felt"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flyt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kortet blev tilføjet"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Kortet blev fjernet"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Feltet blev tilføjet"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Feltet blev fjernet"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigeringsværktøj til Kvikmenu."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-notifikation: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Åbn Indstillinger."</string>
@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Brug fingeraftryk for at åbne"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Godkendelse er påkrævet. Sæt fingeren på fingeraftrykslæseren for at godkende."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Igangværende telefonopkald"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Flytilstand"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Forbundet"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Der oprettes ikke automatisk internetforbindelse"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Der oprettes ikke automatisk mobildataforbindelse"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Der er ingen forbindelse"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Der er ingen andre tilgængelige netværk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Der er ingen tilgængelige netværk"</string>

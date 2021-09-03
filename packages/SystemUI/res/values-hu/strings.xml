@@ -354,7 +354,7 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Beviteli módszer"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Tartózkodási hely"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Hely kikapcsolva"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraelérés"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Hozzáférés a kamerához"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonelérés"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Rendelkezésre áll"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Letiltva"</string>
@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Ujjlenyomat használata a megnyitáshoz"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Hitelesítés szükséges. Érintse meg az ujjlenyomat-érzékelőt a hitelesítéshez."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Folyamatban lévő telefonhívás"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Repülős üzemmód"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiladat"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="NETWORKMODE">%2$s</xliff:g>/<xliff:g id="STATE">%1$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Csatlakozva"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Az internetre történő csatlakozás nem automatikus"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Nincs automatikus mobiladat-kapcsolat"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nincs kapcsolat"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nincs több rendelkezésre álló hálózat"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nincs rendelkezésre álló hálózat"</string>

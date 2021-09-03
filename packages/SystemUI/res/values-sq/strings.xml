@@ -1162,11 +1162,11 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Përdor gjurmën e gishtit për ta hapur"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kërkohet vërtetimi. Prek sensorin e gjurmës së gishtit për t\'u vërtetuar."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonatë në vazhdim"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Modaliteti i aeroplanit"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Të dhënat celulare"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Lidhur"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Interneti nuk do të lidhet automatikisht"</string>
+    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
+    <skip />
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nuk ka lidhje"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nuk ofrohet asnjë rrjet tjetër"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nuk ofrohet asnjë rrjet"</string>
