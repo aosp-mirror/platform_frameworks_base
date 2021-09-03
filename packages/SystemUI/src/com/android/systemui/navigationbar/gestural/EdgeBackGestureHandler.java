@@ -384,7 +384,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void onNavigationSettingsChanged() {
         boolean wasBackAllowed = isHandlingGestures();
         updateCurrentUserResources();
-        if (wasBackAllowed != isHandlingGestures()) {
+        if (mStateChangeCallback != null && wasBackAllowed != isHandlingGestures()) {
             mStateChangeCallback.run();
         }
     }

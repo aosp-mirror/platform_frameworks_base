@@ -150,6 +150,7 @@ public class ParsingPackageUtils {
     public static final boolean DEBUG_JAR = false;
     public static final boolean DEBUG_BACKUP = false;
     public static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
+    public static final float ASPECT_RATIO_NOT_SET = -1f;
 
     /** File name in an APK for the Android manifest. */
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
@@ -2096,7 +2097,7 @@ public class ParsingPackageUtils {
             pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
             pkg.setMemtagMode(sa.getInt(R.styleable.AndroidManifestApplication_memtagMode, -1));
             if (sa.hasValue(R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized)) {
-                Boolean v = sa.getBoolean(
+                final boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized, false);
                 pkg.setNativeHeapZeroInitialized(
                         v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);
@@ -2677,7 +2678,7 @@ public class ParsingPackageUtils {
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
             // If the max aspect ratio for the activity has already been set, skip.
-            if (activity.getMaxAspectRatio() != null) {
+            if (activity.getMaxAspectRatio() != ASPECT_RATIO_NOT_SET) {
                 continue;
             }
 
@@ -2706,7 +2707,7 @@ public class ParsingPackageUtils {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
-            if (activity.getMinAspectRatio() == null) {
+            if (activity.getMinAspectRatio() == ASPECT_RATIO_NOT_SET) {
                 activity.setMinAspectRatio(activity.getResizeMode(), minAspectRatio);
             }
         }

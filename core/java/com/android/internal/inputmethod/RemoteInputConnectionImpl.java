@@ -752,6 +752,15 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     private <T> void dispatch(@NonNull AndroidFuture untypedFuture, @NonNull Supplier<T> supplier) {
         @SuppressWarnings("unchecked")
         final AndroidFuture<T> future = untypedFuture;
-        dispatch(() -> future.complete(supplier.get()));
+        dispatch(() -> {
+            final T result;
+            try {
+                result = supplier.get();
+            } catch (Throwable throwable) {
+                future.completeExceptionally(throwable);
+                throw throwable;
+            }
+            future.complete(result);
+        });
     }
 }

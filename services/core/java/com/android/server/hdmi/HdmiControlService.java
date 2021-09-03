@@ -1685,7 +1685,8 @@ public class HdmiControlService extends SystemService {
                         return;
                     }
                     HdmiCecLocalDeviceTv tv = tv();
-                    if (tv == null) {
+                    HdmiCecLocalDevicePlayback playback = playback();
+                    if (tv == null && playback == null) {
                         if (!mAddressAllocated) {
                             mSelectRequestBuffer.set(SelectRequestBuffer.newDeviceSelect(
                                     HdmiControlService.this, deviceId, callback));
@@ -1698,20 +1699,24 @@ public class HdmiControlService extends SystemService {
                         invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
-                    HdmiMhlLocalDeviceStub device = mMhlController.getLocalDeviceById(deviceId);
-                    if (device != null) {
-                        if (device.getPortId() == tv.getActivePortId()) {
-                            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+                    if (tv != null) {
+                        HdmiMhlLocalDeviceStub device = mMhlController.getLocalDeviceById(deviceId);
+                        if (device != null) {
+                            if (device.getPortId() == tv.getActivePortId()) {
+                                invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+                                return;
+                            }
+                            // Upon selecting MHL device, we send RAP[Content On] to wake up
+                            // the connected mobile device, start routing control to switch ports.
+                            // callback is handled by MHL action.
+                            device.turnOn(callback);
+                            tv.doManualPortSwitching(device.getPortId(), null);
                             return;
                         }
-                        // Upon selecting MHL device, we send RAP[Content On] to wake up
-                        // the connected mobile device, start routing control to switch ports.
-                        // callback is handled by MHL action.
-                        device.turnOn(callback);
-                        tv.doManualPortSwitching(device.getPortId(), null);
+                        tv.deviceSelect(deviceId, callback);
                         return;
                     }
-                    tv.deviceSelect(deviceId, callback);
+                    playback.deviceSelect(deviceId, callback);
                 }
             });
         }

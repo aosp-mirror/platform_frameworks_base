@@ -173,7 +173,10 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
             @Override
             public void onFixedRotationFinished(int displayId) {}
         };
-        mAtm.mWindowManager.registerDisplayWindowListener(listener);
+        int[] displayIds = mAtm.mWindowManager.registerDisplayWindowListener(listener);
+        for (int i = 0; i < displayIds.length; i++) {
+            added.add(displayIds[i]);
+        }
         // Check that existing displays call added
         assertEquals(mRootWindowContainer.getChildCount(), added.size());
         assertEquals(0, changed.size());

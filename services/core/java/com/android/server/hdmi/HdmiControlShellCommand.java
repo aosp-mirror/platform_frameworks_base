@@ -92,6 +92,9 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("      Sets the System Audio Mode feature on or off on TV devices");
         pw.println("  setarc [on|off]");
         pw.println("      Sets the ARC feature on or off on TV devices");
+        pw.println("  deviceselect <device id>");
+        pw.println("      Switch to device with given id");
+        pw.println("      The device's id is represented by its logical address.");
     }
 
     private int handleShellCommand(String cmd) throws RemoteException {
@@ -110,10 +113,28 @@ final class HdmiControlShellCommand extends ShellCommand {
                 return setSystemAudioMode(pw);
             case "setarc":
                 return setArcMode(pw);
+            case "deviceselect":
+                return deviceSelect(pw);
         }
 
         getErrPrintWriter().println("Unhandled command: " + cmd);
         return 1;
+    }
+
+    private int deviceSelect(PrintWriter pw) throws RemoteException {
+        if (getRemainingArgsCount() != 1) {
+            throw new IllegalArgumentException("Expected exactly 1 argument.");
+        }
+        int deviceId = Integer.parseInt(getNextArg());
+
+        pw.print("Sending Device Select...");
+        mBinderService.deviceSelect(deviceId, mHdmiControlCallback);
+
+        if (!receiveCallback("Device Select")) {
+            return 1;
+        }
+
+        return mCecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
     }
 
     private int oneTouchPlay(PrintWriter pw) throws RemoteException {

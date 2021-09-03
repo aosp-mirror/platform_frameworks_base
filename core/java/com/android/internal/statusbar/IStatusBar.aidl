@@ -149,7 +149,7 @@ oneway interface IStatusBar
     */
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation, int userId,
-            String opPackageName, long operationId, int multiSensorConfig);
+            long operationId, String opPackageName, long requestId, int multiSensorConfig);
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */

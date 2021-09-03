@@ -101,7 +101,7 @@ public class ParsedProcessUtils {
             proc.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1));
             proc.setMemtagMode(sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1));
             if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized)) {
-                Boolean v = sa.getBoolean(
+                final boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized, false);
                 proc.setNativeHeapZeroInitialized(
                         v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);

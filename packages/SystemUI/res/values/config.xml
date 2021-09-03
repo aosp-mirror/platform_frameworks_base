@@ -310,11 +310,6 @@
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
-    <!-- Whether the multi-user switch on the keyguard opens QS user panel. If false, clicking the
-         user switch on the keyguard will replace the notifications and status area with the user
-         switcher. The multi-user switch is only shown if config_keyguardUserSwitcher=false. -->
-    <bool name="config_keyguard_user_switch_opens_qs_details">false</bool>
-
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 

@@ -245,7 +245,7 @@ public class FingerprintService extends SystemService {
 
         @SuppressWarnings("deprecation")
         @Override // Binder call
-        public void authenticate(final IBinder token, final long operationId,
+        public long authenticate(final IBinder token, final long operationId,
                 final int sensorId, final int userId, final IFingerprintServiceReceiver receiver,
                 final String opPackageName) {
             final int callingUid = Binder.getCallingUid();
@@ -255,7 +255,7 @@ public class FingerprintService extends SystemService {
             if (!canUseFingerprint(opPackageName, true /* requireForeground */, callingUid,
                     callingPid, callingUserId)) {
                 Slog.w(TAG, "Authenticate rejecting package: " + opPackageName);
-                return;
+                return -1;
             }
 
             // Keyguard check must be done on the caller's binder identity, since it also checks
@@ -270,7 +270,7 @@ public class FingerprintService extends SystemService {
                     // SafetyNet for b/79776455
                     EventLog.writeEvent(0x534e4554, "79776455");
                     Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
-                    return;
+                    return -1;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity1);
@@ -290,7 +290,7 @@ public class FingerprintService extends SystemService {
             }
             if (provider == null) {
                 Slog.w(TAG, "Null provider for authenticate");
-                return;
+                return -1;
             }
 
             final FingerprintSensorPropertiesInternal sensorProps =
@@ -299,18 +299,17 @@ public class FingerprintService extends SystemService {
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
                 final long identity2 = Binder.clearCallingIdentity();
                 try {
-                    authenticateWithPrompt(operationId, sensorProps, userId, receiver);
+                    return authenticateWithPrompt(operationId, sensorProps, userId, receiver);
                 } finally {
                     Binder.restoreCallingIdentity(identity2);
                 }
-            } else {
-                provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
-                        0 /* cookie */, new ClientMonitorCallbackConverter(receiver), opPackageName,
-                        restricted, statsClient, isKeyguard, mFingerprintStateCallback);
             }
+            return provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
+                    0 /* cookie */, new ClientMonitorCallbackConverter(receiver), opPackageName,
+                    restricted, statsClient, isKeyguard, mFingerprintStateCallback);
         }
 
-        private void authenticateWithPrompt(
+        private long authenticateWithPrompt(
                 final long operationId,
                 @NonNull final FingerprintSensorPropertiesInternal props,
                 final int userId,
@@ -387,33 +386,33 @@ public class FingerprintService extends SystemService {
                         }
                     };
 
-            biometricPrompt.authenticateUserForOperation(
+            return biometricPrompt.authenticateUserForOperation(
                     new CancellationSignal(), executor, promptCallback, userId, operationId);
         }
 
         @Override
-        public void detectFingerprint(final IBinder token, final int userId,
+        public long detectFingerprint(final IBinder token, final int userId,
                 final IFingerprintServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
-                return;
+                return -1;
             }
 
             if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
                 // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
                 // ever be invoked when the user is encrypted or lockdown.
                 Slog.e(TAG, "detectFingerprint invoked when user is not encrypted or lockdown");
-                return;
+                return -1;
             }
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for detectFingerprint");
-                return;
+                return -1;
             }
 
-            provider.second.scheduleFingerDetect(provider.first, token, userId,
+            return provider.second.scheduleFingerDetect(provider.first, token, userId,
                     new ClientMonitorCallbackConverter(receiver), opPackageName,
                     BiometricsProtoEnums.CLIENT_KEYGUARD, mFingerprintStateCallback);
         }
@@ -421,7 +420,7 @@ public class FingerprintService extends SystemService {
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, IBinder token, long operationId,
                 int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-                int cookie, boolean allowBackgroundAuthentication) {
+                long requestId, int cookie, boolean allowBackgroundAuthentication) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -432,9 +431,9 @@ public class FingerprintService extends SystemService {
 
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
-                    new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication,
-                    mFingerprintStateCallback);
+                    new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, requestId,
+                    restricted, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    allowBackgroundAuthentication, mFingerprintStateCallback);
         }
 
         @Override // Binder call
@@ -452,7 +451,8 @@ public class FingerprintService extends SystemService {
 
 
         @Override // Binder call
-        public void cancelAuthentication(final IBinder token, final String opPackageName) {
+        public void cancelAuthentication(final IBinder token, final String opPackageName,
+                long requestId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -469,11 +469,12 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.second.cancelAuthentication(provider.first, token);
+            provider.second.cancelAuthentication(provider.first, token, requestId);
         }
 
         @Override // Binder call
-        public void cancelFingerprintDetect(final IBinder token, final String opPackageName) {
+        public void cancelFingerprintDetect(final IBinder token, final String opPackageName,
+                final long requestId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "cancelFingerprintDetect called from non-sysui package: "
@@ -489,12 +490,12 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.second.cancelAuthentication(provider.first, token);
+            provider.second.cancelAuthentication(provider.first, token, requestId);
         }
 
         @Override // Binder call
         public void cancelAuthenticationFromService(final int sensorId, final IBinder token,
-                final String opPackageName) {
+                final String opPackageName, final long requestId) {
 
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
@@ -506,7 +507,7 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.cancelAuthentication(sensorId, token);
+            provider.cancelAuthentication(sensorId, token, requestId);
         }
 
         @Override // Binder call

@@ -24,7 +24,7 @@ import android.media.audio.common.AudioFormatDescription;
  *
  * {@hide}
  */
-@JavaDerive(equals = true, toString = true)
+@JavaDerive(equals=true, toString=true)
 @VintfStability
 parcelable AudioConfigBase {
     int sampleRate;

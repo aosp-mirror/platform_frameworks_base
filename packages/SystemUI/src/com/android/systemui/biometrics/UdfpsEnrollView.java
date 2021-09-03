@@ -64,4 +64,8 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
     void onLastStepAcquired() {
         mHandler.post(mFingerprintDrawable::onLastStepAcquired);
     }
+
+    void onEnrollmentHelp() {
+        mHandler.post(mFingerprintDrawable::onEnrollmentHelp);
+    }
 }

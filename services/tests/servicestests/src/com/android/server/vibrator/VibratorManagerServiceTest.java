@@ -233,6 +233,19 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void createService_resetsVibrators() {
+        mockVibrators(1, 2);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+
+        createService();
+        assertEquals(1, mVibratorProviders.get(1).getOffCount());
+        assertEquals(1, mVibratorProviders.get(2).getOffCount());
+        assertEquals(Arrays.asList(false), mVibratorProviders.get(1).getExternalControlStates());
+        assertEquals(Arrays.asList(false), mVibratorProviders.get(2).getExternalControlStates());
+    }
+
+    @Test
     public void createService_doNotCrashIfUsedBeforeSystemReady() {
         mockVibrators(1, 2);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
@@ -991,7 +1004,7 @@ public class VibratorManagerServiceTest {
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(IExternalVibratorService.SCALE_NONE, scale);
-        assertEquals(Arrays.asList(true, false),
+        assertEquals(Arrays.asList(false, true, false),
                 mVibratorProviders.get(1).getExternalControlStates());
     }
 
@@ -1017,7 +1030,8 @@ public class VibratorManagerServiceTest {
         verify(firstController).mute();
         verify(secondController, never()).mute();
         // Set external control called only once.
-        assertEquals(Arrays.asList(true), mVibratorProviders.get(1).getExternalControlStates());
+        assertEquals(Arrays.asList(false, true),
+                mVibratorProviders.get(1).getExternalControlStates());
     }
 
     @Test
@@ -1039,7 +1053,8 @@ public class VibratorManagerServiceTest {
 
         // Vibration is cancelled.
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
-        assertEquals(Arrays.asList(true), mVibratorProviders.get(1).getExternalControlStates());
+        assertEquals(Arrays.asList(false, true),
+                mVibratorProviders.get(1).getExternalControlStates());
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {
