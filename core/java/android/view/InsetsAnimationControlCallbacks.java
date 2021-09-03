@@ -35,7 +35,7 @@ public interface InsetsAnimationControlCallbacks {
      *     <li>Dispatch {@link WindowInsetsAnimationControlListener#onReady}</li>
      * </ul>
      */
-    <T extends InsetsAnimationControlRunner & WindowInsetsAnimationController>
+    <T extends InsetsAnimationControlRunner & InternalInsetsAnimationController>
     void startAnimation(T runner, WindowInsetsAnimationControlListener listener, int types,
             WindowInsetsAnimation animation, Bounds bounds);
 
