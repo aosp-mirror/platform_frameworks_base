@@ -659,7 +659,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"Системийн UI Тохируулагч"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Залгаатай тэжээлийн хувийг харуулах"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Тэжээлийн хувийг цэнэглээгүй байх үед статусын хэсэгт харуулна уу"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"Түргэвчилсэн Tохиргоо"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"Шуурхай тохиргоо"</string>
     <string name="status_bar" msgid="4357390266055077437">"Статус самбар"</string>
     <string name="overview" msgid="3522318590458536816">"Тойм"</string>
     <string name="demo_mode" msgid="263484519766901593">"Системийн UI демо горим"</string>
@@ -684,7 +684,7 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> цагт"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>-т"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Түргэн Тохиргоо, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Шуурхай тохиргоо, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Сүлжээний цэг"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ажлын профайл"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
@@ -697,8 +697,8 @@
     <string name="activity_not_found" msgid="8711661533828200293">"Аппыг таны төхөөрөмжид суулгаагүй байна"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Цагийн секундыг харуулах"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Статус талбарт цагийн секундыг харуулах. Энэ нь тэжээлийн цэнэгт нөлөөлж болно."</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"Түргэн тохиргоог дахин засварлах"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"Түргэн тохиргоонд гэрэлтүүлэг харах"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"Шуурхай тохиргоог дахин засварлах"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"Шуурхай тохиргоонд гэрэлтүүлэг харах"</string>
     <string name="experimental" msgid="3549865454812314826">"Туршилтын"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth-г асаах уу?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Компьютерийн гараа таблетад холбохын тулд эхлээд Bluetooth-г асаана уу."</string>
@@ -920,11 +920,11 @@
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g> байрлал"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Хавтан нэмсэн"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Хавтанг хассан"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Түргэн тохиргоо засварлагч."</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Шуурхай тохиргоо засварлагч."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> мэдэгдэл: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Шуурхай тохиргоог нээнэ үү."</string>
-    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Хурдан тохиргоог хаана уу."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Шуурхай тохиргоог хаана уу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Сэрүүлэг тавьсан."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g>-р нэвтэрсэн"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"хэрэглэгчийг сонгох"</string>
@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Нээхийн тулд хурууны хээг ашиглана уу"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Баталгаажуулалт шаардлагатай. Баталгаажуулахын тулд хурууны хээ мэдрэгчид хүрнэ үү."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Үргэлжилж буй утасны дуудлага"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Нислэгийн горим"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобайл дата"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Холбогдсон"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Интернэт автоматаар холбогдохгүй"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобайл дата автоматаар холбогдохгүй"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Холболт алга"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Өөр боломжтой сүлжээ байхгүй байна"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Боломжтой сүлжээ байхгүй байна"</string>
