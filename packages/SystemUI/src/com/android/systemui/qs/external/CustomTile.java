@@ -133,8 +133,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         updateDefaultTileAndIcon();
         if (mInitialDefaultIconFetched.compareAndSet(false, true)) {
             if (mDefaultIcon == null) {
-                mQSLogger.logTileDestroyed(getTileSpec(),
-                        "Custom tile default icon not available");
+                Log.w(TAG, "No default icon for " + getTileSpec() + ", destroying tile");
+                mHost.removeTile(getTileSpec());
             }
         }
         if (mServiceManager.isToggleableTile()) {
@@ -412,7 +412,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             tileState = Tile.STATE_UNAVAILABLE;
         }
         state.state = tileState;
-        Drawable drawable;
+        Drawable drawable = null;
         try {
             drawable = mTile.getIcon().loadDrawable(mUserContext);
         } catch (Exception e) {
