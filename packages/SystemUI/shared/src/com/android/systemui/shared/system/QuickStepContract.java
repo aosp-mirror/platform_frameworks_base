@@ -285,8 +285,8 @@ public class QuickStepContract {
      * These values are expressed in pixels because they should not respect display or font
      * scaling, this means that we don't have to reload them on config changes.
      */
-    public static float getWindowCornerRadius(Resources resources) {
-        return ScreenDecorationsUtils.getWindowCornerRadius(resources);
+    public static float getWindowCornerRadius(Context context) {
+        return ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
     /**

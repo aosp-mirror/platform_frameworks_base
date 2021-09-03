@@ -482,7 +482,7 @@ class ActivityLaunchAnimator(
             val endRadius = if (isExpandingFullyAbove) {
                 // Most of the time, expanding fully above the root view means expanding in full
                 // screen.
-                ScreenDecorationsUtils.getWindowCornerRadius(context.resources)
+                ScreenDecorationsUtils.getWindowCornerRadius(context)
             } else {
                 // This usually means we are in split screen mode, so 2 out of 4 corners will have
                 // a radius of 0.

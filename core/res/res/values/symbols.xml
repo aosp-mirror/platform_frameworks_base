@@ -4452,4 +4452,19 @@
   <java-symbol type="array" name="config_mainBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_secondaryBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_waterfallCutoutArray" />
+
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom_adjustment" />
+  <java-symbol type="array" name="config_roundedCornerRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusAdjustmentArray" />
+  <java-symbol type="bool" name="config_secondaryBuiltInDisplayIsRound" />
+  <java-symbol type="array" name="config_builtInDisplayIsRoundArray" />
 </resources>
