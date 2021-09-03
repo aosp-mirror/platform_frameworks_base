@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.Application;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -259,7 +260,11 @@ public final class CompanionDeviceManager {
      *
      * @param component the name of the component
      * @return whether the given component has the notification listener permission
+     *
+     * @deprecated Use
+     * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)} instead.
      */
+    @Deprecated
     public boolean hasNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
             return false;

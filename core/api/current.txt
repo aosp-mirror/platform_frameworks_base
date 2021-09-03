@@ -9856,7 +9856,7 @@ package android.companion {
     method @RequiresPermission(value=android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method public void disassociate(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getAssociations();
-    method public boolean hasNotificationAccess(android.content.ComponentName);
+    method @Deprecated public boolean hasNotificationAccess(android.content.ComponentName);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
