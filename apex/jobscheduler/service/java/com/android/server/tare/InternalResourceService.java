@@ -16,6 +16,8 @@
 
 package com.android.server.tare;
 
+import static android.provider.Settings.Global.TARE_ALARM_MANAGER_CONSTANTS;
+import static android.provider.Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -96,9 +98,11 @@ public class InternalResourceService extends SystemService {
     private final PackageManagerInternal mPackageManagerInternal;
 
     private final Agent mAgent;
-    private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final ConfigObserver mConfigObserver;
     private final EconomyManagerStub mEconomyManagerStub;
+
+    @GuardedBy("mLock")
+    private CompleteEconomicPolicy mCompleteEconomicPolicy;
 
     @NonNull
     @GuardedBy("mLock")
@@ -217,7 +221,7 @@ public class InternalResourceService extends SystemService {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mEconomyManagerStub = new EconomyManagerStub();
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
-        mAgent = new Agent(this, mCompleteEconomicPolicy);
+        mAgent = new Agent(this);
 
         mConfigObserver = new ConfigObserver(mHandler, context);
 
@@ -245,6 +249,12 @@ public class InternalResourceService extends SystemService {
     }
 
     /** Returns the installed packages for all users. */
+    @NonNull
+    @GuardedBy("mLock")
+    CompleteEconomicPolicy getCompleteEconomicPolicyLocked() {
+        return mCompleteEconomicPolicy;
+    }
+
     @NonNull
     List<PackageInfo> getInstalledPackages() {
         synchronized (mLock) {
@@ -698,14 +708,14 @@ public class InternalResourceService extends SystemService {
             long requiredBalance = 0;
             final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
                     bill.getAnticipatedActions();
-            for (int i = 0; i < projectedActions.size(); ++i) {
-                AnticipatedAction action = projectedActions.get(i);
-                final long cost =
-                        mCompleteEconomicPolicy.getCostOfAction(action.actionId, userId, pkgName);
-                requiredBalance += cost * action.numInstantaneousCalls
-                        + cost * (action.ongoingDurationMs / 1000);
-            }
             synchronized (mLock) {
+                for (int i = 0; i < projectedActions.size(); ++i) {
+                    AnticipatedAction action = projectedActions.get(i);
+                    final long cost = mCompleteEconomicPolicy.getCostOfAction(
+                            action.actionId, userId, pkgName);
+                    requiredBalance += cost * action.numInstantaneousCalls
+                            + cost * (action.ongoingDurationMs / 1000);
+                }
                 return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance;
             }
         }
@@ -722,16 +732,16 @@ public class InternalResourceService extends SystemService {
             long totalCostPerSecond = 0;
             final List<EconomyManagerInternal.AnticipatedAction> projectedActions =
                     bill.getAnticipatedActions();
-            for (int i = 0; i < projectedActions.size(); ++i) {
-                AnticipatedAction action = projectedActions.get(i);
-                final long cost =
-                        mCompleteEconomicPolicy.getCostOfAction(action.actionId, userId, pkgName);
-                totalCostPerSecond += cost;
-            }
-            if (totalCostPerSecond == 0) {
-                return FOREVER_MS;
-            }
             synchronized (mLock) {
+                for (int i = 0; i < projectedActions.size(); ++i) {
+                    AnticipatedAction action = projectedActions.get(i);
+                    final long cost = mCompleteEconomicPolicy.getCostOfAction(
+                            action.actionId, userId, pkgName);
+                    totalCostPerSecond += cost;
+                }
+                if (totalCostPerSecond == 0) {
+                    return FOREVER_MS;
+                }
                 return mAgent.getBalanceLocked(userId, pkgName) * 1000 / totalCostPerSecond;
             }
         }
@@ -784,15 +794,24 @@ public class InternalResourceService extends SystemService {
         public void start() {
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.ENABLE_TARE), false, this);
-            updateConfig();
+            mContentResolver.registerContentObserver(
+                    Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS), false, this);
+            mContentResolver.registerContentObserver(
+                    Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS), false, this);
+            updateEnabledStatus();
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            updateConfig();
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.Global.getUriFor(Settings.Global.ENABLE_TARE))) {
+                updateEnabledStatus();
+            } else if (uri.equals(Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS))
+                    || uri.equals(Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS))) {
+                updateEconomicPolicy();
+            }
         }
 
-        private void updateConfig() {
+        private void updateEnabledStatus() {
             final boolean isTareEnabled = Settings.Global.getInt(mContentResolver,
                     Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
             if (mIsEnabled != isTareEnabled) {
@@ -801,6 +820,17 @@ public class InternalResourceService extends SystemService {
                     setupEverything();
                 } else {
                     tearDownEverything();
+                }
+            }
+        }
+
+        private void updateEconomicPolicy() {
+            synchronized (mLock) {
+                mCompleteEconomicPolicy.tearDown();
+                mCompleteEconomicPolicy = new CompleteEconomicPolicy(InternalResourceService.this);
+                if (mIsEnabled && mBootPhase >= PHASE_SYSTEM_SERVICES_READY) {
+                    mCompleteEconomicPolicy.setup();
+                    mAgent.onPricingChangedLocked();
                 }
             }
         }

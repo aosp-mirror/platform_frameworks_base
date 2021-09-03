@@ -75,7 +75,7 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    public long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
+    long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
         long min = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
             min += mEnabledEconomicPolicies.valueAt(i).getMinSatiatedBalance(userId, pkgName);
@@ -84,24 +84,24 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    public long getMaxSatiatedBalance() {
+    long getMaxSatiatedBalance() {
         return mMaxSatiatedBalance;
     }
 
     @Override
-    public long getMaxSatiatedCirculation() {
+     long getMaxSatiatedCirculation() {
         return mMaxSatiatedCirculation;
     }
 
     @NonNull
     @Override
-    public int[] getCostModifiers() {
+    int[] getCostModifiers() {
         return mCostModifiers == null ? EmptyArray.INT : mCostModifiers;
     }
 
     @Nullable
     @Override
-    public Action getAction(@AppAction int actionId) {
+    Action getAction(@AppAction int actionId) {
         if (mActions.contains(actionId)) {
             return mActions.get(actionId);
         }
@@ -123,7 +123,7 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
 
     @Nullable
     @Override
-    public Reward getReward(@UtilityReward int rewardId) {
+    Reward getReward(@UtilityReward int rewardId) {
         if (mRewards.contains(rewardId)) {
             return mRewards.get(rewardId);
         }

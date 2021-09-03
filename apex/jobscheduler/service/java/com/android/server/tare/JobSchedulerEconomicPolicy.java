@@ -107,12 +107,9 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.KeyValueListParser;
 import android.util.IndentingPrintWriter;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -147,7 +144,6 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     private long mMaxSatiatedCirculation;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
-    private final SettingsObserver mSettingsObserver;
     private final InternalResourceService mInternalResourceService;
 
     private final SparseArray<Action> mActions = new SparseArray<>();
@@ -156,7 +152,6 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     JobSchedulerEconomicPolicy(InternalResourceService irs) {
         super(irs);
         mInternalResourceService = irs;
-        mSettingsObserver = new SettingsObserver(TareHandlerThread.getHandler());
         loadConstants("");
     }
 
@@ -164,12 +159,7 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     void setup() {
         super.setup();
         ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
-        resolver.registerContentObserver(
-                Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS),
-                false, mSettingsObserver, UserHandle.USER_ALL);
-        loadConstants(Settings.Global.getString(
-                mInternalResourceService.getContext().getContentResolver(),
-                TARE_JOB_SCHEDULER_CONSTANTS));
+        loadConstants(Settings.Global.getString(resolver, TARE_JOB_SCHEDULER_CONSTANTS));
     }
 
     @Override
@@ -322,19 +312,6 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
                         arcToNarc(mParser.getInt(
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_MAX,
                                 DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX))));
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            loadConstants(Settings.Global.getString(
-                    mInternalResourceService.getContext().getContentResolver(),
-                    TARE_JOB_SCHEDULER_CONSTANTS));
-        }
     }
 
     @Override

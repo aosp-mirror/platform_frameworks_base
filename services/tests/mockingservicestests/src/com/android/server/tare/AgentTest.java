@@ -59,6 +59,7 @@ public class AgentTest {
                 .mockStatic(LocalServices.class)
                 .startMocking();
         when(mIrs.getContext()).thenReturn(mContext);
+        when(mIrs.getCompleteEconomicPolicyLocked()).thenReturn(mEconomicPolicy);
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mock(AlarmManager.class));
     }
 
@@ -71,7 +72,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_UnderMax() {
-        Agent agent = new Agent(mIrs, mEconomicPolicy);
+        Agent agent = new Agent(mIrs);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getMaxCirculationLocked();
@@ -100,7 +101,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxCirculation() {
-        Agent agent = new Agent(mIrs, mEconomicPolicy);
+        Agent agent = new Agent(mIrs);
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getMaxCirculationLocked();
@@ -147,7 +148,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxSatiatedBalance() {
-        Agent agent = new Agent(mIrs, mEconomicPolicy);
+        Agent agent = new Agent(mIrs);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getMaxCirculationLocked();

@@ -98,12 +98,9 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.KeyValueListParser;
 import android.util.IndentingPrintWriter;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -145,7 +142,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private long mMaxSatiatedCirculation;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
-    private final SettingsObserver mSettingsObserver;
     private final InternalResourceService mInternalResourceService;
 
     private final SparseArray<Action> mActions = new SparseArray<>();
@@ -154,7 +150,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     AlarmManagerEconomicPolicy(InternalResourceService irs) {
         super(irs);
         mInternalResourceService = irs;
-        mSettingsObserver = new SettingsObserver(TareHandlerThread.getHandler());
         loadConstants("");
     }
 
@@ -162,12 +157,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     void setup() {
         super.setup();
         ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
-        resolver.registerContentObserver(
-                Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS),
-                false, mSettingsObserver, UserHandle.USER_ALL);
-        loadConstants(Settings.Global.getString(
-                mInternalResourceService.getContext().getContentResolver(),
-                TARE_ALARM_MANAGER_CONSTANTS));
+        loadConstants(Settings.Global.getString(resolver, TARE_ALARM_MANAGER_CONSTANTS));
     }
 
     @Override
@@ -215,7 +205,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         }
 
         mMinSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
-                        DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
+                DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
         mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
                 DEFAULT_AM_MAX_SATIATED_BALANCE));
         mMaxSatiatedCirculation = arcToNarc(mParser.getInt(KEY_AM_MAX_CIRCULATION,
@@ -312,7 +302,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                 (long) (arcToNarc(1) * mParser.getFloat(KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING)),
                 arcToNarc(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_MAX,
-                                DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX))));
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX))));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
                 arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT)),
@@ -348,19 +338,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                         arcToNarc(mParser.getInt(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX))));
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            loadConstants(Settings.Global.getString(
-                    mInternalResourceService.getContext().getContentResolver(),
-                    TARE_ALARM_MANAGER_CONSTANTS));
-        }
     }
 
     @Override
