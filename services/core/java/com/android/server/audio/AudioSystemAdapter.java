@@ -17,12 +17,15 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioMix;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -59,6 +62,9 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     private ConcurrentHashMap<AudioAttributes, ArrayList<AudioDeviceAttributes>>
             mDevicesForAttrCache;
     private int[] mMethodCacheHit;
+    private static final Object sRoutingListenerLock = new Object();
+    @GuardedBy("sRoutingListenerLock")
+    private static @Nullable OnRoutingUpdatedListener sRoutingListener;
 
     /**
      * should be false except when trying to debug caching errors. When true, the value retrieved
@@ -76,6 +82,23 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
             Log.d(TAG, "---- onRoutingUpdated (from native) ----------");
         }
         invalidateRoutingCache();
+        final OnRoutingUpdatedListener listener;
+        synchronized (sRoutingListenerLock) {
+            listener = sRoutingListener;
+        }
+        if (listener != null) {
+            listener.onRoutingUpdatedFromNative();
+        }
+    }
+
+    interface OnRoutingUpdatedListener {
+        void onRoutingUpdatedFromNative();
+    }
+
+    static void setRoutingListener(@Nullable OnRoutingUpdatedListener listener) {
+        synchronized (sRoutingListenerLock) {
+            sRoutingListener = listener;
+        }
     }
 
     /**
