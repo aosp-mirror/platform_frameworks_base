@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package android.window;
 
-import android.window.RemoteTransition;
-import android.window.TransitionFilter;
-
-/**
- * Interface that is exposed to remote callers to manipulate the transitions feature.
- */
-interface IShellTransitions {
-
-    /**
-     * Registers a remote transition handler.
-     */
-    oneway void registerRemote(in TransitionFilter filter,
-            in RemoteTransition remoteTransition) = 1;
-
-    /**
-     * Unregisters a remote transition handler.
-     */
-    oneway void unregisterRemote(in RemoteTransition remoteTransition) = 2;
-}
+parcelable RemoteTransition;
