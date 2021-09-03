@@ -900,6 +900,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public VerifiedInputEvent verifyInputEvent(InputEvent event) {
+        Objects.requireNonNull(event, "event must not be null");
         return nativeVerifyInputEvent(mPtr, event);
     }
 
