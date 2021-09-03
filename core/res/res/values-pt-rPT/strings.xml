@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilize a impressão digital ou o bloqueio de ecrã para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Algo correu mal. Tente novamente."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícone de impressão digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema com o Desbloqueio facial"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilize o rosto ou o bloqueio de ecrã para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Algo correu mal. Tente novamente."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícone de rosto"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ler definições de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permite que a app leia as definições de sincronização de uma conta. Por exemplo, pode determinar se a app Pessoas está sincronizada com uma conta."</string>
@@ -1692,7 +1694,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho está ativado, premir ambos os botões de volume durante 3 segundos inicia uma funcionalidade de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Pretende ativar o atalho das funcionalidades de acessibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Manter premidas ambas as teclas de volume durante alguns segundos ativa as funcionalidades de acessibilidade. Estas podem alterar a forma como o seu dispositivo funciona.\n\nFuncionalidades atuais:\n<xliff:g id="SERVICE">%1$s</xliff:g>\npode alterar as funcionalidades selecionadas em Definições &gt; Acessibilidade."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Pretende ativar o atalho do serviço <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Manter premidas ambas as teclas de volume durante alguns segundos ativa o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, uma funcionalidade de acessibilidade. Esta pode alterar a forma como o seu dispositivo funciona.\n\nPode alterar este atalho para outra funcionalidade em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ativar"</string>
