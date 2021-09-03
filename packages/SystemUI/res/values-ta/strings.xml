@@ -450,7 +450,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும்."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"திறக்க, மீண்டும் தட்டவும்"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"அன்லாக் செய்ய, மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
