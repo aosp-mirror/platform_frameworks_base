@@ -119,6 +119,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        loadDimens();
 
         MarginLayoutParams lp = (MarginLayoutParams) mMultiUserAvatar.getLayoutParams();
         lp.width = lp.height = getResources().getDimensionPixelSize(
@@ -127,6 +128,22 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         // System icons
         updateSystemIconsLayoutParams();
+
+        // mStatusIconArea
+        mStatusIconArea.setPaddingRelative(
+                mStatusIconArea.getPaddingStart(),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top),
+                mStatusIconArea.getPaddingEnd(),
+                mStatusIconArea.getPaddingBottom()
+        );
+
+        // mStatusIconContainer
+        mStatusIconContainer.setPaddingRelative(
+                mStatusIconContainer.getPaddingStart(),
+                mStatusIconContainer.getPaddingTop(),
+                getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding),
+                mStatusIconContainer.getPaddingBottom()
+        );
 
         // Respect font size setting.
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
