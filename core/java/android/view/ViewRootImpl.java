@@ -4031,6 +4031,10 @@ public final class ViewRootImpl implements ViewParent,
                 mBlastBufferQueue.setNextTransaction(null);
                 mBlastBufferQueue.setTransactionCompleteCallback(mRtLastAttemptedDrawFrameNum,
                         null);
+                // Apply the transactions that were sent to mergeWithNextTransaction since the
+                // frame didn't draw on this vsync. It's possible the frame will draw later, but
+                // it's better to not be sync than to block on a frame that may never come.
+                mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
             }
 
             mHandler.postAtFrontOfQueue(() -> {
