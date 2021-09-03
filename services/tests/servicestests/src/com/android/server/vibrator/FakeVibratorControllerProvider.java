@@ -52,6 +52,7 @@ final class FakeVibratorControllerProvider {
 
     private boolean mIsAvailable = true;
     private long mLatency;
+    private int mOffCount;
 
     private int mCapabilities;
     private int[] mSupportedEffects;
@@ -93,6 +94,7 @@ final class FakeVibratorControllerProvider {
 
         @Override
         public void off() {
+            mOffCount++;
         }
 
         @Override
@@ -306,6 +308,11 @@ final class FakeVibratorControllerProvider {
     /** Return list of states set for external control to the fake vibrator hardware. */
     public List<Boolean> getExternalControlStates() {
         return mExternalControlStates;
+    }
+
+    /** Returns the number of times the vibrator was turned off. */
+    public int getOffCount() {
+        return mOffCount;
     }
 
     /**

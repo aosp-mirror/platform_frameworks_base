@@ -304,13 +304,22 @@ final class VibratorController {
         }
     }
 
-    /** Turns off the vibrator.This will affect the state of {@link #isVibrating()}. */
+    /** Turns off the vibrator. This will affect the state of {@link #isVibrating()}. */
     public void off() {
         synchronized (mLock) {
             mNativeWrapper.off();
             mCurrentAmplitude = 0;
             notifyVibratorOffLocked();
         }
+    }
+
+    /**
+     * Resets the vibrator hardware to a default state.
+     * This turns the vibrator off, which will affect the state of {@link #isVibrating()}.
+     */
+    public void reset() {
+        setExternalControl(false);
+        off();
     }
 
     @Override

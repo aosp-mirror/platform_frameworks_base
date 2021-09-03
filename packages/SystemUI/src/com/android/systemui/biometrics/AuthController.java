@@ -501,7 +501,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, String opPackageName, long operationId,
+            int userId, long operationId, String opPackageName, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig) {
         @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
 
@@ -515,6 +515,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     + ", credentialAllowed: " + credentialAllowed
                     + ", requireConfirmation: " + requireConfirmation
                     + ", operationId: " + operationId
+                    + ", requestId: " + requestId
                     + ", multiSensorConfig: " + multiSensorConfig);
         }
         SomeArgs args = SomeArgs.obtain();
@@ -526,6 +527,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         args.argi1 = userId;
         args.arg6 = opPackageName;
         args.arg7 = operationId;
+        args.arg8 = requestId;
         args.argi2 = multiSensorConfig;
 
         boolean skipAnimation = false;
@@ -629,6 +631,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (mCurrentDialog == null) {
             // Could be possible if the caller canceled authentication after credential success
             // but before the client was notified.
+            if (DEBUG) Log.d(TAG, "dialog already gone");
             return;
         }
 
@@ -683,6 +686,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final int userId = args.argi1;
         final String opPackageName = (String) args.arg6;
         final long operationId = (long) args.arg7;
+        final long requestId = (long) args.arg8;
         final @BiometricMultiSensorMode int multiSensorConfig = args.argi2;
 
         // Create a new dialog but do not replace the current one yet.
@@ -695,6 +699,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 opPackageName,
                 skipAnimation,
                 operationId,
+                requestId,
                 multiSensorConfig);
 
         if (newDialog == null) {
@@ -772,7 +777,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     protected AuthDialog buildDialog(PromptInfo promptInfo, boolean requireConfirmation,
             int userId, int[] sensorIds, boolean credentialAllowed, String opPackageName,
-            boolean skipIntro, long operationId,
+            boolean skipIntro, long operationId, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
@@ -782,6 +787,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setOpPackageName(opPackageName)
                 .setSkipIntro(skipIntro)
                 .setOperationId(operationId)
+                .setRequestId(requestId)
                 .setMultiSensorConfig(multiSensorConfig)
                 .build(sensorIds, credentialAllowed, mFpProps, mFaceProps);
     }

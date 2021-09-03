@@ -521,9 +521,10 @@ interface IWindowManager
     void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
-     * Registers an IDisplayContainerListener
+     * Registers an IDisplayContainerListener, and returns the set of existing display ids. The
+     * listener's onDisplayAdded() will not be called for the displays returned.
      */
-    void registerDisplayWindowListener(IDisplayWindowListener listener);
+    int[] registerDisplayWindowListener(IDisplayWindowListener listener);
 
     /**
      * Unregisters an IDisplayContainerListener.

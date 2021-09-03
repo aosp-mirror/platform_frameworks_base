@@ -95,12 +95,18 @@ public interface ServiceProvider {
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
-    void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
+    long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient,
             @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication,
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
+
+    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication,
@@ -108,7 +114,7 @@ public interface ServiceProvider {
 
     void startPreparedClient(int sensorId, int cookie);
 
-    void cancelAuthentication(int sensorId, @NonNull IBinder token);
+    void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
 
     void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,

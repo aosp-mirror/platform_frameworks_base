@@ -486,8 +486,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void showTurnOffMobileDialog() {
-        CharSequence carrierName =
-                mSubscriptionManager.getDefaultDataSubscriptionInfo().getCarrierName();
+        CharSequence carrierName = getMobileNetworkTitle();
         boolean isInService = mInternetDialogController.isVoiceStateInService();
         if (TextUtils.isEmpty(carrierName) || !isInService) {
             carrierName = mContext.getString(R.string.mobile_data_disable_message_default_carrier);

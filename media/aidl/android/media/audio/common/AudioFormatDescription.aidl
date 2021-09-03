@@ -33,7 +33,7 @@ import android.media.audio.common.PcmType;
  *
  * {@hide}
  */
-@JavaDerive(equals = true, toString = true)
+@JavaDerive(equals=true, toString=true)
 @VintfStability
 parcelable AudioFormatDescription {
     /**

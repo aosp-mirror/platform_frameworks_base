@@ -692,8 +692,11 @@ public class CameraServiceProxy extends SystemService
             }
 
             try {
-                WindowManagerGlobal.getWindowManagerService().registerDisplayWindowListener(
-                        mDisplayWindowListener);
+                int[] displayIds = WindowManagerGlobal.getWindowManagerService()
+                        .registerDisplayWindowListener(mDisplayWindowListener);
+                for (int i = 0; i < displayIds.length; i++) {
+                    mDisplayWindowListener.onDisplayAdded(displayIds[i]);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to register display window listener!");
             }

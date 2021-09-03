@@ -16,15 +16,17 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingUtils.NOT_SET;
+
 import android.annotation.NonNull;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.R;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,7 +48,7 @@ public class ParsedInstrumentationUtils {
             ParseResult<ParsedInstrumentation> result = ParsedComponentUtils.parseComponent(
                     instrumentation, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestInstrumentation_banner,
-                    null /*descriptionAttr*/,
+                    NOT_SET /*descriptionAttr*/,
                     R.styleable.AndroidManifestInstrumentation_icon,
                     R.styleable.AndroidManifestInstrumentation_label,
                     R.styleable.AndroidManifestInstrumentation_logo,

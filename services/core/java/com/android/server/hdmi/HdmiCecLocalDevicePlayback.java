@@ -124,6 +124,39 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 String.valueOf(addr));
     }
 
+    /**
+     * Performs the action 'device select' or 'one touch play' initiated by a Playback device.
+     *
+     * @param id id of HDMI device to select
+     * @param callback callback object to report the result with
+     */
+    @ServiceThreadOnly
+    void deviceSelect(int id, IHdmiControlCallback callback) {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            if (id == getDeviceInfo().getId()) {
+                mService.oneTouchPlay(callback);
+                return;
+            }
+        }
+        HdmiDeviceInfo targetDevice = mService.getHdmiCecNetwork().getDeviceInfo(id);
+        if (targetDevice == null) {
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+            return;
+        }
+        int targetAddress = targetDevice.getLogicalAddress();
+        if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
+            return;
+        }
+        if (!mService.isControlEnabled()) {
+            setActiveSource(targetDevice, "HdmiCecLocalDevicePlayback#deviceSelect()");
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
+        removeAction(DeviceSelectActionFromPlayback.class);
+        addAndStartAction(new DeviceSelectActionFromPlayback(this, targetDevice, callback));
+    }
+
     @Override
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {

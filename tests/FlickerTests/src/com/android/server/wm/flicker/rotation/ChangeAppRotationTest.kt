@@ -103,6 +103,11 @@ class ChangeAppRotationTest(
         super.navBarLayerRotatesAndScales()
     }
 
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
