@@ -54,6 +54,7 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DisplayThread;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
  * Policy that implements who gets control over the windows generating insets.
@@ -170,8 +171,12 @@ class InsetsPolicy {
             changed = true;
         }
         if (changed) {
-            mPolicy.getStatusBarManagerInternal().showTransient(mDisplayContent.getDisplayId(),
-                    mShowingTransientTypes.toArray());
+            StatusBarManagerInternal statusBarManagerInternal =
+                    mPolicy.getStatusBarManagerInternal();
+            if (statusBarManagerInternal != null) {
+                statusBarManagerInternal.showTransient(
+                        mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
+            }
             updateBarControlTarget(mFocusedWin);
 
             // The leashes can be created while updating bar control target. The surface transaction
@@ -306,9 +311,11 @@ class InsetsPolicy {
                     abortTypes.add(type);
                 }
             }
-            if (abortTypes.size() > 0) {
-                mPolicy.getStatusBarManagerInternal().abortTransient(mDisplayContent.getDisplayId(),
-                        abortTypes.toArray());
+            StatusBarManagerInternal statusBarManagerInternal =
+                    mPolicy.getStatusBarManagerInternal();
+            if (abortTypes.size() > 0 && statusBarManagerInternal != null) {
+                statusBarManagerInternal.abortTransient(
+                        mDisplayContent.getDisplayId(), abortTypes.toArray());
             }
         }
     }
@@ -318,8 +325,11 @@ class InsetsPolicy {
      * updateBarControlTarget(mFocusedWin) after this invocation.
      */
     private void abortTransient() {
-        mPolicy.getStatusBarManagerInternal().abortTransient(mDisplayContent.getDisplayId(),
-                mShowingTransientTypes.toArray());
+        StatusBarManagerInternal statusBarManagerInternal = mPolicy.getStatusBarManagerInternal();
+        if (statusBarManagerInternal != null) {
+            statusBarManagerInternal.abortTransient(
+                    mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
+        }
         mShowingTransientTypes.clear();
     }
 
@@ -478,8 +488,12 @@ class InsetsPolicy {
             final int state = visible ? WINDOW_STATE_SHOWING : WINDOW_STATE_HIDDEN;
             if (mState != state) {
                 mState = state;
-                mPolicy.getStatusBarManagerInternal().setWindowState(
-                        mDisplayContent.getDisplayId(), mId, state);
+                StatusBarManagerInternal statusBarManagerInternal =
+                        mPolicy.getStatusBarManagerInternal();
+                if (statusBarManagerInternal != null) {
+                    statusBarManagerInternal.setWindowState(
+                            mDisplayContent.getDisplayId(), mId, state);
+                }
             }
         }
     }
