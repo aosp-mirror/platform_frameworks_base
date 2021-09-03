@@ -340,6 +340,13 @@ public abstract class PanelViewController {
     protected abstract float getOpeningHeight();
 
     /**
+     * Minimum fraction from where expansion should start. This is set when pulling down on a
+     * heads-up notification.
+     * @param minFraction Fraction from 0 to 1.
+     */
+    public abstract void setMinFraction(float minFraction);
+
+    /**
      * @return whether the swiping direction is upwards and above a 45 degree angle compared to the
      * horizontal direction
      */
