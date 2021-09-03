@@ -641,6 +641,8 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
+    <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
