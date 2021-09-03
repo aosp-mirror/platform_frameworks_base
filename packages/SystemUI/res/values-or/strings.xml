@@ -248,7 +248,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"ବିଜ୍ଞପ୍ତି ଖାରଜ କରାଗଲା।"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ଦ୍ରୁତ ସେଟିଂସ୍।"</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"କ୍ୱିକ୍ ସେଟିଂସ୍।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌।"</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଂସ୍"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
@@ -659,7 +659,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"ଏମ୍ବେଡ୍‍ ହୋଇଥିବା ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଦେଖାନ୍ତୁ"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ଚାର୍ଜ ହେଉନଥିବାବେଳେ ଷ୍ଟାଟସ୍‍ ବାର୍‍ ଆଇକନ୍‍ ଭିତରେ ବ୍ୟାଟେରୀ ସ୍ତର ଶତକଡ଼ା ଦେଖାନ୍ତୁ"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"ଦ୍ରୁତ ସେଟିଂସ୍"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"କ୍ୱିକ୍ ସେଟିଂସ୍"</string>
     <string name="status_bar" msgid="4357390266055077437">"ଷ୍ଟାଟସ୍‍ ବାର୍‍"</string>
     <string name="overview" msgid="3522318590458536816">"ଅବଲୋକନ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ସିଷ୍ଟମ୍‌ UI ଡେମୋ ମୋଡ୍‌"</string>
@@ -684,7 +684,7 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>ବେଳେ ଆପଣ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ହେଲେ"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ଦ୍ରୁତ ସେଟିଙ୍ଗ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"କ୍ୱିକ୍ ସେଟିଂସ୍, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ହଟସ୍ପଟ୍‌"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"କେତେକଙ୍କ ପାଇଁ ମଜାଦାର, କିନ୍ତୁ ସମସ୍ତଙ୍କ ପାଇଁ ନୁହେଁ"</string>
@@ -1162,11 +1162,11 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ଖୋଲିବାକୁ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ। ପ୍ରମାଣୀକରଣ କରିବାକୁ ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ସ୍ପର୍ଶ କରନ୍ତୁ।"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ଚାଲୁଥିବା ଫୋନ୍ କଲ୍"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"ଏୟାରପ୍ଲେନ୍ ମୋଡ୍"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ମୋବାଇଲ ଡାଟା"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ସଂଯୋଗ କରାଯାଇଛି"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ଇଣ୍ଟରନେଟ୍ ସ୍ଵତଃ-ସଂଯୋଗ ହେବ ନାହିଁ"</string>
+    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
+    <skip />
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ସଂଯୋଗ ନାହିଁ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ଅନ୍ୟ କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
