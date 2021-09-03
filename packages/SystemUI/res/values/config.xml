@@ -679,4 +679,36 @@
 
     <!-- Flag to activate notification to contents feature -->
     <bool name="config_notificationToContents">false</bool>
+
+    <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
+         customization for secondary display-->
+    <bool name="config_roundedCornerMultipleRadiusSecondary">false</bool>
+
+    <!-- Whether the rounded corners are multiple radius for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerMultipleRadiusArray">
+        <item>@bool/config_roundedCornerMultipleRadius</item>
+        <item>@bool/config_roundedCornerMultipleRadiusSecondary</item>
+    </array>
+
+    <!-- The rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerDrawableArray">
+        <item>@drawable/rounded</item>
+        <item>@drawable/rounded_secondary</item>
+    </array>
+
+    <!-- The top rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerTopDrawableArray">
+        <item>@drawable/rounded_corner_top</item>
+        <item>@drawable/rounded_corner_top_secondary</item>
+    </array>
+
+    <!-- The bottom rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerBottomDrawableArray">
+        <item>@drawable/rounded_corner_bottom</item>
+        <item>@drawable/rounded_corner_bottom_secondary</item>
+    </array>
 </resources>
