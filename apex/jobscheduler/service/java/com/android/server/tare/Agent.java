@@ -33,6 +33,7 @@ import static com.android.server.tare.TareUtils.narcToString;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Looper;
@@ -575,18 +576,29 @@ class Agent {
         }
     }
 
+    /** Returns true if an app should be given credits in the general distributions. */
+    private boolean shouldGiveCredits(@NonNull PackageInfo packageInfo) {
+        final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+        // Skip apps that wouldn't be doing any work. Giving them ARCs would be wasteful.
+        if (applicationInfo == null || !applicationInfo.hasCode()) {
+            return false;
+        }
+        final int userId = UserHandle.getUserId(packageInfo.applicationInfo.uid);
+        // No point allocating ARCs to the system. It can do whatever it wants.
+        return !mIrs.isSystem(userId, packageInfo.packageName);
+    }
+
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
         final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo pkgInfo = pkgs.get(i);
-            final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
-            final String pkgName = pkgInfo.packageName;
-            if (mIrs.isSystem(userId, pkgName)) {
-                // No point allocating ARCs to the system. It can do whatever it wants.
+            if (!shouldGiveCredits(pkgInfo)) {
                 continue;
             }
+            final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
+            final String pkgName = pkgInfo.packageName;
             Ledger ledger = getLedgerLocked(userId, pkgName);
             final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
             final double perc = batteryLevel / 100d;
@@ -620,12 +632,11 @@ class Agent {
 
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo packageInfo = pkgs.get(i);
-            final String pkgName = packageInfo.packageName;
-            final Ledger ledger = getLedgerLocked(userId, pkgName);
-            if (mIrs.isSystem(userId, pkgName)) {
-                // No point allocating ARCs to the system. It can do whatever it wants.
+            if (!shouldGiveCredits(packageInfo)) {
                 continue;
             }
+            final String pkgName = packageInfo.packageName;
+            final Ledger ledger = getLedgerLocked(userId, pkgName);
             if (ledger.getCurrentBalance() > 0) {
                 // App already got credits somehow. Move along.
                 Slog.wtf(TAG, "App " + pkgName + " had credits before economy was set up");
