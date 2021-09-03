@@ -517,6 +517,7 @@ public class SettingsBackupTest {
                     Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST,
                     Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST,
                     Settings.Global.UPDATABLE_DRIVER_SPHAL_LIBRARIES,
+                    Settings.Global.UWB_ENABLED,
                     Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
