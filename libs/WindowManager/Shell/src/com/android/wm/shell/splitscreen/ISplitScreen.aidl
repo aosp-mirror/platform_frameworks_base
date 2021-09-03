@@ -52,9 +52,10 @@ interface ISplitScreen {
     oneway void removeFromSideStage(int taskId) = 4;
 
     /**
-     * Removes the split-screen stages.
+     * Removes the split-screen stages and leaving indicated task to top. Passing INVALID_TASK_ID
+     * to indicate leaving no top task after leaving split-screen.
      */
-    oneway void exitSplitScreen() = 5;
+    oneway void exitSplitScreen(int toTopTaskId) = 5;
 
     /**
      * @param exitSplitScreenOnHide if to exit split-screen if both stages are not visible.

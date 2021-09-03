@@ -214,6 +214,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         wct.setBounds(mRootTaskInfo.token, bounds);
     }
 
+    void reorderChild(int taskId, boolean onTop, WindowContainerTransaction wct) {
+        if (!containsTask(taskId)) {
+            return;
+        }
+        wct.reorder(mChildrenTaskInfo.get(taskId).token, onTop /* onTop */);
+    }
+
     void setVisibility(boolean visible, WindowContainerTransaction wct) {
         wct.reorder(mRootTaskInfo.token, visible /* onTop */);
     }
