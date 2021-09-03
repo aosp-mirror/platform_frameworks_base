@@ -3229,6 +3229,7 @@ package android.window {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method @NonNull public android.os.IBinder getFragmentToken();
     method @NonNull public android.graphics.Point getPositionInParent();
+    method public int getRunningActivityCount();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public int getWindowingMode();
     method public boolean hasRunningActivity();
