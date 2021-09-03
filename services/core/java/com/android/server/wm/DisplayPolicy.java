@@ -2430,7 +2430,7 @@ public class DisplayPolicy {
      */
     float getWindowCornerRadius() {
         return mDisplayContent.getDisplay().getType() == TYPE_INTERNAL
-                ? ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources()) : 0f;
+                ? ScreenDecorationsUtils.getWindowCornerRadius(mContext) : 0f;
     }
 
     boolean isShowingDreamLw() {
