@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. പരിശോധിച്ചുറപ്പിക്കാൻ, വിരലടയാള സെൻസറിൽ സ്‌പർശിക്കുക."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"സജീവമായ ഫോൺ കോൾ"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"ഇന്റർനെറ്റ് സ്വയമേവ കണക്‌റ്റ് ചെയ്യില്ല"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"മൊബൈൽ ഡാറ്റ സ്വയമേവ കണക്റ്റ് ചെയ്യില്ല"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"കണക്ഷനില്ല"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"മറ്റ് നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>

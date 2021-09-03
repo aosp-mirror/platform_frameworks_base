@@ -1009,7 +1009,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Algunes aplicacions estan fent servir el següent: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"En ús per <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ho està utilitzant"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Utilitzat recentment per <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(feina)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Trucada"</string>
@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilitza l\'empremta digital per obrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticació necessària. Toca el sensor d\'empremtes digitals per autenticar-te."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Trucada en curs"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Mode d\'avió"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dades mòbils"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connectat"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Internet no es connectarà automàticament"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Les dades mòbils no es connectaran automàticament"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sense connexió"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hi ha cap altra xarxa disponible"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"No hi ha cap xarxa disponible"</string>

@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ប្រើស្នាមម្រាមដៃ ដើម្បីបើក"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ការហៅទូរសព្ទ​ដែលកំពុង​ដំណើរការ"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"ពេលជិះ​យន្តហោះ"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"អ៊ីនធឺណិតនឹងមិនភ្ជាប់ដោយស្វ័យប្រវត្តិទេ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"ទិន្នន័យទូរសព្ទចល័ត​នឹងមិនភ្ជាប់ដោយស្វ័យប្រវត្តិទេ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"មិនមាន​ការតភ្ជាប់ទេ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"មិន​មាន​បណ្ដាញផ្សេងទៀតដែល​អាច​ប្រើ​បានទេ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"មិន​មាន​បណ្ដាញដែល​អាច​ប្រើ​បានទេ"</string>
