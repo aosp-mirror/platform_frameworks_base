@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,22 +34,10 @@
 package android.media.audio.common;
 /* @hide */
 @Backing(type="int") @VintfStability
-enum AudioStreamType {
-  INVALID = -2,
-  SYS_RESERVED_DEFAULT = -1,
-  VOICE_CALL = 0,
-  SYSTEM = 1,
-  RING = 2,
-  MUSIC = 3,
-  ALARM = 4,
-  NOTIFICATION = 5,
-  BLUETOOTH_SCO = 6,
-  ENFORCED_AUDIBLE = 7,
-  DTMF = 8,
-  TTS = 9,
-  ACCESSIBILITY = 10,
-  ASSISTANT = 11,
-  SYS_RESERVED_REROUTING = 12,
-  SYS_RESERVED_PATCH = 13,
-  CALL_ASSISTANT = 14,
+enum AudioContentType {
+  UNKNOWN = 0,
+  SPEECH = 1,
+  MUSIC = 2,
+  MOVIE = 3,
+  SONIFICATION = 4,
 }

@@ -37,8 +37,11 @@ enum AudioStreamType {
      * Indicates that the operation is applied to the "default" stream
      * in this context, e.g. MUSIC in normal device state, or RING if the
      * phone is ringing.
+     *
+     * Value reserved for system use only. HALs must never return this value to
+     * the system or accept it from the system.
      */
-    DEFAULT = -1,
+    SYS_RESERVED_DEFAULT = -1,
     /** Used to identify the volume of audio streams for phone calls. */
     VOICE_CALL = 0,
     /** Used to identify the volume of audio streams for system sounds. */
