@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Jätkamiseks kasutage oma sõrmejälge või ekraanilukku"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sõrmejälje ikoon"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Näoga avamine"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Probleem funktsiooniga Näoga avamine"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jätkamiseks kasutage oma nägu või ekraanilukku"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Näoikoon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"loe sünkroonimisseadeid"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Võimaldab rakendusel lugeda konto sünkroonimisseadeid. Näiteks võib see määrata, kas rakendus Inimesed on kontoga sünkroonitud."</string>
@@ -1691,7 +1695,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Kas lülitada juurdepääsufunktsioonide otsetee sisse?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hoidke juurdepääsufunktsioonide sisselülitamiseks mõlemat helitugevuse klahvi mõni sekund all. See võib teie seadme tööviisi muuta.\n\nPraegused funktsioonid:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nValitud funktsioone saab muuta jaotises Seaded &gt; Juurdepääsetavus."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Kas lülitada teenuse <xliff:g id="SERVICE">%1$s</xliff:g> otsetee sisse?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Kui hoiate mõlemat helitugevuse klahvi mõni sekund all, lülitatakse juurdepääsufunktsioon <xliff:g id="SERVICE">%1$s</xliff:g> sisse. See võib teie seadme tööviisi muuta.\n\nSelle otsetee saab asendada muu otseteega jaotises Seaded &gt; Juurdepääsetavus."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Lülita sisse"</string>
