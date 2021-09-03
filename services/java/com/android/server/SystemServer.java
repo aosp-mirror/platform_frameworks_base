@@ -2087,14 +2087,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(DockObserver.class);
             t.traceEnd();
 
-            // TODO(b/191495635): re-enable thermal observer after fixing b/191375904.
-            /*
             if (isWatch) {
                 t.traceBegin("StartThermalObserver");
                 mSystemServiceManager.startService(THERMAL_OBSERVER_CLASS);
                 t.traceEnd();
             }
-            */
 
             t.traceBegin("StartWiredAccessoryManager");
             try {
@@ -2445,8 +2442,6 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
-        // TODO(b/191495635): Re-enable these services after fixing b/191375904.
-       /*
        if (isWatch) {
             // Must be started before services that depend it, e.g. WearConnectivityService
             t.traceBegin("StartWearPowerService");
@@ -2475,7 +2470,6 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
             t.traceEnd();
         }
-        */
 
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
             t.traceBegin("StartSliceManagerService");
