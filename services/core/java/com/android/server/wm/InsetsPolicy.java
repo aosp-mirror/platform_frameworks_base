@@ -46,6 +46,7 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.InternalInsetsAnimationController;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
@@ -336,7 +337,7 @@ class InsetsPolicy {
 
     private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin,
             boolean fake) {
-        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1 && !fake) {
+        if (!fake && isShowingTransientTypes(Type.statusBars())) {
             return mDummyControlTarget;
         }
         final WindowState notificationShade = mPolicy.getNotificationShade();
@@ -386,7 +387,7 @@ class InsetsPolicy {
             // Force showing navigation bar while IME is visible.
             return null;
         }
-        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1 && !fake) {
+        if (!fake && isShowingTransientTypes(Type.navigationBars())) {
             return mDummyControlTarget;
         }
         if (focusedWin == mPolicy.getNotificationShade()) {
@@ -410,6 +411,16 @@ class InsetsPolicy {
             return mDummyControlTarget;
         }
         return focusedWin;
+    }
+
+    private boolean isShowingTransientTypes(@Type.InsetsType int types) {
+        final IntArray showingTransientTypes = mShowingTransientTypes;
+        for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
+            if ((InsetsState.toPublicType(showingTransientTypes.get(i)) & types) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
