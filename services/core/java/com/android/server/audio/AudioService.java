@@ -2958,7 +2958,7 @@ public class AudioService extends IAudioService.Stub
             if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
                 // only modify the hearing aid attenuation when the stream to modify matches
                 // the one expected by the hearing aid
-                if (streamType == getHearingAidStreamType()) {
+                if (streamType == getBluetoothContextualVolumeStream()) {
                     if (DEBUG_VOL) {
                         Log.d(TAG, "adjustSreamVolume postSetHearingAidVolumeIndex index="
                                 + newIndex + " stream=" + streamType);
@@ -3308,11 +3308,11 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /*package*/ int getHearingAidStreamType() {
-        return getHearingAidStreamType(mMode.get());
+    /*package*/ int getBluetoothContextualVolumeStream() {
+        return getBluetoothContextualVolumeStream(mMode.get());
     }
 
-    private int getHearingAidStreamType(int mode) {
+    private int getBluetoothContextualVolumeStream(int mode) {
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
@@ -3469,7 +3469,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void updateHearingAidVolumeOnVoiceActivityUpdate() {
-        final int streamType = getHearingAidStreamType();
+        final int streamType = getBluetoothContextualVolumeStream();
         final int index = getStreamVolume(streamType);
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_HEARING_AID,
                 mVoicePlaybackActive.get(), streamType, index));
@@ -3501,7 +3501,7 @@ public class AudioService extends IAudioService.Stub
                 return;
         }
 
-        int streamType = getHearingAidStreamType(newMode);
+        int streamType = getBluetoothContextualVolumeStream(newMode);
 
         final Set<Integer> deviceTypes = AudioSystem.generateAudioDeviceTypesSet(
                 mAudioSystem.getDevicesForStream(streamType));
@@ -3582,7 +3582,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (device == AudioSystem.DEVICE_OUT_HEARING_AID
-                    && streamType == getHearingAidStreamType()) {
+                    && streamType == getBluetoothContextualVolumeStream()) {
                 Log.i(TAG, "setStreamVolume postSetHearingAidVolumeIndex index=" + index
                         + " stream=" + streamType);
                 mDeviceBroker.postSetHearingAidVolumeIndex(index, streamType);
@@ -6264,6 +6264,38 @@ public class AudioService extends IAudioService.Stub
         }
         mDeviceBroker.postBluetoothHearingAidDeviceConnectionState(
                 device, state, suppressNoisyIntent, musicDevice, "AudioService");
+    }
+
+    private void setBluetoothLeAudioDeviceConnectionState(@NonNull BluetoothDevice device,
+            @BtProfileConnectionState int state) {
+        if (device == null) {
+            throw new IllegalArgumentException("Illegal null device");
+        }
+        if (state != BluetoothProfile.STATE_CONNECTED
+                && state != BluetoothProfile.STATE_DISCONNECTED) {
+            throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
+                    + " (dis)connection, got " + state);
+        }
+    }
+
+    /**
+     * See AudioManager.setBluetoothLeAudioOutDeviceConnectionState()
+     */
+    public void setBluetoothLeAudioOutDeviceConnectionState(
+            @NonNull BluetoothDevice device, @BtProfileConnectionState int state,
+            boolean suppressNoisyIntent) {
+        setBluetoothLeAudioDeviceConnectionState(device, state);
+        mDeviceBroker.postBluetoothLeAudioOutDeviceConnectionState(device, state,
+                suppressNoisyIntent, "AudioService");
+    }
+
+    /**
+     * See AudioManager.setBluetoothLeAudioInDeviceConnectionState()
+     */
+    public void setBluetoothLeAudioInDeviceConnectionState(
+            @NonNull BluetoothDevice device, @BtProfileConnectionState int state) {
+        setBluetoothLeAudioDeviceConnectionState(device, state);
+        mDeviceBroker.postBluetoothLeAudioInDeviceConnectionState(device, state, "AudioService");
     }
 
     /**
