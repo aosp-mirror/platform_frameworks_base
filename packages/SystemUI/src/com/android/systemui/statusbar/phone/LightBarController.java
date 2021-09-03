@@ -33,6 +33,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -86,8 +87,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean mNavbarColorManagedByIme;
 
     @Inject
-    public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
-            BatteryController batteryController, NavigationModeController navModeController) {
+    public LightBarController(
+            Context ctx,
+            DarkIconDispatcher darkIconDispatcher,
+            BatteryController batteryController,
+            NavigationModeController navModeController,
+            DumpManager dumpManager) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
@@ -95,6 +100,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mNavigationMode = navModeController.addListener((mode) -> {
             mNavigationMode = mode;
         });
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {

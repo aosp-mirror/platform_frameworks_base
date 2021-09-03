@@ -48,6 +48,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -63,8 +64,10 @@ import javax.inject.Inject;
  * Tracks and reports on {@link StatusBarState}.
  */
 @SysUISingleton
-public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
-        CallbackController<StateListener>, Dumpable {
+public class StatusBarStateControllerImpl implements
+        SysuiStatusBarStateController,
+        CallbackController<StateListener>,
+        Dumpable {
     private static final String TAG = "SbStateController";
     private static final boolean DEBUG_IMMERSIVE_APPS =
             SystemProperties.getBoolean("persist.debug.immersive_apps", false);
@@ -146,11 +149,13 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger) {
+    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager) {
         mUiEventLogger = uiEventLogger;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
+
+        dumpManager.registerDumpable(this);
     }
 
     @Override

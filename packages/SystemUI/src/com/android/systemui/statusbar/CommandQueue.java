@@ -79,7 +79,8 @@ import java.util.ArrayList;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks>,
+public class CommandQueue extends IStatusBar.Stub implements
+        CallbackController<Callbacks>,
         DisplayManager.DisplayListener {
     private static final String TAG = CommandQueue.class.getSimpleName();
 

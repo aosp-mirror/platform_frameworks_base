@@ -50,6 +50,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -151,7 +152,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController) {
+            ShadeController shadeController,
+            DumpManager dumpManager) {
         mContext = context;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mMainHandler = mainHandler;
@@ -171,6 +173,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mOnUserInteractionCallback = onUserInteractionCallback;
         mShadeController = shadeController;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
+
+        dumpManager.registerDumpable(this);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
