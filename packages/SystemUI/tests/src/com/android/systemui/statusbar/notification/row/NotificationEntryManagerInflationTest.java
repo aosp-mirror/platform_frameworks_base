@@ -47,11 +47,13 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -119,6 +121,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         throw new RuntimeException("Timed out waiting to inflate");
     };
 
+    @Mock private NotificationListener mNotificationListener;
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationEntryManager.KeyguardEnvironment mEnvironment;
     @Mock private NotificationListContainer mListContainer;
@@ -186,9 +189,11 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mRemoteInputManager,
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class),
-                mock(IStatusBarService.class)
+                mock(IStatusBarService.class),
+                mock(DumpManager.class)
         );
-        mEntryManager.setRanker(
+        mEntryManager.initialize(
+                mNotificationListener,
                 new NotificationRankingManager(
                         () -> mock(NotificationMediaManager.class),
                         mGroupMembershipManager,

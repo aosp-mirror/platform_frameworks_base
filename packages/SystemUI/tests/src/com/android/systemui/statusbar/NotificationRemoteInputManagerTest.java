@@ -25,6 +25,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
@@ -87,7 +88,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
                 mClickNotifier,
-                mock(ActionClickLogger.class));
+                mock(ActionClickLogger.class),
+                mock(DumpManager.class));
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
@@ -272,7 +274,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
                 NotificationClickNotifier clickNotifier,
-                ActionClickLogger actionClickLogger) {
+                ActionClickLogger actionClickLogger,
+                DumpManager dumpManager) {
             super(
                     context,
                     lockscreenUserManager,
@@ -283,7 +286,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     mainHandler,
                     remoteInputUriController,
                     clickNotifier,
-                    actionClickLogger);
+                    actionClickLogger,
+                    dumpManager);
         }
 
         public void setUpWithPresenterForTest(Callback callback,

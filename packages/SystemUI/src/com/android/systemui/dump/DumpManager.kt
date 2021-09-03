@@ -56,6 +56,15 @@ open class DumpManager @Inject constructor() {
     }
 
     /**
+     * Same as the above override, but automatically uses the simple class name as the dumpable
+     * name.
+     */
+    @Synchronized
+    fun registerDumpable(module: Dumpable) {
+        registerDumpable(module::class.java.simpleName, module)
+    }
+
+    /**
      * Unregisters a previously-registered dumpable.
      */
     @Synchronized

@@ -26,6 +26,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -42,6 +43,7 @@ public class GarbageMonitorTest extends SysuiTestCase {
 
     @Mock private LeakReporter mLeakReporter;
     @Mock private TrackedGarbage mTrackedGarbage;
+    @Mock private DumpManager mDumpManager;
     private GarbageMonitor mGarbageMonitor;
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -53,8 +55,9 @@ public class GarbageMonitorTest extends SysuiTestCase {
                         mContext,
                         mFakeExecutor,
                         new MessageRouterImpl(mFakeExecutor),
-                        new LeakDetector(null, mTrackedGarbage, null),
-                        mLeakReporter);
+                        new LeakDetector(null, mTrackedGarbage, null, mDumpManager),
+                        mLeakReporter,
+                        mDumpManager);
     }
 
     @Test

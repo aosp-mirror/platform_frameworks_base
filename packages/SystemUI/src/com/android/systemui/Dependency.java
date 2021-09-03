@@ -597,11 +597,6 @@ public class Dependency {
         if (obj == null) {
             obj = createDependency(key);
             mDependencies.put(key, obj);
-
-            // TODO: Get dependencies to register themselves instead
-            if (autoRegisterModulesForDump() && obj instanceof Dumpable) {
-                mDumpManager.registerDumpable(obj.getClass().getName(), (Dumpable) obj);
-            }
         }
         return obj;
     }
@@ -617,17 +612,6 @@ public class Dependency {
                     + ". " + mProviders.size() + " providers known.");
         }
         return provider.createDependency();
-    }
-
-    // Currently, there are situations in tests where we might create more than one instance of a
-    // thing that should be a singleton: the "real" one (created by Dagger, usually as a result of
-    // inflating a view), and a mocked one (injected into Dependency). If we register the mocked
-    // one, the DumpManager will throw an exception complaining (rightly) that we have too many
-    // things registered with that name. So in tests, we disable the auto-registration until the
-    // root cause is fixed, i.e. inflated views in tests with Dagger dependencies.
-    @VisibleForTesting
-    protected boolean autoRegisterModulesForDump() {
-        return true;
     }
 
     private static Dependency sDependency;

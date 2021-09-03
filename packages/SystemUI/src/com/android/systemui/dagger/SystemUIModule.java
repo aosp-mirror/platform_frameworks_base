@@ -145,8 +145,10 @@ public abstract class SystemUIModule {
 
     @SysUISingleton
     @Provides
-    static SysUiState provideSysUiState() {
-        return new SysUiState();
+    static SysUiState provideSysUiState(DumpManager dumpManager) {
+        final SysUiState state = new SysUiState();
+        dumpManager.registerDumpable(state);
+        return state;
     }
 
     @BindsOptionalOf

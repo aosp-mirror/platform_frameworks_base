@@ -64,8 +64,10 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -130,6 +132,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private LeakDetector mLeakDetector;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NotificationRowBinder mNotificationRowBinder;
+    @Mock private NotificationListener mNotificationListener;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -195,9 +198,11 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mRemoteInputManager,
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class),
-                mock(IStatusBarService.class)
+                mock(IStatusBarService.class),
+                mock(DumpManager.class)
         );
-        mEntryManager.setRanker(
+        mEntryManager.initialize(
+                mNotificationListener,
                 new NotificationRankingManager(
                         () -> mNotificationMediaManager,
                         mGroupManager,

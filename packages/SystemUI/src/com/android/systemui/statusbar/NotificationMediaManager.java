@@ -52,6 +52,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaDataManager;
@@ -73,7 +74,6 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -188,8 +188,8 @@ public class NotificationMediaManager implements Dumpable {
             NotifCollection notifCollection,
             FeatureFlags featureFlags,
             @Main DelayableExecutor mainExecutor,
-            DeviceConfigProxy deviceConfig,
-            MediaDataManager mediaDataManager) {
+            MediaDataManager mediaDataManager,
+            DumpManager dumpManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -214,6 +214,8 @@ public class NotificationMediaManager implements Dumpable {
             setupNotifPipeline();
             mUsingNotifPipeline = true;
         }
+
+        dumpManager.registerDumpable(this);
     }
 
     private void setupNotifPipeline() {
