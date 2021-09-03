@@ -444,12 +444,11 @@ class GnssNetworkConnectivityHandler {
         capabilities = networkAttributes.mCapabilities;
         Log.i(TAG, String.format(
                 "updateNetworkState, state=%s, connected=%s, network=%s, capabilities=%s"
-                        + ", apn: %s, availableNetworkCount: %d",
+                        + ", availableNetworkCount: %d",
                 agpsDataConnStateAsString(),
                 isConnected,
                 network,
                 capabilities,
-                apn,
                 mAvailableNetworkAttributes.size()));
 
         if (native_is_agps_ril_supported()) {
