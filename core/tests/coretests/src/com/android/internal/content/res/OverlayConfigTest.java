@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.FileUtils;
 import android.os.SystemProperties;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class OverlayConfigTest {
     private static final String TEST_APK_PACKAGE_NAME =

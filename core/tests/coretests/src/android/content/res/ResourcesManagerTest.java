@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.platform.test.annotations.Postsubmit;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
@@ -32,6 +33,7 @@ import junit.framework.TestCase;
 import java.util.HashMap;
 import java.util.Map;
 
+@Postsubmit
 public class ResourcesManagerTest extends TestCase {
     private static final int SECONDARY_DISPLAY_ID = 1;
     private static final String APP_ONE_RES_DIR = "app_one.apk";
