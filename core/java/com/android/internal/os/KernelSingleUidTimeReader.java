@@ -24,6 +24,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -248,6 +250,32 @@ public class KernelSingleUidTimeReader {
         }
 
         public native long[] readBpfData(int uid);
+
+        /**
+         * Reads CPU time-in-state data for the specified UID and adds the delta since the
+         * previous call to the current state stats in the LongArrayMultiStateCounter.
+         */
+        public boolean addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs) {
+            return addDeltaFromBpf(uid, counter.mNativeObject, timestampMs);
+        }
+
+        @CriticalNative
+        private static native boolean addDeltaFromBpf(int uid,
+                long longArrayMultiStateCounterNativePointer, long timestampMs);
+
+        /**
+         * Used for testing.
+         *
+         * Takes mock cpu-time-in-frequency data and uses it the same way eBPF data would be used.
+         */
+        public boolean addDeltaForTest(int uid, LongArrayMultiStateCounter counter,
+                long timestampMs, long[][] timeInFreqDataNanos) {
+            return addDeltaForTest(uid, counter.mNativeObject, timestampMs, timeInFreqDataNanos);
+        }
+
+        private static native boolean addDeltaForTest(int uid,
+                long longArrayMultiStateCounterNativePointer, long timestampMs,
+                long[][] timeInFreqDataNanos);
     }
 
     @VisibleForTesting

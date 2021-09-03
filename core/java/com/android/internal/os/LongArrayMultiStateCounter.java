@@ -31,7 +31,7 @@ import libcore.util.NativeAllocationRegistry;
  *   // At 1000 ms, the state changes to 1
  *   counter.setState(1, 1000);
  *
- *   // At 3000 ms, the tracked values are updated to {100, 200}
+ *   // At 3000 ms, the tracked values are updated to {30, 300}
  *   arrayContainer.setValues(new long[]{{30, 300}};
  *   counter.updateValues(arrayContainer, 3000);
  *
@@ -107,7 +107,10 @@ public class LongArrayMultiStateCounter {
 
     private final int mStateCount;
     private final int mLength;
-    private final long mNativeObject;
+
+    // Visible to other objects in this package so that it can be passed to @CriticalNative
+    // methods.
+    final long mNativeObject;
 
     public LongArrayMultiStateCounter(int stateCount, int arrayLength, int initialState,
             long timestampMs) {
