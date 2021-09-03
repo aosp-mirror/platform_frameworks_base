@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -43,10 +44,10 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     private IBinder mTransition = null;
 
     /** The remote to delegate animation to */
-    private final IRemoteTransition mRemote;
+    private final RemoteTransition mRemote;
 
     public OneShotRemoteHandler(@NonNull ShellExecutor mainExecutor,
-            @NonNull IRemoteTransition remote) {
+            @NonNull RemoteTransition remote) {
         mMainExecutor = mainExecutor;
         mRemote = remote;
     }
@@ -88,7 +89,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            mRemote.startAnimation(transition, info, startTransaction, cb);
+            mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (mRemote.asBinder() != null) {
@@ -115,7 +116,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             }
         };
         try {
-            mRemote.mergeAnimation(transition, info, t, mergeTarget, cb);
+            mRemote.getRemoteTransition().mergeAnimation(transition, info, t, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error merging remote transition.", e);
         }
@@ -125,8 +126,9 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     @Nullable
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @Nullable TransitionRequestInfo request) {
-        IRemoteTransition remote = request.getRemoteTransition();
-        if (remote != mRemote) return null;
+        RemoteTransition remote = request.getRemoteTransition();
+        IRemoteTransition iRemote = remote != null ? remote.getRemoteTransition() : null;
+        if (iRemote != mRemote.getRemoteTransition()) return null;
         mTransition = transition;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);

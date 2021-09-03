@@ -43,7 +43,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
@@ -553,7 +553,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions,
                 @SplitPosition int sidePosition,
-                @Nullable IRemoteTransition remoteTransition) {
+                @Nullable RemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
                             sideTaskId, sideOptions, sidePosition, remoteTransition));
