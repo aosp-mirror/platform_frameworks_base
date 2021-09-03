@@ -169,6 +169,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
     private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
     private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
+    private static final long DEFAULT_PROCESS_KILL_TIMEOUT_MS = 10 * 1000;
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
@@ -285,6 +286,11 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR =
             "push_messaging_over_quota_behavior";
+
+    /**
+     * Time in milliseconds; the allowed duration from a process is killed until it's really gone.
+     */
+    private static final String KEY_PROCESS_KILL_TIMEOUT = "process_kill_timeout";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -566,6 +572,11 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS;
 
     /**
+     * The allowed duration from a process is killed until it's really gone.
+     */
+    volatile long mProcessKillTimeoutMs = DEFAULT_PROCESS_KILL_TIMEOUT_MS;
+
+    /**
      * Whether to allow "opt-out" from the foreground service restrictions.
      * (https://developer.android.com/about/versions/12/foreground-services)
      */
@@ -827,6 +838,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_ENABLE_COMPONENT_ALIAS:
                             case KEY_COMPONENT_ALIAS_OVERRIDES:
                                 updateComponentAliases();
+                                break;
+                            case KEY_PROCESS_KILL_TIMEOUT:
+                                updateProcessKillTimeout();
                                 break;
                             default:
                                 break;
@@ -1269,6 +1283,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 KEY_COMPONENT_ALIAS_OVERRIDES,
                 DEFAULT_COMPONENT_ALIAS_OVERRIDES);
         mService.mComponentAliasResolver.update(mEnableComponentAlias, mComponentAliasOverrides);
+    }
+
+    private void updateProcessKillTimeout() {
+        mProcessKillTimeoutMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROCESS_KILL_TIMEOUT,
+                DEFAULT_PROCESS_KILL_TIMEOUT_MS);
     }
 
     private void updateImperceptibleKillExemptions() {
