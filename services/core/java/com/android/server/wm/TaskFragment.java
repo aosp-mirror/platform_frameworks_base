@@ -2080,12 +2080,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
         final Point positionInParent = new Point();
         getRelativePosition(positionInParent);
+        final int[] runningActivityCount = new int[1];
+        forAllActivities(a -> {
+            if (!a.finishing) {
+                runningActivityCount[0]++;
+            }
+        });
         return new TaskFragmentInfo(
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getChildCount() == 0,
-                hasRunningActivity(this),
+                runningActivityCount[0],
                 isVisible(),
                 childActivities,
                 positionInParent);
