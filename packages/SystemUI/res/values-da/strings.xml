@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Manglende Wi-Fi-forbindelse"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Byt om på farver"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Ombyt farver"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Flere indstillinger"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Udfør"</string>
@@ -655,8 +655,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Arbejdsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flytilstand"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Tilføj et felt"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-ikon"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Tilføj felt"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-felt"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>, medmindre du slår funktionen fra inden da"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
