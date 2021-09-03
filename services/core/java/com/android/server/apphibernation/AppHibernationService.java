@@ -269,16 +269,16 @@ public final class AppHibernationService extends SystemService {
         getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
-        userId = handleIncomingUser(userId, methodName);
-        if (!checkUserStatesExist(userId, methodName)) {
+        final int realUserId = handleIncomingUser(userId, methodName);
+        if (!checkUserStatesExist(realUserId, methodName)) {
             return;
         }
         synchronized (mLock) {
-            final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
+            final Map<String, UserLevelState> packageStates = mUserStates.get(realUserId);
             final UserLevelState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
                 Slog.e(TAG, String.format("Package %s is not installed for user %s",
-                        packageName, userId));
+                        packageName, realUserId));
                 return;
             }
 
@@ -286,13 +286,17 @@ public final class AppHibernationService extends SystemService {
                 return;
             }
 
+            pkgState.hibernated = isHibernating;
             if (isHibernating) {
-                hibernatePackageForUser(packageName, userId, pkgState);
+                mBackgroundExecutor.execute(() -> hibernatePackageForUser(packageName, realUserId));
             } else {
-                unhibernatePackageForUser(packageName, userId, pkgState);
+                mBackgroundExecutor.execute(
+                        () -> unhibernatePackageForUser(packageName, realUserId));
+                pkgState.lastUnhibernatedMs = System.currentTimeMillis();
             }
+
             final UserLevelState stateSnapshot = new UserLevelState(pkgState);
-            final int userIdSnapshot = userId;
+            final int userIdSnapshot = realUserId;
             mBackgroundExecutor.execute(() -> {
                 FrameworkStatsLog.write(
                         FrameworkStatsLog.USER_LEVEL_HIBERNATION_STATE_CHANGED,
@@ -300,8 +304,8 @@ public final class AppHibernationService extends SystemService {
                         userIdSnapshot,
                         stateSnapshot.hibernated);
             });
-            List<UserLevelState> states = new ArrayList<>(mUserStates.get(userId).values());
-            mUserDiskStores.get(userId).scheduleWriteHibernationStates(states);
+            List<UserLevelState> states = new ArrayList<>(mUserStates.get(realUserId).values());
+            mUserDiskStores.get(realUserId).scheduleWriteHibernationStates(states);
         }
     }
 
@@ -326,10 +330,12 @@ public final class AppHibernationService extends SystemService {
                 return;
             }
             if (state.hibernated != isHibernating) {
+                state.hibernated = isHibernating;
                 if (isHibernating) {
-                    hibernatePackageGlobally(packageName, state);
+                    mBackgroundExecutor.execute(() -> hibernatePackageGlobally(packageName, state));
                 } else {
-                    unhibernatePackageGlobally(packageName, state);
+                    state.savedByte = 0;
+                    state.lastUnhibernatedMs = System.currentTimeMillis();
                 }
                 List<GlobalLevelState> states = new ArrayList<>(mGlobalHibernationStates.values());
                 mGlobalLevelHibernationDiskStore.scheduleWriteHibernationStates(states);
@@ -366,20 +372,16 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Put an app into hibernation for a given user, allowing user-level optimizations to occur.
-     *
-     * @param pkgState package hibernation state
+     * Put an app into hibernation for a given user, allowing user-level optimizations to occur. Do
+     * not hold {@link #mLock} while calling this to avoid deadlock scenarios.
      */
-    @GuardedBy("mLock")
-    private void hibernatePackageForUser(@NonNull String packageName, int userId,
-            @NonNull UserLevelState pkgState) {
+    private void hibernatePackageForUser(@NonNull String packageName, int userId) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
         final long caller = Binder.clearCallingIdentity();
         try {
             mIActivityManager.forceStopPackage(packageName, userId);
             mIPackageManager.deleteApplicationCacheFilesAsUser(packageName, userId,
                     null /* observer */);
-            pkgState.hibernated = true;
         } catch (RemoteException e) {
             throw new IllegalStateException(
                     "Failed to hibernate due to manager not being available", e);
@@ -390,16 +392,11 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Remove a package from hibernation for a given user.
-     *
-     * @param pkgState package hibernation state
+     * Remove a package from hibernation for a given user. Do not hold {@link #mLock} while calling
+     * this.
      */
-    @GuardedBy("mLock")
-    private void unhibernatePackageForUser(@NonNull String packageName, int userId,
-            UserLevelState pkgState) {
+    private void unhibernatePackageForUser(@NonNull String packageName, int userId) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
-        pkgState.hibernated = false;
-        pkgState.lastUnhibernatedMs = System.currentTimeMillis();
         final long caller = Binder.clearCallingIdentity();
         // Deliver LOCKED_BOOT_COMPLETE AND BOOT_COMPLETE broadcast so app can re-register
         // their alarms/jobs/etc.
@@ -450,29 +447,20 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Put a package into global hibernation, optimizing its storage at a package / APK level.
+     * Put a package into global hibernation, optimizing its storage at a package / APK level. Do
+     * not hold {@link #mLock} while calling this.
      */
-    @GuardedBy("mLock")
     private void hibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
+        long savedBytes = 0;
         if (mOatArtifactDeletionEnabled) {
-            state.savedByte = Math.max(
+            savedBytes = Math.max(
                     mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName),
                     0);
         }
-        state.hibernated = true;
-        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-    }
-
-    /**
-     * Unhibernate a package from global hibernation.
-     */
-    @GuardedBy("mLock")
-    private void unhibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
-        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
-        state.hibernated = false;
-        state.savedByte = 0;
-        state.lastUnhibernatedMs = System.currentTimeMillis();
+        synchronized (mLock) {
+            state.savedByte = savedBytes;
+        }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
