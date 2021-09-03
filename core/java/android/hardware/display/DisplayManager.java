@@ -864,7 +864,8 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler);
+        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
@@ -882,15 +883,17 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(projection, builder.build(), callback, handler);
+        return createVirtualDisplay(projection, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+            @Nullable Context windowContext) {
         return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                handler);
+                handler, windowContext);
     }
 
     /**
