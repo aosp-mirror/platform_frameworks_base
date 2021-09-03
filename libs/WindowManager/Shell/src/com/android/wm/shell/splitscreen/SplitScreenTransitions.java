@@ -35,7 +35,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -169,7 +169,7 @@ class SplitScreenTransitions {
 
     /** Starts a transition to enter split with a remote transition animator. */
     IBinder startEnterTransition(@WindowManager.TransitionType int transitType,
-            @NonNull WindowContainerTransaction wct, @Nullable IRemoteTransition remoteTransition,
+            @NonNull WindowContainerTransaction wct, @Nullable RemoteTransition remoteTransition,
             @NonNull Transitions.TransitionHandler handler) {
         if (remoteTransition != null) {
             // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)

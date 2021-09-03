@@ -34,6 +34,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.ITransitionPlayer;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 
@@ -223,7 +224,7 @@ class TransitionController {
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef, @Nullable IRemoteTransition remoteTransition) {
+            @NonNull WindowContainer readyGroupRef, @Nullable RemoteTransition remoteTransition) {
         if (mTransitionPlayer == null) {
             return null;
         }
@@ -252,7 +253,7 @@ class TransitionController {
     /** Asks the transition player (shell) to start a created but not yet started transition. */
     @NonNull
     Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask,
-            @Nullable IRemoteTransition remoteTransition) {
+            @Nullable RemoteTransition remoteTransition) {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
