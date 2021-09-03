@@ -19,7 +19,6 @@ package androidx.window.extensions.embedding;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.window.extensions.organizer.SplitController;
 
 /**
  * Provider for the reference implementation of androidx.window.extensions.embedding OEM interface

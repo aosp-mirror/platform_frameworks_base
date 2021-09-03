@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
@@ -32,8 +32,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.extensions.embedding.SplitPairRule;
-import androidx.window.extensions.embedding.SplitRule;
 
 import java.util.concurrent.Executor;
 
@@ -297,7 +295,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // TODO(b/190433398): Supply correct insets.
         final WindowMetrics parentMetrics = new WindowMetrics(parentBounds,
                 new WindowInsets(new Rect()));
-        return rule.getParentWindowMetricsPredicate().test(parentMetrics);
+        return rule.checkParentMetrics(parentMetrics);
     }
 
     @NonNull

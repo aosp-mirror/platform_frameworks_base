@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import android.annotation.NonNull;
 import android.app.Activity;
-
-import androidx.window.extensions.embedding.SplitPairRule;
-import androidx.window.extensions.embedding.SplitPlaceholderRule;
-import androidx.window.extensions.embedding.SplitRule;
 
 /**
  * Client-side descriptor of a split that holds two containers.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import android.graphics.Rect;
 import android.view.Choreographer;

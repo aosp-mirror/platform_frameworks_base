@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,14 +35,6 @@ import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
-import androidx.window.extensions.embedding.ActivityRule;
-import androidx.window.extensions.embedding.ActivityStack;
-import androidx.window.extensions.embedding.EmbeddingRule;
-import androidx.window.extensions.embedding.SplitInfo;
-import androidx.window.extensions.embedding.SplitPairRule;
-import androidx.window.extensions.embedding.SplitPlaceholderRule;
-import androidx.window.extensions.embedding.SplitRule;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +45,7 @@ import java.util.function.Consumer;
  * Main controller class that manages split states and presentation.
  */
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
-        androidx.window.extensions.embedding.ActivityEmbeddingComponent {
+        ActivityEmbeddingComponent {
 
     private final SplitPresenter mPresenter;
 
@@ -503,7 +495,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 continue;
             }
             SplitPlaceholderRule placeholderRule = (SplitPlaceholderRule) rule;
-            if (placeholderRule.getActivityPredicate().test(activity)) {
+            if (placeholderRule.matchesActivity(activity)) {
                 return placeholderRule;
             }
         }
@@ -569,8 +561,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 continue;
             }
             SplitPairRule pairRule = (SplitPairRule) rule;
-            if (pairRule.getActivityIntentPredicate().test(
-                    new Pair(primaryActivity, secondaryActivityIntent))) {
+            if (pairRule.matchesActivityIntentPair(primaryActivity, secondaryActivityIntent)) {
                 return pairRule;
             }
         }
@@ -589,10 +580,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
             SplitPairRule pairRule = (SplitPairRule) rule;
             final Intent intent = secondaryActivity.getIntent();
-            if (pairRule.getActivityPairPredicate().test(
-                    new Pair(primaryActivity, secondaryActivity))
-                    && (intent == null || pairRule.getActivityIntentPredicate().test(
-                            new Pair(primaryActivity, intent)))) {
+            if (pairRule.matchesActivityPair(primaryActivity, secondaryActivity)
+                    && (intent == null
+                    || pairRule.matchesActivityIntentPair(primaryActivity, intent))) {
                 return pairRule;
             }
         }
@@ -626,10 +616,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (!activityRule.shouldAlwaysExpand()) {
                 continue;
             }
-            if (activity != null && activityRule.getActivityPredicate().test(activity)) {
+            if (activity != null && activityRule.matchesActivity(activity)) {
                 return true;
-            }
-            if (intent != null && activityRule.getIntentPredicate().test(intent)) {
+            } else if (intent != null && activityRule.matchesIntent(intent)) {
                 return true;
             }
         }
@@ -683,11 +672,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     /** Executor that posts on the main application thread. */
     private static class MainThreadExecutor implements Executor {
-        private final Handler handler = new Handler(Looper.getMainLooper());
+        private final Handler mHandler = new Handler(Looper.getMainLooper());
 
         @Override
         public void execute(Runnable r) {
-            handler.post(r);
+            mHandler.post(r);
         }
     }
 
