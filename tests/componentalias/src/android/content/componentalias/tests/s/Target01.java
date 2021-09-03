@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.componentalias.tests.common;
+package android.content.componentalias.tests.s;
 
-public final class ComponentAliasTestCommon {
-    private ComponentAliasTestCommon() {
-    }
-
-    public static final String TAG = "ComponentAliasTest";
-
-    public static final String TEST_PACKAGE = "android.content.componentalias.tests";
-
-    public static final String APP_PACKAGE = "android.content.componentalias.tests.app";
-    public static final String SUB1_PACKAGE = "android.content.componentalias.tests.app.sub1";
-    public static final String SUB2_PACKAGE = "android.content.componentalias.tests.app.sub2";
+public class Target01 extends BaseService {
 }

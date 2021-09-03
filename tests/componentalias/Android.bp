@@ -16,26 +16,14 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_library {
-    name: "ComponentAliasTestsCommon",
-    srcs: [
-        "common/**/*.java",
-    ],
-    plugins: [
-        "staledataclass-annotation-processor",
-    ],
-    platform_apis: true, // We use hidden APIs in the test.
-}
-
-android_test {
-    name: "ComponentAliasTests",
+java_defaults {
+    name: "ComponentAliasTests_defaults",
     static_libs: [
         "androidx.test.rules",
         "compatibility-device-util-axt",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
         "ub-uiautomator",
-        "ComponentAliasTestsCommon",
     ],
     libs: ["android.test.base"],
     srcs: [
@@ -45,4 +33,54 @@ android_test {
         "general-tests",
     ],
     platform_apis: true, // We use hidden APIs in the test.
+}
+
+// We build three APKs from the exact same source files, so these APKs contain the exact same tests.
+// And we run the tests on each APK, so that we can test various situations:
+// - When the alias is in the same package, target in the same package.
+// - When the alias is in the same package, target in another package.
+// - When the alias is in another package, which also contains the target.
+// - When the alias is in another package, and the target is in yet another package.
+// etc etc...
+
+android_test {
+    name: "ComponentAliasTests",
+    defaults: [
+        "ComponentAliasTests_defaults",
+    ],
+    package_name: "android.content.componentalias.tests",
+    manifest: "AndroidManifest.xml",
+    additional_manifests: [
+        "AndroidManifest_service_aliases.xml",
+        "AndroidManifest_service_targets.xml",
+    ],
+    test_config_template: "AndroidTest-template.xml",
+}
+
+android_test {
+    name: "ComponentAliasTests1",
+    defaults: [
+        "ComponentAliasTests_defaults",
+    ],
+    package_name: "android.content.componentalias.tests.sub1",
+    manifest: "AndroidManifest.xml",
+    additional_manifests: [
+        "AndroidManifest_service_aliases.xml",
+        "AndroidManifest_service_targets.xml",
+    ],
+    test_config_template: "AndroidTest-template.xml",
+}
+
+android_test {
+    name: "ComponentAliasTests2",
+    defaults: [
+        "ComponentAliasTests_defaults",
+    ],
+    package_name: "android.content.componentalias.tests.sub2",
+    manifest: "AndroidManifest.xml",
+    additional_manifests: [
+        "AndroidManifest_service_aliases.xml",
+        "AndroidManifest_service_targets.xml",
+    ],
+    test_config_template: "AndroidTest-template.xml",
 }
