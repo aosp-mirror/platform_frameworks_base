@@ -388,7 +388,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Manglende Wi-Fi-forbindelse"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Byt om på farver"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Ombyt farver"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Flere indstillinger"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Udfør"</string>
@@ -654,8 +654,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Arbejdsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flytilstand"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Tilføj et felt"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-ikon"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Tilføj felt"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Broadcast-felt"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>, medmindre du slår funktionen fra inden da"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -883,10 +883,10 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Øverste 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Øverste 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Vis nederste del i fuld skærm"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern kortet"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj kortet til slutningen"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt kortet"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj et kort"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern felt"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj feltet til slutningen"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt felt"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj felt"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flyt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
