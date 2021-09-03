@@ -43,7 +43,7 @@ import android.view.animation.Interpolator;
  * @hide
  */
 public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner,
-        WindowInsetsAnimationController, WindowInsetsAnimationControlListener {
+        InternalInsetsAnimationController, WindowInsetsAnimationControlListener {
 
     private final InsetsState mFromState;
     private final InsetsState mToState;

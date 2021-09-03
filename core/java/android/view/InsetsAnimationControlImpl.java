@@ -69,7 +69,7 @@ import java.util.Objects;
  * @hide
  */
 @VisibleForTesting
-public class InsetsAnimationControlImpl implements WindowInsetsAnimationController,
+public class InsetsAnimationControlImpl implements InternalInsetsAnimationController,
         InsetsAnimationControlRunner {
 
     private static final String TAG = "InsetsAnimationCtrlImpl";
