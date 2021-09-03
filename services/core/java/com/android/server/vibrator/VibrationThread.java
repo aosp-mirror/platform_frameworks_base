@@ -1040,7 +1040,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             newSegments.remove(segmentIndex);
             newSegments.addAll(segmentIndex, fallback.getSegments());
             if (segmentIndex < effect.getRepeatIndex()) {
-                newRepeatIndex += fallback.getSegments().size();
+                newRepeatIndex += fallback.getSegments().size() - 1;
             }
             return new VibrationEffect.Composed(newSegments, newRepeatIndex);
         }
