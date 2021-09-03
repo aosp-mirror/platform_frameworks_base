@@ -142,7 +142,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotificationPanelViewTest extends SysuiTestCase {
+public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     private static final int NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE = 50;
 
@@ -469,6 +469,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .addCallback(mNotificationPanelViewController.mStatusBarStateListener);
         mNotificationPanelViewController
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
+    }
+
+    @Test
+    public void testSetMinFraction() {
+        mNotificationPanelViewController.setMinFraction(0.5f);
+        verify(mNotificationShadeDepthController).setPanelPullDownMinFraction(eq(0.5f));
     }
 
     @Test
