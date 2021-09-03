@@ -43,6 +43,7 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InternalInsetsAnimationController;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.WindowInsetsAnimation;
@@ -585,7 +586,7 @@ class InsetsPolicy {
             }
 
             @Override
-            public <T extends InsetsAnimationControlRunner & WindowInsetsAnimationController>
+            public <T extends InsetsAnimationControlRunner & InternalInsetsAnimationController>
             void startAnimation(T runner, WindowInsetsAnimationControlListener listener, int types,
                     WindowInsetsAnimation animation,
                     Bounds bounds) {
