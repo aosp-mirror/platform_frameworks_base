@@ -11845,6 +11845,13 @@ public final class Settings {
         public static final String WIFI_MIGRATION_COMPLETED = "wifi_migration_completed";
 
         /**
+         * Whether UWB should be enabled.
+         * @hide
+         */
+        @Readable
+        public static final String UWB_ENABLED = "uwb_enabled";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
