@@ -1168,11 +1168,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Potrebna je autentifikacija. Dodirnite senzor otiska prsta da biste se autentificirali."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonski poziv u tijeku"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Način rada u zrakoplovu"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilni podaci"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Neće biti automatskog povezivanja s internetom"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilni podaci neće se automatski povezati"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Niste povezani"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nije dostupna nijedna druga mreža"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nema dostupnih mreža"</string>
