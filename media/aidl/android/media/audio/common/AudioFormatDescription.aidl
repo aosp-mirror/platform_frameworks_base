@@ -73,14 +73,6 @@ parcelable AudioFormatDescription {
      *   - Otherwise, "x-" prefix is added, e.g. "audio/x-iec61937".
      *   - All MIME types not found in the IANA formats list have an associated
      *     comment.
-     *
-     * For PCM encapsulations with a known bitstream format, the latter
-     * is added to the encapsulation encoding as a suffix, after a "+" char.
-     * For example, an IEC61937 encapsulation of AC3 has the following
-     * representation:
-     *   type = NON_PCM,
-     *   pcm = PcmType.INT_16_BIT,
-     *   encoding = "audio/x-iec61937+audio/ac3"
      */
     @utf8InCpp String encoding;
 }
