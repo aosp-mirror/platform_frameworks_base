@@ -1190,6 +1190,12 @@ public class DisplayPolicy {
             default:
                 if (attrs.providesInsetsTypes != null) {
                     for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
+                        final TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider =
+                                !attrs.providedInternalImeInsets.equals(Insets.NONE)
+                                    ? (displayFrames, windowState, inOutFrame) ->
+                                            inOutFrame.inset(windowState.getLayoutingAttrs(
+                                                displayFrames.mRotation).providedInternalImeInsets)
+                                    : null;
                         switch (insetsType) {
                             case ITYPE_STATUS_BAR:
                                 mStatusBarAlt = win;
@@ -1209,12 +1215,13 @@ public class DisplayPolicy {
                                 break;
                         }
                         if (!INSETS_LAYOUT_GENERALIZATION) {
-                            mDisplayContent.setInsetProvider(insetsType, win, null);
+                            mDisplayContent.setInsetProvider(insetsType, win, null,
+                                    imeFrameProvider);
                         } else {
                             mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
                                     windowState, inOutFrame) -> inOutFrame.inset(
                                             windowState.getLayoutingAttrs(displayFrames.mRotation)
-                                                    .providedInternalInsets));
+                                                    .providedInternalInsets), imeFrameProvider);
                         }
                     }
                 }
