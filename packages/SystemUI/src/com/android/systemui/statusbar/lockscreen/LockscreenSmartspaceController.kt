@@ -45,6 +45,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
 import java.lang.RuntimeException
@@ -67,6 +68,7 @@ class LockscreenSmartspaceController @Inject constructor(
     private val contentResolver: ContentResolver,
     private val configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
+    private val deviceProvisionedController: DeviceProvisionedController,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     @Main private val handler: Handler,
@@ -82,6 +84,55 @@ class LockscreenSmartspaceController @Inject constructor(
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
+
+    private val deviceProvisionedListener =
+        object : DeviceProvisionedController.DeviceProvisionedListener {
+            override fun onDeviceProvisionedChanged() {
+                connectSession()
+            }
+
+            override fun onUserSetupChanged() {
+                connectSession()
+            }
+        }
+
+    private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
+        execution.assertIsMainThread()
+        val filteredTargets = targets.filter(::filterSmartspaceTarget)
+        plugin?.onTargetsAvailable(filteredTargets)
+    }
+
+    private val userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            execution.assertIsMainThread()
+            reloadSmartspace()
+        }
+    }
+
+    private val settingsObserver = object : ContentObserver(handler) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            execution.assertIsMainThread()
+            reloadSmartspace()
+        }
+    }
+
+    private val configChangeListener = object : ConfigurationController.ConfigurationListener {
+        override fun onThemeChanged() {
+            execution.assertIsMainThread()
+            updateTextColorFromWallpaper()
+        }
+    }
+
+    private val statusBarStateListener = object : StatusBarStateController.StateListener {
+        override fun onDozeAmountChanged(linear: Float, eased: Float) {
+            execution.assertIsMainThread()
+            smartspaceView.setDozeAmount(eased)
+        }
+    }
+
+    init {
+        deviceProvisionedController.addCallback(deviceProvisionedListener)
+    }
 
     fun isEnabled(): Boolean {
         execution.assertIsMainThread()
@@ -144,10 +195,20 @@ class LockscreenSmartspaceController @Inject constructor(
         if (plugin == null || session != null) {
             return
         }
-        val session = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, "lockscreen").build())
-        session.addOnTargetsAvailableListener(uiExecutor, sessionListener)
 
+        // Only connect after the device is fully provisioned to avoid connection caching
+        // issues
+        if (!deviceProvisionedController.isDeviceProvisioned() ||
+                !deviceProvisionedController.isCurrentUserSetup()) {
+            return
+        }
+
+        val newSession = smartspaceManager.createSmartspaceSession(
+                SmartspaceConfig.Builder(context, "lockscreen").build())
+        newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
+        this.session = newSession
+
+        deviceProvisionedController.removeCallback(deviceProvisionedListener)
         userTracker.addCallback(userTrackerCallback, uiExecutor)
         contentResolver.registerContentObserver(
                 secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
@@ -157,8 +218,6 @@ class LockscreenSmartspaceController @Inject constructor(
         )
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
-
-        this.session = session
 
         reloadSmartspace()
     }
@@ -196,43 +255,6 @@ class LockscreenSmartspaceController @Inject constructor(
     fun removeListener(listener: SmartspaceTargetListener) {
         execution.assertIsMainThread()
         plugin?.unregisterListener(listener)
-    }
-
-    private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
-        execution.assertIsMainThread()
-        val filteredTargets = targets.filter(::filterSmartspaceTarget)
-        plugin?.onTargetsAvailable(filteredTargets)
-    }
-
-    private val userTrackerCallback = object : UserTracker.Callback {
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            execution.assertIsMainThread()
-            reloadSmartspace()
-        }
-
-        override fun onProfilesChanged(profiles: List<UserInfo>) {
-        }
-    }
-
-    private val settingsObserver = object : ContentObserver(handler) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            execution.assertIsMainThread()
-            reloadSmartspace()
-        }
-    }
-
-    private val configChangeListener = object : ConfigurationController.ConfigurationListener {
-        override fun onThemeChanged() {
-            execution.assertIsMainThread()
-            updateTextColorFromWallpaper()
-        }
-    }
-
-    private val statusBarStateListener = object : StatusBarStateController.StateListener {
-        override fun onDozeAmountChanged(linear: Float, eased: Float) {
-            execution.assertIsMainThread()
-            smartspaceView.setDozeAmount(eased)
-        }
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
