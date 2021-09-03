@@ -972,6 +972,7 @@ message GlobalSettingsProto {
     optional SettingProto usb_mass_storage_enabled = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto use_google_mail = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto use_open_wifi_package = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto uwb_enabled = 155 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto vt_ims_enabled = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wait_for_debugger = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -1065,5 +1066,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 155;
+    // Next tag = 156;
 }
