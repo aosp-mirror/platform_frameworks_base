@@ -58,16 +58,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     // TODO(b/191269755): use the value defined in InsetsController.
     private static final int ANIMATION_DURATION_RESIZE = 300;
 
-    /**
-     * The task bar height defined in launcher. Used to determine whether to insets divider bounds
-     * or not.
-     */
-    private static final int EXPANDED_TASK_BAR_HEIGHT_IN_DP = 60;
-
     /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
-    private final float mExpandedTaskBarHeight = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, EXPANDED_TASK_BAR_HEIGHT_IN_DP,
-            getResources().getDisplayMetrics());
+    private float mExpandedTaskBarHeight;
 
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
@@ -167,6 +159,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
+        mExpandedTaskBarHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.taskbar_frame_height);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
