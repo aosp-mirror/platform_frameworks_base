@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gunakan cap jari atau kunci skrin anda untuk meneruskan"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon cap jari"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Buka Kunci Wajah"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isu dengan Buka Kunci Wajah"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan wajah atau kunci skrin anda untuk meneruskan"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"membaca tetapan penyegerakan"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Membenarkan apl membaca tetapan segerak untuk akaun. Sebagai contoh, ini boleh menentukan sama ada apl Orang disegerakkan dengan akaun."</string>

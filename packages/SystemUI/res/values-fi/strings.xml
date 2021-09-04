@@ -861,7 +861,7 @@
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Kuulokemikrofoni liitetty"</string>
     <string name="data_saver" msgid="3484013368530820763">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Data Saver on käytössä."</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Data Saver on pois käytöstä."</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Data Saver on pois päältä."</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Päällä"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Pois päältä"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Ei käytettävissä"</string>
@@ -976,9 +976,9 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilitiedonsiirto"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois käytöstä"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ei ole käytössä"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"Älä häiritse ‑tila on pois käytöstä"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Älä häiritse ‑tila on pois päältä"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Automaattinen sääntö otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Sovellus otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Automaattinen sääntö tai sovellus otti käyttöön Älä häiritse ‑tilan."</string>
@@ -1162,11 +1162,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Avaa sormenjäljellä"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Todennus vaaditaan. Todenna koskettamalla sormenjälkitunnistinta."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Puhelu käynnissä"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Lentokonetila"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiilidata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Yhdistetty"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Internetyhteyttä ei muodosteta automaattisesti"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobiilidata ei yhdisty automaattisesti"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Ei yhteyttä"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ei muita verkkoja käytettävissä"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Ei verkkoja käytettävissä"</string>

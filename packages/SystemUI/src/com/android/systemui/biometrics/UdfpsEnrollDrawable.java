@@ -43,7 +43,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     // 1 + SCALE_MAX is the maximum that the moving target will animate to
     private static final float SCALE_MAX = 0.25f;
 
-    @NonNull private final UdfpsEnrollProgressBarDrawable mProgressDrawable;
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorOutlinePaint;
     @NonNull private final Paint mBlueFill;
@@ -62,7 +61,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
 
-        mProgressDrawable = new UdfpsEnrollProgressBarDrawable(context, this);
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
@@ -100,8 +98,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
-        mProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
-
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
             if (mAnimatorSet != null && mAnimatorSet.isRunning()) {
                 mAnimatorSet.end();
@@ -139,18 +135,8 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         }
     }
 
-    void onLastStepAcquired() {
-        mProgressDrawable.onLastStepAcquired();
-    }
-
-    void onEnrollmentHelp() {
-        mProgressDrawable.onEnrollmentHelp();
-    }
-
     @Override
     public void draw(@NonNull Canvas canvas) {
-        mProgressDrawable.draw(canvas);
-
         if (isIlluminationShowing()) {
             return;
         }
@@ -176,11 +162,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             mFingerprintDrawable.setAlpha(mAlpha);
             mSensorOutlinePaint.setAlpha(mAlpha);
         }
-    }
-
-    @Override
-    public void onBoundsChange(@NonNull Rect rect) {
-        mProgressDrawable.setBounds(rect);
     }
 
     @Override
