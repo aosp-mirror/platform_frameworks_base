@@ -1174,11 +1174,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Каб адкрыць, скарыстайце адбітак пальца"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Патрабуецца аўтэнтыфікацыя. Дакраніцеся да сканера адбіткаў пальцаў."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Бягучы тэлефонны выклік"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Рэжым палёту"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мабільная перадача даных"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Падключана"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Аўтаматычнае падключэнне да інтэрнэту адсутнічае"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мабільная перадача даных не ўключаецца аўтаматычна"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Няма падключэння"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Больш няма даступных сетак"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Няма даступных сетак"</string>

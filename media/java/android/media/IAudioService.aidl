@@ -279,6 +279,11 @@ interface IAudioService {
     void setBluetoothHearingAidDeviceConnectionState(in BluetoothDevice device,
             int state, boolean suppressNoisyIntent, int musicDevice);
 
+    void setBluetoothLeAudioOutDeviceConnectionState(in BluetoothDevice device, int state,
+            boolean suppressNoisyIntent);
+
+    void setBluetoothLeAudioInDeviceConnectionState(in BluetoothDevice device, int state);
+
     void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
             int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
 

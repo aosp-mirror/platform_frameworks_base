@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"অব্যাহত ৰাখিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেচ আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ফেচ আনলক ব্যৱহাৰ কৰোঁতে সমস্যা হৈছে"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"অব্যাহত ৰাখিবলৈ আপোনাৰ মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"মুখমণ্ডলৰ আইকন"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ছিংকৰ ছেটিংসমূহ পঢ়ক"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"একাউণ্টৰ ছিংক ছেটিংবোৰ পঢ়িবলৈ এপক অনুমতি দিয়ে। যেনে, People এপ কোনো একাউণ্টত ছিংক কৰা হৈছে নে নাই সেয়া নির্ধাৰণ কৰিব পাৰে।"</string>
@@ -1692,7 +1696,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শ্বৰ্টকাটটো অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটাম ৩ ছেকেণ্ডৰ বাবে হেঁচি ধৰি ৰাখিলে এটা সাধ্য সুবিধা আৰম্ভ হ’ব।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"সাধ্য সুবিধাসমূহৰ বাবে শ্বৰ্টকাট অন কৰিবনে?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"দুয়োটা ভলিউম কী কিছুসময়ৰ বাবে ধৰি থাকিলে সাধ্য-সুবিধাসমূহ অন কৰে। এইটোৱে আপোনাৰ ডিভাইচটোৱে কাম কৰাৰ ধৰণ সলনি কৰিব পাৰে।\n\nবর্তমানৰ সুবিধাসমূহ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nআপুনি ছেটিংসমূহ &gt; সাধ্য-সুবিধাত কিছুমান নিৰ্দিষ্ট সুবিধা সলনি কৰিব পাৰে।"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g>ৰ শ্বৰ্টকাট অন কৰিবনে?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"দুয়োটা ভলিউম কী কিছুসময়ৰ বাবে ধৰি থাকিলে এটা সাধ্য- সুবিধা <xliff:g id="SERVICE">%1$s</xliff:g> অন কৰে। এইটোৱে আপোনাৰ ডিভাইচটোৱে কাম কৰাৰ ধৰণ সলনি কৰিব পাৰে।\n\nআপুনি ছেটিংসমূহ &gt; সাধ্য-সুবিধাসমূহত এই শ্বৰ্টকাটটো অন্য এটা সুবিধালৈ সলনি কৰিব পাৰে।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"অন কৰক"</string>

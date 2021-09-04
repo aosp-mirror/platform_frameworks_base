@@ -48,6 +48,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
@@ -584,12 +585,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
         }
 
+        /**
+        * @deprecated Use
+        * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)} instead.
+        */
+        @Deprecated
         @Override
         public boolean hasNotificationAccess(ComponentName component) throws RemoteException {
             checkCanCallNotificationApi(component.getPackageName());
-            String setting = Settings.Secure.getString(getContext().getContentResolver(),
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
-            return new ComponentNameSet(setting).contains(component);
+            NotificationManager nm = getContext().getSystemService(NotificationManager.class);
+            return nm.isNotificationListenerAccessGranted(component);
         }
 
         @Override

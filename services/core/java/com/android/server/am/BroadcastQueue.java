@@ -230,6 +230,10 @@ public final class BroadcastQueue {
         return mPendingBroadcast != null && mPendingBroadcast.curApp.getPid() == pid;
     }
 
+    boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
+        return mPendingBroadcast != null && mPendingBroadcast.curApp == app;
+    }
+
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
         mParallelBroadcasts.add(r);
         enqueueBroadcastHelper(r);

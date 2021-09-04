@@ -58,8 +58,8 @@
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Nomor Penelepon Masuk"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Menyembunyikan ID Penelepon untuk Panggilan Keluar"</string>
-    <string name="ColpMmi" msgid="4736462893284419302">"ID Saluran yang Tersambung"</string>
-    <string name="ColrMmi" msgid="5889782479745764278">"Batasan ID Saluran yang Tersambung"</string>
+    <string name="ColpMmi" msgid="4736462893284419302">"ID Saluran yang Terhubung"</string>
+    <string name="ColrMmi" msgid="5889782479745764278">"Batasan ID Saluran yang Terhubung"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Penerusan panggilan"</string>
     <string name="CwMmi" msgid="3164609577675404761">"Nada tunggu"</string>
     <string name="BaMmi" msgid="7205614070543372167">"Pemblokiran panggilan"</string>
@@ -162,7 +162,7 @@
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema autentikasi situs tidak didukung."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Tidak dapat mengautentikasi."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Autentikasi via proxy server gagal."</string>
-    <string name="httpErrorConnect" msgid="3295081579893205617">"Tidak dapat tersambung ke server."</string>
+    <string name="httpErrorConnect" msgid="3295081579893205617">"Tidak dapat terhubung ke server."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"Tidak dapat berkomunikasi dengan server. Coba lagi nanti."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Koneksi ke server terputus."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"Halaman ini berisi terlalu banyak pengalihan server."</string>
@@ -468,7 +468,7 @@
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"akses layanan panggilan IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Memungkinkan aplikasi menggunakan layanan IMS untuk melakukan panggilan tanpa campur tangan Anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca identitas dan status ponsel"</string>
-    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
+    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang terhubung oleh sebuah panggilan."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"sambungkan panggilan telepon melalui sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Mengizinkan aplikasi menyambungkan panggilan telepon melalui sistem untuk menyempurnakan pengalaman menelepon."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"melihat dan mengontrol panggilan melalui sistem."</string>
@@ -504,7 +504,7 @@
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Mengizinkan aplikasi mendapatkan daftar akun yang dikenal oleh perangkat Android TV. Ini mungkin mencakup akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"lihat koneksi jaringan"</string>
-    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang koneksi jaringan, misalnya jaringan yang ada dan tersambung."</string>
+    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Memungkinkan aplikasi melihat informasi tentang koneksi jaringan, misalnya jaringan yang ada dan terhubung."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"dapatkan akses jaringan penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Memungkinkan aplikasi membuat soket jaringan dan menggunakan protokol jaringan khusus. Browser dan aplikasi lain menyediakan sarana untuk mengirim data ke internet sehingga izin ini tidak diperlukan untuk mengirim data ke internet."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"ubah konektivitas jaringan"</string>
@@ -512,7 +512,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"mengubah konektivitas yang tertambat"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Mengizinkan apl mengubah status konektivitas jaringan yang tertambat."</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"lihat sambungan Wi-Fi"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Memungkinkan aplikasi melihat informasi tentang jaringan Wi-Fi, misalnya apakah Wi-Fi diaktifkan dan nama perangkat Wi-Fi yang tersambung."</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Memungkinkan aplikasi melihat informasi tentang jaringan Wi-Fi, misalnya apakah Wi-Fi diaktifkan dan nama perangkat Wi-Fi yang terhubung."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"sambung dan putuskan Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Memungkinkan aplikasi menyambung ke dan memutus dari titik akses Wi-Fi, dan mengubah konfigurasi perangkat untuk jaringan Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Izinkan penerimaan Wi-Fi Multicast"</string>
@@ -524,14 +524,14 @@
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Mengizinkan aplikasi mengonfigurasi Bluetooth di perangkat Android TV, serta menemukan dan menyambungkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"sambungkan dan putuskan dari WiMAX"</string>
-    <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
+    <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang terhubung."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"Ganti status WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Mengizinkan aplikasi menghubungkan perangkat Android TV ke, dan memutuskan hubungan perangkat Android TV dari, jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Memungkinkan aplikasi menyambungkan ponsel ke dan memutus ponsel dari jaringan WiMAX."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"sambungkan dengan perangkat Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di tablet, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Mengizinkan aplikasi melihat konfigurasi Bluetooth di perangkat Android TV, serta melakukan dan menerima sambungan dengan perangkat yang tersambung."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Mengizinkan aplikasi melihat konfigurasi Bluetooth di perangkat Android TV, serta melakukan dan menerima sambungan dengan perangkat yang terhubung."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di ponsel, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"temukan &amp; sambungkan perangkat Bluetooth di sekitar"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Mengizinkan aplikasi menemukan dan menyambungkan perangkat Bluetooth di sekitar"</string>
@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gunakan sidik jari atau kunci layar untuk melanjutkan"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon sidik jari"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Face Unlock"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan face lock atau kunci layar untuk melanjutkan"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"baca setelan sinkronisasi"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Memungkinkan aplikasi membaca setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat menentukan apakah aplikasi Orang disinkronkan dengan sebuah akun."</string>
@@ -1366,7 +1370,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB diaktifkan"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Tethering USB diaktifkan"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB diaktifkan"</string>
-    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori USB tersambung"</string>
+    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori USB terhubung"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Ketuk untuk opsi lainnya."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Mengisi daya perangkat yang terhubung. Ketuk untuk opsi lainnya."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Aksesori audio analog terdeteksi"</string>
@@ -1498,9 +1502,9 @@
     <string name="vpn_title" msgid="5906991595291514182">"VPN diaktifkan"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"VPN diaktifkan oleh <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Ketuk untuk mengelola jaringan."</string>
-    <string name="vpn_text_long" msgid="278540576806169831">"Tersambung ke <xliff:g id="SESSION">%s</xliff:g>. Ketuk untuk mengelola jaringan."</string>
+    <string name="vpn_text_long" msgid="278540576806169831">"Terhubung ke <xliff:g id="SESSION">%s</xliff:g>. Ketuk untuk mengelola jaringan."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Menyambungkan VPN selalu aktif..."</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"VPN selalu aktif tersambung"</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"VPN selalu aktif terhubung"</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Terputus dari VPN yang selalu aktif"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Tidak dapat terhubung ke VPN yang selalu aktif"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Ubah setelan jaringan atau VPN"</string>
@@ -1635,7 +1639,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"Menyambung..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"Menghubungkan..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"Tidak tersedia"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"Sedang digunakan"</string>
@@ -1692,7 +1696,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Aktifkan pintasan untuk fitur aksesibilitas?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Aktifkan pintasan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, yang merupakan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktifkan"</string>

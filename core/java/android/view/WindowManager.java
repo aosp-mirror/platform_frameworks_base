@@ -3532,6 +3532,14 @@ public interface WindowManager extends ViewManager {
         public Insets providedInternalInsets = Insets.NONE;
 
         /**
+         * If specified, the insets provided by this window for the IME will be our window frame
+         * minus the insets specified by providedInternalImeInsets.
+         *
+         * @hide
+         */
+        public Insets providedInternalImeInsets = Insets.NONE;
+
+        /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
          * This will make layout during rotation change smoothly.
          *
@@ -3905,6 +3913,7 @@ public interface WindowManager extends ViewManager {
                 out.writeInt(0);
             }
             providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
             if (paramsForRotation != null) {
                 checkNonRecursiveParams();
                 out.writeInt(paramsForRotation.length);
@@ -3984,6 +3993,7 @@ public interface WindowManager extends ViewManager {
                 in.readIntArray(providesInsetsTypes);
             }
             providedInternalInsets = Insets.CREATOR.createFromParcel(in);
+            providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
             int paramsForRotationLength = in.readInt();
             if (paramsForRotationLength > 0) {
                 paramsForRotation = new LayoutParams[paramsForRotationLength];
@@ -4290,6 +4300,11 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (!providedInternalImeInsets.equals(o.providedInternalImeInsets)) {
+                providedInternalImeInsets = o.providedInternalImeInsets;
+                changes |= LAYOUT_CHANGED;
+            }
+
             if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
                 paramsForRotation = o.paramsForRotation;
                 checkNonRecursiveParams();
@@ -4494,6 +4509,10 @@ public interface WindowManager extends ViewManager {
             if (!providedInternalInsets.equals(Insets.NONE)) {
                 sb.append(" providedInternalInsets=");
                 sb.append(providedInternalInsets);
+            }
+            if (!providedInternalImeInsets.equals(Insets.NONE)) {
+                sb.append(" providedInternalImeInsets=");
+                sb.append(providedInternalImeInsets);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());

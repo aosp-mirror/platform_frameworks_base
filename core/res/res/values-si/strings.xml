@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ඉදිරියට යාමට ඔබගේ ඇඟිලි සලකුණ හෝ තිර අගුල භාවිත කරන්න"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු හැරීම"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"මුහුණෙන් අගුලු හැරීම සම්බන්ධව ගැටලුවකි"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ඉදිරියට යාමට ඔබගේ මුහුණු හෝ තිර අගුල භාවිත කරන්න"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"මුහුණ නිරූපකය"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
@@ -1692,7 +1696,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"කෙටිමග ක්‍රියාත්මක විට, හඬ පරිමා බොත්තම් දෙකම තත්පර 3ක් තිස්සේ එබීමෙන් ප්‍රවේශ්‍යතා විශේෂාංගය ආරම්භ වනු ඇත."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ප්‍රවේශ්‍යතා විශේෂාංග සඳහා කෙටි මග ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංග ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nවත්මන් විශේෂාංග:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nඔබට තේරූ විශේෂාංග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි වෙනස් කළ හැකිය."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> කෙටි මග ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංගයක් වන <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nඔබට මෙම කෙටිමග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි තවත් විශේෂාංගයකට වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ක්‍රියාත්මක කරන්න"</string>

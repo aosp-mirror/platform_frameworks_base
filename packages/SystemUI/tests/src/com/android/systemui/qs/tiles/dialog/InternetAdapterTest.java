@@ -10,21 +10,26 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.drawable.Drawable;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableResources;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.wifi.WifiUtils;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.wifitrackerlib.WifiEntry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +40,11 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     private static final String WIFI_TITLE = "Wi-Fi Title";
     private static final String WIFI_SUMMARY = "Wi-Fi Summary";
+    private static final int GEAR_ICON_RES_ID = R.drawable.ic_settings_24dp;
+    private static final int LOCK_ICON_RES_ID = R.drawable.ic_friction_lock_closed;
+
+    @Rule
+    public MockitoRule mRule = MockitoJUnit.rule();
 
     @Mock
     private WifiEntry mInternetWifiEntry;
@@ -46,13 +56,18 @@ public class InternetAdapterTest extends SysuiTestCase {
     private InternetDialogController mInternetDialogController;
     @Mock
     private WifiUtils.InternetIconInjector mWifiIconInjector;
+    @Mock
+    private Drawable mGearIcon;
+    @Mock
+    private Drawable mLockIcon;
 
+    private TestableResources mTestableResources;
     private InternetAdapter mInternetAdapter;
     private InternetAdapter.InternetViewHolder mViewHolder;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mTestableResources = mContext.getOrCreateTestableResources();
         when(mInternetWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mInternetWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
         when(mInternetWifiEntry.isDefaultNetwork()).thenReturn(true);
@@ -83,7 +98,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mWifiTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mWifiSummaryText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mWifiIcon.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mWifiLockedIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mWifiEndIcon.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -94,7 +109,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mWifiTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mWifiSummaryText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mWifiIcon.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mWifiLockedIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mWifiEndIcon.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -123,5 +138,30 @@ public class InternetAdapterTest extends SysuiTestCase {
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
         verify(mWifiIconInjector).getIcon(eq(true) /* noInternet */, anyInt());
+    }
+
+    @Test
+    public void viewHolderUpdateEndIcon_wifiConnected_updateGearIcon() {
+        mTestableResources.addOverride(GEAR_ICON_RES_ID, mGearIcon);
+
+        mViewHolder.updateEndIcon(WifiEntry.CONNECTED_STATE_CONNECTED, WifiEntry.SECURITY_PSK);
+
+        assertThat(mViewHolder.mWifiEndIcon.getDrawable()).isEqualTo(mGearIcon);
+    }
+
+    @Test
+    public void viewHolderUpdateEndIcon_wifiDisconnectedAndSecurityPsk_updateLockIcon() {
+        mTestableResources.addOverride(LOCK_ICON_RES_ID, mLockIcon);
+
+        mViewHolder.updateEndIcon(WifiEntry.CONNECTED_STATE_DISCONNECTED, WifiEntry.SECURITY_PSK);
+
+        assertThat(mViewHolder.mWifiEndIcon.getDrawable()).isEqualTo(mLockIcon);
+    }
+
+    @Test
+    public void viewHolderUpdateEndIcon_wifiDisconnectedAndSecurityNone_hideIcon() {
+        mViewHolder.updateEndIcon(WifiEntry.CONNECTED_STATE_DISCONNECTED, WifiEntry.SECURITY_NONE);
+
+        assertThat(mViewHolder.mWifiEndIcon.getVisibility()).isEqualTo(View.GONE);
     }
 }

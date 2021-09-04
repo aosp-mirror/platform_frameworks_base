@@ -60,6 +60,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -82,8 +83,11 @@ public class InternalResourceService extends SystemService {
     static final long UNUSED_RECLAMATION_PERIOD_MS = 24 * HOUR_IN_MILLIS;
     /** How much of an app's unused wealth should be reclaimed periodically. */
     private static final float DEFAULT_UNUSED_RECLAMATION_PERCENTAGE = .1f;
+    private static final int PACKAGE_QUERY_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_APEX;
 
-    /** Global local for all resource economy state. */
+    /** Global lock for all resource economy state. */
     private final Object mLock = new Object();
 
     private final Handler mHandler;
@@ -240,11 +244,28 @@ public class InternalResourceService extends SystemService {
         return mLock;
     }
 
+    /** Returns the installed packages for all users. */
     @NonNull
     List<PackageInfo> getInstalledPackages() {
         synchronized (mLock) {
             return mPkgCache;
         }
+    }
+
+    /** Returns the installed packages for the specified user. */
+    @NonNull
+    List<PackageInfo> getInstalledPackages(final int userId) {
+        final List<PackageInfo> userPkgs = new ArrayList<>();
+        synchronized (mLock) {
+            for (int i = 0; i < mPkgCache.size(); ++i) {
+                final PackageInfo packageInfo = mPkgCache.get(i);
+                if (packageInfo.applicationInfo != null
+                        && UserHandle.getUserId(packageInfo.applicationInfo.uid) == userId) {
+                    userPkgs.add(packageInfo);
+                }
+            }
+        }
+        return userPkgs;
     }
 
     @GuardedBy("mLock")
@@ -300,9 +321,10 @@ public class InternalResourceService extends SystemService {
         final int userId = UserHandle.getUserId(uid);
         final PackageInfo packageInfo;
         try {
-            packageInfo = mPackageManager.getPackageInfoAsUser(pkgName, 0, userId);
+            packageInfo =
+                    mPackageManager.getPackageInfoAsUser(pkgName, PACKAGE_QUERY_FLAGS, userId);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.wtf(TAG, "PM couldn't find newly added package: " + pkgName);
+            Slog.wtf(TAG, "PM couldn't find newly added package: " + pkgName, e);
             return;
         }
         synchronized (mPackageToUidCache) {
@@ -354,7 +376,8 @@ public class InternalResourceService extends SystemService {
 
     void onUserAdded(final int userId) {
         synchronized (mLock) {
-            loadInstalledPackageListLocked();
+            mPkgCache.addAll(
+                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId));
             mAgent.grantBirthrightsLocked(userId);
         }
     }
@@ -371,7 +394,6 @@ public class InternalResourceService extends SystemService {
                     break;
                 }
             }
-            loadInstalledPackageListLocked();
             mAgent.onUserRemovedLocked(userId, removedPkgs);
         }
     }
@@ -468,7 +490,14 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private void loadInstalledPackageListLocked() {
-        mPkgCache = mPackageManager.getInstalledPackages(0);
+        mPkgCache.clear();
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        final int[] userIds = userManagerInternal.getUserIds();
+        for (int userId : userIds) {
+            mPkgCache.addAll(
+                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId));
+        }
     }
 
     private void registerListeners() {

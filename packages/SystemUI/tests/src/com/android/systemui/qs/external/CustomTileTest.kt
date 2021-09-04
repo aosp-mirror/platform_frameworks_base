@@ -51,6 +51,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -282,8 +283,10 @@ class CustomTileTest : SysuiTestCase() {
     @Test
     fun testNotAvailableAfterInitializationWithoutIcon() {
         val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        reset(tileHost)
         tile.initialize()
         testableLooper.processAllMessages()
         assertFalse(tile.isAvailable)
+        verify(tileHost).removeTile(tile.tileSpec)
     }
 }

@@ -55,7 +55,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.SplashScreen;
 import android.window.WindowContainerToken;
 
@@ -426,7 +426,7 @@ public class ActivityOptions {
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
     private RemoteAnimationAdapter mRemoteAnimationAdapter;
     private IBinder mLaunchCookie;
-    private IRemoteTransition mRemoteTransition;
+    private RemoteTransition mRemoteTransition;
     private boolean mOverrideTaskTransition;
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
@@ -1054,7 +1054,7 @@ public class ActivityOptions {
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
     public static ActivityOptions makeRemoteAnimation(RemoteAnimationAdapter remoteAnimationAdapter,
-            IRemoteTransition remoteTransition) {
+            RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
         opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
         opts.mAnimationType = ANIM_REMOTE_ANIMATION;
@@ -1064,11 +1064,11 @@ public class ActivityOptions {
 
     /**
      * Create an {@link ActivityOptions} instance that lets the application control the entire
-     * transition using a {@link IRemoteTransition}.
+     * transition using a {@link RemoteTransition}.
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
-    public static ActivityOptions makeRemoteTransition(IRemoteTransition remoteTransition) {
+    public static ActivityOptions makeRemoteTransition(RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
         opts.mRemoteTransition = remoteTransition;
         return opts;
@@ -1181,8 +1181,7 @@ public class ActivityOptions {
         }
         mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
-        mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
-                KEY_REMOTE_TRANSITION));
+        mRemoteTransition = opts.getParcelable(KEY_REMOTE_TRANSITION);
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
         mSplashScreenThemeResName = opts.getString(KEY_SPLASH_SCREEN_THEME);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
@@ -1348,7 +1347,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public IRemoteTransition getRemoteTransition() {
+    public RemoteTransition getRemoteTransition() {
         return mRemoteTransition;
     }
 
@@ -1965,7 +1964,7 @@ public class ActivityOptions {
             b.putBinder(KEY_LAUNCH_COOKIE, mLaunchCookie);
         }
         if (mRemoteTransition != null) {
-            b.putBinder(KEY_REMOTE_TRANSITION, mRemoteTransition.asBinder());
+            b.putParcelable(KEY_REMOTE_TRANSITION, mRemoteTransition);
         }
         if (mOverrideTaskTransition) {
             b.putBoolean(KEY_OVERRIDE_TASK_TRANSITION, mOverrideTaskTransition);

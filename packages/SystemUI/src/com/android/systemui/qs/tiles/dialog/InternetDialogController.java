@@ -248,8 +248,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
-    protected Intent getWifiDetailsSettingsIntent() {
-        String key = mConnectedEntry == null ? null : mConnectedEntry.getKey();
+    protected Intent getWifiDetailsSettingsIntent(String key) {
         if (TextUtils.isEmpty(key)) {
             if (DEBUG) {
                 Log.d(TAG, "connected entry's key is empty");
@@ -558,8 +557,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
     }
 
-    void launchWifiNetworkDetailsSetting() {
-        Intent intent = getWifiDetailsSettingsIntent();
+    void launchWifiNetworkDetailsSetting(String key) {
+        Intent intent = getWifiDetailsSettingsIntent(key);
         if (intent != null) {
             mCallback.dismissDialog();
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
@@ -739,7 +738,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 final Intent intent = new Intent("com.android.settings.WIFI_DIALOG")
                         .putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, mWifiEntry.getKey());
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mActivityStarter.startActivity(intent, true);
+                mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {
                 Toast.makeText(mContext, R.string.wifi_failed_connect_message,
                         Toast.LENGTH_SHORT).show();

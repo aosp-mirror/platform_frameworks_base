@@ -163,18 +163,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/media_seamless_fallback"
-        android:layout_width="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_height="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginStart="@dimen/qs_center_guideline_padding"
-        android:layout_marginEnd="@dimen/qs_seamless_fallback_margin"
-        android:tint="?android:attr/textColor"
-        android:src="@drawable/ic_cast_connected"
-        android:forceHasOverlappingRendering="false" />
-
     <!-- Seek Bar -->
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <SeekBar

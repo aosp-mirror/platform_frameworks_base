@@ -1014,7 +1014,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Апликације користе <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Користи <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Користи: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Недавно користио/ла <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(посао)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонски позив"</string>
@@ -1168,11 +1168,10 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Отворите помоћу отиска прста"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Потребна је потврда идентитета. Додирните сензор за отисак прста да бисте потврдили идентитет."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Актуелни телефонски позив"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"Режим рада у авиону"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилни подаци"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Повезано"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"Аутоматско повезивање на интернет није могуће"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Није успело аутом. повезивање преко моб. података"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Веза није успостављена"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Није доступна ниједна друга мрежа"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема доступних мрежа"</string>
