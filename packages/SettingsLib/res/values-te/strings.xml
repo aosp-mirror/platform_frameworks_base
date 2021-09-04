@@ -89,7 +89,7 @@
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ఇంటర్నెట్ యాక్సెస్"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"కాంటాక్ట్ షేరింగ్"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"కాంటాక్ట్ షేరింగ్ కోసం ఉపయోగించండి"</string>
-    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ఇంటర్నెట్ కనెక్షన్ భాగస్వామ్యం"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ఇంటర్నెట్ కనెక్షన్ షేరింగ్"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"వచన మెసేజ్‌లు"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM యాక్సెస్"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ఆడియో: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>

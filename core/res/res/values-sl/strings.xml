@@ -615,6 +615,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Za nadaljevanje uporabite prstni odtis ali odklepanje s poverilnico."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona prstnih odtisov"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Odklepanje z obrazom"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Težava z odklepanjem z obrazom"</string>
@@ -667,6 +669,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Za nadaljevanje uporabite obraz ali odklepanje s poverilnico."</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona obraza"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"branje nastavitev sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Aplikaciji omogoča branje nastavitev sinhronizacije za račun. S tem lahko aplikacija na primer ugotovi, ali je aplikacija Ljudje sinhronizirana z računom."</string>
@@ -1735,7 +1739,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite vklopiti bližnjico za funkcije za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili funkcije za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nIzbrane funkcije lahko spremenite v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami«."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Želite vklopiti bližnjico za <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili storitev <xliff:g id="SERVICE">%1$s</xliff:g>, ki je funkcija za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami« spremenite, da bo uporabljena za drugo funkcijo."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vklopi"</string>

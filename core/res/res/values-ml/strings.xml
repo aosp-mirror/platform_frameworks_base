@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"തുടരാൻ നിങ്ങളുടെ ഫിംഗർപ്രിന്റ്‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ഫെയ്‌സ് അൺലോക്ക്"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ഫെയ്‌സ് അൺലോക്കുമായി ബന്ധപ്പെട്ട പ്രശ്നം"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"തുടരാൻ നിങ്ങളുടെ മുഖം‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"മുഖത്തിന്റെ ഐക്കൺ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിച്ചിട്ടുണ്ടോയെന്നത് നിർണ്ണയിക്കാൻ ഇതിനാകും."</string>
@@ -1691,7 +1695,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ഉപയോഗസഹായി ഫീച്ചറുകൾക്കുള്ള കുറുക്കുവഴി ഓണാക്കണോ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത്, ഉപയോഗസഹായി ഫീച്ചറുകൾ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന രീതിയെ ഇത് മാറ്റിയേക്കാം.\n\nനിലവിലുള്ള ഫീച്ചറുകൾ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nതിരഞ്ഞെടുത്ത ഫീച്ചറുകൾ ക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിൽ മാറ്റാനാവും."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> കുറുക്കുവഴി ഓണാക്കണോ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത് ഉപയോഗസഹായി ഫീച്ചറായ <xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിനെ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം ഇത് മാറ്റിയേക്കാം.\n\nക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിലെ മറ്റൊരു ഫീച്ചറിലേക്ക് നിങ്ങൾക്ക് ഈ കുറുക്കുവഴി മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ഓണാക്കുക"</string>

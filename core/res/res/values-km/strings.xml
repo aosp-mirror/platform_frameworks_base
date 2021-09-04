@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ប្រើការចាក់សោអេក្រង់ ឬស្នាមម្រាមដៃរបស់អ្នក ដើម្បីបន្ត"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"រូបស្នាមម្រាមដៃ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ដោះ​សោ​តាម​​ទម្រង់​មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"មានបញ្ហា​ពាក់ព័ន្ធនឹង​មុខងារ​ដោះសោ​តាមទម្រង់មុខ"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ប្រើការចាក់សោអេក្រង់ ឬមុខរបស់អ្នក ដើម្បីបន្ត"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"រូប​ផ្ទៃមុខ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ឲ្យ​កម្មវិធី​អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​កំណត់​ថា​តើ​​​កម្មវិធី​ត្រូវ​បាន​បើក​ជា​មួយ​គណនី​ដែរ​ឬទេ។"</string>
@@ -1691,7 +1695,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"បើក​ផ្លូវកាត់​សម្រាប់មុខងារ​ភាពងាយស្រួលឬ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nមុខងារ​បច្ចុប្បន្ន៖\n<xliff:g id="SERVICE">%1$s</xliff:g>\nអ្នកអាច​ប្ដូរ​មុខងារ​ដែលបាន​ជ្រើសរើស​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"បើក​ផ្លូវកាត់ <xliff:g id="SERVICE">%1$s</xliff:g> ឬ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក <xliff:g id="SERVICE">%1$s</xliff:g> ដែលជា​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nអ្នកអាច​ប្ដូរផ្លូវកាត់​នេះទៅ​មុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"បើក"</string>

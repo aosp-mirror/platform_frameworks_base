@@ -632,7 +632,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         runningAnimations.add(runner.getAnimation());
                     }
 
-                    if (((WindowInsetsAnimationController) runner).applyChangeInsets(state)) {
+                    if (((InternalInsetsAnimationController) runner).applyChangeInsets(state)) {
                         finishedAnimations.add(runner.getAnimation());
                     }
                 }
@@ -1513,7 +1513,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     @Override
-    public <T extends InsetsAnimationControlRunner & WindowInsetsAnimationController>
+    public <T extends InsetsAnimationControlRunner & InternalInsetsAnimationController>
     void startAnimation(T runner, WindowInsetsAnimationControlListener listener, int types,
             WindowInsetsAnimation animation, Bounds bounds) {
         mHost.dispatchWindowInsetsAnimationPrepare(animation);

@@ -902,7 +902,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.pulse_expansion_max_top_overshoot);
         mScrimCornerRadius = mResources.getDimensionPixelSize(
                 R.dimen.notification_scrim_corner_radius);
-        mScreenCornerRadius = (int) ScreenDecorationsUtils.getWindowCornerRadius(mResources);
+        mScreenCornerRadius = (int) ScreenDecorationsUtils.getWindowCornerRadius(
+                mView.getContext());
         mLockscreenNotificationQSPadding = mResources.getDimensionPixelSize(
                 R.dimen.notification_side_paddings);
     }

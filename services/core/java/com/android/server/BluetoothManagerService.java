@@ -2479,7 +2479,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         try {
             foregroundUser = ActivityManager.getCurrentUser();
             valid = (callingUser == foregroundUser) || parentUser == foregroundUser
-                    || callingAppId == Process.NFC_UID || callingAppId == mSystemUiUid;
+                    || callingAppId == Process.NFC_UID || callingAppId == mSystemUiUid
+                    || callingAppId == Process.SHELL_UID;
             if (DBG && !valid) {
                 Slog.d(TAG, "checkIfCallerIsForegroundUser: valid=" + valid + " callingUser="
                         + callingUser + " parentUser=" + parentUser + " foregroundUser="

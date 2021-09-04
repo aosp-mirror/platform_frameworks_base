@@ -583,7 +583,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
-            Handler handler) {
+            Handler handler, @Nullable Context windowContext) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
@@ -609,7 +609,7 @@ public final class DisplayManagerGlobal {
             return null;
         }
         return new VirtualDisplay(this, display, callbackWrapper,
-                virtualDisplayConfig.getSurface());
+                virtualDisplayConfig.getSurface(), windowContext);
     }
 
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {

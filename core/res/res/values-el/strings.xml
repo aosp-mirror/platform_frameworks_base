@@ -609,6 +609,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Χρησιμοποιήστε το δακτυλικό σας αποτύπωμα ή το κλείδωμα οθόνης για να συνεχίσετε"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ξεκλείδωμα με το πρόσωπο"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Πρόβλημα με το Ξεκλείδωμα με το πρόσωπο"</string>
@@ -661,6 +663,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Χρησιμοποιήστε το πρόσωπό σας ή το κλείδωμα οθόνης για συνέχεια"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Εικ. προσ."</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"διαβάζει τις ρυθμίσεις συγχρονισμού"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Επιτρέπει στην εφαρμογή την ανάγνωση των ρυθμίσεων συγχρονισμού για έναν λογαριασμό. Για παράδειγμα, αυτό μπορεί να καθορίσει εάν η εφαρμογή \"Άτομα\" είναι συγχρονισμένη με έναν λογαριασμό."</string>
@@ -1691,7 +1695,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Όταν η συντόμευση είναι ενεργοποιημένη, το πάτημα και των δύο κουμπιών έντασης ήχου για 3 δευτερόλεπτα θα ξεκινήσει μια λειτουργία προσβασιμότητας."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ενεργοποίηση συντόμευσης για λειτουργίες προσβασιμότητας;"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Για να ενεργοποιήσετε τις λειτουργίες προσβασιμότητας, πατήστε παρατεταμένα τα δύο πλήκτρα έντασης για μερικά δευτερόλεπτα. Αυτό ενδέχεται να αλλάξει τον τρόπο λειτουργίας της συσκευής σας.\n\nΤρέχουσες λειτουργίες:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nΜπορείτε να αλλάξετε τις επιλεγμένες λειτουργίες στις Ρυθμίσεις &gt; Προσβασιμότητα."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Ενεργοποίηση συντόμευσης <xliff:g id="SERVICE">%1$s</xliff:g>;"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Μπορείτε να ενεργοποιήσετε τη λειτουργία <xliff:g id="SERVICE">%1$s</xliff:g>, η οποία είναι μία από τις λειτουργίες προσβασιμότητας, πατώντας παρατεταμένα ταυτόχρονα τα δύο πλήκτρα έντασης ήχου για μερικά δευτερόλεπτα. Αυτό ενδέχεται να αλλάξει τον τρόπο λειτουργίας της συσκευής σας.\n\nΜπορείτε να αλλάξετε αυτή τη συντόμευση σε μια άλλη λειτουργία στις Ρυθμίσεις &gt; Προσβασιμότητα."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ενεργοποίηση"</string>

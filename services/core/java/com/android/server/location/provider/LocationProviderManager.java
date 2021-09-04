@@ -1078,7 +1078,7 @@ public class LocationProviderManager extends
         }
 
         private void onTransportFailure(Exception e) {
-            if (e instanceof RemoteException) {
+            if (e instanceof PendingIntent.CanceledException) {
                 Log.w(TAG, mName + " provider registration " + getIdentity() + " removed", e);
                 synchronized (mLock) {
                     remove();

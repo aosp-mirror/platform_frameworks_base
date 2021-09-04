@@ -5095,6 +5095,14 @@
            - config_fillBuiltInDisplayCutoutArray
            - config_maskBuiltInDisplayCutoutArray
            - config_waterfallCutoutArray
+           - config_roundedCornerRadiusArray
+           - config_roundedCornerTopRadiusArray
+           - config_roundedCornerBottomRadiusArray
+           - config_builtInDisplayIsRoundArray (config in SystemUI resource)
+           - config_roundedCornerMultipleRadiusArray (config in SystemUI resource)
+           - config_roundedCornerDrawableArray (config in SystemUI resource)
+           - config_roundedCornerTopDrawableArray (config in SystemUI resource)
+           - config_roundedCornerBottomDrawableArray (config in SystemUI resource)
 
          Leave this array empty for single display device and the system will load the default main
          built-in related configs.
@@ -5156,4 +5164,48 @@
          This flag should be enabled only when the product does not have any UI to toggle airplane
          mode like automotive devices.-->
     <bool name="config_autoResetAirplaneMode">false</bool>
+
+    <bool name="config_secondaryBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
+
+    <!-- The display round config for each display in a multi-display device. -->
+    <array name="config_builtInDisplayIsRoundArray" translatable="false">
+        <item>@bool/config_mainBuiltInDisplayIsRound</item>
+        <item>@bool/config_secondaryBuiltInDisplayIsRound</item>
+    </array>
+
+    <!-- The rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius</item>
+        <item>@dimen/secondary_rounded_corner_radius</item>
+    </array>
+
+    <!-- The top rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerTopRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_top</item>
+        <item>@dimen/secondary_rounded_corner_radius_top</item>
+    </array>
+
+    <!-- The bottom rounded corner radius for each display in a multi-display device. -->
+    <array name="config_roundedCornerBottomRadiusArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_bottom</item>
+        <item>@dimen/secondary_rounded_corner_radius_bottom</item>
+    </array>
+
+    <!-- The rounded corner radius adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_adjustment</item>
+    </array>
+
+    <!-- The rounded corner radius top adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerTopRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_top_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_top_adjustment</item>
+    </array>
+
+    <!-- The rounded corner radius bottom adjustment for each display in a multi-display device. -->
+    <array name="config_roundedCornerBottomRadiusAdjustmentArray" translatable="false">
+        <item>@dimen/rounded_corner_radius_bottom_adjustment</item>
+        <item>@dimen/secondary_rounded_corner_radius_bottom_adjustment</item>
+    </array>
 </resources>
