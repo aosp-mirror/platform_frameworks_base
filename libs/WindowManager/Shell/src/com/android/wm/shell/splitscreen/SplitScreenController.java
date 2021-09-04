@@ -22,7 +22,6 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -44,7 +43,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
@@ -76,6 +75,7 @@ import java.util.concurrent.Executor;
  * {@link SplitScreen}.
  * @see StageCoordinator
  */
+// TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
 public class SplitScreenController implements DragAndDropPolicy.Starter,
         RemoteCallable<SplitScreenController> {
     private static final String TAG = SplitScreenController.class.getSimpleName();
@@ -241,46 +241,34 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options) {
-        final boolean wasInSplit = isSplitScreenVisible();
-
         LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
             @Override
             public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                boolean cancelled = apps == null || apps.length == 0;
                 mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
-                if (cancelled) {
-                    if (!wasInSplit) {
-                        final WindowContainerTransaction undoWct = new WindowContainerTransaction();
-                        mStageCoordinator.prepareExitSplitScreen(STAGE_TYPE_MAIN, undoWct);
-                        mSyncQueue.queue(undoWct);
-                        mSyncQueue.runInSync(undoT -> {
-                            // looks weird, but we want undoT to execute after t but still want the
-                            // rest of the syncQueue runnables to aggregate.
-                            t.merge(undoT);
-                            undoT.merge(t);
-                        });
-                        return;
-                    }
-                } else {
+
+                if (apps != null) {
                     for (int i = 0; i < apps.length; ++i) {
                         if (apps[i].mode == MODE_OPENING) {
                             t.show(apps[i].leash);
                         }
                     }
                 }
-                RemoteAnimationTarget divider = mStageCoordinator.getDividerBarLegacyTarget();
+
+                final RemoteAnimationTarget divider = mStageCoordinator.getDividerBarLegacyTarget();
                 if (divider.leash != null) {
                     t.show(divider.leash);
                 }
+
                 t.apply();
-                if (cancelled) return;
-                try {
-                    finishedCallback.onAnimationFinished();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error finishing legacy transition: ", e);
+                if (finishedCallback != null) {
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error finishing legacy transition: ", e);
+                    }
                 }
             }
         };
@@ -565,7 +553,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions,
                 @SplitPosition int sidePosition,
-                @Nullable IRemoteTransition remoteTransition) {
+                @Nullable RemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
                             sideTaskId, sideOptions, sidePosition, remoteTransition));

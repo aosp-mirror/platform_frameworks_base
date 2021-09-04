@@ -2273,7 +2273,10 @@ public class DisplayPolicy {
     void notifyDisplayReady() {
         mHandler.post(() -> {
             final int displayId = getDisplayId();
-            getStatusBarManagerInternal().onDisplayReady(displayId);
+            StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+            if (statusBar != null) {
+                statusBar.onDisplayReady(displayId);
+            }
             final WallpaperManagerInternal wpMgr = LocalServices
                     .getService(WallpaperManagerInternal.class);
             if (wpMgr != null) {
@@ -2409,7 +2412,7 @@ public class DisplayPolicy {
      */
     float getWindowCornerRadius() {
         return mDisplayContent.getDisplay().getType() == TYPE_INTERNAL
-                ? ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources()) : 0f;
+                ? ScreenDecorationsUtils.getWindowCornerRadius(mContext) : 0f;
     }
 
     boolean isShowingDreamLw() {

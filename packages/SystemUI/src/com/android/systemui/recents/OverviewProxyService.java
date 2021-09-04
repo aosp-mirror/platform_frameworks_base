@@ -547,7 +547,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources());
+        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
         mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
                 .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;

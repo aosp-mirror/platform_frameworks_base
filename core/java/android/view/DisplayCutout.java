@@ -39,6 +39,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.DisplayUtils;
 import android.util.Pair;
 import android.util.RotationUtils;
 import android.util.proto.ProtoOutputStream;
@@ -874,38 +875,13 @@ public final class DisplayCutout {
     }
 
     /**
-     * Gets the index of the given display unique id in {@link R.array#config_displayUniqueIdArray}
-     * which is used to get the related cutout configs for that display.
-     *
-     * For multi-display device, {@link R.array#config_displayUniqueIdArray} should be set for each
-     * display if there are different type of cutouts on each display.
-     * For single display device, {@link R.array#config_displayUniqueIdArray} should not to be set
-     * and the system will load the default configs for main built-in display.
-     */
-    private static int getDisplayCutoutConfigIndex(Resources res, String displayUniqueId) {
-        int index = -1;
-        if (displayUniqueId == null || displayUniqueId.isEmpty()) {
-            return index;
-        }
-        final String[] ids = res.getStringArray(R.array.config_displayUniqueIdArray);
-        final int size = ids.length;
-        for (int i = 0; i < size; i++) {
-            if (displayUniqueId.equals(ids[i])) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    /**
      * Gets the display cutout by the given display unique id.
      *
      * Loads the default config {@link R.string#config_mainBuiltInDisplayCutout) if
      * {@link R.array#config_displayUniqueIdArray} is not set.
      */
     private static String getDisplayCutoutPath(Resources res, String displayUniqueId) {
-        final int index = getDisplayCutoutConfigIndex(res, displayUniqueId);
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
         final String[] array = res.getStringArray(R.array.config_displayCutoutPathArray);
         if (index >= 0 && index < array.length) {
             return array[index];
@@ -920,7 +896,7 @@ public final class DisplayCutout {
      * {@link R.array#config_displayUniqueIdArray} is not set.
      */
     private static String getDisplayCutoutApproximationRect(Resources res, String displayUniqueId) {
-        final int index = getDisplayCutoutConfigIndex(res, displayUniqueId);
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
         final String[] array = res.getStringArray(
                 R.array.config_displayCutoutApproximationRectArray);
         if (index >= 0 && index < array.length) {
@@ -939,7 +915,7 @@ public final class DisplayCutout {
      * @hide
      */
     public static boolean getMaskBuiltInDisplayCutout(Resources res, String displayUniqueId) {
-        final int index = getDisplayCutoutConfigIndex(res, displayUniqueId);
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
         final TypedArray array = res.obtainTypedArray(R.array.config_maskBuiltInDisplayCutoutArray);
         boolean maskCutout;
         if (index >= 0 && index < array.length()) {
@@ -961,7 +937,7 @@ public final class DisplayCutout {
      * @hide
      */
     public static boolean getFillBuiltInDisplayCutout(Resources res, String displayUniqueId) {
-        final int index = getDisplayCutoutConfigIndex(res, displayUniqueId);
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
         final TypedArray array = res.obtainTypedArray(R.array.config_fillBuiltInDisplayCutoutArray);
         boolean fillCutout;
         if (index >= 0 && index < array.length()) {
@@ -984,7 +960,7 @@ public final class DisplayCutout {
      */
     private static Insets getWaterfallInsets(Resources res, String displayUniqueId) {
         Insets insets;
-        final int index = getDisplayCutoutConfigIndex(res, displayUniqueId);
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
         final TypedArray array = res.obtainTypedArray(R.array.config_waterfallCutoutArray);
         if (index >= 0 && index < array.length() && array.getResourceId(index, 0) > 0) {
             final int resourceId = array.getResourceId(index, 0);

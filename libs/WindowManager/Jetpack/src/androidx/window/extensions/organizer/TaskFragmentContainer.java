@@ -125,6 +125,14 @@ class TaskFragmentContainer {
         return false;
     }
 
+    int getRunningActivityCount() {
+        int count = mPendingAppearedActivities.size();
+        if (mInfo != null) {
+            count += mInfo.getRunningActivityCount();
+        }
+        return count;
+    }
+
     @Nullable
     TaskFragmentInfo getInfo() {
         return mInfo;

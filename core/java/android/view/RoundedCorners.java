@@ -27,9 +27,11 @@ import static android.view.Surface.ROTATION_90;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DisplayUtils;
 import android.util.Pair;
 import android.view.RoundedCorner.Position;
 
@@ -94,8 +96,8 @@ public class RoundedCorners implements Parcelable {
      * @android:dimen/rounded_corner_radius_top and @android:dimen/rounded_corner_radius_bottom
      */
     public static RoundedCorners fromResources(
-            Resources res, int displayWidth, int displayHeight) {
-        return fromRadii(loadRoundedCornerRadii(res), displayWidth, displayHeight);
+            Resources res, String displayUniqueId, int displayWidth, int displayHeight) {
+        return fromRadii(loadRoundedCornerRadii(res, displayUniqueId), displayWidth, displayHeight);
     }
 
     /**
@@ -140,14 +142,16 @@ public class RoundedCorners implements Parcelable {
      * Loads the rounded corner radii from resources.
      *
      * @param res
+     * @param displayUniqueId the display unique id.
      * @return a Pair of radius. The first is the top rounded corner radius and second is the
      * bottom corner radius.
      */
     @Nullable
-    private static Pair<Integer, Integer> loadRoundedCornerRadii(Resources res) {
-        final int radiusDefault = res.getDimensionPixelSize(R.dimen.rounded_corner_radius);
-        final int radiusTop = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_top);
-        final int radiusBottom = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_bottom);
+    private static Pair<Integer, Integer> loadRoundedCornerRadii(
+            Resources res, String displayUniqueId) {
+        final int radiusDefault = getRoundedCornerRadius(res, displayUniqueId);
+        final int radiusTop = getRoundedCornerTopRadius(res, displayUniqueId);
+        final int radiusBottom = getRoundedCornerBottomRadius(res, displayUniqueId);
         if (radiusDefault == 0 && radiusTop == 0 && radiusBottom == 0) {
             return null;
         }
@@ -155,6 +159,164 @@ public class RoundedCorners implements Parcelable {
                         radiusTop > 0 ? radiusTop : radiusDefault,
                         radiusBottom > 0 ? radiusBottom : radiusDefault);
         return radii;
+    }
+
+    /**
+     * Gets the default rounded corner radius of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerRadius(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_roundedCornerRadiusArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets the top rounded corner radius of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius_top} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerTopRadius(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_roundedCornerTopRadiusArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_top);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets the bottom rounded corner radius of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius_bottom} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerBottomRadius(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(
+                R.array.config_roundedCornerBottomRadiusArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_bottom);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets the rounded corner radius adjustment of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius_adjustment} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerRadiusAdjustment(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(
+                R.array.config_roundedCornerRadiusAdjustmentArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_adjustment);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets the rounded corner top radius adjustment of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius_top_adjustment} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerRadiusTopAdjustment(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(
+                R.array.config_roundedCornerTopRadiusAdjustmentArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_top_adjustment);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets the rounded corner bottom radius adjustment of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default dimen{@link R.dimen#rounded_corner_radius_bottom_adjustment} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static int getRoundedCornerRadiusBottomAdjustment(
+            Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(
+                R.array.config_roundedCornerBottomRadiusAdjustmentArray);
+        int radius;
+        if (index >= 0 && index < array.length()) {
+            radius = array.getDimensionPixelSize(index, 0);
+        } else {
+            radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius_bottom_adjustment);
+        }
+        array.recycle();
+        return radius;
+    }
+
+    /**
+     * Gets whether a built-in display is round.
+     *
+     * Loads the default config{@link R.bool#config_mainBuiltInDisplayIsRound} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static boolean getBuiltInDisplayIsRound(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_builtInDisplayIsRoundArray);
+        boolean isRound;
+        if (index >= 0 && index < array.length()) {
+            isRound = array.getBoolean(index, false);
+        } else {
+            isRound = res.getBoolean(R.bool.config_mainBuiltInDisplayIsRound);
+        }
+        array.recycle();
+        return isRound;
     }
 
     /**

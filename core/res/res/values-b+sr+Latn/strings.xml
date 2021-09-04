@@ -612,6 +612,8 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Koristite otisak prsta ili zaključavanje ekrana da biste nastavili"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
+    <skip />
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona otiska prsta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem sa otključavanje licem"</string>
@@ -664,6 +666,8 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Koristite lice ili zaključavanje ekrana da biste nastavili"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
+    <skip />
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona lica"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"čitanje podešavanja sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Dozvoljava aplikaciji da čita podešavanja sinhronizacije za nalog. Na primer, ovako može da se utvrdi da li je aplikacija Ljudi sinhronizovana sa nalogom."</string>
@@ -1713,7 +1717,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite da uključite prečicu za funkcije pristupačnosti?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključiće se funkcije pristupačnosti. To može da promeni način rada uređaja.\n\nPostojeće funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nMožete da promenite izabrane funkcije u odeljku Podešavanja &gt; Pristupačnost."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Želite da uključite prečicu za uslugu <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključuje se <xliff:g id="SERVICE">%1$s</xliff:g>, funkcija pristupačnosti. To može da promeni način rada uređaja.\n\nMožete da promenite funkciju na koju se odnosi ova prečica u odeljku Podešavanja &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Uključi"</string>

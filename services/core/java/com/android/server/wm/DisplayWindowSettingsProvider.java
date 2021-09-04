@@ -264,8 +264,14 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
     @NonNull
     private static AtomicFile getVendorSettingsFile() {
-        final File vendorFile = new File(Environment.getVendorDirectory(),
+        // First look under product path for treblized builds.
+        File vendorFile = new File(Environment.getProductDirectory(),
                 VENDOR_DISPLAY_SETTINGS_FILE_PATH);
+        if (!vendorFile.exists()) {
+            // Try and look in vendor path.
+            vendorFile = new File(Environment.getVendorDirectory(),
+                VENDOR_DISPLAY_SETTINGS_FILE_PATH);
+        }
         return new AtomicFile(vendorFile, WM_DISPLAY_COMMIT_TAG);
     }
 

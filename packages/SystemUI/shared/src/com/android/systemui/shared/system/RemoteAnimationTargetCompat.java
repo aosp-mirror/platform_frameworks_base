@@ -71,11 +71,11 @@ public class RemoteAnimationTargetCompat {
     public final boolean allowEnterPip;
     public final int rotationChange;
     public final int windowType;
+    public final WindowConfiguration windowConfiguration;
 
     private final SurfaceControl mStartLeash;
 
     // Fields used only to unrap into RemoteAnimationTarget
-    private final WindowConfiguration windowConfiguration;
     private final Rect startBounds;
 
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
@@ -235,8 +235,9 @@ public class RemoteAnimationTargetCompat {
         rotationChange = change.getEndRotation() - change.getStartRotation();
         windowType = INVALID_WINDOW_TYPE;
 
-        // TODO this probably isn't right but it's unused for now /shrug
-        windowConfiguration = new WindowConfiguration();
+        windowConfiguration = change.getTaskInfo() != null
+            ? change.getTaskInfo().configuration.windowConfiguration
+            : new WindowConfiguration();
         startBounds = change.getStartAbsBounds();
     }
 

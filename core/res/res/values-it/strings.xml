@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Per continuare devi usare la tua impronta o il tuo blocco schermo"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Si è verificato un errore. Riprova."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Sblocco con il volto"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Sblocco con il volto"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Per continuare devi usare il tuo volto o il tuo blocco schermo"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Si è verificato un errore. Riprova."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona volto"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>
@@ -1691,7 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vuoi attivare la scorciatoia per le funzioni di accessibilità?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Se tieni premuti entrambi i tasti del volume per qualche secondo, vengono attivate le funzioni di accessibilità. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nFunzioni correnti:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuoi modificare le funzioni selezionate in Impostazioni &gt; Accessibilità."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vuoi attivare la scorciatoia per <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Se tieni premuti entrambi i tasti del volume per qualche secondo verrà attivata la funzione di accessibilità <xliff:g id="SERVICE">%1$s</xliff:g>. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nPuoi associare questa scorciatoia a un\'altra funzionalità in Impostazioni &gt; Accessibilità."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Attiva"</string>

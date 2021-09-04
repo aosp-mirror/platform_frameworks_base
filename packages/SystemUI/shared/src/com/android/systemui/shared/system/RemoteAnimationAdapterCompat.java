@@ -37,6 +37,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 
 import java.util.ArrayList;
@@ -62,7 +63,8 @@ public class RemoteAnimationAdapterCompat {
 
     /** Helper to just build a remote transition. Use this if the legacy adapter isn't needed. */
     public static RemoteTransitionCompat buildRemoteTransition(RemoteAnimationRunnerCompat runner) {
-        return new RemoteTransitionCompat(wrapRemoteTransition(runner));
+        return new RemoteTransitionCompat(
+                new RemoteTransition(wrapRemoteTransition(runner)));
     }
 
     public RemoteTransitionCompat getRemoteTransition() {

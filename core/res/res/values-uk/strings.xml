@@ -615,6 +615,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Щоб продовжити, скористайтеся відбитком пальця або даними для розблокування екрана"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Сталася помилка. Повторіть спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
@@ -667,6 +668,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Щоб продовжити, скористайтеся фейсконтролем або даними для розблокування екрана"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Сталася помилка. Повторіть спробу."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Значок обличчя"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"читати налаштування синхронізації"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Дозволяє програмі читати налаштування синхронізації для облікового запису, наприклад, визначати, чи програма Люди синхронізується з обліковим записом."</string>
@@ -1735,7 +1737,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Якщо цей засіб увімкнено, ви можете активувати спеціальні можливості, утримуючи обидві кнопки гучності протягом трьох секунд."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Увімкнути засіб спеціальних можливостей?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, вмикаються спеціальні можливості. Це впливає на роботу пристрою.\n\nПоточні функції:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nВибрані функції можна змінити в налаштуваннях у меню спеціальних можливостей."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Увімкнути засіб швидкого доступу до сервісу <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, буде ввімкнено спеціальні можливості – <xliff:g id="SERVICE">%1$s</xliff:g>. Це може вплинути на роботу пристрою.\n\nДля цієї комбінації клавіш можна вибрати іншу функцію в меню \"Налаштування &gt; Спеціальні можливості\"."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Увімкнути"</string>

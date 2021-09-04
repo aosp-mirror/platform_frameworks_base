@@ -275,8 +275,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 syncId = startSyncWithOrganizer(callback);
                 applyTransaction(t, syncId, null /* transition */, caller);
                 setSyncReady(syncId);
-                mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY)
-                        .executeAppTransition();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -653,18 +651,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     options = activityOptions.toBundle();
                 }
 
-                int res = mService.mAmInternal.sendIntentSender(hop.getPendingIntent().getTarget(),
+                mService.mAmInternal.sendIntentSender(hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
                         null /* requiredPermission */, options);
-                if (res != ActivityManager.START_SUCCESS
-                        && res != ActivityManager.START_TASK_TO_FRONT) {
-                    if (!mTransitionController.isShellTransitionsEnabled()) {
-                        final DisplayContent dc =
-                                mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
-                        dc.cancelAppTransition();
-                    }
-                }
                 break;
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
