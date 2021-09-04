@@ -28,7 +28,7 @@ import java.io.File;
  */
 public class ProtoLogImpl extends BaseProtoLogImpl {
     private static final int BUFFER_CAPACITY = 1024 * 1024;
-    private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.pb";
+    private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.winscope";
     private static final String VIEWER_CONFIG_FILENAME = "/system/etc/protolog.conf.json.gz";
 
     private static ProtoLogImpl sServiceInstance = null;

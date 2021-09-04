@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,35 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.launch
+package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.parser.toWindowName
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launching an app from launcher
+ * Test expanding a pip window back to full screen via the expand button
  *
- * To run this test: `atest FlickerTests:OpenAppWarmTest`
+ * To run this test: `atest WMShellFlickerTests:ExitPipViaExpandButtonClickTest`
  *
  * Actions:
- *     Launch [testApp]
- *     Press home
- *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
+ *     Launch an app in pip mode [pipApp],
+ *     Launch another full screen mode [testApp]
+ *     Expand [pipApp] app to full screen by clicking on the pip window and
+ *     then on the expand button
  *
  * Notes:
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [OpenAppTransition]
+ *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
@@ -54,59 +52,29 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
-class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+@Group3
+class ExitPipViaExpandButtonClickTest(
+    testSpec: FlickerTestParameter
+) : ExitPipToAppTransition(testSpec) {
+
     /**
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = {
-            super.transition(this, it)
+        get() = buildTransition(eachRun = true) {
             setup {
-                test {
+                eachRun {
+                    // launch an app behind the pip one
                     testApp.launchViaIntent(wmHelper)
-                }
-                eachRun {
-                    device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
-                    this.setRotation(testSpec.config.startRotation)
-                }
-            }
-            teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
                 }
             }
             transitions {
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
+                // This will bring PipApp to fullscreen
+                pipApp.expandPipWindowToApp(wmHelper)
+                // Wait until the other app is no longer visible
+                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
             }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     companion object {
         /**
@@ -117,9 +85,9 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+        fun getParams(): List<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
+                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
         }
     }
 }

@@ -144,9 +144,7 @@ class SetRequestedOrientationWhilePinnedTest(
 
     @FlakyTest
     @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
-    }
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

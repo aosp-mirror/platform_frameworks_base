@@ -129,7 +129,7 @@ class ResizeLegacySplitScreen(
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Test
-    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Test
     fun navBarLayerRotatesAndScales() =
