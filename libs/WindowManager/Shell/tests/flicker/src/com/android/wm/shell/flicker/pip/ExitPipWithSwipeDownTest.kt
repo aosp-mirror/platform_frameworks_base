@@ -22,6 +22,7 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.startRotation
@@ -33,24 +34,40 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip launch.
- * To run this test: `atest WMShellFlickerTests:PipCloseWithSwipe`
+ * Test closing a pip window by swiping it to the bottom-center of the screen
+ *
+ * To run this test: `atest WMShellFlickerTests:ExitPipWithSwipeDownTest`
+ *
+ * Actions:
+ *     Launch an app in pip mode [pipApp],
+ *     Swipe the pip window to the bottom-center of the screen and wait it disappear
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition(testSpec) {
+class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransition(testSpec) {
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = {
-            super.transition(this, it)
+        get() = { args ->
+            super.transition(this, args)
             transitions {
                 val pipRegion = wmHelper.getWindowRegion(pipApp.component).bounds
                 val pipCenterX = pipRegion.centerX()
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
-                device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 5)
+                device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 10)
+                wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+                wmHelper.waitForWindowSurfaceDisappeared(pipApp.component)
+                wmHelper.waitForAppTransitionIdle()
             }
         }
 
@@ -90,4 +107,20 @@ class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition
     @Presubmit
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): List<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance()
+                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
+                            repetitions = 20)
+        }
+    }
 }
