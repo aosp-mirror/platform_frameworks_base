@@ -248,6 +248,11 @@ class Agent {
     private void noteOngoingEventLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag, final long startElapsed,
             final boolean updateBalanceCheck) {
+        if (mIrs.isSystem(userId, pkgName)) {
+            // Events are free for the system. Don't bother recording them.
+            return;
+        }
+
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null) {
@@ -409,6 +414,11 @@ class Agent {
     private void stopOngoingActionLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag, final long nowElapsed, final long now,
             final boolean updateBalanceCheck, final boolean notifyOnAffordabilityChange) {
+        if (mIrs.isSystem(userId, pkgName)) {
+            // Events are free for the system. Don't bother recording them.
+            return;
+        }
+
         final Ledger ledger = getLedgerLocked(userId, pkgName);
 
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
@@ -430,15 +440,13 @@ class Agent {
         }
         ongoingEvent.refCount--;
         if (ongoingEvent.refCount <= 0) {
-            if (!mIrs.isSystem(userId, pkgName)) {
-                final long startElapsed = ongoingEvent.startTimeElapsed;
-                final long startTime = now - (nowElapsed - startElapsed);
-                final long actualDelta =
-                        getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
-                recordTransactionLocked(userId, pkgName, ledger,
-                        new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
-                        notifyOnAffordabilityChange);
-            }
+            final long startElapsed = ongoingEvent.startTimeElapsed;
+            final long startTime = now - (nowElapsed - startElapsed);
+            final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
+            recordTransactionLocked(userId, pkgName, ledger,
+                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
+                    notifyOnAffordabilityChange);
+
             ongoingEvents.delete(eventId, tag);
         }
         if (updateBalanceCheck) {
