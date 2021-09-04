@@ -665,12 +665,10 @@ public class InputManagerService extends IInputManager.Stub
      */
     @Override // Binder call
     public boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists) {
-        if (keyCodes == null) {
-            throw new IllegalArgumentException("keyCodes must not be null.");
-        }
-        if (keyExists == null || keyExists.length < keyCodes.length) {
-            throw new IllegalArgumentException("keyExists must not be null and must be at "
-                    + "least as large as keyCodes.");
+        Objects.requireNonNull(keyCodes, "keyCodes must not be null");
+        Objects.requireNonNull(keyExists, "keyExists must not be null");
+        if (keyExists.length < keyCodes.length) {
+            throw new IllegalArgumentException("keyExists must be at least as large as keyCodes");
         }
 
         return nativeHasKeys(mPtr, deviceId, sourceMask, keyCodes, keyExists);
@@ -685,7 +683,7 @@ public class InputManagerService extends IInputManager.Stub
      */
     public boolean transferTouch(IBinder destChannelToken) {
         // TODO(b/162194035): Replace this with a SPY window
-        Objects.requireNonNull(destChannelToken, "destChannelToken must not be null.");
+        Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
         return nativeTransferTouch(mPtr, destChannelToken);
     }
 
@@ -696,9 +694,7 @@ public class InputManagerService extends IInputManager.Stub
      * @return The input channel.
      */
     public InputChannel monitorInput(String inputChannelName, int displayId) {
-        if (inputChannelName == null) {
-            throw new IllegalArgumentException("inputChannelName must not be null.");
-        }
+        Objects.requireNonNull(inputChannelName, "inputChannelName not be null");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
@@ -722,7 +718,6 @@ public class InputManagerService extends IInputManager.Stub
                 "monitorInputRegion()")) {
             throw new SecurityException("Requires MONITOR_INPUT permission");
         }
-
         Objects.requireNonNull(inputChannelName, "inputChannelName must not be null.");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
@@ -755,10 +750,7 @@ public class InputManagerService extends IInputManager.Stub
      * @param connectionToken The input channel to unregister.
      */
     public void removeInputChannel(IBinder connectionToken) {
-        if (connectionToken == null) {
-            throw new IllegalArgumentException("connectionToken must not be null.");
-        }
-
+        Objects.requireNonNull(connectionToken, "connectionToken must not be null");
         nativeRemoveInputChannel(mPtr, connectionToken);
     }
 
@@ -830,9 +822,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private boolean injectInputEventInternal(InputEvent event, int mode) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
+        Objects.requireNonNull(event, "event must not be null");
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
                 && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
@@ -900,6 +890,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public VerifiedInputEvent verifyInputEvent(InputEvent event) {
+        Objects.requireNonNull(event, "event must not be null");
         return nativeVerifyInputEvent(mPtr, event);
     }
 
@@ -976,9 +967,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public void registerInputDevicesChangedListener(IInputDevicesChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mInputDevicesLock) {
             int callingPid = Binder.getCallingPid();
@@ -1173,9 +1162,7 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call & native callback
     public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor,
             int surfaceRotation) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
+        Objects.requireNonNull(inputDeviceDescriptor, "inputDeviceDescriptor must not be null");
 
         synchronized (mDataStore) {
             return mDataStore.getTouchCalibration(inputDeviceDescriptor, surfaceRotation);
@@ -1189,12 +1176,8 @@ public class InputManagerService extends IInputManager.Stub
                 "setTouchCalibrationForInputDevice()")) {
             throw new SecurityException("Requires SET_INPUT_CALIBRATION permission");
         }
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (calibration == null) {
-            throw new IllegalArgumentException("calibration must not be null");
-        }
+        Objects.requireNonNull(inputDeviceDescriptor, "inputDeviceDescriptor must not be null");
+        Objects.requireNonNull(calibration, "calibration must not be null");
         if (surfaceRotation < Surface.ROTATION_0 || surfaceRotation > Surface.ROTATION_270) {
             throw new IllegalArgumentException("surfaceRotation value out of bounds");
         }
@@ -1231,9 +1214,7 @@ public class InputManagerService extends IInputManager.Stub
                 "registerTabletModeChangedListener()")) {
             throw new SecurityException("Requires TABLET_MODE_LISTENER permission");
         }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "event must not be null");
 
         synchronized (mTabletModeLock) {
             final int callingPid = Binder.getCallingPid();
@@ -1417,9 +1398,8 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         final KeyboardLayout[] result = new KeyboardLayout[1];
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
@@ -1566,9 +1546,8 @@ public class InputManagerService extends IInputManager.Stub
      * descriptor for ids that aren't useful (such as the default 0, 0).
      */
     private String getLayoutDescriptor(InputDeviceIdentifier identifier) {
-        if (identifier == null || identifier.getDescriptor() == null) {
-            throw new IllegalArgumentException("identifier and descriptor must not be null");
-        }
+        Objects.requireNonNull(identifier, "identifier must not be null");
+        Objects.requireNonNull(identifier.getDescriptor(), "descriptor must not be null");
 
         if (identifier.getVendorId() == 0 && identifier.getProductId() == 0) {
             return identifier.getDescriptor();
@@ -1606,9 +1585,9 @@ public class InputManagerService extends IInputManager.Stub
                 "setCurrentKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1645,9 +1624,8 @@ public class InputManagerService extends IInputManager.Stub
                 "addKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1674,9 +1652,8 @@ public class InputManagerService extends IInputManager.Stub
                 "removeKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
 
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
@@ -1762,9 +1739,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void requestPointerCapture(IBinder inputChannelToken, boolean enabled) {
-        if (inputChannelToken == null) {
-            return;
-        }
+        Objects.requireNonNull(inputChannelToken, "event must not be null");
 
         nativeRequestPointerCapture(mPtr, inputChannelToken, enabled);
     }
@@ -2368,10 +2343,7 @@ public class InputManagerService extends IInputManager.Stub
             Slog.d(TAG, "registerSensorListener: listener=" + listener + " callingPid="
                     + Binder.getCallingPid());
         }
-        if (listener == null) {
-            Slog.e(TAG, "listener must not be null");
-            return false;
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mInputDevicesLock) {
             int callingPid = Binder.getCallingPid();
@@ -2403,9 +2375,7 @@ public class InputManagerService extends IInputManager.Stub
                     + Binder.getCallingPid());
         }
 
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mInputDevicesLock) {
             int callingPid = Binder.getCallingPid();
@@ -3244,9 +3214,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void sendInputEvent(InputEvent event, int policyFlags) {
-            if (event == null) {
-                throw new IllegalArgumentException("event must not be null");
-            }
+            Objects.requireNonNull(event, "event must not be null");
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
