@@ -33,6 +33,7 @@ import static com.android.server.tare.TareUtils.narcToString;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Looper;
@@ -54,6 +55,7 @@ import com.android.server.usage.AppStandbyInternal;
 
 import libcore.util.EmptyArray;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
@@ -129,6 +131,54 @@ class Agent {
     @GuardedBy("mLock")
     private final BalanceThresholdAlarmListener mBalanceThresholdAlarmListener =
             new BalanceThresholdAlarmListener();
+
+    /**
+     * Comparator to use to sort apps before we distribute ARCs so that we try to give the most
+     * important apps ARCs first.
+     */
+    @VisibleForTesting
+    final Comparator<PackageInfo> mPackageDistributionComparator =
+            new Comparator<PackageInfo>() {
+                @Override
+                public int compare(PackageInfo pi1, PackageInfo pi2) {
+                    final ApplicationInfo appInfo1 = pi1.applicationInfo;
+                    final ApplicationInfo appInfo2 = pi2.applicationInfo;
+                    // Put any packages that don't declare an application at the end. A missing
+                    // <application> tag likely means the app won't be doing any work anyway.
+                    if (appInfo1 == null) {
+                        if (appInfo2 == null) {
+                            return 0;
+                        }
+                        return 1;
+                    } else if (appInfo2 == null) {
+                        return -1;
+                    }
+                    // Privileged apps eat first. They're likely required for the device to
+                    // function properly.
+                    // TODO: include headless system apps
+                    if (appInfo1.isPrivilegedApp()) {
+                        if (!appInfo2.isPrivilegedApp()) {
+                            return -1;
+                        }
+                    } else if (appInfo2.isPrivilegedApp()) {
+                        return 1;
+                    }
+
+                    // Sort by most recently used.
+                    final long timeSinceLastUsedMs1 =
+                            mAppStandbyInternal.getTimeSinceLastUsedByUser(
+                                    pi1.packageName, UserHandle.getUserId(pi1.applicationInfo.uid));
+                    final long timeSinceLastUsedMs2 =
+                            mAppStandbyInternal.getTimeSinceLastUsedByUser(
+                                    pi2.packageName, UserHandle.getUserId(pi2.applicationInfo.uid));
+                    if (timeSinceLastUsedMs1 < timeSinceLastUsedMs2) {
+                        return -1;
+                    } else if (timeSinceLastUsedMs1 > timeSinceLastUsedMs2) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            };
 
     private static final int MSG_CHECK_BALANCE = 0;
     private static final int MSG_CLEAN_LEDGER = 1;
@@ -586,6 +636,8 @@ class Agent {
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
+        pkgs.sort(mPackageDistributionComparator);
+
         final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo pkgInfo = pkgs.get(i);
@@ -625,6 +677,8 @@ class Agent {
         final long maxBirthright =
                 mIrs.getMaxCirculationLocked() / mIrs.getInstalledPackages().size();
         final long now = getCurrentTimeMillis();
+
+        pkgs.sort(mPackageDistributionComparator);
 
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo packageInfo = pkgs.get(i);
