@@ -98,40 +98,41 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
-        if (mEnrollHelper.isCenterEnrollmentComplete()) {
+        if (mEnrollHelper != null && !mEnrollHelper.isCenterEnrollmentStage()) {
             if (mAnimatorSet != null && mAnimatorSet.isRunning()) {
                 mAnimatorSet.end();
             }
 
             final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
+            if (mCurrentX != point.x || mCurrentY != point.y) {
+                final ValueAnimator x = ValueAnimator.ofFloat(mCurrentX, point.x);
+                x.addUpdateListener(animation -> {
+                    mCurrentX = (float) animation.getAnimatedValue();
+                    invalidateSelf();
+                });
 
-            final ValueAnimator x = ValueAnimator.ofFloat(mCurrentX, point.x);
-            x.addUpdateListener(animation -> {
-                mCurrentX = (float) animation.getAnimatedValue();
-                invalidateSelf();
-            });
+                final ValueAnimator y = ValueAnimator.ofFloat(mCurrentY, point.y);
+                y.addUpdateListener(animation -> {
+                    mCurrentY = (float) animation.getAnimatedValue();
+                    invalidateSelf();
+                });
 
-            final ValueAnimator y = ValueAnimator.ofFloat(mCurrentY, point.y);
-            y.addUpdateListener(animation -> {
-                mCurrentY = (float) animation.getAnimatedValue();
-                invalidateSelf();
-            });
+                final ValueAnimator scale = ValueAnimator.ofFloat(0, (float) Math.PI);
+                scale.setDuration(ANIM_DURATION);
+                scale.addUpdateListener(animation -> {
+                    // Grow then shrink
+                    mCurrentScale = 1
+                            + SCALE_MAX * (float) Math.sin((float) animation.getAnimatedValue());
+                    invalidateSelf();
+                });
 
-            final ValueAnimator scale = ValueAnimator.ofFloat(0, (float) Math.PI);
-            scale.setDuration(ANIM_DURATION);
-            scale.addUpdateListener(animation -> {
-                // Grow then shrink
-                mCurrentScale = 1 +
-                        SCALE_MAX * (float) Math.sin((float) animation.getAnimatedValue());
-                invalidateSelf();
-            });
+                mAnimatorSet = new AnimatorSet();
 
-            mAnimatorSet = new AnimatorSet();
-
-            mAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-            mAnimatorSet.setDuration(ANIM_DURATION);
-            mAnimatorSet.playTogether(x, y, scale);
-            mAnimatorSet.start();
+                mAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                mAnimatorSet.setDuration(ANIM_DURATION);
+                mAnimatorSet.playTogether(x, y, scale);
+                mAnimatorSet.start();
+            }
         }
     }
 
@@ -142,7 +143,7 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         }
 
         // Draw moving target
-        if (mEnrollHelper.isCenterEnrollmentComplete()) {
+        if (mEnrollHelper != null && !mEnrollHelper.isCenterEnrollmentStage()) {
             canvas.save();
             canvas.translate(mCurrentX, mCurrentY);
 
