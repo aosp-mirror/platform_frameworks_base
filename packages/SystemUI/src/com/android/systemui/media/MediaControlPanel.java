@@ -33,6 +33,7 @@ import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.os.Process;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
@@ -111,6 +112,9 @@ public class MediaControlPanel {
     private int mAlbumArtSize;
     // Instance id for logging purpose.
     protected int mInstanceId = -1;
+    // Uid for the media app.
+    protected int mUid = Process.INVALID_UID;
+    private int mSmartspaceMediaItemsCount;
     private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
 
@@ -266,7 +270,13 @@ public class MediaControlPanel {
         }
         mKey = key;
         MediaSession.Token token = data.getToken();
-        mInstanceId = SmallHash.hash(data.getPackageName());
+        PackageManager packageManager = mContext.getPackageManager();
+        try {
+            mUid = packageManager.getApplicationInfo(data.getPackageName(), 0 /* flags */).uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Unable to look up package name", e);
+        }
+        mInstanceId = SmallHash.hash(mUid);
 
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -360,27 +370,16 @@ public class MediaControlPanel {
 
         final MediaDeviceData device = data.getDevice();
         final int seamlessId = mPlayerViewHolder.getSeamless().getId();
-        final int seamlessFallbackId = mPlayerViewHolder.getSeamlessFallback().getId();
-        final boolean showFallback = device != null && !device.getEnabled();
-        final int seamlessFallbackVisibility = showFallback ? View.VISIBLE : View.GONE;
-        mPlayerViewHolder.getSeamlessFallback().setVisibility(seamlessFallbackVisibility);
-        expandedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
-        collapsedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
-        final int seamlessVisibility = showFallback ? View.GONE : View.VISIBLE;
-        mPlayerViewHolder.getSeamless().setVisibility(seamlessVisibility);
-        expandedSet.setVisibility(seamlessId, seamlessVisibility);
-        collapsedSet.setVisibility(seamlessId, seamlessVisibility);
-        final float seamlessAlpha = data.getResumption() ? DISABLED_ALPHA : 1.0f;
+        // Disable clicking on output switcher for invalid devices and resumption controls
+        final boolean seamlessDisabled = (device != null && !device.getEnabled())
+                || data.getResumption();
+        final float seamlessAlpha = seamlessDisabled ? DISABLED_ALPHA : 1.0f;
         expandedSet.setAlpha(seamlessId, seamlessAlpha);
         collapsedSet.setAlpha(seamlessId, seamlessAlpha);
-        // Disable clicking on output switcher for resumption controls.
-        mPlayerViewHolder.getSeamless().setEnabled(!data.getResumption());
+        mPlayerViewHolder.getSeamless().setEnabled(!seamlessDisabled);
         String deviceString = null;
-        if (showFallback) {
-            iconView.setImageDrawable(null);
-        } else if (device != null) {
+        if (device != null && device.getEnabled()) {
             Drawable icon = device.getIcon();
-            iconView.setVisibility(View.VISIBLE);
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
                 aIcon.setBackgroundColor(mBackgroundColor);
@@ -391,10 +390,9 @@ public class MediaControlPanel {
             deviceString = device.getName();
         } else {
             // Reset to default
-            Log.w(TAG, "device is null. Not binding output chip.");
-            iconView.setVisibility(View.GONE);
-            deviceString = mContext.getString(
-                    com.android.internal.R.string.ext_media_seamless_action);
+            Log.w(TAG, "Device is null or not enabled: " + device + ", not binding output chip.");
+            iconView.setImageResource(R.drawable.ic_media_home_devices);
+            deviceString =  mContext.getString(R.string.media_seamless_other_device);
         }
         deviceName.setText(deviceString);
         seamlessView.setContentDescription(deviceString);
@@ -531,10 +529,11 @@ public class MediaControlPanel {
         }
 
         // Set up recommendation card's header.
-        ApplicationInfo applicationInfo = null;
+        ApplicationInfo applicationInfo;
         try {
             applicationInfo = mContext.getPackageManager()
                     .getApplicationInfo(data.getPackageName(), 0 /* flags */);
+            mUid = applicationInfo.uid;
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Fail to get media recommendation's app info", e);
             return;
@@ -553,7 +552,8 @@ public class MediaControlPanel {
             headerTitleText.setText(appLabel);
         }
         // Set up media rec card's tap action if applicable.
-        setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction());
+        setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
+                /* interactedSubcardRank */ -1);
         // Set up media rec card's accessibility label.
         recommendationCard.setContentDescription(
                 mContext.getString(R.string.controls_media_smartspace_rec_description, appLabel));
@@ -567,7 +567,8 @@ public class MediaControlPanel {
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
-        for (int itemIndex = 0, uiComponentIndex = 0;
+        int uiComponentIndex = 0;
+        for (int itemIndex = 0;
                 itemIndex < mediaRecommendationNum && uiComponentIndex < mediaRecommendationNum;
                 itemIndex++) {
             SmartspaceAction recommendation = mediaRecommendationList.get(itemIndex);
@@ -582,7 +583,8 @@ public class MediaControlPanel {
 
             // Set up the media item's click listener if applicable.
             ViewGroup mediaCoverContainer = mediaCoverContainers.get(uiComponentIndex);
-            setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation);
+            setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation,
+                    uiComponentIndex);
 
             // Set up the accessibility label for the media item.
             String artistName = recommendation.getExtras()
@@ -614,10 +616,10 @@ public class MediaControlPanel {
                     mediaCoverItemsResIds.get(uiComponentIndex), true);
             setVisibleAndAlpha(expandedSet,
                     mediaCoverContainersResIds.get(uiComponentIndex), true);
-
             uiComponentIndex++;
         }
 
+        mSmartspaceMediaItemsCount = uiComponentIndex;
         // Set up long press to show guts setting panel.
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
@@ -750,7 +752,8 @@ public class MediaControlPanel {
 
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
-            @NonNull SmartspaceAction action) {
+            @NonNull SmartspaceAction action,
+            int interactedSubcardRank) {
         if (view == null || action == null || action.getIntent() == null
                 || action.getIntent().getExtras() == null) {
             Log.e(TAG, "No tap action can be set up");
@@ -758,9 +761,10 @@ public class MediaControlPanel {
         }
 
         view.setOnClickListener(v -> {
-            // When media recommendation card is shown, it will always be the top card.
             logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                    /* isRecommendationCard */ true);
+                    /* isRecommendationCard */ true,
+                    interactedSubcardRank,
+                    getSmartspaceSubCardCardinality());
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
                 // Request to unlock the device if the activity needs to be opened in foreground.
@@ -818,9 +822,28 @@ public class MediaControlPanel {
     }
 
     private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard) {
+        logSmartspaceCardReported(eventId, isRecommendationCard,
+                /* interactedSubcardRank */ 0,
+                /* interactedSubcardCardinality */ 0);
+    }
+
+    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard,
+            int interactedSubcardRank, int interactedSubcardCardinality) {
         mMediaCarouselController.logSmartspaceCardReported(eventId,
                 mInstanceId,
+                mUid,
                 isRecommendationCard,
-                getSurfaceForSmartspaceLogging());
+                getSurfaceForSmartspaceLogging(),
+                interactedSubcardRank,
+                interactedSubcardCardinality);
+    }
+
+    private int getSmartspaceSubCardCardinality() {
+        if (!mMediaCarouselController.getMediaCarouselScrollHandler().getQsExpanded()
+                && mSmartspaceMediaItemsCount > 3) {
+            return 3;
+        }
+
+        return mSmartspaceMediaItemsCount;
     }
 }

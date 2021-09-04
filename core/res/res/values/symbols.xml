@@ -1318,6 +1318,7 @@
   <java-symbol type="dimen" name="lock_pattern_dot_line_width" />
   <java-symbol type="dimen" name="lock_pattern_dot_size" />
   <java-symbol type="dimen" name="lock_pattern_dot_size_activated" />
+  <java-symbol type="dimen" name="lock_pattern_fade_away_gradient_width" />
   <java-symbol type="drawable" name="clock_dial" />
   <java-symbol type="drawable" name="clock_hand_hour" />
   <java-symbol type="drawable" name="clock_hand_minute" />
@@ -1742,6 +1743,7 @@
   <java-symbol type="dimen" name="navigation_bar_height_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
+  <java-symbol type="dimen" name="taskbar_frame_height" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
@@ -4478,4 +4480,19 @@
 
   <java-symbol type="string" name="config_wearSysUiPackage"/>
   <java-symbol type="string" name="config_wearSysUiMainActivity"/>
+
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_top_adjustment" />
+  <java-symbol type="dimen" name="secondary_rounded_corner_radius_bottom_adjustment" />
+  <java-symbol type="array" name="config_roundedCornerRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusArray" />
+  <java-symbol type="array" name="config_roundedCornerRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerTopRadiusAdjustmentArray" />
+  <java-symbol type="array" name="config_roundedCornerBottomRadiusAdjustmentArray" />
+  <java-symbol type="bool" name="config_secondaryBuiltInDisplayIsRound" />
+  <java-symbol type="array" name="config_builtInDisplayIsRoundArray" />
 </resources>

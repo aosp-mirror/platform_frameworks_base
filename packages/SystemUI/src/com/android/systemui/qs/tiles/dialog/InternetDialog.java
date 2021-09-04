@@ -423,7 +423,10 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     void onClickConnectedWifi() {
-        mInternetDialogController.launchWifiNetworkDetailsSetting();
+        if (mConnectedWifiEntry == null) {
+            return;
+        }
+        mInternetDialogController.launchWifiNetworkDetailsSetting(mConnectedWifiEntry.getKey());
     }
 
     void onClickSeeMoreButton() {

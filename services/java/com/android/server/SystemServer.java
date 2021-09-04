@@ -302,6 +302,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.power.WearPowerService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
             "com.google.android.clockwork.sidekick.SidekickService";
+    private static final String WEAR_DISPLAYOFFLOAD_SERVICE_CLASS =
+            "com.google.android.clockwork.displayoffload.DisplayOffloadService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.google.android.clockwork.display.WearDisplayService";
     private static final String WEAR_LEFTY_SERVICE_CLASS =
@@ -1117,6 +1119,13 @@ public final class SystemServer implements Dumpable {
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
         mSystemServiceManager.startService(LightsService.class);
+        t.traceEnd();
+
+        t.traceBegin("StartDisplayOffloadService");
+        // Package manager isn't started yet; need to use SysProp not hardware feature
+        if (SystemProperties.getBoolean("config.enable_display_offload", false)) {
+            mSystemServiceManager.startService(WEAR_DISPLAYOFFLOAD_SERVICE_CLASS);
+        }
         t.traceEnd();
 
         t.traceBegin("StartSidekickService");
@@ -2078,14 +2087,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(DockObserver.class);
             t.traceEnd();
 
-            // TODO(b/191495635): re-enable thermal observer after fixing b/191375904.
-            /*
             if (isWatch) {
                 t.traceBegin("StartThermalObserver");
                 mSystemServiceManager.startService(THERMAL_OBSERVER_CLASS);
                 t.traceEnd();
             }
-            */
 
             t.traceBegin("StartWiredAccessoryManager");
             try {
@@ -2436,8 +2442,6 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
-        // TODO(b/191495635): Re-enable these services after fixing b/191375904.
-       /*
        if (isWatch) {
             // Must be started before services that depend it, e.g. WearConnectivityService
             t.traceBegin("StartWearPowerService");
@@ -2466,7 +2470,6 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
             t.traceEnd();
         }
-        */
 
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
             t.traceBegin("StartSliceManagerService");

@@ -55,6 +55,8 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+    <!-- Height of the bottom taskbar not including decorations like rounded corners. -->
+    <dimen name="taskbar_frame_height">60dp</dimen>
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
@@ -641,6 +643,8 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
+    <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
@@ -952,4 +956,12 @@
     <dimen name="secondary_waterfall_display_top_edge_size">0px</dimen>
     <dimen name="secondary_waterfall_display_right_edge_size">0px</dimen>
     <dimen name="secondary_waterfall_display_bottom_edge_size">0px</dimen>
+
+    <!-- Rounded corner settings for secondary built-in display -->
+    <dimen name="secondary_rounded_corner_radius">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_top_adjustment">0px</dimen>
+    <dimen name="secondary_rounded_corner_radius_bottom_adjustment">0px</dimen>
 </resources>

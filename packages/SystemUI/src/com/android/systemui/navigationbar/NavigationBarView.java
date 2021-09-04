@@ -279,7 +279,7 @@ public class NavigationBarView extends FrameLayout implements
             new RotationButtonUpdatesCallback() {
                 @Override
                 public void onVisibilityChanged(boolean visible) {
-                    if (visible) {
+                    if (visible && mAutoHideController != null) {
                         // If the button will actually become visible and the navbar is about
                         // to hide, tell the statusbar to keep it around for longer
                         mAutoHideController.touchAutoHide();

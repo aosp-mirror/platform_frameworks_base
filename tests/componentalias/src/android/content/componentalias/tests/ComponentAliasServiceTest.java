@@ -17,18 +17,19 @@
 package android.content.componentalias.tests;
 
 import static android.content.Context.BIND_AUTO_CREATE;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.APP_PACKAGE;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.SUB1_PACKAGE;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.SUB2_PACKAGE;
-import static android.content.componentalias.tests.common.ComponentAliasTestCommon.TAG;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.MAIN_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.SUB1_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.SUB2_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.TAG;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.hamcrest.core.IsNot.not;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.componentalias.tests.common.ComponentAliasMessage;
 import android.os.IBinder;
 import android.provider.DeviceConfig;
 import android.util.Log;
@@ -42,8 +43,11 @@ import com.android.compatibility.common.util.ShellUtils;
 import com.android.compatibility.common.util.TestUtils;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.function.Consumer;
 
 /**
  * Test for the experimental "Component alias" feature.
@@ -92,7 +96,7 @@ public class ComponentAliasServiceTest {
                     .setMethodName("onServiceConnected")
                     .setComponent(name);
 
-            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
+            BroadcastMessenger.send(sContext, TAG, m);
         }
 
         @Override
@@ -104,7 +108,7 @@ public class ComponentAliasServiceTest {
                     .setMethodName("onServiceDisconnected")
                     .setComponent(name);
 
-            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
+            BroadcastMessenger.send(sContext, TAG, m);
         }
 
         @Override
@@ -115,7 +119,7 @@ public class ComponentAliasServiceTest {
                     .setSenderIdentity("sServiceConnection")
                     .setMethodName("onBindingDied");
 
-            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
+            BroadcastMessenger.send(sContext, TAG, m);
         }
 
         @Override
@@ -126,18 +130,18 @@ public class ComponentAliasServiceTest {
                     .setSenderIdentity("sServiceConnection")
                     .setMethodName("onNullBinding");
 
-            BroadcastMessenger.send(sContext, sContext.getPackageName(), m);
+            BroadcastMessenger.send(sContext, TAG, m);
         }
     };
 
     private void testStartAndStopService_common(
             Intent originalIntent,
             ComponentName componentNameForClient,
-            ComponentName componentNameForTarget) throws Exception {
+            ComponentName componentNameForTarget) {
 
         ComponentAliasMessage m;
 
-        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext)) {
+        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext, TAG)) {
             // Start the service.
             ComponentName result = sContext.startService(originalIntent);
             assertThat(result).isEqualTo(componentNameForClient);
@@ -167,40 +171,64 @@ public class ComponentAliasServiceTest {
         }
     }
 
+    private static class Combo {
+        public final ComponentName alias;
+        public final ComponentName target;
+        public final String action;
+
+        private Combo(ComponentName alias, ComponentName target, String action) {
+            this.alias = alias;
+            this.target = target;
+            this.action = action;
+        }
+    }
+
+    private void forEachCombo(Consumer<Combo> callback) {
+        callback.accept(new Combo(
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias00"),
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Target00"),
+                MAIN_PACKAGE + ".IS_ALIAS_00"));
+        callback.accept(new Combo(
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias01"),
+                new ComponentName(SUB1_PACKAGE, MAIN_PACKAGE + ".s.Target01"),
+                MAIN_PACKAGE + ".IS_ALIAS_01"));
+        callback.accept(new Combo(
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias02"),
+                new ComponentName(SUB2_PACKAGE, MAIN_PACKAGE + ".s.Target02"),
+                MAIN_PACKAGE + ".IS_ALIAS_02"));
+    }
+
+
     @Test
     public void testStartAndStopService_explicitComponentName() throws Exception {
-        Intent i = new Intent().setComponent(
-                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01"));
-
-        ComponentName alias = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01");
-        ComponentName target = new ComponentName(SUB1_PACKAGE, APP_PACKAGE + ".s.Target01");
-
-        testStartAndStopService_common(i, alias, target);
+        forEachCombo((c) -> {
+            Intent i = new Intent().setComponent(c.alias);
+            testStartAndStopService_common(i, c.alias, c.target);
+        });
     }
 
     @Test
     public void testStartAndStopService_explicitPackageName() throws Exception {
-        Intent i = new Intent().setPackage(APP_PACKAGE);
-        i.setAction(APP_PACKAGE + ".IS_ALIAS_02");
+        forEachCombo((c) -> {
+            Intent i = new Intent().setPackage(c.alias.getPackageName());
+            i.setAction(c.action);
 
-        ComponentName alias = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
-        ComponentName target = new ComponentName(SUB2_PACKAGE, APP_PACKAGE + ".s.Target02");
-
-        testStartAndStopService_common(i, alias, target);
+            testStartAndStopService_common(i, c.alias, c.target);
+        });
     }
 
     @Test
     public void testStartAndStopService_override() throws Exception {
-        Intent i = new Intent().setPackage(APP_PACKAGE);
-        i.setAction(APP_PACKAGE + ".IS_ALIAS_01");
+        Intent i = new Intent().setPackage(MAIN_PACKAGE);
+        i.setAction(MAIN_PACKAGE + ".IS_ALIAS_01");
 
         // Change some of the aliases from what's defined in <meta-data>.
 
-        ComponentName aliasA = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01");
-        ComponentName targetA = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Target02");
+        ComponentName aliasA = new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias01");
+        ComponentName targetA = new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Target02");
 
-        ComponentName aliasB = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
-        ComponentName targetB = new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Target01");
+        ComponentName aliasB = new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias02");
+        ComponentName targetB = new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Target01");
 
         sDeviceConfig.set("component_alias_overrides",
                 aliasA.flattenToShortString() + ":" + targetA.flattenToShortString()
@@ -220,10 +248,10 @@ public class ComponentAliasServiceTest {
     private void testBindAndUnbindService_common(
             Intent originalIntent,
             ComponentName componentNameForClient,
-            ComponentName componentNameForTarget) throws Exception {
+            ComponentName componentNameForTarget) {
         ComponentAliasMessage m;
 
-        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext)) {
+        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext, TAG)) {
             // Bind to the service.
             assertThat(sContext.bindService(
                     originalIntent, sServiceConnection, BIND_AUTO_CREATE)).isTrue();
@@ -263,37 +291,45 @@ public class ComponentAliasServiceTest {
 
     @Test
     public void testBindService_explicitComponentName() throws Exception {
-        Intent i = new Intent().setComponent(
-                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01"));
+        forEachCombo((c) -> {
+            Intent i = new Intent().setComponent(c.alias);
 
-        testBindAndUnbindService_common(i,
-                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias01"),
-                new ComponentName(SUB1_PACKAGE, APP_PACKAGE + ".s.Target01"));
+            testBindAndUnbindService_common(i, c.alias, c.target);
+        });
+
     }
 
     @Test
     public void testBindService_explicitPackageName() throws Exception {
-        Intent i = new Intent().setPackage(APP_PACKAGE);
-        i.setAction(APP_PACKAGE + ".IS_ALIAS_02");
+        forEachCombo((c) -> {
+            Intent i = new Intent().setPackage(c.alias.getPackageName());
+            i.setAction(c.action);
 
-        testBindAndUnbindService_common(i,
-                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02"),
-                new ComponentName(SUB2_PACKAGE, APP_PACKAGE + ".s.Target02"));
+            testBindAndUnbindService_common(i, c.alias, c.target);
+        });
     }
 
+    /**
+     * Make sure, when the service process is killed, the client will get a callback with the
+     * right component name.
+     */
     @Test
     public void testBindService_serviceKilled() throws Exception {
-        Intent originalIntent = new Intent().setPackage(APP_PACKAGE);
-        originalIntent.setAction(APP_PACKAGE + ".IS_ALIAS_02");
+
+        // We need to kill SUB2_PACKAGE, don't run it for this package.
+        Assume.assumeThat(sContext.getPackageName(), not(SUB2_PACKAGE));
+
+        Intent originalIntent = new Intent().setPackage(MAIN_PACKAGE);
+        originalIntent.setAction(MAIN_PACKAGE + ".IS_ALIAS_02");
 
         final ComponentName componentNameForClient =
-                new ComponentName(APP_PACKAGE, APP_PACKAGE + ".s.Alias02");
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias02");
         final ComponentName componentNameForTarget =
-                new ComponentName(SUB2_PACKAGE, APP_PACKAGE + ".s.Target02");
+                new ComponentName(SUB2_PACKAGE, MAIN_PACKAGE + ".s.Target02");
 
         ComponentAliasMessage m;
 
-        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext)) {
+        try (Receiver<ComponentAliasMessage> receiver = new Receiver<>(sContext, TAG)) {
             // Bind to the service.
             assertThat(sContext.bindService(
                     originalIntent, sServiceConnection, BIND_AUTO_CREATE)).isTrue();
@@ -306,6 +342,7 @@ public class ComponentAliasServiceTest {
             m = receiver.waitForNextMessage();
             assertThat(m.getMethodName()).isEqualTo("onServiceConnected");
             assertThat(m.getComponent()).isEqualTo(componentNameForClient);
+            // We don't need to check all the fields because these are tested else where.
 
             // Now kill the service process.
             ShellUtils.runShellCommand("su 0 killall %s", SUB2_PACKAGE);

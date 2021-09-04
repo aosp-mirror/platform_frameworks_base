@@ -1162,11 +1162,11 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"उघडण्यासाठी फिंगरप्रिंट वापरा"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ऑथेंटिकेशन आवश्यक आहे. ऑथेंटिकेट करण्यासाठी फिंगरप्रिंट सेन्सरला स्पर्श करा."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"फोन कॉल सुरू आहे"</string>
-    <string name="airplane_mode" msgid="2536350001462130668">"विमान मोड"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट केले आहे"</string>
-    <string name="mobile_data_off_summary" msgid="5621158216585822679">"इंटरनेट ऑटो-कनेक्ट होणार नाही"</string>
+    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
+    <skip />
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"कोणतेही कनेक्शन नाही"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"इतर कोणतेही नेटवर्क उपलब्ध नाहीत"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"कोणतेही नेटवर्क उपलब्‍ध नाही"</string>

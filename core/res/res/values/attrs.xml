@@ -8658,6 +8658,8 @@
         <attr name="successColor" format="color|reference"/>
         <!-- The dot color -->
         <attr name="dotColor" format="color|reference"/>
+        <!-- Color of the dot when it's activated -->
+        <attr name="dotActivatedColor" format="color|reference"/>
 
     </declare-styleable>
 

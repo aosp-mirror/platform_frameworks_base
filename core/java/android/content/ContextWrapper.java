@@ -756,12 +756,32 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @Nullable
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler, int flags) {
+        return mBase.registerReceiverForAllUsers(receiver, filter, broadcastPermission,
+                scheduler, flags);
+    }
+
+    /** @hide */
+    @Override
     @UnsupportedAppUsage
     public Intent registerReceiverAsUser(@Nullable BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler) {
         return mBase.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
                 scheduler);
+    }
+
+    /** @hide */
+    @Override
+    @UnsupportedAppUsage
+    public Intent registerReceiverAsUser(@Nullable BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler, int flags) {
+        return mBase.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
+                scheduler, flags);
     }
 
     @Override

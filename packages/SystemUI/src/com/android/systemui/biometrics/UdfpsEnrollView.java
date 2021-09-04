@@ -17,9 +17,12 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -32,20 +35,25 @@ import com.android.systemui.R;
  */
 public class UdfpsEnrollView extends UdfpsAnimationView {
     @NonNull private final UdfpsEnrollDrawable mFingerprintDrawable;
+    @NonNull private final UdfpsEnrollProgressBarDrawable mFingerprintProgressDrawable;
     @NonNull private final Handler mHandler;
 
     @NonNull private ImageView mFingerprintView;
+    @NonNull private ImageView mFingerprintProgressView;
 
     public UdfpsEnrollView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFingerprintDrawable = new UdfpsEnrollDrawable(mContext);
+        mFingerprintProgressDrawable = new UdfpsEnrollProgressBarDrawable(context);
         mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     protected void onFinishInflate() {
         mFingerprintView = findViewById(R.id.udfps_enroll_animation_fp_view);
+        mFingerprintProgressView = findViewById(R.id.udfps_enroll_animation_fp_progress_view);
         mFingerprintView.setImageDrawable(mFingerprintDrawable);
+        mFingerprintProgressView.setImageDrawable(mFingerprintProgressDrawable);
     }
 
     @Override
@@ -53,19 +61,35 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
         return mFingerprintDrawable;
     }
 
+    void updateSensorLocation(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
+        View fingerprintAccessibilityView = findViewById(R.id.udfps_enroll_accessibility_view);
+        final int sensorHeight = sensorProps.sensorRadius * 2;
+        final int sensorWidth = sensorHeight;
+        ViewGroup.LayoutParams params = fingerprintAccessibilityView.getLayoutParams();
+        params.width = sensorWidth;
+        params.height = sensorHeight;
+        fingerprintAccessibilityView.setLayoutParams(params);
+        fingerprintAccessibilityView.requestLayout();
+    }
+
     void setEnrollHelper(UdfpsEnrollHelper enrollHelper) {
         mFingerprintDrawable.setEnrollHelper(enrollHelper);
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
-        mHandler.post(() -> mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps));
+        mHandler.post(() -> {
+            mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
+            mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
+        });
     }
 
     void onLastStepAcquired() {
-        mHandler.post(mFingerprintDrawable::onLastStepAcquired);
+        mHandler.post(() -> {
+            mFingerprintProgressDrawable.onLastStepAcquired();
+        });
     }
 
     void onEnrollmentHelp() {
-        mHandler.post(mFingerprintDrawable::onEnrollmentHelp);
+        mHandler.post(mFingerprintProgressDrawable::onEnrollmentHelp);
     }
 }

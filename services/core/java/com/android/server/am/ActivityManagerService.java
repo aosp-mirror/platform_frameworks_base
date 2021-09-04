@@ -121,6 +121,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSER
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.ProcessList.ProcStartHandler;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -1502,7 +1503,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final MainHandler mHandler;
     final Handler mUiHandler;
     final ServiceThread mProcStartHandlerThread;
-    final Handler mProcStartHandler;
+    final ProcStartHandler mProcStartHandler;
 
     ActivityManagerConstants mConstants;
 
@@ -1691,7 +1692,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case PROC_START_TIMEOUT_MSG: {
                 ProcessRecord app = (ProcessRecord) msg.obj;
                 synchronized (ActivityManagerService.this) {
-                    processStartTimedOutLocked(app);
+                    handleProcessStartOrKillTimeoutLocked(app, /* isKillTimeout */ false);
                 }
             } break;
             case CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG: {
@@ -2261,7 +2262,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandlerThread = new ServiceThread(TAG + ":procStart",
                 THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         mProcStartHandlerThread.start();
-        mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
+        mProcStartHandler = new ProcStartHandler(this, mProcStartHandlerThread.getLooper());
 
         mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
@@ -4254,47 +4255,77 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    private final void processStartTimedOutLocked(ProcessRecord app) {
+    void handleProcessStartOrKillTimeoutLocked(ProcessRecord app, boolean isKillTimeout) {
         final int pid = app.getPid();
-        boolean gone = removePidIfNoThreadLocked(app);
+        boolean gone = isKillTimeout || removePidIfNoThreadLocked(app);
 
         if (gone) {
-            Slog.w(TAG, "Process " + app + " failed to attach");
-            EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
+            if (isKillTimeout) {
+                // It's still alive... maybe blocked at uninterruptible sleep ?
+                final ProcessRecord successor = app.mSuccessor;
+                Slog.wtf(TAG, app.toString() + " " + app.getDyingPid()
+                        + " refused to die while trying to launch " + successor
+                        + ", cancelling the process start");
+
+                // It doesn't make sense to proceed with launching the new instance while the old
+                // instance is still alive, abort the launch.
+                app.mSuccessorStartRunnable = null;
+                app.mSuccessor = null;
+                successor.mPredecessor = null;
+
+                // We're going to cleanup the successor process record, which wasn't started at all.
+                app = successor;
+            } else {
+                Slog.w(TAG, "Process " + app + " failed to attach");
+                EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
+            }
             synchronized (mProcLock) {
                 mProcessList.removeProcessNameLocked(app.processName, app.uid);
                 mAtmInternal.clearHeavyWeightProcessIfEquals(app.getWindowProcessController());
-                mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 // Take care of any launching providers waiting for this process.
                 mCpHelper.cleanupAppInLaunchingProvidersLocked(app, true);
                 // Take care of any services that are waiting for the process.
                 mServices.processStartTimedOutLocked(app);
-                app.killLocked("start timeout", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
-                        true);
+                if (!isKillTimeout) {
+                    mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
+                    app.killLocked("start timeout",
+                            ApplicationExitInfo.REASON_INITIALIZATION_FAILURE, true);
+                    removeLruProcessLocked(app);
+                }
                 if (app.isolated) {
                     mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+                    mProcessList.mAppExitInfoTracker.mIsolatedUidRecords.removeIsolatedUid(
+                            app.uid, app.info.uid);
+                    getPackageManagerInternal().removeIsolatedUid(app.uid);
                 }
-                removeLruProcessLocked(app);
             }
             final BackupRecord backupTarget = mBackupTargets.get(app.userId);
-            if (backupTarget != null && backupTarget.app.getPid() == pid) {
+            if (!isKillTimeout && backupTarget != null && backupTarget.app.getPid() == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
+                final int userId = app.userId;
+                final String packageName = app.info.packageName;
                 mHandler.post(new Runnable() {
                 @Override
                     public void run(){
                         try {
                             IBackupManager bm = IBackupManager.Stub.asInterface(
                                     ServiceManager.getService(Context.BACKUP_SERVICE));
-                            bm.agentDisconnectedForUser(app.userId, app.info.packageName);
+                            bm.agentDisconnectedForUser(userId, packageName);
                         } catch (RemoteException e) {
                             // Can't happen; the backup manager is local
                         }
                     }
                 });
             }
-            if (isPendingBroadcastProcessLocked(pid)) {
-                Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
-                skipPendingBroadcastLocked(pid);
+            if (!isKillTimeout) {
+                if (isPendingBroadcastProcessLocked(pid)) {
+                    Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
+                    skipPendingBroadcastLocked(pid);
+                }
+            } else {
+                if (isPendingBroadcastProcessLocked(app)) {
+                    skipCurrentReceiverLocked(app);
+                }
             }
         } else {
             Slog.w(TAG, "Spurious process start timeout - pid not known for " + app);
@@ -12394,6 +12425,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || mOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
     }
 
+    boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
+        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(app)
+                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(app)
+                || mOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app);
+    }
+
     void skipPendingBroadcastLocked(int pid) {
             Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
             for (BroadcastQueue queue : mBroadcastQueues) {
@@ -12432,7 +12469,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Dynamic receivers are exported by default for versions prior to T
         final boolean exported =
                 ((flags & Context.RECEIVER_EXPORTED) != 0
-                        || (!Compatibility.isChangeEnabled(161145287)));
+                        || (!Compatibility.isChangeEnabled(
+                                DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)));
 
         int callingUid;
         int callingPid;
@@ -12502,7 +12540,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // If the change is enabled, but neither exported or not exported is set, we need to log
             // an error so the consumer can know to explicitly set the value for their flag
-            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(161145287)
+            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(
+                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)
                     && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
                     == 0)) {
                 Slog.e(TAG,
