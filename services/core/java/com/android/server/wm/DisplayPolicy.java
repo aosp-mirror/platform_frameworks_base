@@ -483,7 +483,8 @@ public class DisplayPolicy {
                             if (mStatusBar != null) {
                                 requestTransientBars(mStatusBar);
                             }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_TOP);
+                            checkAltBarSwipeForTransientBars(ALT_BAR_TOP,
+                                    false /* allowForAllPositions */);
                         }
                     }
 
@@ -494,7 +495,8 @@ public class DisplayPolicy {
                                     && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                                 requestTransientBars(mNavigationBar);
                             }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM);
+                            checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM,
+                                    false /* allowForAllPositions */);
                         }
                     }
 
@@ -504,13 +506,13 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean excluded =
-                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            final boolean allowSideSwipe = mNavigationBarAlwaysShowOnSideGesture &&
+                                    !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
                             if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_RIGHT
-                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
+                                    || allowSideSwipe)) {
                                 requestTransientBars(mNavigationBar);
                             }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
+                            checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT, allowSideSwipe);
                         }
                         excludedRegion.recycle();
                     }
@@ -521,13 +523,13 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean excluded =
-                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            final boolean allowSideSwipe = mNavigationBarAlwaysShowOnSideGesture &&
+                                    !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
                             if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_LEFT
-                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
+                                    || allowSideSwipe)) {
                                 requestTransientBars(mNavigationBar);
                             }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
+                            checkAltBarSwipeForTransientBars(ALT_BAR_LEFT, allowSideSwipe);
                         }
                         excludedRegion.recycle();
                     }
@@ -681,17 +683,19 @@ public class DisplayPolicy {
         mHandler.post(mGestureNavigationSettingsObserver::register);
     }
 
-    private void checkAltBarSwipeForTransientBars(@WindowManagerPolicy.AltBarPosition int pos) {
-        if (mStatusBarAlt != null && mStatusBarAltPosition == pos) {
+    private void checkAltBarSwipeForTransientBars(@WindowManagerPolicy.AltBarPosition int pos,
+            boolean allowForAllPositions) {
+        if (mStatusBarAlt != null && (mStatusBarAltPosition == pos || allowForAllPositions)) {
             requestTransientBars(mStatusBarAlt);
         }
-        if (mNavigationBarAlt != null && mNavigationBarAltPosition == pos) {
+        if (mNavigationBarAlt != null
+                && (mNavigationBarAltPosition == pos || allowForAllPositions)) {
             requestTransientBars(mNavigationBarAlt);
         }
-        if (mClimateBarAlt != null && mClimateBarAltPosition == pos) {
+        if (mClimateBarAlt != null && (mClimateBarAltPosition == pos || allowForAllPositions)) {
             requestTransientBars(mClimateBarAlt);
         }
-        if (mExtraNavBarAlt != null && mExtraNavBarAltPosition == pos) {
+        if (mExtraNavBarAlt != null && (mExtraNavBarAltPosition == pos || allowForAllPositions)) {
             requestTransientBars(mExtraNavBarAlt);
         }
     }
