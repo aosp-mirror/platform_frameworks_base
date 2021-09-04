@@ -43,6 +43,7 @@ import static com.android.server.accessibility.AccessibilityTraceProto.WHERE;
 import static com.android.server.accessibility.AccessibilityTraceProto.WINDOW_MANAGER_SERVICE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowTracing.WINSCOPE_EXT;
 import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
 import android.accessibilityservice.AccessibilityTrace;
@@ -2081,7 +2082,7 @@ final class AccessibilityController {
         }
 
         private static final int BUFFER_CAPACITY = 1024 * 1024 * 12;
-        private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace.pb";
+        private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace" + WINSCOPE_EXT;
         private static final String TAG = "AccessibilityTracing";
         private static final long MAGIC_NUMBER_VALUE =
                 ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;

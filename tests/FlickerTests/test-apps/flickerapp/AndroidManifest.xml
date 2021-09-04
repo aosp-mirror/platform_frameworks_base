@@ -59,5 +59,26 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".NonResizeableActivity"
+            android:resizeableActivity="false"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeableActivity"
+            android:label="NonResizeableApp"
+            android:exported="true"
+            android:showOnLockScreen="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ButtonActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ButtonActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="ButtonActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
