@@ -370,27 +370,16 @@ public class MediaControlPanel {
 
         final MediaDeviceData device = data.getDevice();
         final int seamlessId = mPlayerViewHolder.getSeamless().getId();
-        final int seamlessFallbackId = mPlayerViewHolder.getSeamlessFallback().getId();
-        final boolean showFallback = device != null && !device.getEnabled();
-        final int seamlessFallbackVisibility = showFallback ? View.VISIBLE : View.GONE;
-        mPlayerViewHolder.getSeamlessFallback().setVisibility(seamlessFallbackVisibility);
-        expandedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
-        collapsedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
-        final int seamlessVisibility = showFallback ? View.GONE : View.VISIBLE;
-        mPlayerViewHolder.getSeamless().setVisibility(seamlessVisibility);
-        expandedSet.setVisibility(seamlessId, seamlessVisibility);
-        collapsedSet.setVisibility(seamlessId, seamlessVisibility);
-        final float seamlessAlpha = data.getResumption() ? DISABLED_ALPHA : 1.0f;
+        // Disable clicking on output switcher for invalid devices and resumption controls
+        final boolean seamlessDisabled = (device != null && !device.getEnabled())
+                || data.getResumption();
+        final float seamlessAlpha = seamlessDisabled ? DISABLED_ALPHA : 1.0f;
         expandedSet.setAlpha(seamlessId, seamlessAlpha);
         collapsedSet.setAlpha(seamlessId, seamlessAlpha);
-        // Disable clicking on output switcher for resumption controls.
-        mPlayerViewHolder.getSeamless().setEnabled(!data.getResumption());
+        mPlayerViewHolder.getSeamless().setEnabled(!seamlessDisabled);
         String deviceString = null;
-        if (showFallback) {
-            iconView.setImageDrawable(null);
-        } else if (device != null) {
+        if (device != null && device.getEnabled()) {
             Drawable icon = device.getIcon();
-            iconView.setVisibility(View.VISIBLE);
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
                 aIcon.setBackgroundColor(mBackgroundColor);
@@ -401,10 +390,9 @@ public class MediaControlPanel {
             deviceString = device.getName();
         } else {
             // Reset to default
-            Log.w(TAG, "device is null. Not binding output chip.");
-            iconView.setVisibility(View.GONE);
-            deviceString = mContext.getString(
-                    com.android.internal.R.string.ext_media_seamless_action);
+            Log.w(TAG, "Device is null or not enabled: " + device + ", not binding output chip.");
+            iconView.setImageResource(R.drawable.ic_media_home_devices);
+            deviceString =  mContext.getString(R.string.media_seamless_other_device);
         }
         deviceName.setText(deviceString);
         seamlessView.setContentDescription(deviceString);
