@@ -40,12 +40,16 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SPLASH_SCREEN_COMPONENT
 import org.junit.Test
 
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    protected val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+    protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
+    /**
+     * Defines the transition used to run the test
+     */
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
         withTestName { testSpec.name }
         repeat { testSpec.config.repetitions }
@@ -62,6 +66,10 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Entry point for the test runner. It will use this method to initialize and cache
+     * flicker executions
+     */
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -69,42 +77,60 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
-    @Test
+    /**
+     * Checks that the navigation bar window is visible during the whole transition
+     */
     open fun navBarWindowIsVisible() {
         testSpec.navBarWindowIsVisible()
     }
 
-    @Presubmit
-    @Test
+    /**
+     * Checks that the navigation bar layer is visible during the whole transition
+     */
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
     }
 
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     */
     @Presubmit
     @Test
     open fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
+    /**
+     * Checks that the status bar window is visible during the whole transition
+     */
     @Presubmit
     @Test
     open fun statusBarWindowIsVisible() {
         testSpec.statusBarWindowIsVisible()
     }
 
+    /**
+     * Checks that the status bar layer is visible during the whole transition
+     */
     @Presubmit
     @Test
     open fun statusBarLayerIsVisible() {
         testSpec.statusBarLayerIsVisible()
     }
 
+    /**
+     * Checks the position of the status bar at the start and end of the transition
+     */
     @Presubmit
     @Test
     open fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
+    /**
+     * Checks that all windows that are visible on the trace, are visible for at least 2
+     * consecutive entries.
+     */
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
@@ -113,6 +139,10 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Checks that all layers that are visible on the trace, are visible for at least 2
+     * consecutive entries.
+     */
     @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
@@ -121,13 +151,16 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Checks that all parts of the screen are covered during the transition
+     */
     @Presubmit
     @Test
-    // During testing the launcher is always in portrait mode
-    open fun entireScreenCovered() {
-        testSpec.entireScreenCovered(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
+    /**
+     * Checks that the focus changes from the launcher to [testApp]
+     */
     @Presubmit
     @Test
     open fun focusChanges() {
@@ -136,12 +169,19 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
-    @Test
+    /**
+     * Checks that [LAUNCHER_COMPONENT] layer is visible at the start of the transition, and
+     * is replaced by [testApp], which remains visible until the end
+     */
     open fun appLayerReplacesLauncher() {
         testSpec.replacesLayer(LAUNCHER_COMPONENT, testApp.component)
     }
 
+    /**
+     * Checks that [LAUNCHER_COMPONENT] window is visible at the start of the transition, and
+     * is replaced by a snapshot or splash screen (optional), and finally, is replaced by
+     * [testApp], which remains visible until the end
+     */
     @Presubmit
     @Test
     open fun appWindowReplacesLauncherAsTopWindow() {
@@ -150,12 +190,16 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
                     .then()
                     .isAppWindowOnTop(SNAPSHOT_COMPONENT, isOptional = true)
                     .then()
+                    .isAppWindowOnTop(SPLASH_SCREEN_COMPONENT, isOptional = true)
+                    .then()
                     .isAppWindowOnTop(testApp.component)
         }
     }
 
-    @Presubmit
-    @Test
+    /**
+     * Checks that [LAUNCHER_COMPONENT] window is visible at the start, and
+     * becomes invisible during the transition
+     */
     open fun launcherWindowBecomesInvisible() {
         testSpec.assertWm {
             this.isAppWindowVisible(LAUNCHER_COMPONENT)
