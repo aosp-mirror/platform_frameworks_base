@@ -4263,6 +4263,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (isKillTimeout) {
                 // It's still alive... maybe blocked at uninterruptible sleep ?
                 final ProcessRecord successor = app.mSuccessor;
+                if (successor == null) {
+                    // There might be a race, nothing to do here.
+                    return;
+                }
                 Slog.wtf(TAG, app.toString() + " " + app.getDyingPid()
                         + " refused to die while trying to launch " + successor
                         + ", cancelling the process start");
