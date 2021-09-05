@@ -79,7 +79,6 @@ android_test {
 
     // These are not normally accessible from apps so they must be explicitly included.
     jni_libs: [
-        "libbacktrace",
         "libbase",
         "libbinder",
         "libc++",
