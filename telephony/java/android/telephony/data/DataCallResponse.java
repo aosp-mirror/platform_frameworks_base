@@ -138,7 +138,7 @@ public final class DataCallResponse implements Parcelable {
     private final int mPduSessionId;
     private final Qos mDefaultQos;
     private final List<QosBearerSession> mQosBearerSessions;
-    private final SliceInfo mSliceInfo;
+    private final NetworkSliceInfo mSliceInfo;
     private final List<TrafficDescriptor> mTrafficDescriptors;
 
     /**
@@ -201,7 +201,8 @@ public final class DataCallResponse implements Parcelable {
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
             @Nullable Qos defaultQos, @Nullable List<QosBearerSession> qosBearerSessions,
-            @Nullable SliceInfo sliceInfo, @Nullable List<TrafficDescriptor> trafficDescriptors) {
+            @Nullable NetworkSliceInfo sliceInfo,
+            @Nullable List<TrafficDescriptor> trafficDescriptors) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -254,7 +255,7 @@ public final class DataCallResponse implements Parcelable {
         mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
         mQosBearerSessions = new ArrayList<>();
         source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader());
-        mSliceInfo = source.readParcelable(SliceInfo.class.getClassLoader());
+        mSliceInfo = source.readParcelable(NetworkSliceInfo.class.getClassLoader());
         mTrafficDescriptors = new ArrayList<>();
         source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader());
     }
@@ -408,7 +409,7 @@ public final class DataCallResponse implements Parcelable {
      * @return The slice info related to this data connection.
      */
     @Nullable
-    public SliceInfo getSliceInfo() {
+    public NetworkSliceInfo getSliceInfo() {
         return mSliceInfo;
     }
 
@@ -620,7 +621,7 @@ public final class DataCallResponse implements Parcelable {
 
         private List<QosBearerSession> mQosBearerSessions = new ArrayList<>();
 
-        private SliceInfo mSliceInfo;
+        private NetworkSliceInfo mSliceInfo;
 
         private List<TrafficDescriptor> mTrafficDescriptors = new ArrayList<>();
 
@@ -851,13 +852,13 @@ public final class DataCallResponse implements Parcelable {
          * The Slice used for this data connection.
          * <p/>
          * If a handover occurs from EPDG to 5G,
-         * this is the {@link SliceInfo} used in {@link DataService#setupDataCall}.
+         * this is the {@link NetworkSliceInfo} used in {@link DataService#setupDataCall}.
          *
          * @param sliceInfo the slice info for the data call
          *
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setSliceInfo(@Nullable SliceInfo sliceInfo) {
+        public @NonNull Builder setSliceInfo(@Nullable NetworkSliceInfo sliceInfo) {
             mSliceInfo = sliceInfo;
             return this;
         }

@@ -17,4 +17,4 @@
 /** @hide */
 package android.telephony.data;
 
-parcelable SliceInfo;
+parcelable NetworkSliceInfo;

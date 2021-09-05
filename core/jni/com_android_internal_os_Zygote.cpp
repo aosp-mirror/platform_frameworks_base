@@ -62,7 +62,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/un.h>
-#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -835,26 +834,6 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   } else {
       BindMount(user_source, "/storage", fail_fn);
   }
-}
-
-static bool NeedsNoRandomizeWorkaround() {
-#if !defined(__arm__)
-    return false;
-#else
-    int major;
-    int minor;
-    struct utsname uts;
-    if (uname(&uts) == -1) {
-        return false;
-    }
-
-    if (sscanf(uts.release, "%d.%d", &major, &minor) != 2) {
-        return false;
-    }
-
-    // Kernels before 3.4.* need the workaround.
-    return (major < 3) || ((major == 3) && (minor < 4));
-#endif
 }
 
 // Utility to close down the Zygote socket file descriptors while
@@ -1686,15 +1665,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
     runtime_flags &= ~RuntimeFlags::GWP_ASAN_LEVEL_MASK;
-
-    if (NeedsNoRandomizeWorkaround()) {
-        // Work around ARM kernel ASLR lossage (http://b/5817320).
-        int old_personality = personality(0xffffffff);
-        int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
-        if (new_personality == -1) {
-            ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
-        }
-    }
 
     SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
                     fail_fn);
