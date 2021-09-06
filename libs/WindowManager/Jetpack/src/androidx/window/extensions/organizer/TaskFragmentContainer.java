@@ -138,7 +138,7 @@ class TaskFragmentContainer {
         return mInfo;
     }
 
-    void setInfo(@Nullable TaskFragmentInfo info) {
+    void setInfo(@NonNull TaskFragmentInfo info) {
         mInfo = info;
         if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
             return;
@@ -190,20 +190,30 @@ class TaskFragmentContainer {
      */
     void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
-        if (mIsFinished) {
-            return;
+        if (!mIsFinished) {
+            mIsFinished = true;
+            finishActivities(shouldFinishDependent, presenter, wct, controller);
         }
-        mIsFinished = true;
 
-        // Finish own activities
-        for (Activity activity : collectActivities()) {
-            activity.finish();
+        if (mInfo == null) {
+            // Defer removal the container and wait until TaskFragment appeared.
+            return;
         }
 
         // Cleanup the visuals
         presenter.deleteTaskFragment(wct, getTaskFragmentToken());
         // Cleanup the records
         controller.removeContainer(this);
+        // Clean up task fragment information
+        mInfo = null;
+    }
+
+    private void finishActivities(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
+            @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
+        // Finish own activities
+        for (Activity activity : collectActivities()) {
+            activity.finish();
+        }
 
         if (!shouldFinishDependent) {
             return;
