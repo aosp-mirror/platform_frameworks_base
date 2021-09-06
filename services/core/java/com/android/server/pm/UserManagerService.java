@@ -80,6 +80,7 @@ import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
 import android.os.UserManager.QuietModeFlag;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
@@ -4835,6 +4836,9 @@ public class UserManagerService extends IUserManager.Stub {
         t.traceBegin("prepareUserData-" + userId);
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
         t.traceEnd();
+
+        StorageManagerInternal smInternal = LocalServices.getService(StorageManagerInternal.class);
+        smInternal.markCeStoragePrepared(userId);
 
         t.traceBegin("reconcileAppsData-" + userId);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);

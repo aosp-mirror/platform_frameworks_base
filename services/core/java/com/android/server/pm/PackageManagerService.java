@@ -15622,8 +15622,9 @@ public class PackageManagerService extends IPackageManager.Stub
         removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), userId, appId);
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
         final int flags;
-        if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+        if (StorageManager.isUserKeyUnlocked(userId) && smInternal.isCeStoragePrepared(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         } else if (umInternal.isUserRunning(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE;
@@ -18724,7 +18725,8 @@ public class PackageManagerService extends IPackageManager.Stub
         StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)
+                    && smInternal.isCeStoragePrepared(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
