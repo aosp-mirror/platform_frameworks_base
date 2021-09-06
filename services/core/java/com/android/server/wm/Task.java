@@ -5159,7 +5159,7 @@ class Task extends TaskFragment {
                 }
 
                 final ActivityRecord prev = baseTask.getActivity(
-                        a -> a.mStartingData != null && a.okToShowLocked());
+                        a -> a.mStartingData != null && a.showToCurrentUser());
                 r.showStartingWindow(prev, newTask, isTaskSwitch,
                         true /* startActivity */, sourceRecord);
             }
@@ -5530,7 +5530,7 @@ class Task extends TaskFragment {
 
             // Don't refocus if invisible to current user
             final ActivityRecord top = tr.getTopNonFinishingActivity();
-            if (top == null || !top.okToShowLocked()) {
+            if (top == null || !top.showToCurrentUser()) {
                 positionChildAtTop(tr);
                 if (top != null) {
                     mTaskSupervisor.mRecentTasks.add(top.getTask());

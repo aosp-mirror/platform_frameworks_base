@@ -1872,12 +1872,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         mHandler.obtainMessage(LAUNCH_TASK_BEHIND_COMPLETE, token).sendToTarget();
     }
 
-    /** Checks whether the userid is a profile of the current user. */
-    boolean isCurrentProfileLocked(int userId) {
-        if (userId == mRootWindowContainer.mCurrentUser) return true;
-        return mService.mAmInternal.isCurrentProfile(userId);
-    }
-
     /**
      * Processes the activities to be stopped or destroyed. This should be called when the resumed
      * activities are idle or drawn.
