@@ -425,6 +425,7 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method public int checkProvisioningPreCondition(@Nullable String, @NonNull String);
+    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void clearOrganizationId();
     method @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD) public void clearSystemUpdatePolicyFreezePeriodRecord();
     method @Nullable public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
