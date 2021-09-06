@@ -25,8 +25,8 @@ import static android.companion.DeviceId.TYPE_MAC_ADDRESS;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static com.android.internal.util.CollectionUtils.add;
 import static com.android.internal.util.CollectionUtils.any;
-import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.CollectionUtils.find;
 import static com.android.internal.util.CollectionUtils.forEach;
@@ -38,6 +38,9 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -46,6 +49,7 @@ import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -99,13 +103,11 @@ import android.permission.PermissionControllerManager;
 import android.text.BidiFormatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -116,7 +118,6 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -125,21 +126,13 @@ import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -147,13 +140,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /** @hide */
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService implements Binder.DeathRecipient {
+    static final String LOG_TAG = "CompanionDeviceManagerService";
+    static final boolean DEBUG = false;
 
     private static final Map<String, String> DEVICE_PROFILE_TO_PERMISSION;
     static {
@@ -162,7 +155,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         map.put(DEVICE_PROFILE_APP_STREAMING,
                 Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING);
 
-        DEVICE_PROFILE_TO_PERMISSION = Collections.unmodifiableMap(map);
+        DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
@@ -174,9 +167,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     static final long DEVICE_LISTENER_DIED_REBIND_TIMEOUT_MS = 10 * 1000;
 
-    private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "CompanionDeviceManagerService";
-
     private static final long PAIR_WITHOUT_PROMPT_WINDOW_MS = 10 * 60 * 1000; // 10 min
 
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
@@ -185,22 +175,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final int ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW = 5;
     private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
 
-    private static final String XML_TAG_ASSOCIATIONS = "associations";
-    private static final String XML_TAG_ASSOCIATION = "association";
-    private static final String XML_ATTR_PACKAGE = "package";
-    private static final String XML_ATTR_DEVICE = "device";
-    private static final String XML_ATTR_PROFILE = "profile";
-    private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
-    private static final String XML_ATTR_TIME_APPROVED = "time_approved";
-    private static final String XML_FILE_NAME = "companion_device_manager_associations.xml";
-
     private static DateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     static {
         sDateFormat.setTimeZone(TimeZone.getDefault());
     }
 
     private final CompanionDeviceManagerImpl mImpl;
-    private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
+    // Persistent data store for all Associations.
+    private final PersistentDataStore mPersistentDataStore;
     private PowerWhitelistManager mPowerWhitelistManager;
     private PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>> mServiceConnectors;
     private IAppOpsService mAppOpsManager;
@@ -240,6 +222,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
+        mPersistentDataStore = new PersistentDataStore();
+
         mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
         mRoleManager = context.getSystemService(RoleManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
@@ -274,7 +258,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         + ", uid = " + uid + ")");
                 int userId = getChangingUserId();
                 updateAssociations(
-                        as -> CollectionUtils.filter(as,
+                        as -> filter(as,
                                 a -> !Objects.equals(a.getPackageName(), packageName)),
                         userId);
 
@@ -634,7 +618,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkCallerIsSystemOr(packageName);
 
             int userId = getCallingUserId();
-            Set<Association> deviceAssociations = CollectionUtils.filter(
+            Set<Association> deviceAssociations = filter(
                     getAllAssociations(userId, packageName),
                     association -> deviceAddress.equals(association.getDeviceMacAddress()));
 
@@ -698,7 +682,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         @Override
         public boolean canPairWithoutPrompt(
                 String packageName, String deviceMacAddress, int userId) {
-            return CollectionUtils.any(
+            return any(
                     getAllAssociations(userId, packageName, deviceMacAddress),
                     a -> System.currentTimeMillis() - a.getTimeApprovedMs()
                             < PAIR_WITHOUT_PROMPT_WINDOW_MS);
@@ -790,7 +774,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void removeAssociation(int userId, String pkg, String deviceMacAddress) {
-        updateAssociations(associations -> CollectionUtils.filter(associations, association -> {
+        updateAssociations(associations -> filter(associations, association -> {
             boolean notMatch = association.getUserId() != userId
                     || !Objects.equals(association.getDeviceMacAddress(), deviceMacAddress)
                     || !Objects.equals(association.getPackageName(), pkg);
@@ -988,22 +972,30 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private void recordAssociation(Association association, int userId) {
         Slog.i(LOG_TAG, "recordAssociation(" + association + ")");
-        updateAssociations(associations -> CollectionUtils.add(associations, association), userId);
+        updateAssociations(associations -> add(associations, association), userId);
     }
 
     private void updateAssociations(Function<Set<Association>, Set<Association>> update,
             int userId) {
         synchronized (mLock) {
-            final Set<Association> old = getAllAssociations(userId);
-            Set<Association> associations = new ArraySet<>(old);
-            associations = update.apply(associations);
-            Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
-            mCachedAssociations.put(userId, Collections.unmodifiableSet(associations));
-            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceManagerService::persistAssociations,
-                    this, associations, userId));
+            if (DEBUG) Slog.d(LOG_TAG, "Updating Associations set...");
 
-            updateAtm(userId, associations);
+            final Set<Association> prevAssociations = getAllAssociations(userId);
+            if (DEBUG) Slog.d(LOG_TAG, "  > Before : " + prevAssociations + "...");
+
+            final Set<Association> updatedAssociations = update.apply(
+                    new ArraySet<>(prevAssociations));
+            if (DEBUG) Slog.d(LOG_TAG, "  > After: " + updatedAssociations);
+
+            mCachedAssociations.put(userId, unmodifiableSet(updatedAssociations));
+
+            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    // TODO: pass the real used IDs ("mapped" per package) instead of emptyMap()
+                    (associations) -> mPersistentDataStore.persistStateForUser(
+                            userId, associations, emptyMap()),
+                    updatedAssociations));
+
+            updateAtm(userId, updatedAssociations);
         }
     }
 
@@ -1025,62 +1017,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-    private void persistAssociations(Set<Association> associations, int userId) {
-        Slog.i(LOG_TAG, "Writing associations to disk: " + associations);
-        final AtomicFile file = getStorageFileForUser(userId);
-        synchronized (file) {
-            file.write(out -> {
-                XmlSerializer xml = Xml.newSerializer();
-                try {
-                    xml.setOutput(out, StandardCharsets.UTF_8.name());
-                    xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                    xml.startDocument(null, true);
-                    xml.startTag(null, XML_TAG_ASSOCIATIONS);
-
-                    forEach(associations, association -> {
-                        XmlSerializer tag = xml.startTag(null, XML_TAG_ASSOCIATION)
-                                .attribute(null, XML_ATTR_PACKAGE, association.getPackageName())
-                                .attribute(null, XML_ATTR_DEVICE,
-                                        association.getDeviceMacAddress());
-                        if (association.getDeviceProfile() != null) {
-                            tag.attribute(null, XML_ATTR_PROFILE, association.getDeviceProfile());
-                            tag.attribute(null, XML_ATTR_NOTIFY_DEVICE_NEARBY,
-                                    Boolean.toString(
-                                            association.isNotifyOnDeviceNearby()));
-                        }
-                        tag.attribute(null, XML_ATTR_TIME_APPROVED,
-                                Long.toString(association.getTimeApprovedMs()));
-                        tag.endTag(null, XML_TAG_ASSOCIATION);
-                    });
-
-                    xml.endTag(null, XML_TAG_ASSOCIATIONS);
-                    xml.endDocument();
-                } catch (Exception e) {
-                    Slog.e(LOG_TAG, "Error while writing associations file", e);
-                    throw ExceptionUtils.propagate(e);
-                }
-            });
-        }
-    }
-
-    private AtomicFile getStorageFileForUser(int userId) {
-        return mUidToStorage.computeIfAbsent(userId, (u) ->
-                new AtomicFile(new File(
-                        //TODO deprecated method - what's the right replacement?
-                        Environment.getUserSystemDirectory(u),
-                        XML_FILE_NAME)));
-    }
-
-    @Nullable
-    private Set<Association> getAllAssociations(int userId) {
+    private @NonNull Set<Association> getAllAssociations(int userId) {
         synchronized (mLock) {
-            if (mCachedAssociations.get(userId) == null) {
-                mCachedAssociations.put(userId, Collections.unmodifiableSet(
-                        emptyIfNull(readAllAssociations(userId))));
-                Slog.i(LOG_TAG, "Read associations from disk: " + mCachedAssociations);
-            }
+            readPersistedStateForUserIfNeededLocked(userId);
+            // This returns non-null, because the readAssociationsInfoForUserIfNeededLocked() method
+            // we just called adds an empty set, if there was no previously saved data.
             return mCachedAssociations.get(userId);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void readPersistedStateForUserIfNeededLocked(@UserIdInt int userId) {
+        if (mCachedAssociations.get(userId) != null) return;
+
+        final Set<Association> associations = new ArraySet<>();
+        // TODO: pass real packageName-to-usedIds map
+        mPersistentDataStore.readStateForUser(userId, associations, emptyMap());
+        Slog.i(LOG_TAG, "Read associations from disk: " + associations);
+
+        mCachedAssociations.put(userId, unmodifiableSet(associations));
     }
 
     private List<UserInfo> getAllUsers() {
@@ -1093,7 +1048,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private Set<Association> getAllAssociations(int userId, @Nullable String packageFilter) {
-        return CollectionUtils.filter(
+        return filter(
                 getAllAssociations(userId),
                 // Null filter == get all associations
                 a -> packageFilter == null || Objects.equals(packageFilter, a.getPackageName()));
@@ -1112,63 +1067,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-
     private Set<Association> getAllAssociations(
             int userId, @Nullable String packageFilter, @Nullable String addressFilter) {
-        return CollectionUtils.filter(
+        return filter(
                 getAllAssociations(userId),
                 // Null filter == get all associations
                 a -> (packageFilter == null || Objects.equals(packageFilter, a.getPackageName()))
                         && (addressFilter == null
                                 || Objects.equals(addressFilter, a.getDeviceMacAddress())));
-    }
-
-    private Set<Association> readAllAssociations(int userId) {
-        final AtomicFile file = getStorageFileForUser(userId);
-
-        if (!file.getBaseFile().exists()) return null;
-
-        ArraySet<Association> result = null;
-        final XmlPullParser parser = Xml.newPullParser();
-        synchronized (file) {
-            try (FileInputStream in = file.openRead()) {
-                parser.setInput(in, StandardCharsets.UTF_8.name());
-                int type;
-                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                    if (type != XmlPullParser.START_TAG
-                            && !XML_TAG_ASSOCIATIONS.equals(parser.getName())) continue;
-
-                    final String appPackage = parser.getAttributeValue(null, XML_ATTR_PACKAGE);
-                    final String deviceAddress = parser.getAttributeValue(null, XML_ATTR_DEVICE);
-
-                    final String profile = parser.getAttributeValue(null, XML_ATTR_PROFILE);
-                    final boolean persistentGrants = Boolean.valueOf(
-                            parser.getAttributeValue(null, XML_ATTR_NOTIFY_DEVICE_NEARBY));
-                    final long timeApproved = parseLongOrDefault(
-                            parser.getAttributeValue(null, XML_ATTR_TIME_APPROVED), 0L);
-
-                    if (appPackage == null || deviceAddress == null) continue;
-
-                    // TODO: either read or generate a valid ID
-                    final int associationId = 0;
-                    final Association association = new Association(
-                            associationId,
-                            userId,
-                            appPackage,
-                            Arrays.asList(new DeviceId(TYPE_MAC_ADDRESS, deviceAddress)),
-                            profile,
-                            /* managedByCompanionApp */false,
-                            /* notifyOnDeviceNearby */ persistentGrants ,
-                            System.currentTimeMillis());
-
-                    result = ArrayUtils.add(result, association);
-                }
-                return result;
-            } catch (XmlPullParserException | IOException e) {
-                Slog.e(LOG_TAG, "Error while reading associations file", e);
-                return null;
-            }
-        }
     }
 
     void onDeviceConnected(String address) {
@@ -1482,15 +1388,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         }
                 });
         return result;
-    }
-
-    private static long parseLongOrDefault(String str, long def) {
-        try {
-            return Long.parseLong(str);
-        } catch (NumberFormatException e) {
-            Slog.w(LOG_TAG, "Failed to parse", e);
-            return def;
-        }
     }
 
     private class ShellCmd extends ShellCommand {
