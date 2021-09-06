@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -85,7 +86,6 @@ public class StartingSurfaceDrawerTests {
 
     static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
         int mAddWindowForTask = 0;
-        int mViewThemeResId;
 
         TestStartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
                 TransactionPool pool) {
@@ -97,7 +97,6 @@ public class StartingSurfaceDrawerTests {
                 WindowManager.LayoutParams params, int suggestType) {
             // listen for addView
             mAddWindowForTask = taskId;
-            mViewThemeResId = view.getContext().getThemeResId();
             // Do not wait for background color
             return false;
         }
@@ -167,12 +166,15 @@ public class StartingSurfaceDrawerTests {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
+        final int[] theme = new int[1];
+        doAnswer(invocation -> theme[0] = (Integer) invocation.callRealMethod())
+                .when(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
+
         mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
                 STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
-                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
-        assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);
+        verify(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
+        assertNotEquals(theme[0], 0);
     }
 
     @Test
