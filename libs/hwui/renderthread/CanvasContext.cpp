@@ -731,8 +731,8 @@ FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber, uint32_t s
     return nullptr;
 }
 
-void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-                                            int32_t surfaceControlId, ASurfaceControlStats* stats) {
+void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceControlId,
+                                            ASurfaceControlStats* stats) {
     auto* instance = static_cast<CanvasContext*>(context);
 
     const ASurfaceControlFunctions& functions =

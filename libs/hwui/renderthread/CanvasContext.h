@@ -196,8 +196,8 @@ public:
     SkISize getNextFrameSize() const;
 
     // Called when SurfaceStats are available.
-    static void onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-                                        int32_t surfaceControlId, ASurfaceControlStats* stats);
+    static void onSurfaceStatsAvailable(void* context, int32_t surfaceControlId,
+                                        ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
             const std::function<bool(int64_t, int64_t, int64_t)>& callback) {

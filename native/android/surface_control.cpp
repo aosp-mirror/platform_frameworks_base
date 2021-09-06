@@ -149,16 +149,15 @@ struct ASurfaceControlStats {
 void ASurfaceControl_registerSurfaceStatsListener(ASurfaceControl* control, int32_t id,
                                                   void* context,
                                                   ASurfaceControl_SurfaceStatsListener func) {
-    SurfaceStatsCallback callback = [func, control, id](void* callback_context, nsecs_t,
-                                                        const sp<Fence>&,
-                                                        const SurfaceStats& surfaceStats) {
+    SurfaceStatsCallback callback = [func, id](void* callback_context, nsecs_t, const sp<Fence>&,
+                                               const SurfaceStats& surfaceStats) {
         ASurfaceControlStats aSurfaceControlStats;
 
         aSurfaceControlStats.acquireTime = surfaceStats.acquireTime;
         aSurfaceControlStats.previousReleaseFence = surfaceStats.previousReleaseFence;
         aSurfaceControlStats.frameNumber = surfaceStats.eventStats.frameNumber;
 
-        (*func)(callback_context, control, id, &aSurfaceControlStats);
+        (*func)(callback_context, id, &aSurfaceControlStats);
     };
 
     TransactionCompletedListener::getInstance()->addSurfaceStatsListener(context,
