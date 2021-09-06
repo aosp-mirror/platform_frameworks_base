@@ -3138,6 +3138,7 @@ class ContextImpl extends Context {
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
             mContentCaptureOptions = container.mContentCaptureOptions;
+            mAutofillOptions = container.mAutofillOptions;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
