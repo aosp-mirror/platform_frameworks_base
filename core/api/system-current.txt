@@ -740,6 +740,11 @@ package android.app {
     field public static final int PIN = 1; // 0x1
   }
 
+  public class LocaleManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_APP_SPECIFIC_LOCALES) public android.os.LocaleList getApplicationLocales(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void setApplicationLocales(@NonNull String, @NonNull android.os.LocaleList);
+  }
+
   public class Notification implements android.os.Parcelable {
     field public static final String CATEGORY_CAR_EMERGENCY = "car_emergency";
     field public static final String CATEGORY_CAR_INFORMATION = "car_information";

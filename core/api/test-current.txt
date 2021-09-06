@@ -276,6 +276,11 @@ package android.app {
     method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
   }
 
+  public class LocaleManager {
+    method @Nullable public android.os.LocaleList getSystemLocales();
+    method public void setSystemLocales(@NonNull android.os.LocaleList);
+  }
+
   public class Notification implements android.os.Parcelable {
     method public boolean shouldShowForegroundImmediately();
   }
