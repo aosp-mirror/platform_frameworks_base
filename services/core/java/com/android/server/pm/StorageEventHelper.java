@@ -170,8 +170,7 @@ public class StorageEventHelper extends StorageEventListener {
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
                 synchronized (mPm.mInstallLock) {
-                    mPm.reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */,
-                            null);
+                    mPm.reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
                 }
             } catch (IllegalStateException e) {
                 // Device was probably ejected, and we'll process that event momentarily

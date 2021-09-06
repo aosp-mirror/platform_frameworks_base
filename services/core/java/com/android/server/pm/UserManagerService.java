@@ -4805,7 +4805,7 @@ public class UserManagerService extends IUserManager.Stub {
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
         t.traceEnd();
         t.traceBegin("reconcileAppsData");
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData, null);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData);
         t.traceEnd();
 
         if (userId != UserHandle.USER_SYSTEM) {
@@ -4821,14 +4821,11 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Called right before a user is unlocked. This gives us a chance to prepare
      * app storage.
-     *
-     * @return set of packages that reconciled app data
      */
-    @NonNull public ArraySet<String> onBeforeUnlockUser(@UserIdInt int userId) {
+    public void onBeforeUnlockUser(@UserIdInt int userId) {
         UserInfo userInfo = getUserInfo(userId);
         if (userInfo == null) {
-            // PMS requires mutable set, so the API uses ArraySet to prevent Collections.emptySet()
-            return new ArraySet<>();
+            return;
         }
         final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
@@ -4839,33 +4836,8 @@ public class UserManagerService extends IUserManager.Stub {
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
         t.traceEnd();
 
-        final ArraySet<String> reconciledPackages = new ArraySet<>();
-        t.traceBegin("reconcileAppsDataFirstPass-" + userId);
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData,
-                reconciledPackages);
-        t.traceEnd();
-        return reconciledPackages;
-    }
-
-    /**
-     * Called right after a user state is moved to {@link UserState#STATE_RUNNING_UNLOCKING}. This
-     * gives us a chance to reconcile app data for apps installed since
-     * {@link #onBeforeUnlockUser(int)} was called.
-     *
-     * @param previouslyReconciledPackages the result from {@link #onBeforeUnlockUser(int)}
-     */
-    public void onUserStateRunningUnlocking(@UserIdInt int userId,
-            @NonNull ArraySet<String> previouslyReconciledPackages) {
-        final UserInfo userInfo = getUserInfo(userId);
-        if (userInfo == null) {
-            return;
-        }
-        // Migrate only if build fingerprints mismatch
-        boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
-        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("reconcileAppsDataSecondPass-" + userId);
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData,
-                previouslyReconciledPackages);
+        t.traceBegin("reconcileAppsData-" + userId);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);
         t.traceEnd();
     }
 

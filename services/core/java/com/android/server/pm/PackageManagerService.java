@@ -6957,7 +6957,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             List<String> deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
-                    true /* onlyCoreApps */, null);
+                    true /* onlyCoreApps */);
             mPrepareAppDataFuture = SystemServerInitThreadPool.submit(() -> {
                 TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                         Trace.TRACE_TAG_PACKAGE_MANAGER);
@@ -18583,32 +18583,22 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps on all mounted volumes.
-     *
-     * @param reconciledPackages A set that will be populated with package names that have
-     *                           successfully had their data reconciled. Any package names already
-     *                           contained will be skipped. Because this must be mutable when
-     *                           non-null, it is typed {@link ArraySet} to prevent accidental
-     *                           usage of {@link Collections#emptySet()}. Null can be passed if the
-     *                           caller doesn't need this functionality.
      */
     @NonNull
-    void reconcileAppsData(int userId, int flags, boolean migrateAppsData,
-            @Nullable ArraySet<String> reconciledPackages) {
+    void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
             synchronized (mInstallLock) {
-                reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData,
-                        reconciledPackages);
+                reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData);
             }
         }
     }
 
     @GuardedBy("mInstallLock")
     void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData, @Nullable ArraySet<String> reconciledPackages) {
-        reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */,
-                reconciledPackages);
+            boolean migrateAppData) {
+        reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
     }
 
     /**
@@ -18623,8 +18613,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @GuardedBy("mInstallLock")
     private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData, boolean onlyCoreApps,
-            @Nullable ArraySet<String> reconciledPackages) {
+            boolean migrateAppData, boolean onlyCoreApps) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
         List<String> result = onlyCoreApps ? new ArrayList<>() : null;
@@ -18687,9 +18676,6 @@ public class PackageManagerService extends IPackageManager.Stub
         int preparedCount = 0;
         for (PackageSetting ps : packages) {
             final String packageName = ps.name;
-            if (reconciledPackages != null && reconciledPackages.contains(packageName)) {
-                continue;
-            }
             if (ps.pkg == null) {
                 Slog.w(TAG, "Odd, missing scanned package " + packageName);
                 // TODO: might be due to legacy ASEC apps; we should circle back
@@ -18705,10 +18691,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps.getInstalled(userId)) {
                 prepareAppDataAndMigrate(batch, ps.pkg, userId, flags, migrateAppData);
                 preparedCount++;
-
-                if (reconciledPackages != null) {
-                    reconciledPackages.add(packageName);
-                }
             }
         }
         executeBatchLI(batch);
