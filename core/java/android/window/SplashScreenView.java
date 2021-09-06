@@ -316,7 +316,8 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         private SurfaceView createSurfaceView(@NonNull SplashScreenView view) {
-            final SurfaceView surfaceView = new SurfaceView(view.getContext());
+            final Context viewContext = view.getContext();
+            final SurfaceView surfaceView = new SurfaceView(viewContext);
             surfaceView.setPadding(0, 0, 0, 0);
             surfaceView.setBackground(mIconBackground);
             if (mSurfacePackage == null) {
@@ -326,10 +327,10 @@ public final class SplashScreenView extends FrameLayout {
                                     + Thread.currentThread().getId());
                 }
 
-                SurfaceControlViewHost viewHost = new SurfaceControlViewHost(mContext,
-                        mContext.getDisplay(),
+                SurfaceControlViewHost viewHost = new SurfaceControlViewHost(viewContext,
+                        viewContext.getDisplay(),
                         surfaceView.getHostToken());
-                ImageView imageView = new ImageView(mContext);
+                ImageView imageView = new ImageView(viewContext);
                 imageView.setBackground(mIconDrawable);
                 viewHost.setView(imageView, mIconSize, mIconSize);
                 SurfaceControlViewHost.SurfacePackage surfacePackage = viewHost.getSurfacePackage();
