@@ -1008,33 +1008,31 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testLockAllProfileTasks() {
-        // Make an activity visible with the user id set to 0
-        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        final int taskId = task.mTaskId;
-        final ActivityRecord activity = task.getTopMostActivity();
+        final int profileUid = UserHandle.PER_USER_RANGE + UserHandle.MIN_SECONDARY_USER_ID;
+        final int profileUserId = UserHandle.getUserId(profileUid);
+        // Create an activity belonging to the profile user.
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setUid(profileUid).build();
+        final Task task = activity.getTask();
 
-        // Create another activity on top and the user id is 1
-        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task)
-                .setUid(UserHandle.PER_USER_RANGE + 1).build();
-        doReturn(true).when(topActivity).okToShowLocked();
+        // Create another activity belonging to current user on top.
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.intent.setAction(Intent.ACTION_MAIN);
 
         // Make sure the listeners will be notified for putting the task to locked state
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
-        mWm.mRoot.lockAllProfileTasks(0);
-        verify(controller).notifyTaskProfileLocked(eq(taskId), eq(0));
+        mWm.mRoot.lockAllProfileTasks(profileUserId);
+        verify(controller).notifyTaskProfileLocked(eq(task.mTaskId), eq(profileUserId));
 
         // Create the work lock activity on top of the task
-        final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task)
-                .setUid(UserHandle.PER_USER_RANGE + 1).build();
-        doReturn(true).when(workLockActivity).okToShowLocked();
+        final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task).build();
         workLockActivity.intent.setAction(ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER);
         doReturn(workLockActivity.mActivityComponent).when(mAtm).getSysUiServiceComponentLocked();
 
         // Make sure the listener won't be notified again.
         clearInvocations(controller);
-        mWm.mRoot.lockAllProfileTasks(0);
+        mWm.mRoot.lockAllProfileTasks(profileUserId);
         verify(controller, never()).notifyTaskProfileLocked(anyInt(), anyInt());
     }
 

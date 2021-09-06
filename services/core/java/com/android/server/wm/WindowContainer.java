@@ -1380,6 +1380,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /** Returns whether the window should be shown for current user. */
     boolean showToCurrentUser() {
         return true;
     }
