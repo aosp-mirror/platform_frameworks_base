@@ -271,7 +271,6 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(amInternal).cleanUpServices(anyInt(), any(), any());
         doReturn(UserHandle.USER_SYSTEM).when(amInternal).getCurrentUserId();
         doReturn(TEST_USER_PROFILE_IDS).when(amInternal).getCurrentProfileIds();
-        doReturn(true).when(amInternal).isCurrentProfile(anyInt());
         doReturn(true).when(amInternal).isUserRunning(anyInt(), anyInt());
         doReturn(true).when(amInternal).hasStartedUserState(anyInt());
         doReturn(false).when(amInternal).shouldConfirmCredentials(anyInt());

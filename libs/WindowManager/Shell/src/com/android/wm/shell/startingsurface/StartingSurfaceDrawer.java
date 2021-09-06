@@ -146,7 +146,7 @@ public class StartingSurfaceDrawer {
         return mDisplayManager.getDisplay(displayId);
     }
 
-    private int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
+    int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
         return splashScreenThemeResId != 0
                 ? splashScreenThemeResId
                 : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
@@ -174,7 +174,7 @@ public class StartingSurfaceDrawer {
 
         final int displayId = taskInfo.displayId;
         final int taskId = taskInfo.taskId;
-        Context context = mContext;
+
         // replace with the default theme if the application didn't set
         final int theme = getSplashScreenTheme(windowInfo.splashScreenThemeResId, activityInfo);
         if (DEBUG_SPLASH_SCREEN) {
@@ -182,10 +182,14 @@ public class StartingSurfaceDrawer {
                     + " theme=" + Integer.toHexString(theme) + " task=" + taskInfo.taskId
                     + " suggestType=" + suggestType);
         }
-
         final Display display = getDisplay(displayId);
         if (display == null) {
             // Can't show splash screen on requested display, so skip showing at all.
+            return;
+        }
+        Context context = displayId == DEFAULT_DISPLAY
+                ? mContext : mContext.createDisplayContext(display);
+        if (context == null) {
             return;
         }
         if (theme != context.getThemeResId()) {
@@ -298,7 +302,8 @@ public class StartingSurfaceDrawer {
         // Record whether create splash screen view success, notify to current thread after
         // create splash screen view finished.
         final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
-        final FrameLayout rootLayout = new FrameLayout(context);
+        final FrameLayout rootLayout = new FrameLayout(
+                mSplashscreenContentDrawer.createViewContextWrapper(context));
         rootLayout.setPadding(0, 0, 0, 0);
         rootLayout.setFitsSystemWindows(false);
         final Runnable setViewSynchronized = () -> {
