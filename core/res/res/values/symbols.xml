@@ -1694,10 +1694,10 @@
   <java-symbol type="anim" name="activity_close_exit" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
-  <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
-  <java-symbol type="array" name="config_safeModeEnabledVibePattern" />
   <java-symbol type="array" name="config_virtualKeyVibePattern" />
+  <java-symbol type="array" name="config_doubleClickVibePattern" />
+  <java-symbol type="array" name="config_safeModeEnabledVibePattern" />
   <java-symbol type="attr" name="actionModePopupWindowStyle" />
   <java-symbol type="attr" name="dialogCustomTitleDecorLayout" />
   <java-symbol type="attr" name="dialogTitleDecorLayout" />
@@ -2500,7 +2500,6 @@
   <java-symbol type="dimen" name="datepicker_year_label_height" />
 
   <java-symbol type="array" name="config_clockTickVibePattern" />
-  <java-symbol type="array" name="config_calendarDateVibePattern" />
 
   <!-- From KeyguardServiceDelegate -->
   <java-symbol type="string" name="config_keyguardComponent" />
