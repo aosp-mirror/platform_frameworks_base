@@ -689,8 +689,10 @@ class UsbUserPermissionManager {
         try {
             ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
             if (aInfo.uid != uid) {
-                throw new IllegalArgumentException("package " + packageName
+                Slog.w(TAG, "package " + packageName
                         + " does not match caller's uid " + uid);
+                throw new IllegalArgumentException("package " + packageName
+                        + " not found");
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException("package " + packageName + " not found");
