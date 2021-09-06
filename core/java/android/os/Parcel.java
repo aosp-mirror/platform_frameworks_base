@@ -695,7 +695,6 @@ public final class Parcel {
      * @hide
      */
     public static boolean hasFileDescriptors(Object value) {
-        getValueType(value); // Will throw if value is not supported
         if (value instanceof LazyValue) {
             return ((LazyValue) value).hasFileDescriptors();
         } else if (value instanceof Parcelable) {
@@ -736,6 +735,8 @@ public final class Parcel {
                     }
                 }
             }
+        } else {
+            getValueType(value); // Will throw if value is not supported
         }
         return false;
     }
