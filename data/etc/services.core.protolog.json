@@ -211,6 +211,12 @@
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
+    "-1898316768": {
+      "message": "Unable to retrieve window container to start layer mirroring for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-1895337367": {
       "message": "Delete root task display=%d winMode=%d",
       "level": "VERBOSE",
@@ -1093,6 +1099,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-904499590": {
+      "message": "Provided surface for layer mirroring on display %d is not present, so do not update the surface",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
       "level": "WARN",
@@ -1302,6 +1314,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "-663411559": {
+      "message": "Going ahead with updating layer mirroring for display %d to new bounds %s and\/or orientation %d.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-655104359": {
       "message": "Frontmost changed immersion: %s",
@@ -1561,6 +1579,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-384564722": {
+      "message": "Unable to start layer mirroring for display %d since the surface is not available.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-381475323": {
       "message": "DisplayContent: boot is waiting for window of type %d to be drawn",
       "level": "DEBUG",
@@ -1633,6 +1657,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
+    "-309399422": {
+      "message": "Display %d state is now (%d), so update layer mirroring?",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-302468788": {
       "message": "Expected target rootTask=%s to be top most but found rootTask=%s",
       "level": "WARN",
@@ -1698,6 +1728,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_MOVEMENT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-190034097": {
+      "message": "Unable to retrieve window container to update layer mirroring for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-177040661": {
       "message": "Start rotation animation. customAnim=%s, mCurRotation=%s, mOriginalRotation=%s",
@@ -1794,6 +1830,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-79877120": {
+      "message": "Display %d has content (%b) so disable layer mirroring",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-70719599": {
       "message": "Unregister remote animations for organizer=%s uid=%d pid=%d",
@@ -2346,6 +2388,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
+    "504397469": {
+      "message": "Unable to update layer mirroring for display %d to new bounds %s and\/or orientation %d, since the surface is not available.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "508887531": {
       "message": "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s",
@@ -3103,6 +3151,12 @@
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1407569006": {
+      "message": "Display %d was already layer mirroring, so apply transformations if necessary",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "1417601133": {
       "message": "Enqueueing ADD_STARTING",
       "level": "VERBOSE",
@@ -3348,6 +3402,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1687376052": {
+      "message": "Display %d has no content and is on, so start layer mirroring for state %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1689989893": {
       "message": "SyncGroup %d: Set ready",
@@ -3751,6 +3811,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_KEEP_SCREEN_ON": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_LAYER_MIRRORING": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_LOCKTASK": {
