@@ -1965,7 +1965,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private boolean startActivityForAttachedApplicationIfNeeded(ActivityRecord r,
             WindowProcessController app, ActivityRecord top) {
-        if (r.finishing || !r.okToShowLocked() || !r.visibleIgnoringKeyguard || r.app != null
+        if (r.finishing || !r.showToCurrentUser() || !r.visibleIgnoringKeyguard || r.app != null
                 || app.mUid != r.info.applicationInfo.uid || !app.mName.equals(r.processName)) {
             return false;
         }
