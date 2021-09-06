@@ -655,7 +655,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @param includingEmbeddedTask whether the activity in a task that being embedded from this
      *                              one should be included.
      * @see #topRunningActivity(boolean, boolean)
-     * @see ActivityRecord#okToShowLocked()
      */
     ActivityRecord getTopNonFinishingActivity(boolean includeOverlays,
             boolean includingEmbeddedTask) {
