@@ -143,8 +143,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL,
-                mFingerprintStateCallback);
+                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
     }
 
     @Override
