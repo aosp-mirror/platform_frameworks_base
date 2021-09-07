@@ -1226,18 +1226,18 @@
 
     <!-- List of split types required by this APK to be present in order to function properly,
          separated by commas. The platform will reject installation of an app that is missing
-         any required split types. Each split type is an arbitrary string that has no specific
-         meaning to the platform, and is only used for matching <code>splitTypes</code> and
-         <code>requiredSplitTypes</code>. As an example, if a split requires strings, drawables,
-         and native code this value could be "language,density,abi". Default value is null to
-         indicate no split types are required. -->
+         any required split types. Each split type is a string, and is only used for matching
+         <code>requiredSplitTypes</code> and <code>splitTypes</code>. As an example, if this
+         APK requires localized string resources, screen density resources, and native code
+         this value could be "language,density,abi". Default value is null to indicate no split
+         types are required. -->
     <attr name="requiredSplitTypes" format="string" />
 
-    <!-- List of split types offered by this APK, separated by commas. Each split type is an
-         arbitrary string that has no specific meaning to the platform, and is only used for
-         matching <code>splitTypes</code> and <code>requiredSplitTypes</code>. As an example,
-         if a split offers strings and drawables the value could be "language,density". Default
-         value is null to indicate no split types are offered. -->
+    <!-- List of split types offered by this APK, separated by commas. Each split type is a
+         string, and is only used for matching <code>requiredSplitTypes</code> and
+         <code>splitTypes</code>. As an example, if this split offers localized string resources,
+         and screen density resources the value could be "language,density". Default value is
+         null to indicate no split types are offered. -->
     <attr name="splitTypes" format="string" />
 
     <!-- Flag to specify if this app wants to run the dex within its APK but not extracted or

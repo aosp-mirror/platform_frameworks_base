@@ -285,7 +285,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
@@ -730,7 +729,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO: rename to mNoDisplay
     @VisibleForTesting
     boolean noDisplay;
-    boolean mShowForAllUsers;
+    final boolean mShowForAllUsers;
     // TODO: Make this final
     int mTargetSdk;
 
@@ -5306,7 +5305,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
         visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
-                && okToShowLocked();
+                && showToCurrentUser();
     }
 
     boolean shouldBeVisible() {
@@ -6343,22 +6342,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return this;
     }
 
-    /** Checks whether the activity should be shown for current user. */
-    public boolean okToShowLocked() {
-        // We cannot show activities when the device is locked and the application is not
-        // encryption aware.
-        if (!StorageManager.isUserKeyUnlocked(mUserId)
-                && !info.applicationInfo.isEncryptionAware()) {
-            return false;
-        }
-
-        return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
-                || (mTaskSupervisor.isCurrentProfileLocked(mUserId)
-                && mAtmService.mAmInternal.isUserRunning(mUserId, 0 /* flags */));
-    }
-
     boolean canBeTopRunning() {
-        return !finishing && okToShowLocked();
+        return !finishing && showToCurrentUser();
     }
 
     /**

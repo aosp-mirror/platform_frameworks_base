@@ -303,6 +303,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public Point getDisplaySurfaceDefaultSize() {
+            if (mSurface == null) {
+                return null;
+            }
             return mSurface.getDefaultSize();
         }
 
