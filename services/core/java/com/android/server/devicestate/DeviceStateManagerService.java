@@ -19,7 +19,6 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
-import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
@@ -36,7 +35,6 @@ import android.hardware.devicestate.IDeviceStateManager;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -48,8 +46,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
-import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.policy.DeviceStatePolicyImpl;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -93,10 +91,9 @@ public final class DeviceStateManagerService extends SystemService {
     private static final boolean DEBUG = false;
 
     private final Object mLock = new Object();
-    // Internal system service thread used to dispatch calls to the policy and to registered
+    // Handler on the {@link DisplayThread} used to dispatch calls to the policy and to registered
     // callbacks though its handler (mHandler). Provides a guarantee of callback order when
     // leveraging mHandler and also enables posting messages with the service lock held.
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     @NonNull
     private final DeviceStatePolicy mDeviceStatePolicy;
@@ -149,11 +146,10 @@ public final class DeviceStateManagerService extends SystemService {
     @VisibleForTesting
     DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
         super(context);
-        // Service thread assigned THREAD_PRIORITY_DISPLAY because this service indirectly drives
+        // We use the DisplayThread because this service indirectly drives
         // display (on/off) and window (position) events through its callbacks.
-        mHandlerThread = new ServiceThread(TAG, THREAD_PRIORITY_DISPLAY, false /* allowIo */);
-        mHandlerThread.start();
-        mHandler = mHandlerThread.getThreadHandler();
+        DisplayThread displayThread = DisplayThread.get();
+        mHandler = new Handler(displayThread.getLooper());
         mOverrideRequestController = new OverrideRequestController(
                 this::onOverrideRequestStatusChangedLocked);
         mDeviceStatePolicy = policy;
@@ -552,7 +548,7 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             ProcessRecord record = new ProcessRecord(callback, pid, this::handleProcessDied,
-                    mHandlerThread.getThreadHandler());
+                    mHandler);
             try {
                 callback.asBinder().linkToDeath(record, 0);
             } catch (RemoteException ex) {
