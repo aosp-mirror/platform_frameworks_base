@@ -138,12 +138,14 @@ public class SplashscreenContentDrawer {
      *                                 null if failed.
      */
     void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
-            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer) {
+            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer,
+            Consumer<Runnable> uiThreadInitConsumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
-                contentView = makeSplashScreenContentView(context, info, suggestType);
+                contentView = makeSplashScreenContentView(context, info, suggestType,
+                        uiThreadInitConsumer);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "failed creating starting window content at taskId: "
@@ -239,7 +241,7 @@ public class SplashscreenContentDrawer {
     }
 
     private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai,
-            @StartingWindowType int suggestType) {
+            @StartingWindowType int suggestType, Consumer<Runnable> uiThreadInitConsumer) {
         updateDensity();
 
         getWindowAttrs(context, mTmpAttrs);
@@ -254,6 +256,7 @@ public class SplashscreenContentDrawer {
                 .setWindowBGColor(themeBGColor)
                 .overlayDrawable(legacyDrawable)
                 .chooseStyle(suggestType)
+                .setUiThreadInitConsumer(uiThreadInitConsumer)
                 .build();
     }
 
@@ -324,6 +327,7 @@ public class SplashscreenContentDrawer {
         private int mThemeColor;
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
+        private Consumer<Runnable> mUiThreadInitTask;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
             mContext = context;
@@ -342,6 +346,11 @@ public class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder chooseStyle(int suggestType) {
             mSuggestType = suggestType;
+            return this;
+        }
+
+        StartingWindowViewBuilder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
+            mUiThreadInitTask = uiThreadInitTask;
             return this;
         }
 
@@ -391,7 +400,8 @@ public class SplashscreenContentDrawer {
                 animationDuration = 0;
             }
 
-            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, animationDuration);
+            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, animationDuration,
+                    mUiThreadInitTask);
         }
 
         private class ShapeIconFactory extends BaseIconFactory {
@@ -469,7 +479,7 @@ public class SplashscreenContentDrawer {
         }
 
         private SplashScreenView fillViewWithIcon(int iconSize, @Nullable Drawable[] iconDrawable,
-                int animationDuration) {
+                int animationDuration, Consumer<Runnable> uiThreadInitTask) {
             Drawable foreground = null;
             Drawable background = null;
             if (iconDrawable != null) {
@@ -485,7 +495,8 @@ public class SplashscreenContentDrawer {
                     .setIconSize(iconSize)
                     .setIconBackground(background)
                     .setCenterViewDrawable(foreground)
-                    .setAnimationDurationMillis(animationDuration);
+                    .setAnimationDurationMillis(animationDuration)
+                    .setUiThreadInitConsumer(uiThreadInitTask);
 
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {
