@@ -628,8 +628,11 @@ public class BubbleController {
             mAddedToWindowManager = true;
             mBubbleData.getOverflow().initialize(this);
             mWindowManager.addView(mStackView, mWmLayoutParams);
-            // Position info is dependent on us being attached to a window
-            mBubblePositioner.update();
+            mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
+                mBubblePositioner.update();
+                mStackView.onDisplaySizeChanged();
+                return windowInsets;
+            });
         } catch (IllegalStateException e) {
             // This means the stack has already been added. This shouldn't happen...
             e.printStackTrace();
