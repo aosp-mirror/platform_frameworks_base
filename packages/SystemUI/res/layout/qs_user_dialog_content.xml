@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:textAlignment="center"
-        android:text="Select user"
+        android:text="@string/qs_user_switch_dialog_title"
         android:textAppearance="@style/TextAppearance.QSDialog.Title"
         android:layout_marginBottom="32dp"
         sysui:layout_constraintTop_toTopOf="parent"
