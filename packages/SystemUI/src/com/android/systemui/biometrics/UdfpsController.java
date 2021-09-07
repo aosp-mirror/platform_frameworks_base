@@ -217,6 +217,7 @@ public class UdfpsController implements DozeReceiver {
         }
 
         void onEnrollmentHelp() {
+            Log.d(TAG, "onEnrollmentHelp");
             if (mEnrollHelper != null) {
                 mEnrollHelper.onEnrollmentHelp();
             }
