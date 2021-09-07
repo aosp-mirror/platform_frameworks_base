@@ -3030,4 +3030,7 @@
     <string name="qs_tile_request_dialog_add">Add tile</string>
     <!-- Text for TileService request dialog. Text for button for user to reject adding the tile [CHAR LIMIT=20] -->
     <string name="qs_tile_request_dialog_not_add">Do not add tile</string>
+
+    <!-- Title for User Switch dialog. [CHAR LIMIT=20] -->
+    <string name="qs_user_switch_dialog_title">Select user</string>
 </resources>
