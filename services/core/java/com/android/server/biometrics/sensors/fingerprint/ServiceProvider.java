@@ -90,27 +90,23 @@ public interface ServiceProvider {
      */
     void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
     long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
-            int statsClient,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            int statsClient);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            boolean allowBackgroundAuthentication);
 
     long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            boolean allowBackgroundAuthentication);
 
     void startPreparedClient(int sensorId, int cookie);
 
@@ -169,6 +165,5 @@ public interface ServiceProvider {
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName);
 }
