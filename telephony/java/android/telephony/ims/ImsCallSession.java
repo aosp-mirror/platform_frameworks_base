@@ -766,7 +766,10 @@ public class ImsCallSession {
      * The method is only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
-     * @param callee dialed string to make the call to
+     * @param callee dial string to make the call to.  The platform passes the dialed number
+     *               entered by the user as-is.  The {@link ImsService} should ensure that the
+     *               number is formatted in SIP messages appropriately (e.g. using
+     *               {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}).
      * @param profile call profile to make the call with the specified service type,
      *      call type and media information
      * @see Listener#callSessionStarted, Listener#callSessionStartFailed
@@ -788,7 +791,10 @@ public class ImsCallSession {
      * The method is only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
-     * @param participants participant list to initiate an IMS conference call
+     * @param participants participant list to initiate an IMS conference call.  The platform passes
+     *               the dialed numbers entered by the user as-is.  The {@link ImsService} should
+     *               ensure that the number is formatted in SIP messages appropriately (e.g. using
+     *               {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}).
      * @param profile call profile to make the call with the specified service type,
      *      call type and media information
      * @see Listener#callSessionStarted, Listener#callSessionStartFailed
