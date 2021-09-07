@@ -49,5 +49,10 @@ public abstract class FingerprintStateListener extends IFingerprintStateListener
      * Defines behavior in response to state update
      * @param newState new state of fingerprint sensor
      */
-    public abstract void onStateChanged(@FingerprintStateListener.State int newState);
+    public void onStateChanged(@FingerprintStateListener.State int newState) {};
+
+    /**
+     * Invoked when enrollment state changes for the specified user
+     */
+    public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {};
 }
