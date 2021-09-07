@@ -56,6 +56,7 @@ public class UdfpsEnrollHelper {
 
     interface Listener {
         void onEnrollmentProgress(int remaining, int totalSteps);
+        void onEnrollmentHelp(int remaining, int totalSteps);
         void onLastStepAcquired();
     }
 
@@ -173,7 +174,9 @@ public class UdfpsEnrollHelper {
     }
 
     void onEnrollmentHelp() {
-
+        if (mListener != null) {
+            mListener.onEnrollmentHelp(mRemainingSteps, mTotalSteps);
+        }
     }
 
     void setListener(Listener listener) {
