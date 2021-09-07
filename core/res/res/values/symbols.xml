@@ -3687,7 +3687,6 @@
   <java-symbol type="string" name="popup_window_default_title" />
   <java-symbol type="bool" name="config_showAreaUpdateInfoSettings" />
   <java-symbol type="layout" name="shutdown_dialog" />
-  <java-symbol type="dimen" name="chooser_service_spacing" />
   <java-symbol type="bool" name="config_showSysuiShutdown" />
   <java-symbol type="drawable" name="chooser_file_generic" />
 
