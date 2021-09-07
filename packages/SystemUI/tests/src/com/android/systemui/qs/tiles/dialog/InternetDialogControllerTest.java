@@ -249,24 +249,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getWifiDetailsSettingsIntent_withNoConnectedEntry_returnNull() {
-        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
+    public void getWifiDetailsSettingsIntent_withNoKey_returnNull() {
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent(null)).isNull();
     }
 
     @Test
-    public void getWifiDetailsSettingsIntent_withNoConnectedEntryKey_returnNull() {
-        when(mConnectedEntry.getKey()).thenReturn(null);
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
-    }
-
-    @Test
-    public void getWifiDetailsSettingsIntent_withConnectedEntryKey_returnIntent() {
-        when(mConnectedEntry.getKey()).thenReturn("test_key");
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNotNull();
+    public void getWifiDetailsSettingsIntent_withKey_returnIntent() {
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent("test_key")).isNotNull();
     }
 
     @Test
@@ -281,20 +270,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withNoConnectedEntry_doNothing() {
-        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
-
-        mInternetDialogController.launchWifiNetworkDetailsSetting();
+    public void launchWifiNetworkDetailsSetting_withNoWifiEntryKey_doNothing() {
+        mInternetDialogController.launchWifiNetworkDetailsSetting(null /* key */);
 
         verify(mActivityStarter, never())
                 .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withConnectedEntryKey_startActivity() {
-        when(mConnectedEntry.getKey()).thenReturn("test_key");
-
-        mInternetDialogController.launchWifiNetworkDetailsSetting();
+    public void launchWifiNetworkDetailsSetting_withWifiEntryKey_startActivity() {
+        mInternetDialogController.launchWifiNetworkDetailsSetting("wifi_entry_key");
 
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
