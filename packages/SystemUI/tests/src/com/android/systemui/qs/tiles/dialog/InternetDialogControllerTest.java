@@ -259,7 +259,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getWifiDrawable_withConnectedEntry_returnIntentIconWithCorrectColor() {
+    public void getInternetWifiDrawable_withConnectedEntry_returnIntentIconWithCorrectColor() {
         final Drawable drawable = mock(Drawable.class);
         when(mWifiIconInjector.getIcon(anyBoolean(), anyInt())).thenReturn(drawable);
 
@@ -267,6 +267,15 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         verify(mWifiIconInjector).getIcon(eq(false), anyInt());
         verify(drawable).setTint(mContext.getColor(R.color.connected_network_primary_color));
+    }
+
+    @Test
+    public void getInternetWifiDrawable_withWifiLevelUnreachable_returnNull() {
+        when(mConnectedEntry.getLevel()).thenReturn(WifiEntry.WIFI_LEVEL_UNREACHABLE);
+
+        Drawable drawable = mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
+
+        assertThat(drawable).isNull();
     }
 
     @Test
