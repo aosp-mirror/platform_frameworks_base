@@ -153,7 +153,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             int index, byte[] value);
     private static native void nativeResetStatementAndClearBindings(
             long connectionPtr, long statementPtr);
-    private static native void nativeExecute(long connectionPtr, long statementPtr);
+    private static native void nativeExecute(long connectionPtr, long statementPtr,
+            boolean isPragmaStmt);
     private static native long nativeExecuteForLong(long connectionPtr, long statementPtr);
     private static native String nativeExecuteForString(long connectionPtr, long statementPtr);
     private static native int nativeExecuteForBlobFileDescriptor(
@@ -699,6 +700,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
         final int cookie = mRecentOperations.beginOperation("execute", sql, bindArgs);
         try {
+            final boolean isPragmaStmt =
+                DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_PRAGMA;
             final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
@@ -706,7 +709,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                    nativeExecute(mConnectionPtr, statement.mStatementPtr, isPragmaStmt);
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
