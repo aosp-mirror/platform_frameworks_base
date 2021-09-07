@@ -741,7 +741,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 final Intent intent = new Intent("com.android.settings.WIFI_DIALOG")
                         .putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, mWifiEntry.getKey());
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mActivityStarter.startActivity(intent, true);
+                mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {
                 Toast.makeText(mContext, R.string.wifi_failed_connect_message,
                         Toast.LENGTH_SHORT).show();
