@@ -26,6 +26,7 @@ import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
@@ -270,6 +272,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     public static Fingerprint21UdfpsMock newInstance(@NonNull Context context,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
@@ -280,8 +283,8 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
                 new TestableBiometricScheduler(TAG, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
-        return new Fingerprint21UdfpsMock(context, sensorProps, scheduler, handler,
-                lockoutResetDispatcher, controller);
+        return new Fingerprint21UdfpsMock(context, fingerprintStateCallback, sensorProps, scheduler,
+                handler, lockoutResetDispatcher, controller);
     }
 
     private static abstract class FakeFingerRunnable implements Runnable {
@@ -400,17 +403,19 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             // internal preemption logic is not run.
             mFingerprint21.scheduleAuthenticate(mFingerprint21.mSensorProperties.sensorId, token,
                     operationId, user, cookie, listener, opPackageName, restricted, statsClient,
-                    isKeyguard, null /* fingerprintStateCallback */);
+                    isKeyguard);
         }
     }
 
     private Fingerprint21UdfpsMock(@NonNull Context context,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull TestableBiometricScheduler scheduler,
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull MockHalResultController controller) {
-        super(context, sensorProps, scheduler, handler, lockoutResetDispatcher, controller);
+        super(context, fingerprintStateCallback, sensorProps, scheduler, handler,
+                lockoutResetDispatcher, controller);
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;
