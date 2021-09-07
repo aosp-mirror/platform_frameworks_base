@@ -581,8 +581,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
         // devices.
         layout.setBaselineAligned(false);
 
-        final boolean isRtl = mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-
         // Add smart replies
         Button previous = null;
         SmartReplyView.SmartReplies smartReplies =
@@ -602,11 +600,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -630,11 +624,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -933,8 +923,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 .collect(Collectors.toList());
         Button singleLineButton = buttons.get(0);
         Button doubleLineButton = buttons.get(1);
-        Drawable singleLineDrawable = singleLineButton.getCompoundDrawables()[0]; // left drawable
-        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawables()[0]; // left drawable
+        Drawable singleLineDrawable = singleLineButton.getCompoundDrawablesRelative()[0]; // start
+        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawablesRelative()[0]; // start
         assertEquals(singleLineDrawable.getBounds().width(),
                      doubleLineDrawable.getBounds().width());
         assertEquals(singleLineDrawable.getBounds().height(),
