@@ -140,7 +140,7 @@ public final class TransitionInfo implements Parcelable {
     private TransitionInfo(Parcel in) {
         mType = in.readInt();
         mFlags = in.readInt();
-        in.readList(mChanges, null /* classLoader */);
+        in.readTypedList(mChanges, Change.CREATOR);
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
         mRootOffset.readFromParcel(in);
@@ -152,7 +152,7 @@ public final class TransitionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
         dest.writeInt(mFlags);
-        dest.writeList(mChanges);
+        dest.writeTypedList(mChanges);
         mRootLeash.writeToParcel(dest, flags);
         mRootOffset.writeToParcel(dest, flags);
         dest.writeTypedObject(mOptions, flags);

@@ -61,7 +61,7 @@ public final class WindowContainerTransaction implements Parcelable {
 
     private WindowContainerTransaction(Parcel in) {
         in.readMap(mChanges, null /* loader */);
-        in.readList(mHierarchyOps, null /* loader */);
+        in.readTypedList(mHierarchyOps, HierarchyOp.CREATOR);
         mErrorCallbackToken = in.readStrongBinder();
         mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(in.readStrongBinder());
     }
@@ -643,7 +643,7 @@ public final class WindowContainerTransaction implements Parcelable {
     /** @hide */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeMap(mChanges);
-        dest.writeList(mHierarchyOps);
+        dest.writeTypedList(mHierarchyOps);
         dest.writeStrongBinder(mErrorCallbackToken);
         dest.writeStrongInterface(mTaskFragmentOrganizer);
     }
@@ -916,7 +916,7 @@ public final class WindowContainerTransaction implements Parcelable {
      * Changes because they must be executed in the same order that they are added.
      * @hide
      */
-    public static class HierarchyOp implements Parcelable {
+    public static final class HierarchyOp implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REPARENT = 0;
         public static final int HIERARCHY_OP_TYPE_REORDER = 1;
         public static final int HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT = 2;
