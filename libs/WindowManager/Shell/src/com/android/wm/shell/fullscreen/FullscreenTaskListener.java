@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.fullscreen;
+
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
-import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.TaskInfo;
 import android.graphics.Point;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
   * Organizes tasks presented in {@link android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN}.
@@ -43,13 +49,17 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private final SyncTransactionQueue mSyncQueue;
 
     private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
+    private final AnimatableTasksListener mAnimatableTasksListener = new AnimatableTasksListener();
+    private final FullscreenUnfoldController mFullscreenUnfoldController;
 
-    public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
+    public FullscreenTaskListener(SyncTransactionQueue syncQueue,
+            Optional<FullscreenUnfoldController> unfoldController) {
         mSyncQueue = syncQueue;
+        mFullscreenUnfoldController = unfoldController.orElse(null);
     }
 
     @Override
-    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+    public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (mDataByTaskId.get(taskInfo.taskId) != null) {
             throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
@@ -67,11 +77,16 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
             t.setMatrix(leash, 1, 0, 0, 1);
             t.show(leash);
         });
+
+        mAnimatableTasksListener.onTaskAppeared(taskInfo);
     }
 
     @Override
-    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+
+        mAnimatableTasksListener.onTaskInfoChanged(taskInfo);
+
         final TaskData data = mDataByTaskId.get(taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
         if (!positionInParent.equals(data.positionInParent)) {
@@ -83,12 +98,15 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     @Override
-    public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
         if (mDataByTaskId.get(taskInfo.taskId) == null) {
             Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
             return;
         }
+
+        mAnimatableTasksListener.onTaskVanished(taskInfo);
         mDataByTaskId.remove(taskInfo.taskId);
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
     }
@@ -123,6 +141,67 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         public TaskData(SurfaceControl surface, Point positionInParent) {
             this.surface = surface;
             this.positionInParent = positionInParent;
+        }
+    }
+
+    class AnimatableTasksListener {
+        private final SparseBooleanArray mTaskIds = new SparseBooleanArray();
+
+        public void onTaskAppeared(RunningTaskInfo taskInfo) {
+            final boolean isApplicable = isAnimatable(taskInfo);
+            if (isApplicable) {
+                mTaskIds.put(taskInfo.taskId, true);
+
+                if (mFullscreenUnfoldController != null) {
+                    SurfaceControl leash = mDataByTaskId.get(taskInfo.taskId).surface;
+                    mFullscreenUnfoldController.onTaskAppeared(taskInfo, leash);
+                }
+            }
+        }
+
+        public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+            final boolean isCurrentlyApplicable = mTaskIds.get(taskInfo.taskId);
+            final boolean isApplicable = isAnimatable(taskInfo);
+
+            if (isCurrentlyApplicable) {
+                if (isApplicable) {
+                    // Still applicable, send update
+                    if (mFullscreenUnfoldController != null) {
+                        mFullscreenUnfoldController.onTaskInfoChanged(taskInfo);
+                    }
+                } else {
+                    // Became inapplicable
+                    if (mFullscreenUnfoldController != null) {
+                        mFullscreenUnfoldController.onTaskVanished(taskInfo);
+                    }
+                    mTaskIds.put(taskInfo.taskId, false);
+                }
+            } else {
+                if (isApplicable) {
+                    // Became applicable
+                    mTaskIds.put(taskInfo.taskId, true);
+
+                    if (mFullscreenUnfoldController != null) {
+                        SurfaceControl leash = mDataByTaskId.get(taskInfo.taskId).surface;
+                        mFullscreenUnfoldController.onTaskAppeared(taskInfo, leash);
+                    }
+                }
+            }
+        }
+
+        public void onTaskVanished(RunningTaskInfo taskInfo) {
+            final boolean isCurrentlyApplicable = mTaskIds.get(taskInfo.taskId);
+            if (isCurrentlyApplicable && mFullscreenUnfoldController != null) {
+                mFullscreenUnfoldController.onTaskVanished(taskInfo);
+            }
+            mTaskIds.put(taskInfo.taskId, false);
+        }
+
+        private boolean isAnimatable(TaskInfo taskInfo) {
+            // Filter all visible tasks that are not launcher tasks
+            // We do not animate launcher as it handles the animation by itself
+            return taskInfo != null && taskInfo.isVisible && taskInfo.getConfiguration()
+                    .windowConfiguration.getActivityType() != ACTIVITY_TYPE_HOME;
         }
     }
 }
