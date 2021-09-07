@@ -210,6 +210,7 @@ public class UdfpsController implements DozeReceiver {
         }
 
         void onAcquiredGood() {
+            Log.d(TAG, "onAcquiredGood");
             if (mEnrollHelper != null) {
                 mEnrollHelper.animateIfLastStep();
             }
