@@ -1638,4 +1638,9 @@
     <dimen name="qs_tile_service_request_dialog_width">304dp</dimen>
     <dimen name="qs_tile_service_request_tile_width">192dp</dimen>
     <dimen name="qs_tile_service_request_content_space">24dp</dimen>
+
+    <dimen name="qs_dialog_button_horizontal_padding">16dp</dimen>
+    <dimen name="qs_dialog_button_vertical_padding">8dp</dimen>
+    <!-- The button will be 48dp tall, but the background needs to be 36dp tall -->
+    <dimen name="qs_dialog_button_vertical_inset">6dp</dimen>
 </resources>
