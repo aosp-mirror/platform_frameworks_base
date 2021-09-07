@@ -492,10 +492,10 @@ nsecs_t CanvasContext::draw() {
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
         waitOnFences();
-        for (auto& func : mFrameCompleteCallbacks) {
-            std::invoke(func, mFrameNumber);
+        for (auto& func : mFrameCommitCallbacks) {
+            std::invoke(func, false /* didProduceBuffer */);
         }
-        mFrameCompleteCallbacks.clear();
+        mFrameCommitCallbacks.clear();
         return 0;
     }
 
@@ -604,10 +604,10 @@ nsecs_t CanvasContext::draw() {
 #endif
 
     if (didSwap) {
-        for (auto& func : mFrameCompleteCallbacks) {
-            std::invoke(func, frameCompleteNr);
+        for (auto& func : mFrameCommitCallbacks) {
+            std::invoke(func, true /* didProduceBuffer */);
         }
-        mFrameCompleteCallbacks.clear();
+        mFrameCommitCallbacks.clear();
     }
 
     if (requireSwap) {
