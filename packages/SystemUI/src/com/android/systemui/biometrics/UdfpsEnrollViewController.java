@@ -74,7 +74,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     @NonNull
     @Override
     public PointF getTouchTranslation() {
-        if (!mEnrollHelper.isCenterEnrollmentComplete()) {
+        if (!mEnrollHelper.isGuidedEnrollmentStage()) {
             return new PointF(0, 0);
         } else {
             return mEnrollHelper.getNextGuidedEnrollmentPoint();
