@@ -140,6 +140,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * The Chooser Activity handles intent resolution specifically for sharing intents -
@@ -2795,7 +2796,7 @@ public class ChooserActivity extends ResolverActivity implements
                 .setSubtype(previewType));
     }
 
-    class ViewHolderBase extends RecyclerView.ViewHolder {
+    abstract static class ViewHolderBase extends RecyclerView.ViewHolder {
         private int mViewType;
 
         ViewHolderBase(View itemView, int viewType) {
@@ -2843,7 +2844,7 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Add a footer to the list, to support scrolling behavior below the navbar.
      */
-    final class FooterViewHolder extends ViewHolderBase {
+    static final class FooterViewHolder extends ViewHolderBase {
         FooterViewHolder(View itemView, int viewType) {
             super(itemView, viewType);
         }
@@ -3268,7 +3269,8 @@ public class ChooserActivity extends ResolverActivity implements
                 parentGroup.addView(row2);
 
                 mDirectShareViewHolder = new DirectShareViewHolder(parentGroup,
-                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow(), viewType);
+                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow(), viewType,
+                        mChooserMultiProfilePagerAdapter::getActiveListAdapter);
                 loadViewsIntoGroup(mDirectShareViewHolder);
 
                 return mDirectShareViewHolder;
@@ -3430,7 +3432,7 @@ public class ChooserActivity extends ResolverActivity implements
      * {@link ChooserGridAdapter#VIEW_TYPE_DIRECT_SHARE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_CALLER_AND_RANK}.
      */
-    abstract class ItemGroupViewHolder extends ViewHolderBase {
+    abstract static class ItemGroupViewHolder extends ViewHolderBase {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
@@ -3480,7 +3482,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class SingleRowViewHolder extends ItemGroupViewHolder {
+    static class SingleRowViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mRow;
 
         SingleRowViewHolder(ViewGroup row, int cellCount, int viewType) {
@@ -3514,7 +3516,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class DirectShareViewHolder extends ItemGroupViewHolder {
+    static class DirectShareViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mParent;
         private final List<ViewGroup> mRows;
         private int mCellCountPerRow;
@@ -3526,14 +3528,17 @@ public class ChooserActivity extends ResolverActivity implements
 
         private final boolean[] mCellVisibility;
 
+        private final Supplier<ChooserListAdapter> mListAdapterSupplier;
+
         DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow,
-                int viewType) {
+                int viewType, Supplier<ChooserListAdapter> listAdapterSupplier) {
             super(rows.size() * cellCountPerRow, parent, viewType);
 
             this.mParent = parent;
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
             this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
+            this.mListAdapterSupplier = listAdapterSupplier;
         }
 
         public ViewGroup addView(int index, View v) {
@@ -3607,8 +3612,7 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // only expand if we have more than maxTargetsPerRow, and delay that decision
                 // until they start to scroll
-                ChooserListAdapter adapter =
-                        mChooserMultiProfilePagerAdapter.getActiveListAdapter();
+                ChooserListAdapter adapter = mListAdapterSupplier.get();
                 int validTargets = adapter.getSelectableServiceTargetCount();
                 if (validTargets <= maxTargetsPerRow) {
                     mHideDirectShareExpansion = true;
