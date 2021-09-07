@@ -113,10 +113,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     /** @return {@code true} if this listener contains the currently focused task. */
     boolean isFocused() {
-        if (mRootTaskInfo.isFocused) return true;
-        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            if (mChildrenTaskInfo.valueAt(i).isFocused) return true;
+        if (mRootTaskInfo == null) {
+            return false;
         }
+
+        if (mRootTaskInfo.isFocused) {
+            return true;
+        }
+
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (mChildrenTaskInfo.valueAt(i).isFocused) {
+                return true;
+            }
+        }
+
         return false;
     }
 
