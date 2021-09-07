@@ -323,6 +323,7 @@ public class QuickStatusBarHeader extends FrameLayout {
                     public void onAnimationAtStart() {
                         super.onAnimationAtStart();
                         mClockDateView.setFreezeSwitching(false);
+                        mClockDateView.setVisibility(View.VISIBLE);
                         setSeparatorVisibility(mShowClockIconsSeparator);
                         // In QQS we never ignore RSSI.
                         mIconContainer.removeIgnoredSlots(mRssiIgnoredSlots);
