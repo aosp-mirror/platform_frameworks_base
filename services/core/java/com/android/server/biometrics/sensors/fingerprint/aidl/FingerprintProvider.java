@@ -25,10 +25,12 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.content.res.TypedArray;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
@@ -145,6 +147,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
 
+        final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
+
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
 
@@ -164,9 +168,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             componentInfo,
                             prop.sensorType,
                             true /* resetLockoutRequiresHardwareAuthToken */,
-                            prop.sensorLocations[0].sensorLocationX,
-                            prop.sensorLocations[0].sensorLocationY,
-                            prop.sensorLocations[0].sensorRadius);
+                            !workaroundLocations.isEmpty() ? workaroundLocations :
+                                    List.of(new SensorLocationInternal(
+                                        "" /* displayId */,
+                                        prop.sensorLocations[0].sensorLocationX,
+                                        prop.sensorLocations[0].sensorLocationY,
+                                        prop.sensorLocations[0].sensorRadius)));
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp, lockoutResetDispatcher, gestureAvailabilityDispatcher);
 
@@ -646,5 +653,46 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     void setTestHalEnabled(boolean enabled) {
         mTestHalEnabled = enabled;
+    }
+
+    // TODO(b/174868353): workaround for gaps in HAL interface (remove and get directly from HAL)
+    // reads values via an overlay instead of querying the HAL
+    @NonNull
+    private List<SensorLocationInternal> getWorkaroundSensorProps(@NonNull Context context) {
+        final List<SensorLocationInternal> sensorLocations = new ArrayList<>();
+
+        final TypedArray sfpsProps = context.getResources().obtainTypedArray(
+                com.android.internal.R.array.config_sfps_sensor_props);
+        for (int i = 0; i < sfpsProps.length(); i++) {
+            final int id = sfpsProps.getResourceId(i, -1);
+            if (id > 0) {
+                final SensorLocationInternal location = parseSensorLocation(
+                        context.getResources().obtainTypedArray(id));
+                if (location != null) {
+                    sensorLocations.add(location);
+                }
+            }
+        }
+        sfpsProps.recycle();
+
+        return sensorLocations;
+    }
+
+    @Nullable
+    private SensorLocationInternal parseSensorLocation(@Nullable TypedArray array) {
+        if (array == null) {
+            return null;
+        }
+
+        try {
+            return new SensorLocationInternal(
+                    array.getString(0),
+                    array.getInt(1, 0),
+                    array.getInt(2, 0),
+                    array.getInt(3, 0));
+        } catch (Exception e) {
+            Slog.w(getTag(), "malformed sensor location", e);
+        }
+        return null;
     }
 }

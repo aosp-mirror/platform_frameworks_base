@@ -17,6 +17,7 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -56,21 +57,8 @@ class SidefpsController @Inject constructor(
     @VisibleForTesting
     val sensorProps: FingerprintSensorPropertiesInternal = fingerprintManager
         ?.sensorPropertiesInternal
-        ?.filter { it.isAnySidefpsType }
-        // TODO(b/188690214): remove - should directly come from HAL
-        ?.map { props ->
-            FingerprintSensorPropertiesInternal(
-                props.sensorId,
-                props.sensorStrength,
-                props.maxEnrollmentsPerUser,
-                props.componentInfo,
-                props.sensorType,
-                props.resetLockoutRequiresHardwareAuthToken,
-                25 /* sensorLocationX */,
-                610 /* sensorLocationY */,
-                112 /* sensorRadius */
-            )
-        }?.firstOrNull() ?: throw IllegalStateException("no side fingerprint sensor")
+        ?.firstOrNull { it.isAnySidefpsType }
+        ?: throw IllegalStateException("no side fingerprint sensor")
 
     @VisibleForTesting
     val orientationListener = BiometricDisplayListener(
@@ -131,29 +119,49 @@ class SidefpsController @Inject constructor(
 
     private fun createOverlayForDisplay(): View {
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
-
         val display = context.display!!
-        val isPortrait = display.isPortrait()
-        val size = windowManager.maximumWindowMetrics.bounds
-        val displayWidth = if (isPortrait) size.width() else size.height()
-        val displayHeight = if (isPortrait) size.height() else size.width()
 
         val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
         lottie.setAnimation(display.asSideFpsAnimation())
         view.rotation = display.asSideFpsAnimationRotation()
 
+        updateOverlayParams(display, lottie.composition?.bounds ?: Rect())
+        lottie.addLottieOnCompositionLoadedListener {
+            if (overlayView == view) {
+                updateOverlayParams(display, it.bounds)
+                windowManager.updateViewLayout(overlayView, overlayViewParams)
+            }
+        }
+
+        return view
+    }
+
+    private fun updateOverlayParams(display: Display, bounds: Rect) {
+        val isPortrait = display.isPortrait()
+        val size = windowManager.maximumWindowMetrics.bounds
+        val displayWidth = if (isPortrait) size.width() else size.height()
+        val displayHeight = if (isPortrait) size.height() else size.width()
+        val offsets = sensorProps.getLocation(display.uniqueId).let { location ->
+            if (location == null) {
+                Log.w(TAG, "No location specified for display: ${display.uniqueId}")
+            }
+            location ?: sensorProps.location
+        }
+
         // ignore sensorLocationX and sensorRadius since it's assumed to be on the side
         // of the device and centered at sensorLocationY
         val (x, y) = when (display.rotation) {
-            Surface.ROTATION_90 -> Pair(sensorProps.sensorLocationY, 0)
-            Surface.ROTATION_270 -> Pair(displayHeight - sensorProps.sensorLocationY, displayWidth)
-            Surface.ROTATION_180 -> Pair(0, displayHeight - sensorProps.sensorLocationY)
-            else -> Pair(displayWidth, sensorProps.sensorLocationY)
+            Surface.ROTATION_90 ->
+                Pair(offsets.sensorLocationY, 0)
+            Surface.ROTATION_270 ->
+                Pair(displayHeight - offsets.sensorLocationY - bounds.width(), displayWidth)
+            Surface.ROTATION_180 ->
+                Pair(0, displayHeight - offsets.sensorLocationY - bounds.height())
+            else ->
+                Pair(displayWidth, offsets.sensorLocationY)
         }
         overlayViewParams.x = x
         overlayViewParams.y = y
-
-        return view
     }
 }
 

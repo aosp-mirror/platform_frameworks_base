@@ -33,6 +33,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -643,10 +644,11 @@ public class UdfpsController implements DozeReceiver {
         // on lockscreen and for the udfps light reveal animation on keyguard.
         // Keyguard is only shown in portrait mode for now, so this will need to
         // be updated if that ever changes.
-        return new RectF(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
+        final SensorLocationInternal location = mSensorProps.getLocation();
+        return new RectF(location.sensorLocationX - location.sensorRadius,
+                location.sensorLocationY - location.sensorRadius,
+                location.sensorLocationX + location.sensorRadius,
+                location.sensorLocationY + location.sensorRadius);
     }
 
     private void updateOverlay() {
@@ -670,10 +672,11 @@ public class UdfpsController implements DozeReceiver {
         }
 
         // Default dimensions assume portrait mode.
-        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius - paddingX;
-        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius - paddingY;
-        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius + 2 * paddingX;
-        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius + 2 * paddingY;
+        final SensorLocationInternal location = mSensorProps.getLocation();
+        mCoreLayoutParams.x = location.sensorLocationX - location.sensorRadius - paddingX;
+        mCoreLayoutParams.y = location.sensorLocationY - location.sensorRadius - paddingY;
+        mCoreLayoutParams.height = 2 * location.sensorRadius + 2 * paddingX;
+        mCoreLayoutParams.width = 2 * location.sensorRadius + 2 * paddingY;
 
         Point p = new Point();
         // Gets the size based on the current rotation of the display.
@@ -686,9 +689,9 @@ public class UdfpsController implements DozeReceiver {
                         && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
-                mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                mCoreLayoutParams.x = location.sensorLocationY - location.sensorRadius
                         - paddingX;
-                mCoreLayoutParams.y = p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                mCoreLayoutParams.y = p.y - location.sensorLocationX - location.sensorRadius
                         - paddingY;
                 break;
 
@@ -697,9 +700,9 @@ public class UdfpsController implements DozeReceiver {
                         && mKeyguardUpdateMonitor.isGoingToSleep()) {
                     break;
                 }
-                mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                mCoreLayoutParams.x = p.x - location.sensorLocationY - location.sensorRadius
                         - paddingX;
-                mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                mCoreLayoutParams.y = location.sensorLocationX - location.sensorRadius
                         - paddingY;
                 break;
 
