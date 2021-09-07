@@ -191,7 +191,7 @@ class PackageParsingPerfTest {
     }
 
     class ParallelParser2(cacher: PackageCacher2? = null)
-        : ParallelParser<ParsingPackageRead>(cacher) {
+        : ParallelParser<ParsingPackageImpl>(cacher) {
         val input = ThreadLocal.withInitial {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
@@ -211,6 +211,7 @@ class PackageParsingPerfTest {
 
         override fun parseImpl(file: File) =
                 parser.parsePackage(input.get()!!.reset(), file, 0).result
+                        as ParsingPackageImpl
     }
 
     abstract class PackageCacher<PackageType : Parcelable>(private val cacheDir: File) {
@@ -266,7 +267,7 @@ class PackageParsingPerfTest {
     /**
      * Re-implementation of the server side PackageCacher, as it's inaccessible here.
      */
-    class PackageCacher2(cacheDir: File) : PackageCacher<ParsingPackageRead>(cacheDir) {
+    class PackageCacher2(cacheDir: File) : PackageCacher<ParsingPackageImpl>(cacheDir) {
         override fun fromParcel(parcel: Parcel) = ParsingPackageImpl(parcel)
     }
 }
