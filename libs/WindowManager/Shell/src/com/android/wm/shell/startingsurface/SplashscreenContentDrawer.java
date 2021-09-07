@@ -50,6 +50,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.SplashScreenView;
@@ -299,6 +300,11 @@ public class SplashscreenContentDrawer {
         }
     }
 
+    /** Creates the wrapper with system theme to avoid unexpected styles from app. */
+    ContextThemeWrapper createViewContextWrapper(Context appContext) {
+        return new ContextThemeWrapper(appContext, mContext.getTheme());
+    }
+
     /** The configuration of the splash screen window. */
     public static class SplashScreenWindowAttrs {
         private int mWindowBgResId = 0;
@@ -472,7 +478,8 @@ public class SplashscreenContentDrawer {
             }
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
-            final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext)
+            final ContextThemeWrapper wrapper = createViewContextWrapper(mContext);
+            final SplashScreenView.Builder builder = new SplashScreenView.Builder(wrapper)
                     .setBackgroundColor(mThemeColor)
                     .setOverlayDrawable(mOverlayDrawable)
                     .setIconSize(iconSize)
