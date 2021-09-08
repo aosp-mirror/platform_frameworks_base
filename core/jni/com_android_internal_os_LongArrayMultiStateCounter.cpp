@@ -63,7 +63,7 @@ static void native_getCounts(jlong nativePtr, jlong longArrayContainerNativePtr,
     *vector = counter->getCount(state);
 }
 
-static jobject native_toString(JNIEnv *env, jlong nativePtr, jobject self) {
+static jobject native_toString(JNIEnv *env, jobject self, jlong nativePtr) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
     return env->NewStringUTF(counter->toString().c_str());
