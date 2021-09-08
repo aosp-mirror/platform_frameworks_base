@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -2051,8 +2052,56 @@ public final class Settings {
     // Intent#EXTRA_USER_ID can also be used
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS
-            = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+    public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS =
+            "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+
+    /**
+     * Intent extra: The id of a setting restricted by supervisors.
+     * <p>
+     * Type: String with a value from the SupervisorVerificationSetting annotation below.
+     * <ul>
+     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
+     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
+     * </ul>
+     * </p>
+     */
+    public static final String EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY =
+            "android.provider.extra.SUPERVISOR_RESTRICTED_SETTING_KEY";
+
+    /**
+     * Unknown setting.
+     */
+    public static final String SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = "";
+
+    /**
+     * Biometric settings for supervisors.
+     */
+    public static final String SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS =
+            "supervisor_restricted_biometrics_controller";
+
+    /**
+     * Keys for {@link #EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY}.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = { "SUPERVISOR_VERIFICATION_SETTING_" }, value = {
+            SUPERVISOR_VERIFICATION_SETTING_UNKNOWN,
+            SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
+    })
+    public @interface SupervisorVerificationSetting {}
+
+    /**
+     * Activity action: Launch UI to manage a setting restricted by supervisors.
+     * <p>
+     * Input: {@link #EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY} specifies what setting to open.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING =
+            "android.settings.MANAGE_SUPERVISOR_RESTRICTED_SETTING";
 
     /**
      * Activity Action: Show a dialog for remote bugreport flow.

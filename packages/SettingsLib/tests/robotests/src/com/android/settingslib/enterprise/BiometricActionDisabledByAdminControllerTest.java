@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.provider.Settings;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -77,11 +78,11 @@ public class BiometricActionDisabledByAdminControllerTest {
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext).startActivity(intentCaptor.capture());
-        assertEquals(BiometricActionDisabledByAdminController.ACTION_LEARN_MORE,
+        assertEquals(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING,
                 intentCaptor.getValue().getAction());
-        assertEquals(BiometricActionDisabledByAdminController.EXTRA_SETTING_VALUE,
+        assertEquals(Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
                 intentCaptor.getValue().getStringExtra(
-                        BiometricActionDisabledByAdminController.EXTRA_SETTING_KEY));
+                        Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY));
         assertSame(componentName, intentCaptor.getValue().getComponent());
     }
 }
