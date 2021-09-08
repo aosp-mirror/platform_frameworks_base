@@ -195,8 +195,8 @@ public:
 
     IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
-    void addFrameCompleteListener(std::function<void(int64_t)>&& func) {
-        mFrameCompleteCallbacks.push_back(std::move(func));
+    void addFrameCommitListener(std::function<void(bool)>&& func) {
+        mFrameCommitCallbacks.push_back(std::move(func));
     }
 
     void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback) {
@@ -328,7 +328,7 @@ private:
     std::vector<std::future<void>> mFrameFences;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
 
-    std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;
+    std::vector<std::function<void(bool)>> mFrameCommitCallbacks;
 
     // If set to true, we expect that callbacks into onSurfaceStatsAvailable
     bool mExpectSurfaceStats = false;

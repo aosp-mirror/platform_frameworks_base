@@ -48,20 +48,26 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Per-user state information about a package.
  * @hide
  */
-public class PackageUserState {
+public class PackageUserState implements android.content.pm.pkg.PackageUserState {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PackageUserState";
 
@@ -77,7 +83,7 @@ public class PackageUserState {
     public boolean virtualPreload;
     public int enabled;
     public String lastDisableAppCaller;
-    public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
+    @PackageManager.InstallReason
     public int installReason;
     public @PackageManager.UninstallReason int uninstallReason;
     public String harmfulAppWarning;
@@ -118,7 +124,6 @@ public class PackageUserState {
         virtualPreload = o.virtualPreload;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
-        categoryHint = o.categoryHint;
         installReason = o.installReason;
         uninstallReason = o.uninstallReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
@@ -132,16 +137,6 @@ public class PackageUserState {
             this.componentLabelIconOverrideMap = new ArrayMap<>(o.componentLabelIconOverrideMap);
         }
         splashScreenTheme = o.splashScreenTheme;
-    }
-
-    @Nullable
-    public OverlayPaths getOverlayPaths() {
-        return overlayPaths;
-    }
-
-    @Nullable
-    public Map<String, OverlayPaths> getSharedLibraryOverlayPaths() {
-        return sharedLibraryOverlayPaths;
     }
 
     /**
@@ -443,9 +438,6 @@ public class PackageUserState {
                         && !lastDisableAppCaller.equals(oldState.lastDisableAppCaller))) {
             return false;
         }
-        if (categoryHint != oldState.categoryHint) {
-            return false;
-        }
         if (installReason != oldState.installReason) {
             return false;
         }
@@ -506,7 +498,6 @@ public class PackageUserState {
         hashCode = 31 * hashCode + Boolean.hashCode(virtualPreload);
         hashCode = 31 * hashCode + enabled;
         hashCode = 31 * hashCode + Objects.hashCode(lastDisableAppCaller);
-        hashCode = 31 * hashCode + categoryHint;
         hashCode = 31 * hashCode + installReason;
         hashCode = 31 * hashCode + uninstallReason;
         hashCode = 31 * hashCode + Objects.hashCode(disabledComponents);
@@ -514,6 +505,103 @@ public class PackageUserState {
         hashCode = 31 * hashCode + Objects.hashCode(harmfulAppWarning);
         hashCode = 31 * hashCode + Objects.hashCode(splashScreenTheme);
         return hashCode;
+    }
+
+    @Override
+    public long getCeDataInode() {
+        return ceDataInode;
+    }
+
+    @NonNull
+    @Override
+    public Set<String> getDisabledComponents() {
+        return disabledComponents;
+    }
+
+    @PackageManager.DistractionRestriction
+    @Override
+    public int getDistractionFlags() {
+        return distractionFlags;
+    }
+
+    @NonNull
+    @Override
+    public Set<String> getEnabledComponents() {
+        return enabledComponents;
+    }
+
+    @Override
+    public int getEnabledState() {
+        return enabled;
+    }
+
+    @Nullable
+    @Override
+    public String getHarmfulAppWarning() {
+        return harmfulAppWarning;
+    }
+
+    @Override
+    public int getInstallReason() {
+        return installReason;
+    }
+
+    @Nullable
+    @Override
+    public String getLastDisableAppCaller() {
+        return lastDisableAppCaller;
+    }
+
+    @Nullable
+    @Override
+    public OverlayPaths getOverlayPaths() {
+        return overlayPaths;
+    }
+
+    @Nullable
+    @Override
+    public Map<String, OverlayPaths> getSharedLibraryOverlayPaths() {
+        return sharedLibraryOverlayPaths;
+    }
+
+    @Override
+    public int getUninstallReason() {
+        return uninstallReason;
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public boolean isInstalled() {
+        return installed;
+    }
+
+    @Override
+    public boolean isInstantApp() {
+        return instantApp;
+    }
+
+    @Override
+    public boolean isNotLaunched() {
+        return notLaunched;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return stopped;
+    }
+
+    @Override
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    @Override
+    public boolean isVirtualPreload() {
+        return virtualPreload;
     }
 
     /**

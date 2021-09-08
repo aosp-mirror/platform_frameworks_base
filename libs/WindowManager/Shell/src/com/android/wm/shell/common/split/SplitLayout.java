@@ -305,6 +305,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
         mSplitWindowManager.setResizingSplits(false);
         updateBounds(mDividePosition);
+        mWinToken1 = null;
+        mWinToken2 = null;
+        mWinBounds1.setEmpty();
+        mWinBounds2.setEmpty();
     }
 
     /**

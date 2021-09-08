@@ -27,12 +27,12 @@ import android.os.Message;
 public interface IState {
 
     /**
-     * Returned by processMessage to indicate the the message was processed.
+     * Returned by processMessage to indicate the message was processed.
      */
     static final boolean HANDLED = true;
 
     /**
-     * Returned by processMessage to indicate the the message was NOT processed.
+     * Returned by processMessage to indicate the message was NOT processed.
      */
     static final boolean NOT_HANDLED = false;
 

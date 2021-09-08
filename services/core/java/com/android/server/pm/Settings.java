@@ -1161,7 +1161,7 @@ public final class Settings implements Watchable, Snappable {
         }
         for (UserInfo user : allUsers) {
             final PackageUserState oldUserState = oldPackage == null
-                    ? PackageSettingBase.DEFAULT_USER_STATE
+                    ? PackageSetting.DEFAULT_USER_STATE
                     : oldPackage.readUserState(user.id);
             if (!oldUserState.equals(newPackage.readUserState(user.id))) {
                 writePackageRestrictionsLPr(user.id);
@@ -2733,9 +2733,6 @@ public final class Settings implements Watchable, Snappable {
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.appId);
         }
-        if (pkg.uidError) {
-            serializer.attributeBoolean(null, "uidError", true);
-        }
         InstallSource installSource = pkg.installSource;
         if (installSource.installerPackageName != null) {
             serializer.attribute(null, "installer", installSource.installerPackageName);
@@ -3004,7 +3001,7 @@ public final class Settings implements Watchable, Snappable {
 
         for (int i = 0; i < N; i++) {
             final PackageSetting p = mPendingPackages.get(i);
-            final int sharedUserId = p.getSharedUserId();
+            final int sharedUserId = p.getSharedUserIdInt();
             final Object idObj = getSettingLPr(sharedUserId);
             if (idObj instanceof SharedUserSetting) {
                 final SharedUserSetting sharedUser = (SharedUserSetting) idObj;
@@ -3522,7 +3519,6 @@ public final class Settings implements Watchable, Snappable {
         String volumeUuid = null;
         boolean updateAvailable = false;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
-        boolean uidError = false;
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         long timeStamp = 0;
@@ -3538,7 +3534,6 @@ public final class Settings implements Watchable, Snappable {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
             userId = parser.getAttributeInt(null, "userId", 0);
-            uidError = parser.getAttributeBoolean(null, "uidError", false);
             sharedUserId = parser.getAttributeInt(null, "sharedUserId", 0);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
@@ -3695,7 +3690,6 @@ public final class Settings implements Watchable, Snappable {
                             + userId + " at " + parser.getPositionDescription());
         }
         if (packageSetting != null) {
-            packageSetting.uidError = uidError;
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
                     installerPackageName, installerAttributionTag, isOrphaned,
@@ -3877,8 +3871,8 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readDisabledComponentsLPw(PackageSettingBase packageSetting,
-            TypedXmlPullParser parser, int userId) throws IOException, XmlPullParserException {
+    private void readDisabledComponentsLPw(PackageSetting packageSetting, TypedXmlPullParser parser,
+            int userId) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3905,8 +3899,8 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readEnabledComponentsLPw(PackageSettingBase packageSetting,
-            TypedXmlPullParser parser, int userId) throws IOException, XmlPullParserException {
+    private void readEnabledComponentsLPw(PackageSetting packageSetting, TypedXmlPullParser parser,
+            int userId) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4512,8 +4506,6 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().getSignatureSchemeVersion();
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            pw.print(prefix); pw.print("  applicationInfo=");
-            pw.println(pkg.toAppInfoToString());
             pw.print(prefix); pw.print("  flags=");
             printFlags(pw, PackageInfoUtils.appInfoFlags(pkg, ps), FLAG_DUMP_SPEC); pw.println();
             int privateFlags = PackageInfoUtils.appInfoPrivateFlags(pkg, ps);

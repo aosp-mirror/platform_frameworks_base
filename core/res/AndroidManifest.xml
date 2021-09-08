@@ -3152,6 +3152,12 @@
     <permission android:name="android.permission.READ_DEVICE_CONFIG"
         android:protectionLevel="signature|preinstalled" />
 
+    <!-- @SystemApi @hide Allows applications like settings to read system-owned
+     application-specific locale configs.
+     <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to monitor {@link android.provider.Settings.Config} access.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS"

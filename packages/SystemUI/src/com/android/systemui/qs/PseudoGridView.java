@@ -38,6 +38,7 @@ public class PseudoGridView extends ViewGroup {
     private int mNumColumns = 3;
     private int mVerticalSpacing;
     private int mHorizontalSpacing;
+    private int mFixedChildWidth = -1;
 
     public PseudoGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,6 +54,8 @@ public class PseudoGridView extends ViewGroup {
                 mVerticalSpacing = a.getDimensionPixelSize(attr, 0);
             } else if (attr == R.styleable.PseudoGridView_horizontalSpacing) {
                 mHorizontalSpacing = a.getDimensionPixelSize(attr, 0);
+            } else if (attr == R.styleable.PseudoGridView_fixedChildWidth) {
+                mFixedChildWidth = a.getDimensionPixelSize(attr, -1);
             }
         }
 
@@ -65,8 +68,15 @@ public class PseudoGridView extends ViewGroup {
             throw new UnsupportedOperationException("Needs a maximum width");
         }
         int width = MeasureSpec.getSize(widthMeasureSpec);
-
-        int childWidth = (width - (mNumColumns - 1) * mHorizontalSpacing) / mNumColumns;
+        int childWidth;
+        int necessarySpaceForChildWidth =
+                mFixedChildWidth * mNumColumns + mHorizontalSpacing * (mNumColumns - 1);
+        if (mFixedChildWidth != -1 && necessarySpaceForChildWidth <= width) {
+            childWidth = mFixedChildWidth;
+            width = mFixedChildWidth * mNumColumns + mHorizontalSpacing * (mNumColumns - 1);
+        } else {
+            childWidth = (width - (mNumColumns - 1) * mHorizontalSpacing) / mNumColumns;
+        }
         int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
         int childHeightSpec = MeasureSpec.UNSPECIFIED;
         int totalHeight = 0;

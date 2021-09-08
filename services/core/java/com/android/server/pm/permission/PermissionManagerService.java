@@ -154,6 +154,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener;
 import com.android.server.policy.PermissionPolicyInternal;
@@ -1485,7 +1486,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 && mayManageRolePermission(callingUid);
         final boolean mayGrantSoftRestrictedPermission = isSoftRestrictedPermission
                 && SoftRestrictedPermissionPolicy.forPermission(mContext,
-                        pkg.toAppInfoWithoutState(), pkg, UserHandle.of(userId), permName)
+                        AndroidPackageUtils.generateAppInfoWithoutState(pkg), pkg,
+                        UserHandle.of(userId), permName)
                         .mayGrantPermission();
 
         final boolean isRuntimePermission;

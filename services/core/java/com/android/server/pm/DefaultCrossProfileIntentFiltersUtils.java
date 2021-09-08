@@ -236,7 +236,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
     private static final DefaultCrossProfileIntentFilter RECOGNIZE_SPEECH =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
-                    /* flags= */0,
+                    /* flags= */ ONLY_IF_NO_MATCH_FOUND,
                     /* letsPersonalDataIntoProfile= */ false)
                     .addAction(ACTION_RECOGNIZE_SPEECH)
                     .addCategory(Intent.CATEGORY_DEFAULT)
