@@ -1596,9 +1596,15 @@ class Task extends TaskFragment {
         } else {
             forAllActivities((r) -> {
                 if (r.finishing) return;
-                // TODO: figure-out how to avoid object creation due to capture of reason variable.
-                r.finishIfPossible(Activity.RESULT_CANCELED,
-                        null /* resultData */, null /* resultGrants */, reason, false /* oomAdj */);
+                // Prevent the transition from being executed too early if the top activity is
+                // resumed but the mVisibleRequested of any other activity is true, the transition
+                // should wait until next activity resumed.
+                if (r.isState(RESUMED) || (r.isVisible()
+                        && !mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CLOSE))) {
+                    r.finishIfPossible(reason, false /* oomAdj */);
+                } else {
+                    r.destroyIfPossible(reason);
+                }
             });
         }
     }
