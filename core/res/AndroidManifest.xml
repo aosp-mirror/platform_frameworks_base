@@ -4862,6 +4862,18 @@
     <permission android:name="android.permission.WRITE_SETTINGS_HOMEPAGE_DATA"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- An application needs this permission for
+         {@link android.provider.Settings#ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK} to show its
+         {@link android.app.Activity} in 2-pane of Settings app. -->
+    <permission android:name="android.permission.LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK"
+                android:protectionLevel="signature|preinstalled" />
+
+    <!-- @SystemApi {@link android.app.Activity} should require this permission to ensure that only
+         the settings app can embed it in a 2-pane window.
+         @hide -->
+    <permission android:name="android.permission.ALLOW_PLACE_IN_TWO_PANE_SETTINGS"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows applications to set a live wallpaper.
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->

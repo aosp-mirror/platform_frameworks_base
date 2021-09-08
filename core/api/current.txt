@@ -99,6 +99,7 @@ package android {
     field public static final String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final String INTERNET = "android.permission.INTERNET";
     field public static final String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
+    field public static final String LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
