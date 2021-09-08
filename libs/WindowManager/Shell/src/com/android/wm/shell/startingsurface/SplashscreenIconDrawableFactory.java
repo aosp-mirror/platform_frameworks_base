@@ -304,6 +304,13 @@ public class SplashscreenIconDrawableFactory {
             return true;
         }
 
+        @Override
+        public void stopAnimation() {
+            if (mIconAnimator != null) {
+                mIconAnimator.end();
+            }
+        }
+
         private final Callback mCallback = new Callback() {
             @Override
             public void invalidateDrawable(@NonNull Drawable who) {

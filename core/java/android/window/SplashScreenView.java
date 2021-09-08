@@ -59,6 +59,7 @@ import com.android.internal.util.ContrastColorUtil;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.function.Consumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -144,6 +145,7 @@ public final class SplashScreenView extends FrameLayout {
         private Bitmap mParceledBrandingBitmap;
         private Instant mIconAnimationStart;
         private Duration mIconAnimationDuration;
+        private Consumer<Runnable> mUiThreadInitTask;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -232,6 +234,15 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Set the Runnable that can receive the task which should be executed on UI thread.
+         * @param uiThreadInitTask
+         */
+        public Builder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
+            mUiThreadInitTask = uiThreadInitTask;
+            return this;
+        }
+
+        /**
          * Set the Drawable object and size for the branding view.
          */
         public Builder setBrandingDrawable(@Nullable Drawable branding, int width, int height) {
@@ -262,7 +273,11 @@ public final class SplashScreenView extends FrameLayout {
             // center icon
             if (mIconDrawable instanceof SplashScreenView.IconAnimateListener
                     || mSurfacePackage != null) {
-                view.mIconView = createSurfaceView(view);
+                if (mUiThreadInitTask != null) {
+                    mUiThreadInitTask.accept(() -> view.mIconView = createSurfaceView(view));
+                } else {
+                    view.mIconView = createSurfaceView(view);
+                }
                 view.initIconAnimation(mIconDrawable,
                         mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
                 view.mIconAnimationStart = mIconAnimationStart;
@@ -316,6 +331,7 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         private SurfaceView createSurfaceView(@NonNull SplashScreenView view) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "SplashScreenView#createSurfaceView");
             final Context viewContext = view.getContext();
             final SurfaceView surfaceView = new SurfaceView(viewContext);
             surfaceView.setPadding(0, 0, 0, 0);
@@ -361,6 +377,7 @@ public final class SplashScreenView extends FrameLayout {
 
             view.addView(surfaceView);
             view.mSurfaceView = surfaceView;
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return surfaceView;
         }
     }
@@ -532,21 +549,30 @@ public final class SplashScreenView extends FrameLayout {
 
     private void releaseAnimationSurfaceHost() {
         if (mSurfaceHost != null && !mIsCopied) {
-            final SurfaceControlViewHost finalSurfaceHost = mSurfaceHost;
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Shell removed splash screen."
+                                + " Releasing SurfaceControlViewHost on thread #"
+                                + Thread.currentThread().getId());
+            }
+            releaseIconHost(mSurfaceHost);
             mSurfaceHost = null;
-            finalSurfaceHost.getView().post(() -> {
-                if (DEBUG) {
-                    Log.d(TAG,
-                            "Shell removed splash screen."
-                                    + " Releasing SurfaceControlViewHost on thread #"
-                                    + Thread.currentThread().getId());
-                }
-                finalSurfaceHost.release();
-            });
         } else if (mSurfacePackage != null && mSurfaceHost == null) {
             mSurfacePackage = null;
             mClientCallback.sendResult(null);
         }
+    }
+
+    /**
+     * Release the host which hold the SurfaceView of the icon.
+     * @hide
+     */
+    public static void releaseIconHost(SurfaceControlViewHost host) {
+        final Drawable background = host.getView().getBackground();
+        if (background instanceof SplashScreenView.IconAnimateListener) {
+            ((SplashScreenView.IconAnimateListener) background).stopAnimation();
+        }
+        host.release();
     }
 
     /**
@@ -640,6 +666,11 @@ public final class SplashScreenView extends FrameLayout {
          * @return true if this drawable object can also be animated and it can be played now.
          */
         boolean prepareAnimate(long duration, Runnable startListener);
+
+        /**
+         * Stop animation.
+         */
+        void stopAnimation();
     }
 
     /**

@@ -332,7 +332,7 @@ public class StartingSurfaceDrawer {
             mSysuiProxy.requestTopUi(true, TAG);
         }
         mSplashscreenContentDrawer.createContentView(context, suggestType, activityInfo, taskId,
-                viewSupplier::setView);
+                viewSupplier::setView, viewSupplier::setUiThreadInitTask);
         try {
             if (addWindow(taskId, appToken, rootLayout, display, params, suggestType)) {
                 // We use the splash screen worker thread to create SplashScreenView while adding
@@ -367,11 +367,18 @@ public class StartingSurfaceDrawer {
     private static class SplashScreenViewSupplier implements Supplier<SplashScreenView> {
         private SplashScreenView mView;
         private boolean mIsViewSet;
+        private Runnable mUiThreadInitTask;
         void setView(SplashScreenView view) {
             synchronized (this) {
                 mView = view;
                 mIsViewSet = true;
                 notify();
+            }
+        }
+
+        void setUiThreadInitTask(Runnable initTask) {
+            synchronized (this) {
+                mUiThreadInitTask = initTask;
             }
         }
 
@@ -383,6 +390,10 @@ public class StartingSurfaceDrawer {
                         wait();
                     } catch (InterruptedException ignored) {
                     }
+                }
+                if (mUiThreadInitTask != null) {
+                    mUiThreadInitTask.run();
+                    mUiThreadInitTask = null;
                 }
                 return mView;
             }
@@ -506,7 +517,7 @@ public class StartingSurfaceDrawer {
             Slog.v(TAG, reason + "the splash screen. Releasing SurfaceControlViewHost for task:"
                     + taskId);
         }
-        viewHost.getView().post(viewHost::release);
+        SplashScreenView.releaseIconHost(viewHost);
     }
 
     protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,
