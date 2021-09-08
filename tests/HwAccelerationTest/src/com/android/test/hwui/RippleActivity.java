@@ -91,7 +91,7 @@ public class RippleActivity extends Activity {
                 + "    d = rand(float2(x, y)) > density ? d : d * .2;\n"
                 + "    d = d * rand(float2(fraction, x * y));\n"
                 + "    float alpha = 1. - pow(fraction, 3.);\n"
-                + "    return float4(sample(in_paintColor, p).rgb, d * alpha);\n"
+                + "    return float4(in_paintColor.eval(p).rgb, d * alpha);\n"
                 + "}";
 
         RippleView(Context c) {
