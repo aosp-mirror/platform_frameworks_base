@@ -117,6 +117,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         container.setInfo(taskFragmentAppearedInfo.getTaskFragmentInfo());
+        if (container.isFinished()) {
+            mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+            updateCallbackIfNecessary();
+        }
     }
 
     @Override
