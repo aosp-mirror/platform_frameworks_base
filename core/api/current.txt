@@ -53434,7 +53434,6 @@ package android.webkit {
     method public void onPermissionRequest(android.webkit.PermissionRequest);
     method public void onPermissionRequestCanceled(android.webkit.PermissionRequest);
     method public void onProgressChanged(android.webkit.WebView, int);
-    method @Deprecated public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
     method public void onReceivedTitle(android.webkit.WebView, String);
     method public void onReceivedTouchIconUrl(android.webkit.WebView, String, boolean);
@@ -53586,9 +53585,6 @@ package android.webkit {
     method public abstract void setAllowFileAccess(boolean);
     method @Deprecated public abstract void setAllowFileAccessFromFileURLs(boolean);
     method @Deprecated public abstract void setAllowUniversalAccessFromFileURLs(boolean);
-    method @Deprecated public abstract void setAppCacheEnabled(boolean);
-    method @Deprecated public abstract void setAppCacheMaxSize(long);
-    method @Deprecated public abstract void setAppCachePath(String);
     method public abstract void setBlockNetworkImage(boolean);
     method public abstract void setBlockNetworkLoads(boolean);
     method public abstract void setBuiltInZoomControls(boolean);
