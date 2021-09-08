@@ -33,16 +33,21 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     @NonNull private final UdfpsEnrollHelper mEnrollHelper;
     @NonNull private final UdfpsEnrollHelper.Listener mEnrollHelperListener =
             new UdfpsEnrollHelper.Listener() {
-        @Override
-        public void onEnrollmentProgress(int remaining, int totalSteps) {
-            mView.onEnrollmentProgress(remaining, totalSteps);
-        }
+                @Override
+                public void onEnrollmentProgress(int remaining, int totalSteps) {
+                    mView.onEnrollmentProgress(remaining, totalSteps);
+                }
 
-        @Override
-        public void onLastStepAcquired() {
-            mView.onLastStepAcquired();
-        }
-    };
+                @Override
+                public void onEnrollmentHelp(int remaining, int totalSteps) {
+                    mView.onEnrollmentHelp(remaining, totalSteps);
+                }
+
+                @Override
+                public void onLastStepAcquired() {
+                    mView.onLastStepAcquired();
+                }
+            };
 
     protected UdfpsEnrollViewController(
             @NonNull UdfpsEnrollView view,
