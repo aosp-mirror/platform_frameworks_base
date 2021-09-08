@@ -33,12 +33,13 @@ import java.util.Map;
  * A class to keep track of the remove state for a given client.
  */
 public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier, T>
-        extends HalClientMonitor<T> implements RemovalConsumer {
+        extends HalClientMonitor<T> implements RemovalConsumer, EnrollmentModifier {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
     private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
+    private final boolean mHasEnrollmentsBeforeStarting;
 
     public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
@@ -49,6 +50,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
+        mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
     }
 
     @Override
@@ -88,6 +90,18 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
             }
             mCallback.onClientFinished(this, true /* success */);
         }
+    }
+
+    @Override
+    public boolean hasEnrollmentStateChanged() {
+        final boolean hasEnrollmentsNow = !mBiometricUtils
+                .getBiometricsForUser(getContext(), getTargetUserId()).isEmpty();
+        return hasEnrollmentsNow != mHasEnrollmentsBeforeStarting;
+    }
+
+    @Override
+    public boolean hasEnrollments() {
+        return !mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId()).isEmpty();
     }
 
     @Override

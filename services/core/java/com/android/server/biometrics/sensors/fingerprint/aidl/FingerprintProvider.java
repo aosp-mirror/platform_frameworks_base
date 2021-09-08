@@ -82,6 +82,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     private boolean mTestHalEnabled;
 
     @NonNull private final Context mContext;
+    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
     @NonNull private final String mHalInstanceName;
     @NonNull @VisibleForTesting
     final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
@@ -130,10 +131,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         }
     }
 
-    public FingerprintProvider(@NonNull Context context, @NonNull SensorProps[] props,
-            @NonNull String halInstanceName, @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+    public FingerprintProvider(@NonNull Context context,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
+            @NonNull SensorProps[] props, @NonNull String halInstanceName,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mContext = context;
+        mFingerprintStateCallback = fingerprintStateCallback;
         mHalInstanceName = halInstanceName;
         mSensors = new SparseArray<>();
         mHandler = new Handler(Looper.getMainLooper());
@@ -335,8 +339,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintStateCallback fingerprintStateCallback) {
+            @FingerprintManager.EnrollReason int enrollReason) {
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
                     .maxEnrollmentsPerUser;
@@ -350,13 +353,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-                    fingerprintStateCallback.onClientStarted(clientMonitor);
+                    mFingerprintStateCallback.onClientStarted(clientMonitor);
                 }
 
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
-                    fingerprintStateCallback.onClientFinished(clientMonitor, success);
+                    mFingerprintStateCallback.onClientFinished(clientMonitor, success);
                     if (success) {
                         scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
                         scheduleInvalidationRequest(sensorId, userId);
@@ -374,17 +377,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
-            int statsClient,
-            @NonNull FingerprintStateCallback fingerprintStateCallback) {
+            int statsClient) {
         final long id = mRequestCounter.incrementAndGet();
-
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token, id, callback, userId,
                     opPackageName, sensorId, mUdfpsOverlayController, isStrongBiometric,
                     statsClient);
-            scheduleForSensor(sensorId, client, fingerprintStateCallback);
+            scheduleForSensor(sensorId, client, mFingerprintStateCallback);
         });
 
         return id;
@@ -394,8 +395,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication,
-            @NonNull FingerprintStateCallback fingerprintStateCallback) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
@@ -405,7 +405,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
                     mUdfpsOverlayController, allowBackgroundAuthentication,
                     mSensors.get(sensorId).getSensorProperties());
-            scheduleForSensor(sensorId, client, fingerprintStateCallback);
+            scheduleForSensor(sensorId, client, mFingerprintStateCallback);
         });
     }
 
@@ -413,13 +413,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication,
-            @NonNull FingerprintStateCallback fingerprintStateCallback) {
+            boolean allowBackgroundAuthentication) {
         final long id = mRequestCounter.incrementAndGet();
 
         scheduleAuthenticate(sensorId, token, operationId, userId, cookie, callback,
-                opPackageName, id, restricted, statsClient, allowBackgroundAuthentication,
-                fingerprintStateCallback);
+                opPackageName, id, restricted, statsClient, allowBackgroundAuthentication);
 
         return id;
     }
@@ -466,7 +464,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                     mSensors.get(sensorId).getAuthenticatorIds());
-            scheduleForSensor(sensorId, client);
+            scheduleForSensor(sensorId, client, mFingerprintStateCallback);
         });
     }
 
@@ -481,7 +479,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mContext.getOpPackageName(), sensorId, enrolledList,
                             FingerprintUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
-            scheduleForSensor(sensorId, client, callback);
+            scheduleForSensor(sensorId, client, new BaseClientMonitor.CompositeCallback(callback,
+                    mFingerprintStateCallback));
         });
     }
 
@@ -626,9 +625,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName) {
-        return mSensors.get(sensorId).createTestSession(callback, fingerprintStateCallback);
+        return mSensors.get(sensorId).createTestSession(callback, mFingerprintStateCallback);
     }
 
     @Override

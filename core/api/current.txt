@@ -99,6 +99,7 @@ package android {
     field public static final String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final String INTERNET = "android.permission.INTERNET";
     field public static final String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
+    field public static final String LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
@@ -35226,6 +35227,7 @@ package android.provider {
     field public static final String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
     field public static final String ACTION_SECURITY_SETTINGS = "android.settings.SECURITY_SETTINGS";
     field public static final String ACTION_SETTINGS = "android.settings.SETTINGS";
+    field public static final String ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK = "android.settings.SETTINGS_LARGE_SCREEN_DEEP_LINK";
     field public static final String ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
     field public static final String ACTION_SHOW_WORK_POLICY_INFO = "android.settings.SHOW_WORK_POLICY_INFO";
     field public static final String ACTION_SOUND_SETTINGS = "android.settings.SOUND_SETTINGS";
@@ -35266,6 +35268,9 @@ package android.provider {
     field public static final String EXTRA_EASY_CONNECT_ERROR_CODE = "android.provider.extra.EASY_CONNECT_ERROR_CODE";
     field public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     field public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME = "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
+    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI";
+    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT";
+    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
     field public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
     field public static final String EXTRA_WIFI_NETWORK_LIST = "android.provider.extra.WIFI_NETWORK_LIST";
     field public static final String EXTRA_WIFI_NETWORK_RESULT_LIST = "android.provider.extra.WIFI_NETWORK_RESULT_LIST";

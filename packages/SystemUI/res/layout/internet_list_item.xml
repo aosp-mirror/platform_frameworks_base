@@ -70,7 +70,7 @@
                 android:id="@+id/wifi_summary"
                 android:textDirection="locale"
                 android:layout_width="wrap_content"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:ellipsize="end"
                 android:textColor="?android:attr/textColorSecondary"
@@ -85,7 +85,7 @@
             android:clickable="false"
             android:layout_gravity="end|center_vertical">
             <ImageView
-                android:id="@+id/wifi_locked_icon"
+                android:id="@+id/wifi_end_icon"
                 android:layout_gravity="end|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

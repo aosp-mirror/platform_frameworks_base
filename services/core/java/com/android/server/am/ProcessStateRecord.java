@@ -21,6 +21,7 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
+import static com.android.server.am.OomAdjuster.CachedCompatChangeId;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -376,6 +377,16 @@ final class ProcessStateRecord {
     private int mCachedHasRecentTasks = VALUE_INVALID;
     @GuardedBy("mService")
     private int mCachedIsReceivingBroadcast = VALUE_INVALID;
+
+    /**
+     * Cache the return value of PlatformCompat.isChangeEnabled().
+     */
+    @GuardedBy("mService")
+    private int[] mCachedCompatChanges = new int[] {
+        VALUE_INVALID, // CACHED_COMPAT_CHANGE_PROCESS_CAPABILITY
+        VALUE_INVALID, // CACHED_COMPAT_CHANGE_CAMERA_MICROPHONE_CAPABILITY
+        VALUE_INVALID, // CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME
+    };
 
     @GuardedBy("mService")
     private int mCachedAdj = ProcessList.INVALID_ADJ;
@@ -1009,6 +1020,16 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
+    boolean getCachedCompatChange(@CachedCompatChangeId int cachedCompatChangeId) {
+        if (mCachedCompatChanges[cachedCompatChangeId] == VALUE_INVALID) {
+            mCachedCompatChanges[cachedCompatChangeId] = mService.mOomAdjuster
+                    .isChangeEnabled(cachedCompatChangeId, mApp.info, false /* default */)
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedCompatChanges[cachedCompatChangeId] == VALUE_TRUE;
+    }
+
+    @GuardedBy("mService")
     void computeOomAdjFromActivitiesIfNecessary(OomAdjuster.ComputeOomAdjWindowCallback callback,
             int adj, boolean foregroundActivities, boolean hasVisibleActivities, int procState,
             int schedGroup, int appUid, int logUid, int processCurTop) {
@@ -1088,6 +1109,9 @@ final class ProcessStateRecord {
         mCurSchedGroup = mSetSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
         mCurProcState = mCurRawProcState = mSetProcState = mAllowStartFgsState =
                 PROCESS_STATE_NONEXISTENT;
+        for (int i = 0; i < mCachedCompatChanges.length; i++) {
+            mCachedCompatChanges[i] = VALUE_INVALID;
+        }
     }
 
     @GuardedBy("mService")
