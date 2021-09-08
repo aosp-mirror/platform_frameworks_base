@@ -5689,7 +5689,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Configuration currOverrideConfig = getRequestedOverrideConfiguration();
         final int currRotation = currOverrideConfig.windowConfiguration.getRotation();
         final int overrideRotation = overrideConfiguration.windowConfiguration.getRotation();
-        if (currRotation != ROTATION_UNDEFINED && currRotation != overrideRotation) {
+        if (currRotation != ROTATION_UNDEFINED && overrideRotation != ROTATION_UNDEFINED
+                && currRotation != overrideRotation) {
             applyRotationAndFinishFixedRotation(currRotation, overrideRotation);
         }
         mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
