@@ -503,15 +503,15 @@ public class SmartReplyView extends ViewGroup {
     }
 
     /**
-     * Returns the combined width of the start drawable (the action icon) and the padding between
-     * the drawable and the button text.
+     * Returns the combined width of the left drawable (the action icon) and the padding between the
+     * drawable and the button text.
      */
-    private int getStartCompoundDrawableWidthWithPadding(Button button) {
-        Drawable[] drawables = button.getCompoundDrawablesRelative();
-        Drawable startDrawable = drawables[0];
-        if (startDrawable == null) return 0;
+    private int getLeftCompoundDrawableWidthWithPadding(Button button) {
+        Drawable[] drawables = button.getCompoundDrawables();
+        Drawable leftDrawable = drawables[0];
+        if (leftDrawable == null) return 0;
 
-        return startDrawable.getBounds().width() + button.getCompoundDrawablePadding();
+        return leftDrawable.getBounds().width() + button.getCompoundDrawablePadding();
     }
 
     private int squeezeButtonToTextWidth(Button button, int heightMeasureSpec, int textWidth) {
@@ -520,8 +520,8 @@ public class SmartReplyView extends ViewGroup {
         // Re-measure the squeezed smart reply button.
         clearLayoutLineCount(button);
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                button.getPaddingStart() + button.getPaddingEnd() + textWidth
-                      + getStartCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
+                button.getPaddingLeft() + button.getPaddingRight() + textWidth
+                      + getLeftCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
         button.measure(widthMeasureSpec, heightMeasureSpec);
 
         final int newWidth = button.getMeasuredWidth();
