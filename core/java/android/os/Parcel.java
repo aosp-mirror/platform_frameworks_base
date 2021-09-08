@@ -3419,15 +3419,7 @@ public final class Parcel {
 
         public void writeToParcel(Parcel out) {
             if (mObject == null) {
-                int restore = mSource.dataPosition();
-                try {
-                    mSource.setDataPosition(mPosition);
-                    out.writeInt(mSource.readInt()); // Type
-                    out.writeInt(mSource.readInt()); // Length
-                    out.appendFrom(mSource, mSource.dataPosition(), mLength);
-                } finally {
-                    mSource.setDataPosition(restore);
-                }
+                out.appendFrom(mSource, mPosition, mLength + 8);
             } else {
                 out.writeValue(mObject);
             }
