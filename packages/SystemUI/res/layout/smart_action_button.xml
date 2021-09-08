@@ -29,8 +29,8 @@
         android:textSize="@dimen/smart_reply_button_font_size"
         android:lineSpacingExtra="@dimen/smart_reply_button_line_spacing_extra"
         android:textColor="@color/smart_reply_button_text"
-        android:paddingStart="@dimen/smart_reply_button_action_padding_left"
-        android:paddingEnd="@dimen/smart_reply_button_padding_horizontal"
+        android:paddingLeft="@dimen/smart_reply_button_action_padding_left"
+        android:paddingRight="@dimen/smart_reply_button_padding_horizontal"
         android:drawablePadding="@dimen/smart_action_button_icon_padding"
         android:textStyle="normal"
         android:ellipsize="none"/>
