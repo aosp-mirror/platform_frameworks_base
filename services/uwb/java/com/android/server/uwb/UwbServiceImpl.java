@@ -18,13 +18,16 @@ package com.android.server.uwb;
 
 import android.annotation.NonNull;
 import android.content.AttributionSource;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.uwb.AdapterState;
 import android.uwb.IUwbAdapter;
 import android.uwb.IUwbAdapterStateCallbacks;
 import android.uwb.IUwbRangingCallbacks;
@@ -225,13 +228,15 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
         mVendorUwbAdapter = null;
     }
 
-    private synchronized IUwbAdapter getVendorUwbAdapter() throws IllegalStateException {
+    private synchronized IUwbAdapter getVendorUwbAdapter()
+            throws IllegalStateException, RemoteException {
         if (mVendorUwbAdapter != null) return mVendorUwbAdapter;
         mVendorUwbAdapter = mUwbInjector.getVendorService();
         if (mVendorUwbAdapter == null) {
             throw new IllegalStateException("No vendor service found!");
         }
         Log.i(TAG, "Retrieved vendor service");
+        mVendorUwbAdapter.setEnabled(mUwbInjector.isPersistedUwbStateEnabled());
         linkToVendorServiceDeath();
         return mVendorUwbAdapter;
     }
@@ -320,6 +325,13 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
 
     @Override
     public synchronized void setEnabled(boolean enabled) throws RemoteException {
+        persistUwbState(enabled);
         getVendorUwbAdapter().setEnabled(enabled);
+    }
+
+    private void persistUwbState(boolean enabled) {
+        final ContentResolver cr = mContext.getContentResolver();
+        int state = enabled ? AdapterState.STATE_ENABLED_ACTIVE : AdapterState.STATE_DISABLED;
+        Settings.Global.putInt(cr, Settings.Global.UWB_ENABLED, state);
     }
 }
