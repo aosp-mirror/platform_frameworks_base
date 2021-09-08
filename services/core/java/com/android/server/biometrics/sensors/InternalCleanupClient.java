@@ -40,7 +40,8 @@ import java.util.Map;
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
 public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Identifier, T>
-        extends HalClientMonitor<T> implements EnumerateConsumer, RemovalConsumer {
+        extends HalClientMonitor<T> implements EnumerateConsumer, RemovalConsumer,
+        EnrollmentModifier {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
 
@@ -61,6 +62,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
     private final List<S> mEnrolledList;
+    private final boolean mHasEnrollmentsBeforeStarting;
     private BaseClientMonitor mCurrentTask;
 
     private final Callback mEnumerateCallback = new Callback() {
@@ -115,6 +117,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mEnrolledList = enrolledList;
+        mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
     }
 
     private void startCleanupUnknownHalTemplates() {
@@ -163,6 +166,18 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             return;
         }
         ((RemovalClient<S, T>) mCurrentTask).onRemoved(identifier, remaining);
+    }
+
+    @Override
+    public boolean hasEnrollmentStateChanged() {
+        final boolean hasEnrollmentsNow = !mBiometricUtils
+                .getBiometricsForUser(getContext(), getTargetUserId()).isEmpty();
+        return hasEnrollmentsNow != mHasEnrollmentsBeforeStarting;
+    }
+
+    @Override
+    public boolean hasEnrollments() {
+        return !mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId()).isEmpty();
     }
 
     @Override

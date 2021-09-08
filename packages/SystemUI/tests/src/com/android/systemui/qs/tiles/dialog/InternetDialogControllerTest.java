@@ -249,28 +249,17 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getWifiDetailsSettingsIntent_withNoConnectedEntry_returnNull() {
-        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
+    public void getWifiDetailsSettingsIntent_withNoKey_returnNull() {
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent(null)).isNull();
     }
 
     @Test
-    public void getWifiDetailsSettingsIntent_withNoConnectedEntryKey_returnNull() {
-        when(mConnectedEntry.getKey()).thenReturn(null);
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNull();
+    public void getWifiDetailsSettingsIntent_withKey_returnIntent() {
+        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent("test_key")).isNotNull();
     }
 
     @Test
-    public void getWifiDetailsSettingsIntent_withConnectedEntryKey_returnIntent() {
-        when(mConnectedEntry.getKey()).thenReturn("test_key");
-
-        assertThat(mInternetDialogController.getWifiDetailsSettingsIntent()).isNotNull();
-    }
-
-    @Test
-    public void getWifiDrawable_withConnectedEntry_returnIntentIconWithCorrectColor() {
+    public void getInternetWifiDrawable_withConnectedEntry_returnIntentIconWithCorrectColor() {
         final Drawable drawable = mock(Drawable.class);
         when(mWifiIconInjector.getIcon(anyBoolean(), anyInt())).thenReturn(drawable);
 
@@ -281,20 +270,25 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withNoConnectedEntry_doNothing() {
-        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
+    public void getInternetWifiDrawable_withWifiLevelUnreachable_returnNull() {
+        when(mConnectedEntry.getLevel()).thenReturn(WifiEntry.WIFI_LEVEL_UNREACHABLE);
 
-        mInternetDialogController.launchWifiNetworkDetailsSetting();
+        Drawable drawable = mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
+
+        assertThat(drawable).isNull();
+    }
+
+    @Test
+    public void launchWifiNetworkDetailsSetting_withNoWifiEntryKey_doNothing() {
+        mInternetDialogController.launchWifiNetworkDetailsSetting(null /* key */);
 
         verify(mActivityStarter, never())
                 .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withConnectedEntryKey_startActivity() {
-        when(mConnectedEntry.getKey()).thenReturn("test_key");
-
-        mInternetDialogController.launchWifiNetworkDetailsSetting();
+    public void launchWifiNetworkDetailsSetting_withWifiEntryKey_startActivity() {
+        mInternetDialogController.launchWifiNetworkDetailsSetting("wifi_entry_key");
 
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
