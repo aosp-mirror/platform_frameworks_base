@@ -16,6 +16,11 @@
 
 package com.android.internal.os;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
@@ -47,7 +52,7 @@ import libcore.util.NativeAllocationRegistry;
  *
  * @hide
  */
-public class LongArrayMultiStateCounter {
+public final class LongArrayMultiStateCounter implements Parcelable {
 
     /**
      * Container for a native equivalent of a long[].
@@ -112,12 +117,20 @@ public class LongArrayMultiStateCounter {
     // methods.
     final long mNativeObject;
 
-    public LongArrayMultiStateCounter(int stateCount, int arrayLength, int initialState,
-            long timestampMs) {
+    public LongArrayMultiStateCounter(int stateCount, int arrayLength) {
+        Preconditions.checkArgumentPositive(stateCount, "stateCount must be greater than 0");
         mStateCount = stateCount;
         mLength = arrayLength;
-        mNativeObject = native_init(stateCount, arrayLength, initialState, timestampMs);
+        mNativeObject = native_init(stateCount, arrayLength);
         sRegistry.registerNativeAllocation(this, mNativeObject);
+    }
+
+    private LongArrayMultiStateCounter(Parcel in) {
+        mNativeObject = native_initFromParcel(in);
+        sRegistry.registerNativeAllocation(this, mNativeObject);
+
+        mStateCount = native_getStateCount(mNativeObject);
+        mLength = native_getArrayLength(mNativeObject);
     }
 
     /**
@@ -161,9 +174,32 @@ public class LongArrayMultiStateCounter {
         return native_toString(mNativeObject);
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        native_writeToParcel(mNativeObject, dest, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<LongArrayMultiStateCounter> CREATOR =
+            new Creator<LongArrayMultiStateCounter>() {
+                @Override
+                public LongArrayMultiStateCounter createFromParcel(Parcel in) {
+                    return new LongArrayMultiStateCounter(in);
+                }
+
+                @Override
+                public LongArrayMultiStateCounter[] newArray(int size) {
+                    return new LongArrayMultiStateCounter[size];
+                }
+            };
+
+
     @CriticalNative
-    private static native long native_init(int stateCount, int arrayLength, int initialState,
-            long timestampMs);
+    private static native long native_init(int stateCount, int arrayLength);
 
     @CriticalNative
     private static native long native_getReleaseFunc();
@@ -181,4 +217,16 @@ public class LongArrayMultiStateCounter {
 
     @FastNative
     private native String native_toString(long nativeObject);
+
+    @FastNative
+    private native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
+
+    @FastNative
+    private static native long native_initFromParcel(Parcel parcel);
+
+    @CriticalNative
+    private static native int native_getStateCount(long nativeObject);
+
+    @CriticalNative
+    private static native int native_getArrayLength(long nativeObject);
 }
