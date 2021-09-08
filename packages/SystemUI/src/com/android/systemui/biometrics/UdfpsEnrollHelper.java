@@ -202,6 +202,21 @@ public class UdfpsEnrollHelper {
         return progressSteps >= STAGE_THRESHOLDS[0] && progressSteps < STAGE_THRESHOLDS[1];
     }
 
+    boolean isTipEnrollmentStage() {
+        if (mTotalSteps == -1 || mRemainingSteps == -1) {
+            return false;
+        }
+        final int progressSteps = mTotalSteps - mRemainingSteps;
+        return progressSteps >= STAGE_THRESHOLDS[1] && progressSteps < STAGE_THRESHOLDS[2];
+    }
+
+    boolean isEdgeEnrollmentStage() {
+        if (mTotalSteps == -1 || mRemainingSteps == -1) {
+            return false;
+        }
+        return mTotalSteps - mRemainingSteps >= STAGE_THRESHOLDS[2];
+    }
+
     @NonNull
     PointF getNextGuidedEnrollmentPoint() {
         if (mAccessibilityEnabled || !isGuidedEnrollmentStage()) {
