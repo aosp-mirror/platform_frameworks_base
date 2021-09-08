@@ -117,7 +117,7 @@ class SurfaceFreezer {
         SurfaceControl leash = mLeash;
         mLeash = null;
         final boolean scheduleAnim = SurfaceAnimator.removeLeash(t, mAnimatable, leash,
-                false /* destroy */);
+                true /* destroy */);
         if (scheduleAnim) {
             mWmService.scheduleAnimationLocked();
         }
