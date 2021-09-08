@@ -34,7 +34,6 @@ public final class BLASTBufferQueue {
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
             int format, long transactionPtr);
-    private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
     private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
@@ -123,10 +122,6 @@ public final class BLASTBufferQueue {
         } finally {
             super.finalize();
         }
-    }
-
-    public void flushShadowQueue() {
-        nativeFlushShadowQueue(mNativeObject);
     }
 
     /**

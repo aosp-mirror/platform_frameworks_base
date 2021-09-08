@@ -4086,18 +4086,16 @@ public final class ViewRootImpl implements ViewParent,
 
     private void addFrameCallbackIfNeeded() {
         final boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
-        final boolean reportNextDraw = mReportNextDraw;
         final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
         final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!nextDrawUseBlastSync && !reportNextDraw && !needsCallbackForBlur) {
+        if (!nextDrawUseBlastSync && !needsCallbackForBlur) {
             return;
         }
 
         if (DEBUG_BLAST) {
             Log.d(mTag, "Creating frameDrawingCallback"
                     + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
-                    + " reportNextDraw=" + reportNextDraw
                     + " hasBlurUpdates=" + hasBlurUpdates);
         }
         mWaitForBlastSyncComplete = nextDrawUseBlastSync;
@@ -4137,11 +4135,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mHandler.postAtFrontOfQueue(this::clearBlastSync);
                 });
-            } else if (reportNextDraw) {
-                // If we need to report next draw, wait for adapter to flush its shadow queue
-                // by processing previously queued buffers so that we can submit the
-                // transaction a timely manner.
-                mBlastBufferQueue.flushShadowQueue();
             }
         };
         registerRtFrameCallback(frameDrawingCallback);

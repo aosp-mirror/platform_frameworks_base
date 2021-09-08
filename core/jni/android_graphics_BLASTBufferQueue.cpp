@@ -112,11 +112,6 @@ static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceCont
                   transaction);
 }
 
-static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
-    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    queue->flushShadowQueue();
-}
-
 static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlong transactionPtr,
                                            jlong framenumber) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
@@ -152,7 +147,6 @@ static const JNINativeMethod gMethods[] = {
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
         {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
-        {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",
                 "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
