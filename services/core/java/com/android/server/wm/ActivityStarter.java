@@ -2722,6 +2722,17 @@ class ActivityStarter {
         mTargetRootTask = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
                 mRootWindowContainer.getDefaultTaskDisplayArea(), mTargetRootTask);
+
+        // We need to check if there is a launch root task in TDA for this target root task.
+        // If it exist, we need to reparent target root task from TDA to launch root task.
+        final TaskDisplayArea tda = mTargetRootTask.getDisplayArea();
+        final Task launchRootTask = tda.getLaunchRootTask(mTargetRootTask.getWindowingMode(),
+                mTargetRootTask.getActivityType(), null /** options */, null /** sourceTask */,
+                0 /** launchFlags */);
+        if (launchRootTask != null && launchRootTask != mTargetRootTask) {
+            mTargetRootTask.reparent(launchRootTask, POSITION_TOP);
+            mTargetRootTask = launchRootTask;
+        }
     }
 
     private void resumeTargetRootTaskIfNeeded() {
