@@ -98,6 +98,15 @@ static void android_os_Parcel_markSensitive(jlong nativePtr)
     }
 }
 
+static void android_os_Parcel_markForBinder(JNIEnv* env, jclass clazz, jlong nativePtr,
+                                            jobject binder)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel) {
+        parcel->markForBinder(ibinderForJavaObject(env, binder));
+    }
+}
+
 static jint android_os_Parcel_dataSize(jlong nativePtr)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
@@ -749,7 +758,9 @@ static jboolean android_os_Parcel_replaceCallingWorkSourceUid(jlong nativePtr, j
 
 static const JNINativeMethod gParcelMethods[] = {
     // @CriticalNative
-    {"nativeMarkSensitive",             "(J)V", (void*)android_os_Parcel_markSensitive},
+    {"nativeMarkSensitive",       "(J)V", (void*)android_os_Parcel_markSensitive},
+    // @FastNative
+    {"nativeMarkForBinder",       "(JLandroid/os/IBinder;)V", (void*)android_os_Parcel_markForBinder},
     // @CriticalNative
     {"nativeDataSize",            "(J)I", (void*)android_os_Parcel_dataSize},
     // @CriticalNative
