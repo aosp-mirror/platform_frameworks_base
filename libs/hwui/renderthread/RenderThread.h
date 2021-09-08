@@ -83,8 +83,9 @@ typedef ASurfaceControl* (*ASC_create)(ASurfaceControl* parent, const char* debu
 typedef void (*ASC_acquire)(ASurfaceControl* control);
 typedef void (*ASC_release)(ASurfaceControl* control);
 
-typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, void* context,
-        ASurfaceControl_SurfaceStatsListener func);
+typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, int32_t id,
+                                                 void* context,
+                                                 ASurfaceControl_SurfaceStatsListener func);
 typedef void (*ASC_unregisterSurfaceStatsListener)(void* context,
                                                    ASurfaceControl_SurfaceStatsListener func);
 

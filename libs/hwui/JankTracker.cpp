@@ -164,7 +164,8 @@ void JankTracker::calculateLegacyJank(FrameInfo& frame) REQUIRES(mDataMutex) {
             - lastFrameOffset + mFrameIntervalLegacy;
 }
 
-void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter) {
+void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter,
+                              int64_t frameNumber, int32_t surfaceControlId) {
     std::lock_guard lock(mDataMutex);
 
     calculateLegacyJank(frame);
@@ -253,7 +254,8 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
     }
 
     if (CC_UNLIKELY(reporter.get() != nullptr)) {
-        reporter->reportFrameMetrics(frame.data(), false /* hasPresentTime */);
+        reporter->reportFrameMetrics(frame.data(), false /* hasPresentTime */, frameNumber,
+                                     surfaceControlId);
     }
 }
 
