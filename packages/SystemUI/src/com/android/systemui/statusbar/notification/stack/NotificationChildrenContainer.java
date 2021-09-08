@@ -75,7 +75,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private float mDividerAlpha;
     private int mNotificationHeaderMargin;
 
-    private int mNotificatonTopPadding;
+    private int mNotificationTopPadding;
     private float mCollapsedBottompadding;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mContainingNotification;
@@ -140,9 +140,9 @@ public class NotificationChildrenContainer extends ViewGroup {
         mDividerAlpha = res.getFloat(R.dimen.notification_divider_alpha);
         mNotificationHeaderMargin = res.getDimensionPixelSize(
                 R.dimen.notification_children_container_margin_top);
-        mNotificatonTopPadding = res.getDimensionPixelSize(
+        mNotificationTopPadding = res.getDimensionPixelSize(
                 R.dimen.notification_children_container_top_padding);
-        mHeaderHeight = mNotificationHeaderMargin + mNotificatonTopPadding;
+        mHeaderHeight = mNotificationHeaderMargin + mNotificationTopPadding;
         mCollapsedBottompadding = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
@@ -203,7 +203,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                     newHeightSpec);
         }
         int dividerHeightSpec = MeasureSpec.makeMeasureSpec(mDividerHeight, MeasureSpec.EXACTLY);
-        int height = mNotificationHeaderMargin + mNotificatonTopPadding;
+        int height = mNotificationHeaderMargin + mNotificationTopPadding;
         int childCount =
                 Math.min(mAttachedChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
         int collapsedChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
@@ -526,11 +526,11 @@ public class NotificationChildrenContainer extends ViewGroup {
                 if (mUserLocked) {
                     intrinsicHeight += NotificationUtils.interpolate(
                             0,
-                            mNotificatonTopPadding + mDividerHeight,
+                            mNotificationTopPadding + mDividerHeight,
                             expandFactor);
                 } else {
                     intrinsicHeight += childrenExpanded
-                            ? mNotificatonTopPadding + mDividerHeight
+                            ? mNotificationTopPadding + mDividerHeight
                             : 0;
                 }
                 firstChild = false;
@@ -583,10 +583,10 @@ public class NotificationChildrenContainer extends ViewGroup {
                 if (expandingToExpandedGroup) {
                     yPosition += NotificationUtils.interpolate(
                             0,
-                            mNotificatonTopPadding + mDividerHeight,
+                            mNotificationTopPadding + mDividerHeight,
                             expandFactor);
                 } else {
-                    yPosition += mChildrenExpanded ? mNotificatonTopPadding + mDividerHeight : 0;
+                    yPosition += mChildrenExpanded ? mNotificationTopPadding + mDividerHeight : 0;
                 }
                 firstChild = false;
             }
@@ -1009,7 +1009,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                     /* likeHighPriority */);
         }
         int maxContentHeight = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificatonTopPadding;
+                + mNotificationTopPadding;
         int visibleChildren = 0;
         int childCount = mAttachedChildren.size();
         for (int i = 0; i < childCount; i++) {
@@ -1072,7 +1072,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     private int getVisibleChildrenExpandHeight() {
         int intrinsicHeight = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificatonTopPadding + mDividerHeight;
+                + mNotificationTopPadding + mDividerHeight;
         int visibleChildren = 0;
         int childCount = mAttachedChildren.size();
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* forceCollapsed */);
@@ -1212,7 +1212,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public int getPositionInLinearLayout(View childInGroup) {
         int position = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificatonTopPadding;
+                + mNotificationTopPadding;
 
         for (int i = 0; i < mAttachedChildren.size(); i++) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
