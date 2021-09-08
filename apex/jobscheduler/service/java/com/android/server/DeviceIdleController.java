@@ -298,27 +298,45 @@ public class DeviceIdleController extends SystemService
     private Intent mLightIdleIntent;
     private AnyMotionDetector mAnyMotionDetector;
     private final AppStateTrackerImpl mAppStateTracker;
+    @GuardedBy("this")
     private boolean mLightEnabled;
+    @GuardedBy("this")
     private boolean mDeepEnabled;
+    @GuardedBy("this")
     private boolean mQuickDozeActivated;
+    @GuardedBy("this")
     private boolean mQuickDozeActivatedWhileIdling;
+    @GuardedBy("this")
     private boolean mForceIdle;
+    @GuardedBy("this")
     private boolean mNetworkConnected;
+    @GuardedBy("this")
     private boolean mScreenOn;
+    @GuardedBy("this")
     private boolean mCharging;
+    @GuardedBy("this")
     private boolean mNotMoving;
+    @GuardedBy("this")
     private boolean mLocating;
+    @GuardedBy("this")
     private boolean mLocated;
+    @GuardedBy("this")
     private boolean mHasGps;
+    @GuardedBy("this")
     private boolean mHasNetworkLocation;
+    @GuardedBy("this")
     private Location mLastGenericLocation;
+    @GuardedBy("this")
     private Location mLastGpsLocation;
 
     /** Time in the elapsed realtime timebase when this listener last received a motion event. */
+    @GuardedBy("this")
     private long mLastMotionEventElapsed;
 
     // Current locked state of the screen
+    @GuardedBy("this")
     private boolean mScreenLocked;
+    @GuardedBy("this")
     private int mNumBlockingConstraints = 0;
 
     /**
@@ -434,19 +452,30 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     private int mState;
+    @GuardedBy("this")
     private int mLightState;
 
+    @GuardedBy("this")
     private long mInactiveTimeout;
+    @GuardedBy("this")
     private long mNextAlarmTime;
+    @GuardedBy("this")
     private long mNextIdlePendingDelay;
+    @GuardedBy("this")
     private long mNextIdleDelay;
+    @GuardedBy("this")
     private long mNextLightIdleDelay;
+    @GuardedBy("this")
     private long mNextLightIdleDelayFlex;
+    @GuardedBy("this")
     private long mNextLightAlarmTime;
+    @GuardedBy("this")
     private long mNextSensingTimeoutAlarmTime;
 
     /** How long a light idle maintenance window should last. */
+    @GuardedBy("this")
     private long mCurLightIdleBudget;
 
     /**
@@ -454,15 +483,20 @@ public class DeviceIdleController extends SystemService
      * only if {@link #mState} == {@link #STATE_IDLE_MAINTENANCE} or
      * {@link #mLightState} == {@link #LIGHT_STATE_IDLE_MAINTENANCE}.
      */
+    @GuardedBy("this")
     private long mMaintenanceStartTime;
+    @GuardedBy("this")
     private long mIdleStartTime;
 
+    @GuardedBy("this")
     private int mActiveIdleOpCount;
     private PowerManager.WakeLock mActiveIdleWakeLock; // held when there are operations in progress
     private PowerManager.WakeLock mGoingIdleWakeLock;  // held when we are going idle so hardware
                                                        // (especially NetworkPolicyManager) can shut
                                                        // down.
+    @GuardedBy("this")
     private boolean mJobsActive;
+    @GuardedBy("this")
     private boolean mAlarmsActive;
 
     /* Factor to apply to INACTIVE_TIMEOUT and IDLE_AFTER_INACTIVE_TIMEOUT in order to enter
@@ -472,8 +506,11 @@ public class DeviceIdleController extends SystemService
      * Also don't apply the factor if the device is in motion because device motion provides a
      * stronger signal than a prediction algorithm.
      */
+    @GuardedBy("this")
     private float mPreIdleFactor;
+    @GuardedBy("this")
     private float mLastPreIdleFactor;
+    @GuardedBy("this")
     private int mActiveReason;
 
     public final AtomicFile mConfigFile;
@@ -659,8 +696,8 @@ public class DeviceIdleController extends SystemService
             = new AlarmManager.OnAlarmListener() {
         @Override
         public void onAlarm() {
-            if (mState == STATE_SENSING) {
-                synchronized (DeviceIdleController.this) {
+            synchronized (DeviceIdleController.this) {
+                if (mState == STATE_SENSING) {
                     // Restart the device idle progression in case the device moved but the screen
                     // didn't turn on.
                     becomeInactiveIfAppropriateLocked();
@@ -714,6 +751,7 @@ public class DeviceIdleController extends SystemService
         mHandler.sendEmptyMessage(MSG_REPORT_STATIONARY_STATUS);
     }
 
+    @GuardedBy("this")
     private boolean isStationaryLocked() {
         final long now = mInjector.getElapsedRealtime();
         return mMotionListener.active
@@ -1592,27 +1630,21 @@ public class DeviceIdleController extends SystemService
     @Override
     public void onAnyMotionResult(int result) {
         if (DEBUG) Slog.d(TAG, "onAnyMotionResult(" + result + ")");
-        if (result != AnyMotionDetector.RESULT_UNKNOWN) {
-            synchronized (this) {
+        synchronized (this) {
+            if (result != AnyMotionDetector.RESULT_UNKNOWN) {
                 cancelSensingTimeoutAlarmLocked();
             }
-        }
-        if ((result == AnyMotionDetector.RESULT_MOVED) ||
-            (result == AnyMotionDetector.RESULT_UNKNOWN)) {
-            synchronized (this) {
+            if ((result == AnyMotionDetector.RESULT_MOVED)
+                    || (result == AnyMotionDetector.RESULT_UNKNOWN)) {
                 handleMotionDetectedLocked(mConstants.INACTIVE_TIMEOUT, "non_stationary");
-            }
-        } else if (result == AnyMotionDetector.RESULT_STATIONARY) {
-            if (mState == STATE_SENSING) {
-                // If we are currently sensing, it is time to move to locating.
-                synchronized (this) {
+            } else if (result == AnyMotionDetector.RESULT_STATIONARY) {
+                if (mState == STATE_SENSING) {
+                    // If we are currently sensing, it is time to move to locating.
                     mNotMoving = true;
                     stepIdleStateLocked("s:stationary");
-                }
-            } else if (mState == STATE_LOCATING) {
-                // If we are currently locating, note that we are not moving and step
-                // if we have located the position.
-                synchronized (this) {
+                } else if (mState == STATE_LOCATING) {
+                    // If we are currently locating, note that we are not moving and step
+                    // if we have located the position.
                     mNotMoving = true;
                     if (mLocated) {
                         stepIdleStateLocked("s:stationary");
@@ -3062,6 +3094,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void updateInteractivityLocked() {
         // The interactivity state from the power manager tells us whether the display is
         // in a state that we need to keep things running so they will update at a normal
@@ -3089,6 +3122,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void updateChargingLocked(boolean charging) {
         if (DEBUG) Slog.i(TAG, "updateChargingLocked: charging=" + charging);
         if (!charging && mCharging) {
@@ -3114,6 +3148,7 @@ public class DeviceIdleController extends SystemService
 
     /** Updates the quick doze flag and enters deep doze if appropriate. */
     @VisibleForTesting
+    @GuardedBy("this")
     void updateQuickDozeFlagLocked(boolean enabled) {
         if (DEBUG) Slog.i(TAG, "updateQuickDozeFlagLocked: enabled=" + enabled);
         mQuickDozeActivated = enabled;
@@ -3138,6 +3173,7 @@ public class DeviceIdleController extends SystemService
     }
 
     @VisibleForTesting
+    @GuardedBy("this")
     void keyguardShowingLocked(boolean showing) {
         if (DEBUG) Slog.i(TAG, "keyguardShowing=" + showing);
         if (mScreenLocked != showing) {
@@ -3150,15 +3186,18 @@ public class DeviceIdleController extends SystemService
     }
 
     @VisibleForTesting
+    @GuardedBy("this")
     void scheduleReportActiveLocked(String activeReason, int activeUid) {
         Message msg = mHandler.obtainMessage(MSG_REPORT_ACTIVE, activeUid, 0, activeReason);
         mHandler.sendMessage(msg);
     }
 
+    @GuardedBy("this")
     void becomeActiveLocked(String activeReason, int activeUid) {
         becomeActiveLocked(activeReason, activeUid, mConstants.INACTIVE_TIMEOUT, true);
     }
 
+    @GuardedBy("this")
     private void becomeActiveLocked(String activeReason, int activeUid,
             long newInactiveTimeout, boolean changeLightIdle) {
         if (DEBUG) {
@@ -3204,6 +3243,7 @@ public class DeviceIdleController extends SystemService
     }
 
     /** Sanity check to make sure DeviceIdleController and AlarmManager are on the same page. */
+    @GuardedBy("this")
     private void verifyAlarmStateLocked() {
         if (mState == STATE_ACTIVE && mNextAlarmTime != 0) {
             Slog.wtf(TAG, "mState=ACTIVE but mNextAlarmTime=" + mNextAlarmTime);
@@ -3221,6 +3261,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void becomeInactiveIfAppropriateLocked() {
         verifyAlarmStateLocked();
 
@@ -3300,6 +3341,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     private void resetIdleManagementLocked() {
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
@@ -3313,6 +3355,7 @@ public class DeviceIdleController extends SystemService
         updateActiveConstraintsLocked();
     }
 
+    @GuardedBy("this")
     private void resetLightIdleManagementLocked() {
         mNextLightIdleDelay = 0;
         mNextLightIdleDelayFlex = 0;
@@ -3320,6 +3363,7 @@ public class DeviceIdleController extends SystemService
         cancelLightAlarmLocked();
     }
 
+    @GuardedBy("this")
     void exitForceIdleLocked() {
         if (mForceIdle) {
             mForceIdle = false;
@@ -3344,9 +3388,12 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     int getLightState() {
-        return mLightState;
+        synchronized (this) {
+            return mLightState;
+        }
     }
 
+    @GuardedBy("this")
     void stepLightIdleStateLocked(String reason) {
         if (mLightState == LIGHT_STATE_OVERRIDE) {
             // If we are already in deep device idle mode, then
@@ -3435,7 +3482,9 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     int getState() {
-        return mState;
+        synchronized (this) {
+            return mState;
+        }
     }
 
     /**
@@ -3448,6 +3497,7 @@ public class DeviceIdleController extends SystemService
     }
 
     @VisibleForTesting
+    @GuardedBy("this")
     void stepIdleStateLocked(String reason) {
         if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
@@ -3588,6 +3638,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     private void moveToStateLocked(int state, String reason) {
         final int oldState = mState;
         mState = state;
@@ -3667,22 +3718,26 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     float getPreIdleTimeoutFactor() {
-        return mPreIdleFactor;
+        synchronized (this) {
+            return mPreIdleFactor;
+        }
     }
 
     @VisibleForTesting
     int setPreIdleTimeoutFactor(float ratio) {
-        if (!mDeepEnabled) {
-            if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Deep Idle disable");
-            return SET_IDLE_FACTOR_RESULT_NOT_SUPPORT;
-        } else if (ratio <= MIN_PRE_IDLE_FACTOR_CHANGE) {
-            if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Invalid input");
-            return SET_IDLE_FACTOR_RESULT_INVALID;
-        } else if (Math.abs(ratio - mPreIdleFactor) < MIN_PRE_IDLE_FACTOR_CHANGE) {
-            if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: New factor same as previous factor");
-            return SET_IDLE_FACTOR_RESULT_IGNORED;
-        }
         synchronized (this) {
+            if (!mDeepEnabled) {
+                if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Deep Idle disable");
+                return SET_IDLE_FACTOR_RESULT_NOT_SUPPORT;
+            } else if (ratio <= MIN_PRE_IDLE_FACTOR_CHANGE) {
+                if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Invalid input");
+                return SET_IDLE_FACTOR_RESULT_INVALID;
+            } else if (Math.abs(ratio - mPreIdleFactor) < MIN_PRE_IDLE_FACTOR_CHANGE) {
+                if (DEBUG) {
+                    Slog.d(TAG, "setPreIdleTimeoutFactor: New factor same as previous factor");
+                }
+                return SET_IDLE_FACTOR_RESULT_IGNORED;
+            }
             mLastPreIdleFactor = mPreIdleFactor;
             mPreIdleFactor = ratio;
         }
@@ -3744,6 +3799,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     private boolean shouldUseIdleTimeoutFactorLocked() {
         // exclude ACTIVE_REASON_MOTION, for exclude device in pocket case
         if (mActiveReason == ACTIVE_REASON_MOTION) {
@@ -3763,13 +3819,17 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     long getNextAlarmTime() {
-        return mNextAlarmTime;
+        synchronized (this) {
+            return mNextAlarmTime;
+        }
     }
 
+    @GuardedBy("this")
     boolean isOpsInactiveLocked() {
         return mActiveIdleOpCount <= 0 && !mJobsActive && !mAlarmsActive;
     }
 
+    @GuardedBy("this")
     void exitMaintenanceEarlyIfNeededLocked() {
         if (mState == STATE_IDLE_MAINTENANCE || mLightState == LIGHT_STATE_IDLE_MAINTENANCE
                 || mLightState == LIGHT_STATE_PRE_IDLE) {
@@ -3794,12 +3854,14 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void motionLocked() {
         if (DEBUG) Slog.d(TAG, "motionLocked()");
         mLastMotionEventElapsed = mInjector.getElapsedRealtime();
         handleMotionDetectedLocked(mConstants.MOTION_INACTIVE_TIMEOUT, "motion");
     }
 
+    @GuardedBy("this")
     void handleMotionDetectedLocked(long timeout, String type) {
         if (mStationaryListeners.size() > 0) {
             postStationaryStatusUpdated();
@@ -3829,6 +3891,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void receivedGenericLocationLocked(Location location) {
         if (mState != STATE_LOCATING) {
             cancelLocatingLocked();
@@ -3845,6 +3908,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void receivedGpsLocationLocked(Location location) {
         if (mState != STATE_LOCATING) {
             cancelLocatingLocked();
@@ -3883,6 +3947,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void cancelAlarmLocked() {
         if (mNextAlarmTime != 0) {
             mNextAlarmTime = 0;
@@ -3890,6 +3955,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void cancelLightAlarmLocked() {
         if (mNextLightAlarmTime != 0) {
             mNextLightAlarmTime = 0;
@@ -3897,6 +3963,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void cancelLocatingLocked() {
         if (mLocating) {
             LocationManager locationManager = mInjector.getLocationManager();
@@ -3914,6 +3981,7 @@ public class DeviceIdleController extends SystemService
         mAlarmManager.cancel(mMotionRegistrationAlarmListener);
     }
 
+    @GuardedBy("this")
     void cancelSensingTimeoutAlarmLocked() {
         if (mNextSensingTimeoutAlarmTime != 0) {
             mNextSensingTimeoutAlarmTime = 0;
@@ -3921,6 +3989,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
         if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
 
@@ -3957,6 +4026,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void scheduleLightAlarmLocked(long delay, long flex) {
         if (DEBUG) {
             Slog.d(TAG, "scheduleLightAlarmLocked(" + delay
@@ -4003,6 +4073,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     void scheduleSensingTimeoutAlarmLocked(long delay) {
         if (DEBUG) Slog.d(TAG, "scheduleSensingAlarmLocked(" + delay + ")");
         mNextSensingTimeoutAlarmTime = SystemClock.elapsedRealtime() + delay;
@@ -4071,6 +4142,7 @@ public class DeviceIdleController extends SystemService
      * @param callingUid the callingUid that setup this temp-allowlist, only valid when param adding
      *                   is true.
      */
+    @GuardedBy("this")
     private void updateTempWhitelistAppIdsLocked(int uid, boolean adding, long durationMs,
             @TempAllowListType int type, @ReasonCode int reasonCode, @Nullable String reason,
             int callingUid) {
@@ -4120,6 +4192,7 @@ public class DeviceIdleController extends SystemService
                 mTempWhitelistAppIdArray);
     }
 
+    @GuardedBy("this")
     void readConfigFileLocked() {
         if (DEBUG) Slog.d(TAG, "Reading config from " + mConfigFile.getBaseFile());
         mPowerSaveWhitelistUserApps.clear();
@@ -4142,6 +4215,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @GuardedBy("this")
     private void readConfigFileLocked(XmlPullParser parser) {
         final PackageManager pm = getContext().getPackageManager();
 
@@ -4987,7 +5061,7 @@ public class DeviceIdleController extends SystemService
                 pw.println();
             }
             if (mNextLightIdleDelay != 0) {
-                pw.print("  mNextIdleDelay=");
+                pw.print("  mNextLightIdleDelay=");
                 TimeUtils.formatDuration(mNextLightIdleDelay, pw);
                 if (mConstants.USE_WINDOW_ALARMS) {
                     pw.print(" (flex=");
