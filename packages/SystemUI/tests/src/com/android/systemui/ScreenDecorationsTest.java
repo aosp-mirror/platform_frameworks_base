@@ -17,6 +17,7 @@ package com.android.systemui;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LENGTH;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
@@ -53,6 +54,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.RotationUtils;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -243,31 +245,36 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 false /* multipleRadius */, false /* fillCutout */);
 
         // left cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                new Rect(0, 200, 1, 210),
-                ZERO_RECT,
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {new Rect(0, 50, 1, 60), null, null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(1, 0, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
+        final Point topRadius = new Point(testTopRadius, testTopRadius);
+        final Point bottomRadius = new Point(testBottomRadius, testBottomRadius);
         View leftRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.left);
+        boolean isTop = mScreenDecorations.isTopRoundedCorner(BOUNDS_POSITION_LEFT, R.id.left);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, isTop ? topRadius : bottomRadius);
+
         View rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.right);
+        isTop = mScreenDecorations.isTopRoundedCorner(BOUNDS_POSITION_LEFT, R.id.right);
         verify(mScreenDecorations, atLeastOnce())
-                .setSize(leftRoundedCorner, new Point(testTopRadius, testTopRadius));
-        verify(mScreenDecorations, atLeastOnce())
-                .setSize(rightRoundedCorner, new Point(testBottomRadius, testBottomRadius));
+                .setSize(rightRoundedCorner, isTop ? topRadius : bottomRadius);
+
         leftRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.left);
+        isTop = mScreenDecorations.isTopRoundedCorner(BOUNDS_POSITION_RIGHT, R.id.left);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, isTop ? topRadius : bottomRadius);
+
         rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.right);
+        isTop = mScreenDecorations.isTopRoundedCorner(BOUNDS_POSITION_RIGHT, R.id.right);
         verify(mScreenDecorations, atLeastOnce())
-                .setSize(leftRoundedCorner, new Point(testTopRadius, testTopRadius));
-        verify(mScreenDecorations, atLeastOnce())
-                .setSize(rightRoundedCorner, new Point(testBottomRadius, testBottomRadius));
+                .setSize(rightRoundedCorner, isTop ? topRadius : bottomRadius);
     }
 
     @Test
@@ -308,13 +315,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // top cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                ZERO_RECT,
-                new Rect(9, 0, 10, 1),
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
         // Top window is created for top cutout.
@@ -335,13 +338,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // left cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                new Rect(0, 200, 1, 210),
-                ZERO_RECT,
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {new Rect(0, 50, 1, 60), null, null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(1, 0, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
         // Left window is created for left cutout.
@@ -362,19 +361,15 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // top cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                ZERO_RECT,
-                new Rect(9, 0, 10, 1),
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        // Top window is created for rouned corner and top cutout.
+        // Top window is created for rounded corner and top cutout.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
-        // Bottom window is created for rouned corner.
+        // Bottom window is created for rounded corner.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]), any());
         // Left window should be null.
@@ -390,19 +385,15 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // left cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                new Rect(0, 200, 1, 210),
-                ZERO_RECT,
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {new Rect(0, 50, 1, 60), null, null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(1, 0, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        // Left window is created for rouned corner and left cutout.
+        // Left window is created for rounded corner and left cutout.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]), any());
-        // Right window is created for rouned corner.
+        // Right window is created for rounded corner.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]), any());
         // Top window should be null.
@@ -418,19 +409,15 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // top and left cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                new Rect(0, 200, 1, 210),
-                new Rect(9, 0, 10, 1),
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {new Rect(0, 50, 1, 60), new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(1, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        // Top window is created for rouned corner and top cutout.
+        // Top window is created for rounded corner and top cutout.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
-        // Bottom window is created for rouned corner.
+        // Bottom window is created for rounded corner.
         verify(mWindowManager, times(1))
                 .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]), any());
         // Left window is created for left cutout.
@@ -447,13 +434,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 true /* fillCutout */);
 
         // Set to short edge cutout(top).
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                ZERO_RECT,
-                new Rect(9, 0, 10, 1),
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
         verify(mWindowManager, times(1))
@@ -463,14 +446,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
 
         // Switch to long edge cutout(left).
-        // left cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                new Rect(0, 200, 1, 210),
-                ZERO_RECT,
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] newBounds = {new Rect(0, 50, 1, 60), null, null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(1, 0, 0, 0), newBounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.onConfigurationChanged(new Configuration());
         verify(mWindowManager, times(1))
@@ -487,13 +465,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 false /* fillCutout */);
 
         // top cutout
-        doReturn(new DisplayCutout(
-                Insets.of(0, 10, 0, 0),
-                ZERO_RECT,
-                new Rect(9, 0, 10, 1),
-                ZERO_RECT,
-                ZERO_RECT,
-                Insets.NONE)).when(mScreenDecorations).getCutout();
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
         assertNull(mScreenDecorations.mOverlays);
@@ -651,5 +625,20 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 R.bool.config_roundedCornerMultipleRadius, multipleRadius);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, fillCutout);
+    }
+
+    private DisplayCutout getDisplayCutoutForRotation(Insets safeInsets, Rect[] cutoutBounds) {
+        final int rotation = mContext.getDisplay().getRotation();
+        final Insets insets = RotationUtils.rotateInsets(safeInsets, rotation);
+        final Rect[] sorted = new Rect[BOUNDS_POSITION_LENGTH];
+        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
+            final int rotatedPos = ScreenDecorations.getBoundPositionFromRotation(i, rotation);
+            if (cutoutBounds[i] != null) {
+                RotationUtils.rotateBounds(cutoutBounds[i], new Rect(0, 0, 100, 200), rotation);
+            }
+            sorted[rotatedPos] = cutoutBounds[i];
+        }
+        return new DisplayCutout(insets, sorted[BOUNDS_POSITION_LEFT], sorted[BOUNDS_POSITION_TOP],
+                sorted[BOUNDS_POSITION_RIGHT], sorted[BOUNDS_POSITION_BOTTOM]);
     }
 }
