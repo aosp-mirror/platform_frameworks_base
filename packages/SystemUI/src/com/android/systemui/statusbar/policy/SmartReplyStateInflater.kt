@@ -311,7 +311,7 @@ interface SmartActionInflater {
                             setBounds(0, 0, newIconSize, newIconSize)
                         }
                 // Add the action icon to the Smart Action button.
-                setCompoundDrawablesRelative(iconDrawable, null, null, null)
+                setCompoundDrawables(iconDrawable, null, null, null)
 
                 val onClickListener = View.OnClickListener {
                     onSmartActionClick(entry, smartActions, actionIndex, action)
