@@ -66,6 +66,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -455,7 +456,8 @@ public class KeyguardIndicationController {
                     new KeyguardIndication.Builder()
                             .setMessage(mContext.getResources().getString(
                                     com.android.internal.R.string.global_action_logout))
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(Utils.getColorAttr(
+                                    mContext, com.android.internal.R.attr.textColorOnAccent))
                             .setBackground(mContext.getDrawable(
                                     com.android.systemui.R.drawable.logout_button_background))
                             .setClickListener((view) -> {
