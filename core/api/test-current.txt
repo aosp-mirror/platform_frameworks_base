@@ -1660,6 +1660,7 @@ package android.telephony {
     method public long getTimestampMillis();
     method public long getTransmitDurationMillisAtPowerLevel(int);
     method @NonNull public android.util.Range<java.lang.Integer> getTransmitPowerRange(int);
+    method public boolean isEmpty();
     method public boolean isValid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;

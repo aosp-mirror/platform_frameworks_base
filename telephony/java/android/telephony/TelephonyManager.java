@@ -57,7 +57,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -175,6 +177,9 @@ public class TelephonyManager {
      * @hide
      */
     public static final String MODEM_ACTIVITY_RESULT_KEY = "controller_activity";
+
+    /** @hide */
+    public static final String EXCEPTION_RESULT_KEY = "exception";
 
     /**
      * The process name of the Phone app as well as many other apps that use this process name, such
@@ -10855,26 +10860,149 @@ public class TelephonyManager {
         return null;
     }
 
-
     /**
-     * Requests the modem activity info. The recipient will place the result
-     * in `result`.
-     * @param result The object on which the recipient will send the resulting
-     * {@link android.telephony.ModemActivityInfo} object with key of
-     * {@link #MODEM_ACTIVITY_RESULT_KEY}.
+     * Exception that may be supplied to the callback provided in {@link #requestModemActivityInfo}.
      * @hide
      */
-    public void requestModemActivityInfo(@NonNull ResultReceiver result) {
+    @SystemApi
+    public static class ModemActivityInfoException extends Exception {
+        /** Indicates that an unknown error occurred */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * Indicates that the modem or phone processes are not available (such as when the device
+         * is in airplane mode).
+         */
+        public static final int ERROR_PHONE_NOT_AVAILABLE = 1;
+
+        /**
+         * Indicates that the modem supplied an invalid instance of {@link ModemActivityInfo}
+         */
+        public static final int ERROR_INVALID_INFO_RECEIVED = 2;
+
+        /**
+         * Indicates that the modem encountered an internal failure when processing the request
+         * for activity info.
+         */
+        public static final int ERROR_MODEM_RESPONSE_ERROR = 3;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"ERROR_"},
+                value = {
+                        ERROR_UNKNOWN,
+                        ERROR_PHONE_NOT_AVAILABLE,
+                        ERROR_INVALID_INFO_RECEIVED,
+                        ERROR_MODEM_RESPONSE_ERROR,
+                })
+        public @interface ModemActivityInfoError {}
+
+        private final int mErrorCode;
+
+        /** @hide */
+        public ModemActivityInfoException(@ModemActivityInfoError int errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        public @ModemActivityInfoError int getErrorCode() {
+            return mErrorCode;
+        }
+
+        @Override
+        public String toString() {
+            switch (mErrorCode) {
+                case ERROR_UNKNOWN: return "ERROR_UNKNOWN";
+                case ERROR_PHONE_NOT_AVAILABLE: return "ERROR_PHONE_NOT_AVAILABLE";
+                case ERROR_INVALID_INFO_RECEIVED: return "ERROR_INVALID_INFO_RECEIVED";
+                case ERROR_MODEM_RESPONSE_ERROR: return "ERROR_MODEM_RESPONSE_ERROR";
+                default: return "UNDEFINED";
+            }
+        }
+    }
+
+    /**
+     * Requests the current modem activity info.
+     *
+     * The provided instance of {@link ModemActivityInfo} represents the cumulative activity since
+     * the last restart of the phone process.
+     *
+     * @param callback A callback object to which the result will be delivered. If there was an
+     *                 error processing the request, {@link OutcomeReceiver#onError} will be called
+     *                 with more details about the error.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void requestModemActivityInfo(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<ModemActivityInfo, ModemActivityInfoException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        // Pass no handler into the receiver, since we're going to be trampolining the call to the
+        // listener onto the provided executor.
+        ResultReceiver wrapperResultReceiver = new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle data) {
+                if (data == null) {
+                    Log.w(TAG, "requestModemActivityInfo: received null bundle");
+                    sendErrorToListener(ModemActivityInfoException.ERROR_UNKNOWN);
+                    return;
+                }
+                data.setDefusable(true);
+                if (data.containsKey(EXCEPTION_RESULT_KEY)) {
+                    int receivedErrorCode = data.getInt(EXCEPTION_RESULT_KEY);
+                    sendErrorToListener(receivedErrorCode);
+                    return;
+                }
+
+                if (!data.containsKey(MODEM_ACTIVITY_RESULT_KEY)) {
+                    Log.w(TAG, "requestModemActivityInfo: Bundle did not contain expected key");
+                    sendErrorToListener(ModemActivityInfoException.ERROR_UNKNOWN);
+                    return;
+                }
+                Parcelable receivedResult = data.getParcelable(MODEM_ACTIVITY_RESULT_KEY);
+                if (!(receivedResult instanceof ModemActivityInfo)) {
+                    Log.w(TAG, "requestModemActivityInfo: Bundle contained something that wasn't "
+                            + "a ModemActivityInfo.");
+                    sendErrorToListener(ModemActivityInfoException.ERROR_UNKNOWN);
+                    return;
+                }
+                ModemActivityInfo modemActivityInfo = (ModemActivityInfo) receivedResult;
+                if (!modemActivityInfo.isValid()) {
+                    Log.w(TAG, "requestModemActivityInfo: Received an invalid ModemActivityInfo");
+                    sendErrorToListener(ModemActivityInfoException.ERROR_INVALID_INFO_RECEIVED);
+                    return;
+                }
+                Log.d(TAG, "requestModemActivityInfo: Sending result to app: " + modemActivityInfo);
+                sendResultToListener(modemActivityInfo);
+            }
+
+            private void sendResultToListener(ModemActivityInfo info) {
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                callback.onResult(info)));
+            }
+
+            private void sendErrorToListener(int code) {
+                ModemActivityInfoException e = new ModemActivityInfoException(code);
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                callback.onError(e)));
+            }
+        };
+
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.requestModemActivityInfo(result);
+                service.requestModemActivityInfo(wrapperResultReceiver);
                 return;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getModemActivityInfo", e);
         }
-        result.send(0, null);
+        executor.execute(() -> callback.onError(
+                new ModemActivityInfoException(
+                        ModemActivityInfoException.ERROR_PHONE_NOT_AVAILABLE)));
     }
 
     /**

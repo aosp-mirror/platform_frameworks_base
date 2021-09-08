@@ -29936,6 +29936,11 @@ package android.os {
     ctor public OperationCanceledException(String);
   }
 
+  public interface OutcomeReceiver<R, E extends java.lang.Throwable> {
+    method public default void onError(@NonNull E);
+    method public void onResult(@NonNull R);
+  }
+
   public final class Parcel {
     method public void appendFrom(android.os.Parcel, int, int);
     method @Nullable public android.os.IBinder[] createBinderArray();

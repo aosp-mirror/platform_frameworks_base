@@ -131,7 +131,7 @@ public final class ModemActivityInfo implements Parcelable {
             + " mTimestamp=" + mTimestamp
             + " mSleepTimeMs=" + mSleepTimeMs
             + " mIdleTimeMs=" + mIdleTimeMs
-            + " mTxTimeMs[]=" + mTxTimeMs
+            + " mTxTimeMs[]=" + Arrays.toString(mTxTimeMs)
             + " mRxTimeMs=" + mRxTimeMs
             + "}";
     }
@@ -320,8 +320,6 @@ public final class ModemActivityInfo implements Parcelable {
      *
      * @return {@code true} if this {@link ModemActivityInfo} record is valid,
      * {@code false} otherwise.
-     *  TODO: remove usages of this outside Telephony by always returning a valid (or null) result
-     *  from telephony.
      * @hide
      */
     @TestApi
@@ -332,7 +330,9 @@ public final class ModemActivityInfo implements Parcelable {
                 && (getReceiveTimeMillis() >= 0) && !isEmpty());
     }
 
-    private boolean isEmpty() {
+    /** @hide */
+    @TestApi
+    public boolean isEmpty() {
         boolean isTxPowerEmpty = mTxTimeMs == null || mTxTimeMs.length == 0
                 || Arrays.stream(mTxTimeMs).allMatch((i) -> i == 0);
 
