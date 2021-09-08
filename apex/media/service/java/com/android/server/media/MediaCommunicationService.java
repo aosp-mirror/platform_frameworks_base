@@ -395,11 +395,7 @@ public class MediaCommunicationService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 //TODO: Dispatch key event to media session 2 if required
-                if (asSystemService) {
-                    mSessionManager.dispatchMediaKeyEventAsSystemService(keyEvent);
-                } else {
-                    mSessionManager.dispatchMediaKeyEvent(keyEvent, false);
-                }
+                mSessionManager.dispatchMediaKeyEvent(keyEvent, asSystemService);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
