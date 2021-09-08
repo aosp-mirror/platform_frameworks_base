@@ -33,6 +33,7 @@ import android.hardware.location.NanoAppState;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,11 @@ import java.util.List;
 /* package */ class ContextHubServiceUtil {
     private static final String TAG = "ContextHubServiceUtil";
     private static final String CONTEXT_HUB_PERMISSION = Manifest.permission.ACCESS_CONTEXT_HUB;
+
+    /**
+     * A host endpoint that is reserved to identify a broadcasted message.
+     */
+    private static final char HOST_ENDPOINT_BROADCAST = 0xFFFF;
 
     /**
      * Creates a ConcurrentHashMap of the Context Hub ID to the ContextHubInfo object given an
@@ -110,11 +116,11 @@ import java.util.List;
     }
 
     /**
-     * Generates the Context Hub HAL's NanoAppBinary object from the client-facing
+     * Generates the Context Hub HAL's HIDL NanoAppBinary object from the client-facing
      * android.hardware.location.NanoAppBinary object.
      *
      * @param nanoAppBinary the client-facing NanoAppBinary object
-     * @return the Context Hub HAL's NanoAppBinary object
+     * @return the Context Hub HAL's HIDL NanoAppBinary object
      */
     /* package */
     static android.hardware.contexthub.V1_0.NanoAppBinary createHidlNanoAppBinary(
@@ -142,6 +148,29 @@ import java.util.List;
     }
 
     /**
+     * Generates the Context Hub HAL's AIDL NanoAppBinary object from the client-facing
+     * android.hardware.location.NanoAppBinary object.
+     *
+     * @param nanoAppBinary the client-facing NanoAppBinary object
+     * @return the Context Hub HAL's AIDL NanoAppBinary object
+     */
+    /* package */
+    static android.hardware.contexthub.NanoappBinary createAidlNanoAppBinary(
+            NanoAppBinary nanoAppBinary) {
+        android.hardware.contexthub.NanoappBinary aidlNanoAppBinary =
+                new android.hardware.contexthub.NanoappBinary();
+
+        aidlNanoAppBinary.nanoappId = nanoAppBinary.getNanoAppId();
+        aidlNanoAppBinary.nanoappVersion = nanoAppBinary.getNanoAppVersion();
+        aidlNanoAppBinary.flags = nanoAppBinary.getFlags();
+        aidlNanoAppBinary.targetChreApiMajorVersion = nanoAppBinary.getTargetChreApiMajorVersion();
+        aidlNanoAppBinary.targetChreApiMinorVersion = nanoAppBinary.getTargetChreApiMinorVersion();
+        aidlNanoAppBinary.customBinary = nanoAppBinary.getBinaryNoHeader();
+
+        return aidlNanoAppBinary;
+    }
+
+    /**
      * Generates a client-facing NanoAppState array from a HAL HubAppInfo array.
      *
      * @param nanoAppInfoList the array of HubAppInfo objects
@@ -154,7 +183,26 @@ import java.util.List;
         for (HubAppInfo appInfo : nanoAppInfoList) {
             nanoAppStateList.add(
                     new NanoAppState(appInfo.info_1_0.appId, appInfo.info_1_0.version,
-                                     appInfo.info_1_0.enabled, appInfo.permissions));
+                            appInfo.info_1_0.enabled, appInfo.permissions));
+        }
+
+        return nanoAppStateList;
+    }
+
+    /**
+     * Generates a client-facing NanoAppState array from a AIDL NanoappInfo array.
+     *
+     * @param nanoAppInfoList the array of NanoappInfo objects
+     * @return the corresponding array of NanoAppState objects
+     */
+    /* package */
+    static List<NanoAppState> createNanoAppStateList(
+            android.hardware.contexthub.NanoappInfo[] nanoAppInfoList) {
+        ArrayList<NanoAppState> nanoAppStateList = new ArrayList<>();
+        for (android.hardware.contexthub.NanoappInfo appInfo : nanoAppInfoList) {
+            nanoAppStateList.add(
+                    new NanoAppState(appInfo.nanoappId, appInfo.nanoappVersion,
+                            appInfo.enabled, new ArrayList<>(Arrays.asList(appInfo.permissions))));
         }
 
         return nanoAppStateList;
@@ -180,6 +228,29 @@ import java.util.List;
     }
 
     /**
+     * Creates an AIDL ContextHubMessage object to send to a nanoapp.
+     *
+     * @param hostEndPoint the ID of the client sending the message
+     * @param message      the client-facing NanoAppMessage object describing the message
+     * @return the AIDL ContextHubMessage object
+     */
+    /* package */
+    static android.hardware.contexthub.ContextHubMessage createAidlContextHubMessage(
+            short hostEndPoint, NanoAppMessage message) {
+        android.hardware.contexthub.ContextHubMessage aidlMessage =
+                new android.hardware.contexthub.ContextHubMessage();
+
+        aidlMessage.nanoappId = message.getNanoAppId();
+        aidlMessage.hostEndPoint = (char) hostEndPoint;
+        aidlMessage.messageType = message.getMessageType();
+        aidlMessage.messageBody = message.getMessageBody();
+        // This explicit definition is required to avoid erroneous behavior at the binder.
+        aidlMessage.permissions = new String[0];
+
+        return aidlMessage;
+    }
+
+    /**
      * Creates a client-facing NanoAppMessage object to send to a client.
      *
      * @param message the HIDL ContextHubMsg object from a nanoapp
@@ -192,6 +263,20 @@ import java.util.List;
         return NanoAppMessage.createMessageFromNanoApp(
                 message.appName, message.msgType, messageArray,
                 message.hostEndPoint == HostEndPoint.BROADCAST);
+    }
+
+    /**
+     * Creates a client-facing NanoAppMessage object to send to a client.
+     *
+     * @param message the AIDL ContextHubMessage object from a nanoapp
+     * @return the NanoAppMessage object
+     */
+    /* package */
+    static NanoAppMessage createNanoAppMessage(
+            android.hardware.contexthub.ContextHubMessage message) {
+        return NanoAppMessage.createMessageFromNanoApp(
+                message.nanoappId, message.messageType, message.messageBody,
+                message.hostEndPoint == HOST_ENDPOINT_BROADCAST);
     }
 
     /**
@@ -271,6 +356,23 @@ import java.util.List;
                 return ContextHubService.CONTEXT_HUB_EVENT_RESTARTED;
             default:
                 Log.e(TAG, "toContextHubEvent: Unknown event type: " + hidlEventType);
+                return ContextHubService.CONTEXT_HUB_EVENT_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts an AIDL AsyncEventType to the corresponding ContextHubService.CONTEXT_HUB_EVENT_*.
+     *
+     * @param aidlEventType The AsyncEventType value.
+     * @return The converted event type.
+     */
+    /* package */
+    static int toContextHubEventFromAidl(int aidlEventType) {
+        switch (aidlEventType) {
+            case android.hardware.contexthub.AsyncEventType.RESTARTED:
+                return ContextHubService.CONTEXT_HUB_EVENT_RESTARTED;
+            default:
+                Log.e(TAG, "toContextHubEventFromAidl: Unknown event type: " + aidlEventType);
                 return ContextHubService.CONTEXT_HUB_EVENT_UNKNOWN;
         }
     }
