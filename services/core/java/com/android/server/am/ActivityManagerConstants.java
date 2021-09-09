@@ -88,6 +88,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
     static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
+    static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_PENDINGINTENT_WARNING_THRESHOLD = "pendingintent_warning_threshold";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -121,6 +122,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
     private static final long DEFAULT_MEMORY_INFO_THROTTLE_TIME = 5*60*1000;
     private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
+    private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final int DEFAULT_PENDINGINTENT_WARNING_THRESHOLD = 2000;
 
     // Flag stored in the DeviceConfig API.
@@ -273,6 +275,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // this long.
     public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
+    /**
+     * When service started from background, before the timeout it can be promoted to FGS by calling
+     * Service.startForeground().
+     */
+    volatile long mFgsStartForegroundTimeoutMs = DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS;
+
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
@@ -420,6 +428,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_MIN_ASSOC_LOG_DURATION:
                                 updateMinAssocLogDuration();
+                                break;
+                            case KEY_FGS_START_FOREGROUND_TIMEOUT:
+                                updateFgsStartForegroundTimeout();
                                 break;
                             default:
                                 break;
@@ -697,6 +708,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 /* defaultValue */ DEFAULT_MIN_ASSOC_LOG_DURATION);
     }
 
+    private void updateFgsStartForegroundTimeout() {
+        mFgsStartForegroundTimeoutMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_START_FOREGROUND_TIMEOUT,
+                DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS);
+    }
+
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");
@@ -769,6 +787,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(Arrays.toString(IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.toArray()));
         pw.print("  "); pw.print(KEY_MIN_ASSOC_LOG_DURATION); pw.print("=");
         pw.println(MIN_ASSOC_LOG_DURATION);
+        pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
+        pw.println(mFgsStartForegroundTimeoutMs);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
