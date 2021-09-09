@@ -56,6 +56,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     // Callback to Jetpack to notify about changes to split states.
     private @NonNull Consumer<List<SplitInfo>> mEmbeddingCallback;
+    private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
 
     public SplitController() {
         mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
@@ -113,8 +114,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         container.setInfo(taskFragmentAppearedInfo.getTaskFragmentInfo());
         if (container.isFinished()) {
             mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
-            updateCallbackIfNecessary();
         }
+        updateCallbackIfNecessary();
     }
 
     @Override
@@ -133,8 +134,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             final boolean shouldFinishDependent =
                     !taskFragmentInfo.isTaskClearedForReuse();
             mPresenter.cleanupContainer(container, shouldFinishDependent);
-            updateCallbackIfNecessary();
         }
+        updateCallbackIfNecessary();
     }
 
     @Override
@@ -158,12 +159,17 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    void onActivityCreated(@NonNull Activity launchedActivity) {
+        handleActivityCreated(launchedActivity);
+        updateCallbackIfNecessary();
+    }
+
     /**
      * Checks if the activity start should be routed to a particular container. It can create a new
      * container for the activity and a new split container if necessary.
      */
     // TODO(b/190433398): Break down into smaller functions.
-    void onActivityCreated(@NonNull Activity launchedActivity) {
+    void handleActivityCreated(@NonNull Activity launchedActivity) {
         final List<EmbeddingRule> splitRules = getSplitRules();
         final TaskFragmentContainer currentContainer = getContainerWithActivity(
                 launchedActivity.getActivityToken(), launchedActivity);
@@ -234,8 +240,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         mPresenter.createNewSplitContainer(activityBelow, launchedActivity,
                 splitPairRule);
-
-        updateCallbackIfNecessary();
     }
 
     private void onActivityConfigurationChanged(@NonNull Activity activity) {
@@ -509,8 +513,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (mEmbeddingCallback == null) {
             return;
         }
-        // TODO(b/190433398): Check if something actually changed
-        mEmbeddingCallback.accept(getActiveSplitStates());
+        if (!allActivitiesCreated()) {
+            return;
+        }
+        List<SplitInfo> currentSplitStates = getActiveSplitStates();
+        if (mLastReportedSplitStates.equals(currentSplitStates)) {
+            return;
+        }
+        mLastReportedSplitStates.clear();
+        mLastReportedSplitStates.addAll(currentSplitStates);
+        mEmbeddingCallback.accept(currentSplitStates);
     }
 
     /**
@@ -519,6 +531,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private List<SplitInfo> getActiveSplitStates() {
         List<SplitInfo> splitStates = new ArrayList<>();
         for (SplitContainer container : mSplitContainers) {
+            if (container.getPrimaryContainer().isEmpty()
+                    || container.getSecondaryContainer().isEmpty()) {
+                // Skipping containers that do not have any activities to report.
+                continue;
+            }
             ActivityStack primaryContainer =
                     new ActivityStack(
                             container.getPrimaryContainer().collectActivities());
@@ -526,10 +543,31 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     new ActivityStack(
                             container.getSecondaryContainer().collectActivities());
             SplitInfo splitState = new SplitInfo(primaryContainer,
-                    secondaryContainer, container.getSplitRule().getSplitRatio());
+                    secondaryContainer,
+                    // Splits that are not showing side-by-side are reported as having 0 split
+                    // ratio, since by definition in the API the primary container occupies no
+                    // width of the split when covered by the secondary.
+                    mPresenter.shouldShowSideBySide(container)
+                            ? container.getSplitRule().getSplitRatio()
+                            : 0.0f);
             splitStates.add(splitState);
         }
         return splitStates;
+    }
+
+    /**
+     * Checks if all activities that are registered with the containers have already appeared in
+     * the client.
+     */
+    private boolean allActivitiesCreated() {
+        for (TaskFragmentContainer container : mContainers) {
+            if (container.getInfo() == null
+                    || container.getInfo().getActivities().size()
+                    != container.collectActivities().size()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
