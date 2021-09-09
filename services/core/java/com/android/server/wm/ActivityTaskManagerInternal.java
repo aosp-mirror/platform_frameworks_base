@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.IntArray;
@@ -609,6 +610,14 @@ public abstract class ActivityTaskManagerInternal {
          * override the system configuration for this application.
          */
         PackageConfigurationUpdater setNightMode(int nightMode);
+
+        /**
+         * Sets the app-specific locales for the application referenced by this updater.
+         * This setting is persisted and will overlay on top of the system locales for
+         * the said application.
+         * @return the current {@link PackageConfigurationUpdater} updated with the provided locale.
+         */
+        PackageConfigurationUpdater setLocales(LocaleList locales);
 
         /**
          * Commit changes.
