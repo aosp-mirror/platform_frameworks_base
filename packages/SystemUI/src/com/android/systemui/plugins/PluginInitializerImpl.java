@@ -14,7 +14,10 @@
 
 package com.android.systemui.plugins;
 
+import android.util.Log;
+
 import com.android.systemui.shared.plugins.PluginInitializer;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,8 +25,25 @@ import javax.inject.Singleton;
 /** */
 @Singleton
 public class PluginInitializerImpl implements PluginInitializer {
+
+    /**
+     * True if WTFs should lead to crashes
+     */
+    private static final boolean WTFS_SHOULD_CRASH = false;
+    private boolean mWtfsSet;
+
     @Inject
     public PluginInitializerImpl(PluginDependencyProvider  dependencyProvider) {
         dependencyProvider.allowPluginDependency(ActivityStarter.class);
+    }
+
+    @Override
+    public void handleWtfs() {
+        if (WTFS_SHOULD_CRASH && !mWtfsSet) {
+            mWtfsSet = true;
+            Log.setWtfHandler((tag, what, system) -> {
+                throw new PluginManagerImpl.CrashWhilePluginActiveException(what);
+            });
+        }
     }
 }

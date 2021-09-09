@@ -18,4 +18,9 @@ package com.android.systemui.shared.plugins;
  * Provides necessary components for initializing {@link PluginManagerImpl}.
  */
 public interface PluginInitializer {
+
+    /**
+     * Called from {@link PluginActionManager}.
+     */
+    void handleWtfs();
 }
