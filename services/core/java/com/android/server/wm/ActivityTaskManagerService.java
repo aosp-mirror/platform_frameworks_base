@@ -4066,6 +4066,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                // Window configuration is unrelated to persistent configuration (e.g. font scale,
+                // locale). Unset it to avoid affecting the current display configuration.
+                values.windowConfiguration.setToDefaults();
                 updateConfigurationLocked(values, null, false, true, userId,
                         false /* deferResume */);
             }
