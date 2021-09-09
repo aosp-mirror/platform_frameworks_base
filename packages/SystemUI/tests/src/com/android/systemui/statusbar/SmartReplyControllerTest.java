@@ -38,6 +38,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -97,7 +98,8 @@ public class SmartReplyControllerTest extends SysuiTestCase {
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
                 mClickNotifier,
-                mock(ActionClickLogger.class));
+                mock(ActionClickLogger.class),
+                mock(DumpManager.class));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)

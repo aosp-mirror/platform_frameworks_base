@@ -48,6 +48,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -116,7 +117,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(ConfigurationController.class),
                         mock(NavigationBarA11yHelper.class),
                         mock(TaskbarDelegate.class),
-                        mock(UserTracker.class)));
+                        mock(UserTracker.class),
+                        mock(DumpManager.class)));
         initializeNavigationBars();
     }
 

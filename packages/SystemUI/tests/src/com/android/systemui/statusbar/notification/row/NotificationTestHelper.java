@@ -46,6 +46,7 @@ import android.widget.RemoteViews;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -125,7 +126,8 @@ public class NotificationTestHelper {
         mGroupMembershipManager = new NotificationGroupManagerLegacy(
                 mStatusBarStateController,
                 () -> mock(PeopleNotificationIdentifier.class),
-                Optional.of((mock(Bubbles.class))));
+                Optional.of((mock(Bubbles.class))),
+                mock(DumpManager.class));
         mGroupExpansionManager = mGroupMembershipManager;
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class), mock(NotificationGroupManagerLegacy.class),
