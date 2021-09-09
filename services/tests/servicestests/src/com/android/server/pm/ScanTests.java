@@ -434,7 +434,8 @@ public class ScanTests {
         final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
                 .addUsesPermission(new ParsedUsesPermission(Manifest.permission.FACTORY_TEST, 0));
 
-        final ScanResult scanResult = mMockPackageManager.scanPackageOnlyLI(
+        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mMockPackageManager);
+        final ScanResult scanResult = scanPackageHelper.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
                 true /*isUnderFactoryTest*/,
@@ -482,7 +483,8 @@ public class ScanTests {
 
     private ScanResult executeScan(
             ScanRequest scanRequest) throws PackageManagerException {
-        ScanResult result = mMockPackageManager.scanPackageOnlyLI(
+        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mMockPackageManager);
+        ScanResult result = scanPackageHelper.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,

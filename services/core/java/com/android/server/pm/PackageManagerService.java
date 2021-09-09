@@ -32,16 +32,10 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
-import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_PROCESS_NOT_DEFINED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
@@ -70,7 +64,6 @@ import static android.content.pm.PackageManager.TYPE_SERVICE;
 import static android.content.pm.PackageManager.TYPE_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
-import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -89,12 +82,8 @@ import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
-import static com.android.server.pm.PackageManagerServiceUtils.comparePackageSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
-import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
-import static com.android.server.pm.PackageManagerServiceUtils.deriveAbiOverride;
 import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
-import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.parsing.PackageInfoUtils.checkUseInstalledOrHidden;
@@ -114,7 +103,6 @@ import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.PendingIntent;
-import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
@@ -209,7 +197,6 @@ import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedMainComponent;
-import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.result.ParseResult;
@@ -250,7 +237,6 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.PerUidReadTimeouts;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
-import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
@@ -288,8 +274,6 @@ import android.util.TimingsTraceLog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
-import android.util.apk.ApkSignatureVerifier;
-import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
@@ -302,7 +286,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.policy.AttributeCache;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -341,7 +324,6 @@ import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -353,7 +335,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
-import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
@@ -786,7 +767,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @VisibleForTesting
     final File mAppLib32InstallDir;
 
-    private static File getAppLib32InstallDir() {
+    static File getAppLib32InstallDir() {
         return new File(Environment.getDataDirectory(), "app-lib");
     }
 
@@ -923,7 +904,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final List<ScanPartition> mDirsToScanAsSystem;
 
-    private final OverlayConfig mOverlayConfig;
+    final OverlayConfig mOverlayConfig;
 
     @GuardedBy("itself")
     final private ArrayList<IPackageChangeObserver> mPackageChangeObservers =
@@ -1416,7 +1397,7 @@ public class PackageManagerService extends IPackageManager.Stub
             new WatchedSparseBooleanArray();
 
     @Watched(manual = true)
-    private ApplicationInfo mAndroidApplication;
+    ApplicationInfo mAndroidApplication;
     @Watched(manual = true)
     final ActivityInfo mResolveActivity = new ActivityInfo();
     final ResolveInfo mResolveInfo = new ResolveInfo();
@@ -1448,7 +1429,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final PermissionManagerServiceInternal mPermissionManager;
 
     @Watched
-    private final ComponentResolver mComponentResolver;
+    final ComponentResolver mComponentResolver;
 
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
@@ -6248,58 +6229,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return StorageEnums.UNKNOWN;
     }
 
-    private final StorageEventListener mStorageListener = new StorageEventListener() {
-        @Override
-        public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
-            if (vol.type == VolumeInfo.TYPE_PRIVATE) {
-                if (vol.state == VolumeInfo.STATE_MOUNTED) {
-                    final String volumeUuid = vol.getFsUuid();
-
-                    // Clean up any users or apps that were removed or recreated
-                    // while this volume was missing
-                    mUserManager.reconcileUsers(volumeUuid);
-                    reconcileApps(volumeUuid);
-
-                    // Clean up any install sessions that expired or were
-                    // cancelled while this volume was missing
-                    mInstallerService.onPrivateVolumeMounted(volumeUuid);
-
-                    loadPrivatePackages(vol);
-
-                } else if (vol.state == VolumeInfo.STATE_EJECTING) {
-                    unloadPrivatePackages(vol);
-                }
-            }
-        }
-
-        @Override
-        public void onVolumeForgotten(String fsUuid) {
-            if (TextUtils.isEmpty(fsUuid)) {
-                Slog.e(TAG, "Forgetting internal storage is probably a mistake; ignoring");
-                return;
-            }
-
-            // Remove any apps installed on the forgotten volume
-            synchronized (mLock) {
-                final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(fsUuid);
-                for (PackageSetting ps : packages) {
-                    Slog.d(TAG, "Destroying " + ps.name + " because volume was forgotten");
-                    deletePackageVersioned(new VersionedPackage(ps.name,
-                            PackageManager.VERSION_CODE_HIGHEST),
-                            new LegacyPackageDeleteObserver(null).getBinder(),
-                            UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS);
-                    // Try very hard to release any references to this package
-                    // so we don't risk the system server being killed due to
-                    // open FDs
-                    AttributeCache.instance().removePackage(ps.name);
-                }
-
-                mSettings.onVolumeForgotten(fsUuid);
-                writeSettingsLPrTEMP();
-            }
-        }
-    };
-
     Bundle extrasForInstallResult(PackageInstalledInfo res) {
         Bundle extras = null;
         switch (res.mReturnCode) {
@@ -6963,8 +6892,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        applyAdjustedAbiToSharedUser(setting, null /*scannedPackage*/,
-                        mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
+                        ScanPackageHelper.applyAdjustedAbiToSharedUser(
+                                setting, null /*scannedPackage*/,
+                                mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
                                 setting.packages, null /*scannedPackage*/));
                 if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
@@ -7229,11 +7159,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Slog.i(TAG, "Fix for b/169414761 is applied");
     }
-
-
-
-
-
 
     @GuardedBy("mLock")
     void updateInstantAppInstallerLocked(String modifiedPackage) {
@@ -10750,52 +10675,6 @@ public class PackageManagerService extends IPackageManager.Stub
         logCriticalInfo(priority, msg);
     }
 
-
-
-
-
-    /**
-     *  Traces a package scan.
-     *  @see #scanPackageLI(File, int, int, long, UserHandle)
-     */
-    @GuardedBy({"mInstallLock", "mLock"})
-    AndroidPackage scanPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
-        try {
-            return scanPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-    }
-
-    /**
-     *  Scans a package and returns the newly parsed package.
-     *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
-     */
-    @GuardedBy({"mInstallLock", "mLock"})
-    private AndroidPackage scanPackageLI(File scanFile, int parseFlags, int scanFlags,
-            long currentTime, UserHandle user) throws PackageManagerException {
-        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
-        final ParsedPackage parsedPackage;
-        try (PackageParser2 pp = mInjector.getScanningPackageParser()) {
-            parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-
-        // Static shared libraries have synthetic package names
-        if (parsedPackage.isStaticSharedLibrary()) {
-            renameStaticSharedLibraryPackage(parsedPackage);
-        }
-
-        final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
-        return helper.addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user,
-                mPlatformPackage, mIsUpgrade, mIsPreNMR1Upgrade);
-    }
-
     // TODO:(b/135203078): Move to parsing
     static void renameStaticSharedLibraryPackage(ParsedPackage parsedPackage) {
         // Derive the new package synthetic package name
@@ -11630,22 +11509,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy("mLock")
-    private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, AndroidPackage newPkg) {
-        if ((oldPkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-            Slog.w(TAG, "Unable to update from " + oldPkg.name
-                    + " to " + newPkg.getPackageName()
-                    + ": old package not in system partition");
-            return false;
-        } else if (mPackages.get(oldPkg.name) != null) {
-            Slog.w(TAG, "Unable to update from " + oldPkg.name
-                    + " to " + newPkg.getPackageName()
-                    + ": old package still exists");
-            return false;
-        }
-        return true;
-    }
-
     @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
@@ -12106,221 +11969,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return resultList;
     }
 
-    private int getVendorPartitionVersion() {
-        final String version = SystemProperties.get("ro.vndk.version");
-        if (!version.isEmpty()) {
-            try {
-                return Integer.parseInt(version);
-            } catch (NumberFormatException ignore) {
-                if (ArrayUtils.contains(Build.VERSION.ACTIVE_CODENAMES, version)) {
-                    return Build.VERSION_CODES.CUR_DEVELOPMENT;
-                }
-            }
-        }
-        return Build.VERSION_CODES.P;
-    }
-
-    @GuardedBy({"mInstallLock", "mLock"})
-    ScanResult scanPackageTracedLI(ParsedPackage parsedPackage,
-            final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
-            @Nullable UserHandle user, String cpuAbiOverride) throws PackageManagerException {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
-        try {
-            return scanPackageNewLI(parsedPackage, parseFlags, scanFlags, currentTime, user,
-                    cpuAbiOverride);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-    }
-
-    /**
-     * Returns the actual scan flags depending upon the state of the other settings.
-     * <p>Updated system applications will not have the following flags set
-     * by default and need to be adjusted after the fact:
-     * <ul>
-     * <li>{@link #SCAN_AS_SYSTEM}</li>
-     * <li>{@link #SCAN_AS_PRIVILEGED}</li>
-     * <li>{@link #SCAN_AS_OEM}</li>
-     * <li>{@link #SCAN_AS_VENDOR}</li>
-     * <li>{@link #SCAN_AS_PRODUCT}</li>
-     * <li>{@link #SCAN_AS_SYSTEM_EXT}</li>
-     * <li>{@link #SCAN_AS_INSTANT_APP}</li>
-     * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
-     * <li>{@link #SCAN_AS_ODM}</li>
-     * </ul>
-     */
-    private @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
-            PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user,
-            AndroidPackage pkg) {
-
-        // TODO(patb): Do away entirely with disabledPkgSetting here. PkgSetting will always contain
-        // the correct isSystem value now that we don't disable system packages before scan.
-        final PackageSetting systemPkgSetting =
-                (scanFlags & SCAN_NEW_INSTALL) != 0 && disabledPkgSetting == null
-                        && pkgSetting != null && pkgSetting.isSystem()
-                        ? pkgSetting
-                        : disabledPkgSetting;
-        if (systemPkgSetting != null)  {
-            // updated system application, must at least have SCAN_AS_SYSTEM
-            scanFlags |= SCAN_AS_SYSTEM;
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
-                scanFlags |= SCAN_AS_PRIVILEGED;
-            }
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
-                scanFlags |= SCAN_AS_OEM;
-            }
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
-                scanFlags |= SCAN_AS_VENDOR;
-            }
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0) {
-                scanFlags |= SCAN_AS_PRODUCT;
-            }
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0) {
-                scanFlags |= SCAN_AS_SYSTEM_EXT;
-            }
-            if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_ODM) != 0) {
-                scanFlags |= SCAN_AS_ODM;
-            }
-        }
-        if (pkgSetting != null) {
-            final int userId = ((user == null) ? 0 : user.getIdentifier());
-            if (pkgSetting.getInstantApp(userId)) {
-                scanFlags |= SCAN_AS_INSTANT_APP;
-            }
-            if (pkgSetting.getVirtulalPreload(userId)) {
-                scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
-            }
-        }
-
-        // Scan as privileged apps that share a user with a priv-app.
-        final boolean skipVendorPrivilegeScan = ((scanFlags & SCAN_AS_VENDOR) != 0)
-                && getVendorPartitionVersion() < 28;
-        if (((scanFlags & SCAN_AS_PRIVILEGED) == 0)
-                && !pkg.isPrivileged()
-                && (pkg.getSharedUserId() != null)
-                && !skipVendorPrivilegeScan) {
-            SharedUserSetting sharedUserSetting = null;
-            try {
-                sharedUserSetting = mSettings.getSharedUserLPw(pkg.getSharedUserId(), 0,
-                        0, false);
-            } catch (PackageManagerException ignore) {
-            }
-            if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
-                // Exempt SharedUsers signed with the platform key.
-                // TODO(b/72378145) Fix this exemption. Force signature apps
-                // to allowlist their privileged permissions just like other
-                // priv-apps.
-                synchronized (mLock) {
-                    PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
-                    if ((compareSignatures(
-                            platformPkgSetting.signatures.mSigningDetails.getSignatures(),
-                            pkg.getSigningDetails().getSignatures())
-                            != PackageManager.SIGNATURE_MATCH)) {
-                        scanFlags |= SCAN_AS_PRIVILEGED;
-                    }
-                }
-            }
-        }
-
-        return scanFlags;
-    }
-
-    // TODO: scanPackageNewLI() and scanPackageOnly() should be merged. But, first, commiting
-    // the results / removing app data needs to be moved up a level to the callers of this
-    // method. Also, we need to solve the problem of potentially creating a new shared user
-    // setting. That can probably be done later and patch things up after the fact.
-    @GuardedBy({"mInstallLock", "mLock"})
-    ScanResult scanPackageNewLI(@NonNull ParsedPackage parsedPackage,
-            final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
-            @Nullable UserHandle user, String cpuAbiOverride) throws PackageManagerException {
-
-        final String renamedPkgName = mSettings.getRenamedPackageLPr(
-                AndroidPackageUtils.getRealPackageOrNull(parsedPackage));
-        final String realPkgName = getRealPackageName(parsedPackage, renamedPkgName);
-        if (realPkgName != null) {
-            ensurePackageRenamed(parsedPackage, renamedPkgName);
-        }
-        final PackageSetting originalPkgSetting = getOriginalPackageLocked(parsedPackage,
-                renamedPkgName);
-        final PackageSetting pkgSetting = mSettings.getPackageLPr(parsedPackage.getPackageName());
-        final PackageSetting disabledPkgSetting =
-                mSettings.getDisabledSystemPkgLPr(parsedPackage.getPackageName());
-
-        if (mTransferredPackages.contains(parsedPackage.getPackageName())) {
-            Slog.w(TAG, "Package " + parsedPackage.getPackageName()
-                    + " was transferred to another, but its .apk remains");
-        }
-
-        scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user, parsedPackage);
-        synchronized (mLock) {
-            boolean isUpdatedSystemApp;
-            if (pkgSetting != null) {
-                isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
-            } else {
-                isUpdatedSystemApp = disabledPkgSetting != null;
-            }
-            applyPolicy(parsedPackage, scanFlags, mPlatformPackage, isUpdatedSystemApp);
-            assertPackageIsValid(parsedPackage, parseFlags, scanFlags);
-
-            SharedUserSetting sharedUserSetting = null;
-            if (parsedPackage.getSharedUserId() != null) {
-                // SIDE EFFECTS; may potentially allocate a new shared user
-                sharedUserSetting = mSettings.getSharedUserLPw(parsedPackage.getSharedUserId(),
-                        0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
-                if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0) {
-                        Log.d(TAG, "Shared UserID " + parsedPackage.getSharedUserId()
-                                + " (uid=" + sharedUserSetting.userId + "):"
-                                + " packages=" + sharedUserSetting.packages);
-                    }
-                }
-            }
-            String platformPackageName = mPlatformPackage == null
-                    ? null : mPlatformPackage.getPackageName();
-            final ScanRequest request = new ScanRequest(parsedPackage, sharedUserSetting,
-                    pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
-                    originalPkgSetting, realPkgName, parseFlags, scanFlags,
-                    Objects.equals(parsedPackage.getPackageName(), platformPackageName), user,
-                    cpuAbiOverride);
-            return scanPackageOnlyLI(request, mInjector, mFactoryTest, currentTime);
-        }
-    }
-
-    /**
-     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
-     * the app ID required for reconcile.
-     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
-     *         failure.
-     */
-    boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
-            throws PackageManagerException {
-        if (!result.mExistingSettingCopied || result.mNeedsNewAppId) {
-            // THROWS: when we can't allocate a user id. add call to check if there's
-            // enough space to ensure we won't throw; otherwise, don't modify state
-            return mSettings.registerAppIdLPw(result.mPkgSetting, result.mNeedsNewAppId);
-        }
-        return false;
-    }
-
-    /**
-     * Reverts any app ID creation that were made by
-     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
-     * referenced method returned true.
-     */
-    void cleanUpAppIdCreation(@NonNull ScanResult result) {
-        // iff we've acquired an app ID for a new package setting, remove it so that it can be
-        // acquired by another request.
-        if (result.mPkgSetting.appId > 0) {
-            mSettings.removeAppIdLPw(result.mPkgSetting.appId);
-        }
-    }
-
     /**
      * Commits the package scan and modifies system state.
      * <p><em>WARNING:</em> The method may throw an excpetion in the middle
@@ -12443,1024 +12091,6 @@ public class PackageManagerService extends IPackageManager.Stub
         pkgSetting.setStatesOnCommit();
 
         return pkg;
-    }
-
-    /**
-     * Returns the "real" name of the package.
-     * <p>This may differ from the package's actual name if the application has already
-     * been installed under one of this package's original names.
-     */
-    static @Nullable String getRealPackageName(@NonNull AndroidPackage pkg,
-            @Nullable String renamedPkgName) {
-        if (isPackageRenamed(pkg, renamedPkgName)) {
-            return AndroidPackageUtils.getRealPackageOrNull(pkg);
-        }
-        return null;
-    }
-
-    /** Returns {@code true} if the package has been renamed. Otherwise, {@code false}. */
-    private static boolean isPackageRenamed(@NonNull AndroidPackage pkg,
-            @Nullable String renamedPkgName) {
-        return pkg.getOriginalPackages().contains(renamedPkgName);
-    }
-
-    /**
-     * Returns the original package setting.
-     * <p>A package can migrate its name during an update. In this scenario, a package
-     * designates a set of names that it considers as one of its original names.
-     * <p>An original package must be signed identically and it must have the same
-     * shared user [if any].
-     */
-    @GuardedBy("mLock")
-    @Nullable PackageSetting getOriginalPackageLocked(@NonNull AndroidPackage pkg,
-            @Nullable String renamedPkgName) {
-        if (isPackageRenamed(pkg, renamedPkgName)) {
-            return null;
-        }
-        for (int i = ArrayUtils.size(pkg.getOriginalPackages()) - 1; i >= 0; --i) {
-            final PackageSetting originalPs =
-                    mSettings.getPackageLPr(pkg.getOriginalPackages().get(i));
-            if (originalPs != null) {
-                // the package is already installed under its original name...
-                // but, should we use it?
-                if (!verifyPackageUpdateLPr(originalPs, pkg)) {
-                    // the new package is incompatible with the original
-                    continue;
-                } else if (originalPs.sharedUser != null) {
-                    if (!originalPs.sharedUser.name.equals(pkg.getSharedUserId())) {
-                        // the shared user id is incompatible with the original
-                        Slog.w(TAG, "Unable to migrate data from " + originalPs.name
-                                + " to " + pkg.getPackageName() + ": old uid "
-                                + originalPs.sharedUser.name
-                                + " differs from " + pkg.getSharedUserId());
-                        continue;
-                    }
-                    // TODO: Add case when shared user id is added [b/28144775]
-                } else {
-                    if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
-                            + pkg.getPackageName() + " to old name " + originalPs.name);
-                }
-                return originalPs;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Renames the package if it was installed under a different name.
-     * <p>When we've already installed the package under an original name, update
-     * the new package so we can continue to have the old name.
-     */
-    static void ensurePackageRenamed(@NonNull ParsedPackage parsedPackage,
-            @NonNull String renamedPackageName) {
-        if (!parsedPackage.getOriginalPackages().contains(renamedPackageName)
-                || parsedPackage.getPackageName().equals(renamedPackageName)) {
-            return;
-        }
-        parsedPackage.setPackageName(renamedPackageName);
-    }
-
-    /**
-     * Applies the adjusted ABI calculated by
-     * {@link PackageAbiHelper#getAdjustedAbiForSharedUser(Set, AndroidPackage)} to all
-     * relevant packages and settings.
-     * @param sharedUserSetting The {@code SharedUserSetting} to adjust
-     * @param scannedPackage the package being scanned or null
-     * @param adjustedAbi the adjusted ABI calculated by {@link PackageAbiHelper}
-     * @return the list of code paths that belong to packages that had their ABIs adjusted.
-     */
-    private static List<String> applyAdjustedAbiToSharedUser(SharedUserSetting sharedUserSetting,
-            ParsedPackage scannedPackage, String adjustedAbi) {
-        if (scannedPackage != null)  {
-            scannedPackage.setPrimaryCpuAbi(adjustedAbi);
-        }
-        List<String> changedAbiCodePath = null;
-        for (PackageSetting ps : sharedUserSetting.packages) {
-            if (scannedPackage == null || !scannedPackage.getPackageName().equals(ps.name)) {
-                if (ps.primaryCpuAbiString != null) {
-                    continue;
-                }
-
-                ps.primaryCpuAbiString = adjustedAbi;
-                if (ps.pkg != null) {
-                    if (!TextUtils.equals(adjustedAbi,
-                            AndroidPackageUtils.getRawPrimaryCpuAbi(ps.pkg))) {
-                        if (DEBUG_ABI_SELECTION) {
-                            Slog.i(TAG,
-                                    "Adjusting ABI for " + ps.name + " to " + adjustedAbi
-                                            + " (scannedPackage="
-                                            + (scannedPackage != null ? scannedPackage : "null")
-                                            + ")");
-                        }
-                        if (changedAbiCodePath == null) {
-                            changedAbiCodePath = new ArrayList<>();
-                        }
-                        changedAbiCodePath.add(ps.getPathString());
-                    }
-                }
-            }
-        }
-        return changedAbiCodePath;
-    }
-
-    /**
-     * Sets the enabled state of components configured through {@link SystemConfig}.
-     * This modifies the {@link PackageSetting} object.
-     *
-     * TODO(b/135203078): Move this to package parsing
-     **/
-    static void configurePackageComponents(AndroidPackage pkg) {
-        final ArrayMap<String, Boolean> componentsEnabledStates = SystemConfig.getInstance()
-                .getComponentsEnabledStates(pkg.getPackageName());
-        if (componentsEnabledStates == null) {
-            return;
-        }
-
-        for (int i = ArrayUtils.size(pkg.getActivities()) - 1; i >= 0; i--) {
-            final ParsedActivity component = pkg.getActivities().get(i);
-            final Boolean enabled = componentsEnabledStates.get(component.getName());
-            if (enabled != null) {
-                component.setEnabled(enabled);
-            }
-        }
-
-        for (int i = ArrayUtils.size(pkg.getReceivers()) - 1; i >= 0; i--) {
-            final ParsedActivity component = pkg.getReceivers().get(i);
-            final Boolean enabled = componentsEnabledStates.get(component.getName());
-            if (enabled != null) {
-                component.setEnabled(enabled);
-            }
-        }
-
-        for (int i = ArrayUtils.size(pkg.getProviders()) - 1; i >= 0; i--) {
-            final ParsedProvider component = pkg.getProviders().get(i);
-            final Boolean enabled = componentsEnabledStates.get(component.getName());
-            if (enabled != null) {
-                component.setEnabled(enabled);
-            }
-        }
-
-        for (int i = ArrayUtils.size(pkg.getServices()) - 1; i >= 0; i--) {
-            final ParsedService component = pkg.getServices().get(i);
-            final Boolean enabled = componentsEnabledStates.get(component.getName());
-            if (enabled != null) {
-                component.setEnabled(enabled);
-            }
-        }
-    }
-
-    /**
-     * Just scans the package without any side effects.
-     * <p>Not entirely true at the moment. There is still one side effect -- this
-     * method potentially modifies a live {@link PackageSetting} object representing
-     * the package being scanned. This will be resolved in the future.
-     *
-     * @param injector injector for acquiring dependencies
-     * @param request Information about the package to be scanned
-     * @param isUnderFactoryTest Whether or not the device is under factory test
-     * @param currentTime The current time, in millis
-     * @return The results of the scan
-     */
-    @GuardedBy("mInstallLock")
-    @VisibleForTesting
-    @NonNull
-    ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
-            Injector injector,
-            boolean isUnderFactoryTest, long currentTime)
-            throws PackageManagerException {
-        final PackageAbiHelper packageAbiHelper = injector.getAbiHelper();
-        ParsedPackage parsedPackage = request.mParsedPackage;
-        PackageSetting pkgSetting = request.mPkgSetting;
-        final PackageSetting disabledPkgSetting = request.mDisabledPkgSetting;
-        final PackageSetting originalPkgSetting = request.mOriginalPkgSetting;
-        final @ParseFlags int parseFlags = request.mParseFlags;
-        final @ScanFlags int scanFlags = request.mScanFlags;
-        final String realPkgName = request.mRealPkgName;
-        final SharedUserSetting sharedUserSetting = request.mSharedUserSetting;
-        final UserHandle user = request.mUser;
-        final boolean isPlatformPackage = request.mIsPlatformPackage;
-
-        List<String> changedAbiCodePath = null;
-
-        if (DEBUG_PACKAGE_SCANNING) {
-            if ((parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0) {
-                Log.d(TAG, "Scanning package " + parsedPackage.getPackageName());
-            }
-        }
-
-        // Initialize package source and resource directories
-        final File destCodeFile = new File(parsedPackage.getPath());
-
-        // We keep references to the derived CPU Abis from settings in oder to reuse
-        // them in the case where we're not upgrading or booting for the first time.
-        String primaryCpuAbiFromSettings = null;
-        String secondaryCpuAbiFromSettings = null;
-        boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
-        if (!needToDeriveAbi) {
-            if (pkgSetting != null) {
-                // TODO(b/154610922): if it is not first boot or upgrade, we should directly use
-                // API info from existing package setting. However, stub packages currently do not
-                // preserve ABI info, thus the special condition check here. Remove the special
-                // check after we fix the stub generation.
-                if (pkgSetting.pkg != null && pkgSetting.pkg.isStub()) {
-                    needToDeriveAbi = true;
-                } else {
-                    primaryCpuAbiFromSettings = pkgSetting.primaryCpuAbiString;
-                    secondaryCpuAbiFromSettings = pkgSetting.secondaryCpuAbiString;
-                }
-            } else {
-                // Re-scanning a system package after uninstalling updates; need to derive ABI
-                needToDeriveAbi = true;
-            }
-        }
-
-        boolean leavingSharedUser = false;
-
-        if (pkgSetting != null && pkgSetting.sharedUser != sharedUserSetting) {
-            if (pkgSetting.sharedUser != null && sharedUserSetting == null) {
-                leavingSharedUser = true;
-                // Log that something is leaving shareduid and keep going
-                Slog.i(TAG,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                        + pkgSetting.sharedUser.name + " to " + "<nothing>.");
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + (pkgSetting.sharedUser != null
-                                ? pkgSetting.sharedUser.name : "<nothing>")
-                                + " to "
-                                + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
-                                + "; replacing with new");
-                pkgSetting = null;
-            }
-        }
-
-        String[] usesStaticLibraries = null;
-        if (!parsedPackage.getUsesStaticLibraries().isEmpty()) {
-            usesStaticLibraries = new String[parsedPackage.getUsesStaticLibraries().size()];
-            parsedPackage.getUsesStaticLibraries().toArray(usesStaticLibraries);
-        }
-
-        final UUID newDomainSetId = injector.getDomainVerificationManagerInternal().generateNewId();
-
-        // TODO(b/135203078): Remove appInfoFlag usage in favor of individually assigned booleans
-        //  to avoid adding something that's unsupported due to lack of state, since it's called
-        //  with null.
-        final boolean createNewPackage = (pkgSetting == null);
-        if (createNewPackage) {
-            final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
-            final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
-
-            // Flags contain system values stored in the server variant of AndroidPackage,
-            // and so the server-side PackageInfoUtils is still called, even without a
-            // PackageSetting to pass in.
-            int pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, null);
-            int pkgPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(parsedPackage, null);
-
-            // REMOVE SharedUserSetting from method; update in a separate call
-            pkgSetting = Settings.createNewSetting(parsedPackage.getPackageName(),
-                    originalPkgSetting, disabledPkgSetting, realPkgName, sharedUserSetting,
-                    destCodeFile, parsedPackage.getNativeLibraryRootDir(),
-                    AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
-                    AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
-                    parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
-                    true /*allowInstall*/, instantApp, virtualPreload,
-                    UserManagerService.getInstance(), usesStaticLibraries,
-                    parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
-                    newDomainSetId);
-        } else {
-            // make a deep copy to avoid modifying any existing system state.
-            pkgSetting = new PackageSetting(pkgSetting);
-            pkgSetting.pkg = parsedPackage;
-
-            // REMOVE SharedUserSetting from method; update in a separate call.
-            //
-            // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
-            // secondaryCpuAbi are not known at this point so we always update them
-            // to null here, only to reset them at a later point.
-            Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, sharedUserSetting,
-                    destCodeFile, parsedPackage.getNativeLibraryDir(),
-                    AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
-                    AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
-                    PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
-                    PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
-                    UserManagerService.getInstance(),
-                    usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups(), newDomainSetId);
-        }
-        if (createNewPackage && originalPkgSetting != null) {
-            // This is the initial transition from the original package, so,
-            // fix up the new package's name now. We must do this after looking
-            // up the package under its new name, so getPackageLP takes care of
-            // fiddling things correctly.
-            parsedPackage.setPackageName(originalPkgSetting.name);
-
-            // File a report about this.
-            String msg = "New package " + pkgSetting.realName
-                    + " renamed to replace old package " + pkgSetting.name;
-            reportSettingsProblem(Log.WARN, msg);
-        }
-
-        final int userId = (user == null ? UserHandle.USER_SYSTEM : user.getIdentifier());
-        // for existing packages, change the install state; but, only if it's explicitly specified
-        if (!createNewPackage) {
-            final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
-            final boolean fullApp = (scanFlags & SCAN_AS_FULL_APP) != 0;
-            setInstantAppForUser(injector, pkgSetting, userId, instantApp, fullApp);
-        }
-        // TODO(patb): see if we can do away with disabled check here.
-        if (disabledPkgSetting != null
-                || (0 != (scanFlags & SCAN_NEW_INSTALL)
-                && pkgSetting != null && pkgSetting.isSystem())) {
-            pkgSetting.getPkgState().setUpdatedSystemApp(true);
-        }
-
-        parsedPackage.setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage, sharedUserSetting,
-                        injector.getCompatibility()));
-
-        if (parsedPackage.isSystem()) {
-            configurePackageComponents(parsedPackage);
-        }
-
-        final String cpuAbiOverride = deriveAbiOverride(request.mCpuAbiOverride);
-        final boolean isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
-
-        final File appLib32InstallDir = getAppLib32InstallDir();
-        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            if (needToDeriveAbi) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage, isUpdatedSystemApp,
-                                cpuAbiOverride, appLib32InstallDir);
-                derivedAbi.first.applyTo(parsedPackage);
-                derivedAbi.second.applyTo(parsedPackage);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-                // Some system apps still use directory structure for native libraries
-                // in which case we might end up not detecting abi solely based on apk
-                // structure. Try to detect abi based on directory structure.
-
-                String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-                if (parsedPackage.isSystem() && !isUpdatedSystemApp
-                        && pkgRawPrimaryCpuAbi == null) {
-                    final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
-                            parsedPackage);
-                    abis.applyTo(parsedPackage);
-                    abis.applyTo(pkgSetting);
-                    final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
-                                    isUpdatedSystemApp, appLib32InstallDir);
-                    nativeLibraryPaths.applyTo(parsedPackage);
-                }
-            } else {
-                // This is not a first boot or an upgrade, don't bother deriving the
-                // ABI during the scan. Instead, trust the value that was stored in the
-                // package setting.
-                parsedPackage.setPrimaryCpuAbi(primaryCpuAbiFromSettings)
-                        .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
-
-                final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
-                                isUpdatedSystemApp, appLib32InstallDir);
-                nativeLibraryPaths.applyTo(parsedPackage);
-
-                if (DEBUG_ABI_SELECTION) {
-                    Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
-                            parsedPackage.getPackageName() + " " +
-                            AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
-                            + ", "
-                            + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
-                }
-            }
-        } else {
-            if ((scanFlags & SCAN_MOVE) != 0) {
-                // We haven't run dex-opt for this move (since we've moved the compiled output too)
-                // but we already have this packages package info in the PackageSetting. We just
-                // use that and derive the native library path based on the new codepath.
-                parsedPackage.setPrimaryCpuAbi(pkgSetting.primaryCpuAbiString)
-                        .setSecondaryCpuAbi(pkgSetting.secondaryCpuAbiString);
-            }
-
-            // Set native library paths again. For moves, the path will be updated based on the
-            // ABIs we've determined above. For non-moves, the path will be updated based on the
-            // ABIs we determined during compilation, but the path will depend on the final
-            // package path (after the rename away from the stage path).
-            final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isUpdatedSystemApp,
-                            appLib32InstallDir);
-            nativeLibraryPaths.applyTo(parsedPackage);
-        }
-
-        // This is a special case for the "system" package, where the ABI is
-        // dictated by the zygote configuration (and init.rc). We should keep track
-        // of this ABI so that we can deal with "normal" applications that run under
-        // the same UID correctly.
-        if (isPlatformPackage) {
-            parsedPackage.setPrimaryCpuAbi(VMRuntime.getRuntime().is64Bit() ?
-                    Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0]);
-        }
-
-        // If there's a mismatch between the abi-override in the package setting
-        // and the abiOverride specified for the install. Warn about this because we
-        // would've already compiled the app without taking the package setting into
-        // account.
-        if ((scanFlags & SCAN_NO_DEX) == 0 && (scanFlags & SCAN_NEW_INSTALL) != 0) {
-            if (cpuAbiOverride == null) {
-                Slog.w(TAG, "Ignoring persisted ABI override " + cpuAbiOverride +
-                        " for package " + parsedPackage.getPackageName());
-            }
-        }
-
-        pkgSetting.primaryCpuAbiString = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-        pkgSetting.secondaryCpuAbiString = AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage);
-        pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
-
-        if (DEBUG_ABI_SELECTION) {
-            Slog.d(TAG, "Resolved nativeLibraryRoot for " + parsedPackage.getPackageName()
-                    + " to root=" + parsedPackage.getNativeLibraryRootDir()
-                    + ", to dir=" + parsedPackage.getNativeLibraryDir()
-                    + ", isa=" + parsedPackage.isNativeLibraryRootRequiresIsa());
-        }
-
-        // Push the derived path down into PackageSettings so we know what to
-        // clean up at uninstall time.
-        pkgSetting.legacyNativeLibraryPathString = parsedPackage.getNativeLibraryRootDir();
-
-        if (DEBUG_ABI_SELECTION) {
-            Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are"
-                    + " primary=" + pkgSetting.primaryCpuAbiString
-                    + " secondary=" + pkgSetting.primaryCpuAbiString
-                    + " abiOverride=" + pkgSetting.cpuAbiOverrideString);
-        }
-
-        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
-            // We don't do this here during boot because we can do it all
-            // at once after scanning all existing packages.
-            //
-            // We also do this *before* we perform dexopt on this package, so that
-            // we can avoid redundant dexopts, and also to make sure we've got the
-            // code and package path correct.
-            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.sharedUser, parsedPackage,
-                    packageAbiHelper.getAdjustedAbiForSharedUser(
-                            pkgSetting.sharedUser.packages, parsedPackage));
-        }
-
-        parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()
-                .contains(android.Manifest.permission.FACTORY_TEST));
-
-        if (parsedPackage.isSystem()) {
-            pkgSetting.setIsOrphaned(true);
-        }
-
-        // Take care of first install / last update times.
-        final long scanFileTime = getLastModifiedTime(parsedPackage);
-        if (currentTime != 0) {
-            if (pkgSetting.firstInstallTime == 0) {
-                pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = currentTime;
-            } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
-                pkgSetting.lastUpdateTime = currentTime;
-            }
-        } else if (pkgSetting.firstInstallTime == 0) {
-            // We need *something*.  Take time time stamp of the file.
-            pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
-        } else if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0) {
-            if (scanFileTime != pkgSetting.timeStamp) {
-                // A package on the system image has changed; consider this
-                // to be an update.
-                pkgSetting.lastUpdateTime = scanFileTime;
-            }
-        }
-        pkgSetting.setTimeStamp(scanFileTime);
-        // TODO(b/135203078): Remove, move to constructor
-        pkgSetting.pkg = parsedPackage;
-        pkgSetting.pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting);
-        pkgSetting.pkgPrivateFlags =
-                PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting);
-        if (parsedPackage.getLongVersionCode() != pkgSetting.versionCode) {
-            pkgSetting.versionCode = parsedPackage.getLongVersionCode();
-        }
-        // Update volume if needed
-        final String volumeUuid = parsedPackage.getVolumeUuid();
-        if (!Objects.equals(volumeUuid, pkgSetting.volumeUuid)) {
-            Slog.i(PackageManagerService.TAG,
-                    "Update" + (pkgSetting.isSystem() ? " system" : "")
-                    + " package " + parsedPackage.getPackageName()
-                    + " volume from " + pkgSetting.volumeUuid
-                    + " to " + volumeUuid);
-            pkgSetting.volumeUuid = volumeUuid;
-        }
-
-        SharedLibraryInfo staticSharedLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibName())) {
-            staticSharedLibraryInfo =
-                    AndroidPackageUtils.createSharedLibraryForStatic(parsedPackage);
-        }
-        List<SharedLibraryInfo> dynamicSharedLibraryInfos = null;
-        if (!ArrayUtils.isEmpty(parsedPackage.getLibraryNames())) {
-            dynamicSharedLibraryInfos = new ArrayList<>(parsedPackage.getLibraryNames().size());
-            for (String name : parsedPackage.getLibraryNames()) {
-                dynamicSharedLibraryInfos.add(
-                        AndroidPackageUtils.createSharedLibraryForDynamic(parsedPackage, name));
-            }
-        }
-
-        return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
-                !createNewPackage /* existingSettingCopied */,
-                leavingSharedUser /* needsNewAppId */, staticSharedLibraryInfo,
-                dynamicSharedLibraryInfos);
-    }
-
-    /**
-     * Returns {@code true} if the given file contains code. Otherwise {@code false}.
-     */
-    private static boolean apkHasCode(String fileName) {
-        StrictJarFile jarFile = null;
-        try {
-            jarFile = new StrictJarFile(fileName,
-                    false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
-            return jarFile.findEntry("classes.dex") != null;
-        } catch (IOException ignore) {
-        } finally {
-            try {
-                if (jarFile != null) {
-                    jarFile.close();
-                }
-            } catch (IOException ignore) {}
-        }
-        return false;
-    }
-
-    /**
-     * Enforces code policy for the package. This ensures that if an APK has
-     * declared hasCode="true" in its manifest that the APK actually contains
-     * code.
-     *
-     * @throws PackageManagerException If bytecode could not be found when it should exist
-     */
-    private static void assertCodePolicy(AndroidPackage pkg)
-            throws PackageManagerException {
-        final boolean shouldHaveCode = pkg.isHasCode();
-        if (shouldHaveCode && !apkHasCode(pkg.getBaseApkPath())) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Package " + pkg.getBaseApkPath() + " code is missing");
-        }
-
-        if (!ArrayUtils.isEmpty(pkg.getSplitCodePaths())) {
-            for (int i = 0; i < pkg.getSplitCodePaths().length; i++) {
-                final boolean splitShouldHaveCode =
-                        (pkg.getSplitFlags()[i] & ApplicationInfo.FLAG_HAS_CODE) != 0;
-                if (splitShouldHaveCode && !apkHasCode(pkg.getSplitCodePaths()[i])) {
-                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                            "Package " + pkg.getSplitCodePaths()[i] + " code is missing");
-                }
-            }
-        }
-    }
-
-    /**
-     * Applies policy to the parsed package based upon the given policy flags.
-     * Ensures the package is in a good state.
-     * <p>
-     * Implementation detail: This method must NOT have any side effect. It would
-     * ideally be static, but, it requires locks to read system state.
-     */
-    static void applyPolicy(ParsedPackage parsedPackage,
-            final @ScanFlags int scanFlags, AndroidPackage platformPkg,
-            boolean isUpdatedSystemApp) {
-        if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
-            parsedPackage.setSystem(true);
-            // TODO(b/135203078): Can this be done in PackageParser? Or just inferred when the flag
-            //  is set during parse.
-            if (parsedPackage.isDirectBootAware()) {
-                parsedPackage.setAllComponentsDirectBootAware(true);
-            }
-            if (compressedFileExists(parsedPackage.getPath())) {
-                parsedPackage.setStub(true);
-            }
-        } else {
-            parsedPackage
-                    // Non system apps cannot mark any broadcast as protected
-                    .clearProtectedBroadcasts()
-                    // non system apps can't be flagged as core
-                    .setCoreApp(false)
-                    // clear flags not applicable to regular apps
-                    .setPersistent(false)
-                    .setDefaultToDeviceProtectedStorage(false)
-                    .setDirectBootAware(false)
-                    // non system apps can't have permission priority
-                    .capPermissionPriorities();
-        }
-        if ((scanFlags & SCAN_AS_PRIVILEGED) == 0) {
-            parsedPackage
-                    .markNotActivitiesAsNotExportedIfSingleUser();
-        }
-
-        parsedPackage.setPrivileged((scanFlags & SCAN_AS_PRIVILEGED) != 0)
-                .setOem((scanFlags & SCAN_AS_OEM) != 0)
-                .setVendor((scanFlags & SCAN_AS_VENDOR) != 0)
-                .setProduct((scanFlags & SCAN_AS_PRODUCT) != 0)
-                .setSystemExt((scanFlags & SCAN_AS_SYSTEM_EXT) != 0)
-                .setOdm((scanFlags & SCAN_AS_ODM) != 0);
-
-        // Check if the package is signed with the same key as the platform package.
-        parsedPackage.setSignedWithPlatformKey(
-                (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
-                        || (platformPkg != null && compareSignatures(
-                        platformPkg.getSigningDetails().getSignatures(),
-                        parsedPackage.getSigningDetails().getSignatures()
-                ) == PackageManager.SIGNATURE_MATCH))
-        );
-
-        if (!parsedPackage.isSystem()) {
-            // Only system apps can use these features.
-            parsedPackage.clearOriginalPackages()
-                    .clearAdoptPermissions();
-        }
-
-        PackageBackwardCompatibility.modifySharedLibraries(parsedPackage, isUpdatedSystemApp);
-    }
-
-    private <T extends ParsedMainComponent>
-            void assertPackageProcesses(AndroidPackage pkg, List<T> components,
-            Map<String, ParsedProcess> procs, String compName)
-            throws PackageManagerException {
-        if (components == null) {
-            return;
-        }
-        for (int i = components.size() - 1; i >= 0; i--) {
-            final ParsedMainComponent component = components.get(i);
-            if (!procs.containsKey(component.getProcessName())) {
-                throw new PackageManagerException(
-                        INSTALL_FAILED_PROCESS_NOT_DEFINED,
-                        "Can't install because " + compName + " " + component.getClassName()
-                                + "'s process attribute " + component.getProcessName()
-                                + " (in package " + pkg.getPackageName()
-                                + ") is not included in the <processes> list");
-            }
-        }
-    }
-
-    /**
-     * Asserts the parsed package is valid according to the given policy. If the
-     * package is invalid, for whatever reason, throws {@link PackageManagerException}.
-     * <p>
-     * Implementation detail: This method must NOT have any side effects. It would
-     * ideally be static, but, it requires locks to read system state.
-     *
-     * @throws PackageManagerException If the package fails any of the validation checks
-     */
-    private void assertPackageIsValid(AndroidPackage pkg, final @ParseFlags int parseFlags,
-            final @ScanFlags int scanFlags)
-                    throws PackageManagerException {
-        if ((parseFlags & ParsingPackageUtils.PARSE_ENFORCE_CODE) != 0) {
-            assertCodePolicy(pkg);
-        }
-
-        if (pkg.getPath() == null) {
-            // Bail out. The resource and code paths haven't been set.
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Code and resource paths haven't been set correctly");
-        }
-
-        // Check that there is an APEX package with the same name only during install/first boot
-        // after OTA.
-        final boolean isUserInstall = (scanFlags & SCAN_BOOTING) == 0;
-        final boolean isFirstBootOrUpgrade = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
-        if ((isUserInstall || isFirstBootOrUpgrade)
-                && mApexManager.isApexPackage(pkg.getPackageName())) {
-            throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                    pkg.getPackageName()
-                            + " is an APEX package and can't be installed as an APK.");
-        }
-
-        // Make sure we're not adding any bogus keyset info
-        final KeySetManagerService ksms = mSettings.getKeySetManagerService();
-        ksms.assertScannedPackageValid(pkg);
-
-        synchronized (mLock) {
-            // The special "android" package can only be defined once
-            if (pkg.getPackageName().equals("android")) {
-                if (mAndroidApplication != null) {
-                    Slog.w(TAG, "*************************************************");
-                    Slog.w(TAG, "Core android package being redefined.  Skipping.");
-                    Slog.w(TAG, " codePath=" + pkg.getPath());
-                    Slog.w(TAG, "*************************************************");
-                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                            "Core android package being redefined.  Skipping.");
-                }
-            }
-
-            // A package name must be unique; don't allow duplicates
-            if ((scanFlags & SCAN_NEW_INSTALL) == 0
-                    && mPackages.containsKey(pkg.getPackageName())) {
-                throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                        "Application package " + pkg.getPackageName()
-                        + " already installed.  Skipping duplicate.");
-            }
-
-            if (pkg.isStaticSharedLibrary()) {
-                // Static libs have a synthetic package name containing the version
-                // but we still want the base name to be unique.
-                if ((scanFlags & SCAN_NEW_INSTALL) == 0
-                        && mPackages.containsKey(pkg.getManifestPackageName())) {
-                    throw new PackageManagerException(
-                            "Duplicate static shared lib provider package");
-                }
-
-                // Static shared libraries should have at least O target SDK
-                if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
-                    throw new PackageManagerException(
-                            "Packages declaring static-shared libs must target O SDK or higher");
-                }
-
-                // Package declaring static a shared lib cannot be instant apps
-                if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-                    throw new PackageManagerException(
-                            "Packages declaring static-shared libs cannot be instant apps");
-                }
-
-                // Package declaring static a shared lib cannot be renamed since the package
-                // name is synthetic and apps can't code around package manager internals.
-                if (!ArrayUtils.isEmpty(pkg.getOriginalPackages())) {
-                    throw new PackageManagerException(
-                            "Packages declaring static-shared libs cannot be renamed");
-                }
-
-                // Package declaring static a shared lib cannot declare dynamic libs
-                if (!ArrayUtils.isEmpty(pkg.getLibraryNames())) {
-                    throw new PackageManagerException(
-                            "Packages declaring static-shared libs cannot declare dynamic libs");
-                }
-
-                // Package declaring static a shared lib cannot declare shared users
-                if (pkg.getSharedUserId() != null) {
-                    throw new PackageManagerException(
-                            "Packages declaring static-shared libs cannot declare shared users");
-                }
-
-                // Static shared libs cannot declare activities
-                if (!pkg.getActivities().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare activities");
-                }
-
-                // Static shared libs cannot declare services
-                if (!pkg.getServices().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare services");
-                }
-
-                // Static shared libs cannot declare providers
-                if (!pkg.getProviders().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare content providers");
-                }
-
-                // Static shared libs cannot declare receivers
-                if (!pkg.getReceivers().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare broadcast receivers");
-                }
-
-                // Static shared libs cannot declare permission groups
-                if (!pkg.getPermissionGroups().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare permission groups");
-                }
-
-                // Static shared libs cannot declare attributions
-                if (!pkg.getAttributions().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare features");
-                }
-
-                // Static shared libs cannot declare permissions
-                if (!pkg.getPermissions().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare permissions");
-                }
-
-                // Static shared libs cannot declare protected broadcasts
-                if (!pkg.getProtectedBroadcasts().isEmpty()) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot declare protected broadcasts");
-                }
-
-                // Static shared libs cannot be overlay targets
-                if (pkg.getOverlayTarget() != null) {
-                    throw new PackageManagerException(
-                            "Static shared libs cannot be overlay targets");
-                }
-
-                // The version codes must be ordered as lib versions
-                long minVersionCode = Long.MIN_VALUE;
-                long maxVersionCode = Long.MAX_VALUE;
-
-                WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
-                        pkg.getStaticSharedLibName());
-                if (versionedLib != null) {
-                    final int versionCount = versionedLib.size();
-                    for (int i = 0; i < versionCount; i++) {
-                        SharedLibraryInfo libInfo = versionedLib.valueAt(i);
-                        final long libVersionCode = libInfo.getDeclaringPackage()
-                                .getLongVersionCode();
-                        if (libInfo.getLongVersion() < pkg.getStaticSharedLibVersion()) {
-                            minVersionCode = Math.max(minVersionCode, libVersionCode + 1);
-                        } else if (libInfo.getLongVersion()
-                                > pkg.getStaticSharedLibVersion()) {
-                            maxVersionCode = Math.min(maxVersionCode, libVersionCode - 1);
-                        } else {
-                            minVersionCode = maxVersionCode = libVersionCode;
-                            break;
-                        }
-                    }
-                }
-                if (pkg.getLongVersionCode() < minVersionCode
-                        || pkg.getLongVersionCode() > maxVersionCode) {
-                    throw new PackageManagerException("Static shared"
-                            + " lib version codes must be ordered as lib versions");
-                }
-            }
-
-            // If we're only installing presumed-existing packages, require that the
-            // scanned APK is both already known and at the path previously established
-            // for it.  Previously unknown packages we pick up normally, but if we have an
-            // a priori expectation about this package's install presence, enforce it.
-            // With a singular exception for new system packages. When an OTA contains
-            // a new system package, we allow the codepath to change from a system location
-            // to the user-installed location. If we don't allow this change, any newer,
-            // user-installed version of the application will be ignored.
-            if ((scanFlags & SCAN_REQUIRE_KNOWN) != 0) {
-                if (mExpectingBetter.containsKey(pkg.getPackageName())) {
-                    Slog.w(TAG, "Relax SCAN_REQUIRE_KNOWN requirement for package "
-                            + pkg.getPackageName());
-                } else {
-                    PackageSetting known = mSettings.getPackageLPr(pkg.getPackageName());
-                    if (known != null) {
-                        if (DEBUG_PACKAGE_SCANNING) {
-                            Log.d(TAG, "Examining " + pkg.getPath()
-                                    + " and requiring known path " + known.getPathString());
-                        }
-                        if (!pkg.getPath().equals(known.getPathString())) {
-                            throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
-                                    "Application package " + pkg.getPackageName()
-                                    + " found at " + pkg.getPath()
-                                    + " but expected at " + known.getPathString()
-                                    + "; ignoring.");
-                        }
-                    } else {
-                        throw new PackageManagerException(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                                "Application package " + pkg.getPackageName()
-                                + " not found; ignoring.");
-                    }
-                }
-            }
-
-            // Verify that this new package doesn't have any content providers
-            // that conflict with existing packages.  Only do this if the
-            // package isn't already installed, since we don't want to break
-            // things that are installed.
-            if ((scanFlags & SCAN_NEW_INSTALL) != 0) {
-                mComponentResolver.assertProvidersNotDefined(pkg);
-            }
-
-            // If this package has defined explicit processes, then ensure that these are
-            // the only processes used by its components.
-            final Map<String, ParsedProcess> procs = pkg.getProcesses();
-            if (!procs.isEmpty()) {
-                if (!procs.containsKey(pkg.getProcessName())) {
-                    throw new PackageManagerException(
-                            INSTALL_FAILED_PROCESS_NOT_DEFINED,
-                            "Can't install because application tag's process attribute "
-                                    + pkg.getProcessName()
-                                    + " (in package " + pkg.getPackageName()
-                                    + ") is not included in the <processes> list");
-                }
-                assertPackageProcesses(pkg, pkg.getActivities(), procs, "activity");
-                assertPackageProcesses(pkg, pkg.getServices(), procs, "service");
-                assertPackageProcesses(pkg, pkg.getReceivers(), procs, "receiver");
-                assertPackageProcesses(pkg, pkg.getProviders(), procs, "provider");
-            }
-
-            // Verify that packages sharing a user with a privileged app are marked as privileged.
-            if (!pkg.isPrivileged() && (pkg.getSharedUserId() != null)) {
-                SharedUserSetting sharedUserSetting = null;
-                try {
-                    sharedUserSetting = mSettings.getSharedUserLPw(pkg.getSharedUserId(),
-                            0, 0, false);
-                } catch (PackageManagerException ignore) {
-                }
-                if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
-                    // Exempt SharedUsers signed with the platform key.
-                    PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
-                    if (!comparePackageSignatures(platformPkgSetting,
-                            pkg.getSigningDetails().getSignatures())) {
-                        throw new PackageManagerException("Apps that share a user with a " +
-                                "privileged app must themselves be marked as privileged. " +
-                                pkg.getPackageName() + " shares privileged user " +
-                                pkg.getSharedUserId() + ".");
-                    }
-                }
-            }
-
-            // Apply policies specific for runtime resource overlays (RROs).
-            if (pkg.getOverlayTarget() != null) {
-                // System overlays have some restrictions on their use of the 'static' state.
-                if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
-                    // We are scanning a system overlay. This can be the first scan of the
-                    // system/vendor/oem partition, or an update to the system overlay.
-                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
-                        // This must be an update to a system overlay. Immutable overlays cannot be
-                        // upgraded.
-                        Objects.requireNonNull(mOverlayConfig,
-                                "Parsing non-system dir before overlay configs are initialized");
-                        if (!mOverlayConfig.isMutable(pkg.getPackageName())) {
-                            throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
-                                    + " is static and cannot be upgraded.");
-                        }
-                    } else {
-                        if ((scanFlags & SCAN_AS_VENDOR) != 0) {
-                            if (pkg.getTargetSdkVersion() < getVendorPartitionVersion()) {
-                                Slog.w(TAG, "System overlay " + pkg.getPackageName()
-                                        + " targets an SDK below the required SDK level of vendor"
-                                        + " overlays (" + getVendorPartitionVersion() + ")."
-                                        + " This will become an install error in a future release");
-                            }
-                        } else if (pkg.getTargetSdkVersion() < Build.VERSION.SDK_INT) {
-                            Slog.w(TAG, "System overlay " + pkg.getPackageName()
-                                    + " targets an SDK below the required SDK level of system"
-                                    + " overlays (" + Build.VERSION.SDK_INT + ")."
-                                    + " This will become an install error in a future release");
-                        }
-                    }
-                } else {
-                    // A non-preloaded overlay packages must have targetSdkVersion >= Q, or be
-                    // signed with the platform certificate. Check this in increasing order of
-                    // computational cost.
-                    if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.Q) {
-                        final PackageSetting platformPkgSetting =
-                                mSettings.getPackageLPr("android");
-                        if (!comparePackageSignatures(platformPkgSetting,
-                                pkg.getSigningDetails().getSignatures())) {
-                            throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
-                                    + " must target Q or later, "
-                                    + "or be signed with the platform certificate");
-                        }
-                    }
-
-                    // A non-preloaded overlay package, without <overlay android:targetName>, will
-                    // only be used if it is signed with the same certificate as its target OR if
-                    // it is signed with the same certificate as a reference package declared
-                    // in 'overlay-config-signature' tag of SystemConfig.
-                    // If the target is already installed or 'overlay-config-signature' tag in
-                    // SystemConfig is set, check this here to augment the last line of defense
-                    // which is OMS.
-                    if (pkg.getOverlayTargetOverlayableName() == null) {
-                        final PackageSetting targetPkgSetting =
-                                mSettings.getPackageLPr(pkg.getOverlayTarget());
-                        if (targetPkgSetting != null) {
-                            if (!comparePackageSignatures(targetPkgSetting,
-                                    pkg.getSigningDetails().getSignatures())) {
-                                // check reference signature
-                                if (mOverlayConfigSignaturePackage == null) {
-                                    throw new PackageManagerException("Overlay "
-                                            + pkg.getPackageName() + " and target "
-                                            + pkg.getOverlayTarget() + " signed with"
-                                            + " different certificates, and the overlay lacks"
-                                            + " <overlay android:targetName>");
-                                }
-                                final PackageSetting refPkgSetting =
-                                        mSettings.getPackageLPr(mOverlayConfigSignaturePackage);
-                                if (!comparePackageSignatures(refPkgSetting,
-                                        pkg.getSigningDetails().getSignatures())) {
-                                    throw new PackageManagerException("Overlay "
-                                            + pkg.getPackageName() + " signed with a different "
-                                            + "certificate than both the reference package and "
-                                            + "target " + pkg.getOverlayTarget() + ", and the "
-                                            + "overlay lacks <overlay android:targetName>");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // If the package is not on a system partition ensure it is signed with at least the
-            // minimum signature scheme version required for its target SDK.
-            if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
-                int minSignatureSchemeVersion =
-                        ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
-                                pkg.getTargetSdkVersion());
-                if (pkg.getSigningDetails().getSignatureSchemeVersion()
-                        < minSignatureSchemeVersion) {
-                    throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                            "No signature found in package of version " + minSignatureSchemeVersion
-                                    + " or newer for package " + pkg.getPackageName());
-                }
-            }
-        }
     }
 
     @GuardedBy("mLock")
@@ -16302,6 +14932,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int[] allUsers;
         final int freezeUser;
         final SparseArray<TempUserState> priorUserStates;
+        final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
         /** enabled state of the uninstalled application */
         synchronized (mLock) {
             uninstalledPs = mSettings.getPackageLPr(packageName);
@@ -16436,8 +15067,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "Enabling system stub after removal; pkg: "
                                     + stubPkg.getPackageName());
                         }
-                        final InitAndSystemPackageHelper helper =
-                                new InitAndSystemPackageHelper(this);
                         helper.enableCompressedPackage(stubPkg, stubPs, mDefParseFlags,
                                 mDirsToScanAsSystem);
                     } else if (DEBUG_COMPRESSION) {
@@ -18445,6 +17074,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
         // More work for application enabled setting updates
         for (int i = 0; i < targetSize; i++) {
             final ComponentEnabledSetting setting = settings.get(i);
@@ -18470,7 +17100,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
                 if (!helper.enableCompressedPackage(deletedPkg, pkgSetting, mDefParseFlags,
                         mDirsToScanAsSystem)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
@@ -19014,15 +17643,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mUserManager.systemReady();
 
         // Watch for external volumes that come and go over time
+        final StorageEventHelper storageEventHelper = new StorageEventHelper(this);
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
-        storage.registerListener(mStorageListener);
+        storage.registerListener(storageEventHelper);
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
 
         // Now that we're mostly running, clean up stale users and apps
         mUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
-        reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
+        storageEventHelper.reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
         mPermissionManager.onSystemReady();
 
@@ -19892,29 +18522,13 @@ public class PackageManagerService extends IPackageManager.Stub
     // ------- apps on sdcard specific code -------
     static final boolean DEBUG_SD_INSTALL = false;
 
-    private static final String SD_ENCRYPTION_KEYSTORE_NAME = "AppsOnSD";
-
-    private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            ArrayList<AndroidPackage> packages, IIntentReceiver finishedReceiver) {
-        final int size = packages.size();
-        final String[] packageNames = new String[size];
-        final int[] packageUids = new int[size];
-        for (int i = 0; i < size; i++) {
-            final AndroidPackage pkg = packages.get(i);
-            packageNames[i] = pkg.getPackageName();
-            packageUids[i] = pkg.getUid();
-        }
-        sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames, packageUids,
-                finishedReceiver);
-    }
-
     void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
             ArrayList<String> pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
         sendResourcesChangedBroadcast(mediaStatus, replacing,
                 pkgList.toArray(new String[pkgList.size()]), uidArr, finishedReceiver);
     }
 
-    private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
+    void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
             String[] pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
         int size = pkgList.length;
         if (size > 0) {
@@ -19932,158 +18546,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // TODO: not sure how to handle this one.
             sendPackageBroadcast(action, null, extras, 0, null, finishedReceiver,
                     null, null, null, null);
-        }
-    }
-
-    private void loadPrivatePackages(final VolumeInfo vol) {
-        mHandler.post(() -> loadPrivatePackagesInner(vol));
-    }
-
-    private void loadPrivatePackagesInner(VolumeInfo vol) {
-        final String volumeUuid = vol.fsUuid;
-        if (TextUtils.isEmpty(volumeUuid)) {
-            Slog.e(TAG, "Loading internal storage is probably a mistake; ignoring");
-            return;
-        }
-
-        final ArrayList<PackageFreezer> freezers = new ArrayList<>();
-        final ArrayList<AndroidPackage> loaded = new ArrayList<>();
-        final int parseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
-
-        final VersionInfo ver;
-        final List<PackageSetting> packages;
-        synchronized (mLock) {
-            ver = mSettings.findOrCreateVersion(volumeUuid);
-            packages = mSettings.getVolumePackagesLPr(volumeUuid);
-        }
-
-        for (PackageSetting ps : packages) {
-            freezers.add(freezePackage(ps.name, "loadPrivatePackagesInner"));
-            synchronized (mInstallLock) {
-                final AndroidPackage pkg;
-                try {
-                    pkg = scanPackageTracedLI(ps.getPath(), parseFlags, SCAN_INITIAL, 0, null);
-                    loaded.add(pkg);
-
-                } catch (PackageManagerException e) {
-                    Slog.w(TAG, "Failed to scan " + ps.getPath() + ": " + e.getMessage());
-                }
-
-                if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
-                    clearAppDataLIF(ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
-                            | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
-                            | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
-                }
-            }
-        }
-
-        // Reconcile app data for all started/unlocked users
-        final StorageManager sm = mInjector.getSystemService(StorageManager.class);
-        UserManagerInternal umInternal = mInjector.getUserManagerInternal();
-        for (UserInfo user : mUserManager.getUsers(false /* includeDying */)) {
-            final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
-                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            } else if (umInternal.isUserRunning(user.id)) {
-                flags = StorageManager.FLAG_STORAGE_DE;
-            } else {
-                continue;
-            }
-
-            try {
-                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
-                synchronized (mInstallLock) {
-                    reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */,
-                            null);
-                }
-            } catch (IllegalStateException e) {
-                // Device was probably ejected, and we'll process that event momentarily
-                Slog.w(TAG, "Failed to prepare storage: " + e);
-            }
-        }
-
-        synchronized (mLock) {
-            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
-            if (isUpgrade) {
-                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
-                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
-                        + volumeUuid);
-            }
-            mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);
-
-            // Yay, everything is now upgraded
-            ver.forceCurrent();
-
-            writeSettingsLPrTEMP();
-        }
-
-        for (PackageFreezer freezer : freezers) {
-            freezer.close();
-        }
-
-        if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
-        sendResourcesChangedBroadcast(true, false, loaded, null);
-        synchronized (mLoadedVolumes) {
-            mLoadedVolumes.add(vol.getId());
-        }
-    }
-
-    private void unloadPrivatePackages(final VolumeInfo vol) {
-        mHandler.post(() -> unloadPrivatePackagesInner(vol));
-    }
-
-    private void unloadPrivatePackagesInner(VolumeInfo vol) {
-        final String volumeUuid = vol.fsUuid;
-        if (TextUtils.isEmpty(volumeUuid)) {
-            Slog.e(TAG, "Unloading internal storage is probably a mistake; ignoring");
-            return;
-        }
-
-        final int[] userIds = mUserManager.getUserIds();
-        final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
-        synchronized (mInstallLock) {
-            synchronized (mLock) {
-                final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(volumeUuid);
-                for (PackageSetting ps : packages) {
-                    if (ps.pkg == null) continue;
-
-                    final AndroidPackage pkg = ps.pkg;
-                    final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
-                    final PackageRemovedInfo outInfo = new PackageRemovedInfo(this);
-
-                    try (PackageFreezer freezer = freezePackageForDelete(ps.name, deleteFlags,
-                            "unloadPrivatePackagesInner")) {
-                        if (deletePackageLIF(ps.name, null, false, userIds, deleteFlags, outInfo,
-                                false)) {
-                            unloaded.add(pkg);
-                        } else {
-                            Slog.w(TAG, "Failed to unload " + ps.getPath());
-                        }
-                    }
-
-                    // Try very hard to release any references to this package
-                    // so we don't risk the system server being killed due to
-                    // open FDs
-                    AttributeCache.instance().removePackage(ps.name);
-                }
-
-                writeSettingsLPrTEMP();
-            }
-        }
-
-        if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
-        sendResourcesChangedBroadcast(false, false, unloaded, null);
-        synchronized (mLoadedVolumes) {
-            mLoadedVolumes.remove(vol.getId());
-        }
-
-        // Try very hard to release any references to this path so we don't risk
-        // the system server being killed due to open FDs
-        ResourcesManager.getInstance().invalidatePath(vol.getPath().getAbsolutePath());
-
-        for (int i = 0; i < 3; i++) {
-            System.gc();
-            System.runFinalization();
         }
     }
 
@@ -20107,74 +18569,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private List<String> collectAbsoluteCodePaths() {
-        synchronized (mLock) {
-            List<String> codePaths = new ArrayList<>();
-            final int packageCount = mSettings.getPackagesLocked().size();
-            for (int i = 0; i < packageCount; i++) {
-                final PackageSetting ps = mSettings.getPackagesLocked().valueAt(i);
-                codePaths.add(ps.getPath().getAbsolutePath());
-            }
-            return codePaths;
-        }
-    }
 
     private void executeBatchLI(@NonNull Installer.Batch batch) {
         try {
             batch.execute(mInstaller);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to execute pending operations", e);
-        }
-    }
-
-    /**
-     * Examine all apps present on given mounted volume, and destroy apps that
-     * aren't expected, either due to uninstallation or reinstallation on
-     * another volume.
-     */
-    private void reconcileApps(String volumeUuid) {
-        List<String> absoluteCodePaths = collectAbsoluteCodePaths();
-        List<File> filesToDelete = null;
-
-        final File[] files = FileUtils.listFilesOrEmpty(
-                Environment.getDataAppDirectory(volumeUuid));
-        for (File file : files) {
-            final boolean isPackage = (isApkFile(file) || file.isDirectory())
-                    && !PackageInstallerService.isStageName(file.getName());
-            if (!isPackage) {
-                // Ignore entries which are not packages
-                continue;
-            }
-
-            String absolutePath = file.getAbsolutePath();
-
-            boolean pathValid = false;
-            final int absoluteCodePathCount = absoluteCodePaths.size();
-            for (int i = 0; i < absoluteCodePathCount; i++) {
-                String absoluteCodePath = absoluteCodePaths.get(i);
-                if (absoluteCodePath.startsWith(absolutePath)) {
-                    pathValid = true;
-                    break;
-                }
-            }
-
-            if (!pathValid) {
-                if (filesToDelete == null) {
-                    filesToDelete = new ArrayList<>();
-                }
-                filesToDelete.add(file);
-            }
-        }
-
-        if (filesToDelete != null) {
-            final int fileToDeleteCount = filesToDelete.size();
-            for (int i = 0; i < fileToDeleteCount; i++) {
-                File fileToDelete = filesToDelete.get(i);
-                logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
-                synchronized (mInstallLock) {
-                    removeCodePathLI(fileToDelete);
-                }
-            }
         }
     }
 
@@ -20205,7 +18605,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mInstallLock")
-    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
+    void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
             boolean migrateAppData, @Nullable ArraySet<String> reconciledPackages) {
         reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */,
                 reconciledPackages);
