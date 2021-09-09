@@ -132,7 +132,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ഉപയോഗസഹായി"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"സ്‌ക്രീൻ തിരിക്കുക"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"അവലോകനം"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"തിരയൽ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ഫോണ്‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"വോയ്‌സ് സഹായം"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"തിരയൽ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>

@@ -307,7 +307,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तुम्ही पूर्वी ऑथोराइझ केलेल्या सर्व संगणकांवरुन USB डीबग करण्यासाठी अ‍ॅक्सेस रीव्होक करायचा?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील ॲप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पाहा"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC पत्ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>

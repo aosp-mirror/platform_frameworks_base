@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ઝડપથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ધીમેથી ચાર્જિંગ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ હંગામીરૂપે પ્રતિબંધિત કરવામાં આવ્યું છે"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જ કરવાનું થોડા સમય માટે મર્યાદિત કરવામાં આવ્યું છે"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"તમારું ચાર્જર કનેક્ટ કરો."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"નેટવર્ક લૉક થયું"</string>
