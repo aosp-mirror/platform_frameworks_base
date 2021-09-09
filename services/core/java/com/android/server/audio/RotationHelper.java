@@ -17,24 +17,26 @@
 package com.android.server.audio;
 
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
 import android.media.AudioSystem;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.util.Log;
-import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
 /**
  * Class to handle device rotation events for AudioService, and forward device rotation
- * and current active ID to the audio HALs through AudioSystem.
+ * and folded state to the audio HALs through AudioSystem.
  *
  * The role of this class is to monitor device orientation changes, and upon rotation,
  * verify the UI orientation. In case of a change, send the new orientation, in increments
  * of 90deg, through AudioSystem.
  *
- * Another role of this class is to track current active display ID changes. In case of a
- * change, send the new active display ID through AudioSystem.
+ * Another role of this class is to track device folded state changes. In case of a
+ * change, send the new folded state through AudioSystem.
  *
  * Note that even though we're responding to device orientation events, we always
  * query the display rotation so audio stays in sync with video/dialogs. This is
@@ -47,11 +49,12 @@ class RotationHelper {
     private static final String TAG = "AudioService.RotationHelper";
 
     private static AudioDisplayListener sDisplayListener;
+    private static FoldStateListener sFoldStateListener;
 
     private static final Object sRotationLock = new Object();
-    private static final Object sActiveDisplayLock = new Object();
+    private static final Object sFoldStateLock = new Object();
     private static int sDeviceRotation = Surface.ROTATION_0; // R/W synchronized on sRotationLock
-    private static int sDisplayId = Display.DEFAULT_DISPLAY; // synchronized on sActiveDisplayLock
+    private static boolean sDeviceFold = true; // R/W synchronized on sFoldStateLock
 
     private static Context sContext;
     private static Handler sHandler;
@@ -75,11 +78,17 @@ class RotationHelper {
         ((DisplayManager) sContext.getSystemService(Context.DISPLAY_SERVICE))
                 .registerDisplayListener(sDisplayListener, sHandler);
         updateOrientation();
+
+        sFoldStateListener = new FoldStateListener(sContext, folded -> updateFoldState(folded));
+        sContext.getSystemService(DeviceStateManager.class)
+                .registerCallback(new HandlerExecutor(sHandler), sFoldStateListener);
     }
 
     static void disable() {
         ((DisplayManager) sContext.getSystemService(Context.DISPLAY_SERVICE))
                 .unregisterDisplayListener(sDisplayListener);
+        sContext.getSystemService(DeviceStateManager.class)
+                .unregisterCallback(sFoldStateListener);
     }
 
     /**
@@ -120,13 +129,17 @@ class RotationHelper {
     }
 
     /**
-     * Query current display active id and publish the change if any.
+     * publish the change of device folded state if any.
      */
-    static void updateActiveDisplayId(int displayId) {
-        synchronized (sActiveDisplayLock) {
-            if (displayId != Display.DEFAULT_DISPLAY && sDisplayId != displayId) {
-                sDisplayId = displayId;
-                AudioSystem.setParameters("active_displayId=" + sDisplayId);
+    static void updateFoldState(boolean newFolded) {
+        synchronized (sFoldStateLock) {
+            if (sDeviceFold != newFolded) {
+                sDeviceFold = newFolded;
+                if (newFolded) {
+                    AudioSystem.setParameters("device_folded=on");
+                } else {
+                    AudioSystem.setParameters("device_folded=off");
+                }
             }
         }
     }
@@ -146,7 +159,6 @@ class RotationHelper {
 
         @Override
         public void onDisplayChanged(int displayId) {
-            updateActiveDisplayId(displayId);
             updateOrientation();
         }
     }
