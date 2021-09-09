@@ -49309,6 +49309,7 @@ package android.view {
     field public static final int AUTOFILL_TYPE_NONE = 0; // 0x0
     field public static final int AUTOFILL_TYPE_TEXT = 1; // 0x1
     field public static final int AUTOFILL_TYPE_TOGGLE = 2; // 0x2
+    field public static final int DRAG_FLAG_ACCESSIBILITY_ACTION = 1024; // 0x400
     field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
     field public static final int DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION = 64; // 0x40
     field public static final int DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION = 128; // 0x80
