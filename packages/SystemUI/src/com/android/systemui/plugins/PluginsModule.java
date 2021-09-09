@@ -23,12 +23,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import com.android.systemui.R;
-import com.android.systemui.dagger.PluginModule;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
-import com.android.systemui.shared.plugins.PluginInstance;
+import com.android.systemui.shared.plugins.PluginInitializer;
+import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.plugins.PluginPrefs;
@@ -68,30 +66,19 @@ public abstract class PluginsModule {
     @Binds
     abstract PluginEnabler bindsPluginEnablerImpl(PluginEnablerImpl impl);
 
-    @Provides
-    @Singleton
-    static PluginInstance.Factory providesPluginInstanceFactory(
-            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins,
-            @Named(PLUGIN_DEBUG) boolean isDebug) {
-        return new PluginInstance.Factory(
-                PluginModule.class.getClassLoader(),
-                new PluginInstance.InstanceFactory<>(),
-                new PluginInstance.VersionChecker(),
-                privilegedPlugins,
-                isDebug);
-    }
+    @Binds
+    abstract PluginInitializer bindsPluginInitializerImpl(PluginInitializerImpl impl);
 
     @Provides
     @Singleton
-    static PluginActionManager.Factory providePluginInstanceManagerFactory(Context context,
+    static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
             PackageManager packageManager, @Main Executor mainExecutor,
-            @Named(PLUGIN_THREAD) Executor pluginExecutor,
+            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer,
             NotificationManager notificationManager, PluginEnabler pluginEnabler,
-            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins,
-            PluginInstance.Factory pluginInstanceFactory) {
-        return new PluginActionManager.Factory(
-                context, packageManager, mainExecutor, pluginExecutor,
-                notificationManager, pluginEnabler, privilegedPlugins, pluginInstanceFactory);
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
+        return new PluginInstanceManager.Factory(
+                context, packageManager, mainExecutor, pluginExecutor, initializer,
+                notificationManager, pluginEnabler, privilegedPlugins);
     }
 
     @Provides
@@ -104,7 +91,7 @@ public abstract class PluginsModule {
     @Provides
     static PluginManager providesPluginManager(
             Context context,
-            PluginActionManager.Factory instanceManagerFactory,
+            PluginInstanceManager.Factory instanceManagerFactory,
             @Named(PLUGIN_DEBUG) boolean debug,
             @Named(PRE_HANDLER)
                     Optional<Thread.UncaughtExceptionHandler> uncaughtExceptionHandlerOptional,
@@ -123,7 +110,7 @@ public abstract class PluginsModule {
 
     @Provides
     @Named(PLUGIN_PRIVILEGED)
-    static List<String> providesPrivilegedPlugins(Context context) {
-        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginWhitelist));
+    static List<String> providesPrivilegedPlugins(PluginInitializer initializer, Context context) {
+        return Arrays.asList(initializer.getPrivilegedPlugins(context));
     }
 }
