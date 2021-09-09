@@ -94,9 +94,9 @@
                   android:exported="false" />
 
         <provider
-            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+            android:name="androidx.startup.InitializationProvider"
             tools:replace="android:authorities"
-            android:authorities="${applicationId}.lifecycle-tests"
+            android:authorities="${applicationId}.startup-tests"
             android:exported="false"
             android:enabled="false"
             android:multiprocess="true" />
