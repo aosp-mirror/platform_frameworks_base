@@ -19,6 +19,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -27,8 +28,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
@@ -42,6 +47,7 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.annotation.Nullable;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
@@ -69,6 +75,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     private HandlerThread mThread;
     private Handler mHandler;
     private TileLifecycleManager mStateManager;
+    private TestContextWrapper mWrappedContext;
 
     @Before
     public void setUp() throws Exception {
@@ -81,12 +88,14 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
         mContext.addMockService(mTileServiceComponentName, mMockTileService);
 
+        mWrappedContext = new TestContextWrapper(mContext);
+
         mTileServiceIntent = new Intent().setComponent(mTileServiceComponentName);
         mUser = new UserHandle(UserHandle.myUserId());
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
-        mStateManager = new TileLifecycleManager(mHandler, mContext,
+        mStateManager = new TileLifecycleManager(mHandler, mWrappedContext,
                 Mockito.mock(IQSService.class), new Tile(),
                 mTileServiceIntent,
                 mUser,
@@ -97,6 +106,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     @After
     public void tearDown() throws Exception {
         mThread.quit();
+        mStateManager.handleDestroy();
     }
 
     private void setPackageEnabled(boolean enabled) throws Exception {
@@ -124,6 +134,18 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     public void testBind() {
         mStateManager.setBindService(true);
         verifyBind(1);
+    }
+
+    @Test
+    public void testPackageReceiverExported() throws Exception {
+        // Make sure that we register a receiver
+        setPackageEnabled(false);
+        mStateManager.setBindService(true);
+        IntentFilter filter = mWrappedContext.mLastIntentFilter;
+        assertTrue(filter.hasAction(Intent.ACTION_PACKAGE_ADDED));
+        assertTrue(filter.hasAction(Intent.ACTION_PACKAGE_CHANGED));
+        assertTrue(filter.hasDataScheme("package"));
+        assertNotEquals(0, mWrappedContext.mLastFlag & Context.RECEIVER_EXPORTED);
     }
 
     @Test
@@ -246,5 +268,24 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     @Test
     public void testToggleableTile() throws Exception {
         assertTrue(mStateManager.isToggleableTile());
+    }
+
+    private static class TestContextWrapper extends ContextWrapper {
+        private IntentFilter mLastIntentFilter;
+        private int mLastFlag;
+
+        TestContextWrapper(Context base) {
+            super(base);
+        }
+
+        @Override
+        public Intent registerReceiverAsUser(@Nullable BroadcastReceiver receiver, UserHandle user,
+                IntentFilter filter, @Nullable String broadcastPermission,
+                @Nullable Handler scheduler, int flags) {
+            mLastIntentFilter = filter;
+            mLastFlag = flags;
+            return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
+                    scheduler, flags);
+        }
     }
 }
