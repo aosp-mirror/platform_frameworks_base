@@ -10800,32 +10800,6 @@ package android.telephony.data {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
   }
 
-  public final class NetworkSliceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
-    method public int getMappedHplmnSliceServiceType();
-    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
-    method public int getSliceServiceType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSliceInfo> CREATOR;
-    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
-    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
-    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
-    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
-    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
-    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
-    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
-  }
-
-  public static final class NetworkSliceInfo.Builder {
-    ctor public NetworkSliceInfo.Builder();
-    method @NonNull public android.telephony.data.NetworkSliceInfo build();
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceServiceType(int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceServiceType(int);
-  }
-
   public final class NrQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
     method @NonNull public java.time.Duration getBitRateWindowDuration();
@@ -10880,15 +10854,6 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
-  }
-
-  public final class TrafficDescriptor implements android.os.Parcelable {
-    ctor public TrafficDescriptor(@Nullable String, @Nullable String);
-    method public int describeContents();
-    method @Nullable public String getDnn();
-    method @Nullable public String getOsAppId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
 }
