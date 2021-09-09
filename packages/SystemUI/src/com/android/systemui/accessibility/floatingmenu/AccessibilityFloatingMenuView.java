@@ -21,7 +21,6 @@ import static android.util.MathUtils.constrain;
 import static android.util.MathUtils.sq;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static java.util.Objects.requireNonNull;
@@ -96,7 +95,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private boolean mIsShowing;
     private boolean mIsDownInEnlargedTouchArea;
     private boolean mIsDragging = false;
-    private boolean mImeVisibility;
     @Alignment
     private int mAlignment;
     @SizeType
@@ -122,6 +120,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private int mRelativeToPointerDownY;
     private float mRadius;
     private final Rect mDisplayInsetsRect = new Rect();
+    private final Rect mImeInsetsRect = new Rect();
     private final Position mPosition;
     private float mSquareScaledTouchSlop;
     private final Configuration mLastConfiguration;
@@ -517,9 +516,14 @@ public class AccessibilityFloatingMenuView extends FrameLayout
             updateLocationWith(mPosition);
         }
 
-        final boolean currentImeVisibility = insets.isVisible(ime());
-        if (currentImeVisibility != mImeVisibility) {
-            mImeVisibility = currentImeVisibility;
+        final Rect imeInsetsRect = windowMetrics.getWindowInsets().getInsets(ime()).toRect();
+        if (!imeInsetsRect.equals(mImeInsetsRect)) {
+            if (isImeVisible(imeInsetsRect)) {
+                mImeInsetsRect.set(imeInsetsRect);
+            } else {
+                mImeInsetsRect.setEmpty();
+            }
+
             updateLocationWith(mPosition);
         }
 
@@ -529,6 +533,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private boolean isMovingTowardsScreenEdge(@Alignment int side, int currentRawX, int downX) {
         return (side == Alignment.RIGHT && currentRawX > downX)
                 || (side == Alignment.LEFT && downX > currentRawX);
+    }
+
+    private boolean isImeVisible(Rect imeInsetsRect) {
+        return imeInsetsRect.left != 0 || imeInsetsRect.top != 0 || imeInsetsRect.right != 0
+                || imeInsetsRect.bottom != 0;
     }
 
     private boolean hasExceededTouchSlop(int startX, int startY, int endX, int endY) {
@@ -741,15 +750,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout
      * @return the moving interval if they overlap each other, otherwise 0.
      */
     private int getInterval() {
-        if (!mImeVisibility) {
-            return 0;
-        }
-
-        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
-        final Insets imeInsets = windowMetrics.getWindowInsets().getInsets(
-                ime() | navigationBars());
-        final int imeY = mDisplayHeight - imeInsets.bottom;
-        final int layoutBottomY = mCurrentLayoutParams.y + getWindowHeight();
+        final int currentLayoutY = (int) (mPosition.getPercentageY() * getMaxWindowY());
+        final int imeY = mDisplayHeight - mImeInsetsRect.bottom;
+        final int layoutBottomY = currentLayoutY + getWindowHeight();
 
         return layoutBottomY > imeY ? (layoutBottomY - imeY) : 0;
     }

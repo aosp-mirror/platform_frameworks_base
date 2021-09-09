@@ -21,7 +21,6 @@ import static android.view.View.OVER_SCROLL_ALWAYS;
 import static android.view.View.OVER_SCROLL_NEVER;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -483,8 +482,8 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
                 mDisplayWindowHeight - (menuView.mCurrentLayoutParams.y + mMenuWindowHeight)
                         + offset;
         return new WindowInsets.Builder()
-                .setVisible(ime() | navigationBars(), true)
-                .setInsets(ime() | navigationBars(), Insets.of(0, 0, 0, fakeImeHeight))
+                .setVisible(ime(), true)
+                .setInsets(ime(), Insets.of(0, 0, 0, fakeImeHeight))
                 .build();
     }
 
