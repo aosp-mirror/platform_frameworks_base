@@ -304,7 +304,7 @@ public class DragAndDropPolicy {
          * Exits splitscreen, with an associated exit trigger from the SplitscreenUIChanged proto
          * for logging.
          */
-        void exitSplitScreen(int exitTrigger);
+        void exitSplitScreen(int toTopTaskId, int exitTrigger);
     }
 
     /**
@@ -357,7 +357,7 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void exitSplitScreen(int exitTrigger) {
+        public void exitSplitScreen(int toTopTaskId, int exitTrigger) {
             throw new UnsupportedOperationException("exitSplitScreen not implemented by starter");
         }
     }
