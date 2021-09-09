@@ -16,10 +16,6 @@
 
 package android.net.nsd;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkStringNotEmpty;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -32,11 +28,13 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Protocol;
+
+import java.util.Objects;
 
 /**
  * The Network Service Discovery Manager class provides the API to discover services
@@ -175,65 +173,63 @@ public final class NsdManager {
      */
     public static final int NSD_STATE_ENABLED = 2;
 
-    private static final int BASE = Protocol.BASE_NSD_MANAGER;
+    /** @hide */
+    public static final int DISCOVER_SERVICES                       = 1;
+    /** @hide */
+    public static final int DISCOVER_SERVICES_STARTED               = 2;
+    /** @hide */
+    public static final int DISCOVER_SERVICES_FAILED                = 3;
+    /** @hide */
+    public static final int SERVICE_FOUND                           = 4;
+    /** @hide */
+    public static final int SERVICE_LOST                            = 5;
 
     /** @hide */
-    public static final int DISCOVER_SERVICES                       = BASE + 1;
+    public static final int STOP_DISCOVERY                          = 6;
     /** @hide */
-    public static final int DISCOVER_SERVICES_STARTED               = BASE + 2;
+    public static final int STOP_DISCOVERY_FAILED                   = 7;
     /** @hide */
-    public static final int DISCOVER_SERVICES_FAILED                = BASE + 3;
-    /** @hide */
-    public static final int SERVICE_FOUND                           = BASE + 4;
-    /** @hide */
-    public static final int SERVICE_LOST                            = BASE + 5;
+    public static final int STOP_DISCOVERY_SUCCEEDED                = 8;
 
     /** @hide */
-    public static final int STOP_DISCOVERY                          = BASE + 6;
+    public static final int REGISTER_SERVICE                        = 9;
     /** @hide */
-    public static final int STOP_DISCOVERY_FAILED                   = BASE + 7;
+    public static final int REGISTER_SERVICE_FAILED                 = 10;
     /** @hide */
-    public static final int STOP_DISCOVERY_SUCCEEDED                = BASE + 8;
+    public static final int REGISTER_SERVICE_SUCCEEDED              = 11;
 
     /** @hide */
-    public static final int REGISTER_SERVICE                        = BASE + 9;
+    public static final int UNREGISTER_SERVICE                      = 12;
     /** @hide */
-    public static final int REGISTER_SERVICE_FAILED                 = BASE + 10;
+    public static final int UNREGISTER_SERVICE_FAILED               = 13;
     /** @hide */
-    public static final int REGISTER_SERVICE_SUCCEEDED              = BASE + 11;
+    public static final int UNREGISTER_SERVICE_SUCCEEDED            = 14;
 
     /** @hide */
-    public static final int UNREGISTER_SERVICE                      = BASE + 12;
+    public static final int RESOLVE_SERVICE                         = 15;
     /** @hide */
-    public static final int UNREGISTER_SERVICE_FAILED               = BASE + 13;
+    public static final int RESOLVE_SERVICE_FAILED                  = 16;
     /** @hide */
-    public static final int UNREGISTER_SERVICE_SUCCEEDED            = BASE + 14;
+    public static final int RESOLVE_SERVICE_SUCCEEDED               = 17;
 
     /** @hide */
-    public static final int RESOLVE_SERVICE                         = BASE + 18;
-    /** @hide */
-    public static final int RESOLVE_SERVICE_FAILED                  = BASE + 19;
-    /** @hide */
-    public static final int RESOLVE_SERVICE_SUCCEEDED               = BASE + 20;
+    public static final int DAEMON_CLEANUP                          = 18;
 
     /** @hide */
-    public static final int DAEMON_CLEANUP                          = BASE + 21;
+    public static final int DAEMON_STARTUP                          = 19;
 
     /** @hide */
-    public static final int DAEMON_STARTUP                          = BASE + 22;
+    public static final int ENABLE                                  = 20;
+    /** @hide */
+    public static final int DISABLE                                 = 21;
 
     /** @hide */
-    public static final int ENABLE                                  = BASE + 24;
-    /** @hide */
-    public static final int DISABLE                                 = BASE + 25;
+    public static final int NATIVE_DAEMON_EVENT                     = 22;
 
     /** @hide */
-    public static final int NATIVE_DAEMON_EVENT                     = BASE + 26;
-
+    public static final int REGISTER_CLIENT                         = 23;
     /** @hide */
-    public static final int REGISTER_CLIENT                         = BASE + 27;
-    /** @hide */
-    public static final int UNREGISTER_CLIENT                       = BASE + 28;
+    public static final int UNREGISTER_CLIENT                       = 24;
 
     /** Dns based service discovery protocol */
     public static final int PROTOCOL_DNS_SD = 0x0001;
@@ -550,7 +546,9 @@ public final class NsdManager {
         final int key;
         synchronized (mMapLock) {
             int valueIndex = mListenerMap.indexOfValue(listener);
-            checkArgument(valueIndex == -1, "listener already in use");
+            if (valueIndex != -1) {
+                throw new IllegalArgumentException("listener already in use");
+            }
             key = nextListenerKey();
             mListenerMap.put(key, listener);
             mServiceMap.put(key, s);
@@ -569,7 +567,9 @@ public final class NsdManager {
         checkListener(listener);
         synchronized (mMapLock) {
             int valueIndex = mListenerMap.indexOfValue(listener);
-            checkArgument(valueIndex != -1, "listener not registered");
+            if (valueIndex == -1) {
+                throw new IllegalArgumentException("listener not registered");
+            }
             return mListenerMap.keyAt(valueIndex);
         }
     }
@@ -598,7 +598,9 @@ public final class NsdManager {
      */
     public void registerService(NsdServiceInfo serviceInfo, int protocolType,
             RegistrationListener listener) {
-        checkArgument(serviceInfo.getPort() > 0, "Invalid port number");
+        if (serviceInfo.getPort() <= 0) {
+            throw new IllegalArgumentException("Invalid port number");
+        }
         checkServiceInfo(serviceInfo);
         checkProtocol(protocolType);
         int key = putListener(listener, serviceInfo);
@@ -660,7 +662,9 @@ public final class NsdManager {
      * Cannot be null. Cannot be in use for an active service discovery.
      */
     public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
-        checkStringNotEmpty(serviceType, "Service type cannot be empty");
+        if (TextUtils.isEmpty(serviceType)) {
+            throw new IllegalArgumentException("Service type cannot be empty");
+        }
         checkProtocol(protocolType);
 
         NsdServiceInfo s = new NsdServiceInfo();
@@ -719,16 +723,22 @@ public final class NsdManager {
     }
 
     private static void checkListener(Object listener) {
-        checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
     }
 
     private static void checkProtocol(int protocolType) {
-        checkArgument(protocolType == PROTOCOL_DNS_SD, "Unsupported protocol");
+        if (protocolType != PROTOCOL_DNS_SD) {
+            throw new IllegalArgumentException("Unsupported protocol");
+        }
     }
 
     private static void checkServiceInfo(NsdServiceInfo serviceInfo) {
-        checkNotNull(serviceInfo, "NsdServiceInfo cannot be null");
-        checkStringNotEmpty(serviceInfo.getServiceName(), "Service name cannot be empty");
-        checkStringNotEmpty(serviceInfo.getServiceType(), "Service type cannot be empty");
+        Objects.requireNonNull(serviceInfo, "NsdServiceInfo cannot be null");
+        if (TextUtils.isEmpty(serviceInfo.getServiceName())) {
+            throw new IllegalArgumentException("Service name cannot be empty");
+        }
+        if (TextUtils.isEmpty(serviceInfo.getServiceType())) {
+            throw new IllegalArgumentException("Service type cannot be empty");
+        }
     }
 }
