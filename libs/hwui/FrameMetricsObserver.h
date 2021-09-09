@@ -45,7 +45,10 @@ public:
      * WARNING! This observer may not receive metrics for the last several frames that the app
      * produces.
      */
-    FrameMetricsObserver(bool waitForPresentTime) : mWaitForPresentTime(waitForPresentTime) {}
+    FrameMetricsObserver(bool waitForPresentTime)
+            : mWaitForPresentTime(waitForPresentTime)
+            , mSurfaceControlId(INT32_MAX)
+            , mAttachedFrameNumber(UINT64_MAX) {}
 
 private:
     const bool mWaitForPresentTime;
