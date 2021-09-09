@@ -12144,6 +12144,100 @@ public class TelephonyManager {
     }
 
     /**
+     * No error. Operation succeeded.
+     * @hide
+     */
+    public static final int ENABLE_VONR_SUCCESS = 0;
+
+    /**
+     * Radio is not available.
+     * @hide
+     */
+    public static final int ENABLE_VONR_RADIO_NOT_AVAILABLE = 2;
+
+    /**
+     * Internal Radio error.
+     * @hide
+     */
+    public static final int ENABLE_VONR_RADIO_ERROR = 3;
+
+    /**
+     * Voice over NR enable/disable request is received when system is in invalid state.
+     * @hide
+     */
+    public static final int ENABLE_VONR_RADIO_INVALID_STATE = 4;
+
+    /**
+     * Voice over NR enable/disable request is not supported.
+     * @hide
+     */
+    public static final int ENABLE_VONR_REQUEST_NOT_SUPPORTED = 5;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EnableVoNrResult"}, value = {
+            ENABLE_VONR_SUCCESS,
+            ENABLE_VONR_RADIO_NOT_AVAILABLE,
+            ENABLE_VONR_RADIO_ERROR,
+            ENABLE_VONR_RADIO_INVALID_STATE,
+            ENABLE_VONR_REQUEST_NOT_SUPPORTED})
+    public @interface EnableVoNrResult {}
+
+    /**
+     * Enable or disable Voice over NR (VoNR)
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param enabled  enable or disable VoNR.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public @EnableVoNrResult int setVoNrEnabled(boolean enabled) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setVoNrEnabled(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setVoNrEnabled", e);
+        }
+
+        return ENABLE_VONR_RADIO_INVALID_STATE;
+    }
+
+    /**
+     * Is Voice over NR (VoNR) enabled.
+     * @return true if Voice over NR (VoNR) is enabled else false. Enabled state does not mean
+     *  voice call over NR is active or voice ove NR is available. It means the device is allowed to
+     *  register IMS over NR.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isVoNrEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isVoNrEnabled(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "isVoNrEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
      * Carrier action to start or stop reporting default network available events.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
