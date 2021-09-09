@@ -436,7 +436,7 @@ public class NotificationTest {
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         CharSequence result = ensureColorSpanContrast(text, background);
 
-        // ensure the span has been updated to have > 3:1 contrast ratio with fill color
+        // ensure the span has been updated to have > 1.3:1 contrast ratio with fill color
         Object[] spans = ((Spannable) result).getSpans(0, result.length(), Object.class);
         assertThat(spans).hasLength(1);
         int foregroundColor = ((ForegroundColorSpan) spans[0]).getForegroundColor();
@@ -487,7 +487,7 @@ public class NotificationTest {
         int background = Color.LTGRAY;
         int foreground = Color.LTGRAY;
         int result = Notification.Builder.ensureButtonFillContrast(foreground, background);
-        assertContrastIsWithinRange(result, background, 3, 3.2);
+        assertContrastIsWithinRange(result, background, 1.3, 1.5);
         assertThat(ContrastColorUtil.calculateLuminance(result))
                 .isLessThan(ContrastColorUtil.calculateLuminance(background));
     }
@@ -497,7 +497,7 @@ public class NotificationTest {
         int background = Color.DKGRAY;
         int foreground = Color.DKGRAY;
         int result = Notification.Builder.ensureButtonFillContrast(foreground, background);
-        assertContrastIsWithinRange(result, background, 3, 3.2);
+        assertContrastIsWithinRange(result, background, 1.3, 1.5);
         assertThat(ContrastColorUtil.calculateLuminance(result))
                 .isGreaterThan(ContrastColorUtil.calculateLuminance(background));
     }

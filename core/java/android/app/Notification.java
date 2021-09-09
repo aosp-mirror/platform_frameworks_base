@@ -1884,6 +1884,14 @@ public class Notification implements Parcelable
              * clicks. To launch an activity in those cases, provide a {@link PendingIntent} for the
              * activity itself.
              *
+             * <p>How an Action is displayed, including whether the {@code icon}, {@code text}, or
+             * both are displayed or required, depends on where and how the action is used, and the
+             * {@link Style} applied to the Notification.
+             *
+             * <p>When the {@code title} is a {@link android.text.Spanned}, any colors set by a
+             * {@link ForegroundColorSpan} or {@link TextAppearanceSpan} may be removed or displayed
+             * with an altered in luminance to ensure proper contrast within the Notification.
+             *
              * @param icon icon to show for this action
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
@@ -6128,7 +6136,7 @@ public class Notification implements Parcelable
                     // Check for a full-length span color to use as the button fill color.
                     Integer fullLengthColor = getFullLengthSpanColor(title);
                     if (fullLengthColor != null) {
-                        // Ensure the custom button fill has 3:1 contrast w/ notification bg.
+                        // Ensure the custom button fill has 1.3:1 contrast w/ notification bg.
                         int notifBackgroundColor = getColors(p).getBackgroundColor();
                         buttonFillColor = ensureButtonFillContrast(
                                 fullLengthColor, notifBackgroundColor);
@@ -6296,7 +6304,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Finds a button fill color with sufficient contrast over bg (3:1) that has the same hue
+         * Finds a button fill color with sufficient contrast over bg (1.3:1) that has the same hue
          * as the original color, but is lightened or darkened depending on whether the background
          * is dark or light.
          *
@@ -6305,8 +6313,8 @@ public class Notification implements Parcelable
         @VisibleForTesting
         public static int ensureButtonFillContrast(int color, int bg) {
             return isColorDark(bg)
-                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 3)
-                    : ContrastColorUtil.findContrastColor(color, bg, true, 3);
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
         }
 
 
