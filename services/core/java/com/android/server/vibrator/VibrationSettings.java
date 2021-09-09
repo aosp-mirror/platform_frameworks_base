@@ -51,8 +51,6 @@ import java.util.List;
 final class VibrationSettings {
     private static final String TAG = "VibrationSettings";
 
-    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = {0, 30, 100, 30};
-
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
@@ -120,8 +118,8 @@ final class VibrationSettings {
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);
-        VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
-                DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
+        VibrationEffect doubleClickEffect = createEffectFromResource(
+                com.android.internal.R.array.config_doubleClickVibePattern);
         VibrationEffect heavyClickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_longPressVibePattern);
         VibrationEffect tickEffect = createEffectFromResource(
@@ -468,12 +466,14 @@ final class VibrationSettings {
                 UserHandle.USER_ALL);
     }
 
+    @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
         long[] timings = getLongIntArray(mContext.getResources(), resId);
         return createEffectFromTimings(timings);
     }
 
-    private static VibrationEffect createEffectFromTimings(long[] timings) {
+    @Nullable
+    private static VibrationEffect createEffectFromTimings(@Nullable long[] timings) {
         if (timings == null || timings.length == 0) {
             return null;
         } else if (timings.length == 1) {
