@@ -441,7 +441,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return this;
         }
 
-        TaskFragment parentTaskFragment = getParent().asTaskFragment();
+        TaskFragment parentTaskFragment = getParent() != null ? getParent().asTaskFragment() : null;
         return parentTaskFragment != null ? parentTaskFragment.getOrganizedTaskFragment() : null;
     }
 
