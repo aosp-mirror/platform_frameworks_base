@@ -32,6 +32,7 @@ import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -66,7 +67,8 @@ class LogBufferFreezerTest : SysuiTestCase() {
                         capture(receiverCaptor),
                         any(IntentFilter::class.java),
                         eq(executor),
-                        any(UserHandle::class.java))
+                        any(UserHandle::class.java),
+                        anyInt())
         receiver = receiverCaptor.value
     }
 
