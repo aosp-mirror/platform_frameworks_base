@@ -73,6 +73,7 @@ public class PluginActionManager<T extends Plugin> {
     private final boolean mIsDebuggable;
     private final PackageManager mPm;
     private final Class<T> mPluginClass;
+    private final PluginInitializer mInitializer;
     private final Executor mMainExecutor;
     private final Executor mBgExecutor;
 
@@ -86,11 +87,13 @@ public class PluginActionManager<T extends Plugin> {
             Executor mainExecutor,
             Executor bgExecutor,
             boolean debuggable,
+            PluginInitializer initializer,
             NotificationManager notificationManager,
             PluginEnabler pluginEnabler,
             List<String> privilegedPlugins,
             PluginInstance.Factory pluginInstanceFactory) {
         mPluginClass = pluginClass;
+        mInitializer = initializer;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mContext = context;
@@ -373,19 +376,21 @@ public class PluginActionManager<T extends Plugin> {
         private final PackageManager mPackageManager;
         private final Executor mMainExecutor;
         private final Executor mBgExecutor;
+        private final PluginInitializer mInitializer;
         private final NotificationManager mNotificationManager;
         private final PluginEnabler mPluginEnabler;
         private final List<String> mPrivilegedPlugins;
         private final PluginInstance.Factory mPluginInstanceFactory;
 
         public Factory(Context context, PackageManager packageManager,
-                Executor mainExecutor, Executor bgExecutor,
+                Executor mainExecutor, Executor bgExecutor, PluginInitializer initializer,
                 NotificationManager notificationManager, PluginEnabler pluginEnabler,
                 List<String> privilegedPlugins, PluginInstance.Factory pluginInstanceFactory) {
             mContext = context;
             mPackageManager = packageManager;
             mMainExecutor = mainExecutor;
             mBgExecutor = bgExecutor;
+            mInitializer = initializer;
             mNotificationManager = notificationManager;
             mPluginEnabler = pluginEnabler;
             mPrivilegedPlugins = privilegedPlugins;
@@ -397,7 +402,7 @@ public class PluginActionManager<T extends Plugin> {
                 boolean allowMultiple, boolean debuggable) {
             return new PluginActionManager<>(mContext, mPackageManager, action, listener,
                     pluginClass, allowMultiple, mMainExecutor, mBgExecutor,
-                    debuggable, mNotificationManager, mPluginEnabler,
+                    debuggable, mInitializer, mNotificationManager, mPluginEnabler,
                     mPrivilegedPlugins, mPluginInstanceFactory);
         }
     }

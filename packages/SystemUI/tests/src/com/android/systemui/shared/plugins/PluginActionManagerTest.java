@@ -74,6 +74,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
     private PluginEnabler mMockEnabler;
     ComponentName mTestPluginComponentName =
             new ComponentName(PRIVILEGED_PACKAGE, TestPlugin.class.getName());
+    private PluginInitializer mInitializer;
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     NotificationManager mNotificationManager;
     private PluginInstance<TestPlugin> mPluginInstance;
@@ -97,13 +98,14 @@ public class PluginActionManagerTest extends SysuiTestCase {
         mMockListener = mock(PluginListener.class);
         mMockEnabler = mock(PluginEnabler.class);
         mMockVersionInfo = mock(VersionInfo.class);
+        mInitializer = mock(PluginInitializer.class);
         mNotificationManager = mock(NotificationManager.class);
         mMockPlugin = mock(TestPlugin.class);
         mPluginInstance = mock(PluginInstance.class);
         when(mPluginInstance.getComponentName()).thenReturn(mTestPluginComponentName);
         when(mPluginInstance.getPackage()).thenReturn(mTestPluginComponentName.getPackageName());
         mActionManagerFactory = new PluginActionManager.Factory(getContext(), mMockPm,
-                mFakeExecutor, mFakeExecutor, mNotificationManager, mMockEnabler,
+                mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager, mMockEnabler,
                 new ArrayList<>(), mPluginInstanceFactory);
 
         mPluginActionManager = mActionManagerFactory.create("myAction", mMockListener,
@@ -176,7 +178,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
     public void testNonDebuggable_privileged() throws Exception {
         // Create a version that thinks the build is not debuggable.
         PluginActionManager.Factory factory = new PluginActionManager.Factory(getContext(),
-                mMockPm, mFakeExecutor, mFakeExecutor, mNotificationManager,
+                mMockPm, mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager,
                 mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE),
                 mPluginInstanceFactory);
         mPluginActionManager = factory.create("myAction", mMockListener,
@@ -220,7 +222,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
     @Test
     public void testDisablePrivileged() throws Exception {
         PluginActionManager.Factory factory = new PluginActionManager.Factory(getContext(),
-                mMockPm, mFakeExecutor, mFakeExecutor, mNotificationManager,
+                mMockPm, mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager,
                 mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE),
                 mPluginInstanceFactory);
         mPluginActionManager = factory.create("myAction", mMockListener,

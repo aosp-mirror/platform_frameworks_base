@@ -28,6 +28,7 @@ import com.android.systemui.dagger.PluginModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
+import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.shared.plugins.PluginInstance;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
@@ -68,6 +69,9 @@ public abstract class PluginsModule {
     @Binds
     abstract PluginEnabler bindsPluginEnablerImpl(PluginEnablerImpl impl);
 
+    @Binds
+    abstract PluginInitializer bindsPluginInitializerImpl(PluginInitializerImpl impl);
+
     @Provides
     @Singleton
     static PluginInstance.Factory providesPluginInstanceFactory(
@@ -85,12 +89,12 @@ public abstract class PluginsModule {
     @Singleton
     static PluginActionManager.Factory providePluginInstanceManagerFactory(Context context,
             PackageManager packageManager, @Main Executor mainExecutor,
-            @Named(PLUGIN_THREAD) Executor pluginExecutor,
+            @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer,
             NotificationManager notificationManager, PluginEnabler pluginEnabler,
             @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins,
             PluginInstance.Factory pluginInstanceFactory) {
         return new PluginActionManager.Factory(
-                context, packageManager, mainExecutor, pluginExecutor,
+                context, packageManager, mainExecutor, pluginExecutor, initializer,
                 notificationManager, pluginEnabler, privilegedPlugins, pluginInstanceFactory);
     }
 
