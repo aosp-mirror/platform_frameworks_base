@@ -13,7 +13,6 @@
  */
 package com.android.systemui.shared.plugins;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -55,10 +54,10 @@ public class PluginManagerTest extends SysuiTestCase {
 
     private static final String PRIVILEGED_PACKAGE = "com.android.systemui";
 
-    private PluginActionManager.Factory mMockFactory;
-    private PluginActionManager<TestPlugin> mMockPluginInstance;
+    private PluginInstanceManager.Factory mMockFactory;
+    private PluginInstanceManager<Plugin> mMockPluginInstance;
     private PluginManagerImpl mPluginManager;
-    private PluginListener<TestPlugin> mMockListener;
+    private PluginListener<?> mMockListener;
     private PackageManager mMockPackageManager;
     private PluginEnabler mPluginEnabler;
     private PluginPrefs mPluginPrefs;
@@ -71,11 +70,11 @@ public class PluginManagerTest extends SysuiTestCase {
     public void setup() throws Exception {
         mRealExceptionHandler = Thread.getUncaughtExceptionPreHandler();
         mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
-        mMockFactory = mock(PluginActionManager.Factory.class);
-        mMockPluginInstance = mock(PluginActionManager.class);
+        mMockFactory = mock(PluginInstanceManager.Factory.class);
+        mMockPluginInstance = mock(PluginInstanceManager.class);
         mPluginEnabler = mock(PluginEnabler.class);
         mPluginPrefs = mock(PluginPrefs.class);
-        when(mMockFactory.create(any(), any(), eq(TestPlugin.class), anyBoolean(), anyBoolean()))
+        when(mMockFactory.create(any(), any(), Mockito.anyBoolean(), any(), Mockito.anyBoolean()))
                 .thenReturn(mMockPluginInstance);
 
         mMockPackageManager = mock(PackageManager.class);
@@ -117,8 +116,8 @@ public class PluginManagerTest extends SysuiTestCase {
         applicationInfo.sourceDir = sourceDir;
         applicationInfo.packageName = PRIVILEGED_PACKAGE;
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(TestPlugin.class),
-                eq(false), eq(false));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(false),
+                any(VersionInfo.class), eq(false));
         verify(mMockPluginInstance).loadAll();
     }
 
@@ -139,8 +138,8 @@ public class PluginManagerTest extends SysuiTestCase {
         invalidApplicationInfo.sourceDir = sourceDir;
         invalidApplicationInfo.packageName = "com.android.invalidpackage";
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(TestPlugin.class),
-                eq(false), eq(false));
+        verify(mMockFactory).create(eq("myAction"), eq(mMockListener), eq(false),
+                any(VersionInfo.class), eq(false));
         verify(mMockPluginInstance).loadAll();
     }
 
