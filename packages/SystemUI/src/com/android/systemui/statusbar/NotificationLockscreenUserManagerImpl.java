@@ -50,6 +50,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -72,7 +73,9 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class NotificationLockscreenUserManagerImpl implements
-        Dumpable, NotificationLockscreenUserManager, StateListener {
+        Dumpable,
+        NotificationLockscreenUserManager,
+        StateListener {
     private static final String TAG = "LockscreenUserManager";
     private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
 
@@ -202,7 +205,8 @@ public class NotificationLockscreenUserManagerImpl implements
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
             DeviceProvisionedController deviceProvisionedController,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            DumpManager dumpManager) {
         mContext = context;
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
@@ -215,6 +219,8 @@ public class NotificationLockscreenUserManagerImpl implements
         mBroadcastDispatcher = broadcastDispatcher;
         mDeviceProvisionedController = deviceProvisionedController;
         mKeyguardStateController = keyguardStateController;
+
+        dumpManager.registerDumpable(this);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {

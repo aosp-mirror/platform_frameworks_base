@@ -37,6 +37,7 @@ import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
@@ -76,6 +77,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var dumpManager: DumpManager
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -106,7 +108,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         `when`(userManager.canAddMoreUsers()).thenReturn(true)
 
-        userSwitcherController = UserSwitcherController(context,
+        userSwitcherController = UserSwitcherController(
+                context,
                 userManager,
                 userTracker,
                 keyguardStateController,
@@ -121,7 +124,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 activityTaskManager,
                 userDetailAdapter,
                 secureSettings,
-                uiBgExecutor)
+                uiBgExecutor,
+                dumpManager)
         userSwitcherController.mPauseRefreshUsers = true
 
         picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))

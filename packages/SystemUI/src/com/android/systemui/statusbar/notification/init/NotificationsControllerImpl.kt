@@ -128,8 +128,7 @@ class NotificationsControllerImpl @Inject constructor(
             groupManagerLegacy.get().setHeadsUpManager(headsUpManager)
             groupAlertTransferHelper.setHeadsUpManager(headsUpManager)
 
-            entryManager.setRanker(legacyRanker)
-            entryManager.attach(notificationListener)
+            entryManager.initialize(notificationListener, legacyRanker)
         }
 
         peopleSpaceWidgetManager.attach(notificationListener)

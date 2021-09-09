@@ -68,6 +68,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -163,7 +164,8 @@ public class UserSwitcherController implements Dumpable {
             IActivityTaskManager activityTaskManager,
             UserDetailAdapter userDetailAdapter,
             SecureSettings secureSettings,
-            @Background Executor bgExecutor) {
+            @Background Executor bgExecutor,
+            DumpManager dumpManager) {
         mContext = context;
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -230,6 +232,8 @@ public class UserSwitcherController implements Dumpable {
 
         keyguardStateController.addCallback(mCallback);
         listenForCallState();
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         refreshUsers(UserHandle.USER_NULL);
     }

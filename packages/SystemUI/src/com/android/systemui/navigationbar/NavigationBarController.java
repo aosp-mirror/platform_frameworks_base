@@ -17,7 +17,6 @@
 package com.android.systemui.navigationbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 
@@ -52,6 +51,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -81,9 +81,11 @@ import dagger.Lazy;
 
 /** A controller to handle navigation bars. */
 @SysUISingleton
-public class NavigationBarController implements Callbacks,
+public class NavigationBarController implements
+        Callbacks,
         ConfigurationController.ConfigurationListener,
-        NavigationModeController.ModeChangedListener, Dumpable {
+        NavigationModeController.ModeChangedListener,
+        Dumpable {
 
     private static final String TAG = NavigationBarController.class.getSimpleName();
 
@@ -157,7 +159,8 @@ public class NavigationBarController implements Callbacks,
             ConfigurationController configurationController,
             NavigationBarA11yHelper navigationBarA11yHelper,
             TaskbarDelegate taskbarDelegate,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            DumpManager dumpManager) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -195,6 +198,8 @@ public class NavigationBarController implements Callbacks,
                 navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer);
         mIsTablet = isTablet(mContext);
         mUserTracker = userTracker;
+
+        dumpManager.registerDumpable(this);
     }
 
     @Override

@@ -20,6 +20,7 @@ import android.os.Trace;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -40,7 +41,8 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     private int mScreenState = SCREEN_OFF;
 
     @Inject
-    public ScreenLifecycle() {
+    public ScreenLifecycle(DumpManager dumpManager) {
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public int getScreenState() {
