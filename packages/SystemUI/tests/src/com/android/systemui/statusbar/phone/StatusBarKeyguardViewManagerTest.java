@@ -45,6 +45,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -120,7 +121,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mBouncer);
 
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
-        mWakefulnessLifecycle = new WakefulnessLifecycle(getContext(), null);
+        mWakefulnessLifecycle = new WakefulnessLifecycle(
+                getContext(),
+                null,
+                mock(DumpManager.class));
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(
                 getContext(),
                 mViewMediatorCallback,

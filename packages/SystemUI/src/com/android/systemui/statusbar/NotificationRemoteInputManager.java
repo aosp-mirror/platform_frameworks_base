@@ -54,6 +54,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -290,7 +291,8 @@ public class NotificationRemoteInputManager implements Dumpable {
             @Main Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
             NotificationClickNotifier clickNotifier,
-            ActionClickLogger logger) {
+            ActionClickLogger logger,
+            DumpManager dumpManager) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
@@ -306,6 +308,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         mStatusBarStateController = statusBarStateController;
         mRemoteInputUriController = remoteInputUriController;
         mClickNotifier = clickNotifier;
+
+        dumpManager.registerDumpable(this);
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override

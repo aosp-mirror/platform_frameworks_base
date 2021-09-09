@@ -125,6 +125,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
@@ -676,7 +677,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 : new LightBarController(mContext,
                         Dependency.get(DarkIconDispatcher.class),
                         Dependency.get(BatteryController.class),
-                        Dependency.get(NavigationModeController.class));
+                        Dependency.get(NavigationModeController.class),
+                        Dependency.get(DumpManager.class));
         setLightBarController(lightBarController);
 
         // TODO(b/118592525): to support multi-display, we start to add something which is
