@@ -6206,11 +6206,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(shell-transitions): Remove mDeferHidingClient once everything is shell-transitions.
         //                          pip activities should just remain in clientVisible.
         if (!clientVisible && mDeferHidingClient) return;
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "setClientVisible: %s clientVisible=%b Callers=%s", this, clientVisible,
-                Debug.getCallers(5));
         super.setClientVisible(clientVisible);
-        sendAppVisibilityToClients();
     }
 
     /**
