@@ -173,8 +173,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
     }
 
-    public void exitSplitScreen(int exitReason) {
-        mStageCoordinator.exitSplitScreen(exitReason);
+    public void exitSplitScreen(int toTopTaskId, int exitReason) {
+        mStageCoordinator.exitSplitScreen(toTopTaskId, exitReason);
     }
 
     public void onKeyguardOccludedChanged(boolean occluded) {
@@ -499,11 +499,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void exitSplitScreen() {
+        public void exitSplitScreen(int toTopTaskId) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreen",
                     (controller) -> {
-                        controller.exitSplitScreen(
-                                FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+                        controller.exitSplitScreen(toTopTaskId,
+                                FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT);
                     });
         }
 

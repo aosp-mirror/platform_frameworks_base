@@ -472,16 +472,32 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    void exitSplitScreen(int exitReason) {
-        exitSplitScreen(null /* childrenToTop */, exitReason);
-    }
-
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
         mExitSplitScreenOnHide = exitSplitScreenOnHide;
     }
 
+    void exitSplitScreen(int toTopTaskId, int exitReason) {
+        StageTaskListener childrenToTop = null;
+        if (mMainStage.containsTask(toTopTaskId)) {
+            childrenToTop = mMainStage;
+        } else if (mSideStage.containsTask(toTopTaskId)) {
+            childrenToTop = mSideStage;
+        }
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (childrenToTop != null) {
+            childrenToTop.reorderChild(toTopTaskId, true /* onTop */, wct);
+        }
+        applyExitSplitScreen(childrenToTop, wct, exitReason);
+    }
+
     private void exitSplitScreen(StageTaskListener childrenToTop, int exitReason) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        applyExitSplitScreen(childrenToTop, wct, exitReason);
+    }
+
+    private void applyExitSplitScreen(StageTaskListener childrenToTop,
+            WindowContainerTransaction wct, int exitReason) {
         mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
         mMainStage.deactivate(wct, childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
@@ -627,7 +643,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Don't dismiss staged split when both stages are not visible due to sleeping display,
             // like the cases keyguard showing or screen off.
             || (!mMainStage.mRootTaskInfo.isSleeping && !mSideStage.mRootTaskInfo.isSleeping)) {
-                exitSplitScreen(SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+                exitSplitScreen(null /* childrenToTop */,
+                        SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
             }
         } else if (mKeyguardOccluded) {
             // At least one of the stages is visible while keyguard occluded. Dismiss split because
@@ -1249,7 +1266,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         @Override
         public void onNoLongerSupportMultiWindow() {
             if (mMainStage.isActive()) {
-                StageCoordinator.this.exitSplitScreen(
+                StageCoordinator.this.exitSplitScreen(null /* childrenToTop */,
                         SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW);
             }
         }

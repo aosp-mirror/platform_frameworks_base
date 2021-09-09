@@ -16,14 +16,17 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
@@ -93,5 +96,39 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         verify(mSideStage).removeTask(
                 eq(task.taskId), any(), any(WindowContainerTransaction.class));
+    }
+
+    @Test
+    public void testExitSplitScreen() {
+        mStageCoordinator.exitSplitScreen(INVALID_TASK_ID,
+                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
+        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
+    }
+
+    @Test
+    public void testExitSplitScreenToMainStage() {
+        final int testTaskId = 12345;
+        when(mMainStage.containsTask(eq(testTaskId))).thenReturn(true);
+        when(mSideStage.containsTask(eq(testTaskId))).thenReturn(false);
+        mStageCoordinator.exitSplitScreen(testTaskId,
+                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
+                any(WindowContainerTransaction.class));
+        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
+        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(true));
+    }
+
+    @Test
+    public void testExitSplitScreenToSideStage() {
+        final int testTaskId = 12345;
+        when(mMainStage.containsTask(eq(testTaskId))).thenReturn(false);
+        when(mSideStage.containsTask(eq(testTaskId))).thenReturn(true);
+        mStageCoordinator.exitSplitScreen(testTaskId,
+                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
+                any(WindowContainerTransaction.class));
+        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(true));
+        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
     }
 }
