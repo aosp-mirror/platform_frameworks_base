@@ -42,6 +42,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
 import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 
@@ -60,6 +61,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final QSCustomizerController mQsCustomizerController;
     private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final FalsingManager mFalsingManager;
+    private final CommandQueue mCommandQueue;
     private final BrightnessController mBrightnessController;
     private final BrightnessSlider mBrightnessSlider;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
@@ -97,7 +99,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
-            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager) {
+            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager,
+            CommandQueue commandQueue) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
@@ -105,6 +108,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mFalsingManager = falsingManager;
+        mCommandQueue = commandQueue;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
 
         mBrightnessSlider = brightnessSliderFactory.create(getContext(), mView);
@@ -274,6 +278,14 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void showDetailAdapter(DetailAdapter detailAdapter, int x, int y) {
+        // TODO(b/199296365)
+        // Workaround for opening detail from QQS, when there might not be enough space to
+        // display e.g. in case of multiuser detail from split shade. Currently showing detail works
+        // only for QS (mView below) and that's why expanding panel (thus showing QS instead of QQS)
+        // makes it displayed correctly.
+        if (!isExpanded()) {
+            mCommandQueue.animateExpandSettingsPanel(null);
+        }
         mView.showDetailAdapter(true, detailAdapter, new int[]{x, y});
     }
 
