@@ -112,11 +112,6 @@ static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceCont
                   transaction);
 }
 
-static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
-    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    queue->flushShadowQueue();
-}
-
 static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlong transactionPtr,
                                            jlong framenumber) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
@@ -144,6 +139,11 @@ static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr)
     return queue->getLastAcquiredFrameNum();
 }
 
+static void nativeApplyPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr, jlong frameNum) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->applyPendingTransactions(frameNum);
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
@@ -152,12 +152,12 @@ static const JNINativeMethod gMethods[] = {
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
         {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
-        {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",
                 "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
                 (void*)nativeSetTransactionCompleteCallback},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
+        {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},
         // clang-format on
 };
 

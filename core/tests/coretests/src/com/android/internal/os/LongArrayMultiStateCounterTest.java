@@ -46,5 +46,10 @@ public class LongArrayMultiStateCounterTest {
         counter.getCounts(longArrayContainer, 1);
         longArrayContainer.getValues(result);
         assertThat(result).isEqualTo(new long[]{25, 50, 75, 100});
+
+        assertThat(counter.toString()).isEqualTo(
+                "currentState: 0 lastStateChangeTimestamp: 9000 lastUpdateTimestamp: 9000 states:"
+                        + " [0: time: 0 counter: { 75, 150, 225, 300}"
+                        + ", 1: time: 0 counter: { 25, 50, 75, 100}]");
     }
 }

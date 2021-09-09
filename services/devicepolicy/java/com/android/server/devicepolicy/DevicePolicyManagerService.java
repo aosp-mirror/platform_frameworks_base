@@ -16966,6 +16966,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void clearOrganizationIdForUser(int userHandle) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userHandle);
+            owner.mOrganizationId = null;
+            owner.mEnrollmentSpecificId = null;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    @Override
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams,
             @NonNull String callerPackage) {

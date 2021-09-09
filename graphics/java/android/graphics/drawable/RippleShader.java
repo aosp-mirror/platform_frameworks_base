@@ -119,7 +119,7 @@ final class RippleShader extends RuntimeShader {
             + "    vec4 waveColor = vec4(in_color.rgb * waveAlpha, waveAlpha);\n"
             + "    vec4 sparkleColor = vec4(in_sparkleColor.rgb * in_sparkleColor.a, "
             + "in_sparkleColor.a);\n"
-            + "    float mask = in_hasMask == 1. ? sample(in_shader, p).a > 0. ? 1. : 0. : 1.;\n"
+            + "    float mask = in_hasMask == 1. ? in_shader.eval(p).a > 0. ? 1. : 0. : 1.;\n"
             + "    return mix(waveColor, sparkleColor, sparkleAlpha) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;

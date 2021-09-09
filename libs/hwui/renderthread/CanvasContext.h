@@ -167,29 +167,13 @@ public:
 
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
-    void addFrameMetricsObserver(FrameMetricsObserver* observer) {
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
-        if (mFrameMetricsReporter.get() == nullptr) {
-            mFrameMetricsReporter.reset(new FrameMetricsReporter());
-        }
-
-        mFrameMetricsReporter->addObserver(observer);
-    }
-
-    void removeFrameMetricsObserver(FrameMetricsObserver* observer) {
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
-        if (mFrameMetricsReporter.get() != nullptr) {
-            mFrameMetricsReporter->removeObserver(observer);
-            if (!mFrameMetricsReporter->hasObservers()) {
-                mFrameMetricsReporter.reset(nullptr);
-            }
-        }
-    }
+    void addFrameMetricsObserver(FrameMetricsObserver* observer);
+    void removeFrameMetricsObserver(FrameMetricsObserver* observer);
 
     // Used to queue up work that needs to be completed before this frame completes
     void enqueueFrameWork(std::function<void()>&& func);
 
-    int64_t getFrameNumber();
+    uint64_t getFrameNumber();
 
     void waitOnFences();
 
@@ -212,8 +196,8 @@ public:
     SkISize getNextFrameSize() const;
 
     // Called when SurfaceStats are available.
-    static void onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-            ASurfaceControlStats* stats);
+    static void onSurfaceStatsAvailable(void* context, int32_t surfaceControlId,
+                                        ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
             const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
@@ -254,7 +238,13 @@ private:
      */
     void reportMetricsWithPresentTime();
 
-    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber);
+    struct FrameMetricsInfo {
+        FrameInfo* frameInfo;
+        int64_t frameNumber;
+        int32_t surfaceId;
+    };
+
+    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId);
 
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
@@ -266,7 +256,10 @@ private:
     // NULL to remove the reference
     ASurfaceControl* mSurfaceControl = nullptr;
     // id to track surface control changes and WebViewFunctor uses it to determine
-    // whether reparenting is needed
+    // whether reparenting is needed also used by FrameMetricsReporter to determine
+    // if a frame is from an "old" surface (i.e. one that existed before the
+    // observer was attched) and therefore shouldn't be reported.
+    // NOTE: It is important that this is an increasing counter.
     int32_t mSurfaceControlGenerationId = 0;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
@@ -288,7 +281,8 @@ private:
 
     // Need at least 4 because we do quad buffer. Add a 5th for good measure.
     RingBuffer<SwapHistory, 5> mSwapHistory;
-    int64_t mFrameNumber = -1;
+    // Frame numbers start at 1, 0 means uninitialized
+    uint64_t mFrameNumber = 0;
     int64_t mDamageId = 0;
 
     // last vsync for a dropped frame due to stuffed queue
@@ -308,10 +302,11 @@ private:
 
     FrameInfo* mCurrentFrameInfo = nullptr;
 
-    // List of frames that are awaiting GPU completion reporting
-    RingBuffer<std::pair<FrameInfo*, int64_t>, 4> mLast4FrameInfos
-            GUARDED_BY(mLast4FrameInfosMutex);
-    std::mutex mLast4FrameInfosMutex;
+    // List of data of frames that are awaiting GPU completion reporting. Used to compute frame
+    // metrics and determine whether or not to report the metrics.
+    RingBuffer<FrameMetricsInfo, 4> mLast4FrameMetricsInfos
+            GUARDED_BY(mLast4FrameMetricsInfosMutex);
+    std::mutex mLast4FrameMetricsInfosMutex;
 
     std::string mName;
     JankTracker mJankTracker;

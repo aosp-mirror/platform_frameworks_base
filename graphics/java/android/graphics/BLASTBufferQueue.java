@@ -34,12 +34,12 @@ public final class BLASTBufferQueue {
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
             int format, long transactionPtr);
-    private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
     private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
             TransactionCompleteCallback callback);
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
+    private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
 
     /**
      * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
@@ -125,10 +125,6 @@ public final class BLASTBufferQueue {
         }
     }
 
-    public void flushShadowQueue() {
-        nativeFlushShadowQueue(mNativeObject);
-    }
-
     /**
      * Merge the transaction passed in to the next transaction in BlastBufferQueue. The next
      * transaction will be applied or merged when the next frame with specified frame number
@@ -144,6 +140,17 @@ public final class BLASTBufferQueue {
      */
     public void mergeWithNextTransaction(long nativeTransaction, long frameNumber) {
         nativeMergeWithNextTransaction(mNativeObject, nativeTransaction, frameNumber);
+    }
+
+    /**
+     * Apply any transactions that were passed to {@link #mergeWithNextTransaction} with the
+     * specified frameNumber. This is intended to ensure transactions don't get stuck as pending
+     * if the specified frameNumber is never drawn.
+     *
+     * @param frameNumber The frameNumber used to determine which transactions to apply.
+     */
+    public void applyPendingTransactions(long frameNumber) {
+        nativeApplyPendingTransactions(mNativeObject, frameNumber);
     }
 
     public long getLastAcquiredFrameNum() {

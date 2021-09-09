@@ -375,6 +375,7 @@ interface IDevicePolicyManager {
 
     void setOrganizationColor(in ComponentName admin, in int color);
     void setOrganizationColorForUser(in int color, in int userId);
+    void clearOrganizationIdForUser(int userHandle);
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
 

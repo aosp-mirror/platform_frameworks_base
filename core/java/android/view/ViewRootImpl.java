@@ -4031,6 +4031,10 @@ public final class ViewRootImpl implements ViewParent,
                 mBlastBufferQueue.setNextTransaction(null);
                 mBlastBufferQueue.setTransactionCompleteCallback(mRtLastAttemptedDrawFrameNum,
                         null);
+                // Apply the transactions that were sent to mergeWithNextTransaction since the
+                // frame didn't draw on this vsync. It's possible the frame will draw later, but
+                // it's better to not be sync than to block on a frame that may never come.
+                mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
             }
 
             mHandler.postAtFrontOfQueue(() -> {
@@ -4086,18 +4090,16 @@ public final class ViewRootImpl implements ViewParent,
 
     private void addFrameCallbackIfNeeded() {
         final boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
-        final boolean reportNextDraw = mReportNextDraw;
         final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
         final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!nextDrawUseBlastSync && !reportNextDraw && !needsCallbackForBlur) {
+        if (!nextDrawUseBlastSync && !needsCallbackForBlur) {
             return;
         }
 
         if (DEBUG_BLAST) {
             Log.d(mTag, "Creating frameDrawingCallback"
                     + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
-                    + " reportNextDraw=" + reportNextDraw
                     + " hasBlurUpdates=" + hasBlurUpdates);
         }
         mWaitForBlastSyncComplete = nextDrawUseBlastSync;
@@ -4137,11 +4139,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mHandler.postAtFrontOfQueue(this::clearBlastSync);
                 });
-            } else if (reportNextDraw) {
-                // If we need to report next draw, wait for adapter to flush its shadow queue
-                // by processing previously queued buffers so that we can submit the
-                // transaction a timely manner.
-                mBlastBufferQueue.flushShadowQueue();
             }
         };
         registerRtFrameCallback(frameDrawingCallback);

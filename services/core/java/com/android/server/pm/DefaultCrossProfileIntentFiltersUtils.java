@@ -199,6 +199,30 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataType("video/*")
                     .build();
 
+    // TODO(b/199068419): Remove once GEM enables the intent for Googlers
+    /** Pick images can be forwarded to work profile. */
+    private static final DefaultCrossProfileIntentFilter ACTION_PICK_IMAGES_TO_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0,
+                    /* letsPersonalDataIntoProfile= */ true)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+    // TODO(b/199068419): Remove once GEM enables the intent for Googlers
+    /** Pick images can be forwarded to work profile. */
+    private static final DefaultCrossProfileIntentFilter
+            ACTION_PICK_IMAGES_WITH_DATA_TYPES_TO_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0,
+                    /* letsPersonalDataIntoProfile= */ true)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataType("image/*")
+                    .addDataType("video/*")
+                    .build();
+
     /** Open document intent can be forwarded to parent user. */
     private static final DefaultCrossProfileIntentFilter OPEN_DOCUMENT =
             new DefaultCrossProfileIntentFilter.Builder(
@@ -312,6 +336,8 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 ACTION_PICK_DATA,
                 ACTION_PICK_IMAGES,
                 ACTION_PICK_IMAGES_WITH_DATA_TYPES,
+                ACTION_PICK_IMAGES_TO_PROFILE,
+                ACTION_PICK_IMAGES_WITH_DATA_TYPES_TO_PROFILE,
                 OPEN_DOCUMENT,
                 GET_CONTENT,
                 USB_DEVICE_ATTACHED,

@@ -203,9 +203,10 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
     mSurfaceControl = surfaceControl;
     mSurfaceControlGenerationId++;
     mExpectSurfaceStats = surfaceControl != nullptr;
-    if (mSurfaceControl != nullptr) {
+    if (mExpectSurfaceStats) {
         funcs.acquireFunc(mSurfaceControl);
-        funcs.registerListenerFunc(surfaceControl, this, &onSurfaceStatsAvailable);
+        funcs.registerListenerFunc(surfaceControl, mSurfaceControlGenerationId, this,
+                                   &onSurfaceStatsAvailable);
     }
 }
 
@@ -218,7 +219,7 @@ void CanvasContext::setupPipelineSurface() {
 
     }
 
-    mFrameNumber = -1;
+    mFrameNumber = 0;
 
     if (mNativeSurface != nullptr && hasSurface) {
         mHaveNewSurface = true;
@@ -512,7 +513,7 @@ nsecs_t CanvasContext::draw() {
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
                                       &(profiler()));
 
-    int64_t frameCompleteNr = getFrameNumber();
+    uint64_t frameCompleteNr = getFrameNumber();
 
     waitOnFences();
 
@@ -580,7 +581,7 @@ nsecs_t CanvasContext::draw() {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
         mHaveNewSurface = false;
-        mFrameNumber = -1;
+        mFrameNumber = 0;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
@@ -613,16 +614,20 @@ nsecs_t CanvasContext::draw() {
     if (requireSwap) {
         if (mExpectSurfaceStats) {
             reportMetricsWithPresentTime();
-            std::lock_guard lock(mLast4FrameInfosMutex);
-            std::pair<FrameInfo*, int64_t>& next = mLast4FrameInfos.next();
-            next.first = mCurrentFrameInfo;
-            next.second = frameCompleteNr;
+            {  // acquire lock
+                std::lock_guard lock(mLast4FrameMetricsInfosMutex);
+                FrameMetricsInfo& next = mLast4FrameMetricsInfos.next();
+                next.frameInfo = mCurrentFrameInfo;
+                next.frameNumber = frameCompleteNr;
+                next.surfaceId = mSurfaceControlGenerationId;
+            }  // release lock
         } else {
             mCurrentFrameInfo->markFrameCompleted();
             mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
                     = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
             std::scoped_lock lock(mFrameMetricsReporterMutex);
-            mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter);
+            mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter, frameCompleteNr,
+                                     mSurfaceControlGenerationId);
         }
     }
 
@@ -658,14 +663,18 @@ void CanvasContext::reportMetricsWithPresentTime() {
     ATRACE_CALL();
     FrameInfo* forthBehind;
     int64_t frameNumber;
+    int32_t surfaceControlId;
+
     {  // acquire lock
-        std::scoped_lock lock(mLast4FrameInfosMutex);
-        if (mLast4FrameInfos.size() != mLast4FrameInfos.capacity()) {
+        std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
+        if (mLast4FrameMetricsInfos.size() != mLast4FrameMetricsInfos.capacity()) {
             // Not enough frames yet
             return;
         }
-        // Surface object keeps stats for the last 8 frames.
-        std::tie(forthBehind, frameNumber) = mLast4FrameInfos.front();
+        auto frameMetricsInfo = mLast4FrameMetricsInfos.front();
+        forthBehind = frameMetricsInfo.frameInfo;
+        frameNumber = frameMetricsInfo.frameNumber;
+        surfaceControlId = frameMetricsInfo.surfaceId;
     }  // release lock
 
     nsecs_t presentTime = 0;
@@ -680,25 +689,51 @@ void CanvasContext::reportMetricsWithPresentTime() {
     {  // acquire lock
         std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter != nullptr) {
-            mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/);
+            mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/,
+                                                      frameNumber, surfaceControlId);
         }
     }  // release lock
 }
 
-FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber) {
-    std::scoped_lock lock(mLast4FrameInfosMutex);
-    for (size_t i = 0; i < mLast4FrameInfos.size(); i++) {
-        if (mLast4FrameInfos[i].second == frameNumber) {
-            return mLast4FrameInfos[i].first;
+void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
+    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    if (mFrameMetricsReporter.get() == nullptr) {
+        mFrameMetricsReporter.reset(new FrameMetricsReporter());
+    }
+
+    // We want to make sure we aren't reporting frames that have already been queued by the
+    // BufferQueueProducer on the rendner thread but are still pending the callback to report their
+    // their frame metrics.
+    uint64_t nextFrameNumber = getFrameNumber();
+    observer->reportMetricsFrom(nextFrameNumber, mSurfaceControlGenerationId);
+    mFrameMetricsReporter->addObserver(observer);
+}
+
+void CanvasContext::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    if (mFrameMetricsReporter.get() != nullptr) {
+        mFrameMetricsReporter->removeObserver(observer);
+        if (!mFrameMetricsReporter->hasObservers()) {
+            mFrameMetricsReporter.reset(nullptr);
         }
     }
+}
+
+FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId) {
+    std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
+    for (size_t i = 0; i < mLast4FrameMetricsInfos.size(); i++) {
+        if (mLast4FrameMetricsInfos[i].frameNumber == frameNumber &&
+            mLast4FrameMetricsInfos[i].surfaceId == surfaceControlId) {
+            return mLast4FrameMetricsInfos[i].frameInfo;
+        }
+    }
+
     return nullptr;
 }
 
-void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-            ASurfaceControlStats* stats) {
-
-    CanvasContext* instance = static_cast<CanvasContext*>(context);
+void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceControlId,
+                                            ASurfaceControlStats* stats) {
+    auto* instance = static_cast<CanvasContext*>(context);
 
     const ASurfaceControlFunctions& functions =
             instance->mRenderThread.getASurfaceControlFunctions();
@@ -706,14 +741,15 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
     nsecs_t gpuCompleteTime = functions.getAcquireTimeFunc(stats);
     uint64_t frameNumber = functions.getFrameNumberFunc(stats);
 
-    FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber);
+    FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
         frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
                 frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
         std::scoped_lock lock(instance->mFrameMetricsReporterMutex);
-        instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
+        instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter, frameNumber,
+                                           surfaceControlId);
     }
 }
 
@@ -854,9 +890,9 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
     mFrameFences.push_back(CommonPool::async(std::move(func)));
 }
 
-int64_t CanvasContext::getFrameNumber() {
-    // mFrameNumber is reset to -1 when the surface changes or we swap buffers
-    if (mFrameNumber == -1 && mNativeSurface.get()) {
+uint64_t CanvasContext::getFrameNumber() {
+    // mFrameNumber is reset to 0 when the surface changes or we swap buffers
+    if (mFrameNumber == 0 && mNativeSurface.get()) {
         mFrameNumber = ANativeWindow_getNextFrameId(mNativeSurface->getNativeWindow());
     }
     return mFrameNumber;
