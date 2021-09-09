@@ -47,26 +47,26 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private static final String TAG = PluginManagerImpl.class.getSimpleName();
     static final String DISABLE_PLUGIN = "com.android.systemui.action.DISABLE_PLUGIN";
 
-    private final ArrayMap<PluginListener<?>, PluginInstanceManager<?>> mPluginMap
+    private final ArrayMap<PluginListener<?>, PluginActionManager<?>> mPluginMap
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
     private final ArraySet<String> mPrivilegedPlugins = new ArraySet<>();
     private final Context mContext;
-    private final PluginInstanceManager.Factory mInstanceManagerFactory;
+    private final PluginActionManager.Factory mActionManagerFactory;
     private final boolean mIsDebuggable;
     private final PluginPrefs mPluginPrefs;
     private final PluginEnabler mPluginEnabler;
     private boolean mListening;
 
     public PluginManagerImpl(Context context,
-            PluginInstanceManager.Factory instanceManagerFactory,
+            PluginActionManager.Factory actionManagerFactory,
             boolean debuggable,
             Optional<UncaughtExceptionHandler> defaultHandlerOptional,
             PluginEnabler pluginEnabler,
             PluginPrefs pluginPrefs,
             List<String> privilegedPlugins) {
         mContext = context;
-        mInstanceManagerFactory = instanceManagerFactory;
+        mActionManagerFactory = actionManagerFactory;
         mIsDebuggable = debuggable;
         mPrivilegedPlugins.addAll(privilegedPlugins);
         mPluginPrefs = pluginPrefs;
@@ -85,25 +85,27 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         return mPrivilegedPlugins.toArray(new String[0]);
     }
 
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
+    /** */
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls) {
         addPluginListener(listener, cls, false);
     }
 
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
+    /** */
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls,
             boolean allowMultiple) {
         addPluginListener(PluginManager.Helper.getAction(cls), listener, cls, allowMultiple);
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<?> cls) {
+            Class<T> cls) {
         addPluginListener(action, listener, cls, false);
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<?> cls, boolean allowMultiple) {
+            Class<T> cls, boolean allowMultiple) {
         mPluginPrefs.addAction(action);
-        PluginInstanceManager<T> p = mInstanceManagerFactory.create(action, listener, allowMultiple,
-                new VersionInfo().addClass(cls), isDebuggable());
+        PluginActionManager<T> p = mActionManagerFactory.create(action, listener, cls,
+                allowMultiple, isDebuggable());
         p.loadAll();
         synchronized (this) {
             mPluginMap.put(listener, p);
@@ -135,7 +137,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         filter.addAction(PLUGIN_CHANGED);
         filter.addAction(DISABLE_PLUGIN);
         filter.addDataScheme("package");
-        mContext.registerReceiver(this, filter, PluginInstanceManager.PLUGIN_PERMISSION, null);
+        mContext.registerReceiver(this, filter, PluginActionManager.PLUGIN_PERMISSION, null);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiver(this, filter);
     }
@@ -150,7 +152,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
             synchronized (this) {
-                for (PluginInstanceManager<?> manager : mPluginMap.values()) {
+                for (PluginActionManager<?> manager : mPluginMap.values()) {
                     manager.loadAll();
                 }
             }
@@ -189,12 +191,14 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 }
             }
             synchronized (this) {
-                if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
-                        manager.onPackageChange(pkg);
+                if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
+                        || Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
+                        || Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
+                    for (PluginActionManager<?> actionManager : mPluginMap.values()) {
+                        actionManager.reloadPackage(pkg);
                     }
                 } else {
-                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
+                    for (PluginActionManager<?> manager : mPluginMap.values()) {
                         manager.onPackageRemoved(pkg);
                     }
                 }
@@ -284,7 +288,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // disable all the plugins, so we can be sure that SysUI is running as
                 // best as possible.
                 synchronized (this) {
-                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
+                    for (PluginActionManager<?> manager : mPluginMap.values()) {
                         disabledAny |= manager.disableAll();
                     }
                 }
@@ -304,7 +308,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             boolean disabledAny = false;
             synchronized (this) {
                 for (StackTraceElement element : throwable.getStackTrace()) {
-                    for (PluginInstanceManager<?> manager : mPluginMap.values()) {
+                    for (PluginActionManager<?> manager : mPluginMap.values()) {
                         disabledAny |= manager.checkAndDisable(element.getClassName());
                     }
                 }
