@@ -212,8 +212,8 @@ class MediaDataManager(
         mediaDataCombineLatest.addListener(mediaDataFilter)
 
         // Set up links back into the pipeline for listeners that need to send events upstream.
-        mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
-            setTimedOut(token, timedOut) }
+        mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
+            setTimedOut(key, timedOut) }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
 
@@ -414,14 +414,18 @@ class MediaDataManager(
      * This will make the player not active anymore, hiding it from QQS and Keyguard.
      * @see MediaData.active
      */
-    internal fun setTimedOut(token: String, timedOut: Boolean, forceUpdate: Boolean = false) {
-        mediaEntries[token]?.let {
+    internal fun setTimedOut(key: String, timedOut: Boolean, forceUpdate: Boolean = false) {
+        mediaEntries[key]?.let {
             if (it.active == !timedOut && !forceUpdate) {
+                if (it.resumption) {
+                    if (DEBUG) Log.d(TAG, "timing out resume player $key")
+                    dismissMediaData(key, 0L /* delay */)
+                }
                 return
             }
             it.active = !timedOut
-            if (DEBUG) Log.d(TAG, "Updating $token timedOut: $timedOut")
-            onMediaDataLoaded(token, token, it)
+            if (DEBUG) Log.d(TAG, "Updating $key timedOut: $timedOut")
+            onMediaDataLoaded(key, key, it)
         }
     }
 
