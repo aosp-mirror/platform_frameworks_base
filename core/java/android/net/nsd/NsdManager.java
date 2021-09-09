@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-
-import java.util.concurrent.CountDownLatch;
 
 /**
  * The Network Service Discovery Manager class provides the API to discover services
@@ -234,6 +230,11 @@ public final class NsdManager {
     /** @hide */
     public static final int NATIVE_DAEMON_EVENT                     = BASE + 26;
 
+    /** @hide */
+    public static final int REGISTER_CLIENT                         = BASE + 27;
+    /** @hide */
+    public static final int UNREGISTER_CLIENT                       = BASE + 28;
+
     /** Dns based service discovery protocol */
     public static final int PROTOCOL_DNS_SD = 0x0001;
 
@@ -274,7 +275,7 @@ public final class NsdManager {
 
     private static final int FIRST_LISTENER_KEY = 1;
 
-    private final INsdManager mService;
+    private final INsdServiceConnector mService;
     private final Context mContext;
 
     private int mListenerKey = FIRST_LISTENER_KEY;
@@ -282,9 +283,7 @@ public final class NsdManager {
     private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<>();
     private final Object mMapLock = new Object();
 
-    private final AsyncChannel mAsyncChannel = new AsyncChannel();
-    private ServiceHandler mHandler;
-    private final CountDownLatch mConnected = new CountDownLatch(1);
+    private final ServiceHandler mHandler;
 
     /**
      * Create a new Nsd instance. Applications use
@@ -295,18 +294,108 @@ public final class NsdManager {
      * is a system private class.
      */
     public NsdManager(Context context, INsdManager service) {
-        mService = service;
         mContext = context;
-        init();
+
+        HandlerThread t = new HandlerThread("NsdManager");
+        t.start();
+        mHandler = new ServiceHandler(t.getLooper());
+
+        try {
+            mService = service.connect(new NsdCallbackImpl(mHandler));
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to connect to NsdService");
+        }
+
+        // Only proactively start the daemon if the target SDK < S, otherwise the internal service
+        // would automatically start/stop the native daemon as needed.
+        if (!CompatChanges.isChangeEnabled(RUN_NATIVE_NSD_ONLY_IF_LEGACY_APPS)) {
+            try {
+                mService.startDaemon();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to proactively start daemon");
+                // Continue: the daemon can still be started on-demand later
+            }
+        }
     }
 
-    /**
-     * @hide
-     */
-    @VisibleForTesting
-    public void disconnect() {
-        mAsyncChannel.disconnect();
-        mHandler.getLooper().quitSafely();
+    private static class NsdCallbackImpl extends INsdManagerCallback.Stub {
+        private final Handler mServHandler;
+
+        NsdCallbackImpl(Handler serviceHandler) {
+            mServHandler = serviceHandler;
+        }
+
+        private void sendInfo(int message, int listenerKey, NsdServiceInfo info) {
+            mServHandler.sendMessage(mServHandler.obtainMessage(message, 0, listenerKey, info));
+        }
+
+        private void sendError(int message, int listenerKey, int error) {
+            mServHandler.sendMessage(mServHandler.obtainMessage(message, error, listenerKey));
+        }
+
+        private void sendNoArg(int message, int listenerKey) {
+            mServHandler.sendMessage(mServHandler.obtainMessage(message, 0, listenerKey));
+        }
+
+        @Override
+        public void onDiscoverServicesStarted(int listenerKey, NsdServiceInfo info) {
+            sendInfo(DISCOVER_SERVICES_STARTED, listenerKey, info);
+        }
+
+        @Override
+        public void onDiscoverServicesFailed(int listenerKey, int error) {
+            sendError(DISCOVER_SERVICES_FAILED, listenerKey, error);
+        }
+
+        @Override
+        public void onServiceFound(int listenerKey, NsdServiceInfo info) {
+            sendInfo(SERVICE_FOUND, listenerKey, info);
+        }
+
+        @Override
+        public void onServiceLost(int listenerKey, NsdServiceInfo info) {
+            sendInfo(SERVICE_LOST, listenerKey, info);
+        }
+
+        @Override
+        public void onStopDiscoveryFailed(int listenerKey, int error) {
+            sendError(STOP_DISCOVERY_FAILED, listenerKey, error);
+        }
+
+        @Override
+        public void onStopDiscoverySucceeded(int listenerKey) {
+            sendNoArg(STOP_DISCOVERY_SUCCEEDED, listenerKey);
+        }
+
+        @Override
+        public void onRegisterServiceFailed(int listenerKey, int error) {
+            sendError(REGISTER_SERVICE_FAILED, listenerKey, error);
+        }
+
+        @Override
+        public void onRegisterServiceSucceeded(int listenerKey, NsdServiceInfo info) {
+            sendInfo(REGISTER_SERVICE_SUCCEEDED, listenerKey, info);
+        }
+
+        @Override
+        public void onUnregisterServiceFailed(int listenerKey, int error) {
+            sendError(UNREGISTER_SERVICE_FAILED, listenerKey, error);
+        }
+
+        @Override
+        public void onUnregisterServiceSucceeded(int listenerKey) {
+            sendNoArg(UNREGISTER_SERVICE_SUCCEEDED, listenerKey);
+        }
+
+        @Override
+        public void onResolveServiceFailed(int listenerKey, int error) {
+            sendError(RESOLVE_SERVICE_FAILED, listenerKey, error);
+        }
+
+        @Override
+        public void onResolveServiceSucceeded(int listenerKey, NsdServiceInfo info) {
+            sendInfo(RESOLVE_SERVICE_SUCCEEDED, listenerKey, info);
+        }
     }
 
     /**
@@ -376,19 +465,6 @@ public final class NsdManager {
         public void handleMessage(Message message) {
             final int what = message.what;
             final int key = message.arg2;
-            switch (what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    return;
-                case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
-                    mConnected.countDown();
-                    return;
-                case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                    Log.e(TAG, "Channel lost");
-                    return;
-                default:
-                    break;
-            }
             final Object listener;
             final NsdServiceInfo ns;
             synchronized (mMapLock) {
@@ -504,36 +580,6 @@ public final class NsdManager {
     }
 
     /**
-     * Initialize AsyncChannel
-     */
-    private void init() {
-        final Messenger messenger = getMessenger();
-        if (messenger == null) {
-            fatal("Failed to obtain service Messenger");
-        }
-        HandlerThread t = new HandlerThread("NsdManager");
-        t.start();
-        mHandler = new ServiceHandler(t.getLooper());
-        mAsyncChannel.connect(mContext, mHandler, messenger);
-        try {
-            mConnected.await();
-        } catch (InterruptedException e) {
-            fatal("Interrupted wait at init");
-        }
-        if (CompatChanges.isChangeEnabled(RUN_NATIVE_NSD_ONLY_IF_LEGACY_APPS)) {
-            return;
-        }
-        // Only proactively start the daemon if the target SDK < S, otherwise the internal service
-        // would automatically start/stop the native daemon as needed.
-        mAsyncChannel.sendMessage(DAEMON_STARTUP);
-    }
-
-    private static void fatal(String msg) {
-        Log.e(TAG, msg);
-        throw new RuntimeException(msg);
-    }
-
-    /**
      * Register a service to be discovered by other services.
      *
      * <p> The function call immediately returns after sending a request to register service
@@ -556,7 +602,11 @@ public final class NsdManager {
         checkServiceInfo(serviceInfo);
         checkProtocol(protocolType);
         int key = putListener(listener, serviceInfo);
-        mAsyncChannel.sendMessage(REGISTER_SERVICE, 0, key, serviceInfo);
+        try {
+            mService.registerService(key, serviceInfo);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -574,7 +624,11 @@ public final class NsdManager {
      */
     public void unregisterService(RegistrationListener listener) {
         int id = getListenerKey(listener);
-        mAsyncChannel.sendMessage(UNREGISTER_SERVICE, 0, id);
+        try {
+            mService.unregisterService(id);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -613,7 +667,11 @@ public final class NsdManager {
         s.setServiceType(serviceType);
 
         int key = putListener(listener, s);
-        mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, key, s);
+        try {
+            mService.discoverServices(key, s);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -634,7 +692,11 @@ public final class NsdManager {
      */
     public void stopServiceDiscovery(DiscoveryListener listener) {
         int id = getListenerKey(listener);
-        mAsyncChannel.sendMessage(STOP_DISCOVERY, 0, id);
+        try {
+            mService.stopDiscovery(id);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -649,29 +711,10 @@ public final class NsdManager {
     public void resolveService(NsdServiceInfo serviceInfo, ResolveListener listener) {
         checkServiceInfo(serviceInfo);
         int key = putListener(listener, serviceInfo);
-        mAsyncChannel.sendMessage(RESOLVE_SERVICE, 0, key, serviceInfo);
-    }
-
-    /** Internal use only @hide */
-    public void setEnabled(boolean enabled) {
         try {
-            mService.setEnabled(enabled);
+            mService.resolveService(key, serviceInfo);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get a reference to NsdService handler. This is used to establish
-     * an AsyncChannel communication with the service
-     *
-     * @return Messenger pointing to the NsdService handler
-     */
-    private Messenger getMessenger() {
-        try {
-            return mService.getMessenger();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
