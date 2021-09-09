@@ -1071,13 +1071,14 @@ final class InstallParams extends HandlerParams {
 
             try {
                 PackageSetting pkgSetting;
+                AndroidPackage oldPackage;
                 synchronized (mPm.mLock) {
                     pkgSetting = mPm.mSettings.getPackageLPr(pkgName);
+                    oldPackage = mPm.mPackages.get(pkgName);
                 }
                 boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
                         && pkgSetting.getPkgState().isUpdatedSystemApp();
                 final String abiOverride = deriveAbiOverride(args.mAbiOverride);
-                AndroidPackage oldPackage = mPm.mPackages.get(pkgName);
                 boolean isUpdatedSystemAppInferred = oldPackage != null && oldPackage.isSystem();
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                         derivedAbi = mPm.mInjector.getAbiHelper().derivePackageAbi(parsedPackage,
@@ -1108,38 +1109,37 @@ final class InstallParams extends HandlerParams {
                 freezePackageForInstall(pkgName, installFlags, "installPackageLI");
         boolean shouldCloseFreezerBeforeReturn = true;
         try {
-            final AndroidPackage existingPackage;
-            String renamedPackage = null;
+            final AndroidPackage oldPackage;
+            String renamedPackage;
             boolean sysPkg = false;
             int targetScanFlags = scanFlags;
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
             if (replace) {
+                final String pkgName11 = parsedPackage.getPackageName();
+                synchronized (mPm.mLock) {
+                    oldPackage = mPm.mPackages.get(pkgName11);
+                }
                 if (parsedPackage.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
                     // and cannot be updated as an update would get a new package name,
                     // unless this is installed from adb which is useful for development.
-                    AndroidPackage existingPkg = mPm.mPackages.get(parsedPackage.getPackageName());
-                    if (existingPkg != null
+                    if (oldPackage != null
                             && (installFlags & PackageManager.INSTALL_FROM_ADB) == 0) {
                         throw new PrepareFailure(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                                "Packages declaring "
-                                        + "static-shared libs cannot be updated");
+                            "Packages declaring "
+                                + "static-shared libs cannot be updated");
                     }
                 }
 
                 final boolean isInstantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
 
-                final AndroidPackage oldPackage;
-                final String pkgName11 = parsedPackage.getPackageName();
                 final int[] allUsers;
                 final int[] installedUsers;
                 final int[] uninstalledUsers;
 
                 synchronized (mPm.mLock) {
-                    oldPackage = mPm.mPackages.get(pkgName11);
-                    existingPackage = oldPackage;
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG,
                                 "replacePackageLI: new=" + parsedPackage + ", old=" + oldPackage);
@@ -1305,7 +1305,7 @@ final class InstallParams extends HandlerParams {
                 ps = null;
                 disabledPs = null;
                 replace = false;
-                existingPackage = null;
+                oldPackage = null;
                 // Remember this for later, in case we need to rollback this install
                 String pkgName1 = parsedPackage.getPackageName();
 
@@ -1336,7 +1336,7 @@ final class InstallParams extends HandlerParams {
             shouldCloseFreezerBeforeReturn = false;
 
             return new PrepareResult(replace, targetScanFlags, targetParseFlags,
-                    existingPackage, parsedPackage, replace /* clearCodeCache */, sysPkg,
+                oldPackage, parsedPackage, replace /* clearCodeCache */, sysPkg,
                     ps, disabledPs);
         } finally {
             res.mFreezer = freezer;
@@ -1364,13 +1364,14 @@ final class InstallParams extends HandlerParams {
         // "updating same package" could also involve key-rotation.
 
         final PackageSetting sourcePackageSetting;
+        final KeySetManagerService ksms;
         synchronized (mPm.mLock) {
             sourcePackageSetting = mPm.mSettings.getPackageLPr(sourcePackageName);
+            ksms = mPm.mSettings.getKeySetManagerService();
         }
 
         final SigningDetails sourceSigningDetails = (sourcePackageSetting == null
                 ? SigningDetails.UNKNOWN : sourcePackageSetting.getSigningDetails());
-        final KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
         if (sourcePackageName.equals(parsedPackage.getPackageName())
                 && (ksms.shouldCheckUpgradeKeySetLocked(
                 sourcePackageSetting, scanFlags))) {
