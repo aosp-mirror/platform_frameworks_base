@@ -11916,7 +11916,6 @@ public final class Settings {
          * Whether UWB should be enabled.
          * @hide
          */
-        @Readable
         public static final String UWB_ENABLED = "uwb_enabled";
 
         /**
