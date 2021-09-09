@@ -3505,6 +3505,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         finishing = true;
         final TaskFragment taskFragment = getTaskFragment();
         if (taskFragment != null) {
+            final Task task = taskFragment.getTask();
+            if (task != null && task.isClearingToReuseTask()
+                    && taskFragment.getTopNonFinishingActivity() == null) {
+                taskFragment.mClearedTaskForReuse = true;
+            }
             taskFragment.sendTaskFragmentInfoChanged();
         }
         if (stopped) {
