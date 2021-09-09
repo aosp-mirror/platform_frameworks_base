@@ -3046,6 +3046,9 @@
     <public name="canPauseRecording" />
     <!-- attribute definitions go here -->
     <public name="requireDeviceScreenOn" />
+  </public-group>
+
+  <public-group type="attr" first-id="0x01010624">
     <public name="memtagMode" />
     <public name="nativeHeapZeroInitialized" />
   </public-group>
