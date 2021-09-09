@@ -174,6 +174,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean mTaskFragmentAppearedSent;
 
     /**
+     * The last running activity of the TaskFragment was finished due to clear task while launching
+     * an activity in the Task.
+     */
+    boolean mClearedTaskForReuse;
+
+    /**
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      *
@@ -1587,6 +1593,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     void addChild(WindowContainer child, int index) {
+        mClearedTaskForReuse = false;
+
         boolean isAddingActivity = child.asActivityRecord() != null;
         final Task task = isAddingActivity ? getTask() : null;
 
@@ -2093,7 +2101,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 runningActivityCount[0],
                 isVisible(),
                 childActivities,
-                positionInParent);
+                positionInParent,
+                mClearedTaskForReuse);
     }
 
     @Nullable

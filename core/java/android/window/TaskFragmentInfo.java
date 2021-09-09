@@ -71,11 +71,18 @@ public final class TaskFragmentInfo implements Parcelable {
     /** Relative position of the fragment's top left corner in the parent container. */
     private final Point mPositionInParent;
 
+    /**
+     * Whether the last running activity in the TaskFragment was finished due to clearing task while
+     * launching an activity in the host Task.
+     */
+    private final boolean mIsTaskClearedForReuse;
+
     /** @hide */
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
             @NonNull Configuration configuration, boolean isEmpty, int runningActivityCount,
-            boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent) {
+            boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent,
+            boolean isTaskClearedForReuse) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
@@ -84,6 +91,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mIsVisible = isVisible;
         mActivities.addAll(activities);
         mPositionInParent = requireNonNull(positionInParent);
+        mIsTaskClearedForReuse = isTaskClearedForReuse;
     }
 
     @NonNull
@@ -128,6 +136,10 @@ public final class TaskFragmentInfo implements Parcelable {
         return mPositionInParent;
     }
 
+    public boolean isTaskClearedForReuse() {
+        return mIsTaskClearedForReuse;
+    }
+
     @WindowingMode
     public int getWindowingMode() {
         return mConfiguration.windowConfiguration.getWindowingMode();
@@ -149,7 +161,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mIsVisible == that.mIsVisible
                 && getWindowingMode() == that.getWindowingMode()
                 && mActivities.equals(that.mActivities)
-                && mPositionInParent.equals(that.mPositionInParent);
+                && mPositionInParent.equals(that.mPositionInParent)
+                && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse;
     }
 
     private TaskFragmentInfo(Parcel in) {
@@ -161,6 +174,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
         mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
+        mIsTaskClearedForReuse = in.readBoolean();
     }
 
     /** @hide */
@@ -174,6 +188,7 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
         dest.writeTypedObject(mPositionInParent, flags);
+        dest.writeBoolean(mIsTaskClearedForReuse);
     }
 
     @NonNull
@@ -199,6 +214,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " runningActivityCount=" + mRunningActivityCount
                 + " isVisible=" + mIsVisible
                 + " positionInParent=" + mPositionInParent
+                + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
                 + "}";
     }
 
