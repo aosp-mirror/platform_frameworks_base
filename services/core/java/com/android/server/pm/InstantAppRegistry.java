@@ -56,7 +56,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
@@ -619,8 +618,7 @@ class InstantAppRegistry implements Watchable, Snappable {
         }
 
         // TODO(b/135203078): Remove toAppInfo call? Requires significant additions/changes to PM
-        Drawable icon = AndroidPackageUtils.generateAppInfoWithoutState(pkg)
-                .loadIcon(mService.mContext.getPackageManager());
+        Drawable icon = pkg.toAppInfoWithoutState().loadIcon(mService.mContext.getPackageManager());
 
         final Bitmap bitmap;
         if (icon instanceof BitmapDrawable) {

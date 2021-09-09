@@ -208,8 +208,8 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static ApplicationInfo generateApplicationInfo(AndroidPackage pkg,
-            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
-            int userId, @Nullable PackageSetting pkgSetting) {
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         if (pkg == null) {
             return null;
         }
@@ -233,9 +233,6 @@ public class PackageInfoUtils {
             info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
                     ? null : usesLibraryFiles.toArray(new String[0]);
             info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
-            if (info.category == ApplicationInfo.CATEGORY_UNDEFINED) {
-                info.category = pkgSetting.getCategoryOverride();
-            }
         }
 
         info.seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);

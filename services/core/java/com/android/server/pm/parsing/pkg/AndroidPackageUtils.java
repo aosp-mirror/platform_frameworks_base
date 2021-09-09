@@ -19,6 +19,7 @@ package com.android.server.pm.parsing.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
@@ -127,7 +128,7 @@ public class AndroidPackageUtils {
             throws PackageManagerException {
         Collection<String> apkToDexMetadataList = getPackageDexMetadata(pkg).values();
         String packageName = pkg.getPackageName();
-        long versionCode = pkg.getLongVersionCode();
+        long versionCode = pkg.toAppInfoWithoutState().longVersionCode;
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (String dexMetadata : apkToDexMetadataList) {
             final ParseResult result = DexMetadataHelper.validateDexMetadataFile(
@@ -252,6 +253,10 @@ public class AndroidPackageUtils {
                 ? pkg.getRoundIconRes() : pkg.getIconRes();
     }
 
+    public static long getLongVersionCode(AndroidPackage pkg) {
+        return PackageInfo.composeLongVersionCode(pkg.getVersionCodeMajor(), pkg.getVersionCode());
+    }
+
     /**
      * Returns false iff the provided flags include the {@link PackageManager#MATCH_SYSTEM_ONLY}
      * flag and the provided package is not a system package. Otherwise returns {@code true}.
@@ -265,7 +270,7 @@ public class AndroidPackageUtils {
 
     public static String getPrimaryCpuAbi(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
         if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.primaryCpuAbiString)) {
-            return getRawPrimaryCpuAbi(pkg);
+            return pkg.getPrimaryCpuAbi();
         }
 
         return pkgSetting.primaryCpuAbiString;
@@ -274,7 +279,7 @@ public class AndroidPackageUtils {
     public static String getSecondaryCpuAbi(AndroidPackage pkg,
             @Nullable PackageSetting pkgSetting) {
         if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.secondaryCpuAbiString)) {
-            return getRawSecondaryCpuAbi(pkg);
+            return pkg.getSecondaryCpuAbi();
         }
 
         return pkgSetting.secondaryCpuAbiString;
@@ -283,17 +288,23 @@ public class AndroidPackageUtils {
     /**
      * Returns the primary ABI as parsed from the package. Used only during parsing and derivation.
      * Otherwise prefer {@link #getPrimaryCpuAbi(AndroidPackage, PackageSetting)}.
+     *
+     * TODO(b/135203078): Actually hide the method
+     * Placed in the utility to hide the method on the interface.
      */
     public static String getRawPrimaryCpuAbi(AndroidPackage pkg) {
-        return ((AndroidPackageHidden) pkg).getPrimaryCpuAbi();
+        return pkg.getPrimaryCpuAbi();
     }
 
     /**
      * Returns the secondary ABI as parsed from the package. Used only during parsing and
      * derivation. Otherwise prefer {@link #getSecondaryCpuAbi(AndroidPackage, PackageSetting)}.
+     *
+     * TODO(b/135203078): Actually hide the method
+     * Placed in the utility to hide the method on the interface.
      */
     public static String getRawSecondaryCpuAbi(AndroidPackage pkg) {
-        return ((AndroidPackageHidden) pkg).getSecondaryCpuAbi();
+        return pkg.getSecondaryCpuAbi();
     }
 
     public static String getSeInfo(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
@@ -303,25 +314,6 @@ public class AndroidPackageUtils {
                 return overrideSeInfo;
             }
         }
-        return ((AndroidPackageHidden) pkg).getSeInfo();
-    }
-
-    @Deprecated
-    @NonNull
-    public static ApplicationInfo generateAppInfoWithoutState(AndroidPackage pkg) {
-        return ((AndroidPackageHidden) pkg).toAppInfoWithoutState();
-    }
-
-    /**
-     * Replacement of unnecessary legacy getRealPackage. Only returns a value if the package was
-     * actually renamed.
-     */
-    @Nullable
-    public static String getRealPackageOrNull(AndroidPackage pkg) {
-        if (pkg.getOriginalPackages().isEmpty() || !pkg.isSystem()) {
-            return null;
-        }
-
-        return pkg.getManifestPackageName();
+        return pkg.getSeInfo();
     }
 }

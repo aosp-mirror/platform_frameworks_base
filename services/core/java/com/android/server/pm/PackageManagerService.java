@@ -350,10 +350,6 @@ import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.AndroidPackageApi;
-import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateImpl;
-import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
@@ -1855,9 +1851,6 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     protected interface Computer {
-
-        @Nullable
-        PackageState getPackageState(@NonNull String packageName);
 
         /**
          * Every method must be annotated.
@@ -3419,16 +3412,6 @@ public class PackageManagerService extends IPackageManager.Stub
             packageName = resolveInternalPackageNameInternalLocked(
                     packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
             return mSettings.getPackageLPr(packageName);
-        }
-
-        @Nullable
-        @Override
-        public PackageState getPackageState(@NonNull String packageName) {
-            int callingUid = Binder.getCallingUid();
-            packageName = resolveInternalPackageNameInternalLocked(
-                    packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
-            PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
-            return pkgSetting == null ? null : PackageStateImpl.copy(pkgSetting);
         }
 
         public final ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
@@ -5197,14 +5180,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return super.getPackageSettingInternal(packageName, callingUid);
             }
         }
-
-        @Nullable
-        public final PackageState getPackageState(@NonNull String packageName) {
-            synchronized (mLock) {
-                return super.getPackageState(packageName);
-            }
-        }
-
         public final ParceledListSlice<PackageInfo> getInstalledPackagesBody(int flags, int userId,
                 int callingUid) {
             synchronized (mLock) {
@@ -5540,17 +5515,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 current.release();
             }
         }
-
-        @Nullable
-        public final PackageState getPackageState(@NonNull String packageName) {
-            ThreadComputer current = live();
-            try {
-                return current.mComputer.getPackageState(packageName);
-            } finally {
-                current.release();
-            }
-        }
-
         public final ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
             ThreadComputer current = snapshot();
             try {
@@ -12241,7 +12205,7 @@ public class PackageManagerService extends IPackageManager.Stub
             @Nullable UserHandle user, String cpuAbiOverride) throws PackageManagerException {
 
         final String renamedPkgName = mSettings.getRenamedPackageLPr(
-                AndroidPackageUtils.getRealPackageOrNull(parsedPackage));
+                parsedPackage.getRealPackage());
         final String realPkgName = getRealPackageName(parsedPackage, renamedPkgName);
         if (realPkgName != null) {
             ensurePackageRenamed(parsedPackage, renamedPkgName);
@@ -12361,8 +12325,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             pkgSetting = result.mPkgSetting;
             if (originalPkgSetting != null) {
-                mSettings.addRenamedPackageLPw(
-                        AndroidPackageUtils.getRealPackageOrNull(parsedPackage),
+                mSettings.addRenamedPackageLPw(parsedPackage.getRealPackage(),
                         originalPkgSetting.name);
                 mTransferredPackages.add(originalPkgSetting.name);
             } else {
@@ -12453,7 +12416,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static @Nullable String getRealPackageName(@NonNull AndroidPackage pkg,
             @Nullable String renamedPkgName) {
         if (isPackageRenamed(pkg, renamedPkgName)) {
-            return AndroidPackageUtils.getRealPackageOrNull(pkg);
+            return pkg.getRealPackage();
         }
         return null;
     }
@@ -12723,7 +12686,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     destCodeFile, parsedPackage.getNativeLibraryRootDir(),
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
-                    parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
+                    parsedPackage.getVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload,
                     UserManagerService.getInstance(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
@@ -12775,8 +12738,11 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting.getPkgState().setUpdatedSystemApp(true);
         }
 
-        parsedPackage.setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage, sharedUserSetting,
-                        injector.getCompatibility()));
+        parsedPackage
+                .setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage, sharedUserSetting,
+                        injector.getCompatibility()))
+                .setSeInfoUser(SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
+                        userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId)));
 
         if (parsedPackage.isSystem()) {
             configurePackageComponents(parsedPackage);
@@ -13074,6 +13040,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!parsedPackage.isSystem()) {
             // Only system apps can use these features.
             parsedPackage.clearOriginalPackages()
+                    .setRealPackage(null)
                     .clearAdoptPermissions();
         }
 
@@ -13417,7 +13384,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // If the target is already installed or 'overlay-config-signature' tag in
                     // SystemConfig is set, check this here to augment the last line of defense
                     // which is OMS.
-                    if (pkg.getOverlayTargetOverlayableName() == null) {
+                    if (pkg.getOverlayTargetName() == null) {
                         final PackageSetting targetPkgSetting =
                                 mSettings.getPackageLPr(pkg.getOverlayTarget());
                         if (targetPkgSetting != null) {
@@ -13593,8 +13560,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // The instance stored in PackageManagerService is special cased to be non-user
                 // specific, so initialize all the needed fields here.
-                mAndroidApplication = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                        new PackageUserState(), UserHandle.USER_SYSTEM, pkgSetting);
+                mAndroidApplication = pkg.toAppInfoWithoutState();
+                mAndroidApplication.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+                mAndroidApplication.privateFlags =
+                        PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+                mAndroidApplication.initForUser(UserHandle.USER_SYSTEM);
 
                 if (!mResolverReplaced) {
                     mResolveActivity.applicationInfo = mAndroidApplication;
@@ -13743,8 +13713,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // The instance created in PackageManagerService is special cased to be non-user
             // specific, so initialize all the needed fields here.
-            ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    new PackageUserState(), UserHandle.USER_SYSTEM, pkgSetting);
+            ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
+            appInfo.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+            appInfo.privateFlags =
+                    PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+            appInfo.initForUser(UserHandle.USER_SYSTEM);
 
             // Set up information for custom user intent resolution activity.
             mResolveActivity.applicationInfo = appInfo;
@@ -20394,10 +20367,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final PackageSetting ps;
-        final String seInfoUser;
         synchronized (mLock) {
             ps = mSettings.getPackageLPr(pkg.getPackageName());
-            seInfoUser = SELinuxUtil.getSeinfoUser(ps.readUserState(userId));
         }
         final String volumeUuid = pkg.getVolumeUuid();
         final String packageName = pkg.getPackageName();
@@ -20408,7 +20379,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Preconditions.checkNotNull(pkgSeInfo);
 
-        final String seInfo = pkgSeInfo + seInfoUser;
+        final String seInfo = pkgSeInfo + (pkg.getSeInfoUser() != null ? pkg.getSeInfoUser() : "");
         final int targetSdkVersion = pkg.getTargetSdkVersion();
 
         return batch.createAppData(volumeUuid, packageName, userId, flags, appId, seInfo,
@@ -20645,8 +20616,7 @@ public class PackageManagerService extends IPackageManager.Stub
             packageAbiOverride = ps.cpuAbiOverrideString;
             appId = UserHandle.getAppId(pkg.getUid());
             seinfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-            label = String.valueOf(pm.getApplicationLabel(
-                    AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
+            label = String.valueOf(pm.getApplicationLabel(pkg.toAppInfoWithoutState()));
             targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
@@ -20812,9 +20782,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
-        final StorageManager storage = mInjector.getSystemService(StorageManager.class);;
-        VolumeInfo volume = storage.findVolumeByUuid(
-                StorageManager.convert(pkg.getVolumeUuid()).toString());
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
+        VolumeInfo volume = storage.findVolumeByUuid(pkg.getStorageUuid().toString());
         int packageExternalStorageType = getPackageExternalStorageType(volume, pkg.isExternalStorage());
 
         if (!isPreviousLocationExternal && pkg.isExternalStorage()) {
@@ -21589,12 +21558,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.getPackage(packageName);
         }
 
-        @Nullable
-        @Override
-        public AndroidPackageApi getAndroidPackage(@NonNull String packageName) {
-            return PackageManagerService.this.getPackage(packageName);
-        }
-
         @Override
         public AndroidPackage getPackage(int uid) {
             return PackageManagerService.this.getPackage(uid);
@@ -21604,12 +21567,6 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public PackageSetting getPackageSetting(String packageName) {
             return PackageManagerService.this.getPackageSetting(packageName);
-        }
-
-        @Nullable
-        @Override
-        public PackageState getPackageState(@NonNull String packageName) {
-            return PackageManagerService.this.getPackageState(packageName);
         }
 
         @Override
@@ -22324,12 +22281,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void forEachPackageSetting(Consumer<PackageSetting> actionLocked) {
-            PackageManagerService.this.forEachPackageSetting(actionLocked);
-        }
-
-        @Override
-        public void forEachPackageState(boolean locked, Consumer<PackageState> action) {
-            PackageManagerService.this.forEachPackageState(locked, action);
+            synchronized (mLock) {
+                for (int index = 0; index < mSettings.getPackagesLocked().size(); index++) {
+                    actionLocked.accept(mSettings.getPackagesLocked().valueAt(index));
+                }
+            }
         }
 
         @Override
@@ -22808,39 +22764,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.getPackageSettingInternal(packageName, callingUid);
     }
 
-    @Nullable
-    private PackageState getPackageState(String packageName) {
-        return mComputer.getPackageState(packageName);
-    }
-
     void forEachPackage(Consumer<AndroidPackage> actionLocked) {
         synchronized (mLock) {
             int numPackages = mPackages.size();
             for (int i = 0; i < numPackages; i++) {
                 actionLocked.accept(mPackages.valueAt(i));
-            }
-        }
-    }
-
-    private void forEachPackageSetting(Consumer<PackageSetting> actionLocked) {
-        synchronized (mLock) {
-            int size = mSettings.getPackagesLocked().size();
-            for (int index = 0; index < size; index++) {
-                actionLocked.accept(mSettings.getPackagesLocked().valueAt(index));
-            }
-        }
-    }
-
-    private void forEachPackageState(boolean locked, Consumer<PackageState> action) {
-        if (locked) {
-            forEachPackageSetting(action::accept);
-        } else {
-            List<PackageState> packageStates = new ArrayList<>();
-            forEachPackageSetting(pkgSetting ->
-                    packageStates.add(PackageStateImpl.copy(pkgSetting)));
-            int size = packageStates.size();
-            for (int index = 0; index < size; index++) {
-                action.accept(packageStates.get(index));
             }
         }
     }

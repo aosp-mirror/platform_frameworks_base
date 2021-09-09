@@ -140,7 +140,7 @@ public class DexMetadataHelperTest {
         Collection<String> apkToDexMetadataList =
                 AndroidPackageUtils.getPackageDexMetadata(pkg).values();
         String packageName = pkg.getPackageName();
-        long versionCode = pkg.getLongVersionCode();
+        long versionCode = pkg.toAppInfoWithoutState().longVersionCode;
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (String dexMetadata : apkToDexMetadataList) {
             final ParseResult result = DexMetadataHelper.validateDexMetadataFile(

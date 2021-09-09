@@ -20,10 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.SharedLibraryInfo;
-import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.pkg.PackageUserState;
 import android.service.pm.PackageProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -33,7 +30,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionState;
-import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.utils.SnapshotCache;
 
@@ -193,14 +189,7 @@ public class PackageSetting extends PackageSettingBase {
         return pkg;
     }
 
-    public Integer getSharedUserId() {
-        if (sharedUser != null) {
-            return sharedUser.userId;
-        }
-        return null;
-    }
-
-    public int getSharedUserIdInt() {
+    public int getSharedUserId() {
         if (sharedUser != null) {
             return sharedUser.userId;
         }
@@ -456,9 +445,5 @@ public class PackageSetting extends PackageSettingBase {
     public PackageSetting setDomainSetId(@NonNull UUID domainSetId) {
         mDomainSetId = domainSetId;
         return this;
-    }
-
-    public String getPackageName() {
-        return name;
     }
 }

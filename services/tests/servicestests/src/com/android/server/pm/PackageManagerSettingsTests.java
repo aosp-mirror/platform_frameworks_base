@@ -955,6 +955,7 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.signatures, testPkgSetting.signatures);
         assertThat(origPkgSetting.signatures, is(testPkgSetting.signatures));
         assertThat(origPkgSetting.timeStamp, is(testPkgSetting.timeStamp));
+        assertThat(origPkgSetting.uidError, is(testPkgSetting.uidError));
         assertNotSame(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
         // No equals() method for SparseArray object
         // assertThat(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
