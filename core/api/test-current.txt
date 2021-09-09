@@ -3251,6 +3251,7 @@ package android.window {
     method public int getWindowingMode();
     method public boolean hasRunningActivity();
     method public boolean isEmpty();
+    method public boolean isTaskClearedForReuse();
     method public boolean isVisible();
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentInfo> CREATOR;
   }
