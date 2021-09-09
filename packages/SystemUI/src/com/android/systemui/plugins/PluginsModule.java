@@ -23,12 +23,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import com.android.systemui.dagger.PluginModule;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
-import com.android.systemui.shared.plugins.PluginInstance;
+import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.plugins.PluginPrefs;
@@ -73,28 +71,14 @@ public abstract class PluginsModule {
 
     @Provides
     @Singleton
-    static PluginInstance.Factory providesPluginInstanceFactory(
-            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins,
-            @Named(PLUGIN_DEBUG) boolean isDebug) {
-        return new PluginInstance.Factory(
-                PluginModule.class.getClassLoader(),
-                new PluginInstance.InstanceFactory<>(),
-                new PluginInstance.VersionChecker(),
-                privilegedPlugins,
-                isDebug);
-    }
-
-    @Provides
-    @Singleton
-    static PluginActionManager.Factory providePluginInstanceManagerFactory(Context context,
+    static PluginInstanceManager.Factory providePluginInstanceManagerFactory(Context context,
             PackageManager packageManager, @Main Executor mainExecutor,
             @Named(PLUGIN_THREAD) Executor pluginExecutor, PluginInitializer initializer,
             NotificationManager notificationManager, PluginEnabler pluginEnabler,
-            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins,
-            PluginInstance.Factory pluginInstanceFactory) {
-        return new PluginActionManager.Factory(
+            @Named(PLUGIN_PRIVILEGED) List<String> privilegedPlugins) {
+        return new PluginInstanceManager.Factory(
                 context, packageManager, mainExecutor, pluginExecutor, initializer,
-                notificationManager, pluginEnabler, privilegedPlugins, pluginInstanceFactory);
+                notificationManager, pluginEnabler, privilegedPlugins);
     }
 
     @Provides
@@ -107,7 +91,7 @@ public abstract class PluginsModule {
     @Provides
     static PluginManager providesPluginManager(
             Context context,
-            PluginActionManager.Factory instanceManagerFactory,
+            PluginInstanceManager.Factory instanceManagerFactory,
             @Named(PLUGIN_DEBUG) boolean debug,
             @Named(PRE_HANDLER)
                     Optional<Thread.UncaughtExceptionHandler> uncaughtExceptionHandlerOptional,

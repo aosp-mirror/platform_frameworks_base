@@ -38,8 +38,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginEnablerImpl;
-import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
+import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginPrefs;
 
@@ -102,7 +102,7 @@ public class PluginFragment extends PreferenceFragment {
         }
 
         List<PackageInfo> apps = pm.getPackagesHoldingPermissions(new String[]{
-                PluginActionManager.PLUGIN_PERMISSION},
+                PluginInstanceManager.PLUGIN_PERMISSION},
                 PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
         apps.forEach(app -> {
             if (!plugins.containsKey(app.packageName)) return;

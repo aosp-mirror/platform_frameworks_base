@@ -30,15 +30,13 @@ public interface PluginManager {
     /** Returns plugins that don't get disabled when an exceptoin occurs. */
     String[] getPrivilegedPlugins();
 
-    /** */
-    <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls);
-    /** */
-    <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls,
+    <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls);
+    <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
             boolean allowMultiple);
     <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls);
+            Class<?> cls);
     <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls, boolean allowMultiple);
+            Class<?> cls, boolean allowMultiple);
 
     void removePluginListener(PluginListener<?> listener);
 

@@ -30,24 +30,24 @@ public class FakePluginManager implements PluginManager {
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls, boolean allowMultiple) {
+            Class<?> cls, boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls) {
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
-    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<T> cls,
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
             boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            Class<T> cls) {
+            Class<?> cls) {
         mLeakChecker.addCallback(listener);
     }
 
