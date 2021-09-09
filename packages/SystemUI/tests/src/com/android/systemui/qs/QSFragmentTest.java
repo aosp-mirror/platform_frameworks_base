@@ -139,7 +139,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
-                mock(SecureSettings.class), mock(CustomTileStatePersister.class));
+                mock(SecureSettings.class), mock(CustomTileStatePersister.class), mFeatureFlags);
         qs.setHost(host);
 
         qs.setListening(true);
