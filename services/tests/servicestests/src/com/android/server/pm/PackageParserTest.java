@@ -56,7 +56,6 @@ import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
@@ -72,7 +71,6 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
@@ -176,7 +174,7 @@ public class PackageParserTest {
                     true /* useCaches */).hideAsFinal();
 
             Parcel p = Parcel.obtain();
-            ((Parcelable) pkg).writeToParcel(p, 0 /* flags */);
+            pkg.writeToParcel(p, 0 /* flags */);
 
             p.setDataPosition(0);
             ParsedPackage deserialized = new PackageImpl(p);
@@ -193,7 +191,7 @@ public class PackageParserTest {
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
-        ((Parcelable) pkg).writeToParcel(p, 0 /* flags */);
+        pkg.writeToParcel(p, 0 /* flags */);
 
         p.setDataPosition(0);
         ParsedPackage deserialized = new PackageImpl(p);
@@ -206,7 +204,7 @@ public class PackageParserTest {
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
-        ((Parcelable) pkg).writeToParcel(p, 0 /* flags */);
+        pkg.writeToParcel(p, 0 /* flags */);
 
         p.setDataPosition(0);
         ParsingPackage deserialized = new PackageImpl(p);
@@ -611,10 +609,10 @@ public class PackageParserTest {
     private static PackageSetting mockPkgSetting(AndroidPackage pkg) {
         return new PackageSettingBuilder()
                 .setName(pkg.getPackageName())
-                .setRealName(pkg.getManifestPackageName())
+                .setRealName(pkg.getRealPackage())
                 .setCodePath(pkg.getPath())
-                .setPrimaryCpuAbiString(AndroidPackageUtils.getRawPrimaryCpuAbi(pkg))
-                .setSecondaryCpuAbiString(AndroidPackageUtils.getRawSecondaryCpuAbi(pkg))
+                .setPrimaryCpuAbiString(pkg.getPrimaryCpuAbi())
+                .setSecondaryCpuAbiString(pkg.getSecondaryCpuAbi())
                 .setPVersionCode(pkg.getLongVersionCode())
                 .setPkgFlags(PackageInfoUtils.appInfoFlags(pkg, null))
                 .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(pkg, null))
@@ -627,7 +625,7 @@ public class PackageParserTest {
     public static void assertPackagesEqual(AndroidPackage a, AndroidPackage b) {
         assertEquals(a.getBaseRevisionCode(), b.getBaseRevisionCode());
         assertEquals(a.isBaseHardwareAccelerated(), b.isBaseHardwareAccelerated());
-        assertEquals(a.getLongVersionCode(), b.getLongVersionCode());
+        assertEquals(a.getVersionCode(), b.getVersionCode());
         assertEquals(a.getSharedUserLabel(), b.getSharedUserLabel());
         assertEquals(a.getInstallLocation(), b.getInstallLocation());
         assertEquals(a.isCoreApp(), b.isCoreApp());
@@ -702,7 +700,7 @@ public class PackageParserTest {
         assertEquals(a.getUsesLibraries(), b.getUsesLibraries());
         assertEquals(a.getUsesOptionalLibraries(), b.getUsesOptionalLibraries());
         assertEquals(a.getOriginalPackages(), b.getOriginalPackages());
-        assertEquals(a.getManifestPackageName(), b.getManifestPackageName());
+        assertEquals(a.getRealPackage(), b.getRealPackage());
         assertEquals(a.getAdoptPermissions(), b.getAdoptPermissions());
         assertBundleApproximateEquals(a.getMetaData(), b.getMetaData());
         assertEquals(a.getVersionName(), b.getVersionName());
@@ -712,7 +710,7 @@ public class PackageParserTest {
         assertEquals(a.getRestrictedAccountType(), b.getRestrictedAccountType());
         assertEquals(a.getRequiredAccountType(), b.getRequiredAccountType());
         assertEquals(a.getOverlayTarget(), b.getOverlayTarget());
-        assertEquals(a.getOverlayTargetOverlayableName(), b.getOverlayTargetOverlayableName());
+        assertEquals(a.getOverlayTargetName(), b.getOverlayTargetName());
         assertEquals(a.getOverlayCategory(), b.getOverlayCategory());
         assertEquals(a.getOverlayPriority(), b.getOverlayPriority());
         assertEquals(a.isOverlayIsStatic(), b.isOverlayIsStatic());
@@ -930,6 +928,7 @@ public class PackageParserTest {
                 .addUsesLibrary("foo11")
                 .addUsesOptionalLibrary("foo12")
                 .addOriginalPackage("foo14")
+                .setRealPackage("foo15")
                 .addAdoptPermission("foo16")
                 .setMetaData(bundle)
                 .setVersionName("foo17")
@@ -954,7 +953,7 @@ public class PackageParserTest {
                 .setCompileSdkVersion(100)
                 .setOverlayCategory("foo24")
                 .setOverlayIsStatic(true)
-                .setOverlayTargetOverlayableName("foo26")
+                .setOverlayTargetName("foo26")
                 .setVisibleToInstantApps(true)
                 .setSplitHasCode(0, true)
                 .hideAsParsed())

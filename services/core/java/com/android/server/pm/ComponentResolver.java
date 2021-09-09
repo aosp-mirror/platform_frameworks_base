@@ -59,7 +59,6 @@ import com.android.server.IntentResolver;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGenerator;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchableImpl;
@@ -685,8 +684,7 @@ public class ComponentResolver
             AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
             if (pkg != null) {
-                pw.print("      applicationInfo=");
-                pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                pw.print("      applicationInfo="); pw.println(pkg.toAppInfoWithoutState());
             }
         }
     }

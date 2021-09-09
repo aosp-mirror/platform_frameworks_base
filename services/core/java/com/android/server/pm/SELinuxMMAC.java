@@ -28,7 +28,6 @@ import android.util.Xml;
 
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import libcore.io.IoUtils;
 
@@ -364,7 +363,7 @@ public final class SELinuxMMAC {
         if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
             return sharedUserSetting.seInfoTargetSdkVersion;
         }
-        final ApplicationInfo appInfo = AndroidPackageUtils.generateAppInfoWithoutState(pkg);
+        final ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
         if (compatibility.isChangeEnabledInternal(SELINUX_LATEST_CHANGES, appInfo)) {
             return Math.max(
                     android.os.Build.VERSION_CODES.CUR_DEVELOPMENT, pkg.getTargetSdkVersion());

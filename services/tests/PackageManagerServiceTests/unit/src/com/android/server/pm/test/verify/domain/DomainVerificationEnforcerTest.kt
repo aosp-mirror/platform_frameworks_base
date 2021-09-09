@@ -27,6 +27,7 @@ import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
+import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
@@ -331,7 +332,7 @@ class DomainVerificationEnforcerTest {
                 domainSetId
             )
         ) {
-            whenever(getPackageName()) { packageName }
+            whenever(getName()) { packageName }
             whenever(getPkg()) { mockPkg(packageName) }
             whenever(this.domainSetId) { domainSetId }
             whenever(readUserState(0)) { PackageUserState() }

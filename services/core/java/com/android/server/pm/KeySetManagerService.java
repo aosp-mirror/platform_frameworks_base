@@ -343,7 +343,7 @@ public class KeySetManagerService {
         return mKeySets.get(id) != null;
     }
 
-    public boolean shouldCheckUpgradeKeySetLocked(PackageSetting oldPs, int scanFlags) {
+    public boolean shouldCheckUpgradeKeySetLocked(PackageSettingBase oldPs, int scanFlags) {
         // Can't rotate keys during boot or if sharedUser.
         if (oldPs == null || (scanFlags&SCAN_INITIAL) != 0 || oldPs.isSharedUser()
                 || !oldPs.keySetData.isUsingUpgradeKeySets()) {
@@ -364,7 +364,7 @@ public class KeySetManagerService {
         return true;
     }
 
-    public boolean checkUpgradeKeySetLocked(PackageSetting oldPS, AndroidPackage pkg) {
+    public boolean checkUpgradeKeySetLocked(PackageSettingBase oldPS, AndroidPackage pkg) {
         // Upgrade keysets are being used.  Determine if new package has a superset of the
         // required keys.
         long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();

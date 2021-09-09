@@ -105,6 +105,7 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     lateinit var param: Param<Any>
 
     @Test
+    @Ignore("b/155935153")
     fun fieldPresence() {
         oldPackages.asSequence().zip(newPackages.asSequence())
                 .forEach { (old, new) ->
@@ -127,6 +128,7 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     }
 
     @Test
+    @Ignore("b/155935153")
     fun fieldAbsence() {
         newPackages.forEach {
             val newWithoutFlag = param.newPkgFunction(it, 0)

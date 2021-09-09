@@ -42,7 +42,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
 
 import java.io.File;
 import java.util.Arrays;
@@ -54,7 +53,7 @@ import java.util.function.Predicate;
 /**
  * Settings base class for pending and resolved classes.
  */
-public abstract class PackageSettingBase extends SettingBase implements PackageState {
+public abstract class PackageSettingBase extends SettingBase {
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -298,7 +297,7 @@ public abstract class PackageSettingBase extends SettingBase implements PackageS
         if (state == null) {
             return DEFAULT_USER_STATE;
         }
-//        state.categoryHint = categoryHint;
+        state.categoryHint = categoryHint;
         return state;
     }
 
@@ -747,7 +746,7 @@ public abstract class PackageSettingBase extends SettingBase implements PackageS
     }
 
     /** @see #mPath */
-    public File getPath() {
+    File getPath() {
         return mPath;
     }
 
