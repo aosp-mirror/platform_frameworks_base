@@ -532,6 +532,6 @@ public class StretchShaderActivity extends Activity {
             + "    uv.y = outV;\n"
             + "    coord.x = uv.x * viewportWidth;\n"
             + "    coord.y = uv.y * viewportHeight;\n"
-            + "    return sample(uContentTexture, coord);\n"
+            + "    return uContentTexture.eval(coord);\n"
             + "}";
 }

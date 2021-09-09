@@ -43,12 +43,14 @@ import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
 import java.security.PublicKey
 import kotlin.contracts.ExperimentalContracts
+import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
 class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, PackageImpl::class) {
@@ -82,7 +84,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "getLongVersionCode",
         // Tested through constructor
         "getManifestPackageName",
-        "setManifestPackageName",
         // Utility methods
         "getStorageUuid",
         // Removal not tested, irrelevant for parcelling concerns
@@ -142,21 +143,19 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getOverlayCategory,
         AndroidPackage::getOverlayPriority,
         AndroidPackage::getOverlayTarget,
-        AndroidPackage::getOverlayTargetName,
+        AndroidPackage::getOverlayTargetOverlayableName,
         AndroidPackage::getPackageName,
         AndroidPackage::getPath,
         AndroidPackage::getPermission,
-        AndroidPackage::getPrimaryCpuAbi,
+        PackageImpl::getPrimaryCpuAbi,
         AndroidPackage::getProcessName,
-        AndroidPackage::getRealPackage,
         AndroidPackage::getRequiredAccountType,
         AndroidPackage::getRequiresSmallestWidthDp,
         AndroidPackage::getResizeableActivity,
         AndroidPackage::getRestrictedAccountType,
         AndroidPackage::getRoundIconRes,
-        AndroidPackage::getSeInfo,
-        AndroidPackage::getSeInfoUser,
-        AndroidPackage::getSecondaryCpuAbi,
+        PackageImpl::getSeInfo,
+        PackageImpl::getSecondaryCpuAbi,
         AndroidPackage::getSecondaryNativeLibraryDir,
         AndroidPackage::getSharedUserId,
         AndroidPackage::getSharedUserLabel,
@@ -236,8 +235,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
     override fun extraParams() = listOf(
         getter(AndroidPackage::getVolumeUuid, "57554103-df3e-4475-ae7a-8feba49353ac"),
         getter(AndroidPackage::isProfileable, true),
-        getter(AndroidPackage::getVersionCode, 3),
-        getter(AndroidPackage::getVersionCodeMajor, 9),
+        getter(PackageImpl::getVersionCode, 3),
+        getter(PackageImpl::getVersionCodeMajor, 9),
         getter(AndroidPackage::getUpgradeKeySets, setOf("testUpgradeKeySet")),
         getter(AndroidPackage::isAnyDensity, false, 0),
         getter(AndroidPackage::isResizeable, false, 0),
@@ -424,7 +423,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             transformSet = { ParsedUsesPermission(it, 0) }
         ),
         getSetByValue(
-            AndroidPackage::getReqFeatures,
+            AndroidPackage::getRequestedFeatures,
             PackageImpl::addReqFeature,
             "test.feature.INFO",
             transformGet = { it.singleOrNull()?.name.orEmpty() },

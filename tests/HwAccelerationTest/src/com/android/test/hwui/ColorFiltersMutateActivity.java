@@ -63,7 +63,7 @@ public class ColorFiltersMutateActivity extends Activity {
                 "uniform shader bitmapShader;\n"
                 + "uniform float param1;\n"
                 + "half4 main(float2 xy) {\n"
-                + "  return half4(sample(bitmapShader, xy).rgb, param1);\n"
+                + "  return half4(bitmapShader.eval(xy).rgb, param1);\n"
                 + "}\n";
 
         BitmapsView(Context c) {

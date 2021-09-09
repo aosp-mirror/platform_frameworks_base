@@ -74,6 +74,9 @@ public class MediaCommunicationManager {
     @GuardedBy("mLock")
     private MediaCommunicationServiceCallbackStub mCallbackStub;
 
+    // TODO: remove this when MCS implements dispatchMediaKeyEvent.
+    private MediaSessionManager mMediaSessionManager;
+
     /**
      * @hide
      */
@@ -222,6 +225,14 @@ public class MediaCommunicationManager {
         return mService;
     }
 
+    // TODO: remove this when MCS implements dispatchMediaKeyEvent.
+    private MediaSessionManager getMediaSessionManager() {
+        if (mMediaSessionManager == null) {
+            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+        }
+        return mMediaSessionManager;
+    }
+
     private List<Session2Token> getSession2Tokens(int userId) {
         try {
             MediaParceledListSlice slice = getService().getSession2Tokens(userId);
@@ -243,6 +254,14 @@ public class MediaCommunicationManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean asSystemService) {
         Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
+
+        // When MCS handles this, caller is changed.
+        // TODO: remove this when MCS implementation is done.
+        if (!asSystemService) {
+            getMediaSessionManager().dispatchMediaKeyEvent(keyEvent, false);
+            return;
+        }
+
         try {
             getService().dispatchMediaKeyEvent(mContext.getPackageName(),
                     keyEvent, asSystemService);

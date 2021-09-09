@@ -140,6 +140,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * The Chooser Activity handles intent resolution specifically for sharing intents -
@@ -234,11 +235,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
 
-    // TODO(b/121287224): Re-evaluate this limit
-    private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
-
-    private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.HASH_SALT_MAX_DAYS,
@@ -257,8 +253,6 @@ public class ChooserActivity extends ResolverActivity implements
     protected boolean mIsSuccessfullySelected;
 
     private long mQueriedSharingShortcutsTimeMs;
-
-    private int mChooserRowServiceSpacing;
 
     private int mCurrAvailableWidth = 0;
     private int mLastNumberOfChildren = -1;
@@ -657,9 +651,6 @@ public class ChooserActivity extends ResolverActivity implements
                         MetricsEvent.PARENT_PROFILE)
                 .addTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE, target.getType())
                 .addTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS, systemCost));
-
-        mChooserRowServiceSpacing = getResources()
-                                        .getDimensionPixelSize(R.dimen.chooser_service_spacing);
 
         if (mResolverDrawerLayout != null) {
             mResolverDrawerLayout.addOnLayoutChangeListener(this::handleLayoutChange);
@@ -2066,24 +2057,6 @@ public class ChooserActivity extends ResolverActivity implements
         return chooserTargetList;
     }
 
-    private String convertServiceName(String packageName, String serviceName) {
-        if (TextUtils.isEmpty(serviceName)) {
-            return null;
-        }
-
-        final String fullName;
-        if (serviceName.startsWith(".")) {
-            // Relative to the app package. Prepend the app package name.
-            fullName = packageName + serviceName;
-        } else if (serviceName.indexOf('.') >= 0) {
-            // Fully qualified package name.
-            fullName = serviceName;
-        } else {
-            fullName = null;
-        }
-        return fullName;
-    }
-
     private void logDirectShareTargetReceived(int logCategory) {
         final int apiLatency = (int) (System.currentTimeMillis() - mQueriedSharingShortcutsTimeMs);
         getMetricsLogger().write(new LogMaker(logCategory).setSubtype(apiLatency));
@@ -2263,37 +2236,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
         }
         return false;
-    }
-
-    void filterServiceTargets(Context contextAsUser, String packageName,
-            List<ChooserTarget> targets) {
-        if (targets == null) {
-            return;
-        }
-
-        final PackageManager pm = contextAsUser.getPackageManager();
-        for (int i = targets.size() - 1; i >= 0; i--) {
-            final ChooserTarget target = targets.get(i);
-            final ComponentName targetName = target.getComponentName();
-            if (packageName != null && packageName.equals(targetName.getPackageName())) {
-                // Anything from the original target's package is fine.
-                continue;
-            }
-
-            boolean remove;
-            try {
-                final ActivityInfo ai = pm.getActivityInfo(targetName, 0);
-                remove = !ai.exported || ai.permission != null;
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "Target " + target + " returned by " + packageName
-                        + " component not found");
-                remove = true;
-            }
-
-            if (remove) {
-                targets.remove(i);
-            }
-        }
     }
 
     /**
@@ -2854,7 +2796,7 @@ public class ChooserActivity extends ResolverActivity implements
                 .setSubtype(previewType));
     }
 
-    class ViewHolderBase extends RecyclerView.ViewHolder {
+    abstract static class ViewHolderBase extends RecyclerView.ViewHolder {
         private int mViewType;
 
         ViewHolderBase(View itemView, int viewType) {
@@ -2902,7 +2844,7 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Add a footer to the list, to support scrolling behavior below the navbar.
      */
-    final class FooterViewHolder extends ViewHolderBase {
+    static final class FooterViewHolder extends ViewHolderBase {
         FooterViewHolder(View itemView, int viewType) {
             super(itemView, viewType);
         }
@@ -3327,7 +3269,8 @@ public class ChooserActivity extends ResolverActivity implements
                 parentGroup.addView(row2);
 
                 mDirectShareViewHolder = new DirectShareViewHolder(parentGroup,
-                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow(), viewType);
+                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow(), viewType,
+                        mChooserMultiProfilePagerAdapter::getActiveListAdapter);
                 loadViewsIntoGroup(mDirectShareViewHolder);
 
                 return mDirectShareViewHolder;
@@ -3489,7 +3432,7 @@ public class ChooserActivity extends ResolverActivity implements
      * {@link ChooserGridAdapter#VIEW_TYPE_DIRECT_SHARE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_CALLER_AND_RANK}.
      */
-    abstract class ItemGroupViewHolder extends ViewHolderBase {
+    abstract static class ItemGroupViewHolder extends ViewHolderBase {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
@@ -3539,7 +3482,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class SingleRowViewHolder extends ItemGroupViewHolder {
+    static class SingleRowViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mRow;
 
         SingleRowViewHolder(ViewGroup row, int cellCount, int viewType) {
@@ -3573,7 +3516,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class DirectShareViewHolder extends ItemGroupViewHolder {
+    static class DirectShareViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mParent;
         private final List<ViewGroup> mRows;
         private int mCellCountPerRow;
@@ -3585,14 +3528,17 @@ public class ChooserActivity extends ResolverActivity implements
 
         private final boolean[] mCellVisibility;
 
+        private final Supplier<ChooserListAdapter> mListAdapterSupplier;
+
         DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow,
-                int viewType) {
+                int viewType, Supplier<ChooserListAdapter> listAdapterSupplier) {
             super(rows.size() * cellCountPerRow, parent, viewType);
 
             this.mParent = parent;
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
             this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
+            this.mListAdapterSupplier = listAdapterSupplier;
         }
 
         public ViewGroup addView(int index, View v) {
@@ -3666,8 +3612,7 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // only expand if we have more than maxTargetsPerRow, and delay that decision
                 // until they start to scroll
-                ChooserListAdapter adapter =
-                        mChooserMultiProfilePagerAdapter.getActiveListAdapter();
+                ChooserListAdapter adapter = mListAdapterSupplier.get();
                 int validTargets = adapter.getSelectableServiceTargetCount();
                 if (validTargets <= maxTargetsPerRow) {
                     mHideDirectShareExpansion = true;

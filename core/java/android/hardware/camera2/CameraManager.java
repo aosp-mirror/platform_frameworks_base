@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
@@ -90,12 +91,19 @@ public final class CameraManager {
     private final Context mContext;
     private final Object mLock = new Object();
 
+    private static final String CAMERA_OPEN_CLOSE_LISTENER_PERMISSION =
+            "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
+    private final boolean mHasOpenCloseListenerPermission;
+
     /**
      * @hide
      */
     public CameraManager(Context context) {
         synchronized(mLock) {
             mContext = context;
+            mHasOpenCloseListenerPermission =
+                    mContext.checkSelfPermission(CAMERA_OPEN_CLOSE_LISTENER_PERMISSION) ==
+                    PackageManager.PERMISSION_GRANTED;
         }
     }
 
@@ -253,7 +261,7 @@ public final class CameraManager {
     public void registerAvailabilityCallback(@NonNull AvailabilityCallback callback,
             @Nullable Handler handler) {
         CameraManagerGlobal.get().registerAvailabilityCallback(callback,
-                CameraDeviceImpl.checkAndWrapHandler(handler));
+                CameraDeviceImpl.checkAndWrapHandler(handler), mHasOpenCloseListenerPermission);
     }
 
     /**
@@ -274,7 +282,8 @@ public final class CameraManager {
         if (executor == null) {
             throw new IllegalArgumentException("executor was null");
         }
-        CameraManagerGlobal.get().registerAvailabilityCallback(callback, executor);
+        CameraManagerGlobal.get().registerAvailabilityCallback(callback, executor,
+                mHasOpenCloseListenerPermission);
     }
 
     /**
@@ -1303,6 +1312,8 @@ public final class CameraManager {
         // Camera ID -> (physical camera ID -> Status map)
         private final ArrayMap<String, ArrayList<String>> mUnavailablePhysicalDevices =
                 new ArrayMap<String, ArrayList<String>>();
+        // Opened Camera ID -> apk name map
+        private final ArrayMap<String, String> mOpenedDevices = new ArrayMap<String, String>();
 
         private final Set<Set<String>> mConcurrentCameraIdCombinations =
                 new ArraySet<Set<String>>();
@@ -1325,6 +1336,7 @@ public final class CameraManager {
 
         // Access only through getCameraService to deal with binder death
         private ICameraService mCameraService;
+        private boolean mHasOpenCloseListenerPermission = false;
 
         // Singleton, don't allow construction
         private CameraManagerGlobal() {
@@ -1402,6 +1414,12 @@ public final class CameraManager {
                                     ICameraServiceListener.STATUS_NOT_PRESENT,
                                     c.cameraId, unavailPhysicalCamera);
                         }
+                    }
+
+                    if (mHasOpenCloseListenerPermission &&
+                            c.status == ICameraServiceListener.STATUS_NOT_AVAILABLE &&
+                            !c.clientPackage.isEmpty()) {
+                        onCameraOpenedLocked(c.cameraId, c.clientPackage);
                     }
                 }
                 mCameraService = cameraService;
@@ -1893,6 +1911,12 @@ public final class CameraManager {
                                 ICameraServiceListener.STATUS_NOT_PRESENT);
                     }
                 }
+
+            }
+            for (int i = 0; i < mOpenedDevices.size(); i++) {
+                String id = mOpenedDevices.keyAt(i);
+                String clientPackageId = mOpenedDevices.valueAt(i);
+                postSingleCameraOpenedUpdate(callback, executor, id, clientPackageId);
             }
         }
 
@@ -2058,9 +2082,15 @@ public final class CameraManager {
          *
          * @param callback the new callback to send camera availability notices to
          * @param executor The executor which should invoke the callback. May not be null.
+         * @param hasOpenCloseListenerPermission whether the client has permission for
+         *                                       onCameraOpened/onCameraClosed callback
          */
-        public void registerAvailabilityCallback(AvailabilityCallback callback, Executor executor) {
+        public void registerAvailabilityCallback(AvailabilityCallback callback, Executor executor,
+                boolean hasOpenCloseListenerPermission) {
             synchronized (mLock) {
+                // In practice, this permission doesn't change. So we don't need one flag for each
+                // callback object.
+                mHasOpenCloseListenerPermission = hasOpenCloseListenerPermission;
                 connectCameraServiceLocked();
 
                 Executor oldExecutor = mCallbackMap.put(callback, executor);
@@ -2152,26 +2182,53 @@ public final class CameraManager {
         @Override
         public void onCameraOpened(String cameraId, String clientPackageId) {
             synchronized (mLock) {
-                final int callbackCount = mCallbackMap.size();
-                for (int i = 0; i < callbackCount; i++) {
-                    Executor executor = mCallbackMap.valueAt(i);
-                    final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+                onCameraOpenedLocked(cameraId, clientPackageId);
+            }
+        }
 
-                    postSingleCameraOpenedUpdate(callback, executor, cameraId, clientPackageId);
+        private void onCameraOpenedLocked(String cameraId, String clientPackageId) {
+            String oldApk = mOpenedDevices.put(cameraId, clientPackageId);
+
+            if (oldApk != null) {
+                if (oldApk.equals(clientPackageId)) {
+                    Log.w(TAG,
+                            "onCameraOpened was previously called for " + oldApk
+                            + " and is now again called for the same package name, "
+                            + "so no new client visible update will be sent");
+                    return;
+                } else {
+                    Log.w(TAG,
+                            "onCameraOpened was previously called for " + oldApk
+                            + " and is now called for " + clientPackageId
+                            + " without onCameraClosed being called first");
                 }
+            }
+
+            final int callbackCount = mCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                Executor executor = mCallbackMap.valueAt(i);
+                final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+
+                postSingleCameraOpenedUpdate(callback, executor, cameraId, clientPackageId);
             }
         }
 
         @Override
         public void onCameraClosed(String cameraId) {
             synchronized (mLock) {
-                final int callbackCount = mCallbackMap.size();
-                for (int i = 0; i < callbackCount; i++) {
-                    Executor executor = mCallbackMap.valueAt(i);
-                    final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+                onCameraClosedLocked(cameraId);
+            }
+        }
 
-                    postSingleCameraClosedUpdate(callback, executor, cameraId);
-                }
+        private void onCameraClosedLocked(String cameraId) {
+            mOpenedDevices.remove(cameraId);
+
+            final int callbackCount = mCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                Executor executor = mCallbackMap.valueAt(i);
+                final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+
+                postSingleCameraClosedUpdate(callback, executor, cameraId);
             }
         }
 
@@ -2229,6 +2286,10 @@ public final class CameraManager {
                 for (int i = mDeviceStatus.size() - 1; i >= 0; i--) {
                     String cameraId = mDeviceStatus.keyAt(i);
                     onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, cameraId);
+
+                    if (mHasOpenCloseListenerPermission) {
+                        onCameraClosedLocked(cameraId);
+                    }
                 }
                 for (int i = 0; i < mTorchStatus.size(); i++) {
                     String cameraId = mTorchStatus.keyAt(i);

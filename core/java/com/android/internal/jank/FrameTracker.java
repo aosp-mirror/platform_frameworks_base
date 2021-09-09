@@ -288,12 +288,12 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             // We don't remove observer here,
             // will remove it when all the frame metrics in this duration are called back.
             // See onFrameMetricsAvailable for the logic of removing the observer.
-            // Let's wait for all callbacks to finish for at most a minute.
+            // Waiting at most 10 seconds for all callbacks to finish.
             mWaitForFinishTimedOut = () -> {
                 Log.e(TAG, "force finish cuj because of time out:" + mSession.getName());
                 finish(mJankInfos.size() - 1);
             };
-            mHandler.postDelayed(mWaitForFinishTimedOut, TimeUnit.MINUTES.toMillis(1));
+            mHandler.postDelayed(mWaitForFinishTimedOut, TimeUnit.SECONDS.toMillis(10));
         }
     }
 

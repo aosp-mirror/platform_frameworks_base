@@ -30,13 +30,17 @@ import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * @hide
@@ -138,6 +142,29 @@ public abstract class IContextHubWrapper {
         }
 
         return (proxy == null) ? null : new ContextHubWrapperV1_2(proxy);
+    }
+
+    /**
+     * Attempts to connect to the Contexthub HAL AIDL service, if it exists.
+     *
+     * @return A valid IContextHubWrapper if the connection was successful, null otherwise.
+     */
+    @Nullable
+    public static IContextHubWrapper maybeConnectToAidl() {
+        android.hardware.contexthub.IContextHub proxy = null;
+        final String aidlServiceName =
+                android.hardware.contexthub.IContextHub.class.getCanonicalName() + "/default";
+        if (ServiceManager.isDeclared(aidlServiceName)) {
+            proxy = android.hardware.contexthub.IContextHub.Stub.asInterface(
+                    ServiceManager.waitForService(aidlServiceName));
+            if (proxy == null) {
+                Log.e(TAG, "Context Hub AIDL service was declared but was not found");
+            }
+        } else {
+            Log.d(TAG, "Context Hub AIDL service is not declared");
+        }
+
+        return (proxy == null) ? null : new ContextHubWrapperAidl(proxy);
     }
 
     /**
@@ -257,6 +284,137 @@ public abstract class IContextHubWrapper {
      */
     public abstract void registerCallback(int contextHubId, @NonNull ICallback callback)
             throws RemoteException;
+
+    private static class ContextHubWrapperAidl extends IContextHubWrapper {
+        private android.hardware.contexthub.IContextHub mHub;
+
+        private ICallback mCallback = null;
+
+        private ContextHubAidlCallback mAidlCallback = new ContextHubAidlCallback();
+
+        private class ContextHubAidlCallback extends
+                android.hardware.contexthub.IContextHubCallback.Stub {
+            public void handleNanoappInfo(android.hardware.contexthub.NanoappInfo[] appInfo) {
+                List<NanoAppState> nanoAppStateList =
+                        ContextHubServiceUtil.createNanoAppStateList(appInfo);
+                mCallback.handleNanoappInfo(nanoAppStateList);
+            }
+
+            public void handleContextHubMessage(android.hardware.contexthub.ContextHubMessage msg,
+                    String[] msgContentPerms) {
+                mCallback.handleNanoappMessage(
+                        (short) msg.hostEndPoint,
+                        ContextHubServiceUtil.createNanoAppMessage(msg),
+                        new ArrayList<>(Arrays.asList(msg.permissions)),
+                        new ArrayList<>(Arrays.asList(msgContentPerms)));
+            }
+
+            public void handleContextHubAsyncEvent(int evt) {
+                mCallback.handleContextHubEvent(
+                        ContextHubServiceUtil.toContextHubEventFromAidl(evt));
+            }
+
+            public void handleTransactionResult(int transactionId, boolean success) {
+                mCallback.handleTransactionResult(transactionId, success);
+            }
+        }
+
+        ContextHubWrapperAidl(android.hardware.contexthub.IContextHub hub) {
+            mHub = hub;
+        }
+
+        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+            Set<String> supportedPermissions = new HashSet<>();
+            ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
+            for (android.hardware.contexthub.ContextHubInfo hub : mHub.getContextHubs()) {
+                hubInfoList.add(new ContextHubInfo(hub));
+                for (String permission : hub.supportedPermissions) {
+                    supportedPermissions.add(permission);
+                }
+            }
+            return new Pair(hubInfoList, new ArrayList<String>(supportedPermissions));
+        }
+
+        // TODO(b/194285834): Implement settings logic
+        public boolean supportsLocationSettingNotifications() {
+            return false;
+        }
+
+        public boolean supportsWifiSettingNotifications() {
+            return false;
+        }
+
+        public boolean supportsAirplaneModeSettingNotifications() {
+            return false;
+        }
+
+        public boolean supportsMicrophoneDisableSettingNotifications() {
+            return false;
+        }
+
+        public void onLocationSettingChanged(boolean enabled) {
+        }
+
+        public void onWifiSettingChanged(boolean enabled) {
+        }
+
+        public void onAirplaneModeSettingChanged(boolean enabled) {
+        }
+
+        public void onMicrophoneDisableSettingChanged(boolean enabled) {
+        }
+
+        @ContextHubTransaction.Result
+        public int sendMessageToContextHub(
+                short hostEndpointId, int contextHubId, NanoAppMessage message)
+                throws RemoteException {
+            return toTransactionResult(mHub.sendMessageToHub(contextHubId,
+                    ContextHubServiceUtil.createAidlContextHubMessage(hostEndpointId, message)));
+        }
+
+        @ContextHubTransaction.Result
+        public int loadNanoapp(int contextHubId, NanoAppBinary binary,
+                int transactionId) throws RemoteException {
+            android.hardware.contexthub.NanoappBinary aidlNanoAppBinary =
+                    ContextHubServiceUtil.createAidlNanoAppBinary(binary);
+            return toTransactionResult(
+                    mHub.loadNanoapp(contextHubId, aidlNanoAppBinary, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int unloadNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return toTransactionResult(mHub.unloadNanoapp(contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int enableNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return toTransactionResult(mHub.enableNanoapp(contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int disableNanoapp(int contextHubId, long nanoappId, int transactionId)
+                throws RemoteException {
+            return toTransactionResult(mHub.disableNanoapp(contextHubId, nanoappId, transactionId));
+        }
+
+        @ContextHubTransaction.Result
+        public int queryNanoapps(int contextHubId) throws RemoteException {
+            return toTransactionResult(mHub.queryNanoapps(contextHubId));
+        }
+
+        public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
+            mCallback = callback;
+            mHub.registerCallback(contextHubId, mAidlCallback);
+        }
+
+        @ContextHubTransaction.Result
+        private int toTransactionResult(boolean success) {
+            return success ? ContextHubTransaction.RESULT_SUCCESS
+                    : ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+        }
+    }
 
     /**
      * An abstract call that defines methods common to all HIDL IContextHubWrappers.

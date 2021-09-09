@@ -944,6 +944,39 @@
         <item name="actionDividerHeight">32dp</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.QSDialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:dialogCornerRadius">28dp</item>
+        <item name="android:buttonCornerRadius">28dp</item>
+        <item name="android:colorBackground">@color/prv_color_surface</item>
+    </style>
+
+    <style name="TextAppearance.QSDialog.Title" parent="Theme.SystemUI.Dialog.QSDialog">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:lineHeight">32sp</item>
+    </style>
+
+    <style name="Widget.QSDialog.Button" parent = "Theme.SystemUI.Dialog.QSDialog">
+        <item name="android:background">@drawable/qs_dialog_btn_filled</item>
+        <item name="android:textColor">@color/prv_text_color_on_accent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="Widget.QSDialog.Button.BorderButton">
+        <item name="android:background">@drawable/qs_dialog_btn_outline</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
     <style name="Theme.SystemUI.Dialog.Internet">
         <item name="android:windowBackground">@drawable/internet_dialog_background</item>
     </style>

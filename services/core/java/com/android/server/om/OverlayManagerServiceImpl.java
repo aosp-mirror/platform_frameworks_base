@@ -100,7 +100,8 @@ final class OverlayManagerServiceImpl {
         if (!Objects.equals(theTruth.getOverlayTarget(), oldSettings.targetPackageName)) {
             return true;
         }
-        if (!Objects.equals(theTruth.getOverlayTargetName(), oldSettings.targetOverlayableName)) {
+        if (!Objects.equals(theTruth.getOverlayTargetOverlayableName(),
+                oldSettings.targetOverlayableName)) {
             return true;
         }
         if (oldSettings.isFabricated) {
@@ -343,7 +344,7 @@ final class OverlayManagerServiceImpl {
                 }
 
                 currentInfo = mSettings.init(overlay, userId, pkg.getOverlayTarget(),
-                        pkg.getOverlayTargetName(), pkg.getBaseApkPath(),
+                        pkg.getOverlayTargetOverlayableName(), pkg.getBaseApkPath(),
                         isPackageConfiguredMutable(pkg),
                         isPackageConfiguredEnabled(pkg),
                         getPackageConfiguredPriority(pkg), pkg.getOverlayCategory(),

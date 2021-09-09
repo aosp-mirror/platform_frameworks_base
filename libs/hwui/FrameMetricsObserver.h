@@ -26,6 +26,13 @@ public:
     virtual void notify(const int64_t* buffer) = 0;
     bool waitForPresentTime() const { return mWaitForPresentTime; };
 
+    void reportMetricsFrom(uint64_t frameNumber, int32_t surfaceControlId) {
+        mAttachedFrameNumber = frameNumber;
+        mSurfaceControlId = surfaceControlId;
+    };
+    uint64_t attachedFrameNumber() const { return mAttachedFrameNumber; };
+    int32_t attachedSurfaceControlId() const { return mSurfaceControlId; };
+
     /**
      * Create a new metrics observer. An observer that watches present time gets notified at a
      * different time than the observer that doesn't.
@@ -42,6 +49,22 @@ public:
 
 private:
     const bool mWaitForPresentTime;
+
+    // The id of the surface control (mSurfaceControlGenerationId in CanvasContext)
+    // for which the mAttachedFrameNumber applies to. We rely on this value being
+    // an increasing counter. We will report metrics:
+    // - for all frames if the frame comes from a surface with a surfaceControlId
+    //   that is strictly greater than mSurfaceControlId.
+    // - for all frames with a frame number greater than or equal to mAttachedFrameNumber
+    //   if the frame comes from a surface with a surfaceControlId that is equal to the
+    //   mSurfaceControlId.
+    // We will never report metrics if the frame comes from a surface with a surfaceControlId
+    // that is strictly smaller than mSurfaceControlId.
+    int32_t mSurfaceControlId;
+
+    // The frame number the metrics observer was attached on. Metrics will be sent from this frame
+    // number (inclusive) onwards in the case that the surface id is equal to mSurfaceControlId.
+    uint64_t mAttachedFrameNumber;
 };
 
 }  // namespace uirenderer

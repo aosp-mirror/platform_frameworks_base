@@ -16,6 +16,7 @@
 
 package android.view.translation;
 
+import static android.view.translation.Helper.ANIMATION_DURATION_MILLIS;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_FINISHED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_PAUSED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_RESUMED;
@@ -26,6 +27,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.assist.ActivityId;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -465,9 +467,6 @@ public class UiTranslationController {
         }
     }
 
-    // TODO: Use a device config value.
-    private static final int ANIMATION_DURATION_MILLIS = 250;
-
     /**
      * Creates a Translator for the given source and target translation specs and start the ui
      * translation when the Translator is created successfully.
@@ -724,7 +723,21 @@ public class UiTranslationController {
             msg.append("text=").append(value.getText() == null
                     ? "null"
                     : "string[" + value.getText().length() + "], ");
-            //TODO: append dictionary results.
+            final Bundle definitions =
+                    (Bundle) value.getExtras().get(TranslationResponseValue.EXTRA_DEFINITIONS);
+            if (definitions != null) {
+                msg.append("definitions={");
+                for (String partOfSpeech : definitions.keySet()) {
+                    msg.append(partOfSpeech).append(":[");
+                    for (CharSequence definition : definitions.getCharSequenceArray(partOfSpeech)) {
+                        msg.append(definition == null
+                                ? "null, "
+                                : "string[" + definition.length() + "], ");
+                    }
+                    msg.append("], ");
+                }
+                msg.append("}");
+            }
             msg.append("transliteration=").append(value.getTransliteration() == null
                     ? "null"
                     : "string[" + value.getTransliteration().length() + "]}, ");

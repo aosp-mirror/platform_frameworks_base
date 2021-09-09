@@ -13754,6 +13754,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Clears organization ID set by the DPC and resets the precomputed enrollment specific ID.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void clearOrganizationId() {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.clearOrganizationIdForUser(myUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates and provisions a managed profile and sets the
      * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
      * owner.

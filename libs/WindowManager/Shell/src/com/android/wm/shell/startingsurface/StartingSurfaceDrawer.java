@@ -146,7 +146,7 @@ public class StartingSurfaceDrawer {
         return mDisplayManager.getDisplay(displayId);
     }
 
-    private int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
+    int getSplashScreenTheme(int splashScreenThemeResId, ActivityInfo activityInfo) {
         return splashScreenThemeResId != 0
                 ? splashScreenThemeResId
                 : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
@@ -174,7 +174,7 @@ public class StartingSurfaceDrawer {
 
         final int displayId = taskInfo.displayId;
         final int taskId = taskInfo.taskId;
-        Context context = mContext;
+
         // replace with the default theme if the application didn't set
         final int theme = getSplashScreenTheme(windowInfo.splashScreenThemeResId, activityInfo);
         if (DEBUG_SPLASH_SCREEN) {
@@ -182,10 +182,14 @@ public class StartingSurfaceDrawer {
                     + " theme=" + Integer.toHexString(theme) + " task=" + taskInfo.taskId
                     + " suggestType=" + suggestType);
         }
-
         final Display display = getDisplay(displayId);
         if (display == null) {
             // Can't show splash screen on requested display, so skip showing at all.
+            return;
+        }
+        Context context = displayId == DEFAULT_DISPLAY
+                ? mContext : mContext.createDisplayContext(display);
+        if (context == null) {
             return;
         }
         if (theme != context.getThemeResId()) {
@@ -298,7 +302,8 @@ public class StartingSurfaceDrawer {
         // Record whether create splash screen view success, notify to current thread after
         // create splash screen view finished.
         final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
-        final FrameLayout rootLayout = new FrameLayout(context);
+        final FrameLayout rootLayout = new FrameLayout(
+                mSplashscreenContentDrawer.createViewContextWrapper(context));
         rootLayout.setPadding(0, 0, 0, 0);
         rootLayout.setFitsSystemWindows(false);
         final Runnable setViewSynchronized = () -> {
@@ -327,7 +332,7 @@ public class StartingSurfaceDrawer {
             mSysuiProxy.requestTopUi(true, TAG);
         }
         mSplashscreenContentDrawer.createContentView(context, suggestType, activityInfo, taskId,
-                viewSupplier::setView);
+                viewSupplier::setView, viewSupplier::setUiThreadInitTask);
         try {
             if (addWindow(taskId, appToken, rootLayout, display, params, suggestType)) {
                 // We use the splash screen worker thread to create SplashScreenView while adding
@@ -362,11 +367,18 @@ public class StartingSurfaceDrawer {
     private static class SplashScreenViewSupplier implements Supplier<SplashScreenView> {
         private SplashScreenView mView;
         private boolean mIsViewSet;
+        private Runnable mUiThreadInitTask;
         void setView(SplashScreenView view) {
             synchronized (this) {
                 mView = view;
                 mIsViewSet = true;
                 notify();
+            }
+        }
+
+        void setUiThreadInitTask(Runnable initTask) {
+            synchronized (this) {
+                mUiThreadInitTask = initTask;
             }
         }
 
@@ -378,6 +390,10 @@ public class StartingSurfaceDrawer {
                         wait();
                     } catch (InterruptedException ignored) {
                     }
+                }
+                if (mUiThreadInitTask != null) {
+                    mUiThreadInitTask.run();
+                    mUiThreadInitTask = null;
                 }
                 return mView;
             }
@@ -501,7 +517,7 @@ public class StartingSurfaceDrawer {
             Slog.v(TAG, reason + "the splash screen. Releasing SurfaceControlViewHost for task:"
                     + taskId);
         }
-        viewHost.getView().post(viewHost::release);
+        SplashScreenView.releaseIconHost(viewHost);
     }
 
     protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,

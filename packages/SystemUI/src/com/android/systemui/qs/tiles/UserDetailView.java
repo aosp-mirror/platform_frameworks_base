@@ -40,6 +40,8 @@ import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 
 /**
@@ -76,6 +78,7 @@ public class UserDetailView extends PseudoGridView {
         private View mCurrentUserView;
         private final UiEventLogger mUiEventLogger;
         private final FalsingManager mFalsingManager;
+        private Consumer<UserSwitcherController.UserRecord> mClickCallback;
 
         @Inject
         public Adapter(Context context, UserSwitcherController controller,
@@ -91,6 +94,10 @@ public class UserDetailView extends PseudoGridView {
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
             return createUserDetailItemView(convertView, parent, item);
+        }
+
+        public void injectCallback(Consumer<UserSwitcherController.UserRecord> clickCallback) {
+            mClickCallback = clickCallback;
         }
 
         public UserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
@@ -170,6 +177,13 @@ public class UserDetailView extends PseudoGridView {
                 onUserListItemClicked(tag);
             }
             Trace.endSection();
+            if (mClickCallback != null) {
+                mClickCallback.accept(tag);
+            }
+        }
+
+        public void linkToViewGroup(ViewGroup viewGroup) {
+            PseudoGridView.ViewGroupAdapterBridge.link(viewGroup, this);
         }
     }
 }

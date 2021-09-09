@@ -762,7 +762,7 @@ public class AppsFilterTest {
         ParsingPackage overlay = pkg("com.some.package.overlay")
                 .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetName("overlayableName");
+                .setOverlayTargetOverlayableName("overlayableName");
         ParsingPackage actor = pkg("com.some.package.actor");
 
         final AppsFilter appsFilter = new AppsFilter(
@@ -787,7 +787,7 @@ public class AppsFilterTest {
                         if (overlay.getPackageName().equals(pkg.getPackageName())) {
                             Map<String, Set<String>> map = new ArrayMap<>();
                             Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetName());
+                            set.add(overlay.getOverlayTargetOverlayableName());
                             map.put(overlay.getOverlayTarget(), set);
                             return map;
                         }
@@ -847,7 +847,7 @@ public class AppsFilterTest {
         ParsingPackage overlay = pkg("com.some.package.overlay")
                 .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetName("overlayableName");
+                .setOverlayTargetOverlayableName("overlayableName");
         ParsingPackage actorOne = pkg("com.some.package.actor.one");
         ParsingPackage actorTwo = pkg("com.some.package.actor.two");
 
@@ -874,7 +874,7 @@ public class AppsFilterTest {
                         if (overlay.getPackageName().equals(pkg.getPackageName())) {
                             Map<String, Set<String>> map = new ArrayMap<>();
                             Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetName());
+                            set.add(overlay.getOverlayTargetOverlayableName());
                             map.put(overlay.getOverlayTarget(), set);
                             return map;
                         }

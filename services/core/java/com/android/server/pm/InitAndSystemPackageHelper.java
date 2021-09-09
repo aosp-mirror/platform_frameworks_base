@@ -77,6 +77,7 @@ import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.utils.WatchedArrayMap;
@@ -960,7 +961,8 @@ public class InitAndSystemPackageHelper {
         PackageSetting pkgSetting;
 
         synchronized (mPm.mLock) {
-            renamedPkgName = mPm.mSettings.getRenamedPackageLPr(parsedPackage.getRealPackage());
+            renamedPkgName = mPm.mSettings.getRenamedPackageLPr(
+                    AndroidPackageUtils.getRealPackageOrNull(parsedPackage));
             final String realPkgName = PackageManagerService.getRealPackageName(parsedPackage,
                     renamedPkgName);
             if (realPkgName != null) {
@@ -1310,7 +1312,7 @@ public class InitAndSystemPackageHelper {
         if (originalPkgSetting == null || !mPm.isDeviceUpgrading()) {
             return;
         }
-        if (originalPkgSetting.versionCode == pkg.getVersionCode()) {
+        if (originalPkgSetting.versionCode == pkg.getLongVersionCode()) {
             return;
         }
 
@@ -1319,7 +1321,7 @@ public class InitAndSystemPackageHelper {
             Slog.d(TAG, originalPkgSetting.name
                     + " clear profile due to version change "
                     + originalPkgSetting.versionCode + " != "
-                    + pkg.getVersionCode());
+                    + pkg.getLongVersionCode());
         }
     }
 }

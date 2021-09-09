@@ -36,7 +36,7 @@ package android.media.audio.common;
 @Backing(type="int") @VintfStability
 enum AudioStreamType {
   INVALID = -2,
-  DEFAULT = -1,
+  SYS_RESERVED_DEFAULT = -1,
   VOICE_CALL = 0,
   SYSTEM = 1,
   RING = 2,

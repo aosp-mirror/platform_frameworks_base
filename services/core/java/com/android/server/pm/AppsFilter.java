@@ -57,6 +57,7 @@ import com.android.server.FgThread;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Snapshots;
@@ -448,7 +449,8 @@ public class AppsFilter implements Watchable, Snappable {
             // TODO(b/135203078): Do not use toAppInfo
             // TODO(b/167551701): Make changeId non-logging
             final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternalNoLogging(
-                    PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
+                    PackageManager.FILTER_APPLICATION_QUERY,
+                    AndroidPackageUtils.generateAppInfoWithoutState(pkg));
             if (enabled) {
                 mDisabledPackages.remove(pkg.getPackageName());
             } else {

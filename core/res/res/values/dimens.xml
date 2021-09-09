@@ -682,9 +682,6 @@
     <dimen name="default_magnifier_horizontal_offset">0dp</dimen>
     <item type="dimen" format="float" name="default_magnifier_zoom">1.25</item>
 
-    <!-- Spacing around the background change frome service to non-service -->
-    <dimen name="chooser_service_spacing">8dp</dimen>
-
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 

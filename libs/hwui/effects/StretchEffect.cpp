@@ -181,7 +181,7 @@ static const SkString stretchShader = SkString(R"(
         );
         coord.x = outU;
         coord.y = outV;
-        return sample(uContentTexture, coord);
+        return uContentTexture.eval(coord);
     })");
 
 static const float ZERO = 0.f;

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/qs_dialog_bg"
+>
+    <TextView
+        android:id="@+id/title"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:textAlignment="center"
+        android:text="@string/qs_user_switch_dialog_title"
+        android:textAppearance="@style/TextAppearance.QSDialog.Title"
+        android:layout_marginBottom="32dp"
+        sysui:layout_constraintTop_toTopOf="parent"
+        sysui:layout_constraintStart_toStartOf="parent"
+        sysui:layout_constraintEnd_toEndOf="parent"
+        sysui:layout_constraintBottom_toTopOf="@id/grid"
+        />
+
+    <com.android.systemui.qs.PseudoGridView
+        android:id="@+id/grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        sysui:verticalSpacing="4dp"
+        sysui:horizontalSpacing="4dp"
+        sysui:fixedChildWidth="80dp"
+        sysui:layout_constraintTop_toBottomOf="@id/title"
+        sysui:layout_constraintStart_toStartOf="parent"
+        sysui:layout_constraintEnd_toEndOf="parent"
+        sysui:layout_constraintBottom_toTopOf="@id/barrier"
+    />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        sysui:barrierDirection="top"
+        sysui:constraint_referenced_ids="settings,done"
+        />
+
+    <Button
+        android:id="@+id/settings"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="@string/quick_settings_more_user_settings"
+        sysui:layout_constraintTop_toBottomOf="@id/barrier"
+        sysui:layout_constraintBottom_toBottomOf="parent"
+        sysui:layout_constraintStart_toStartOf="parent"
+        sysui:layout_constraintEnd_toStartOf="@id/done"
+        sysui:layout_constraintHorizontal_chainStyle="spread_inside"
+        style="@style/Widget.QSDialog.Button.BorderButton"
+        />
+
+    <Button
+        android:id="@+id/done"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="@string/quick_settings_done"
+        sysui:layout_constraintTop_toBottomOf="@id/barrier"
+        sysui:layout_constraintBottom_toBottomOf="parent"
+        sysui:layout_constraintStart_toEndOf="@id/settings"
+        sysui:layout_constraintEnd_toEndOf="parent"
+        style="@style/Widget.QSDialog.Button"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
