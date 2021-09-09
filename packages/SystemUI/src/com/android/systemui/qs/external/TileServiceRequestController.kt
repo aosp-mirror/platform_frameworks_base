@@ -17,17 +17,20 @@
 package com.android.systemui.qs.external
 
 import android.app.Dialog
+import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.internal.statusbar.IAddTileResultCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.QSTileHost
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.R
+import com.android.systemui.statusbar.CommandQueue
 import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -39,24 +42,41 @@ private const val TAG = "TileServiceRequestController"
  */
 class TileServiceRequestController constructor(
     private val qsTileHost: QSTileHost,
+    private val commandQueue: CommandQueue,
     private val commandRegistry: CommandRegistry,
     private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsTileHost.context) }
 ) {
 
     companion object {
-        // Temporary return values while there's no API
-        internal const val ADD_TILE = 0
-        internal const val DONT_ADD_TILE = 1
-        internal const val TILE_ALREADY_ADDED = 2
+        internal const val ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED
+        internal const val DONT_ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED
+        internal const val TILE_ALREADY_ADDED =
+                StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED
         internal const val DISMISSED = 3
+    }
+
+    private val commandQueueCallback = object : CommandQueue.Callbacks {
+        override fun requestAddTile(
+            componentName: ComponentName,
+            appName: CharSequence,
+            label: CharSequence,
+            icon: Icon,
+            callback: IAddTileResultCallback
+        ) {
+            requestTileAdd(componentName, appName, label, icon) {
+                callback.onTileRequest(it)
+            }
+        }
     }
 
     fun init() {
         commandRegistry.registerCommand("tile-service-add") { TileServiceRequestCommand() }
+        commandQueue.addCallback(commandQueueCallback)
     }
 
     fun destroy() {
         commandRegistry.unregisterCommand("tile-service-add")
+        commandQueue.removeCallback(commandQueueCallback)
     }
 
     private fun addTile(componentName: ComponentName) {
@@ -133,10 +153,11 @@ class TileServiceRequestController constructor(
 
     @SysUISingleton
     class Builder @Inject constructor(
+        private val commandQueue: CommandQueue,
         private val commandRegistry: CommandRegistry
     ) {
         fun create(qsTileHost: QSTileHost): TileServiceRequestController {
-            return TileServiceRequestController(qsTileHost, commandRegistry)
+            return TileServiceRequestController(qsTileHost, commandQueue, commandRegistry)
         }
     }
 }

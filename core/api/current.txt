@@ -6694,6 +6694,16 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method public int requestAddTileService(@NonNull android.content.ComponentName, @NonNull CharSequence, @NonNull android.graphics.drawable.Icon, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    field public static final int TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT = 3; // 0x3
+    field public static final int TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE = 1; // 0x1
+    field public static final int TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER = 4; // 0x4
+    field public static final int TILE_ADD_REQUEST_ANSWER_FAILED_REQUEST_IN_PROGRESS = 2; // 0x2
+    field public static final int TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON = 5; // 0x5
+    field public static final int TILE_ADD_REQUEST_ANSWER_SUCCESS = 0; // 0x0
+    field public static final int TILE_ADD_REQUEST_RESULT_TILE_ADDED = 2; // 0x2
+    field public static final int TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED = 1; // 0x1
+    field public static final int TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED = 0; // 0x0
   }
 
   public final class SyncNotedAppOp implements android.os.Parcelable {
@@ -10696,6 +10706,7 @@ package android.content {
     field public static final String SEARCH_SERVICE = "search";
     field public static final String SENSOR_SERVICE = "sensor";
     field public static final String SHORTCUT_SERVICE = "shortcut";
+    field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String STORAGE_SERVICE = "storage";
     field public static final String STORAGE_STATS_SERVICE = "storagestats";
     field public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";

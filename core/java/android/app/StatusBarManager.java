@@ -24,7 +24,9 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,11 +37,15 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Allows an app to control the status bar.
@@ -205,6 +211,71 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     /** @hide */
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
+
+    /**
+     * Response indicating that the tile was not added.
+     */
+    public static final int TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED = 0;
+    /**
+     * Response indicating that the tile was already added and the user was not prompted.
+     */
+    public static final int TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED = 1;
+    /**
+     * Response indicating that the tile was added.
+     */
+    public static final int TILE_ADD_REQUEST_RESULT_TILE_ADDED = 2;
+    /** @hide */
+    public static final int TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"TILE_ADD_REQUEST_RESULT_"}, value = {
+            TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED,
+            TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED,
+            TILE_ADD_REQUEST_RESULT_TILE_ADDED,
+            TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequestResult {}
+
+    /**
+     * Indicates that the request was sent successfully. Does not indicate that the user
+     * has accepted the request.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_SUCCESS = 0;
+    /**
+     * Indicates that this package does not match that of the
+     * {@link android.service.quicksettings.TileService}.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE = 1;
+    /**
+     * Indicates that there's a request in progress for this package.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_REQUEST_IN_PROGRESS = 2;
+    /**
+     * Indicates that the component does not match an enabled
+     * {@link android.service.quicksettings.TileService} for the current user.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT = 3;
+    /**
+     * Indicates that the user is not the current user.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER = 4;
+    /**
+     * The request could not be processed due to an unkonwn reason.
+     */
+    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON = 5;
+
+    /** @hide */
+    @IntDef(prefix = {"TILE_ADD_REQUEST_ANSWER_"}, value = {
+            TILE_ADD_REQUEST_ANSWER_SUCCESS,
+            TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE,
+            TILE_ADD_REQUEST_ANSWER_FAILED_REQUEST_IN_PROGRESS,
+            TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT,
+            TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER,
+            TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequestAnswer {}
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -529,6 +600,69 @@ public class StatusBarManager {
         }
     }
 
+    /**
+     * Request to the user to add a {@link android.service.quicksettings.TileService}
+     * to the set of current QS tiles.
+     * <p>
+     * Calling this will prompt the user to decide whether they want to add the shown
+     * {@link android.service.quicksettings.TileService} to their current tiles. The user can
+     * deny the request and the system can stop processing requests for a given
+     * {@link ComponentName} after a number of requests.
+     * <p>
+     * The request will show to the user information about the tile:
+     * <ul>
+     *     <li>Application name</li>
+     *     <li>Label for the tile</li>
+     *     <li>Icon for the tile</li>
+     * </ul>
+     * <p>
+     * The user for which this will be added is determined from the {@link Context} used to retrieve
+     * this service, and must match the current user.
+     *
+     * @param tileServiceComponentName {@link ComponentName} of the
+     *        {@link android.service.quicksettings.TileService} for the request.
+     * @param tileLabel label of the tile to show to the user.
+     * @param icon icon to use in the tile shown to the user.
+     * @param resultExecutor an executor to run the callback on
+     * @param resultCallback callback to indicate the {@link RequestResult}.
+     * @return whether the request was successfully sent.
+     *
+     * @see android.service.quicksettings.TileService
+     */
+    @RequestAnswer
+    public int requestAddTileService(
+            @NonNull ComponentName tileServiceComponentName,
+            @NonNull CharSequence tileLabel,
+            @NonNull Icon icon,
+            @NonNull Executor resultExecutor,
+            @NonNull Consumer<Integer> resultCallback
+    ) {
+        Objects.requireNonNull(tileServiceComponentName);
+        Objects.requireNonNull(tileLabel);
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(resultExecutor);
+        Objects.requireNonNull(resultCallback);
+        if (!tileServiceComponentName.getPackageName().equals(mContext.getPackageName())) {
+            return TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE;
+        }
+        int userId = mContext.getUserId();
+        RequestResultCallback callbackProxy = new RequestResultCallback(resultExecutor,
+                resultCallback);
+        IStatusBarService svc = getService();
+        try {
+            return svc.requestAddTile(
+                    tileServiceComponentName,
+                    tileLabel,
+                    icon,
+                    userId,
+                    callbackProxy
+            );
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+        return TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON;
+    }
+
     /** @hide */
     public static String windowStateToString(int state) {
         if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
@@ -771,6 +905,27 @@ public class StatusBarManager {
             if (mNotificationIcons) disable1 |= DISABLE_NOTIFICATION_ICONS;
 
             return new Pair<Integer, Integer>(disable1, disable2);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static final class RequestResultCallback extends IAddTileResultCallback.Stub {
+
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final Consumer<Integer> mCallback;
+
+        RequestResultCallback(@NonNull Executor executor, @NonNull Consumer<Integer> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onTileRequest(int userResponse) {
+            mExecutor.execute(() -> mCallback.accept(userResponse));
         }
     }
 }

@@ -21,7 +21,9 @@ import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.ITransientNotificationCallback;
 import android.app.Notification;
@@ -31,7 +33,11 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
@@ -53,6 +59,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.service.notification.NotificationStats;
+import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -68,6 +75,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -123,7 +131,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private final Object mLock = new Object();
     private final DeathRecipient mDeathRecipient = new DeathRecipient();
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManager;
+    private final PackageManagerInternal mPackageManagerInternal;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
 
@@ -227,6 +237,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         displayManager.registerDisplayListener(this, mHandler);
         mActivityTaskManager = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
     @Override
@@ -1638,6 +1650,96 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    private void checkCallingUidPackage(String packageName, int callingUid, int userId) {
+        int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+        if (UserHandle.getAppId(callingUid) != UserHandle.getAppId(packageUid)) {
+            throw new SecurityException("Package " + packageName
+                    + " does not belong to the calling uid " + callingUid);
+        }
+    }
+
+    private ResolveInfo isComponentValidTileService(ComponentName componentName, int userId) {
+        Intent intent = new Intent(TileService.ACTION_QS_TILE);
+        intent.setComponent(componentName);
+        ResolveInfo r = mPackageManagerInternal.resolveService(intent,
+                intent.resolveTypeIfNeeded(mContext.getContentResolver()), 0, userId,
+                Process.myUid());
+        int enabled = mPackageManagerInternal.getComponentEnabledSetting(
+                componentName, Process.myUid(), userId);
+        if (r != null
+                && r.serviceInfo != null
+                && resolveEnabledComponent(r.serviceInfo.enabled, enabled)
+                && Manifest.permission.BIND_QUICK_SETTINGS_TILE.equals(r.serviceInfo.permission)) {
+            return r;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean resolveEnabledComponent(boolean defaultValue, int pmResult) {
+        if (pmResult == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            return true;
+        }
+        if (pmResult == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            return defaultValue;
+        }
+        return false;
+    }
+
+    @Override
+    public int requestAddTile(
+            @NonNull ComponentName componentName,
+            @NonNull CharSequence label,
+            @NonNull Icon icon,
+            int userId,
+            @NonNull IAddTileResultCallback callback
+    ) {
+        int callingUid = Binder.getCallingUid();
+        String packageName = componentName.getPackageName();
+
+        // Check calling user can act on behalf of current user
+        mActivityManagerInternal.handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
+                false, ActivityManagerInternal.ALLOW_NON_FULL, "requestAddTile", packageName);
+
+        // Check calling uid matches package
+        checkCallingUidPackage(packageName, callingUid, userId);
+
+        int currentUser = mActivityManagerInternal.getCurrentUserId();
+
+        // Check current user
+        if (userId != currentUser) {
+            return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER;
+        }
+
+        // We've checked that the package, component name and uid all match.
+        ResolveInfo r = isComponentValidTileService(componentName, userId);
+        if (r == null) {
+            return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT;
+        }
+
+        IAddTileResultCallback proxyCallback = new IAddTileResultCallback.Stub() {
+            @Override
+            public void onTileRequest(int i) throws RemoteException {
+                if (i == StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED) {
+                    i = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED;
+                }
+                callback.onTileRequest(i);
+            }
+        };
+
+        CharSequence appName = r.serviceInfo.applicationInfo
+                .loadLabel(mContext.getPackageManager());
+        if (mBar != null) {
+            try {
+                mBar.requestAddTile(componentName, appName, label, icon, proxyCallback);
+                return StatusBarManager.TILE_ADD_REQUEST_ANSWER_SUCCESS;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestAddTile", e);
+            }
+        }
+        return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON;
     }
 
     public String[] getStatusBarIcons() {

@@ -34,6 +34,7 @@ import android.app.StatusBarManager.WindowType;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
@@ -58,6 +59,7 @@ import android.view.WindowInsetsController.Behavior;
 import androidx.annotation.NonNull;
 
 import com.android.internal.os.SomeArgs;
+import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
@@ -149,6 +151,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
     private static final int MSG_SET_UDFPS_HBM_LISTENER = 60 << MSG_SHIFT;
+    private static final int MSG_TILE_SERVICE_REQUEST_ADD = 61 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -403,6 +406,16 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
          */
         default void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {}
+
+        /**
+         * @see IStatusBar#requestAddTile
+         */
+        default void requestAddTile(
+                @NonNull ComponentName componentName,
+                @NonNull CharSequence appName,
+                @NonNull CharSequence label,
+                @NonNull Icon icon,
+                @NonNull IAddTileResultCallback callback) {}
     }
 
     public CommandQueue(Context context) {
@@ -1108,6 +1121,23 @@ public class CommandQueue extends IStatusBar.Stub implements
         GcUtils.runGcAndFinalizersSync();
     }
 
+    @Override
+    public void requestAddTile(
+            @NonNull ComponentName componentName,
+            @NonNull CharSequence appName,
+            @NonNull CharSequence label,
+            @NonNull Icon icon,
+            @NonNull IAddTileResultCallback callback
+    ) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = componentName;
+        args.arg2 = appName;
+        args.arg3 = label;
+        args.arg4 = icon;
+        args.arg5 = callback;
+        mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_ADD, args).sendToTarget();
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1480,6 +1510,19 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).setNavigationBarLumaSamplingEnabled(msg.arg1,
                                 msg.arg2 != 0);
                     }
+                    break;
+                case MSG_TILE_SERVICE_REQUEST_ADD:
+                    args = (SomeArgs) msg.obj;
+                    ComponentName componentName = (ComponentName) args.arg1;
+                    CharSequence appName = (CharSequence) args.arg2;
+                    CharSequence label = (CharSequence) args.arg3;
+                    Icon icon = (Icon) args.arg4;
+                    IAddTileResultCallback callback = (IAddTileResultCallback) args.arg5;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).requestAddTile(
+                                componentName, appName, label, icon, callback);
+                    }
+                    args.recycle();
                     break;
             }
         }

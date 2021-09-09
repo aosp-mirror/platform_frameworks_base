@@ -2353,7 +2353,6 @@ package android.content {
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final String SMARTSPACE_SERVICE = "smartspace";
     field public static final String STATS_MANAGER = "stats";
-    field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
