@@ -636,7 +636,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
 
-    AccessibilityController mAccessibilityController;
+    final AccessibilityController mAccessibilityController;
     private RecentsAnimationController mRecentsAnimationController;
 
     Watermark mWatermark;
@@ -1382,6 +1382,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mStartingSurfaceController = new StartingSurfaceController(this);
 
         mBlurController = new BlurController(mContext, mPowerManager);
+        mAccessibilityController = new AccessibilityController(this);
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
@@ -2161,7 +2162,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mWindowPlacerLocked.performSurfacePlacement();
 
                     // We need to report touchable region changes to accessibility.
-                    if (mAccessibilityController != null) {
+                    if (mAccessibilityController.hasCallbacks()) {
                         mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
                                 uid, w.getDisplayContent().getDisplayId());
                     }
@@ -2174,7 +2175,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized (mGlobalLock) {
-            if (mAccessibilityController != null) {
+            if (mAccessibilityController.hasCallbacks()) {
                 WindowState window = mWindowMap.get(token);
                 if (window != null) {
                     mAccessibilityController.onRectangleOnScreenRequested(
@@ -2264,7 +2265,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mActivityRecord.checkKeyguardFlagsChanged();
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
-                        && (mAccessibilityController != null)) {
+                        && (mAccessibilityController.hasCallbacks())) {
                     // No move or resize, but the controller checks for title changes as well
                     mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
                             uid, win.getDisplayContent().getDisplayId());
@@ -2586,7 +2587,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mDestroying = true;
             win.destroySurface(false, stopped);
         }
-        if (mAccessibilityController != null) {
+        if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
         }
 
@@ -6376,7 +6377,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
-        if (mAccessibilityController != null) {
+        if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.dump(pw, "  ");
         }
 
@@ -7396,7 +7397,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void setMagnificationSpec(int displayId, MagnificationSpec spec) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.setMagnificationSpec(displayId, spec);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7407,7 +7408,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void setForceShowMagnifiableBounds(int displayId, boolean show) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.setForceShowMagnifiableBounds(displayId, show);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7418,7 +7419,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.getMagnificationRegion(displayId, magnificationRegion);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7434,7 +7435,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
                 MagnificationSpec spec = null;
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     spec = mAccessibilityController.getMagnificationSpecForWindow(windowState);
                 }
                 if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
@@ -7453,16 +7454,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public boolean setMagnificationCallbacks(int displayId,
                 @Nullable MagnificationCallbacks callbacks) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController == null) {
-                    mAccessibilityController = new AccessibilityController(
-                            WindowManagerService.this);
-                }
-                boolean result = mAccessibilityController.setMagnificationCallbacks(
-                        displayId, callbacks);
-                if (!mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController = null;
-                }
-                return result;
+                return mAccessibilityController.setMagnificationCallbacks(displayId, callbacks);
             }
         }
 
@@ -7470,15 +7462,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void setWindowsForAccessibilityCallback(int displayId,
                 WindowsForAccessibilityCallback callback) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController == null) {
-                    mAccessibilityController = new AccessibilityController(
-                            WindowManagerService.this);
-                }
-                mAccessibilityController.setWindowsForAccessibilityCallback(
-                        displayId, callback);
-                if (!mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController = null;
-                }
+                mAccessibilityController.setWindowsForAccessibilityCallback(displayId, callback);
             }
         }
 
@@ -7651,13 +7635,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void computeWindowsForAccessibility(int displayId) {
-            final AccessibilityController accessibilityController;
-            synchronized (mGlobalLock) {
-                accessibilityController = mAccessibilityController;
-            }
-            if (accessibilityController != null) {
-                accessibilityController.performComputeChangedWindowsNot(displayId, true);
-            }
+            mAccessibilityController.performComputeChangedWindowsNot(displayId, true);
         }
 
         @Override

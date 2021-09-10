@@ -682,7 +682,7 @@ class WindowStateAnimator {
             applyAnimationLocked(transit, true);
         }
 
-        if (mService.mAccessibilityController != null) {
+        if (mService.mAccessibilityController.hasCallbacks()) {
             mService.mAccessibilityController.onWindowTransition(mWin, transit);
         }
     }
