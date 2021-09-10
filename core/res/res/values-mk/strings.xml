@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Користете го вашиот отпечаток или заклучување екран за да продолжите"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Нешто не е во ред. Обидете се повторно."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користете отклучување со лик или заклучување екран за да продолжите"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Нешто не е во ред. Обидете се повторно."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Икона"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"чита поставки за синхронизација"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Овозможува апликацијата да ги чита поставките за синхронизирање на сметка. На пример, така може да се утврди дали апликацијата „Луѓе“ е синхронизирана со сметка."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучат функциите за пристапност. Ова може да го промени начинот на функционирање на уредот.\n\nТековни функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМоже да ги промените избраните функции во „Поставки &gt; Пристапност“."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Да се вклучи кратенка за <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучи функцијата за пристапност <xliff:g id="SERVICE">%1$s</xliff:g>. Ова може да го промени начинот на функционирање на уредот.\n\nМоже да ја измените кратенкава да биде за друга функција во „Поставки &gt; Пристапност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Вклучи"</string>

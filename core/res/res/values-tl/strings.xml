@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gamitin ang iyong fingerprint o lock ng screen para magpatuloy"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nagkaproblema. Subukan ulit."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isyu sa Pag-unlock Gamit ang Mukha"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gamitin ang iyong mukha o lock ng screen para magpatuloy"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Nagkaproblema. Subukan ulit."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Face icon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"basahin ang mga setting ng sync"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"I-on ang shortcut para sa mga feature ng pagiging naa-access?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng accessibility kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Accessibility."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"I-on ang shortcut ng <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng accessibility na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"I-on"</string>
