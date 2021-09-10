@@ -1541,7 +1541,18 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
-            if (!mStorageSessionController.supportsExternalStorage(vol.mountUserId)) {
+            final Context volumeUserContext = mContext.createContextAsUser(
+                    UserHandle.of(vol.mountUserId), 0);
+
+            boolean isMediaSharedWithParent =
+                    (volumeUserContext != null) ? volumeUserContext.getSystemService(
+                            UserManager.class).isMediaSharedWithParent() : false;
+
+            // For all the users where media is shared with parent, creation of emulated volume
+            // should not be skipped even if media provider instance is not running in that user
+            // space
+            if (!isMediaSharedWithParent
+                    && !mStorageSessionController.supportsExternalStorage(vol.mountUserId)) {
                 Slog.d(TAG, "Ignoring volume " + vol.getId() + " because user "
                         + Integer.toString(vol.mountUserId)
                         + " does not support external storage.");
