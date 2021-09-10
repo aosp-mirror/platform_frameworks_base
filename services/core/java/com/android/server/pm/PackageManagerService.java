@@ -23388,6 +23388,37 @@ public class PackageManagerService extends IPackageManager.Stub
         return new IntentSender(target);
     }
 
+    @Override
+    public boolean mayPackageQuery(String sourcePackageName, String targetPackageName, int userId) {
+        if (!mUserManager.exists(userId)) return false;
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
+                false /*checkShell*/, "may package query");
+        synchronized (mLock) {
+            final PackageSetting sourceSetting = getPackageSetting(sourcePackageName);
+            final PackageSetting targetSetting = getPackageSetting(targetPackageName);
+            if (sourceSetting == null || targetSetting == null) {
+                throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
+                        + (sourceSetting == null ? sourcePackageName + " " : "")
+                        + (targetSetting == null ? targetPackageName + " " : "")
+                        + "not found."));
+            }
+            final boolean filterSource =
+                    shouldFilterApplicationLocked(sourceSetting, callingUid, userId);
+            final boolean filterTarget =
+                    shouldFilterApplicationLocked(targetSetting, callingUid, userId);
+            // The caller must have visibility of the both packages
+            if (filterSource || filterTarget) {
+                throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
+                        + (filterSource ? sourcePackageName + " " : "")
+                        + (filterTarget ? targetPackageName + " " : "")
+                        + "not found."));
+            }
+            final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.appId);
+            return !shouldFilterApplicationLocked(targetSetting, sourcePackageUid, userId);
+        }
+    }
+
     private static class TempUserState {
         public final int enabledState;
         @Nullable
