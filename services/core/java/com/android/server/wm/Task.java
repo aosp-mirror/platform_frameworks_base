@@ -165,6 +165,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -570,7 +571,9 @@ class Task extends TaskFragment {
             mRoot = r;
 
             // Only end search if we are ignore relinquishing identity or we are not relinquishing.
-            return ignoreRelinquishIdentity || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+            return ignoreRelinquishIdentity
+                    || mNeverRelinquishIdentity
+                    || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         }
     }
 
@@ -1009,7 +1012,14 @@ class Task extends TaskFragment {
     private void setIntent(Intent _intent, ActivityInfo info) {
         if (!isLeafTask()) return;
 
-        mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+        if (info.applicationInfo.uid == Process.SYSTEM_UID
+                || info.applicationInfo.isSystemApp()) {
+            // Only allow the apps that pre-installed on the system image to apply
+            // relinquishTaskIdentity
+            mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+        } else {
+            mNeverRelinquishIdentity = true;
+        }
         affinity = info.taskAffinity;
         if (intent == null) {
             // If this task already has an intent associated with it, don't set the root
