@@ -333,7 +333,8 @@ public final class WindowManagerImpl implements WindowManager {
                     .getWindowInsets(attrs, displayId, insetsState);
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
                     isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode, null /* typeSideMap */);
+                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode,
+                    null /* typeSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
