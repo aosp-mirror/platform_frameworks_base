@@ -12670,7 +12670,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Intent intent = allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, null, -1, -1, false, null, null, null, OP_NONE, null, receivers,
+                            null, null, -1, -1, PROCESS_STATE_NONEXISTENT, false, null, null, null,
+                            OP_NONE, null, receivers,
                             null, 0, null, null, false, true, true, -1, false, null,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */);
                     queue.enqueueParallelBroadcastLocked(r);
@@ -12931,6 +12932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Nullable int[] broadcastAllowList) {
         intent = new Intent(intent);
 
+        final int callerUidState = getUidStateLocked(realCallingUid);
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
         // Instant Apps cannot use FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS
         if (callerInstantApp) {
@@ -13498,7 +13500,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                    callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
+                    callerFeatureId, callingPid, callingUid, callerUidState, callerInstantApp,
+                    resolvedType,
                     requiredPermissions, excludedPermissions, appOp, brOptions, registeredReceivers,
                     resultTo, resultCode, resultData, resultExtras, ordered, sticky, false, userId,
                     allowBackgroundActivityStarts, backgroundActivityStartsToken,
@@ -13596,7 +13599,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                    callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
+                    callerFeatureId, callingPid, callingUid, callerUidState, callerInstantApp,
+                    resolvedType,
                     requiredPermissions, excludedPermissions, appOp, brOptions,
                     receivers, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId, allowBackgroundActivityStarts,
