@@ -14,10 +14,8 @@
 
 package com.android.systemui.plugins;
 
-import android.content.Context;
 import android.util.Log;
 
-import com.android.systemui.R;
 import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 
@@ -38,12 +36,6 @@ public class PluginInitializerImpl implements PluginInitializer {
     public PluginInitializerImpl(PluginDependencyProvider  dependencyProvider) {
         dependencyProvider.allowPluginDependency(ActivityStarter.class);
     }
-
-    @Override
-    public String[] getPrivilegedPlugins(Context context) {
-        return context.getResources().getStringArray(R.array.config_pluginWhitelist);
-    }
-
 
     @Override
     public void handleWtfs() {
