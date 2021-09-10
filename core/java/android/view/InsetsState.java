@@ -202,7 +202,7 @@ public class InsetsState implements Parcelable {
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
-        boolean[] typeVisibilityMap = new boolean[SIZE];
+        boolean[] typeVisibilityMap = new boolean[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
