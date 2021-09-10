@@ -384,10 +384,10 @@ public class ResolverActivityTest {
         info = createPackageManagerMockedInfo(true);
         pg = new ResolveInfoPresentationGetter(
                 info.ctx, 0, info.resolveInfo);
-        assertThat("With override permission label should match resolve info label if set",
-                pg.getLabel().equals(info.setResolveInfoLabel));
-        assertThat("With override permission sublabel should be empty",
-                TextUtils.isEmpty(pg.getSubLabel()));
+        assertThat("With override permission label should match activity label if set",
+                pg.getLabel().equals(info.setActivityLabel));
+        assertThat("With override permission the sublabel should be the resolve info label",
+                pg.getSubLabel().equals(info.setResolveInfoLabel));
     }
 
     @Test
