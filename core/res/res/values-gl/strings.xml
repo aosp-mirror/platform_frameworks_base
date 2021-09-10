@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Para continuar, utiliza a impresión dixital ou o bloqueo de pantalla"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Produciuse un erro. Téntao de novo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona de impresión dixital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Produciuse un problema co desbloqueo facial"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Para continuar, utiliza o desbloqueo facial ou a credencial do dispositivo"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Produciuse un erro. Téntao de novo."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona cara"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ler a configuración de vinculación"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permite á aplicación ler a configuración de vinculación dunha conta. Por exemplo, esta acción pode determinar se a aplicación Contactos se vincula cunha conta."</string>
@@ -985,7 +983,7 @@
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Confirmar navegación"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Abandonar esta páxina"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Permanecer nesta páxina"</string>
-    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nEstás seguro de que queres saír desta páxina?"</string>
+    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nSeguro que queres saír desta páxina?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Confirmar"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Consello: Toca dúas veces para achegar e afastar o zoom."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"Encher"</string>

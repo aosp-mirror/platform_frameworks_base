@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilitza l\'empremta digital o el bloqueig de pantalla per continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"S\'ha produït un error. Torna-ho a provar."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema amb Desbloqueig facial"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilitza la cara o el bloqueig de pantalla per continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"S\'ha produït un error. Torna-ho a provar."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"llegir la configuració de sincronització"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Contactes estigui sincronitzada amb un compte."</string>
@@ -911,7 +909,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Xarxa bloquejada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La targeta SIM està bloquejada pel PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia de l\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia d\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La targeta SIM està bloquejada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
