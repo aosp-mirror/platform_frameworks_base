@@ -1855,7 +1855,7 @@
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Alterada para uma nova solicitação SS"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabalho"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alertado"</string>
-    <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Abrir"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Recolher"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"alternar expansão"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Porta USB periférica Android"</string>

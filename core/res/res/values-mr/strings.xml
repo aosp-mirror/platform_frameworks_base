@@ -963,7 +963,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"ब्राउझर भौगोलिक स्थान परवानग्या सुधारित करा"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"ब्राउझरच्या भौगोलिक स्थान परवानग्या सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स यादृच्छिक वेबसाइटवर स्थान माहिती पाठविण्यास अनुमती देण्यासाठी याचा वापर करू शकतात."</string>
     <string name="save_password_message" msgid="2146409467245462965">"ब्राउझरने हा पासवर्ड लक्षात ठेवावा असे तुम्ही इच्छिता?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"आत्ता नाही"</string>
+    <string name="save_password_notnow" msgid="2878327088951240061">"आता नको"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"लक्षात ठेवा"</string>
     <string name="save_password_never" msgid="6776808375903410659">"कधीही नाही"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"तुम्हाला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
@@ -1947,7 +1947,7 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"नाही, नको"</string>
-    <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नाही"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नको"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"कधीही नाही"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"अपडेट करा"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"पुढे सुरू ठेवा"</string>

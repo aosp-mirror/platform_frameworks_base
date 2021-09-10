@@ -1918,7 +1918,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"फ़ोटो और तस्वीरें"</string>
     <string name="app_category_social" msgid="2278269325488344054">"सामाजिक और संचार"</string>
     <string name="app_category_news" msgid="1172762719574964544">"समाचार और पत्रिकाएं"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Maps और नेविगेशन ऐप्लिकेशन"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"मैप और नेविगेशन ऐप्लिकेशन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>

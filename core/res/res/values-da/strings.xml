@@ -191,10 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratoren har gjort personlig brug af enheden utilgængelig"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dette er en administreret enhed"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Din organisation administrerer denne enhed og kan overvåge netværkstrafik. Tryk for at se info."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps kan få adgang til din placering"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps kan få adgang til din lokation"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakt din it-administrator for at få flere oplysninger"</string>
     <string name="country_detector" msgid="7023275114706088854">"Landeregistrering"</string>
-    <string name="location_service" msgid="2439187616018455546">"Placeringstjeneste"</string>
+    <string name="location_service" msgid="2439187616018455546">"Lokationstjeneste"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tjenesten Sensor Notification"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Tjenesten Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheden slettes"</string>
@@ -295,8 +295,8 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Skift til arbejdsprofil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"have adgang til dine kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="1995955142118450685">"få adgang til enhedens placering"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Lokation"</string>
+    <string name="permgroupdesc_location" msgid="1995955142118450685">"få adgang til enhedens lokation"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"have adgang til din kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
@@ -419,14 +419,14 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din tablet. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din Android TV-enhed. Denne app kan sende meddelelser, der lader til at stamme fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din telefon. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig placering i forgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering. Dette kan øge batteriforbruget."</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig placering i forgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din placering, selv når den ikke er i brug."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for lokationsudbyder"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for lokationsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre lokationskilder."</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig lokation i forgrunden"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige lokation via lokationstjenester, når appen er i brug. Lokationstjenester skal være aktiveret på din enhed, før appen kan finde din lokation. Dette kan øge batteriforbruget."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig lokation i forgrunden"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige lokation via lokationstjenester, når appen er i brug. Lokationstjenester skal være aktiveret på din enhed, før appen kan finde din lokation."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til lokation i baggrunden"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din lokation, selv når den ikke er i brug."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"optage lyd"</string>
@@ -534,8 +534,8 @@
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Tillader, at appen kan ændre din videosamling."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"ændre din billedsamling"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tillader, at appen kan ændre din billedsamling."</string>
-    <string name="permlab_mediaLocation" msgid="7368098373378598066">"læse placeringer fra din mediesamling"</string>
-    <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse placeringer fra din mediesamling."</string>
+    <string name="permlab_mediaLocation" msgid="7368098373378598066">"læse lokationer fra din mediesamling"</string>
+    <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse lokationer fra din mediesamling."</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hardware er ikke tilgængelig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Godkendelsen blev annulleret"</string>
@@ -1456,14 +1456,14 @@
     <string name="websearch" msgid="5624340204512793290">"Websøgning"</string>
     <string name="find_next" msgid="5341217051549648153">"Find næste"</string>
     <string name="find_previous" msgid="4405898398141275532">"Find forrige"</string>
-    <string name="gpsNotifTicker" msgid="3207361857637620780">"Placeringsanmodning fra <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="1590033371665669570">"Placeringsanmodning"</string>
+    <string name="gpsNotifTicker" msgid="3207361857637620780">"Lokationsanmodning fra <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="1590033371665669570">"Lokationsanmodning"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Anmodet om af <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nej"</string>
-    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Din placering i nødstilfælde er tilgået"</string>
-    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Din enheds producent fik adgang til din placering i løbet af en nødsituation for nylig"</string>
-    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Dit mobilselskab fik adgang til din placering i løbet af en nødsituation for nylig"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Din lokation i nødstilfælde er tilgået"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Din enheds producent fik adgang til din lokation i løbet af en nødsituation for nylig"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Dit mobilselskab fik adgang til din lokation i løbet af en nødsituation for nylig"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Grænsen for sletning er overskredet"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Der er <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> slettede emner for <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Hvad vil du gøre?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Slet elementerne"</string>

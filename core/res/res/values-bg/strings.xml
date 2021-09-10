@@ -808,7 +808,7 @@
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Препоръчан/а от"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Роднина"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"Сестра"</string>
-    <string name="relationTypeSpouse" msgid="6916682664436031703">"Съпруг/а"</string>
+    <string name="relationTypeSpouse" msgid="6916682664436031703">"Съпруг(а)"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Персонализиран"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Домашен"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"Служебен"</string>

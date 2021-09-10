@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Xarxa bloquejada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La targeta SIM està bloquejada pel PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia de l\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia d\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La targeta SIM està bloquejada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>

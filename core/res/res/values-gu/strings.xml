@@ -897,7 +897,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> વિજેટ."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"વપરાશકર્તા પસંદગીકર્તા"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"સ્થિતિ"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"કૅમેરો"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"કૅમેરા"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"મીડિયા નિયંત્રણો"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"વિજેટ પુનઃક્રમાંકન પ્રારંભ થયું."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"વિજેટ પુનઃક્રમાંકન સમાપ્ત થયું."</string>
