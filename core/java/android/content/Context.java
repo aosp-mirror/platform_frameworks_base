@@ -3801,6 +3801,7 @@ public abstract class Context {
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
             LIGHTS_SERVICE,
+            LOCALE_SERVICE,
             //@hide: PEOPLE_SERVICE,
             //@hide: DEVICE_STATE_SERVICE,
             //@hide: SPEECH_RECOGNITION_SERVICE,
@@ -5782,6 +5783,15 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String DISPLAY_HASH_SERVICE = "display_hash";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.LocaleManager}.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String LOCALE_SERVICE = "locale";
 
     /**
      * Determine whether the given permission is allowed for a particular
