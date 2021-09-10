@@ -73,3 +73,7 @@ per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
 # VINTF
 per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
 per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS
+
+# Battery
+per-file com_android_internal_os_Kernel* = file:/BATTERY_STATS_OWNERS
+per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNERS
