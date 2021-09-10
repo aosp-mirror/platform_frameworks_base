@@ -561,6 +561,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
             switch (msg.what) {
                 case MSG_CHECK_STORAGE_DELTA: {
+                    mStats.restat(Environment.getDataDirectory().getAbsolutePath());
                     long bytesDelta = Math.abs(mPreviousBytes - mStats.getAvailableBytes());
                     if (bytesDelta > mMinimumThresholdBytes) {
                         mPreviousBytes = mStats.getAvailableBytes();
@@ -583,6 +584,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
                     // If errors occurred getting the quotas from disk, let's re-calc them.
                     if (mPreviousBytes < 0) {
+                        mStats.restat(Environment.getDataDirectory().getAbsolutePath());
                         mPreviousBytes = mStats.getAvailableBytes();
                         recalculateQuotas(strategy);
                     }
