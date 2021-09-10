@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
@@ -734,6 +735,17 @@ interface IWindowManager
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out InsetsState outInsetsState);
+
+    /**
+     * Returns a list of {@link android.view.DisplayInfo} for the logical display. This is not
+     * guaranteed to include all possible device states. The list items are unique.
+     *
+     * If invoked through a package other than a launcher app, returns an empty list.
+     *
+     * @param displayId the id of the logical display
+     * @param packageName the name of the calling package
+     */
+    List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName);
 
     /**
      * Called to show global actions.
