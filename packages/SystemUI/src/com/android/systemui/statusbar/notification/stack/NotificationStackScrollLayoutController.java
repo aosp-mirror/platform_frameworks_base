@@ -783,9 +783,6 @@ public class NotificationStackScrollLayoutController {
         mTunerService.addTunable(
                 (key, newValue) -> {
                     switch (key) {
-                        case Settings.Secure.NOTIFICATION_DISMISS_RTL:
-                            mView.updateDismissRtlSetting("1".equals(newValue));
-                            break;
                         case Settings.Secure.NOTIFICATION_HISTORY_ENABLED:
                             updateFooter();
                             break;
@@ -795,7 +792,6 @@ public class NotificationStackScrollLayoutController {
                     }
                 },
                 HIGH_PRIORITY,
-                Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
