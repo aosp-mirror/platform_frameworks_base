@@ -89,9 +89,7 @@ import java.util.UUID;
  *
  * @hide
  */
-public class ParsingPackageImpl implements ParsingPackage, Parcelable {
-
-    private static final String TAG = "PackageImpl";
+public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden, Parcelable {
 
     public static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     public static ForInternedString sForInternedString = Parcelling.Cache.getOrCreate(
@@ -147,10 +145,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForInternedString.class)
     protected String packageName;
 
-    @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    private String realPackage;
-
     @NonNull
     protected String mBaseApkPath;
 
@@ -166,7 +160,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private String overlayTarget;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
-    private String overlayTargetName;
+    private String overlayTargetOverlayableName;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String overlayCategory;
@@ -1019,7 +1013,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return appInfo;
     }
 
-    @Override
     public ApplicationInfo toAppInfoWithoutStateWithoutFlags() {
         ApplicationInfo appInfo = new ApplicationInfo();
 
@@ -1126,12 +1119,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.compileSdkVersion);
         dest.writeString(this.compileSdkVersionCodeName);
         sForInternedString.parcel(this.packageName, dest, flags);
-        dest.writeString(this.realPackage);
         dest.writeString(this.mBaseApkPath);
         dest.writeString(this.restrictedAccountType);
         dest.writeString(this.requiredAccountType);
         sForInternedString.parcel(this.overlayTarget, dest, flags);
-        dest.writeString(this.overlayTargetName);
+        dest.writeString(this.overlayTargetOverlayableName);
         dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
         sForInternedStringValueMap.parcel(this.overlayables, dest, flags);
@@ -1250,12 +1242,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.compileSdkVersion = in.readInt();
         this.compileSdkVersionCodeName = in.readString();
         this.packageName = sForInternedString.unparcel(in);
-        this.realPackage = in.readString();
         this.mBaseApkPath = in.readString();
         this.restrictedAccountType = in.readString();
         this.requiredAccountType = in.readString();
         this.overlayTarget = sForInternedString.unparcel(in);
-        this.overlayTargetName = in.readString();
+        this.overlayTargetOverlayableName = in.readString();
         this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
         this.overlayables = sForInternedStringValueMap.unparcel(in);
@@ -1384,6 +1375,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public long getLongVersionCode() {
+        return mLongVersionCode;
+    }
+
+    @Override
     public int getBaseRevisionCode() {
         return baseRevisionCode;
     }
@@ -1409,12 +1405,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public String getPackageName() {
         return packageName;
-    }
-
-    @Nullable
-    @Override
-    public String getRealPackage() {
-        return realPackage;
     }
 
     @NonNull
@@ -1448,8 +1438,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @Override
-    public String getOverlayTargetName() {
-        return overlayTargetName;
+    public String getOverlayTargetOverlayableName() {
+        return overlayTargetOverlayableName;
     }
 
     @Nullable
@@ -1552,7 +1542,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public List<FeatureInfo> getReqFeatures() {
+    public List<FeatureInfo> getRequestedFeatures() {
         return reqFeatures;
     }
 
@@ -1939,13 +1929,13 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public int getTargetSandboxVersion() {
-        return targetSandboxVersion;
+    public int getTargetSdkVersion() {
+        return targetSdkVersion;
     }
 
     @Override
-    public int getTargetSdkVersion() {
-        return targetSdkVersion;
+    public int getTargetSandboxVersion() {
+        return targetSandboxVersion;
     }
 
     @Nullable
@@ -2698,20 +2688,15 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setRealPackage(@Nullable String realPackage) {
-        this.realPackage = realPackage;
-        return this;
-    }
-
-    @Override
     public ParsingPackageImpl setRestrictedAccountType(@Nullable String restrictedAccountType) {
         this.restrictedAccountType = restrictedAccountType;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setOverlayTargetName(@Nullable String overlayTargetName) {
-        this.overlayTargetName = overlayTargetName;
+    public ParsingPackageImpl setOverlayTargetOverlayableName(
+            @Nullable String overlayTargetOverlayableName) {
+        this.overlayTargetOverlayableName = overlayTargetOverlayableName;
         return this;
     }
 

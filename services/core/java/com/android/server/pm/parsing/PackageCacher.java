@@ -76,7 +76,8 @@ public class PackageCacher {
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
 
-        final PackageParserCacheHelper.ReadHelper helper = new PackageParserCacheHelper.ReadHelper(p);
+        final PackageParserCacheHelper.ReadHelper helper =
+                new PackageParserCacheHelper.ReadHelper(p);
         helper.startAndInstall();
 
         ParsedPackage pkg = new PackageImpl(p);
@@ -98,9 +99,10 @@ public class PackageCacher {
     @VisibleForTesting
     public static byte[] toCacheEntryStatic(ParsedPackage pkg) {
         final Parcel p = Parcel.obtain();
-        final PackageParserCacheHelper.WriteHelper helper = new PackageParserCacheHelper.WriteHelper(p);
+        final PackageParserCacheHelper.WriteHelper helper =
+                new PackageParserCacheHelper.WriteHelper(p);
 
-        pkg.writeToParcel(p, 0 /* flags */);
+        ((PackageImpl) pkg).writeToParcel(p, 0 /* flags */);
 
         helper.finishAndUninstall();
 

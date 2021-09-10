@@ -136,9 +136,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             boolean isUpdatedSystemApp, File appLib32InstallDir) {
         // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
         // current state in PackageSetting is irrelevant.
-        return deriveNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
-                appLib32InstallDir, pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
-                isUpdatedSystemApp);
+        return deriveNativeLibraryPaths(new Abis(AndroidPackageUtils.getRawPrimaryCpuAbi(pkg),
+                AndroidPackageUtils.getRawSecondaryCpuAbi(pkg)), appLib32InstallDir, pkg.getPath(),
+                pkg.getBaseApkPath(), pkg.isSystem(), isUpdatedSystemApp);
     }
 
     private static NativeLibraryPaths deriveNativeLibraryPaths(final Abis abis,
