@@ -352,7 +352,7 @@ public class Vcn extends Handler {
     }
 
     private void handleSafeModeStatusChanged() {
-        logDbg("VcnGatewayConnection safe mode status changed");
+        logVdbg("VcnGatewayConnection safe mode status changed");
         boolean hasSafeModeGatewayConnection = false;
 
         // If any VcnGatewayConnection is in safe mode, mark the entire VCN as being in safe mode
@@ -368,7 +368,7 @@ public class Vcn extends Handler {
                 hasSafeModeGatewayConnection ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE;
         if (oldStatus != mCurrentStatus) {
             mVcnCallback.onSafeModeStatusChanged(hasSafeModeGatewayConnection);
-            logDbg(
+            logInfo(
                     "Safe mode "
                             + (mCurrentStatus == VCN_STATUS_CODE_SAFE_MODE ? "entered" : "exited"));
         }
@@ -537,6 +537,16 @@ public class Vcn extends Handler {
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
+    }
+
+    private void logInfo(String msg) {
+        Slog.i(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "INFO: " + msg);
+    }
+
+    private void logInfo(String msg, Throwable tr) {
+        Slog.i(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "INFO: " + msg + tr);
     }
 
     private void logErr(String msg) {
