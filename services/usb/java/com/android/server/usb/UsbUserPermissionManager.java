@@ -45,6 +45,7 @@ import android.service.usb.UsbUidPermissionProto;
 import android.service.usb.UsbUserPermissionsManagerProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlPullParser;
@@ -73,6 +74,8 @@ import java.io.IOException;
 class UsbUserPermissionManager {
     private static final String TAG = UsbUserPermissionManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    private static final int SNET_EVENT_LOG_ID = 0x534e4554;
 
     @GuardedBy("mLock")
     /** Mapping of USB device name to list of UIDs with permissions for the device
@@ -691,6 +694,7 @@ class UsbUserPermissionManager {
             if (aInfo.uid != uid) {
                 Slog.w(TAG, "package " + packageName
                         + " does not match caller's uid " + uid);
+                EventLog.writeEvent(SNET_EVENT_LOG_ID, "180104273", -1, "");
                 throw new IllegalArgumentException("package " + packageName
                         + " not found");
             }
