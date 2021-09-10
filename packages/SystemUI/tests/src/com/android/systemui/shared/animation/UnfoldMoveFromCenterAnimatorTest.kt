@@ -56,45 +56,71 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
     @Test
     fun testRegisterViewOnTheLeftOfVerticalFold_halfProgress_viewTranslatedToTheRight() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_0)
-        val view = createView(x = 20)
+        val view = createView(x = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
 
         animator.onTransitionProgress(0.5f)
 
         // Positive translationX -> translated to the right
-        assertThat(view.translationX).isWithin(0.1f).of(3.75f)
+        // 10x10 view center is 25px from the center,
+        // When progress is 0.5 it should be translated at:
+        // 25 * 0.3 * (1 - 0.5) = 3.75px
+        assertThat(view.translationX).isWithin(0.01f).of(3.75f)
     }
 
     @Test
     fun testRegisterViewOnTheLeftOfVerticalFold_zeroProgress_viewTranslatedToTheRight() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_0)
-        val view = createView(x = 20)
+        val view = createView(x = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
 
         animator.onTransitionProgress(0f)
 
         // Positive translationX -> translated to the right
-        assertThat(view.translationX).isWithin(0.1f).of(7.5f)
+        // 10x10 view center is 25px from the center,
+        // When progress is 0 it should be translated at:
+        // 25 * 0.3 * (1 - 0) = 7.5px
+        assertThat(view.translationX).isWithin(0.01f).of(7.5f)
     }
 
     @Test
     fun testRegisterViewOnTheLeftOfVerticalFold_fullProgress_viewTranslatedToTheOriginalPosition() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_0)
-        val view = createView(x = 20)
+        val view = createView(x = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
 
         animator.onTransitionProgress(1f)
 
+        // Positive translationX -> translated to the right
+        // 10x10 view center is 25px from the center,
+        // When progress is 1 it should be translated at:
+        // 25 * 0.3 * 0 = 0px
         assertThat(view.translationX).isEqualTo(0f)
+    }
+
+    @Test
+    fun testViewOnTheLeftOfVerticalFoldWithTranslation_halfProgress_viewTranslatedToTheRight() {
+        givenScreen(width = 100, height = 100, rotation = ROTATION_0)
+        val view = createView(x = 20, width = 10, height = 10, translationX = 100f)
+        animator.registerViewForAnimation(view)
+        animator.onTransitionStarted()
+
+        animator.onTransitionProgress(0.5f)
+
+        // Positive translationX -> translated to the right, original translation is ignored
+        // 10x10 view center is 25px from the center,
+        // When progress is 0.5 it should be translated at:
+        // 25 * 0.3 * (1 - 0.5) = 3.75px
+        assertThat(view.translationX).isWithin(0.01f).of(3.75f)
     }
 
     @Test
     fun testRegisterViewAndUnregister_halfProgress_viewIsNotUpdated() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_0)
-        val view = createView(x = 20)
+        val view = createView(x = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
         animator.clearRegisteredViews()
@@ -107,7 +133,7 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
     @Test
     fun testRegisterViewUpdateProgressAndUnregister_halfProgress_viewIsNotUpdated() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_0)
-        val view = createView(x = 20)
+        val view = createView(x = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
         animator.onTransitionProgress(0.2f)
@@ -121,14 +147,14 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
     @Test
     fun testRegisterViewOnTheTopOfHorizontalFold_halfProgress_viewTranslatedToTheBottom() {
         givenScreen(width = 100, height = 100, rotation = ROTATION_90)
-        val view = createView(y = 20)
+        val view = createView(y = 20, width = 10, height = 10)
         animator.registerViewForAnimation(view)
         animator.onTransitionStarted()
 
         animator.onTransitionProgress(0.5f)
 
         // Positive translationY -> translated to the bottom
-        assertThat(view.translationY).isWithin(0.1f).of(3.75f)
+        assertThat(view.translationY).isWithin(0.01f).of(3.75f)
     }
 
     private fun createView(
@@ -156,9 +182,11 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         }
     }
 
-    private fun givenScreen(width: Int = 100,
-                            height: Int = 100,
-                            rotation: Int = ROTATION_0) {
+    private fun givenScreen(
+        width: Int = 100,
+        height: Int = 100,
+        rotation: Int = ROTATION_0
+    ) {
         val display = mock(Display::class.java)
         whenever(display.getSize(any())).thenAnswer {
             val size = (it.arguments[0] as Point)
