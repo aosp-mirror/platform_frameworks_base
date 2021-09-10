@@ -165,7 +165,18 @@ import java.util.List;
         aidlNanoAppBinary.flags = nanoAppBinary.getFlags();
         aidlNanoAppBinary.targetChreApiMajorVersion = nanoAppBinary.getTargetChreApiMajorVersion();
         aidlNanoAppBinary.targetChreApiMinorVersion = nanoAppBinary.getTargetChreApiMinorVersion();
-        aidlNanoAppBinary.customBinary = nanoAppBinary.getBinaryNoHeader();
+        // This explicit definition is required to avoid erroneous behavior at the binder.
+        aidlNanoAppBinary.customBinary = new byte[0];
+
+        // Log exceptions while processing the binary, but continue to pass down the binary
+        // since the error checking is deferred to the Context Hub.
+        try {
+            aidlNanoAppBinary.customBinary = nanoAppBinary.getBinaryNoHeader();
+        } catch (IndexOutOfBoundsException e) {
+            Log.w(TAG, e.getMessage());
+        } catch (NullPointerException e) {
+            Log.w(TAG, "NanoApp binary was null");
+        }
 
         return aidlNanoAppBinary;
     }
