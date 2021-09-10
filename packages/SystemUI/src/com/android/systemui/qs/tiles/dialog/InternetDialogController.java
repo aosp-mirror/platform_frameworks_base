@@ -58,9 +58,11 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.DeviceInfoUtils;
+import com.android.settingslib.SignalIcon;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings;
+import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
@@ -534,6 +536,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
 
         int resId = mapIconSets(config).get(iconKey).dataContentDescription;
+        final MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        if (mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork()) {
+            SignalIcon.MobileIconGroup carrierMergedWifiIconGroup =
+                    TelephonyIcons.CARRIER_MERGED_WIFI;
+            resId = carrierMergedWifiIconGroup.dataContentDescription;
+        }
+
         return resId != 0
                 ? SubscriptionManager.getResourcesForSubId(context, subId).getString(resId) : "";
     }
