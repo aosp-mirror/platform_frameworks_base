@@ -1063,7 +1063,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                         // TODO(jaewan): Implement
                     }
                 } else if (mCurrentFullUserRecord.mLastMediaButtonReceiverHolder != null) {
-                    String packageName = mLastMediaButtonReceiverHolder.getPackageName();
+                    String packageName =
+                            mCurrentFullUserRecord.mLastMediaButtonReceiverHolder.getPackageName();
                     callback.onMediaKeyEventSessionChanged(packageName, null);
                 } else {
                     callback.onMediaKeyEventSessionChanged("", null);
