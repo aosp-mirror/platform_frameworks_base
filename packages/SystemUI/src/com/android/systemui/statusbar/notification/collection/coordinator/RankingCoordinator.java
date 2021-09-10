@@ -41,6 +41,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class RankingCoordinator implements Coordinator {
+    public static final boolean SHOW_ALL_SECTIONS = false;
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
     private final NodeController mSilentHeaderController;
@@ -83,7 +84,11 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mAlertingHeaderController;
+            // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and mAlertingHeaderController
+            if (SHOW_ALL_SECTIONS) {
+                return mAlertingHeaderController;
+            }
+            return null;
         }
     };
 

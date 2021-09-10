@@ -205,7 +205,11 @@ public class HeadsUpCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mIncomingHeaderController;
+            // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and mIncomingHeaderController
+            if (RankingCoordinator.SHOW_ALL_SECTIONS) {
+                return mIncomingHeaderController;
+            }
+            return null;
         }
     };
 
