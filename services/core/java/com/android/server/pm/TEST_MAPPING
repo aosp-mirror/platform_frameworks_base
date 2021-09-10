@@ -1,14 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "CtsAtomicInstallTestCases",
-      "file_patterns": [
-        "core/java/.*Install.*",
-        "services/core/.*Install.*",
-        "services/core/java/com/android/server/pm/.*"
-      ]
-    },
-    {
       "name": "CtsPackageInstallTestCases",
       "file_patterns": [
         "core/java/.*Install.*",
