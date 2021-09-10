@@ -60,7 +60,6 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -121,8 +120,6 @@ public class QSTileHostTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
-    @Mock
-    private FeatureFlags mFeatureFlags;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -140,14 +137,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
                 mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
-                mSecureSettings, mCustomTileStatePersister, mFeatureFlags);
+                mSecureSettings, mCustomTileStatePersister);
         setUpTileFactory();
-<<<<<<< TARGET BRANCH (33be4a Merge "Correctly clip QS during heads-up pull down" into sc-)
-=======
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(false);
-        when(mSecureSettings.getStringForUser(eq(QSTileHost.TILES_SETTING), anyInt()))
-                .thenReturn("");
->>>>>>> SOURCE BRANCH (bc6f74 [DO NOT MERGE] Make sure WiFi and Cell tiles are not created)
     }
 
     private void setUpTileFactory() {
@@ -175,13 +166,13 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testLoadTileSpecs_emptySetting() {
-        List<String> tiles = QSTileHost.loadTileSpecs(mContext, "", mFeatureFlags);
+        List<String> tiles = QSTileHost.loadTileSpecs(mContext, "");
         assertFalse(tiles.isEmpty());
     }
 
     @Test
     public void testLoadTileSpecs_nullSetting() {
-        List<String> tiles = QSTileHost.loadTileSpecs(mContext, null, mFeatureFlags);
+        List<String> tiles = QSTileHost.loadTileSpecs(mContext, null);
         assertFalse(tiles.isEmpty());
     }
 
@@ -192,55 +183,6 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "not-valid");
 
         assertEquals(2, mQSTileHost.getTiles().size());
-    }
-
-    @Test
-    public void testRemoveWifiAndCellularWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
-        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2");
-
-        assertEquals("internet", mQSTileHost.mTileSpecs.get(0));
-        assertEquals("spec1", mQSTileHost.mTileSpecs.get(1));
-        assertEquals("spec2", mQSTileHost.mTileSpecs.get(2));
-    }
-
-    @Test
-    public void testRemoveWifiAndCellularWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
-        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2, internet");
-
-        assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
-        assertEquals("spec2", mQSTileHost.mTileSpecs.get(1));
-        assertEquals("internet", mQSTileHost.mTileSpecs.get(2));
-    }
-
-    @Test
-    public void testRemoveWifiWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
-        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, wifi, spec2");
-
-        assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
-        assertEquals("internet", mQSTileHost.mTileSpecs.get(1));
-        assertEquals("spec2", mQSTileHost.mTileSpecs.get(2));
-    }
-
-    @Test
-    public void testRemoveCellWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
-        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, spec2, cell, internet");
-
-        assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
-        assertEquals("spec2", mQSTileHost.mTileSpecs.get(1));
-        assertEquals("internet", mQSTileHost.mTileSpecs.get(2));
-    }
-
-    @Test
-    public void testNoWifiNoCellularNoInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
-        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1,spec2");
-
-        assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
-        assertEquals("spec2", mQSTileHost.mTileSpecs.get(1));
     }
 
     @Test
@@ -376,7 +318,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testLoadTileSpec_repeated() {
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "spec1,spec1,spec2", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "spec1,spec1,spec2");
 
         assertEquals(2, specs.size());
         assertEquals("spec1", specs.get(0));
@@ -387,7 +329,7 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testLoadTileSpec_repeatedInDefault() {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1,spec1");
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default");
 
         // Remove spurious tiles, like dbg:mem
         specs.removeIf(spec -> !"spec1".equals(spec));
@@ -398,7 +340,7 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testLoadTileSpec_repeatedDefaultAndSetting() {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1");
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default,spec1", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default,spec1");
 
         // Remove spurious tiles, like dbg:mem
         specs.removeIf(spec -> !"spec1".equals(spec));
@@ -436,12 +378,11 @@ public class QSTileHostTest extends SysuiTestCase {
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
                 UiEventLogger uiEventLogger, UserTracker userTracker,
-                SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
-                FeatureFlags featureFlags) {
+                SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
                     Optional.of(statusBar), qsLogger, uiEventLogger, userTracker, secureSettings,
-                    customTileStatePersister, featureFlags);
+                    customTileStatePersister);
         }
 
         @Override
