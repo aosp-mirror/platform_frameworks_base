@@ -34,11 +34,13 @@ public:
     MOCK_METHOD(void, notify, (const int64_t* buffer), (override));
 };
 
-TEST(FrameMetricsReporter, reportsAllFramesIfNoFromFrameIsSpecified) {
+// To make sure it is clear that something went wrong if no from frame is set (to make it easier
+// to catch bugs were we forget to set the fromFrame).
+TEST(FrameMetricsReporter, doesNotReportAnyFrameIfNoFromFrameIsSpecified) {
     auto reporter = std::make_shared<FrameMetricsReporter>();
 
     auto observer = sp<TestFrameMetricsObserver>::make(false /*waitForPresentTime*/);
-    EXPECT_CALL(*observer, notify).Times(4);
+    EXPECT_CALL(*observer, notify).Times(0);
 
     reporter->addObserver(observer.get());
 
@@ -62,17 +64,19 @@ TEST(FrameMetricsReporter, reportsAllFramesIfNoFromFrameIsSpecified) {
 }
 
 TEST(FrameMetricsReporter, respectsWaitForPresentTimeUnset) {
-    auto reporter = std::make_shared<FrameMetricsReporter>();
-
-    auto observer = sp<TestFrameMetricsObserver>::make(false /*waitForPresentTime*/);
-    reporter->addObserver(observer.get());
-
     const int64_t* stats;
     bool hasPresentTime = false;
     uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
+    auto reporter = std::make_shared<FrameMetricsReporter>();
+
+    auto observer = sp<TestFrameMetricsObserver>::make(hasPresentTime);
+    observer->reportMetricsFrom(frameNumber, surfaceControlId);
+    reporter->addObserver(observer.get());
+
     EXPECT_CALL(*observer, notify).Times(1);
+    hasPresentTime = false;
     reporter->reportFrameMetrics(stats, hasPresentTime, frameNumber, surfaceControlId);
 
     EXPECT_CALL(*observer, notify).Times(0);
@@ -81,17 +85,19 @@ TEST(FrameMetricsReporter, respectsWaitForPresentTimeUnset) {
 }
 
 TEST(FrameMetricsReporter, respectsWaitForPresentTimeSet) {
-    auto reporter = std::make_shared<FrameMetricsReporter>();
-
-    auto observer = sp<TestFrameMetricsObserver>::make(true /*waitForPresentTime*/);
-    reporter->addObserver(observer.get());
-
     const int64_t* stats;
-    bool hasPresentTime = false;
+    bool hasPresentTime = true;
     uint64_t frameNumber = 3;
     int32_t surfaceControlId = 0;
 
+    auto reporter = std::make_shared<FrameMetricsReporter>();
+
+    auto observer = sp<TestFrameMetricsObserver>::make(hasPresentTime);
+    observer->reportMetricsFrom(frameNumber, surfaceControlId);
+    reporter->addObserver(observer.get());
+
     EXPECT_CALL(*observer, notify).Times(0);
+    hasPresentTime = false;
     reporter->reportFrameMetrics(stats, hasPresentTime, frameNumber, surfaceControlId);
 
     EXPECT_CALL(*observer, notify).Times(1);
