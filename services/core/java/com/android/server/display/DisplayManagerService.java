@@ -130,6 +130,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -212,6 +213,9 @@ public final class DisplayManagerService extends SystemService {
     private IMediaProjectionManager mProjectionService;
     private int[] mUserDisabledHdrTypes = {};
     private boolean mAreUserDisabledHdrTypesAllowed = true;
+
+    // Display mode chosen by user.
+    private Display.Mode mUserPreferredMode;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -581,6 +585,7 @@ public final class DisplayManagerService extends SystemService {
             updateSettingsLocked();
 
             updateUserDisabledHdrTypesFromSettingsLocked();
+            updateUserPreferredDisplayModeSettingsLocked();
         }
 
         mDisplayModeDirector.setDesiredDisplayModeSpecsListener(
@@ -795,9 +800,8 @@ public final class DisplayManagerService extends SystemService {
                     mUserDisabledHdrTypes[i] = Integer.parseInt(userDisabledHdrTypeStrings[i]);
                 }
             } catch (NumberFormatException e) {
-                Slog.e(TAG,
-                        "Failed to parse USER_DISABLED_HDR_FORMATS. "
-                                + "Clearing the setting.", e);
+                Slog.e(TAG, "Failed to parse USER_DISABLED_HDR_FORMATS. "
+                        + "Clearing the setting.", e);
                 clearUserDisabledHdrTypesLocked();
             }
         } else {
@@ -811,6 +815,17 @@ public final class DisplayManagerService extends SystemService {
             Settings.Global.putString(mContext.getContentResolver(),
                     Settings.Global.USER_DISABLED_HDR_FORMATS, "");
         }
+    }
+
+    private void updateUserPreferredDisplayModeSettingsLocked() {
+        final float refreshRate = Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_REFRESH_RATE, 0.0f);
+        final int height = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, -1);
+        final int width = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, -1);
+        Display.Mode mode = new Display.Mode(height, width, refreshRate);
+        mUserPreferredMode = isResolutionAndRefreshRateValid(mode) ? mode : null;
     }
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]
@@ -1259,6 +1274,9 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
+        if (mUserPreferredMode != null) {
+            device.setUserPreferredDisplayModeLocked(mUserPreferredMode);
+        }
         addDisplayPowerControllerLocked(display);
         mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
 
@@ -1427,6 +1445,39 @@ public final class DisplayManagerService extends SystemService {
 
     int getPreferredWideGamutColorSpaceIdInternal() {
         return mWideColorSpace.getId();
+    }
+
+    void setUserPreferredDisplayModeInternal(Display.Mode mode) {
+        synchronized (mSyncRoot) {
+            if (Objects.equals(mUserPreferredMode, mode)) {
+                return;
+            }
+
+            if (mode != null && !isResolutionAndRefreshRateValid(mode)) {
+                throw new IllegalArgumentException("width, height and refresh rate of mode should "
+                        + "be greater than 0");
+            }
+            mUserPreferredMode = mode;
+
+            final int resolutionHeight = mode == null ? -1 : mode.getPhysicalHeight();
+            final int resolutionWidth = mode == null ? -1 : mode.getPhysicalWidth();
+            final float refreshRate = mode == null ? 0.0f : mode.getRefreshRate();
+            Settings.Global.putFloat(mContext.getContentResolver(),
+                    Settings.Global.USER_PREFERRED_REFRESH_RATE, refreshRate);
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, resolutionHeight);
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, resolutionWidth);
+            mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
+                device.setUserPreferredDisplayModeLocked(mode);
+            });
+        }
+    }
+
+    private Display.Mode getUserPreferredDisplayModeInternal() {
+        synchronized (mSyncRoot) {
+            return mUserPreferredMode;
+        }
     }
 
     void setShouldAlwaysRespectAppRequestedModeInternal(boolean enabled) {
@@ -2019,6 +2070,10 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mStableDisplaySize=" + mStableDisplaySize);
             pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
 
+            if (mUserPreferredMode != null) {
+                pw.println(mUserPreferredMode.toString());
+            }
+
             pw.println();
             if (!mAreUserDisabledHdrTypesAllowed) {
                 pw.println("  mUserDisabledHdrTypes: size=" + mUserDisabledHdrTypes.length);
@@ -2095,6 +2150,11 @@ public final class DisplayManagerService extends SystemService {
         }
         array.recycle();
         return floatArray;
+    }
+
+    private static boolean isResolutionAndRefreshRateValid(Display.Mode mode) {
+        return mode.getPhysicalWidth() > 0 && mode.getPhysicalHeight() > 0
+                && mode.getRefreshRate() > 0.0f;
     }
 
     /**
@@ -3078,6 +3138,29 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getPreferredWideGamutColorSpaceIdInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setUserPreferredDisplayMode(Display.Mode mode) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.WRITE_SECURE_SETTINGS,
+                    "Permission required to set the user preferred display mode.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setUserPreferredDisplayModeInternal(mode);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public Display.Mode getUserPreferredDisplayMode() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getUserPreferredDisplayModeInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

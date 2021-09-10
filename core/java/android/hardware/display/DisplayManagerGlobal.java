@@ -877,6 +877,29 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Sets the default display mode, according to the refresh rate and the resolution chosen by the
+     * user.
+     */
+    public void setUserPreferredDisplayMode(Display.Mode mode) {
+        try {
+            mDm.setUserPreferredDisplayMode(mode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user preferred display mode.
+     */
+    public Display.Mode getUserPreferredDisplayMode() {
+        try {
+            return mDm.getUserPreferredDisplayMode();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * When enabled the app requested display resolution and refresh rate is always selected
      * in DisplayModeDirector regardless of user settings and policies for low brightness, low
      * battery etc.

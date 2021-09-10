@@ -1000,6 +1000,18 @@ public final class Display {
     }
 
     /**
+     * Returns the default mode of the display.
+     * @hide
+     */
+    @TestApi
+    public @NonNull Mode getDefaultMode() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.getDefaultMode();
+        }
+    }
+
+    /**
      * Gets the supported modes of this display.
      */
     public Mode[] getSupportedModes() {
@@ -1699,12 +1711,25 @@ public final class Display {
          */
         public static final Mode[] EMPTY_ARRAY = new Mode[0];
 
+        /**
+         * @hide
+         */
+        public static final int INVALID_MODE_ID = -1;
+
         private final int mModeId;
         private final int mWidth;
         private final int mHeight;
         private final float mRefreshRate;
         @NonNull
         private final float[] mAlternativeRefreshRates;
+
+        /**
+         * @hide
+         */
+        @TestApi
+        public Mode(int width, int height, float refreshRate) {
+            this(INVALID_MODE_ID, width, height, refreshRate, new float[0]);
+        }
 
         /**
          * @hide
@@ -1804,6 +1829,7 @@ public final class Display {
          *
          * @hide
          */
+        @TestApi
         public boolean matches(int width, int height, float refreshRate) {
             return mWidth == width &&
                     mHeight == height &&
