@@ -38,7 +38,6 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
 import android.companion.BluetoothLeDeviceFilter;
@@ -95,7 +94,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     DeviceFilterPair mSelectedDevice;
     IFindDeviceCallback mFindCallback;
 
-    AndroidFuture<Association> mServiceCallback;
+    AndroidFuture<String> mServiceCallback;
     boolean mIsScanning = false;
     @Nullable
     CompanionDeviceActivity mActivity = null;
@@ -106,7 +105,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         public void startDiscovery(AssociationRequest request,
                 String callingPackage,
                 IFindDeviceCallback findCallback,
-                AndroidFuture serviceCallback) {
+                AndroidFuture<String> serviceCallback) {
             Log.i(LOG_TAG,
                     "startDiscovery() called with: filter = [" + request
                             + "], findCallback = [" + findCallback + "]"
@@ -320,9 +319,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         if (callingPackage == null || deviceAddress == null) {
             return;
         }
-        mServiceCallback.complete(new Association(
-                getUserId(), deviceAddress, callingPackage, mRequest.getDeviceProfile(), false,
-                System.currentTimeMillis()));
+        mServiceCallback.complete(deviceAddress);
     }
 
     void onCancel() {
