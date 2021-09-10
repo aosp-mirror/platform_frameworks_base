@@ -20920,6 +20920,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    compiler-stats: dump compiler statistics");
                 pw.println("    service-permissions: dump permissions required by services");
                 pw.println("    snapshot: dump snapshot statistics");
+                pw.println("    protected-broadcasts: print list of protected broadcast actions");
                 pw.println("    known-packages: dump known packages");
                 pw.println("    <package.name>: info about given package");
                 return;
@@ -21079,6 +21080,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         opti++;
                     }
                 }
+            } else if ("protected-broadcasts".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_PROTECTED_BROADCASTS);
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
                     writeSettingsLPrTEMP();
@@ -21423,6 +21426,22 @@ public class PackageManagerService extends IPackageManager.Stub
                 final long now = SystemClock.currentTimeMicro();
                 mSnapshotStatistics.dump(pw, "  ", now, hits, level, dumpState.isBrief());
             }
+        }
+
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PROTECTED_BROADCASTS)
+                && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
+            pw.println("Protected broadcast actions:");
+            synchronized (mProtectedBroadcasts) {
+                for (int i = 0; i < mProtectedBroadcasts.size(); i++) {
+                    pw.print("  ");
+                    pw.println(mProtectedBroadcasts.valueAt(i));
+                }
+            }
+
         }
     }
 
