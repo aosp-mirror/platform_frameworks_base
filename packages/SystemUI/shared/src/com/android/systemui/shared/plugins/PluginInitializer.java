@@ -28,7 +28,7 @@ public interface PluginInitializer {
 
 
     /**
-     * Called from {@link PluginInstanceManager}.
+     * Called from {@link PluginActionManager}.
      */
     void handleWtfs();
 }
