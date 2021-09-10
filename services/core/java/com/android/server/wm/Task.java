@@ -1990,14 +1990,7 @@ class Task extends TaskFragment {
             taskDisplayArea.onRootTaskWindowingModeChanged(this);
         }
 
-        if (mDisplayContent == null) {
-            return;
-        }
-
-        // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        final int overrideWindowingMode = getRequestedOverrideWindowingMode();
-        if (overrideWindowingMode != WINDOWING_MODE_PINNED
-                && !getRequestedOverrideBounds().isEmpty()) {
+        if (!isOrganized() && !getRequestedOverrideBounds().isEmpty() && mDisplayContent != null) {
             // If the parent (display) has rotated, rotate our bounds to best-fit where their
             // bounds were on the pre-rotated display.
             final int newRotation = getWindowConfiguration().getRotation();
