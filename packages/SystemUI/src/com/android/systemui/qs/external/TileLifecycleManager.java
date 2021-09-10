@@ -329,7 +329,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         filter.addDataScheme("package");
         try {
             mPackageReceiverRegistered.set(true);
-            mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
+            mContext.registerReceiverAsUser(
+                    this, mUser, filter, null, mHandler, Context.RECEIVER_EXPORTED);
         } catch (Exception ex) {
             mPackageReceiverRegistered.set(false);
             Log.e(TAG, "Could not register package receiver", ex);
