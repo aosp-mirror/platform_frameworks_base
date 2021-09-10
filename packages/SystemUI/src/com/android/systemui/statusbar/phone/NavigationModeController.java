@@ -399,7 +399,8 @@ public class NavigationModeController implements Dumpable {
                         .setStyle(new Notification.BigTextStyle())
                         .setSmallIcon(R.drawable.ic_info)
                         .setAutoCancel(true)
-                        .setContentIntent(PendingIntent.getActivity(context, 0, new Intent(), 0));
+                        .setContentIntent(PendingIntent.getActivity(context, 0, new Intent(),
+                                PendingIntent.FLAG_IMMUTABLE));
         context.getSystemService(NotificationManager.class).notify(TAG, 0, builder.build());
     }
 
