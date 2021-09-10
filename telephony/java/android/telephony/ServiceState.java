@@ -444,7 +444,9 @@ public class ServiceState implements Parcelable {
         mArfcnRsrpBoost = s.mArfcnRsrpBoost;
         synchronized (mNetworkRegistrationInfos) {
             mNetworkRegistrationInfos.clear();
-            mNetworkRegistrationInfos.addAll(s.getNetworkRegistrationInfoList());
+            for (NetworkRegistrationInfo nri : s.getNetworkRegistrationInfoList()) {
+                mNetworkRegistrationInfos.add(new NetworkRegistrationInfo(nri));
+            }
         }
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
