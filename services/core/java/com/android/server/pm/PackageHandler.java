@@ -656,7 +656,8 @@ public class PackageHandler extends Handler {
                                 StorageManager.class);
                         VolumeInfo volume =
                                 storage.findVolumeByUuid(
-                                        res.mPkg.getStorageUuid().toString());
+                                        StorageManager.convert(
+                                                res.mPkg.getVolumeUuid()).toString());
                         int packageExternalStorageType =
                                 PackageManagerService.getPackageExternalStorageType(volume,
                                         res.mPkg.isExternalStorage());

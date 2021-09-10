@@ -300,9 +300,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setOverlayTarget(String overlayTarget);
 
-    ParsingPackage setOverlayTargetName(String overlayTargetName);
-
-    ParsingPackage setRealPackage(String realPackage);
+    ParsingPackage setOverlayTargetOverlayableName(String overlayTargetOverlayableName);
 
     ParsingPackage setRequiredAccountType(String requiredAccountType);
 

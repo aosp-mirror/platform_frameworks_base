@@ -139,7 +139,7 @@ class DomainVerificationUserStateOverrideTest {
         }
 
         whenever(getPkg()) { pkg }
-        whenever(getName()) { pkgName }
+        whenever(getPackageName()) { pkgName }
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }

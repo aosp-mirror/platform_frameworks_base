@@ -20,6 +20,7 @@ import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.content.ComponentName;
@@ -48,6 +49,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -648,7 +651,15 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
 
-    public abstract @Nullable PackageSetting getPackageSetting(String packageName);
+    /**
+     * Returns the {@link SystemApi} variant of a package for use with mainline.
+     */
+    @Nullable
+    public abstract AndroidPackageApi getAndroidPackage(@NonNull String packageName);
+
+    public abstract @Nullable PackageSetting getPackageSetting(@NonNull String packageName);
+
+    public abstract @Nullable PackageState getPackageState(@NonNull String packageName);
 
     /**
      * Returns a package for the given UID. If the UID is part of a shared user ID, one
@@ -872,6 +883,17 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @param actionLocked action to be performed
      */
     public abstract void forEachPackageSetting(Consumer<PackageSetting> actionLocked);
+
+    /**
+     * Perform the given action for each package.
+     *
+     * @param locked whether to hold the packages lock. If the lock is not held, the objects will
+     *               be iterated using a temporary data structure. In the vast majority of cases,
+     *               the lock should not have to be held. This is exposed to mirror the
+     *               functionality of the other forEach methods, for eventual migration.
+     * @param action action to be performed
+     */
+    public abstract void forEachPackageState(boolean locked, Consumer<PackageState> action);
 
     /**
      * Perform the given action for each installed package for a user.
