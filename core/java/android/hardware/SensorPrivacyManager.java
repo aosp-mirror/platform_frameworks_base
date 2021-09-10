@@ -41,6 +41,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -137,6 +138,11 @@ public final class SensorPrivacyManager {
         public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
 
         /**
+         * Constant for SAFETY_HUB.
+         */
+        public static final int SAFETY_HUB = SensorPrivacyToggleSourceProto.SAFETY_HUB;
+
+        /**
          * Source for toggling sensors
          *
          * @hide
@@ -146,7 +152,8 @@ public final class SensorPrivacyManager {
                 SETTINGS,
                 DIALOG,
                 SHELL,
-                OTHER
+                OTHER,
+                SAFETY_HUB
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
@@ -409,6 +416,31 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public void setSensorPrivacy(@Sensors.Sensor int sensor,
+            boolean enable) {
+        setSensorPrivacy(resolveSourceFromCurrentContext(), sensor, enable,
+                UserHandle.USER_CURRENT);
+    }
+
+    private @Sources.Source int resolveSourceFromCurrentContext() {
+        String packageName = mContext.getOpPackageName();
+        if (Objects.equals(packageName,
+                mContext.getPackageManager().getPermissionControllerPackageName())) {
+            return Sources.SAFETY_HUB;
+        }
+        return Sources.OTHER;
+    }
+
+    /**
+     * Sets sensor privacy to the specified state for an individual sensor.
+     *
+     * @param sensor the sensor which to change the state for
+     * @param enable the state to which sensor privacy should be set.
+     *
+     * @hide
+     */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
@@ -445,7 +477,6 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
-    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
