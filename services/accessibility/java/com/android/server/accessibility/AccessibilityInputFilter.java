@@ -608,7 +608,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             final Context uiContext = displayContext.createWindowContext(
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
             magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
-                    mAms.getFullScreenMagnificationController(), mAms.getTraceManager(),
+                    mAms.getMagnificationController().getFullScreenMagnificationController(),
+                    mAms.getTraceManager(),
                     mAms.getMagnificationController(), detectControlGestures, triggerable,
                     new WindowMagnificationPromptController(displayContext, mUserId), displayId);
         }
