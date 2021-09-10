@@ -351,16 +351,21 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Gets the system routing session associated with no specific application.
+     * Gets the system routing session for the given {@code packageName}.
+     * Apps can select a route that is not the global route. (e.g. an app can select the device
+     * route while BT route is available.)
+     *
+     * @param packageName the package name of the application.
      */
-    @NonNull
-    public RoutingSessionInfo getSystemRoutingSession() {
-        for (RoutingSessionInfo sessionInfo : getActiveSessions()) {
-            if (sessionInfo.isSystemSession()) {
-                return sessionInfo;
-            }
+    @Nullable
+    public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
+        try {
+            return mMediaRouterService.getSystemSessionInfoForPackage(
+                    getOrCreateClient(), packageName);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Unable to get current system session info", ex);
         }
-        throw new IllegalStateException("No system routing session");
+        return null;
     }
 
     /**
@@ -377,13 +382,10 @@ public final class MediaRouter2Manager {
             return null;
         }
         if (playbackInfo.getPlaybackType() == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            return new RoutingSessionInfo.Builder(getSystemRoutingSession())
-                    .setClientPackageName(mediaController.getPackageName())
-                    .build();
+            return getSystemRoutingSession(mediaController.getPackageName());
         }
-        for (RoutingSessionInfo sessionInfo : getActiveSessions()) {
-            if (!sessionInfo.isSystemSession()
-                    && areSessionsMatched(mediaController, sessionInfo)) {
+        for (RoutingSessionInfo sessionInfo : getRemoteSessions()) {
+            if (areSessionsMatched(mediaController, sessionInfo)) {
                 return sessionInfo;
             }
         }
@@ -395,20 +397,17 @@ public final class MediaRouter2Manager {
      * The first element of the returned list is the system routing session.
      *
      * @param packageName the package name of the application that is routing.
-     * @see #getSystemRoutingSession()
+     * @see #getSystemRoutingSession(String)
      */
     @NonNull
     public List<RoutingSessionInfo> getRoutingSessions(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
         List<RoutingSessionInfo> sessions = new ArrayList<>();
+        sessions.add(getSystemRoutingSession(packageName));
 
-        for (RoutingSessionInfo sessionInfo : getActiveSessions()) {
-            if (sessionInfo.isSystemSession()) {
-                sessions.add(new RoutingSessionInfo.Builder(sessionInfo)
-                        .setClientPackageName(packageName)
-                        .build());
-            } else if (TextUtils.equals(sessionInfo.getClientPackageName(), packageName)) {
+        for (RoutingSessionInfo sessionInfo : getRemoteSessions()) {
+            if (TextUtils.equals(sessionInfo.getClientPackageName(), packageName)) {
                 sessions.add(sessionInfo);
             }
         }
@@ -416,23 +415,21 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Gets the list of all active routing sessions.
+     * Gets the list of all routing sessions except the system routing session.
      * <p>
-     * The first element of the list is the system routing session containing
-     * phone speakers, wired headset, Bluetooth devices.
-     * The system routing session is shared by apps such that controlling it will affect
-     * all apps.
      * If you want to transfer media of an application, use {@link #getRoutingSessions(String)}.
+     * If you want to get only the system routing session, use
+     * {@link #getSystemRoutingSession(String)}.
      *
      * @see #getRoutingSessions(String)
-     * @see #getSystemRoutingSession()
+     * @see #getSystemRoutingSession(String)
      */
     @NonNull
-    public List<RoutingSessionInfo> getActiveSessions() {
+    public List<RoutingSessionInfo> getRemoteSessions() {
         Client client = getOrCreateClient();
         if (client != null) {
             try {
-                return mMediaRouterService.getActiveSessions(client);
+                return mMediaRouterService.getRemoteSessions(client);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
             }

@@ -189,7 +189,8 @@ class MediaRouter2ServiceImpl {
     }
 
     @NonNull
-    public RoutingSessionInfo getSystemSessionInfo() {
+    public RoutingSessionInfo getSystemSessionInfo(
+            @Nullable String packageName, boolean setDeviceRouteSelected) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
         final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
@@ -203,14 +204,22 @@ class MediaRouter2ServiceImpl {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 List<RoutingSessionInfo> sessionInfos;
                 if (hasModifyAudioRoutingPermission) {
-                    sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
-                    if (sessionInfos != null && !sessionInfos.isEmpty()) {
-                        systemSessionInfo = sessionInfos.get(0);
+                    if (setDeviceRouteSelected) {
+                        systemSessionInfo = userRecord.mHandler.mSystemProvider
+                                .generateDeviceRouteSelectedSessionInfo(packageName);
                     } else {
-                        Slog.w(TAG, "System provider does not have any session info.");
+                        sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
+                        if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                            systemSessionInfo = new RoutingSessionInfo.Builder(sessionInfos.get(0))
+                                    .setClientPackageName(packageName).build();
+                        } else {
+                            Slog.w(TAG, "System provider does not have any session info.");
+                        }
                     }
                 } else {
-                    systemSessionInfo = userRecord.mHandler.mSystemProvider.getDefaultSessionInfo();
+                    systemSessionInfo = new RoutingSessionInfo.Builder(
+                            userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
+                            .setClientPackageName(packageName).build();
                 }
             }
             return systemSessionInfo;
@@ -403,12 +412,12 @@ class MediaRouter2ServiceImpl {
     ////////////////////////////////////////////////////////////////
 
     @NonNull
-    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+    public List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager) {
         Objects.requireNonNull(manager, "manager must not be null");
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                return getActiveSessionsLocked(manager);
+                return getRemoteSessionsLocked(manager);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -861,19 +870,21 @@ class MediaRouter2ServiceImpl {
     ////   - Should have @NonNull/@Nullable on all arguments
     ////////////////////////////////////////////////////////////
 
-    private List<RoutingSessionInfo> getActiveSessionsLocked(
+    private List<RoutingSessionInfo> getRemoteSessionsLocked(
             @NonNull IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord == null) {
-            Slog.w(TAG, "getActiveSessionLocked: Ignoring unknown manager");
+            Slog.w(TAG, "getRemoteSessionLocked: Ignoring unknown manager");
             return Collections.emptyList();
         }
 
         List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
         for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mRouteProviders) {
-            sessionInfos.addAll(provider.getSessionInfos());
+            if (!provider.mIsSystemRouteProvider) {
+                sessionInfos.addAll(provider.getSessionInfos());
+            }
         }
         return sessionInfos;
     }

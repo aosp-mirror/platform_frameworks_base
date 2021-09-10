@@ -300,7 +300,8 @@ public final class MediaRouter2 {
         mManagerCallback = new ManagerCallback();
         mHandler = new Handler(Looper.getMainLooper());
         mSystemController = new SystemRoutingController(
-                ensureClientPackageNameForSystemSession(sManager.getSystemRoutingSession()));
+                ensureClientPackageNameForSystemSession(
+                        sManager.getSystemRoutingSession(clientPackageName)));
         mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
                 sManager.getPreferredFeatures(clientPackageName), true).build();
         updateAllRoutesFromManager();

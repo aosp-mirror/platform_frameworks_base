@@ -4319,6 +4319,9 @@
          doesn't support the work profile. [CHAR LIMIT=100] -->
     <string name="activity_resolver_work_profiles_support">%1$s doesn\'t support work profile</string>
 
+    <!-- DO NOT TRANSLATE -->
+    <string name="default_audio_route_id">default_audio_route</string>
+
     <!-- Name of the default audio route for tablets when nothing
          is connected to a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name" product="tablet">Tablet</string>
@@ -4346,6 +4349,9 @@
 
     <!-- Name of the default audio route category. [CHAR LIMIT=50] -->
     <string name="default_audio_route_category_name">System</string>
+
+    <!-- DO NOT TRANSLATE -->
+    <string name="bluetooth_a2dp_audio_route_id">bluetooth_a2dp_audio_route</string>
 
     <!-- Description of the bluetooth a2dp audio route. [CHAR LIMIT=50] -->
     <string name="bluetooth_a2dp_audio_route_name">Bluetooth audio</string>
