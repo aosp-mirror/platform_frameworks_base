@@ -110,11 +110,10 @@ public class UiTranslationController {
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
             TranslationSpec targetSpec, List<AutofillId> views,
             UiTranslationSpec uiTranslationSpec) {
-        if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
-                || state == STATE_UI_TRANSLATION_RESUMED)) {
+        if (mActivity.isDestroyed()) {
+            Log.i(TAG, "Cannot update " + stateToString(state) + " for destroyed " + mActivity);
             return;
         }
-
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
                 + (DEBUG ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
         synchronized (mLock) {
@@ -342,10 +341,8 @@ public class UiTranslationController {
      */
     private void onVirtualViewTranslationCompleted(
             SparseArray<LongSparseArray<ViewTranslationResponse>> translatedResult) {
-        if (!mActivity.isResumed()) {
-            if (DEBUG) {
-                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
-            }
+        if (mActivity.isDestroyed()) {
+            Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
         }
         synchronized (mLock) {
@@ -393,10 +390,8 @@ public class UiTranslationController {
      * The method is used to handle the translation result for non-vertual views.
      */
     private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
-        if (!mActivity.isResumed()) {
-            if (DEBUG) {
-                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
-            }
+        if (mActivity.isDestroyed()) {
+            Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
         }
         final int resultCount = translatedResult.size();
