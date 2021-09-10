@@ -11029,6 +11029,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 case PackageDexOptimizer.DEX_OPT_SKIPPED:
                     numberOfPackagesSkipped++;
                     break;
+                case PackageDexOptimizer.DEX_OPT_CANCELLED:
+                    // ignore this case
+                    break;
                 case PackageDexOptimizer.DEX_OPT_FAILED:
                     numberOfPackagesFailed++;
                     break;
@@ -11174,12 +11177,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /*package*/ void controlDexOptBlocking(boolean block) {
+        mPackageDexOptimizer.controlDexOptBlocking(block);
+    }
+
     /**
      * Perform dexopt on the given package and return one of following result:
      *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
      *  {@link PackageDexOptimizer#DEX_OPT_PERFORMED}
+     *  {@link PackageDexOptimizer#DEX_OPT_CANCELLED}
      *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
+    @PackageDexOptimizer.DexOptResult
     /* package */ int performDexOptWithStatus(DexoptOptions options) {
         return performDexOptTraced(options);
     }
@@ -11304,8 +11313,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager.reconcileSecondaryDexFiles(packageName);
     }
 
-    // TODO(calin): this is only needed for BackgroundDexOptService. Find a cleaner way to inject
-    // a reference there.
     /*package*/ DexManager getDexManager() {
         return mDexManager;
     }

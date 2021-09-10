@@ -43,6 +43,7 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getReas
 import static dalvik.system.DexFile.getSafeModeCompilerFilter;
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -79,6 +80,8 @@ import dalvik.system.DexFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,15 +95,39 @@ public class PackageDexOptimizer {
     private static final String TAG = "PackageDexOptimizer";
     static final String OAT_DIR_NAME = "oat";
     // TODO b/19550105 Remove error codes and use exceptions
+    /** No need to run dexopt and it was skipped */
     public static final int DEX_OPT_SKIPPED = 0;
+    /** Dexopt was completed */
     public static final int DEX_OPT_PERFORMED = 1;
+    /**
+     * Cancelled while running it. This is not an error case as cancel was requested
+     * from the client.
+     */
+    public static final int DEX_OPT_CANCELLED = 2;
+    /** Failed to run dexopt */
     public static final int DEX_OPT_FAILED = -1;
+
+    @IntDef(prefix = {"DEX_OPT_"}, value = {
+            DEX_OPT_SKIPPED,
+            DEX_OPT_PERFORMED,
+            DEX_OPT_CANCELLED,
+            DEX_OPT_FAILED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DexOptResult {
+    }
+
     // One minute over PM WATCHDOG_TIMEOUT
     private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
-    @GuardedBy("mInstallLock")
-    private final Installer mInstaller;
     private final Object mInstallLock;
+
+    /**
+     * This should be accessed only through {@link #getInstallerLI()} with {@link #mInstallLock}
+     * or {@link #getInstallerWithoutLock()} without the lock. Check both methods for further
+     * details on when to use each of them.
+     */
+    private final Installer mInstaller;
 
     @GuardedBy("mInstallLock")
     private final PowerManager.WakeLock mDexoptWakeLock;
@@ -144,6 +171,7 @@ public class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
+    @DexOptResult
     int performDexOpt(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
@@ -170,10 +198,20 @@ public class PackageDexOptimizer {
     }
 
     /**
+     * Cancels currently running dex optimization.
+     */
+    void controlDexOptBlocking(boolean block) {
+        // This method should not hold mInstallLock as cancelling should be possible while
+        // the lock is held by other thread running performDexOpt.
+        getInstallerWithoutLock().controlDexOptBlocking(block);
+    }
+
+    /**
      * Performs dexopt on all code paths of the given package.
      * It assumes the install lock is held.
      */
     @GuardedBy("mInstallLock")
+    @DexOptResult
     private int performDexOptLI(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
@@ -269,7 +307,6 @@ public class PackageDexOptimizer {
                         profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
                         packageStats, options.isDowngrade(), profileName, dexMetadataPath,
                         options.getCompilationReason());
-
                 // OTAPreopt doesn't have stats so don't report in that case.
                 if (packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
@@ -293,6 +330,14 @@ public class PackageDexOptimizer {
                     }
                 }
 
+                // Should stop the operation immediately.
+                if (newResult == DEX_OPT_CANCELLED) {
+                    // Even for the cancellation, return failed if has failed.
+                    if (result == DEX_OPT_FAILED) {
+                        return result;
+                    }
+                    return newResult;
+                }
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
@@ -314,6 +359,7 @@ public class PackageDexOptimizer {
      *      DEX_OPT_SKIPPED if the path does not need to be deopt-ed.
      */
     @GuardedBy("mInstallLock")
+    @DexOptResult
     private int dexOptPath(AndroidPackage pkg, @NonNull PackageSetting pkgSetting, String path,
             String isa, String compilerFilter, int profileAnalysisResult, String classLoaderContext,
             int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
@@ -340,12 +386,14 @@ public class PackageDexOptimizer {
             // installd only uses downgrade flag for secondary dex files and ignores it for
             // primary dex files.
             String seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);
-            mInstaller.dexopt(path, uid, pkg.getPackageName(), isa, dexoptNeeded, oatDir,
-                    dexoptFlags, compilerFilter, pkg.getVolumeUuid(), classLoaderContext,
-                    seInfo, false /* downgrade*/, pkg.getTargetSdkVersion(),
-                    profileName, dexMetadataPath,
+            boolean completed = getInstallerLI().dexopt(path, uid, pkg.getPackageName(), isa,
+                    dexoptNeeded, oatDir, dexoptFlags, compilerFilter, pkg.getVolumeUuid(),
+                    classLoaderContext, seInfo, /* downgrade= */ false ,
+                    pkg.getTargetSdkVersion(), profileName, dexMetadataPath,
                     getAugmentedReasonName(compilationReason, dexMetadataPath != null));
-
+            if (!completed) {
+                return DEX_OPT_CANCELLED;
+            }
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
                 packageStats.setCompileTime(path, (int)(endTime - startTime));
@@ -360,6 +408,7 @@ public class PackageDexOptimizer {
     /**
      * Perform dexopt (if needed) on a system server code path).
      */
+    @DexOptResult
     public int dexoptSystemServerPath(
             String dexPath, PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
         int dexoptFlags = DEXOPT_PUBLIC
@@ -380,23 +429,28 @@ public class PackageDexOptimizer {
                 continue;
             }
             try {
-                mInstaller.dexopt(
-                        dexPath,
-                        android.os.Process.SYSTEM_UID,
-                        /* packageName= */ "android",
-                        isa,
-                        dexoptNeeded,
-                        /* oatDir= */ null,
-                        dexoptFlags,
-                        options.getCompilerFilter(),
-                        StorageManager.UUID_PRIVATE_INTERNAL,
-                        dexUseInfo.getClassLoaderContext(),
-                        /* seInfo= */ null,
-                        /* downgrade= */ false ,
-                        /* targetSdk= */ 0,
-                        /* profileName */ null,
-                        /* dexMetadataPath */ null,
-                        getReasonName(options.getCompilationReason()));
+                synchronized (mInstallLock) {
+                    boolean completed = getInstallerLI().dexopt(
+                            dexPath,
+                            android.os.Process.SYSTEM_UID,
+                            /* pkgName= */ "android",
+                            isa,
+                            dexoptNeeded,
+                            /* outputPath= */ null,
+                            dexoptFlags,
+                            options.getCompilerFilter(),
+                            StorageManager.UUID_PRIVATE_INTERNAL,
+                            dexUseInfo.getClassLoaderContext(),
+                            /* seInfo= */ null,
+                            /* downgrade= */ false,
+                            /* targetSdkVersion= */ 0,
+                            /* profileName= */ null,
+                            /* dexMetadataPath= */ null,
+                            getReasonName(options.getCompilationReason()));
+                    if (!completed) {
+                        return DEX_OPT_CANCELLED;
+                    }
+                }
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to dexopt", e);
                 return DEX_OPT_FAILED;
@@ -426,6 +480,7 @@ public class PackageDexOptimizer {
      * throwing exceptions). Or maybe make a separate call to installd to get DexOptNeeded, though
      * that seems wasteful.
      */
+    @DexOptResult
     public int dexOptSecondaryDexPath(ApplicationInfo info, String path,
             PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
         if (info.uid == -1) {
@@ -475,6 +530,7 @@ public class PackageDexOptimizer {
     }
 
     @GuardedBy("mInstallLock")
+    @DexOptResult
     private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path,
             PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
         if (options.isDexoptOnlySharedDex() && !dexUseInfo.isUsedByOtherApps()) {
@@ -523,11 +579,15 @@ public class PackageDexOptimizer {
                 // arguments as some (dexopNeeded and oatDir) will be computed by installd because
                 // system server cannot read untrusted app content.
                 // TODO(calin): maybe add a separate call.
-                mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
-                        /*oatDir*/ null, dexoptFlags,
+                boolean completed = getInstallerLI().dexopt(path, info.uid, info.packageName,
+                        isa, /* dexoptNeeded= */ 0,
+                        /* outputPath= */ null, dexoptFlags,
                         compilerFilter, info.volumeUuid, classLoaderContext, info.seInfo,
-                        options.isDowngrade(), info.targetSdkVersion, /*profileName*/ null,
-                        /*dexMetadataPath*/ null, getReasonName(reason));
+                        options.isDowngrade(), info.targetSdkVersion, /* profileName= */ null,
+                        /* dexMetadataPath= */ null, getReasonName(reason));
+                if (!completed) {
+                    return DEX_OPT_CANCELLED;
+                }
             }
 
             return DEX_OPT_PERFORMED;
@@ -810,7 +870,9 @@ public class PackageDexOptimizer {
         }
         // Merge profiles. It returns whether or not there was an updated in the profile info.
         try {
-            return mInstaller.mergeProfiles(uid, pkg.getPackageName(), profileName);
+            synchronized (mInstallLock) {
+                return getInstallerLI().mergeProfiles(uid, pkg.getPackageName(), profileName);
+            }
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to merge profiles", e);
             // We don't need to optimize if we failed to merge.
@@ -920,5 +982,22 @@ public class PackageDexOptimizer {
             // and discard dexoptanalyzer result.
             return flags | DEXOPT_FORCE;
         }
+    }
+
+    /**
+     * Returns {@link #mInstaller} with {@link #mInstallLock}. This should be used for all
+     * {@link #mInstaller} access unless {@link #getInstallerWithoutLock()} is allowed.
+     */
+    @GuardedBy("mInstallLock")
+    private Installer getInstallerLI() {
+        return mInstaller;
+    }
+
+    /**
+     * Returns {@link #mInstaller} without lock. This should be used only inside
+     * {@link #controlDexOptBlocking(boolean)}.
+     */
+    private Installer getInstallerWithoutLock() {
+        return mInstaller;
     }
 }
