@@ -1464,19 +1464,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            if (mSurfaceControl == null) {
-                return;
-            }
-
-            // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
-            // its 2nd frame if RenderThread is running slowly could potentially see
-            // this as false, enter the branch, get pre-empted, then this comes along
-            // and reports a new position, then the UI thread resumes and reports
-            // its position. This could therefore be de-sync'd in that interval, but
-            // the synchronization would violate the rule that RT must never block
-            // on the UI thread which would open up potential deadlocks. The risk of
-            // a single-frame desync is therefore preferable for now.
             synchronized(mSurfaceControlLock) {
+                if (mSurfaceControl == null) {
+                    return;
+                }
+                // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
+                // its 2nd frame if RenderThread is running slowly could potentially see
+                // this as false, enter the branch, get pre-empted, then this comes along
+                // and reports a new position, then the UI thread resumes and reports
+                // its position. This could therefore be de-sync'd in that interval, but
+                // the synchronization would violate the rule that RT must never block
+                // on the UI thread which would open up potential deadlocks. The risk of
+                // a single-frame desync is therefore preferable for now.
                 mRtHandlingPositionUpdates = true;
             }
             if (mRTLastReportedPosition.left == left
@@ -1506,8 +1505,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 if (mViewVisibility) {
                     mPositionChangedTransaction.show(mSurfaceControl);
                 }
-                applyChildSurfaceTransaction_renderWorker(mPositionChangedTransaction,
-                        getViewRootImpl().mSurface, frameNumber);
+                final ViewRootImpl viewRoot = getViewRootImpl();
+                if (viewRoot != null) {
+                    applyChildSurfaceTransaction_renderWorker(mPositionChangedTransaction,
+                            viewRoot.mSurface, frameNumber);
+                }
                 applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
                 mPendingTransaction = false;
             } catch (Exception ex) {
@@ -1528,7 +1530,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionLost(long frameNumber) {
-            if (DEBUG) {
+            if (DEBUG_POSITION) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
             }
@@ -1540,15 +1542,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mPositionChangedTransaction.clear();
                 mPendingTransaction = false;
             }
-            if (mSurfaceControl == null) {
-                return;
-            }
 
             /**
              * positionLost can be called while UI thread is un-paused so we
              * need to hold the lock here.
              */
             synchronized (mSurfaceControlLock) {
+                if (mSurfaceControl == null) {
+                    return;
+                }
                 mRtTransaction.hide(mSurfaceControl);
                 if (mRtReleaseSurfaces) {
                     mRtReleaseSurfaces = false;
