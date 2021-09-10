@@ -477,15 +477,16 @@ public final class IInputContextInvoker {
      * Invokes {@link IInputContext#requestCursorUpdates(int, IIntResultCallback)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
+     * @param imeDisplayId the display ID that is associated with the IME.
      * @return {@link AndroidFuture<Boolean>} that can be used to retrieve the invocation
      *         result. {@link RemoteException} will be treated as an error.
      */
     @AnyThread
     @NonNull
-    public AndroidFuture<Boolean> requestCursorUpdates(int cursorUpdateMode) {
+    public AndroidFuture<Boolean> requestCursorUpdates(int cursorUpdateMode, int imeDisplayId) {
         final AndroidFuture<Boolean> future = new AndroidFuture<>();
         try {
-            mIInputContext.requestCursorUpdates(cursorUpdateMode, future);
+            mIInputContext.requestCursorUpdates(cursorUpdateMode, imeDisplayId, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }

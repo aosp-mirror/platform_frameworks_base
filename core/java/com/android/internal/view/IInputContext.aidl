@@ -75,7 +75,8 @@ import com.android.internal.infra.AndroidFuture;
 
     void getSelectedText(int flags, in AndroidFuture future /* T=CharSequence */);
 
-    void requestCursorUpdates(int cursorUpdateMode, in AndroidFuture future /* T=Boolean */);
+    void requestCursorUpdates(int cursorUpdateMode, int imeDisplayId,
+            in AndroidFuture future /* T=Boolean */);
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
             in AndroidFuture future /* T=Boolean */);

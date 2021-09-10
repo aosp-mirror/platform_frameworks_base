@@ -567,11 +567,16 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void requestCursorUpdates(int cursorUpdateMode, AndroidFuture future /* T=Boolean */) {
+    public void requestCursorUpdates(int cursorUpdateMode, int imeDisplayId,
+            AndroidFuture future /* T=Boolean */) {
         dispatchWithTracing("requestCursorUpdates", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
                 Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+                return false;
+            }
+            if (mParentInputMethodManager.getDisplayId() != imeDisplayId) {
+                // requestCursorUpdates() is not currently supported across displays.
                 return false;
             }
             return ic.requestCursorUpdates(cursorUpdateMode);
