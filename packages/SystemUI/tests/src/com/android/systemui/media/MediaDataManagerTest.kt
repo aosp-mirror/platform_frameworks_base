@@ -163,7 +163,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetTimedOut_deactivatesMedia() {
+    fun testSetTimedOut_active_deactivatesMedia() {
         val data = MediaData(userId = USER_ID, initialized = true, backgroundColor = 0, app = null,
                 appIcon = null, artist = null, song = null, artwork = null, actions = emptyList(),
                 actionsToShowInCompact = emptyList(), packageName = "INVALID", token = null,
@@ -173,6 +173,25 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         mediaDataManager.setTimedOut(KEY, timedOut = true)
         assertThat(data.active).isFalse()
+    }
+
+    @Test
+    fun testSetTimedOut_resume_dismissesMedia() {
+        // WHEN resume controls are present, and time out
+        val desc = MediaDescription.Builder().run {
+            setTitle(SESSION_TITLE)
+            build()
+        }
+        mediaDataManager.addResumptionControls(USER_ID, desc, Runnable {}, session.sessionToken,
+                APP_NAME, pendingIntent, PACKAGE_NAME)
+        backgroundExecutor.runAllReady()
+        foregroundExecutor.runAllReady()
+        mediaDataManager.setTimedOut(PACKAGE_NAME, timedOut = true)
+
+        // THEN it is removed and listeners are informed
+        foregroundExecutor.advanceClockToLast()
+        foregroundExecutor.runAllReady()
+        verify(listener).onMediaDataRemoved(PACKAGE_NAME)
     }
 
     @Test

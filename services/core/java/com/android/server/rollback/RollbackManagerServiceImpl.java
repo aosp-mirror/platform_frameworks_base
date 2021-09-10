@@ -654,15 +654,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     @WorkerThread
     private void onPackageReplaced(String packageName) {
         assertInWorkerThread();
-        // TODO: Could this end up incorrectly deleting a rollback for a
-        // package that is about to be installed?
         long installedVersion = getInstalledPackageVersion(packageName);
-
         Iterator<Rollback> iter = mRollbacks.iterator();
         while (iter.hasNext()) {
             Rollback rollback = iter.next();
-            // TODO: Should we remove rollbacks in the ENABLING state here?
-            if ((rollback.isEnabling() || rollback.isAvailable())
+            if ((rollback.isAvailable())
                     && rollback.includesPackageWithDifferentVersion(packageName,
                     installedVersion)) {
                 iter.remove();

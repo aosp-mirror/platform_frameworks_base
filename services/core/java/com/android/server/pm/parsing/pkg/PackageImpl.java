@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.SELinuxUtil;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
@@ -33,6 +32,7 @@ import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -42,6 +42,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 
 import java.io.File;
+import java.util.UUID;
 
 /**
  * Extensions to {@link ParsingPackageImpl} including fields/state contained in the system server
@@ -52,8 +53,7 @@ import java.io.File;
  *
  * @hide
  */
-public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, AndroidPackage,
-        AndroidPackageHidden {
+public final class PackageImpl extends ParsingPackageImpl implements ParsedPackage, AndroidPackage {
 
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
@@ -116,6 +116,9 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String seInfo;
+    @Nullable
+    @DataClass.ParcelWith(ForInternedString.class)
+    protected String seInfoUser;
 
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
@@ -261,6 +264,12 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     @Override
     public PackageImpl setRestrictUpdateHash(@Nullable byte... value) {
         super.setRestrictUpdateHash(value);
+        return this;
+    }
+
+    @Override
+    public PackageImpl setRealPackage(@Nullable String realPackage) {
+        super.setRealPackage(realPackage);
         return this;
     }
 
@@ -418,6 +427,12 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     }
 
     @Override
+    public PackageImpl setSeInfoUser(@Nullable String seInfoUser) {
+        this.seInfoUser = TextUtils.safeIntern(seInfoUser);
+        return this;
+    }
+
+    @Override
     public PackageImpl setSplitCodePaths(@Nullable String[] splitCodePaths) {
         this.splitCodePaths = splitCodePaths;
         if (splitCodePaths != null) {
@@ -472,6 +487,19 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     }
 
     @Override
+    public UUID getStorageUuid() {
+        return StorageManager.convert(volumeUuid);
+    }
+
+    @Deprecated
+    @Override
+    public String toAppInfoToString() {
+        return "PackageImpl{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " " + getPackageName() + "}";
+    }
+
+    @Override
     public ParsedPackage setCoreApp(boolean coreApp) {
         return setBoolean(Booleans.CORE_APP, coreApp);
     }
@@ -501,7 +529,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         appInfo.secondaryCpuAbi = secondaryCpuAbi;
         appInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
         appInfo.seInfo = seInfo;
-        appInfo.seInfoUser = SELinuxUtil.COMPLETE_STR;
+        appInfo.seInfoUser = seInfoUser;
         appInfo.uid = uid;
         return appInfo;
     }
@@ -522,6 +550,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         sForInternedString.parcel(this.secondaryCpuAbi, dest, flags);
         dest.writeString(this.secondaryNativeLibraryDir);
         dest.writeString(this.seInfo);
+        dest.writeString(this.seInfoUser);
         dest.writeInt(this.uid);
         dest.writeInt(this.mBooleans);
     }
@@ -536,6 +565,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         this.secondaryCpuAbi = sForInternedString.unparcel(in);
         this.secondaryNativeLibraryDir = in.readString();
         this.seInfo = in.readString();
+        this.seInfoUser = in.readString();
         this.uid = in.readInt();
         this.mBooleans = in.readInt();
 
@@ -606,6 +636,12 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         return seInfo;
     }
 
+    @Nullable
+    @Override
+    public String getSeInfoUser() {
+        return seInfoUser;
+    }
+
     @Override
     public boolean isCoreApp() {
         return getBoolean(Booleans.CORE_APP);
@@ -664,7 +700,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         return uid;
     }
 
-    @Override
+    @DataClass.Generated.Member
     public PackageImpl setStub(boolean value) {
         setBoolean(Booleans.STUB, value);
         return this;

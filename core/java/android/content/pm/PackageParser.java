@@ -7971,9 +7971,12 @@ public class PackageParser {
         }
         ai.enabledSetting = state.enabled;
         if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
+            ai.category = state.categoryHint;
+        }
+        if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
-        ai.seInfoUser = SELinuxUtil.getSeinfoUser(state);
+        ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
         final OverlayPaths overlayPaths = state.getAllOverlayPaths();
         if (overlayPaths != null) {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);

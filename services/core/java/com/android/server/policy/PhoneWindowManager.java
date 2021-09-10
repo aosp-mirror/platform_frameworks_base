@@ -390,12 +390,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Assigned on main thread, accessed on UI thread
     volatile VrManagerInternal mVrManagerInternal;
 
-    // Vibrator pattern for haptic feedback of a long press.
-    long[] mLongPressVibePattern;
-
-    // Vibrator pattern for a short vibration when tapping on a day/month/year date of a Calendar.
-    long[] mCalendarDateVibePattern;
-
     // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
     long[] mSafeModeEnabledVibePattern;
 
@@ -1804,10 +1798,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         context.registerReceiver(mMultiuserReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
-        mLongPressVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_longPressVibePattern);
-        mCalendarDateVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_calendarDateVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
 

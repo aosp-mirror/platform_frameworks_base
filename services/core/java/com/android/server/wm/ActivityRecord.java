@@ -3505,6 +3505,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         finishing = true;
         final TaskFragment taskFragment = getTaskFragment();
         if (taskFragment != null) {
+            final Task task = taskFragment.getTask();
+            if (task != null && task.isClearingToReuseTask()
+                    && taskFragment.getTopNonFinishingActivity() == null) {
+                taskFragment.mClearedTaskForReuse = true;
+            }
             taskFragment.sendTaskFragmentInfoChanged();
         }
         if (stopped) {
@@ -6213,11 +6218,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(shell-transitions): Remove mDeferHidingClient once everything is shell-transitions.
         //                          pip activities should just remain in clientVisible.
         if (!clientVisible && mDeferHidingClient) return;
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "setClientVisible: %s clientVisible=%b Callers=%s", this, clientVisible,
-                Debug.getCallers(5));
         super.setClientVisible(clientVisible);
-        sendAppVisibilityToClients();
     }
 
     /**

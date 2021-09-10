@@ -349,8 +349,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mSealed = false;
     @GuardedBy("mLock")
     private boolean mShouldBeSealed = false;
-    @GuardedBy("mLock")
-    private boolean mCommitted = false;
+
+    private final AtomicBoolean mCommitted = new AtomicBoolean(false);
+
     @GuardedBy("mLock")
     private boolean mRelinquished = false;
 
@@ -693,11 +694,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return;
                 }
                 mDestroyed = true;
-                boolean isCommitted = mCommitted;
                 List<PackageInstallerSession> childSessions = getChildSessionsLocked();
                 r = () -> {
                     assertNotLocked("abandonStaged");
-                    if (isCommitted) {
+                    if (mCommitted.get()) {
                         mStagingManager.abortCommittedSession(this);
                     }
                     cleanStageDir(childSessions);
@@ -1070,7 +1070,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mPrepared = prepared;
-        mCommitted = committed;
+        mCommitted.set(committed);
         mDestroyed = destroyed;
         mStagedSession = params.isStaged ? new StagedSession(isReady, isApplied, isFailed,
                 stagedSessionErrorCode, stagedSessionErrorMessage) : null;
@@ -1140,7 +1140,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
-            info.isCommitted = mCommitted;
+            info.isCommitted = mCommitted.get();
             info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
@@ -1196,9 +1196,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** {@hide} */
     boolean isCommitted() {
-        synchronized (mLock) {
-            return mCommitted;
-        }
+        return mCommitted.get();
     }
 
     /** {@hide} */
@@ -1236,7 +1234,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void assertPreparedAndNotCommittedOrDestroyedLocked(String cookie) {
         assertPreparedAndNotDestroyedLocked(cookie);
-        if (mCommitted) {
+        if (mCommitted.get()) {
             throw new SecurityException(cookie + " not allowed after commit");
         }
     }
@@ -1277,7 +1275,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
-        if (!isIncrementalInstallation() || !mCommitted) {
+        if (!isIncrementalInstallation() || !mCommitted.get()) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
@@ -2005,7 +2003,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         //             single / child sessions.
         try {
             synchronized (mLock) {
-                if (mCommitted) {
+                if (mCommitted.get()) {
                     return true;
                 }
                 // Read transfers from the original owner stay open, but as the session's data
@@ -2038,7 +2036,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // will probably close their end.
                 mActiveCount.incrementAndGet();
 
-                mCommitted = true;
+                if (!mCommitted.compareAndSet(false /*expect*/, true /*update*/)) {
+                    throw new PackageManagerException(
+                            INSTALL_FAILED_INTERNAL_ERROR,
+                            TextUtils.formatSimple(
+                                    "The mCommitted of session %d should be false originally",
+                                    sessionId));
+                }
                 committedMillis = System.currentTimeMillis();
             }
             return true;
@@ -4112,7 +4116,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean canBeAddedAsChild(int parentCandidate) {
         synchronized (mLock) {
             return (!hasParentSessionId() || mParentSessionId == parentCandidate)
-                    && !mCommitted && !mDestroyed;
+                    && !mCommitted.get()
+                    && !mDestroyed;
         }
     }
 
@@ -4556,7 +4561,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_CID, stageCid);
             }
             writeBooleanAttribute(out, ATTR_PREPARED, mPrepared);
-            writeBooleanAttribute(out, ATTR_COMMITTED, mCommitted);
+            writeBooleanAttribute(out, ATTR_COMMITTED, mCommitted.get());
             writeBooleanAttribute(out, ATTR_DESTROYED, mDestroyed);
             writeBooleanAttribute(out, ATTR_SEALED, mSealed);
 

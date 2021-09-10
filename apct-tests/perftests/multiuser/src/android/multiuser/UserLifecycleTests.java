@@ -89,8 +89,8 @@ public class UserLifecycleTests {
     private static final String TAG = UserLifecycleTests.class.getSimpleName();
 
     /** Max runtime for each test (including all runs within that test). */
-    // No point exceeding 10 minutes, since device would likely be considered non-responsive anyway.
-    private static final long TIMEOUT_MAX_TEST_TIME_MS = 9 * 60_000;
+    // Must be less than the AndroidTest.xml test-timeout to avoid being considered non-responsive.
+    private static final long TIMEOUT_MAX_TEST_TIME_MS = 24 * 60_000;
 
     private static final int TIMEOUT_IN_SECOND = 30;
     private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;

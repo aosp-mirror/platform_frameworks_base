@@ -56,6 +56,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -423,7 +424,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mStatusBarStateController,
                     Handler.createAsync(Looper.myLooper()),
                     mDeviceProvisionedController,
-                    mKeyguardStateController);
+                    mKeyguardStateController,
+                    mock(DumpManager.class));
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

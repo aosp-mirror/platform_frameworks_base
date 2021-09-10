@@ -213,8 +213,8 @@ public class PackageInfoWithoutStateUtils {
         PackageInfo pi = new PackageInfo();
         pi.packageName = pkg.getPackageName();
         pi.splitNames = pkg.getSplitNames();
-        pi.versionCode = ((ParsingPackageHidden) pkg).getVersionCode();
-        pi.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
+        pi.versionCode = pkg.getVersionCode();
+        pi.versionCodeMajor = pkg.getVersionCodeMajor();
         pi.baseRevisionCode = pkg.getBaseRevisionCode();
         pi.splitRevisionCodes = pkg.getSplitRevisionCodes();
         pi.versionName = pkg.getVersionName();
@@ -229,7 +229,7 @@ public class PackageInfoWithoutStateUtils {
         pi.restrictedAccountType = pkg.getRestrictedAccountType();
         pi.requiredAccountType = pkg.getRequiredAccountType();
         pi.overlayTarget = pkg.getOverlayTarget();
-        pi.targetOverlayableName = pkg.getOverlayTargetOverlayableName();
+        pi.targetOverlayableName = pkg.getOverlayTargetName();
         pi.overlayCategory = pkg.getOverlayCategory();
         pi.overlayPriority = pkg.getOverlayPriority();
         pi.mOverlayIsStatic = pkg.isOverlayIsStatic();
@@ -246,10 +246,10 @@ public class PackageInfoWithoutStateUtils {
                 pi.configPreferences = new ConfigurationInfo[size];
                 pkg.getConfigPreferences().toArray(pi.configPreferences);
             }
-            size = pkg.getRequestedFeatures().size();
+            size = pkg.getReqFeatures().size();
             if (size > 0) {
                 pi.reqFeatures = new FeatureInfo[size];
-                pkg.getRequestedFeatures().toArray(pi.reqFeatures);
+                pkg.getReqFeatures().toArray(pi.reqFeatures);
             }
             size = pkg.getFeatureGroups().size();
             if (size > 0) {
@@ -389,10 +389,10 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
-            int userId, boolean assignUserFields) {
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
+            boolean assignUserFields) {
         // Make shallow copy so we can store the metadata/libraries safely
-        ApplicationInfo ai = ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
+        ApplicationInfo ai = pkg.toAppInfoWithoutState();
 
         if (assignUserFields) {
             assignUserFields(pkg, ai, userId);
@@ -435,9 +435,12 @@ public class PackageInfoWithoutStateUtils {
         }
         ai.enabledSetting = state.enabled;
         if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
+            ai.category = state.categoryHint;
+        }
+        if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
-        ai.seInfoUser = SELinuxUtil.getSeinfoUser(state);
+        ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
         final OverlayPaths overlayPaths = state.getAllOverlayPaths();
         if (overlayPaths != null) {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
