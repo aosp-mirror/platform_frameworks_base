@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -225,7 +226,8 @@ public interface StatusBarPhoneModule {
             WallpaperManager wallpaperManager,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
-            TunerService tunerService) {
+            TunerService tunerService,
+            DumpManager dumpManager) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -318,6 +320,7 @@ public interface StatusBarPhoneModule {
                 wallpaperManager,
                 unlockedScreenOffAnimationController,
                 startingSurfaceOptional,
-                tunerService);
+                tunerService,
+                dumpManager);
     }
 }

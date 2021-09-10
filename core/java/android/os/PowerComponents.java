@@ -30,7 +30,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * Contains details of battery attribution data broken down to individual power drain types
@@ -39,61 +38,21 @@ import java.util.Arrays;
  * @hide
  */
 class PowerComponents {
-    private static final int CUSTOM_POWER_COMPONENT_OFFSET = BatteryConsumer.POWER_COMPONENT_COUNT
-            - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-
-    private final double mConsumedPowerMah;
-    @NonNull
-    private final double[] mPowerComponentsMah;
-    @NonNull
-    private final long[] mUsageDurationsMs;
-    private final int mCustomPowerComponentCount;
-    @Nullable
-    private final byte[] mPowerModels;
-    // Not written to Parcel and must be explicitly restored during the parent object's unparceling
-    private String[] mCustomPowerComponentNames;
+    private final BatteryConsumer.BatteryConsumerData mData;
 
     PowerComponents(@NonNull Builder builder) {
-        mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
-        mCustomPowerComponentCount = mCustomPowerComponentNames.length;
-        mPowerComponentsMah = builder.mPowerComponentsMah;
-        mUsageDurationsMs = builder.mUsageDurationsMs;
-        mConsumedPowerMah = builder.getTotalPower();
-        mPowerModels = builder.getPowerModels();
+        mData = builder.mData;
     }
 
-    PowerComponents(@NonNull Parcel source) {
-        mConsumedPowerMah = source.readDouble();
-        mCustomPowerComponentCount = source.readInt();
-        mPowerComponentsMah = source.createDoubleArray();
-        mUsageDurationsMs = source.createLongArray();
-        if (source.readBoolean()) {
-            mPowerModels = new byte[BatteryConsumer.POWER_COMPONENT_COUNT];
-            source.readByteArray(mPowerModels);
-        } else {
-            mPowerModels = null;
-        }
-    }
-
-    /** Writes contents to Parcel */
-    void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeDouble(mConsumedPowerMah);
-        dest.writeInt(mCustomPowerComponentCount);
-        dest.writeDoubleArray(mPowerComponentsMah);
-        dest.writeLongArray(mUsageDurationsMs);
-        if (mPowerModels != null) {
-            dest.writeBoolean(true);
-            dest.writeByteArray(mPowerModels);
-        } else {
-            dest.writeBoolean(false);
-        }
+    PowerComponents(BatteryConsumer.BatteryConsumerData data) {
+        mData = data;
     }
 
     /**
      * Total power consumed by this consumer, in mAh.
      */
     public double getConsumedPower() {
-        return mConsumedPowerMah;
+        return mData.getDouble(mData.layout.consumedPowerColumn);
     }
 
     /**
@@ -108,11 +67,7 @@ class PowerComponents {
             throw new IllegalArgumentException(
                     "Unsupported power component ID: " + componentId);
         }
-        try {
-            return mPowerComponentsMah[componentId];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Unsupported power component ID: " + componentId);
-        }
+        return mData.getDouble(mData.layout.firstConsumedPowerColumn + componentId);
     }
 
     /**
@@ -122,30 +77,20 @@ class PowerComponents {
      * @return Amount of consumed power in mAh.
      */
     public double getConsumedPowerForCustomComponent(int componentId) {
-        if (componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                && componentId < BatteryConsumer.LAST_CUSTOM_POWER_COMPONENT_ID) {
-            try {
-                return mPowerComponentsMah[CUSTOM_POWER_COMPONENT_OFFSET + componentId];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException(
-                        "Unsupported custom power component ID: " + componentId);
-            }
+        final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+        if (index >= 0 && index < mData.layout.customPowerComponentCount) {
+            return mData.getDouble(mData.layout.firstCustomConsumedPowerColumn + index);
         } else {
             throw new IllegalArgumentException(
                     "Unsupported custom power component ID: " + componentId);
         }
-    }
-
-    void setCustomPowerComponentNames(String[] customPowerComponentNames) {
-        mCustomPowerComponentNames = customPowerComponentNames;
     }
 
     public String getCustomPowerComponentName(int componentId) {
-        if (componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                && componentId < BatteryConsumer.LAST_CUSTOM_POWER_COMPONENT_ID) {
+        final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+        if (index >= 0 && index < mData.layout.customPowerComponentCount) {
             try {
-                return mCustomPowerComponentNames[componentId
-                        - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID];
+                return mData.layout.customPowerComponentNames[index];
             } catch (ArrayIndexOutOfBoundsException e) {
                 throw new IllegalArgumentException(
                         "Unsupported custom power component ID: " + componentId);
@@ -156,17 +101,13 @@ class PowerComponents {
         }
     }
 
-    public boolean hasPowerModels() {
-        return mPowerModels != null;
-    }
-
     @BatteryConsumer.PowerModel
-    int getPowerModel(@BatteryConsumer.PowerComponent int component) {
-        if (!hasPowerModels()) {
+    int getPowerModel(@BatteryConsumer.PowerComponent int componentId) {
+        if (!mData.layout.powerModelsIncluded) {
             throw new IllegalStateException(
                     "Power model IDs were not requested in the BatteryUsageStatsQuery");
         }
-        return mPowerModels[component];
+        return mData.getInt(mData.layout.firstPowerModelColumn + componentId);
     }
 
     /**
@@ -181,11 +122,7 @@ class PowerComponents {
             throw new IllegalArgumentException(
                     "Unsupported power component ID: " + componentId);
         }
-        try {
-            return mUsageDurationsMs[componentId];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Unsupported power component ID: " + componentId);
-        }
+        return mData.getLong(mData.layout.firstUsageDurationColumn + componentId);
     }
 
     /**
@@ -195,33 +132,13 @@ class PowerComponents {
      * @return Amount of time in milliseconds.
      */
     public long getUsageDurationForCustomComponentMillis(int componentId) {
-        if (componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+        final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+        if (index >= 0 && index < mData.layout.customPowerComponentCount) {
+            return mData.getLong(mData.layout.firstCustomUsageDurationColumn + index);
+        } else {
             throw new IllegalArgumentException(
                     "Unsupported custom power component ID: " + componentId);
         }
-        try {
-            return mUsageDurationsMs[CUSTOM_POWER_COMPONENT_OFFSET + componentId];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException(
-                    "Unsupported custom power component ID: " + componentId);
-        }
-    }
-
-    public int getCustomPowerComponentCount() {
-        return mCustomPowerComponentCount;
-    }
-
-    /**
-     * Returns the largest usage duration among all power components.
-     */
-    public long getMaxComponentUsageDurationMillis() {
-        long max = 0;
-        for (int i = mUsageDurationsMs.length - 1; i >= 0; i--) {
-            if (mUsageDurationsMs[i] > max) {
-                max = mUsageDurationsMs[i];
-            }
-        }
-        return max;
     }
 
     public void dump(PrintWriter pw, boolean skipEmptyComponents) {
@@ -232,13 +149,14 @@ class PowerComponents {
             if (skipEmptyComponents && componentPower == 0) {
                 continue;
             }
-            pw.print(separator); separator = " ";
+            pw.print(separator);
+            separator = " ";
             pw.print(BatteryConsumer.powerComponentIdToString(componentId));
             pw.print("=");
             PowerCalculator.printPowerMah(pw, componentPower);
         }
 
-        final int customComponentCount = getCustomPowerComponentCount();
+        final int customComponentCount = mData.layout.customPowerComponentCount;
         for (int customComponentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
                 customComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
                         + customComponentCount;
@@ -248,7 +166,8 @@ class PowerComponents {
             if (skipEmptyComponents && customComponentPower == 0) {
                 continue;
             }
-            pw.print(separator); separator = " ";
+            pw.print(separator);
+            separator = " ";
             pw.print(getCustomPowerComponentName(customComponentId));
             pw.print("=");
             PowerCalculator.printPowerMah(pw, customComponentPower);
@@ -272,11 +191,10 @@ class PowerComponents {
     private boolean writeStatsProtoImpl(@Nullable ProtoOutputStream proto) {
         boolean interestingData = false;
 
-        for (int idx = 0; idx < mPowerComponentsMah.length; idx++) {
-            final int componentId = idx < BatteryConsumer.POWER_COMPONENT_COUNT ?
-                    idx : idx - CUSTOM_POWER_COMPONENT_OFFSET;
-            final long powerDeciCoulombs = convertMahToDeciCoulombs(mPowerComponentsMah[idx]);
-            final long durationMs = mUsageDurationsMs[idx];
+        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                componentId++) {
+            final long powerDeciCoulombs = convertMahToDeciCoulombs(getConsumedPower(componentId));
+            final long durationMs = getUsageDurationMillis(componentId);
 
             if (powerDeciCoulombs == 0 && durationMs == 0) {
                 // No interesting data. Make sure not to even write the COMPONENT int.
@@ -289,23 +207,47 @@ class PowerComponents {
                 return true;
             }
 
-            final long token =
-                    proto.start(BatteryUsageStatsAtomsProto.BatteryConsumerData.POWER_COMPONENTS);
-            proto.write(
-                    BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
-                            .COMPONENT,
-                    componentId);
-            proto.write(
-                    BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
-                            .POWER_DECI_COULOMBS,
-                    powerDeciCoulombs);
-            proto.write(
-                    BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
-                            .DURATION_MILLIS,
-                    durationMs);
-            proto.end(token);
+            writePowerComponent(proto, componentId, powerDeciCoulombs, durationMs);
+        }
+        for (int idx = 0; idx < mData.layout.customPowerComponentCount; idx++) {
+            final int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + idx;
+            final long powerDeciCoulombs =
+                    convertMahToDeciCoulombs(getConsumedPowerForCustomComponent(componentId));
+            final long durationMs = getUsageDurationForCustomComponentMillis(componentId);
+
+            if (powerDeciCoulombs == 0 && durationMs == 0) {
+                // No interesting data. Make sure not to even write the COMPONENT int.
+                continue;
+            }
+
+            interestingData = true;
+            if (proto == null) {
+                // We're just asked whether there is data, not to actually write it. And there is.
+                return true;
+            }
+
+            writePowerComponent(proto, componentId, powerDeciCoulombs, durationMs);
         }
         return interestingData;
+    }
+
+    private void writePowerComponent(ProtoOutputStream proto, int componentId,
+            long powerDeciCoulombs, long durationMs) {
+        final long token =
+                proto.start(BatteryUsageStatsAtomsProto.BatteryConsumerData.POWER_COMPONENTS);
+        proto.write(
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
+                        .COMPONENT,
+                componentId);
+        proto.write(
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
+                        .POWER_DECI_COULOMBS,
+                powerDeciCoulombs);
+        proto.write(
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
+                        .DURATION_MILLIS,
+                durationMs);
+        proto.end(token);
     }
 
     void writeToXml(TypedXmlSerializer serializer) throws IOException {
@@ -326,15 +268,15 @@ class PowerComponents {
             if (durationMs != 0) {
                 serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
             }
-            if (mPowerModels != null) {
+            if (mData.layout.powerModelsIncluded) {
                 serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_MODEL,
-                        mPowerModels[componentId]);
+                        getPowerModel(componentId));
             }
             serializer.endTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
         }
 
-        final int customComponentEnd =
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + mCustomPowerComponentCount;
+        final int customComponentEnd = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                + mData.layout.customPowerComponentCount;
         for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
                 componentId < customComponentEnd;
                 componentId++) {
@@ -430,22 +372,15 @@ class PowerComponents {
     static final class Builder {
         private static final byte POWER_MODEL_UNINITIALIZED = -1;
 
-        private final double[] mPowerComponentsMah;
-        private final String[] mCustomPowerComponentNames;
-        private final long[] mUsageDurationsMs;
-        private final byte[] mPowerModels;
+        private final BatteryConsumer.BatteryConsumerData mData;
 
-        Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels) {
-            mCustomPowerComponentNames = customPowerComponentNames;
-            int powerComponentCount =
-                    BatteryConsumer.POWER_COMPONENT_COUNT + mCustomPowerComponentNames.length;
-            mPowerComponentsMah = new double[powerComponentCount];
-            mUsageDurationsMs = new long[powerComponentCount];
-            if (includePowerModels) {
-                mPowerModels = new byte[BatteryConsumer.POWER_COMPONENT_COUNT];
-                Arrays.fill(mPowerModels, POWER_MODEL_UNINITIALIZED);
-            } else {
-                mPowerModels = null;
+        Builder(BatteryConsumer.BatteryConsumerData data) {
+            mData = data;
+            if (mData.layout.powerModelsIncluded) {
+                for (int i = 0; i < BatteryConsumer.POWER_COMPONENT_COUNT; i++) {
+                    mData.putLong(mData.layout.firstPowerModelColumn + i,
+                            POWER_MODEL_UNINITIALIZED);
+                }
             }
         }
 
@@ -463,15 +398,11 @@ class PowerComponents {
                 throw new IllegalArgumentException(
                         "Unsupported power component ID: " + componentId);
             }
-            try {
-                mPowerComponentsMah[componentId] = componentPower;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException(
-                        "Unsupported power component ID: " + componentId);
+            mData.putDouble(mData.layout.firstConsumedPowerColumn + componentId, componentPower);
+            if (mData.layout.powerModelsIncluded) {
+                mData.putLong(mData.layout.firstPowerModelColumn + componentId, powerModel);
             }
-            if (mPowerModels != null) {
-                mPowerModels[componentId] = (byte) powerModel;
-            }
+
             return this;
         }
 
@@ -483,19 +414,12 @@ class PowerComponents {
          */
         @NonNull
         public Builder setConsumedPowerForCustomComponent(int componentId, double componentPower) {
-            if (componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                    && componentId < BatteryConsumer.LAST_CUSTOM_POWER_COMPONENT_ID) {
-                try {
-                    mPowerComponentsMah[CUSTOM_POWER_COMPONENT_OFFSET + componentId] =
-                            componentPower;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new IllegalArgumentException(
-                            "Unsupported custom power component ID: " + componentId);
-                }
-            } else {
+            final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+            if (index < 0 || index >= mData.layout.customPowerComponentCount) {
                 throw new IllegalArgumentException(
                         "Unsupported custom power component ID: " + componentId);
             }
+            mData.putDouble(mData.layout.firstCustomConsumedPowerColumn + index, componentPower);
             return this;
         }
 
@@ -513,12 +437,8 @@ class PowerComponents {
                 throw new IllegalArgumentException(
                         "Unsupported power component ID: " + componentId);
             }
-            try {
-                mUsageDurationsMs[componentId] = componentUsageDurationMillis;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException(
-                        "Unsupported power component ID: " + componentId);
-            }
+            mData.putLong(mData.layout.firstUsageDurationColumn + componentId,
+                    componentUsageDurationMillis);
             return this;
         }
 
@@ -531,51 +451,67 @@ class PowerComponents {
         @NonNull
         public Builder setUsageDurationForCustomComponentMillis(int componentId,
                 long componentUsageDurationMillis) {
-            if (componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+            final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+            if (index < 0 || index >= mData.layout.customPowerComponentCount) {
                 throw new IllegalArgumentException(
                         "Unsupported custom power component ID: " + componentId);
             }
-            try {
-                mUsageDurationsMs[CUSTOM_POWER_COMPONENT_OFFSET + componentId] =
-                        componentUsageDurationMillis;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException(
-                        "Unsupported custom power component ID: " + componentId);
-            }
+
+            mData.putLong(mData.layout.firstCustomUsageDurationColumn + index,
+                    componentUsageDurationMillis);
             return this;
         }
 
         public void addPowerAndDuration(PowerComponents.Builder other) {
-            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
-                    other.mPowerModels);
+            addPowerAndDuration(other.mData);
         }
 
         public void addPowerAndDuration(PowerComponents other) {
-            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
-                    other.mPowerModels);
+            addPowerAndDuration(other.mData);
         }
 
-        private void addPowerAndDuration(double[] powerComponentsMah,
-                long[] usageDurationsMs, byte[] powerModels) {
-            if (mPowerComponentsMah.length != powerComponentsMah.length) {
+        private void addPowerAndDuration(BatteryConsumer.BatteryConsumerData otherData) {
+            if (mData.layout.customPowerComponentCount
+                    != otherData.layout.customPowerComponentCount) {
                 throw new IllegalArgumentException(
-                        "Number of power components does not match: " + powerComponentsMah.length
-                                + ", expected: " + mPowerComponentsMah.length);
+                        "Number of power components does not match: "
+                                + otherData.layout.customPowerComponentCount
+                                + ", expected: " + mData.layout.customPowerComponentCount);
             }
 
-            for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
-                mPowerComponentsMah[i] += powerComponentsMah[i];
+            for (int i = BatteryConsumer.POWER_COMPONENT_COUNT - 1; i >= 0; i--) {
+                final int powerColumnIndex = mData.layout.firstConsumedPowerColumn + i;
+                mData.putDouble(powerColumnIndex,
+                        mData.getDouble(powerColumnIndex)
+                                + otherData.getDouble(powerColumnIndex));
+
+                final int durationColumnIndex = mData.layout.firstUsageDurationColumn + i;
+                mData.putLong(durationColumnIndex,
+                        mData.getLong(durationColumnIndex)
+                                + otherData.getLong(durationColumnIndex));
             }
-            for (int i = mUsageDurationsMs.length - 1; i >= 0; i--) {
-                mUsageDurationsMs[i] += usageDurationsMs[i];
+
+            for (int i = mData.layout.customPowerComponentCount - 1; i >= 0; i--) {
+                final int powerColumnIndex = mData.layout.firstCustomConsumedPowerColumn + i;
+                mData.putDouble(powerColumnIndex,
+                        mData.getDouble(powerColumnIndex) + otherData.getDouble(powerColumnIndex));
+
+                final int usageColumnIndex = mData.layout.firstCustomUsageDurationColumn + i;
+                mData.putLong(usageColumnIndex,
+                        mData.getLong(usageColumnIndex) + otherData.getLong(usageColumnIndex)
+                );
             }
-            if (mPowerModels != null && powerModels != null) {
-                for (int i = mPowerModels.length - 1; i >= 0; i--) {
-                    if (mPowerModels[i] == POWER_MODEL_UNINITIALIZED) {
-                        mPowerModels[i] = powerModels[i];
-                    } else if (mPowerModels[i] != powerModels[i]
-                            && powerModels[i] != POWER_MODEL_UNINITIALIZED) {
-                        mPowerModels[i] = BatteryConsumer.POWER_MODEL_UNDEFINED;
+
+            if (mData.layout.powerModelsIncluded && otherData.layout.powerModelsIncluded) {
+                for (int i = BatteryConsumer.POWER_COMPONENT_COUNT - 1; i >= 0; i--) {
+                    final int columnIndex = mData.layout.firstPowerModelColumn + i;
+                    int powerModel = mData.getInt(columnIndex);
+                    int otherPowerModel = otherData.getInt(columnIndex);
+                    if (powerModel == POWER_MODEL_UNINITIALIZED) {
+                        mData.putLong(columnIndex, otherPowerModel);
+                    } else if (powerModel != otherPowerModel
+                            && otherPowerModel != POWER_MODEL_UNINITIALIZED) {
+                        mData.putLong(columnIndex, BatteryConsumer.POWER_MODEL_UNDEFINED);
                     }
                 }
             }
@@ -587,23 +523,15 @@ class PowerComponents {
          */
         public double getTotalPower() {
             double totalPowerMah = 0;
-            for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
-                totalPowerMah += mPowerComponentsMah[i];
+            for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                    componentId++) {
+                totalPowerMah +=
+                        mData.getDouble(mData.layout.firstConsumedPowerColumn + componentId);
+            }
+            for (int i = 0; i < mData.layout.customPowerComponentCount; i++) {
+                totalPowerMah += mData.getDouble(mData.layout.firstCustomConsumedPowerColumn + i);
             }
             return totalPowerMah;
-        }
-
-        private byte[] getPowerModels() {
-            if (mPowerModels == null) {
-                return null;
-            }
-
-            byte[] powerModels = new byte[mPowerModels.length];
-            for (int i = mPowerModels.length - 1; i >= 0; i--) {
-                powerModels[i] = mPowerModels[i] != POWER_MODEL_UNINITIALIZED ? mPowerModels[i]
-                        : BatteryConsumer.POWER_MODEL_UNDEFINED;
-            }
-            return powerModels;
         }
 
         /**
@@ -611,6 +539,18 @@ class PowerComponents {
          */
         @NonNull
         public PowerComponents build() {
+            mData.putDouble(mData.layout.consumedPowerColumn, getTotalPower());
+
+            if (mData.layout.powerModelsIncluded) {
+                for (int i = BatteryConsumer.POWER_COMPONENT_COUNT - 1; i >= 0; i--) {
+                    final int powerModel = mData.getInt(mData.layout.firstPowerModelColumn + i);
+                    if (powerModel == POWER_MODEL_UNINITIALIZED) {
+                        mData.putInt(mData.layout.firstPowerModelColumn + i,
+                                BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    }
+                }
+            }
+
             return new PowerComponents(this);
         }
     }

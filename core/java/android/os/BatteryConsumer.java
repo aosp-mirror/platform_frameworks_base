@@ -19,6 +19,8 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.database.CursorWindow;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
@@ -31,6 +33,8 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public abstract class BatteryConsumer {
+
+    private static final String TAG = "BatteryConsumer";
 
     /**
      * Power usage component, describing the particular part of the system
@@ -147,10 +151,20 @@ public abstract class BatteryConsumer {
      */
     public static final int POWER_MODEL_MEASURED_ENERGY = 2;
 
+    static final int COLUMN_INDEX_BATTERY_CONSUMER_TYPE = 0;
+    static final int COLUMN_COUNT = 1;
+
+    protected final BatteryConsumerData mData;
     protected final PowerComponents mPowerComponents;
 
-    protected BatteryConsumer(@NonNull PowerComponents powerComponents) {
+    protected BatteryConsumer(BatteryConsumerData data, @NonNull PowerComponents powerComponents) {
+        mData = data;
         mPowerComponents = powerComponents;
+    }
+
+    public BatteryConsumer(BatteryConsumerData data) {
+        mData = data;
+        mPowerComponents = new PowerComponents(data);
     }
 
     /**
@@ -192,11 +206,7 @@ public abstract class BatteryConsumer {
     }
 
     public int getCustomPowerComponentCount() {
-        return mPowerComponents.getCustomPowerComponentCount();
-    }
-
-    void setCustomPowerComponentNames(String[] customPowerComponentNames) {
-        mPowerComponents.setCustomPowerComponentNames(customPowerComponentNames);
+        return mData.layout.customPowerComponentCount;
     }
 
     /**
@@ -229,10 +239,6 @@ public abstract class BatteryConsumer {
      */
     public long getUsageDurationForCustomComponentMillis(int componentId) {
         return mPowerComponents.getUsageDurationForCustomComponentMillis(componentId);
-    }
-
-    protected void writeToParcel(Parcel dest, int flags) {
-        mPowerComponents.writeToParcel(dest, flags);
     }
 
     /**
@@ -318,13 +324,151 @@ public abstract class BatteryConsumer {
         return (long) (powerMah * (10 * 3600 / 1000) + 0.5);
     }
 
-    protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
-        final PowerComponents.Builder mPowerComponentsBuilder;
+    static class BatteryConsumerData {
+        private final CursorWindow mCursorWindow;
+        private final int mCursorRow;
+        public final BatteryConsumerDataLayout layout;
 
-        public BaseBuilder(@NonNull String[] customPowerComponentNames,
-                boolean includePowerModels) {
-            mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentNames,
-                    includePowerModels);
+        BatteryConsumerData(CursorWindow cursorWindow, int cursorRow,
+                BatteryConsumerDataLayout layout) {
+            mCursorWindow = cursorWindow;
+            mCursorRow = cursorRow;
+            this.layout = layout;
+        }
+
+        @Nullable
+        static BatteryConsumerData create(CursorWindow cursorWindow,
+                BatteryConsumerDataLayout layout) {
+            int cursorRow = cursorWindow.getNumRows();
+            if (!cursorWindow.allocRow()) {
+                Slog.e(TAG, "Cannot allocate BatteryConsumerData: too many UIDs: " + cursorRow);
+                cursorRow = -1;
+            }
+            return new BatteryConsumerData(cursorWindow, cursorRow, layout);
+        }
+
+        void putInt(int columnIndex, int value) {
+            if (mCursorRow == -1) {
+                return;
+            }
+            mCursorWindow.putLong(value, mCursorRow, columnIndex);
+        }
+
+        int getInt(int columnIndex) {
+            if (mCursorRow == -1) {
+                return 0;
+            }
+            return mCursorWindow.getInt(mCursorRow, columnIndex);
+        }
+
+        void putDouble(int columnIndex, double value) {
+            if (mCursorRow == -1) {
+                return;
+            }
+            mCursorWindow.putDouble(value, mCursorRow, columnIndex);
+        }
+
+        double getDouble(int columnIndex) {
+            if (mCursorRow == -1) {
+                return 0;
+            }
+            return mCursorWindow.getDouble(mCursorRow, columnIndex);
+        }
+
+        void putLong(int columnIndex, long value) {
+            if (mCursorRow == -1) {
+                return;
+            }
+            mCursorWindow.putLong(value, mCursorRow, columnIndex);
+        }
+
+        long getLong(int columnIndex) {
+            if (mCursorRow == -1) {
+                return 0;
+            }
+            return mCursorWindow.getLong(mCursorRow, columnIndex);
+        }
+
+        void putString(int columnIndex, String value) {
+            if (mCursorRow == -1) {
+                return;
+            }
+            mCursorWindow.putString(value, mCursorRow, columnIndex);
+        }
+
+        String getString(int columnIndex) {
+            if (mCursorRow == -1) {
+                return null;
+            }
+            return mCursorWindow.getString(mCursorRow, columnIndex);
+        }
+    }
+
+    static class BatteryConsumerDataLayout {
+        public final String[] customPowerComponentNames;
+        public final int customPowerComponentCount;
+        public final boolean powerModelsIncluded;
+
+        public final int consumedPowerColumn;
+        public final int firstConsumedPowerColumn;
+        public final int firstCustomConsumedPowerColumn;
+        public final int firstUsageDurationColumn;
+        public final int firstCustomUsageDurationColumn;
+        public final int firstPowerModelColumn;
+        public final int columnCount;
+
+        private BatteryConsumerDataLayout(int firstColumn, String[] customPowerComponentNames,
+                boolean powerModelsIncluded) {
+            this.customPowerComponentNames = customPowerComponentNames;
+            this.customPowerComponentCount = customPowerComponentNames.length;
+            this.powerModelsIncluded = powerModelsIncluded;
+
+            int columnIndex = firstColumn;
+            consumedPowerColumn = columnIndex++;
+
+            firstConsumedPowerColumn = columnIndex;
+            columnIndex += BatteryConsumer.POWER_COMPONENT_COUNT;
+
+            firstCustomConsumedPowerColumn = columnIndex;
+            columnIndex += customPowerComponentCount;
+
+            firstUsageDurationColumn = columnIndex;
+            columnIndex += BatteryConsumer.POWER_COMPONENT_COUNT;
+
+            firstCustomUsageDurationColumn = columnIndex;
+            columnIndex += customPowerComponentCount;
+
+            if (powerModelsIncluded) {
+                firstPowerModelColumn = columnIndex;
+                columnIndex += BatteryConsumer.POWER_COMPONENT_COUNT;
+            } else {
+                firstPowerModelColumn = -1;
+            }
+
+            columnCount = columnIndex;
+        }
+    }
+
+    static BatteryConsumerDataLayout createBatteryConsumerDataLayout(
+            String[] customPowerComponentNames, boolean includePowerModels) {
+        int columnCount = BatteryConsumer.COLUMN_COUNT;
+        columnCount = Math.max(columnCount, AggregateBatteryConsumer.COLUMN_COUNT);
+        columnCount = Math.max(columnCount, UidBatteryConsumer.COLUMN_COUNT);
+        columnCount = Math.max(columnCount, UserBatteryConsumer.COLUMN_COUNT);
+
+        return new BatteryConsumerDataLayout(columnCount, customPowerComponentNames,
+                includePowerModels);
+    }
+
+    protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
+        protected final BatteryConsumer.BatteryConsumerData mData;
+        protected final PowerComponents.Builder mPowerComponentsBuilder;
+
+        public BaseBuilder(BatteryConsumer.BatteryConsumerData data, int consumerType) {
+            mData = data;
+            data.putLong(COLUMN_INDEX_BATTERY_CONSUMER_TYPE, consumerType);
+
+            mPowerComponentsBuilder = new PowerComponents.Builder(data);
         }
 
         /**

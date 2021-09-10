@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,10 +84,13 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     @Inject
     public WakefulnessLifecycle(
             Context context,
-            @Nullable IWallpaperManager wallpaperManagerService) {
+            @Nullable IWallpaperManager wallpaperManagerService,
+            DumpManager dumpManager) {
         mContext = context;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         mWallpaperManagerService = wallpaperManagerService;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public @Wakefulness int getWakefulness() {

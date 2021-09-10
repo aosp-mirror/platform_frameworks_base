@@ -78,6 +78,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
@@ -534,7 +535,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
             Optional<StartingSurface> startingSurface,
-            SmartspaceTransitionController smartspaceTransitionController) {
+            SmartspaceTransitionController smartspaceTransitionController,
+            DumpManager dumpManager) {
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
@@ -557,6 +559,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         // Listen for nav bar mode changes
         mNavBarMode = navModeController.addListener(this);

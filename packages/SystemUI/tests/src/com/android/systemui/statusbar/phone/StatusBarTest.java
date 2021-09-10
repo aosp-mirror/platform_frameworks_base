@@ -83,6 +83,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -326,7 +327,7 @@ public class StatusBarTest extends SysuiTestCase {
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
         WakefulnessLifecycle wakefulnessLifecycle =
-                new WakefulnessLifecycle(mContext, mIWallpaperManager);
+                new WakefulnessLifecycle(mContext, mIWallpaperManager, mock(DumpManager.class));
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
@@ -381,7 +382,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNetworkController,
                 mBatteryController,
                 mColorExtractor,
-                new ScreenLifecycle(),
+                new ScreenLifecycle(mock(DumpManager.class)),
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubblesManager),
@@ -440,7 +441,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mWallpaperManager,
                 mUnlockedScreenOffAnimationController,
                 Optional.of(mStartingSurface),
-                mTunerService);
+                mTunerService,
+                mock(DumpManager.class));
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))

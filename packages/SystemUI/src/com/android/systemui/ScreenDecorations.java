@@ -568,7 +568,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    private static int getBoundPositionFromRotation(@BoundsPosition int pos, int rotation) {
+    @VisibleForTesting
+    static int getBoundPositionFromRotation(@BoundsPosition int pos, int rotation) {
         return (pos - rotation) < 0
                 ? pos - rotation + DisplayCutout.BOUNDS_POSITION_LENGTH
                 : pos - rotation;
@@ -964,7 +965,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    private boolean isTopRoundedCorner(@BoundsPosition int pos, int id) {
+    @VisibleForTesting
+    boolean isTopRoundedCorner(@BoundsPosition int pos, int id) {
         switch (pos) {
             case BOUNDS_POSITION_LEFT:
             case BOUNDS_POSITION_RIGHT:

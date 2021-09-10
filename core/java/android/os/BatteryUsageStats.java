@@ -18,6 +18,8 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.database.Cursor;
+import android.database.CursorWindow;
 import android.util.Range;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
@@ -31,6 +33,7 @@ import com.android.internal.os.PowerCalculator;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -51,7 +54,7 @@ import java.util.List;
  *
  * @hide
  */
-public final class BatteryUsageStats implements Parcelable {
+public final class BatteryUsageStats implements Parcelable, Closeable {
 
     /**
      * Scope of battery stats included in a BatteryConsumer: the entire device, just
@@ -110,6 +113,9 @@ public final class BatteryUsageStats implements Parcelable {
     static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
 
+    // We need about 700 bytes per UID
+    private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 5_000 * 700;
+
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
 
     private final int mDischargePercentage;
@@ -122,11 +128,13 @@ public final class BatteryUsageStats implements Parcelable {
     private final long mBatteryTimeRemainingMs;
     private final long mChargeTimeRemainingMs;
     private final String[] mCustomPowerComponentNames;
+    private final boolean mIncludesPowerModels;
     private final List<UidBatteryConsumer> mUidBatteryConsumers;
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final Parcel mHistoryBuffer;
     private final List<BatteryStats.HistoryTag> mHistoryTagPool;
+    private CursorWindow mBatteryConsumersCursorWindow;
 
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
@@ -141,6 +149,8 @@ public final class BatteryUsageStats implements Parcelable {
         mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
+        mIncludesPowerModels = builder.mIncludePowerModels;
+        mBatteryConsumersCursorWindow = builder.mBatteryConsumersCursorWindow;
 
         double totalPowerMah = 0;
         final int uidBatteryConsumerCount = builder.mUidBatteryConsumerBuilders.size();
@@ -309,38 +319,43 @@ public final class BatteryUsageStats implements Parcelable {
         mBatteryTimeRemainingMs = source.readLong();
         mChargeTimeRemainingMs = source.readLong();
         mCustomPowerComponentNames = source.readStringArray();
+        mIncludesPowerModels = source.readBoolean();
+
+        mBatteryConsumersCursorWindow = CursorWindow.newFromParcel(source);
+        BatteryConsumer.BatteryConsumerDataLayout dataLayout =
+                BatteryConsumer.createBatteryConsumerDataLayout(mCustomPowerComponentNames,
+                        mIncludesPowerModels);
+
+        final int numRows = mBatteryConsumersCursorWindow.getNumRows();
+
         mAggregateBatteryConsumers =
                 new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
-        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
-            mAggregateBatteryConsumers[i] =
-                    AggregateBatteryConsumer.CREATOR.createFromParcel(source);
-            mAggregateBatteryConsumers[i].setCustomPowerComponentNames(mCustomPowerComponentNames);
+        mUidBatteryConsumers = new ArrayList<>(numRows);
+        mUserBatteryConsumers = new ArrayList<>();
+
+        for (int i = 0; i < numRows; i++) {
+            final BatteryConsumer.BatteryConsumerData data =
+                    new BatteryConsumer.BatteryConsumerData(mBatteryConsumersCursorWindow, i,
+                            dataLayout);
+
+            int consumerType = mBatteryConsumersCursorWindow.getInt(i,
+                            BatteryConsumer.COLUMN_INDEX_BATTERY_CONSUMER_TYPE);
+            switch (consumerType) {
+                case AggregateBatteryConsumer.CONSUMER_TYPE_AGGREGATE: {
+                    final AggregateBatteryConsumer consumer = new AggregateBatteryConsumer(data);
+                    mAggregateBatteryConsumers[consumer.getScope()] = consumer;
+                    break;
+                }
+                case UidBatteryConsumer.CONSUMER_TYPE_UID: {
+                    mUidBatteryConsumers.add(new UidBatteryConsumer(data));
+                    break;
+                }
+                case UserBatteryConsumer.CONSUMER_TYPE_USER:
+                    mUserBatteryConsumers.add(new UserBatteryConsumer(data));
+                    break;
+            }
         }
 
-        // UidBatteryConsumers are included as a blob to avoid a TransactionTooLargeException
-        final Parcel blob = Parcel.obtain();
-        final byte[] bytes = source.readBlob();
-        blob.unmarshall(bytes, 0, bytes.length);
-        blob.setDataPosition(0);
-
-        final int uidCount = blob.readInt();
-        mUidBatteryConsumers = new ArrayList<>(uidCount);
-        for (int i = 0; i < uidCount; i++) {
-            final UidBatteryConsumer consumer =
-                    UidBatteryConsumer.CREATOR.createFromParcel(blob);
-            consumer.setCustomPowerComponentNames(mCustomPowerComponentNames);
-            mUidBatteryConsumers.add(consumer);
-        }
-        blob.recycle();
-
-        int userCount = source.readInt();
-        mUserBatteryConsumers = new ArrayList<>(userCount);
-        for (int i = 0; i < userCount; i++) {
-            final UserBatteryConsumer consumer =
-                    UserBatteryConsumer.CREATOR.createFromParcel(source);
-            consumer.setCustomPowerComponentNames(mCustomPowerComponentNames);
-            mUserBatteryConsumers.add(consumer);
-        }
         if (source.readBoolean()) {
             final byte[] historyBlob = source.readBlob();
 
@@ -374,26 +389,9 @@ public final class BatteryUsageStats implements Parcelable {
         dest.writeLong(mBatteryTimeRemainingMs);
         dest.writeLong(mChargeTimeRemainingMs);
         dest.writeStringArray(mCustomPowerComponentNames);
-        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
-            mAggregateBatteryConsumers[i].writeToParcel(dest, flags);
-        }
+        dest.writeBoolean(mIncludesPowerModels);
+        mBatteryConsumersCursorWindow.writeToParcel(dest, flags);
 
-        // UidBatteryConsumers are included as a blob, because each UidBatteryConsumer
-        // takes > 300 bytes, so a typical number of UIDs in the system, 300 would result
-        // in a 90 kB Parcel, which is not safe to pass in a binder transaction because
-        // of the possibility of TransactionTooLargeException
-        final Parcel blob = Parcel.obtain();
-        blob.writeInt(mUidBatteryConsumers.size());
-        for (int i = mUidBatteryConsumers.size() - 1; i >= 0; i--) {
-            mUidBatteryConsumers.get(i).writeToParcel(blob, flags);
-        }
-        dest.writeBlob(blob.marshall());
-        blob.recycle();
-
-        dest.writeInt(mUserBatteryConsumers.size());
-        for (int i = mUserBatteryConsumers.size() - 1; i >= 0; i--) {
-            mUserBatteryConsumers.get(i).writeToParcel(dest, flags);
-        }
         if (mHistoryBuffer != null) {
             dest.writeBoolean(true);
             dest.writeBlob(mHistoryBuffer.marshall());
@@ -682,8 +680,7 @@ public final class BatteryUsageStats implements Parcelable {
                     i++;
                 }
 
-                builder = new Builder(
-                        customComponentNames.toArray(new String[0]), true);
+                builder = new Builder(customComponentNames.toArray(new String[0]), true);
 
                 builder.setStatsStartTimestamp(
                         parser.getAttributeLong(null, XML_ATTR_START_TIMESTAMP));
@@ -733,13 +730,29 @@ public final class BatteryUsageStats implements Parcelable {
         return builder.build();
     }
 
+    @Override
+    public void close() throws IOException {
+        mBatteryConsumersCursorWindow.close();
+        mBatteryConsumersCursorWindow = null;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (mBatteryConsumersCursorWindow != null) {
+            mBatteryConsumersCursorWindow.close();
+        }
+        super.finalize();
+    }
+
     /**
      * Builder for BatteryUsageStats.
      */
     public static final class Builder {
+        private final CursorWindow mBatteryConsumersCursorWindow;
         @NonNull
         private final String[] mCustomPowerComponentNames;
         private final boolean mIncludePowerModels;
+        private final BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
         private long mStatsStartTimestampMs;
         private long mStatsEndTimestampMs;
         private long mStatsDurationMs = -1;
@@ -762,12 +775,22 @@ public final class BatteryUsageStats implements Parcelable {
             this(customPowerComponentNames, false);
         }
 
-        public Builder(@NonNull String[] customPowerComponentNames,  boolean includePowerModels) {
+        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels) {
+            mBatteryConsumersCursorWindow =
+                    new CursorWindow(null, BATTERY_CONSUMER_CURSOR_WINDOW_SIZE);
+            mBatteryConsumerDataLayout =
+                    BatteryConsumer.createBatteryConsumerDataLayout(customPowerComponentNames,
+                            includePowerModels);
+            mBatteryConsumersCursorWindow.setNumColumns(mBatteryConsumerDataLayout.columnCount);
+
             mCustomPowerComponentNames = customPowerComponentNames;
             mIncludePowerModels = includePowerModels;
-            for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
-                mAggregateBatteryConsumersBuilders[i] = new AggregateBatteryConsumer.Builder(
-                        customPowerComponentNames, includePowerModels);
+            for (int scope = 0; scope < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; scope++) {
+                final BatteryConsumer.BatteryConsumerData data =
+                        BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
+                                mBatteryConsumerDataLayout);
+                mAggregateBatteryConsumersBuilders[scope] =
+                        new AggregateBatteryConsumer.Builder(data, scope);
             }
         }
 
@@ -892,8 +915,10 @@ public final class BatteryUsageStats implements Parcelable {
             int uid = batteryStatsUid.getUid();
             UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
             if (builder == null) {
-                builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mIncludePowerModels, batteryStatsUid);
+                final BatteryConsumer.BatteryConsumerData data =
+                        BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
+                                mBatteryConsumerDataLayout);
+                builder = new UidBatteryConsumer.Builder(data, batteryStatsUid);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -908,8 +933,10 @@ public final class BatteryUsageStats implements Parcelable {
         public UidBatteryConsumer.Builder getOrCreateUidBatteryConsumerBuilder(int uid) {
             UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
             if (builder == null) {
-                builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mIncludePowerModels, uid);
+                final BatteryConsumer.BatteryConsumerData data =
+                        BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
+                                mBatteryConsumerDataLayout);
+                builder = new UidBatteryConsumer.Builder(data, uid);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -923,8 +950,10 @@ public final class BatteryUsageStats implements Parcelable {
         public UserBatteryConsumer.Builder getOrCreateUserBatteryConsumerBuilder(int userId) {
             UserBatteryConsumer.Builder builder = mUserBatteryConsumerBuilders.get(userId);
             if (builder == null) {
-                builder = new UserBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mIncludePowerModels, userId);
+                final BatteryConsumer.BatteryConsumerData data =
+                        BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
+                                mBatteryConsumerDataLayout);
+                builder = new UserBatteryConsumer.Builder(data, userId);
                 mUserBatteryConsumerBuilders.put(userId, builder);
             }
             return builder;
@@ -987,6 +1016,39 @@ public final class BatteryUsageStats implements Parcelable {
             }
 
             return this;
+        }
+
+        /**
+         * Dumps raw contents of the cursor window for debugging.
+         */
+        void dump(PrintWriter writer) {
+            final int numRows = mBatteryConsumersCursorWindow.getNumRows();
+            int numColumns = mBatteryConsumerDataLayout.columnCount;
+            for (int i = 0; i < numRows; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < numColumns; j++) {
+                    final int type = mBatteryConsumersCursorWindow.getType(i, j);
+                    switch (type) {
+                        case Cursor.FIELD_TYPE_NULL:
+                            sb.append("null, ");
+                            break;
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            sb.append(mBatteryConsumersCursorWindow.getInt(i, j)).append(", ");
+                            break;
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            sb.append(mBatteryConsumersCursorWindow.getFloat(i, j)).append(", ");
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                            sb.append(mBatteryConsumersCursorWindow.getString(i, j)).append(", ");
+                            break;
+                        case Cursor.FIELD_TYPE_BLOB:
+                            sb.append("BLOB, ");
+                            break;
+                    }
+                }
+                sb.setLength(sb.length() - 2);
+                writer.println(sb);
+            }
         }
     }
 }

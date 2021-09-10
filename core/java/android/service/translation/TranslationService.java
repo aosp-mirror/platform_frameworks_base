@@ -48,6 +48,7 @@ import android.view.translation.TranslationManager;
 import android.view.translation.TranslationRequest;
 import android.view.translation.TranslationResponse;
 import android.view.translation.TranslationSpec;
+import android.view.translation.Translator;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -82,7 +83,10 @@ public abstract class TranslationService extends Service {
      * android.R.styleable#TranslationService translation-service}&gt;</code> tag.
      *
      * <p>Here's an example of how to use it on {@code AndroidManifest.xml}:
-     * TODO: fill in doc example (check CCService/AFService).
+     * <pre> &lt;translation-service
+     *     android:settingsActivity="foo.bar.SettingsActivity"
+     *     . . .
+     * /&gt;</pre>
      */
     public static final String SERVICE_META_DATA = "android.translation_service";
 
@@ -149,7 +153,6 @@ public abstract class TranslationService extends Service {
         void onTranslationSuccess(@NonNull TranslationResponse response);
 
         /**
-         * TODO: implement javadoc
          * @removed use {@link #onTranslationSuccess} with an error response instead.
          */
         @Deprecated
@@ -226,7 +229,7 @@ public abstract class TranslationService extends Service {
      * should call back with {@code false}.</p>
      *
      * @param translationContext the {@link TranslationContext} of the session being created.
-     * @param sessionId the int id of the session.
+     * @param sessionId the id of the session.
      * @param callback {@link Consumer} to notify whether the session was successfully created.
      */
     // TODO(b/176464808): the session id won't be unique cross client/server process. Need to find
@@ -235,8 +238,6 @@ public abstract class TranslationService extends Service {
             int sessionId, @NonNull Consumer<Boolean> callback);
 
     /**
-     * TODO: fill in javadoc.
-     *
      * @removed use {@link #onCreateTranslationSession(TranslationContext, int, Consumer)}
      * instead.
      */
@@ -247,19 +248,16 @@ public abstract class TranslationService extends Service {
     }
 
     /**
-     * TODO: fill in javadoc.
+     * Called when a translation session is finished.
      *
-     * @param sessionId
+     * <p>The translation session is finished when the client calls {@link Translator#destroy()} on
+     * the corresponding translator.
+     *
+     * @param sessionId id of the session that finished.
      */
     public abstract void onFinishTranslationSession(int sessionId);
 
     /**
-     * TODO: fill in javadoc.
-     *
-     * @param request
-     * @param sessionId
-     * @param callback
-     * @param cancellationSignal
      * @removed use
      * {@link #onTranslationRequest(TranslationRequest, int, CancellationSignal, Consumer)} instead.
      */
@@ -277,23 +275,29 @@ public abstract class TranslationService extends Service {
      * {@link TranslationRequest#FLAG_PARTIAL_RESPONSES} was set, the service may call
      * {@code callback.accept()} multiple times with partial responses.</p>
      *
-     * @param request
-     * @param sessionId
-     * @param callback
-     * @param cancellationSignal
+     * @param request The translation request containing the data to be translated.
+     * @param sessionId id of the session that sent the translation request.
+     * @param cancellationSignal A {@link CancellationSignal} that notifies when a client has
+     *                           cancelled the operation in progress.
+     * @param callback {@link Consumer} to pass back the translation response.
      */
     public abstract void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull Consumer<TranslationResponse> callback);
 
     /**
-     * TODO: fill in javadoc
+     * Called to request a set of {@link TranslationCapability}s that are supported by the service.
+     *
+     * <p>The set of translation capabilities are limited to those supporting the source and target
+     * {@link TranslationSpec.DataFormat}. e.g. Calling this with
+     * {@link TranslationSpec#DATA_FORMAT_TEXT} as source and target returns only capabilities that
+     * translates text to text.</p>
      *
      * <p>Must call {@code callback.accept} to pass back the set of translation capabilities.</p>
      *
-     * @param sourceFormat
-     * @param targetFormat
-     * @param callback
+     * @param sourceFormat data format restriction of the translation source spec.
+     * @param targetFormat data format restriction of the translation target spec.
+     * @param callback {@link Consumer} to pass back the set of translation capabilities.
      */
     public abstract void onTranslationCapabilitiesRequest(
             @TranslationSpec.DataFormat int sourceFormat,
