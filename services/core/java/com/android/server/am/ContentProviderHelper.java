@@ -15,6 +15,7 @@
  */
 package com.android.server.am;
 
+import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
 import static android.os.Process.PROC_PARENS;
@@ -46,6 +47,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -72,6 +74,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -177,12 +180,22 @@ public class ContentProviderHelper {
                 cpr = mProviderMap.getProviderByName(name, UserHandle.USER_SYSTEM);
                 if (cpr != null) {
                     cpi = cpr.info;
+
                     if (mService.isSingleton(
                             cpi.processName, cpi.applicationInfo, cpi.name, cpi.flags)
                                 && mService.isValidSingletonCall(
                                         r == null ? callingUid : r.uid, cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
+                    } else if (isAuthorityRedirectedForCloneProfile(name)) {
+                        UserManagerInternal umInternal = LocalServices.getService(
+                                UserManagerInternal.class);
+                        UserInfo userInfo = umInternal.getUserInfo(userId);
+
+                        if (userInfo != null && userInfo.isCloneProfile()) {
+                            userId = umInternal.getProfileParentId(userId);
+                            checkCrossUser = false;
+                        }
                     } else {
                         cpr = null;
                         cpi = null;
@@ -1026,6 +1039,7 @@ public class ContentProviderHelper {
      * at the given authority and user.
      */
     String checkContentProviderAccess(String authority, int userId) {
+        boolean checkUser = true;
         if (userId == UserHandle.USER_ALL) {
             mService.mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
@@ -1041,11 +1055,32 @@ public class ContentProviderHelper {
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                     userId);
+            if (cpi == null && isAuthorityRedirectedForCloneProfile(authority)) {
+                // This might be a provider that's running only in the system user that's
+                // also serving clone profiles
+                cpi = AppGlobals.getPackageManager().resolveContentProvider(authority,
+                        ActivityManagerService.STOCK_PM_FLAGS
+                                | PackageManager.GET_URI_PERMISSION_PATTERNS
+                                | PackageManager.MATCH_DISABLED_COMPONENTS
+                                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                        UserHandle.USER_SYSTEM);
+            }
         } catch (RemoteException ignored) {
         }
         if (cpi == null) {
             return "Failed to find provider " + authority + " for user " + userId
                     + "; expected to find a valid ContentProvider for this authority";
+        }
+
+        if (isAuthorityRedirectedForCloneProfile(authority)) {
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+            UserInfo userInfo = umInternal.getUserInfo(userId);
+
+            if (userInfo != null && userInfo.isCloneProfile()) {
+                userId = umInternal.getProfileParentId(userId);
+                checkUser = false;
+            }
         }
 
         final int callingPid = Binder.getCallingPid();
@@ -1060,7 +1095,7 @@ public class ContentProviderHelper {
         }
 
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
-                userId, true, appName);
+                userId, checkUser, appName);
     }
 
     int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {
