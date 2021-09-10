@@ -72,7 +72,6 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -227,13 +226,12 @@ public class TaskSnapshotWindow {
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState tmpInsetsState = new InsetsState();
-        final InsetsVisibilities tmpRequestedVisibilities = new InsetsVisibilities();
         final InputChannel tmpInputChannel = new InputChannel();
 
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    tmpRequestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
+                    info.requestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);

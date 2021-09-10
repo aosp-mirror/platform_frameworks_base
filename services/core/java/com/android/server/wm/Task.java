@@ -3515,6 +3515,7 @@ class Task extends TaskFragment {
         final WindowState mainWindow = activity.findMainWindow();
         if (mainWindow != null) {
             info.mainWindowLayoutParams = mainWindow.getAttrs();
+            info.requestedVisibilities.set(mainWindow.getRequestedVisibilities());
         }
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
