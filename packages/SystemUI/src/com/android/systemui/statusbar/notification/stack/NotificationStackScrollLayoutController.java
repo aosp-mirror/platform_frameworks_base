@@ -1272,6 +1272,9 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void updateSectionBoundaries(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            return;
+        }
         mView.updateSectionBoundaries(reason);
     }
 
