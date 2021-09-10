@@ -269,10 +269,11 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void panelScrimMinFractionChanged(float minFraction) {
+    public void onPanelMinFractionChanged(float minFraction) {
         if (isNaN(minFraction)) {
             throw new IllegalArgumentException("minFraction cannot be NaN");
         }
+        super.onPanelMinFractionChanged(minFraction);
         if (mMinFraction != minFraction) {
             mMinFraction = minFraction;
             updateScrimFraction();
