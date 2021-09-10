@@ -376,6 +376,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
+import com.android.server.am.ComponentAliasResolver.Resolution;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
@@ -12725,9 +12726,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+            // Replace the alias receivers with their targets.
+            if (newReceivers != null) {
+                for (int i = newReceivers.size() - 1; i >= 0; i--) {
+                    final ResolveInfo ri = newReceivers.get(i);
+                    final Resolution<ResolveInfo> resolution = mComponentAliasResolver
+                            .resolveReceiver(intent, ri, resolvedType, pmFlags, user, callingUid);
+                    if (resolution == null) {
+                        // It was an alias, but the target was not found.
+                        newReceivers.remove(i);
+                        continue;
+                    }
+                    if (resolution.isAlias()) {
+                        newReceivers.set(i, resolution.getTarget());
+                    }
+                }
+            }
             if (newReceivers != null && newReceivers.size() == 0) {
                 newReceivers = null;
             }
+
             if (receivers == null) {
                 receivers = newReceivers;
             } else if (newReceivers != null) {

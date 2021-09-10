@@ -27,24 +27,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.core.IsNot.not;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.provider.DeviceConfig;
-import android.util.Log;
-
-import androidx.test.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.BroadcastMessenger;
 import com.android.compatibility.common.util.BroadcastMessenger.Receiver;
-import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.compatibility.common.util.ShellUtils;
 import com.android.compatibility.common.util.TestUtils;
 
-import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -58,30 +50,7 @@ import java.util.function.Consumer;
  * Note all the helper APKs are battery-exempted (via AndroidTest.xml), so they can run
  * BG services.
  */
-public class ComponentAliasServiceTest {
-
-    private static final Context sContext = InstrumentationRegistry.getTargetContext();
-
-    private static final DeviceConfigStateHelper sDeviceConfig = new DeviceConfigStateHelper(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER);
-    @Before
-    public void enableComponentAlias() throws Exception {
-        sDeviceConfig.set("component_alias_overrides", "");
-        sDeviceConfig.set("enable_experimental_component_alias", "true");
-
-        // Device config propagation happens on a handler, so we need to wait for AM to
-        // actually set it.
-        TestUtils.waitUntil("Wait until component alias is actually enabled", () -> {
-            return ShellUtils.runShellCommand("dumpsys activity component-alias")
-                    .indexOf("Enabled: true") > 0;
-        });
-    }
-
-    @AfterClass
-    public static void restoreDeviceConfig() throws Exception {
-        sDeviceConfig.close();
-    }
-
+public class ComponentAliasServiceTest extends BaseComponentAliasTest {
     /**
      * Service connection used throughout the tests. It sends a message for each callback via
      * the messenger.
@@ -89,7 +58,7 @@ public class ComponentAliasServiceTest {
     private static final ServiceConnection sServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.w(TAG, "onServiceConnected: " + name);
+            log("onServiceConnected: " + name);
 
             ComponentAliasMessage m = new ComponentAliasMessage()
                     .setSenderIdentity("sServiceConnection")
@@ -101,7 +70,7 @@ public class ComponentAliasServiceTest {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAG, "onServiceDisconnected: " + name);
+            log("onServiceDisconnected: " + name);
 
             ComponentAliasMessage m = new ComponentAliasMessage()
                     .setSenderIdentity("sServiceConnection")
@@ -113,7 +82,7 @@ public class ComponentAliasServiceTest {
 
         @Override
         public void onBindingDied(ComponentName name) {
-            Log.w(TAG, "onBindingDied: " + name);
+            log("onBindingDied: " + name);
 
             ComponentAliasMessage m = new ComponentAliasMessage()
                     .setSenderIdentity("sServiceConnection")
@@ -124,7 +93,7 @@ public class ComponentAliasServiceTest {
 
         @Override
         public void onNullBinding(ComponentName name) {
-            Log.w(TAG, "onNullBinding: " + name);
+            log("onNullBinding: " + name);
 
             ComponentAliasMessage m = new ComponentAliasMessage()
                     .setSenderIdentity("sServiceConnection")
@@ -171,36 +140,23 @@ public class ComponentAliasServiceTest {
         }
     }
 
-    private static class Combo {
-        public final ComponentName alias;
-        public final ComponentName target;
-        public final String action;
-
-        private Combo(ComponentName alias, ComponentName target, String action) {
-            this.alias = alias;
-            this.target = target;
-            this.action = action;
-        }
-    }
-
     private void forEachCombo(Consumer<Combo> callback) {
-        callback.accept(new Combo(
+        new Combo(
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias00"),
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Target00"),
-                MAIN_PACKAGE + ".IS_ALIAS_00"));
-        callback.accept(new Combo(
+                MAIN_PACKAGE + ".IS_ALIAS_00").apply(callback);
+        new Combo(
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias01"),
                 new ComponentName(SUB1_PACKAGE, MAIN_PACKAGE + ".s.Target01"),
-                MAIN_PACKAGE + ".IS_ALIAS_01"));
-        callback.accept(new Combo(
+                MAIN_PACKAGE + ".IS_ALIAS_01").apply(callback);
+        new Combo(
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".s.Alias02"),
                 new ComponentName(SUB2_PACKAGE, MAIN_PACKAGE + ".s.Target02"),
-                MAIN_PACKAGE + ".IS_ALIAS_02"));
+                MAIN_PACKAGE + ".IS_ALIAS_02").apply(callback);
     }
 
-
     @Test
-    public void testStartAndStopService_explicitComponentName() throws Exception {
+    public void testStartAndStopService_explicitComponentName() {
         forEachCombo((c) -> {
             Intent i = new Intent().setComponent(c.alias);
             testStartAndStopService_common(i, c.alias, c.target);
@@ -208,7 +164,7 @@ public class ComponentAliasServiceTest {
     }
 
     @Test
-    public void testStartAndStopService_explicitPackageName() throws Exception {
+    public void testStartAndStopService_explicitPackageName() {
         forEachCombo((c) -> {
             Intent i = new Intent().setPackage(c.alias.getPackageName());
             i.setAction(c.action);
@@ -290,7 +246,7 @@ public class ComponentAliasServiceTest {
     }
 
     @Test
-    public void testBindService_explicitComponentName() throws Exception {
+    public void testBindService_explicitComponentName() {
         forEachCombo((c) -> {
             Intent i = new Intent().setComponent(c.alias);
 
@@ -300,7 +256,7 @@ public class ComponentAliasServiceTest {
     }
 
     @Test
-    public void testBindService_explicitPackageName() throws Exception {
+    public void testBindService_explicitPackageName() {
         forEachCombo((c) -> {
             Intent i = new Intent().setPackage(c.alias.getPackageName());
             i.setAction(c.action);
@@ -314,7 +270,7 @@ public class ComponentAliasServiceTest {
      * right component name.
      */
     @Test
-    public void testBindService_serviceKilled() throws Exception {
+    public void testBindService_serviceKilled() {
 
         // We need to kill SUB2_PACKAGE, don't run it for this package.
         Assume.assumeThat(sContext.getPackageName(), not(SUB2_PACKAGE));
