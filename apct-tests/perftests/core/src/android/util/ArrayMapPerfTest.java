@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -66,6 +67,36 @@ public class ArrayMapPerfTest {
                     map.put(Integer.toString(j), j);
                 }
                 map.forEach(consumer);
+            }
+        }
+    }
+
+    @Test
+    public void testReplaceAll_Small() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        BiFunction<Integer, Integer, Integer> function = (k, v) -> 2 * v;
+        while (state.keepRunning()) {
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                ArrayMap<Integer, Integer> map = new ArrayMap<>();
+                for (int j = 0; j < SET_SIZE_SMALL; j++) {
+                    map.put(j, j);
+                }
+                map.replaceAll(function);
+            }
+        }
+    }
+
+    @Test
+    public void testReplaceAll_Large() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        BiFunction<Integer, Integer, Integer> function = (k, v) -> 2 * v;
+        while (state.keepRunning()) {
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                ArrayMap<Integer, Integer> map = new ArrayMap<>();
+                for (int j = 0; j < SET_SIZE_LARGE; j++) {
+                    map.put(j, j);
+                }
+                map.replaceAll(function);
             }
         }
     }
