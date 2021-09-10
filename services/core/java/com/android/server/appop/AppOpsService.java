@@ -4562,8 +4562,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         if (pkgUid != Process.INVALID_UID) {
             if (pkgUid != UserHandle.getAppId(uid)) {
-                String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
-                throw new SecurityException("Specified package " + packageName + " under uid "
+                //TODO 195339480: replace true with debug
+                String otherUidMessage = true ? " but it is really " + pkgUid : " but it is not";
+                throw new SecurityException("Specified package \"" + packageName + "\" under uid "
                         +  UserHandle.getAppId(uid) + otherUidMessage);
             }
             return new PackageVerificationResult(RestrictionBypass.UNRESTRICTED,
@@ -4618,8 +4619,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (pkgUid != uid) {
-            String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
-            throw new SecurityException("Specified package " + packageName + " under uid " + uid
+            //TODO 195339480: replace true with debug
+            String otherUidMessage = true ? " but it is really " + pkgUid : " but it is not";
+            throw new SecurityException("Specified package \"" + packageName + "\" under uid " + uid
                     + otherUidMessage);
         }
 
