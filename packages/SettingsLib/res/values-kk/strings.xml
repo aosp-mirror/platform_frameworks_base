@@ -46,7 +46,7 @@
     <string name="private_dns_broken" msgid="1984159464346556931">"Жеке DNS серверіне кіру мүмкін емес."</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Шектеулі байланыс"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Интернетпен байланыс жоқ"</string>
-    <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Есептік жазбаға кіру керек"</string>
+    <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Аккаунтқа кіру керек"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Кіру нүктесі уақытша бос емес"</string>
     <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s арқылы қосылды"</string>
     <string name="available_via_carrier" msgid="465598683092718294">"%1$s арқылы қолжетімді"</string>
