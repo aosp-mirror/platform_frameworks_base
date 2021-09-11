@@ -437,7 +437,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Time se deblokira pristup za sve aplikacije i usluge kojima je dopuštena upotreba vašeg mikrofona."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Time se deblokira pristup za sve aplikacije i usluge kojima je dopuštena upotreba vašeg fotoaparata."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Time se deblokira pristup za sve aplikacije i usluge kojima je dopuštena upotreba vašeg fotoaparata ili mikrofona."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Ostali uređaji"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Uključivanje/isključivanje pregleda"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Napunjeno"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Punjenje"</string>
@@ -1171,7 +1171,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilni podaci"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilni podaci neće se automatski povezati"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilna veza neće se automatski uspostaviti"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Niste povezani"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nije dostupna nijedna druga mreža"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nema dostupnih mreža"</string>

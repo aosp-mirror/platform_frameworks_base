@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"මෙය ඔබගේ මයික්‍රෆෝනය භාවිත කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"මෙය ඔබගේ කැමරාව භාවිතා කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"මෙය ඔබගේ කැමරාව හෝ මයික්‍රෆෝනය භාවිත කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"උපාංගය"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"වෙනත් උපාංගය"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"දළ විශ්ලේෂණය ටොගල කරන්න"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"අරෝපිතයි"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ආරෝපණය වෙමින්"</string>

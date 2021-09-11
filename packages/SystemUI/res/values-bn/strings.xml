@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"এটার জন্য মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার মাইক্রোফোন ব্যবহার করার অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এটার জন্য ক্যামেরার অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এটার জন্য ক্যামেরা অথবা মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা অথবা মাইক্রোফোন ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"ডিভাইস"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইস"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"চার্জ হয়েছে"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"চার্জ হচ্ছে"</string>
@@ -1165,8 +1165,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"মোবাইল ডেটা"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"কানেক্ট করা আছে"</string>
-    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"মোবাইল ডেটা নিজে থেকে কানেক্ট হবে না"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"কানেকশন নেই"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"অন্য কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"কোনও নেটওয়ার্ক উপলভ্য নেই"</string>
