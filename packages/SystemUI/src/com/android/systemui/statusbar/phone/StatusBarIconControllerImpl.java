@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
@@ -72,7 +73,8 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     public StatusBarIconControllerImpl(
             Context context,
             CommandQueue commandQueue,
-            DemoModeController demoModeController) {
+            DemoModeController demoModeController,
+            DumpManager dumpManager) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -84,6 +86,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         commandQueue.addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /** */

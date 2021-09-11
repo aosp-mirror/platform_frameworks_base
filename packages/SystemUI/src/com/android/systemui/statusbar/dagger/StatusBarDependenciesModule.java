@@ -24,6 +24,7 @@ import android.os.Handler;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
@@ -65,7 +66,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -98,7 +98,8 @@ public interface StatusBarDependenciesModule {
             Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
             NotificationClickNotifier clickNotifier,
-            ActionClickLogger actionClickLogger) {
+            ActionClickLogger actionClickLogger,
+            DumpManager dumpManager) {
         return new NotificationRemoteInputManager(
                 context,
                 lockscreenUserManager,
@@ -109,7 +110,8 @@ public interface StatusBarDependenciesModule {
                 mainHandler,
                 remoteInputUriController,
                 clickNotifier,
-                actionClickLogger);
+                actionClickLogger,
+                dumpManager);
     }
 
     /** */
@@ -126,8 +128,8 @@ public interface StatusBarDependenciesModule {
             NotifCollection notifCollection,
             FeatureFlags featureFlags,
             @Main DelayableExecutor mainExecutor,
-            DeviceConfigProxy deviceConfigProxy,
-            MediaDataManager mediaDataManager) {
+            MediaDataManager mediaDataManager,
+            DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
                 statusBarOptionalLazy,
@@ -139,8 +141,8 @@ public interface StatusBarDependenciesModule {
                 notifCollection,
                 featureFlags,
                 mainExecutor,
-                deviceConfigProxy,
-                mediaDataManager);
+                mediaDataManager,
+                dumpManager);
     }
 
     /** */
