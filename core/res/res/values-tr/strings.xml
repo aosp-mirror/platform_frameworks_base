@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Devam etmek için parmak izi veya ekran kilidinizi kullanın"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Bir hata oluştu. Tekrar deneyin."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Parmak izi simgesi"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Devam etmek için yüz veya ekran kilidinizi kullanın"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Bir hata oluştu. Tekrar deneyin."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Yüz simgesi"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"senk. ayarlarını okuma"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını okuma izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize olup olmadığını belirleyebilir."</string>

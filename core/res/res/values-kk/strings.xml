@@ -278,7 +278,7 @@
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Физикалық пернетақта"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Қауіпсіздік"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Көлік режимі"</string>
-    <string name="notification_channel_account" msgid="6436294521740148173">"Есептік жазба күйі"</string>
+    <string name="notification_channel_account" msgid="6436294521740148173">"Аккаунт күйі"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Әзірлеуші хабарлары"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"Әзірлеушілердің маңызды хабарлары"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Жаңартылған нұсқалар"</string>
@@ -411,9 +411,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Қолданба трансляция біткеннен кейін сақталатын бекітілген трансляцияларды жібере алатын болады. Тым жиі пайдалансаңыз, жад толып, Android TV құрылғысы баяу немесе тұрақсыз жұмыс істеуі мүмкін."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Қолданбаға хабар тарату аяқталғанда сақталатын жабысқақ хабар тарату мүмкіндігін береді. Тым көп қолдану телефон жұмысын баяулатады немесе жадты көп қолдану арқылы жұмысын тұрақсыздандырады."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"контактілерді оқу"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Қолданбаға планшетте сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданбалар контактілер жасалған планшеттегі есептік жазбаларды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған есептік жазбалар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Қолданбаға Android TV құрылғысында сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданба контактілер жасалған Android TV құрылғысындағы есептік жазбаларды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған есептік жазбалар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Қолданбаға телефонда сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданбалар контактілер жасалған телефондағы есептік жазбаларды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған есептік жазбалар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Қолданбаға планшетте сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданбалар контактілер жасалған планшеттегі аккаунттарды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған аккаунттар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Қолданбаға Android TV құрылғысында сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданба контактілер жасалған Android TV құрылғысындағы аккаунттарды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған аккаунттар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Қолданбаға телефонда сақталған контактілеріңіз туралы деректерді оқуға рұқсат етеді. Қолданбалар контактілер жасалған телефондағы аккаунттарды пайдалана алады. Бұған сіз орнатқан қолданбалар арқылы жасалған аккаунттар кіруі мүмкін. Бұл рұқсат қолданбаларға контакт деректерін сақтау мүмкіндігін береді және зиянды қолданбалар контакт деректерін сіздің келісіміңізсіз бөлісуі ықтимал."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"контактілерді өзгерту"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Қолданбаға планшетте сақталған контактілеріңіз туралы деректерді өзгертуге рұқсат етеді. Бұл рұқсат қолданбаларға контактілер туралы деректерді жоюға рұқсат береді."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Қолданбаға Android TV құрылғысында сақталған контактілеріңіз туралы деректерді өзгертуге рұқсат етеді. Бұл рұқсат қолданбаларға контактілер туралы деректерді жоюға рұқсат береді."</string>
@@ -499,10 +499,10 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"Қолданбаға планшеттің уақыт белдеуін өзгертуге рұқсат береді."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Қолданба Android TV құрылғыңыздың уақыт белдеуін өзгерте алатын болады."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"Қолданбаға телефонның уақыт белдеуін өзгертуге рұқсат береді."</string>
-    <string name="permlab_getAccounts" msgid="5304317160463582791">"құрылғыдағы есептік жазбаларды табу"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Қолданбаға планшет арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Қолданба Android TV құрылғыңыз танитын есептік жазбалардың тізімін ала алатын болады. Оған сіз орнатқан қолданбалар арқылы жасалған кез келген есептік жазба кіруі мүмкін."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Қолданбаға телефон арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
+    <string name="permlab_getAccounts" msgid="5304317160463582791">"құрылғыдағы аккаунттарды табу"</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Қолданбаға планшет арқылы белгілі аккаунттар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған аккаунттар да қамтылуы мүмкін."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Қолданба Android TV құрылғыңыз танитын аккаунтлардың тізімін ала алатын болады. Оған сіз орнатқан қолданбалар арқылы жасалған кез келген аккаунт кіруі мүмкін."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Қолданбаға телефон арқылы белгілі аккаунттар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған аккаунттар да қамтылуы мүмкін."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"желі байланыстарын көру"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Қолданбаға желі байланысы туралы ақпаратты, мысалы, қайсысы бар және қосылған деген сияқты, көру мүмкіндігін береді."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"желіге толық қатынасы бар"</string>
@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Жалғастыру үшін саусақ ізін немесе экран құлпын пайдаланыңыз."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Бірдеңе дұрыс болмады. Қайталап көріңіз."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Бет тану"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Бет тану функциясына қатысты мәселе шықты"</string>
@@ -663,15 +662,14 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Жалғастыру үшін бетті анықтау функциясын немесе экран құлпын пайдаланыңыз."</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Бірдеңе дұрыс болмады. Қайталап көріңіз."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Бет белгішесі"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"синх параметрлерін оқу"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Қолданбаға есептік жазба синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының есептік жазбамен сихрондалғаны анықталуы мүмкін."</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Қолданбаға аккаунт синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының аккаунтмен сихрондалғаны анықталуы мүмкін."</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"синх қосу және өшіру арасында ауысу"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Қолданбаға есептік жазбаның синхрондау параметрлерін жөндеу мүмкіндігін береді. Мысалы, бұл People қолданбасын есептік жазбамен синхрондауды қосу үшін қолданылуы мүмкін."</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Қолданбаға аккаунттың синхрондау параметрлерін жөндеу мүмкіндігін береді. Мысалы, бұл People қолданбасын аккаунтпен синхрондауды қосу үшін қолданылуы мүмкін."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"үйлестіру санақтық ақпаратын оқу"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Қолданбаға есептік жазбаның синхрондалу статистикаларын, оның ішінде синхрондау шараларының тарихы және қанша дерек синхрондалғаны жайлы, оқу мүмкіндігін береді."</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Қолданбаға аккаунттың синхрондалу статистикаларын, оның ішінде синхрондау шараларының тарихы және қанша дерек синхрондалғаны жайлы, оқу мүмкіндігін береді."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ортақ жадтың мазмұнын оқу"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Қолданбаға ортақ жадтың мазмұнын оқуға мүмкіндік береді."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ортақ жадтың мазмұнын өзгерту немесе жою"</string>
@@ -694,7 +692,7 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"Қолданбаға белгілі бір желілер және қолданбалар үшін журналдық желіні пайдалануды оқуға рұқсат береді."</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"желі саясатын басқару"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"Қолданбаға желілік саясаттарды басқаруға және қолданба ережелерін анықтауға рұқсат береді."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"желіні қолдану есептік жазбаларын өзгерту"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"желіні қолдану аккаунттарын өзгерту"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"Қолданбаға қолданбалардың желіні қолдану әрекетін өзгерту мүмкіндігін береді. Қалыпты қолданбалар қолданысына арналмаған."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"хабарларға кіру"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"Қолданбаға хабарларды алу, тексеру және тазалау мүмкіндігін береді, басқа қолданбалар арқылы қойылған хабарларды қоса."</string>
@@ -928,7 +926,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон зауыттың бастапқы параметрлеріне қайта реттеледі."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Кескінді ұмытып қалдыңыз ба?"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Есептік жазбаның бекітпесін ашу"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Аккаунттың бекітпесін ашу"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Тым көп кескін әрекеттері"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ашу үшін Google есептік жазбаңызбен кіріңіз."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Пайдаланушы атауы (эл. пошта)"</string>
@@ -1485,8 +1483,8 @@
     <string name="allow" msgid="6195617008611933762">"Рұқсат беру"</string>
     <string name="deny" msgid="6632259981847676572">"Тыйым салу"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Рұқсат өтінілді"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы үшін <xliff:g id="APP">%1$s</xliff:g>\nқолданбасы арқылы рұқсат сұралды."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nаккаунт үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты үшін <xliff:g id="APP">%1$s</xliff:g>\nқолданбасы арқылы рұқсат сұралды."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Осы қолданбаны жұмыс профиліңізде пайдаланып жатырсыз"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Енгізу әдісі"</string>
@@ -1535,13 +1533,13 @@
     <string name="gpsVerifYes" msgid="3719843080744112940">"Иә"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Жоқ"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Жою шектеуінен асып кетті"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Мұнда <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> жойылған <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> есептік жазбасының элементі бар. Не істеуді қалайсыз?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Мұнда <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> жойылған <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> аккаунтының элементі бар. Не істеуді қалайсыз?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Бұл нәрселер жойылсын"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Жойылғандарды кері орындау"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Қазір ешқандай әрекет жасамаңыз"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Есептік жазба таңдау"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"Есептік жазба қосу"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Есептік жазба қосу."</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдау"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"Аккаунт қосу"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Аккаунт қосу."</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Арттыру"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Азайту"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> түймесін басып тұрыңыз."</string>
@@ -1669,13 +1667,13 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Дұрыс PUK кодын қайта енгізіңіз. Әрекеттерді қайталау SIM картасының істен шығуына себеп болады."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN коды сәйкес емес."</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Тым көп кескін әрекеттері"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Ашу үшін Google есептік жазбасы арқылы кіріңіз."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Ашу үшін Google аккаунты арқылы кіріңіз."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Пайдаланушы атауы (эл. пошта)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Құпия сөз"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Кіру"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Пайдаланушы атауы немесе кілтсөз жарамсыз."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Пайдаланушы атауын немесе кілтсөзді ұмытып қалдыңыз ба?\n"<b>"google.com/accounts/recovery"</b>" веб-сайтына кіріңіз."</string>
-    <string name="kg_login_checking_password" msgid="4676010303243317253">"Есептік жазбаны тексеруде…"</string>
+    <string name="kg_login_checking_password" msgid="4676010303243317253">"Аккаунтты тексеруде…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"PIN кодты <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
@@ -1685,9 +1683,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"Планшетті ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Планшет бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс ашпадыңыз. Енді Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді есептік жазба арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді аккаунт арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды аккаунт арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Жою"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
@@ -1968,8 +1966,8 @@
     <string name="importance_from_user" msgid="2782756722448800447">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Қатысты адамдарға байланысты бұл маңызды."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы (мұндай есептік жазбаға ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы (мұндай аккаунтқа ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Тіл қосу"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Аймақ параметрі"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Тіл атауын теріңіз"</string>

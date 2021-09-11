@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gebruik jou vingerafdruk of skermslot om voort te gaan"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Iets is fout. Probeer weer."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Vingerafdrukikoon"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Gesigslot"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Kwessie met Gesigslot"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gebruik jou gesig of skermslot om voort te gaan"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Iets is fout. Probeer weer."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Gesig-ikoon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lees sinkroniseer-instellings"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Laat die program toe om die sinkroniseringinstellings van \'n rekening te lees. Byvoorbeeld, dit kan bepaal of die People-program met \'n rekening gesinkroniseer is."</string>
