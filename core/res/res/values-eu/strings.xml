@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Aurrera egiteko, erabili hatz-marka edo pantailaren blokeoa"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Aurpegi bidez desblokeatzeko eginbidea"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arazoak ditugu aurpegi bidez desblokeatzeko eginbidearekin"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aurrera egiteko, erabili aurpegia edo pantailaren blokeoa"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aurpegiaren ikonoa"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
@@ -1316,7 +1314,7 @@
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> sareak konektagarritasun murriztua du"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Sakatu hala ere konektatzeko"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
+    <string name="network_switch_metered_detail" msgid="1358296010128405906">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Baliteke zerbait ordaindu behar izatea."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"datu-konexioa"</item>
@@ -1989,7 +1987,7 @@
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aplikazioa Android-en bertsio zaharrago baterako sortu zenez, baliteke behar bezala ez funtzionatzea. Bilatu eguneratzerik baden, edo jarri garatzailearekin harremanetan."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Bilatu eguneratzeak"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mezu berriak dituzu"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"Mezuak ikusteko, ireki SMS mezuetarako aplikazioa"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"Mezuak ikusteko, ireki SMSetarako aplikazioa"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Baliteke funtzio batzuk mugatuta egotea"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Blokeatuta dago laneko profila"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Sakatu profila desblokeatzeko"</string>

@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"請使用指紋解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"發生錯誤，請再試一次。"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋圖示"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"人臉解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"人臉解鎖功能發生問題"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"請使用人臉解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"發生錯誤，請再試一次。"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"臉孔圖示"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允許應用程式讀取帳戶的同步處理設定，例如判斷「使用者」應用程式是否和某個帳戶進行同步處理。"</string>

@@ -242,7 +242,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"টে\'বলেটৰ বিকল্পসমূহ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TVৰ বিকল্পসমূহ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ফ\'নৰ বিকল্পসমূহ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"স্ক্ৰীণ ল\'ক"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"স্ক্ৰীন লক"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"পাৱাৰ অফ"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"পাৱাৰ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ৰিষ্টাৰ্ট কৰক"</string>
@@ -329,7 +329,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ৱিণ্ড’ সমল বিচাৰি উলিওৱাৰ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"আপুনি চাই থকা ৱিণ্ড’খনৰ সমল পৰীক্ষা কৰাৰ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"স্পৰ্শৰ দ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰাৰ"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"আঙুলিৰে টিপা বস্তুসমূহ ডাঙৰকৈ কৈ শুনোৱা হ’ব আৰু আঙুলিৰ স্পৰ্শেৰে নিৰ্দেশ দি স্ক্ৰীণ অন্বেষণ কৰিব পাৰিব।"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"আঙুলিৰে টিপা বস্তুসমূহ ডাঙৰকৈ কৈ শুনোৱা হ’ব আৰু আঙুলিৰ স্পৰ্শেৰে নিৰ্দেশ দি স্ক্ৰীন অন্বেষণ কৰিব পাৰিব।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"আপুনি লিখা পাঠ নিৰীক্ষণ কৰাৰ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"ক্ৰেডিট কাৰ্ডৰ নম্বৰ আৰু পাছৱৰ্ডৰ দৰে ব্যক্তিগত ডেটা ইয়াত অন্তৰ্ভুক্ত।"</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"ডিছপ্লে’ৰ বিবৰ্ধন নিয়ন্ত্ৰণ কৰাৰ"</string>
@@ -387,7 +387,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="6559320515561928348">"অন্য এপবোৰ বন্ধ কৰক"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"এপটোক অন্য এপসমূহৰ নেপথ্যৰ প্ৰক্ৰিয়াসমূহ শেষ কৰিবলৈ অনুমতি দিয়ে৷ এই কার্যৰ বাবে অন্য এপসমূহ চলাটো বন্ধ হ\'ব পাৰে৷"</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"এই এপটো অইন এপৰ ওপৰত প্ৰদৰ্শিত হ\'ব পাৰে"</string>
-    <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"এই এপটো অইন এপৰ ওপৰত বা স্ক্ৰীণৰ অইন অংশত প্ৰদৰ্শিত হ\'ব পাৰে। এই কাৰ্যই এপসমূহৰ স্বাভাৱিক কাৰ্যকলাপত ব্যাঘাত জন্মাব পাৰে আৰু অইন এপসমূহক স্ক্ৰীণত কেনেকৈ দেখা পোৱা যায় সেইটো সলনি কৰিব পাৰে।"</string>
+    <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"এই এপ্‌টো অন্য এপৰ ওপৰত বা স্ক্ৰীনৰ অন্য অংশত প্ৰদৰ্শিত হ\'ব পাৰে। এই কাৰ্যই এপৰ স্বাভাৱিক ব্যৱহাৰত ব্যাঘাত জন্মাব পাৰে আৰু অন্য এপ্‌সমূহক স্ক্ৰীনত কেনেকৈ দেখা পোৱা যায় সেইটো সলনি কৰিব পাৰে।"</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"নেপথ্যত চলিব পাৰে"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"এই এপটো নেপথ্যত চলিব পাৰে। ইয়াৰ ফলত বেটাৰি সোনকালে শেষ হ\'ব পাৰে।"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"নেপথ্যত ডেটা ব্যৱহাৰ কৰিব পাৰে"</string>
@@ -545,10 +545,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"এপটোক নিয়েৰ ফিল্ড কমিউনিকেশ্বন (NFC) টেগ, কাৰ্ড আৰু ৰিডাৰসমূহৰ সৈতে যোগাযোগ কৰিবলৈ অনুমতি দিয়ে।"</string>
-    <string name="permlab_disableKeyguard" msgid="3605253559020928505">"আপোনাৰ স্ক্ৰীণ ল\'ক অক্ষম কৰক"</string>
+    <string name="permlab_disableKeyguard" msgid="3605253559020928505">"আপোনাৰ স্ক্ৰীন লক অক্ষম কৰক"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"এপটোক কী ল\'ক আৰু জড়িত হোৱা যিকোনো পাছৱৰ্ডৰ সুৰক্ষা অক্ষম কৰিব দিয়ে৷ উদাহৰণস্বৰূপে, কোনো অন্তৰ্গামী ফ\'ন কল উঠোৱাৰ সময়ত ফ\'নটোৱে কী-লকটো অক্ষম কৰে, তাৰ পিছত কল শেষ হ\'লেই কী লকটো পুনৰ সক্ষম কৰে৷"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"স্ক্ৰীণ লকৰ জটিলতাৰ অনুৰোধ"</string>
-    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"এপটোক স্ক্ৰীণ লকৰ জটিলতাৰ স্তৰ (উচ্চ, মধ্যম, নিম্ন বা একেবাৰে নাই) শিকিবলৈ অনুমতি দিয়ে ই স্ক্ৰীণ লকৰ সম্ভাব্য দৈৰ্ঘ্য বা স্ক্ৰীণ লকৰ প্ৰকাৰ দৰ্শায়। লগতে এপটোৱে ব্যৱহাৰকাৰীক স্ক্ৰীণ লকটো এটা নিৰ্দিষ্ট স্তৰলৈ আপডে’ট কৰিবলৈ পৰামৰ্শ দিব পাৰে যিটো ব্যৱহাৰকাৰীয়ে অৱজ্ঞা কৰি পৰৱর্তী পৃষ্ঠালৈ যাব পাৰে। মনত ৰাখিব যে স্ক্ৰীণ লকটো সাধাৰণ পাঠ হিচাপে সঞ্চয় কৰা নহয় সেয়ে এপ্‌টোৱে সঠিক পাছৱৰ্ডটো জানিব নোৱাৰে।"</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"এপ্‌টোক স্ক্ৰীন লকৰ জটিলতাৰ স্তৰ (উচ্চ, মধ্যম, নিম্ন বা একেবাৰে নাই)ৰ বিষয়ে জানিবলৈ অনুমতি দিয়ে, যিয়ে স্ক্ৰীন লকৰ সম্ভাব্য দৈৰ্ঘ্য বা স্ক্ৰীন লকৰ প্ৰকাৰ দৰ্শায়। লগতে এপ্‌টোৱে ব্যৱহাৰকাৰীক স্ক্ৰীন লকটো এটা নিৰ্দিষ্ট স্তৰলৈ আপডে’ট কৰিবলৈ পৰামৰ্শ দিব পাৰে যিটো ব্যৱহাৰকাৰীয়ে অৱজ্ঞা কৰি পৰৱর্তী পৃষ্ঠালৈ যাব পাৰে। মনত ৰাখিব যে স্ক্ৰীন লকটো সাধাৰণ পাঠ হিচাপে ষ্ট\'ৰ কৰা নহয়; সেয়েহে, এপ্‌টোৱে সঠিক পাছৱৰ্ডটো জানিব নোৱাৰে।"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰক"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ পৰিচালনা কৰিব পাৰে"</string>
@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"অব্যাহত ৰাখিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেচ আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ফেচ আনলক ব্যৱহাৰ কৰোঁতে সমস্যা হৈছে"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"অব্যাহত ৰাখিবলৈ আপোনাৰ মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"মুখমণ্ডলৰ আইকন"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ছিংকৰ ছেটিংসমূহ পঢ়ক"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"একাউণ্টৰ ছিংক ছেটিংবোৰ পঢ়িবলৈ এপক অনুমতি দিয়ে। যেনে, People এপ কোনো একাউণ্টত ছিংক কৰা হৈছে নে নাই সেয়া নির্ধাৰণ কৰিব পাৰে।"</string>
@@ -684,8 +682,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"এপটোক নতুন টেলিকম সংযোগ পঞ্জীয়ন কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"টেলিকম সংযোগ পৰিচালনা কৰা"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"এপটোক টেলিকম সংযোগ পৰিচালনা কৰিবলৈ অনুমতি দিয়ে।"</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ইন-কল স্ক্ৰীণৰ সৈতে সংযোগ স্থাপন"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ব্যৱহাৰকাৰীয়ে কেতিয়া আৰু কেনেদৰে ইন-কল-স্ক্ৰীণ চাব, তাক নিয়ন্ত্ৰণ কৰিবলৈ এপক অনুমতি দিয়ে।"</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ইন-কল স্ক্ৰীনৰ সৈতে সংযোগ স্থাপন"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ব্যৱহাৰকাৰীগৰাকীয়ে কেতিয়া আৰু কেনেদৰে ইন-কল-স্ক্ৰীন চায় সেয়া নিয়ন্ত্ৰণ কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"টেলিফ\'নী সেৱাসমূহৰ সৈতে সংযোগ স্থাপন"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"কল কৰিবলৈ/লাভ কৰিবলৈ টেলিফ\'নী সেৱাসমূহৰ সৈতে এপক সংযোগ স্থাপনৰ বাবে অনুমতি দিয়ে।"</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ইন-কল ব্যৱহাৰকাৰীৰ অভিজ্ঞতা প্ৰদান কৰা"</string>
@@ -709,7 +707,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"নেটৱৰ্ক অৱস্থাসমূহৰ ওপৰত নিৰীক্ষণৰ বাবে শুনিব পাৰে"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"এটা এপ্লিকেশ্বনক নেটৱৰ্ক অৱস্থাসমূহত নিৰীক্ষণৰ বাবে শুনিবলৈ অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"ইনপুট ডিভাইচ কেলিব্ৰেশ্বন সলনি কৰিব পাৰে"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"টাচ্চ স্ক্ৰীণৰ কেলিব্ৰেশ্বন পেৰামিটাৰ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"টাচ্চ স্ক্ৰীনৰ কেলিব্ৰেশ্বন পেৰামিটাৰ সংশোধন কৰিবলৈ এপক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে কেতিয়াও প্ৰয়োজন হোৱা উচিত নহয়।"</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM প্ৰমাণপত্ৰসমূহলৈ প্ৰৱেশ"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"এটা এপ্লিকেশ্বনক DRM প্ৰমাণপত্ৰ গোটাবলৈ আৰু ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন নহয়।"</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android বীম স্থানান্তৰণৰ স্থিতি লাভ কৰিব পাৰে"</string>
@@ -727,18 +725,18 @@
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"এটা উচ্চ ছেম্পলিঙৰ হাৰত ছেন্সৰৰ ডেটা এক্সেছ কৰে"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"এপ্‌টোক ২০০ হাৰ্টজতকৈ অধিক হাৰত ছেন্সৰৰ ডেটাৰ নমুনা ল’বলৈ অনুমতি দিয়ে"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"পাছৱর্ডৰ নিয়ম ছেট কৰক"</string>
-    <string name="policydesc_limitPassword" msgid="4105491021115793793">"স্ক্ৰীণ লক পাছৱৰ্ড আৰু পিনৰ দৈর্ঘ্য আৰু কি কি আখৰ ব্যৱহাৰ কৰিব পাৰে তাক নিয়ন্ত্ৰণ কৰক।"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্ৰীণ আনলক কৰা প্ৰয়াসবোৰ পৰ্যবেক্ষণ কৰিব পাৰে"</string>
+    <string name="policydesc_limitPassword" msgid="4105491021115793793">"স্ক্ৰীন লক পাছৱৰ্ড আৰু পিনত অনুমোদিত দৈৰ্ঘ্য আৰু বৰ্ণবোৰ নিয়ন্ত্ৰণ কৰক।।"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্ৰীন আনলক কৰা প্ৰয়াসবোৰ নিৰীক্ষণ কৰক"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"স্ক্ৰীণ আনলক কৰোতে লিখা অশুদ্ধ পাছৱৰ্ডৰ হিচাপ ৰাখক, আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড লিখা হয় তেন্তে টে\'বলেটটো লক কৰক বা টে\'বলেটটোৰ সকলো ডেটা মোহাৰক।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"স্ক্ৰীণ আনলক কৰোঁতে দিয়া ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড দিয়া হয় তেন্তে Android TV ডিভাইচটো লক কৰক অথবা আপোনাৰ Android TV ডিভাইচৰ সকলো ডেটা মচক।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"স্ক্ৰীণ আনলক কৰোতে লিখা অশুদ্ধ পাছৱৰ্ডৰ হিচাপ ৰাখক, আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড লিখা হয় তেন্তে ফ\'নটো লক কৰক বা ফ\'নটোৰ সকলো ডেটা মোহাৰক।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"স্ক্ৰীণ আনলক কৰোতে লিখা অশুদ্ধ পাছৱৰ্ডৰ হিচাপ নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড দিয়া হয় তেন্তে টে\'বলেটটো লক কৰক বা এই ব্যৱহাৰকাৰীৰ সকলো ডেটা মচক।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"স্ক্ৰীণখন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয় তেন্তে Android TV ডিভাইচটো লক কৰক অথবা এই ব্যৱহাৰকাৰীৰ সকলো ডেটা মচক।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"স্ক্ৰীণ আনলক কৰোতে দিয়া অশুদ্ধ পাছৱৰ্ডৰ হিচাপ নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড দিয়া হয় তেন্তে ফ\'নটো লক কৰক বা এই ব্যৱহাৰকাৰীৰ সকলো ডেটা মচক।"</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"স্ক্ৰীণ লক সলনি কৰক"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"স্ক্ৰীণ লক সলনি কৰক।"</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"স্ক্ৰীণখন লক কৰক"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"স্ক্ৰীণ কেনেকৈ আৰু কেতিয়া ল\'ক হ\'ব লাগে সেয়া নিয়ন্ত্ৰণ কৰক।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"স্ক্ৰীন আনলক কৰোঁতে টাইপ কৰা অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে টেবলেটটো লক কৰক বা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"স্ক্ৰীনখন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে Android TV ডিভাইচটো লক কৰক অথবা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"স্ক্ৰীনখন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে ফ\'নটো লক কৰক অথবা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"স্ক্ৰীন লক সলনি কৰক"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"স্ক্ৰীন লক সলনি কৰক।"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"স্ক্ৰীনখন লক কৰক"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"স্ক্ৰীন কেনেকৈ আৰু কেতিয়া লক হয় সেয়া নিয়ন্ত্ৰণ কৰক।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"সকলো ডেটা মচক"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"সতৰ্কবাণী প্ৰেৰণ নকৰাকৈয়ে ফেক্টৰী ডেটা ৰিছেট কৰি টেবলেটৰ ডেটা মচক।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"কোনো সতর্কবার্তা নপঠিওৱাকৈ ফেক্টৰী ডেটা ৰিছেট কৰি আপোনাৰ Android TV ডিভাইচৰ ডেটা মচক।"</string>
@@ -749,13 +747,13 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"এই ফ\'নটোত থকা এই ব্যৱহাৰকাৰীৰ তথ্য কোনো সর্তকবাণী নিদিয়াকৈ মচি পেলাওক।"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ডিভাইচৰ বাবে গ্ল\'বেল প্ৰক্সী ছেট কৰক"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"নীতি সক্ষম কৰি থোৱা অৱস্থাত ব্য়ৱহাৰ কৰিবৰ বাবে ডিভাইচৰ বাবে গ্ল\'বেল প্ৰক্সী ছেট কৰক। কেৱল ডিভাইচৰ গৰাকীয়েহে গ্ল\'বেল প্ৰক্সী ছেট কৰিব পাৰে।"</string>
-    <string name="policylab_expirePassword" msgid="6015404400532459169">"স্ক্ৰীণ লক পাছৱৰ্ডৰ ম্যাদ ওকলাৰ দিন ছেট কৰক"</string>
-    <string name="policydesc_expirePassword" msgid="9136524319325960675">"স্ক্ৰীণ লকৰ পাছৱৰ্ড, পিন বা আর্হি কিমান ঘনাই সলনি কৰিব লাগিব তাক সলনি কৰক।"</string>
+    <string name="policylab_expirePassword" msgid="6015404400532459169">"স্ক্ৰীন লক পাছৱৰ্ডৰ ম্যাদ ওকলাৰ দিন ছেট কৰক"</string>
+    <string name="policydesc_expirePassword" msgid="9136524319325960675">"স্ক্ৰীন লকৰ পাছৱৰ্ড, পিন বা আর্হি কিমান ঘনাই সলনি কৰিব লাগিব তাক সলনি কৰক।"</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"সঞ্চয়াগাৰৰ এনক্ৰিপশ্বন ছেট কৰক"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"সঞ্চয় কৰি ৰখা ডেটাক এনক্ৰিপ্ট কৰাৰ প্ৰয়োজন।"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"কেমেৰাবোৰ অক্ষম কৰক"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"সকলো ডিভাইচৰ কেমেৰাবোৰ ব্যৱহাৰ কৰাত বাধা দিয়ক।"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"স্ক্ৰীণ লকৰ কিছুমান সুবিধা অক্ষম কৰক"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"স্ক্ৰীন লকৰ কিছুমান সুবিধা অক্ষম কৰক"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"স্ক্ৰীণ লকৰ কিছুমান সুবিধা ব্যৱহাৰ হোৱাত বাধা দিয়ক।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ঘৰ"</item>
@@ -882,7 +880,7 @@
     <string name="keyguard_label_text" msgid="3841953694564168384">"আনলক কৰিবলৈ মেনু টিপাৰ পিছত ০ টিপক।"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"জৰুৰীকালীন নম্বৰ"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"কোনো সেৱা নাই"</string>
-    <string name="lockscreen_screen_locked" msgid="7364905540516041817">"স্ক্ৰীণ লক কৰা হ’ল।"</string>
+    <string name="lockscreen_screen_locked" msgid="7364905540516041817">"স্ক্ৰীন লক কৰা হ’ল।"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"আনলক কৰিবলৈ বা জৰুৰীকালীন কল কৰিবলৈ মেনু টিপক।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"আনলক কৰিবলৈ মেনু টিপক।"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"আনলক কৰিবলৈ আর্হি আঁকক"</string>
@@ -1395,7 +1393,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"শ্বেয়াৰ কৰক"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"প্ৰত্যাখ্যান কৰক"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ইনপুট পদ্ধতি বাছনি কৰক"</string>
-    <string name="show_ime" msgid="6406112007347443383">"কায়িক কীব’ৰ্ড সক্ৰিয় হৈ থাকোঁতে ইয়াক স্ক্ৰীণত ৰাখিব"</string>
+    <string name="show_ime" msgid="6406112007347443383">"কায়িক কীব’ৰ্ড সক্ৰিয় হৈ থাকোঁতে ইয়াক স্ক্ৰীনত ৰাখক"</string>
     <string name="hardware" msgid="1800597768237606953">"ভাৰ্শ্বুৱল কীব\'ৰ্ড দেখুৱাওক"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"কায়িক কীব’ৰ্ড কনফিগাৰ কৰক"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ভাষা আৰু চানেকি বাছনি কৰিবলৈ ইয়াত টিপক"</string>
@@ -1633,7 +1631,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ৱায়াৰলেচ ডিছপ্লে’"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"কাষ্ট"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ডিভাইচৰ লগত সংযোগ কৰক"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ডিভাইচত স্ক্ৰীণ কাষ্ট কৰক"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ডিভাইচত স্ক্ৰীন কাষ্ট কৰক"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ডিভাইচৰ সন্ধান কৰক…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ছেটিংসমূহ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"বিচ্ছিন্ন কৰক"</string>
@@ -1642,8 +1640,8 @@
     <string name="media_route_status_available" msgid="1477537663492007608">"উপলব্ধ"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"উপলব্ধ নহয়"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"ব্যৱহাৰ হৈ আছে"</string>
-    <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"অন্তৰ্নিমিত স্ক্ৰীণ"</string>
-    <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI স্ক্ৰীণ"</string>
+    <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"বিল্ট-ইন স্ক্ৰীন"</string>
+    <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI স্ক্ৰীন"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"অ\'ভাৰলে\' #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", সুৰক্ষিত"</string>
@@ -2092,7 +2090,7 @@
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ছেটিংসমূহ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"কেমেৰা"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"মাইক্ৰ\'ফ\'ন"</string>
-    <string name="notification_appops_overlay_active" msgid="5571732753262836481">"স্ক্ৰীণত অইন এপৰ ওপৰত দেখুৱাওক"</string>
+    <string name="notification_appops_overlay_active" msgid="5571732753262836481">"আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ আছে"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"মতামত দিয়ক"</string>
     <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"এই জাননীটোৰ গুৰুত্ব ডিফ’ল্টলৈ বৃদ্ধি কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"এই জাননীটোৰ গুৰুত্ব নীৰৱলৈ হ্ৰাস কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
