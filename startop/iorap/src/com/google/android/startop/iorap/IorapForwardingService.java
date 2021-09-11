@@ -21,16 +21,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
-import android.app.job.JobService;
 import android.app.job.JobScheduler;
+import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.Handler;
-import android.os.Parcel;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -45,18 +42,15 @@ import com.android.server.SystemService;
 import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.wm.ActivityMetricsLaunchObserver;
-import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
-import com.android.server.wm.ActivityMetricsLaunchObserver.Temperature;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * System-server-local proxy into the {@code IIorap} native service.
@@ -347,7 +341,8 @@ public class IorapForwardingService extends SystemService {
         launchObserverRegistry.registerLaunchObserver(mAppLaunchObserver);
         launchObserverRegistry.registerLaunchObserver(mEventSequenceValidator);
 
-        BackgroundDexOptService.addPackagesUpdatedListener(mDexOptPackagesUpdated);
+        BackgroundDexOptService.getService().addPackagesUpdatedListener(
+                mDexOptPackagesUpdated);
 
 
         mRegisteredListeners = true;

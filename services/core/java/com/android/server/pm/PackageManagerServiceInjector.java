@@ -134,6 +134,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<DomainVerificationManagerInternal>
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
+    private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -168,7 +169,8 @@ public class PackageManagerServiceInjector {
             Producer<Handler> handlerProducer,
             SystemWrapper systemWrapper,
             ServiceProducer getLocalServiceProducer,
-            ServiceProducer getSystemServiceProducer) {
+            ServiceProducer getSystemServiceProducer,
+            Producer<BackgroundDexOptService> backgroundDexOptService) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -217,6 +219,7 @@ public class PackageManagerServiceInjector {
                 new Singleton<>(
                         domainVerificationManagerInternalProducer);
         mHandlerProducer = new Singleton<>(handlerProducer);
+        mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
     }
 
     /**
@@ -375,6 +378,10 @@ public class PackageManagerServiceInjector {
 
     public ActivityManagerInternal getActivityManagerInternal() {
         return getLocalService(ActivityManagerInternal.class);
+    }
+
+    public BackgroundDexOptService getBackgroundDexOptService() {
+        return mBackgroundDexOptService.get(this, mPackageManager);
     }
 
     /** Provides an abstraction to static access to system state. */
