@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"మీ మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"పరికరం"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"ఇతర పరికరం"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ఛార్జ్ చేయబడింది"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ఛార్జ్ అవుతోంది"</string>
@@ -1165,8 +1165,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"మొబైల్ డేటా"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"కనెక్ట్ చేయబడింది"</string>
-    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"మొబైల్ డేటా ఆటోమెటిక్‌గా కనెక్ట్ అవ్వదు"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"కనెక్షన్ లేదు"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ఇతర నెట్‌వర్క్‌లేవీ అందుబాటులో లేవు"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"నెట్‌వర్క్‌లు అందుబాటులో లేవు"</string>

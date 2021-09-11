@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"यसो गर्नुभयो भने माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"यसो गर्नुभयो भने क्यामेरा प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"यसो गर्नुभयो भने क्यामेरा वा माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"यन्त्र"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हुँदै छ"</string>
