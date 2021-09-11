@@ -68,6 +68,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.settings.UserContextProvider;
@@ -159,7 +160,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
                 Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController);
+                mShadeController, mock(DumpManager.class));
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);

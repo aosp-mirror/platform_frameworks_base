@@ -23,6 +23,8 @@ import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
+import android.os.Process;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.SparseLongArray;
 import android.view.Display;
@@ -53,6 +55,8 @@ import java.util.Map;
 public class BatteryStatsNoteTest extends TestCase {
 
     private static final int UID = 10500;
+    private static final int ISOLATED_APP_ID = Process.FIRST_ISOLATED_UID + 23;
+    private static final int ISOLATED_UID = UserHandle.getUid(0, ISOLATED_APP_ID);
     private static final WorkSource WS = new WorkSource(UID);
 
     /**
@@ -106,6 +110,88 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.getUidStatsLocked(UID).noteStopWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
 
+        BatteryStats.Timer aggregTimer = bi.getUidStats().get(UID)
+                .getAggregatedPartialWakelockTimer();
+        long actualTime = aggregTimer.getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
+        long bgTime = aggregTimer.getSubTimer().getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
+        assertEquals(220_000, actualTime);
+        assertEquals(120_000, bgTime);
+    }
+
+    /**
+     * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid.
+     */
+    @SmallTest
+    public void testNoteStartWakeLocked_isolatedUid() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        int pid = 10;
+        String name = "name";
+        String historyName = "historyName";
+
+        WorkSource.WorkChain isolatedWorkChain = new WorkSource.WorkChain();
+        isolatedWorkChain.addNode(ISOLATED_UID, name);
+
+        // Map ISOLATED_UID to UID.
+        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+        bi.noteStartWakeLocked(ISOLATED_UID, pid, isolatedWorkChain, name, historyName,
+                WAKE_TYPE_PARTIAL, false);
+
+        clocks.realtime = clocks.uptime = 100;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        clocks.realtime = clocks.uptime = 220;
+        bi.noteStopWakeLocked(ISOLATED_UID, pid, isolatedWorkChain, name, historyName,
+                WAKE_TYPE_PARTIAL);
+
+        // ISOLATED_UID wakelock time should be attributed to UID.
+        BatteryStats.Timer aggregTimer = bi.getUidStats().get(UID)
+                .getAggregatedPartialWakelockTimer();
+        long actualTime = aggregTimer.getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
+        long bgTime = aggregTimer.getSubTimer().getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
+        assertEquals(220_000, actualTime);
+        assertEquals(120_000, bgTime);
+    }
+
+    /**
+     * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid, with a race where the
+     * isolated uid is removed from batterystats before the wakelock has been stopped.
+     */
+    @SmallTest
+    public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        int pid = 10;
+        String name = "name";
+        String historyName = "historyName";
+
+        WorkSource.WorkChain isolatedWorkChain = new WorkSource.WorkChain();
+        isolatedWorkChain.addNode(ISOLATED_UID, name);
+
+        // Map ISOLATED_UID to UID.
+        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+        bi.noteStartWakeLocked(ISOLATED_UID, pid, isolatedWorkChain, name, historyName,
+                WAKE_TYPE_PARTIAL, false);
+
+        clocks.realtime = clocks.uptime = 100;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        clocks.realtime = clocks.uptime = 150;
+        bi.maybeRemoveIsolatedUidLocked(ISOLATED_UID, clocks.realtime, clocks.uptime);
+
+        clocks.realtime = clocks.uptime = 220;
+        bi.noteStopWakeLocked(ISOLATED_UID, pid, isolatedWorkChain, name, historyName,
+                WAKE_TYPE_PARTIAL);
+
+        // ISOLATED_UID wakelock time should be attributed to UID.
         BatteryStats.Timer aggregTimer = bi.getUidStats().get(UID)
                 .getAggregatedPartialWakelockTimer();
         long actualTime = aggregTimer.getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);

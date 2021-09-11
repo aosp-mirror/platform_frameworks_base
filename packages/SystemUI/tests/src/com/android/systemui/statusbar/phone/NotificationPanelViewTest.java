@@ -89,6 +89,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
@@ -299,6 +300,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private ControlsComponent mControlsComponent;
     @Mock
     private LockscreenGestureLogger mLockscreenGestureLogger;
+    @Mock
+    private DumpManager mDumpManager;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -310,7 +313,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger);
+        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager);
 
         mKeyguardStatusView = new KeyguardStatusView(mContext);
         mKeyguardStatusView.setId(R.id.keyguard_status_view);
@@ -367,7 +370,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
                         mock(HeadsUpManagerPhone.class),
-                        new StatusBarStateControllerImpl(new UiEventLoggerFake()),
+                        new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mUnlockedScreenOffAnimationController);

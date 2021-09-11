@@ -48,8 +48,10 @@ import javax.inject.Inject;
  * Retrieve doze information
  */
 @SysUISingleton
-public class DozeParameters implements TunerService.Tunable,
-        com.android.systemui.plugins.statusbar.DozeParameters, Dumpable {
+public class DozeParameters implements
+        TunerService.Tunable,
+        com.android.systemui.plugins.statusbar.DozeParameters,
+        Dumpable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final boolean FORCE_NO_BLANKING =
             SystemProperties.getBoolean("debug.force_no_blanking", false);

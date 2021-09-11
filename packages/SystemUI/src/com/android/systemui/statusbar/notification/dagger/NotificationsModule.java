@@ -30,6 +30,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
@@ -109,7 +110,8 @@ public interface NotificationsModule {
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            DumpManager dumpManager) {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
@@ -118,7 +120,8 @@ public interface NotificationsModule {
                 notificationRemoteInputManagerLazy,
                 leakDetector,
                 fgsFeatureController,
-                statusBarService);
+                statusBarService,
+                dumpManager);
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
@@ -142,7 +145,8 @@ public interface NotificationsModule {
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController) {
+            ShadeController shadeController,
+            DumpManager dumpManager) {
         return new NotificationGutsManager(
                 context,
                 statusBarOptionalLazy,
@@ -161,23 +165,25 @@ public interface NotificationsModule {
                 bubblesManagerOptional,
                 uiEventLogger,
                 onUserInteractionCallback,
-                shadeController);
+                shadeController,
+                dumpManager);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
     @SysUISingleton
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
-            FeatureFlags featureFlags,
             NotificationEntryManager notificationEntryManager,
             Handler handler,
             StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            WakefulnessLifecycle wakefulnessLifecycle,
+            DumpManager dumpManager) {
         return new VisualStabilityManager(
                 notificationEntryManager,
                 handler,
                 statusBarStateController,
-                wakefulnessLifecycle);
+                wakefulnessLifecycle,
+                dumpManager);
     }
 
     /** Provides an instance of {@link NotificationLogger} */

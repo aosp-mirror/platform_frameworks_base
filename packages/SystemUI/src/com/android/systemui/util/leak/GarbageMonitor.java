@@ -51,6 +51,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -137,7 +138,8 @@ public class GarbageMonitor implements Dumpable {
             @Background DelayableExecutor delayableExecutor,
             @Background MessageRouter messageRouter,
             LeakDetector leakDetector,
-            LeakReporter leakReporter) {
+            LeakReporter leakReporter,
+            DumpManager dumpManager) {
         mContext = context.getApplicationContext();
 
         mDelayableExecutor = delayableExecutor;
@@ -149,6 +151,8 @@ public class GarbageMonitor implements Dumpable {
         mLeakReporter = leakReporter;
 
         mDumpTruck = new DumpTruck(mContext);
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         if (ENABLE_AM_HEAP_LIMIT) {
             mHeapLimit = Settings.Global.getInt(context.getContentResolver(),

@@ -146,6 +146,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -780,7 +781,8 @@ public class StatusBar extends SystemUI implements
             WallpaperManager wallpaperManager,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
-            TunerService tunerService) {
+            TunerService tunerService,
+            DumpManager dumpManager) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -896,6 +898,8 @@ public class StatusBar extends SystemUI implements
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
+
+        dumpManager.registerDumpable(this);
     }
 
     @Override

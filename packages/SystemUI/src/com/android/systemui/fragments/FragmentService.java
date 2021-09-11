@@ -22,6 +22,7 @@ import android.view.View;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -60,11 +61,15 @@ public class FragmentService implements Dumpable {
             };
 
     @Inject
-    public FragmentService(FragmentCreator.Factory fragmentCreatorFactory,
-            ConfigurationController configurationController) {
+    public FragmentService(
+            FragmentCreator.Factory fragmentCreatorFactory,
+            ConfigurationController configurationController,
+            DumpManager dumpManager) {
         mFragmentCreator = fragmentCreatorFactory.build();
         initInjectionMap();
         configurationController.addCallback(mConfigurationListener);
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     ArrayMap<String, Method> getInjectionMap() {
