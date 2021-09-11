@@ -62,7 +62,8 @@ public class LetterboxTest {
         mSurfaces = new SurfaceControlMocker();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 () -> mAreCornersRounded, () -> Color.valueOf(mColor),
-                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha);
+                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
+                /* doubleTapCallback= */ () -> {});
         mTransaction = spy(StubTransaction.class);
     }
 

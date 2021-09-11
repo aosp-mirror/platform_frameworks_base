@@ -16,8 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import static com.android.server.wm.ActivityRecord.computeAspectRatio;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
@@ -28,6 +32,8 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -36,6 +42,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
@@ -138,7 +145,8 @@ final class LetterboxUiController {
                         this::getLetterboxBackgroundColor,
                         this::hasWallpaperBackgroudForLetterbox,
                         this::getLetterboxWallpaperBlurRadius,
-                        this::getLetterboxWallpaperDarkScrimAlpha);
+                        this::getLetterboxWallpaperDarkScrimAlpha,
+                        this::handleDoubleTap);
                 mLetterbox.attachInput(w);
             }
             mActivityRecord.getPosition(mTmpPoint);
@@ -156,6 +164,74 @@ final class LetterboxUiController {
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+    }
+
+    float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
+        // Don't check resolved configuration because it may not be updated yet during
+        // configuration change.
+        return isReachabilityEnabled(parentConfiguration)
+                // Using the last global dynamic position to avoid "jumps" when moving
+                // between apps or activities.
+                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability()
+                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
+    }
+
+    float getFixedOrientationLetterboxAspectRatio(Configuration parentConfiguration) {
+        // Don't check resolved windowing mode because it may not be updated yet during
+        // configuration change.
+        if (!isReachabilityEnabled(parentConfiguration)) {
+            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+        }
+
+        int dividerWindowWidth =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
+        int dividerInsets =
+                getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
+        int dividerSize = dividerWindowWidth - dividerInsets * 2;
+
+        // Getting the same aspect ratio that apps get in split screen.
+        Rect bounds = new Rect(parentConfiguration.windowConfiguration.getAppBounds());
+        bounds.inset(dividerSize, /* dy */ 0);
+        bounds.right = bounds.centerX();
+
+        return computeAspectRatio(bounds);
+    }
+
+    Resources getResources() {
+        return mActivityRecord.mWmService.mContext.getResources();
+    }
+
+    private void handleDoubleTap() {
+        if (!isReachabilityEnabled() || mActivityRecord.isInTransition()) {
+            return;
+        }
+
+        mLetterboxConfiguration.flipHorizontalMultiplierForReachability();
+
+        // TODO(197549949): Add animation for transition.
+        mActivityRecord.recomputeConfiguration();
+    }
+
+    /**
+     * Whether reachability is enabled for an activity in the curren configuration.
+     *
+     * <p>Conditions that needs to be met:
+     * <ul>
+     *   <li>Activity is portrait-only.
+     *   <li>Fullscreen window in landscape device orientation.
+     *   <li>Reachability is enabled.
+     * </ul>
+     */
+    private boolean isReachabilityEnabled(Configuration parentConfiguration) {
+        return mLetterboxConfiguration.getIsReachabilityEnabled()
+                && parentConfiguration.windowConfiguration.getWindowingMode()
+                        == WINDOWING_MODE_FULLSCREEN
+                && parentConfiguration.orientation == ORIENTATION_LANDSCAPE
+                && mActivityRecord.getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
+    }
+
+    private boolean isReachabilityEnabled() {
+        return isReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
     @VisibleForTesting
@@ -285,7 +361,7 @@ final class LetterboxUiController {
         }
 
         pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
-        pw.println(prefix + "  letterboxAspectRatio="
+        pw.println(prefix + "  activityAspectRatio="
                 + mActivityRecord.computeAspectRatio(mActivityRecord.getBounds()));
 
         boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
@@ -308,8 +384,13 @@ final class LetterboxUiController {
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
                     + getLetterboxWallpaperBlurRadius());
         }
+
+        pw.println(prefix + "  isReachabilityEnabled=" + isReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier());
+                + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
+                + getFixedOrientationLetterboxAspectRatio(
+                        mActivityRecord.getParent().getConfiguration()));
     }
 
     /**
