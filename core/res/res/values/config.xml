@@ -4873,6 +4873,21 @@
         or > 1, it is ignored and central positionis used (0.5). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
+    <!-- Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
+        device orientation. -->
+    <bool name="config_letterboxIsReachabilityEnabled">false</bool>
+
+    <!-- Default horizonal position of a center of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in landscape device orientation.
+        0 corresponds to the left side of the screen and 1 to the right side. If given value < 0.0
+        or > 1, it is ignored and right positionis used (1.0). The position multiplier is changed
+        to a symmetrical value computed as (1 - current multiplier) after each double tap in the
+        letterbox area. -->
+    <item name="config_letterboxDefaultPositionMultiplierForReachability"
+          format="float" type="dimen">
+        0.9
+    </item>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 

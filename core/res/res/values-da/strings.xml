@@ -194,11 +194,11 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratoren har gjort personlig brug af enheden utilgængelig"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dette er en administreret enhed"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Din organisation administrerer denne enhed og kan overvåge netværkstrafik. Tryk for at se info."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps kan få adgang til din placering"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps kan få adgang til din lokation"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakt din it-administrator for at få flere oplysninger"</string>
-    <string name="geofencing_service" msgid="3826902410740315456">"Geografisk placeringstjeneste"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"Tjeneste til geografisk afgrænsning"</string>
     <string name="country_detector" msgid="7023275114706088854">"Landeregistrering"</string>
-    <string name="location_service" msgid="2439187616018455546">"Placeringstjeneste"</string>
+    <string name="location_service" msgid="2439187616018455546">"Lokationstjeneste"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjeneste"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tjenesten Sensor Notification"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Tjenesten Twilight"</string>
@@ -304,8 +304,8 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Skift til arbejdsprofil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"have adgang til dine kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="1995955142118450685">"få adgang til enhedens placering"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Lokation"</string>
+    <string name="permgroupdesc_location" msgid="1995955142118450685">"få adgang til enhedens lokation"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"have adgang til din kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
@@ -434,14 +434,14 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din tablet. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din Android TV-enhed. Denne app kan sende meddelelser, der lader til at stamme fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din telefon. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig placering i forgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering. Dette kan øge batteriforbruget."</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig placering i forgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din placering, selv når den ikke er i brug."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for lokationsudbyder"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for lokationsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre lokationskilder."</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig lokation i forgrunden"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige lokation via lokationstjenester, når appen er i brug. Lokationstjenester skal være aktiveret på din enhed, før appen kan finde din lokation. Dette kan øge batteriforbruget."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig lokation i forgrunden"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige lokation via lokationstjenester, når appen er i brug. Lokationstjenester skal være aktiveret på din enhed, før appen kan finde din lokation."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til lokation i baggrunden"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din lokation, selv når den ikke er i brug."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"optage lyd"</string>
@@ -561,8 +561,8 @@
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Tillader, at appen kan ændre din videosamling."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"ændre din billedsamling"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tillader, at appen kan ændre din billedsamling."</string>
-    <string name="permlab_mediaLocation" msgid="7368098373378598066">"læse placeringer fra din mediesamling"</string>
-    <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse placeringer fra din mediesamling."</string>
+    <string name="permlab_mediaLocation" msgid="7368098373378598066">"læse lokationer fra din mediesamling"</string>
+    <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse lokationer fra din mediesamling."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometri"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometri eller skærmlås"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Brug dit fingeraftryk eller din skærmlås for at fortsætte"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Noget gik galt. Prøv igen."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon for fingeraftryk"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ansigtslås"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Der er et problem med Ansigtslås"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Brug din ansigts- eller skærmlås for at fortsætte"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Noget gik galt. Prøv igen."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ansigt"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"læse indstillinger for synkronisering"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Tillader, at appen kan læse synkroniseringsindstillingerne for en konto. Denne tilladelse kan f.eks. fastslå, om appen Personer er synkroniseret med en konto."</string>
@@ -1529,8 +1527,8 @@
     <string name="websearch" msgid="5624340204512793290">"Websøgning"</string>
     <string name="find_next" msgid="5341217051549648153">"Find næste"</string>
     <string name="find_previous" msgid="4405898398141275532">"Find forrige"</string>
-    <string name="gpsNotifTicker" msgid="3207361857637620780">"Placeringsanmodning fra <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="1590033371665669570">"Placeringsanmodning"</string>
+    <string name="gpsNotifTicker" msgid="3207361857637620780">"Lokationsanmodning fra <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="1590033371665669570">"Lokationsanmodning"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Anmodet om af <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nej"</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du aktivere genvejen til hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hvis du holder begge lydstyrkeknapperne nede i et par sekunder, aktiveres hjælpefunktionerne. Det kan ændre på, hvordan din enhed fungerer.\n\nAktuelle funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ændre de valgte funktioner i Indstillinger &gt; Hjælpefunktioner."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vil du aktivere <xliff:g id="SERVICE">%1$s</xliff:g>-genvejen?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hvis du holder begge lydstyrkeknapperne nede i et par sekunder, aktiveres hjælpefunktionen <xliff:g id="SERVICE">%1$s</xliff:g>. Det kan ændre på, hvordan din enhed fungerer.\n\nDu kan ændre denne genvej til en anden funktion i Indstillinger &gt; Hjælpefunktioner."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivér"</string>
