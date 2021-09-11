@@ -7528,11 +7528,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     parentAppBounds.width(), screenResolvedBounds.width());
         } else {
             float positionMultiplier =
-                    mWmService.mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
-            positionMultiplier =
-                    (positionMultiplier < 0.0f || positionMultiplier > 1.0f)
-                            // Default to central position if invalid value is provided.
-                            ? 0.5f : positionMultiplier;
+                    mLetterboxUiController.getHorizontalPositionMultiplier(newParentConfiguration);
             offsetX = (int) Math.ceil((parentAppBounds.width() - screenResolvedBounds.width())
                     * positionMultiplier);
         }
@@ -7547,6 +7543,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
         getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+    }
+
+    void recomputeConfiguration() {
+        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+    }
+
+    boolean isInTransition() {
+        return mAtmService.getTransitionController().inTransition() // Shell transitions.
+                || isAnimating(PARENTS | TRANSITION); // Legacy transitions.
     }
 
     /**
@@ -7651,6 +7656,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the activity requires a different orientation (either by override or activityInfo),
         // make it fit the available bounds by scaling down its bounds.
         final int forcedOrientation = getRequestedConfigurationOrientation();
+
         if (forcedOrientation == ORIENTATION_UNDEFINED
                 || (forcedOrientation == parentOrientation && orientationRespectedWithInsets)) {
             return;
@@ -7702,10 +7708,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect prevResolvedBounds = new Rect(resolvedBounds);
         resolvedBounds.set(containingBounds);
 
-        // Override from config_fixedOrientationLetterboxAspectRatio or via ADB with
-        // set-fixed-orientation-letterbox-aspect-ratio.
         final float letterboxAspectRatioOverride =
-                mWmService.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+                mLetterboxUiController.getFixedOrientationLetterboxAspectRatio(newParentConfig);
         final float desiredAspectRatio =
                 letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
                         ? letterboxAspectRatioOverride : computeAspectRatio(parentBounds);

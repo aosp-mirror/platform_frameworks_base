@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ໃຊ້ລາຍນິ້ວມື ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ມີບາງຢ່າງຜິດພາດເກີດຂຶ້ນ. ກະລຸນາລອງໃໝ່."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ເກີດບັນຫາກັບການປົດລັອກດ້ວຍໜ້າ"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ໃຊ້ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ມີບາງຢ່າງຜິດພາດເກີດຂຶ້ນ. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ໄອຄອນໃບໜ້າ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ອ່ານການຕັ້ງຄ່າຊິ້ງຂໍ້ມູນ"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການຕັ້ງຄ່າການຊິ້ງຂໍ້ມູນຂອງບັນຊີໄດ້. ຕົວຢ່າງເຊັ່ນ: ມັນຈະສາມາດກວດສອບໄດ້ແອັບຯ People ຖືກຊິ້ງຂໍ້ມູນກັບບັນຊີໃດນຶ່ງແລ້ວຫຼືຍັງ."</string>
@@ -1696,8 +1694,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ເປີດໃຊ້ທາງລັດສຳລັບຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nຄຸນສົມບັດປັດຈຸບັນ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nທ່ານສາມາດປ່ຽນຄຸນສົມບັດທີ່ເລືອກໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"ເປີດໃຊ້ທາງລັດ <xliff:g id="SERVICE">%1$s</xliff:g> ບໍ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ເປີດໃຊ້"</string>

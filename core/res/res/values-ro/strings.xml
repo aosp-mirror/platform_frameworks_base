@@ -612,8 +612,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Folosiți amprenta sau blocarea ecranului pentru a continua"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"A apărut o eroare. Încercați din nou."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Pictograma amprentă"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Deblocare facială"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problemă cu Deblocarea facială"</string>
@@ -666,8 +665,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Folosiți-vă chipul sau blocarea ecranului pentru a continua"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"A apărut o eroare. Încercați din nou."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Pictograma chip"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"citire setări sincronizare"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permite aplicației să citească setările de sincronizare ale unui cont. De exemplu, cu această permisiune aplicația poate determina dacă aplicația Persoane este sincronizată cu un anumit cont."</string>
@@ -1718,8 +1716,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Atunci când comanda rapidă este activată, dacă apăsați ambele butoane de volum timp de trei secunde, veți lansa o funcție de accesibilitate."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Activați comanda rapidă pentru funcțiile de accesibilitate?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Dacă apăsați ambele taste de volum câteva secunde, activați funcțiile de accesibilitate. Acest lucru poate schimba funcționarea dispozitivului.\n\nFuncțiile actuale:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuteți schimba funcțiile selectate din Setări &gt; Accesibilitate."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Activați comanda rapidă <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Dacă apăsați ambele taste de volum câteva secunde, activați funcția de accesibilitate <xliff:g id="SERVICE">%1$s</xliff:g>. Acest lucru poate schimba funcționarea dispozitivului.\n\nPuteți alege altă funcție pentru această comandă în Setări &gt; Accesibilitate."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activați"</string>
