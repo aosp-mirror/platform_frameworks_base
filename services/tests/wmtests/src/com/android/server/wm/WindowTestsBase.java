@@ -223,6 +223,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
+        // Ensure letterbox reachability treatment isn't overridden on any device target.
+        // {@link com.android.internal.R.bool.config_letterboxIsReachabilityEnabled},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setIsReachabilityEnabled(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
@@ -230,12 +234,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
     @After
     public void tearDown() throws Exception {
         // Revert back to device overrides.
-        mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(
-                mContext.getResources().getFloat(
-                        com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio));
-        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
-                mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier));
+        mAtm.mWindowManager.mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetIsReachabilityEnabled();
     }
 
     /**
