@@ -220,6 +220,8 @@ message CountMetric {
 
   repeated MetricStateLink state_link = 9;
 
+  optional bool split_bucket_for_app_upgrade = 11;
+
   optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
 
   reserved 100;
@@ -249,6 +251,8 @@ message DurationMetric {
   optional FieldMatcher dimensions_in_what = 6;
 
   optional TimeUnit bucket = 7;
+
+  optional bool split_bucket_for_app_upgrade = 12;
 
   optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 
@@ -289,7 +293,7 @@ message GaugeMetric {
 
   optional int32 max_pull_delay_sec = 13 [default = 30];
 
-  optional bool split_bucket_for_app_upgrade = 14 [default = true];
+  optional bool split_bucket_for_app_upgrade = 14;
 
   reserved 100;
   reserved 101;
@@ -342,7 +346,7 @@ message ValueMetric {
 
   optional int32 max_pull_delay_sec = 16 [default = 30];
 
-  optional bool split_bucket_for_app_upgrade = 17 [default = true];
+  optional bool split_bucket_for_app_upgrade = 17;
 
   optional FieldMatcher dimensions_in_condition = 9 [deprecated = true];
 
