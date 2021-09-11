@@ -1889,11 +1889,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             if (!mConfigurationProvider.isDisplayInfoNrAdvancedSupported(
                                     r.callingPackage, Binder.getCallingUserHandle())) {
-                                telephonyDisplayInfo =
+                                r.callback.onDisplayInfoChanged(
                                         getBackwardCompatibleTelephonyDisplayInfo(
-                                                telephonyDisplayInfo);
+                                                telephonyDisplayInfo));
+                            } else {
+                                r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                             }
-                            r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }

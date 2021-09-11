@@ -356,7 +356,11 @@ public class UiTranslationController {
             }
             for (int i = 0; i < translatedResult.size(); i++) {
                 final AutofillId autofillId = new AutofillId(translatedResult.keyAt(i));
-                final View view = mViews.get(autofillId).get();
+                final WeakReference<View> viewRef = mViews.get(autofillId);
+                if (viewRef == null) {
+                    continue;
+                }
+                final View view = viewRef.get();
                 if (view == null) {
                     Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
                             + " may be gone.");
@@ -416,7 +420,11 @@ public class UiTranslationController {
                     Log.w(TAG, "No AutofillId is set in ViewTranslationResponse");
                     continue;
                 }
-                final View view = mViews.get(autofillId).get();
+                final WeakReference<View> viewRef = mViews.get(autofillId);
+                if (viewRef == null) {
+                    continue;
+                }
+                final View view = viewRef.get();
                 if (view == null) {
                     Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
                             + " may be gone.");
