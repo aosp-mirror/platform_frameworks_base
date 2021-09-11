@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Sebenzisa izigxivizo zakho zomunwe noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Kunento engahambanga kahle. Zama futhi."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Isithonjana sezigxivizo zeminwe"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ukuvula ubuso"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Inkinga Ngokuvula ngobuso"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Sebenzisa ubuso bakho noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Kunento engahambanga kahle. Zama futhi."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Isithonjana sobuso"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"funda izilungiselelo zokuvumelanisa"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Ivumela uhlelo lokusebenza ukufunda izilungiselelo zokuvumelanisa ze-akhawunti. Isibonelo, lokhu kungacacisa ukuthi noma ngabe uhlelo lokusebenza le-People livumelanisiwe ne-akhawunti."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Uma isinqamuleli sivuliwe, ukucindezela zombili izinkinobho zevolumu amasekhondi angu-3 kuzoqalisa isici sokufinyelela."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vula isinqamuleli sezici zokufinyeleleka?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ukubambela phansi bobabili okhiye bevolumu amasekhondi ambalwa kuvula izici zokufinyelela. Lokhu kungashintsha indlela idivayisi yakho esebenza ngayo.\n\nIzici zamanje:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nUngashintsha izici ezikhethiwe Kuzilungiselelo &gt; Ukufinyeleleka."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vula isinqamuleli se-<xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ukubambela phansi bobabili okhiye bevolumu amasekhondi ambalwa kuvula i-<xliff:g id="SERVICE">%1$s</xliff:g>, eyisici sokufinyelela Lokhu kungashintsha indlela idivayisi yakho esebenza ngayo.\n\nUngashintshela lesi sinqamuleli kwesinye isici Kuzilungiselelo &gt; Ukufinyeleleka."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vula"</string>

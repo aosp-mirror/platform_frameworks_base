@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ચાલુ રાખવા માટે તમારા ફિંગરપ્રિન્ટ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ફિંગરપ્રિન્ટ આયકન"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ફેસ અનલૉક"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ફેસ અનલૉકની સુવિધામાં સમસ્યા"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ચાલુ રાખવા માટે તમારા ફેસ લૉક અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ચહેરા આઇકન"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"સિંક સેટિંગ વાંચો"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ઍપને એકાઉન્ટ માટે સિંક સેટિંગને વાંચવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, આ એકાઉન્ટ સાથે લોકો ઍપ સિંક થઈ છે કે કેમ તે નિર્ધારિત કરી શકે છે."</string>
@@ -954,7 +952,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> વિજેટ."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"વપરાશકર્તા પસંદગીકર્તા"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"સ્થિતિ"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"કૅમેરો"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"કૅમેરા"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"મીડિયા નિયંત્રણો"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"વિજેટ પુનઃક્રમાંકન પ્રારંભ થયું."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"વિજેટ પુનઃક્રમાંકન સમાપ્ત થયું."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ઍક્સેસિબિલિટી સુવિધાઓ માટે શૉર્ટકટ ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nવર્તમાન સુવિધાઓ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને પસંદ કરેલી સુવિધાઓને બદલી શકો છો."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> શૉર્ટકટ ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા એવી <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને આ શૉર્ટકટને બીજી સુવિધામાં બદલી શકો છો."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ચાલુ કરો"</string>

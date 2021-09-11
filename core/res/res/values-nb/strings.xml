@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Bruk fingeravtrykket eller skjermlåsen for å fortsette"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Noe gikk galt. Prøv på nytt."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon for fingeravtrykk"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem med ansiktslås"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Bruk ansikts- eller skjermlåsen for å fortsette"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Noe gikk galt. Prøv på nytt."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ansiktikon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når snarveien er på, starter en tilgjengelighetsfunksjon når du trykker inn begge volumknappene i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du slå på snarveien for tilgjengelighetsfunksjoner?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hvis du holder inne volumtastene i noen sekunder, slås tilgjengelighetsfunksjoner på. Dette kan endre hvordan enheten din fungerer.\n\nNåværende funksjoner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan endre valgte funksjoner i Innstillinger &gt; Tilgjengelighet."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vil du slå på <xliff:g id="SERVICE">%1$s</xliff:g>-snarveien?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hvis du holder inne begge volumtastene i noen sekunder, slår du på <xliff:g id="SERVICE">%1$s</xliff:g>, en tilgjengelighetsfunksjon. Dette kan endre hvordan enheten din fungerer.\n\nDu kan endre denne snarveien til en annen funksjon i Innstillinger &gt; Tilgjengelighet."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Slå på"</string>
