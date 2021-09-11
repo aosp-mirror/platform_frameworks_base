@@ -39,6 +39,8 @@ import org.jetbrains.uast.UTryExpression
 import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.getQualifiedParentOrThis
 import org.jetbrains.uast.getUCallExpression
+import org.jetbrains.uast.skipParenthesizedExprDown
+import org.jetbrains.uast.skipParenthesizedExprUp
 
 /**
  * Lint Detector that finds issues with improper usages of the token returned by
@@ -87,7 +89,8 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
          * - Stores token variable name, scope in the file, location and finally block in tokensMap
          */
         override fun visitLocalVariable(node: ULocalVariable) {
-            val rhsExpression = node.uastInitializer?.getUCallExpression() ?: return
+            val initializer = node.uastInitializer?.skipParenthesizedExprDown()
+            val rhsExpression = initializer?.getUCallExpression() ?: return
             if (!isMethodCall(rhsExpression, Method.BINDER_CLEAR_CALLING_IDENTITY)) return
             val location = context.getLocation(node as UElement)
             val variableName = node.getName()
@@ -162,7 +165,8 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                 return
             }
             if (!isMethodCall(node, Method.BINDER_RESTORE_CALLING_IDENTITY)) return
-            val arg = node.valueArguments[0] as? USimpleNameReferenceExpression ?: return
+            val first = node.valueArguments[0].skipParenthesizedExprDown()
+            val arg = first as? USimpleNameReferenceExpression ?: return
             val variableName = arg.identifier
             val originalScope = tokensMap[variableName]?.scope ?: return
             val psi = arg.sourcePsi ?: return
@@ -177,7 +181,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             // receiver.selector, so to get the call's immediate parent we need to get the topmost
             // parent qualified reference expression and access its parent
             if (tokensMap[variableName]?.finallyBlock != null &&
-                    node.getQualifiedParentOrThis().uastParent !=
+                    skipParenthesizedExprUp(node.getQualifiedParentOrThis().uastParent) !=
                         tokensMap[variableName]?.finallyBlock) {
                 context.report(
                         ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
