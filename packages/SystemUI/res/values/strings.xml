@@ -3025,6 +3025,8 @@
     <string name="wifi_empty_list_wifi_on">Searching for networks\u2026</string>
     <!-- Provider Model: Failure notification for connect -->
     <string name="wifi_failed_connect_message">Failed to connect to network</string>
+    <!-- Provider Model: Toast message for when the user selects cellular as the internet provider and Wi-Fi auto-connect is temporarily disabled [CHAR LIMIT=60]-->
+    <string name="wifi_wont_autoconnect_for_now">Wi\u2011Fi won\u2019t auto-connect for now</string>
     <!-- Provider Model: Title to see all the networks [CHAR LIMIT=50] -->
     <string name="see_all_networks">See all</string>
     <!-- Summary for warning to disconnect ethernet first then switch to other networks. [CHAR LIMIT=60] -->
