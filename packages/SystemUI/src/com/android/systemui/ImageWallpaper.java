@@ -120,6 +120,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
+            Trace.beginSection("ImageWallpaper.Engine#onCreate");
             mEglHelper = getEglHelperInstance();
             // Deferred init renderer because we need to get wallpaper by display context.
             mRenderer = getRendererInstance();
@@ -129,6 +130,7 @@ public class ImageWallpaper extends WallpaperService {
             mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
             getDisplayContext().getSystemService(DisplayManager.class)
                     .registerDisplayListener(this, mWorker.getThreadHandler());
+            Trace.endSection();
         }
 
         @Override
@@ -185,15 +187,22 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void updateSurfaceSize() {
+            Trace.beginSection("ImageWallpaper#updateSurfaceSize");
             SurfaceHolder holder = getSurfaceHolder();
             Size frameSize = mRenderer.reportSurfaceSize();
             int width = Math.max(MIN_SURFACE_WIDTH, frameSize.getWidth());
             int height = Math.max(MIN_SURFACE_HEIGHT, frameSize.getHeight());
             holder.setFixedSize(width, height);
+            Trace.endSection();
         }
 
         @Override
         public boolean shouldZoomOutWallpaper() {
+            return true;
+        }
+
+        @Override
+        public boolean shouldWaitForEngineShown() {
             return true;
         }
 
@@ -340,8 +349,10 @@ public class ImageWallpaper extends WallpaperService {
         public void onSurfaceCreated(SurfaceHolder holder) {
             if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> {
+                Trace.beginSection("ImageWallpaper#onSurfaceCreated");
                 mEglHelper.init(holder, needSupportWideColorGamut());
                 mRenderer.onSurfaceCreated();
+                Trace.endSection();
             });
         }
 
@@ -358,9 +369,11 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrame() {
+            Trace.beginSection("ImageWallpaper#drawFrame");
             preRender();
             requestRender();
             postRender();
+            Trace.endSection();
         }
 
         public void preRender() {
@@ -425,9 +438,8 @@ public class ImageWallpaper extends WallpaperService {
 
         public void postRender() {
             // This method should only be invoked from worker thread.
-            Trace.beginSection("ImageWallpaper#postRender");
             scheduleFinishRendering();
-            Trace.endSection();
+            reportEngineShown(false /* waitForEngineShown */);
         }
 
         private void cancelFinishRenderingTask() {

@@ -898,7 +898,8 @@ public class TaskTests extends WindowTestsBase {
 
     /**
      * Test that root activity index is reported correctly when looking for the 'effective root' in
-     * case when bottom activities are relinquishing task identity or finishing.
+     * case when bottom activity is finishing. Ignore the relinquishing task identity if it's not a
+     * system activity even with the FLAG_RELINQUISH_TASK_IDENTITY.
      */
     @Test
     public void testFindRootIndex_effectiveRoot_finishingAndRelinquishing() {
@@ -912,7 +913,7 @@ public class TaskTests extends WindowTestsBase {
         new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals("The first non-finishing activity and non-relinquishing task identity "
-                + "must be reported.", task.getChildAt(2), task.getRootActivity(
+                + "must be reported.", task.getChildAt(0), task.getRootActivity(
                 false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
@@ -932,8 +933,8 @@ public class TaskTests extends WindowTestsBase {
     }
 
     /**
-     * Test that the topmost activity index is reported correctly when looking for the
-     * 'effective root' for the case when all activities have relinquishTaskIdentity set.
+     * Test that the root activity index is reported correctly when looking for the
+     * 'effective root' for the case when all non-system activities have relinquishTaskIdentity set.
      */
     @Test
     public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
@@ -944,9 +945,9 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
 
-        assertEquals("The topmost activity in the task must be reported.",
-                task.getChildAt(task.getChildCount() - 1), task.getRootActivity(
-                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
+        assertEquals("The topmost activity in the task must be reported.", task.getChildAt(0),
+                task.getRootActivity(false /*ignoreRelinquishIdentity*/,
+                        true /*setToBottomIfNone*/));
     }
 
     /** Test that bottom-most activity is reported in {@link Task#getRootActivity()}. */
@@ -1084,8 +1085,8 @@ public class TaskTests extends WindowTestsBase {
     }
 
     /**
-     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with activity that
-     * relinquishes task identity.
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with non-system
+     * activity that relinquishes task identity.
      */
     @Test
     public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
@@ -1100,7 +1101,7 @@ public class TaskTests extends WindowTestsBase {
 
         assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
-        assertEquals(task.mTaskId,
+        assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
                 ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
                 ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));

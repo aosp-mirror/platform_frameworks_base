@@ -92,7 +92,7 @@ public class TileServiceManager {
         filter.addDataScheme("package");
         Context context = mServices.getContext();
         context.registerReceiverAsUser(mUninstallReceiver, userTracker.getUserHandle(), filter,
-                null, mHandler);
+                null, mHandler, Context.RECEIVER_EXPORTED);
     }
 
     boolean isLifecycleStarted() {

@@ -86,7 +86,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
-import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -223,10 +223,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         @Nullable FingerprintGestureDispatcher getFingerprintGestureDispatcher();
 
         /**
-         * @return The magnification controller
+         * @return The magnification processor
          */
         @NonNull
-        FullScreenMagnificationController getFullScreenMagnificationController();
+        MagnificationProcessor getMagnificationProcessor();
 
         /**
          * Called back to notify system that the client has changed
@@ -975,7 +975,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mSystemSupport.getFullScreenMagnificationController().getScale(displayId);
+            return mSystemSupport.getMagnificationProcessor().getScale(displayId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -991,19 +991,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!hasRightsToCurrentUserLocked()) {
                 return region;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                magnificationController.getMagnificationRegion(displayId, region);
+                magnificationProcessor.getMagnificationRegion(displayId, region,
+                        mSecurityPolicy.canControlMagnification(this));
                 return region;
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
             }
         }
     }
@@ -1017,18 +1013,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterX(displayId);
+                return magnificationProcessor.getCenterX(displayId,
+                        mSecurityPolicy.canControlMagnification(this));
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
             }
         }
     }
@@ -1042,30 +1034,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!hasRightsToCurrentUserLocked()) {
                 return 0.0f;
             }
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(displayId, magnificationController);
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterY(displayId);
+                return magnificationProcessor.getCenterY(displayId,
+                        mSecurityPolicy.canControlMagnification(this));
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                if (registeredJustForThisCall) {
-                    magnificationController.unregister(displayId);
-                }
             }
         }
-    }
-
-    private boolean registerMagnificationIfNeeded(int displayId,
-            FullScreenMagnificationController magnificationController) {
-        if (!magnificationController.isRegistered(displayId)
-                && mSecurityPolicy.canControlMagnification(this)) {
-            magnificationController.register(displayId);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -1083,10 +1061,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            FullScreenMagnificationController magnificationController =
-                    mSystemSupport.getFullScreenMagnificationController();
-            return (magnificationController.reset(displayId, animate)
-                    || !magnificationController.isMagnifying(displayId));
+            MagnificationProcessor magnificationProcessor =
+                    mSystemSupport.getMagnificationProcessor();
+            return (magnificationProcessor.reset(displayId, animate)
+                    || !magnificationProcessor.isMagnifying(displayId));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1109,12 +1087,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                FullScreenMagnificationController magnificationController =
-                        mSystemSupport.getFullScreenMagnificationController();
-                if (!magnificationController.isRegistered(displayId)) {
-                    magnificationController.register(displayId);
-                }
-                return magnificationController
+                MagnificationProcessor magnificationProcessor =
+                        mSystemSupport.getMagnificationProcessor();
+                return magnificationProcessor
                         .setScaleAndCenter(displayId, scale, centerX, centerY, animate, mId);
             } finally {
                 Binder.restoreCallingIdentity(identity);

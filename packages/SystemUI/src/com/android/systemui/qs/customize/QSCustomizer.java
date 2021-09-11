@@ -116,6 +116,7 @@ public class QSCustomizer extends LinearLayout {
      */
     void show(int x, int y, TileAdapter tileAdapter) {
         if (!isShown) {
+            mRecyclerView.getLayoutManager().scrollToPosition(0);
             int[] containerLocation = findViewById(R.id.customize_container).getLocationOnScreen();
             mX = x - containerLocation[0];
             mY = y - containerLocation[1];
@@ -131,6 +132,7 @@ public class QSCustomizer extends LinearLayout {
 
     void showImmediately() {
         if (!isShown) {
+            mRecyclerView.getLayoutManager().scrollToPosition(0);
             setVisibility(VISIBLE);
             mClipper.cancelAnimator();
             mClipper.showBackground();

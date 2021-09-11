@@ -1,15 +1,17 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.systemui.shared.plugins;
@@ -19,8 +21,6 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,13 +41,11 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.Requires;
-import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -64,29 +62,33 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class PluginInstanceManagerTest extends SysuiTestCase {
+public class PluginActionManagerTest extends SysuiTestCase {
 
     private static final String PRIVILEGED_PACKAGE = "com.android.systemui.shared.plugins";
     private TestPlugin mMockPlugin;
 
     private PackageManager mMockPm;
-    private PluginListener<Plugin> mMockListener;
-    private PluginInstanceManager<Plugin> mPluginInstanceManager;
+    private PluginListener<TestPlugin> mMockListener;
+    private PluginActionManager<TestPlugin> mPluginActionManager;
     private VersionInfo mMockVersionInfo;
     private PluginEnabler mMockEnabler;
     ComponentName mTestPluginComponentName =
             new ComponentName(PRIVILEGED_PACKAGE, TestPlugin.class.getName());
-    private PluginInitializer mInitializer;
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     NotificationManager mNotificationManager;
-    private PluginInstanceManager.Factory mInstanceManagerFactory;
-    private final PluginInstanceManager.InstanceFactory<Plugin> mPluginInstanceFactory =
-            new PluginInstanceManager.InstanceFactory<Plugin>() {
+    private PluginInstance<TestPlugin> mPluginInstance;
+    private PluginInstance.Factory mPluginInstanceFactory = new PluginInstance.Factory(
+            this.getClass().getClassLoader(),
+            new PluginInstance.InstanceFactory<>(), new PluginInstance.VersionChecker(),
+            Collections.emptyList(), false) {
         @Override
-        Plugin create(Class cls) {
-            return mMockPlugin;
+        public <T extends Plugin> PluginInstance<T> create(Context context, ApplicationInfo appInfo,
+                ComponentName componentName, Class<T> pluginClass) {
+            return (PluginInstance<T>) mPluginInstance;
         }
     };
+
+    private PluginActionManager.Factory mActionManagerFactory;
 
     @Before
     public void setup() throws Exception {
@@ -95,16 +97,17 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockListener = mock(PluginListener.class);
         mMockEnabler = mock(PluginEnabler.class);
         mMockVersionInfo = mock(VersionInfo.class);
-        mInitializer = mock(PluginInitializer.class);
         mNotificationManager = mock(NotificationManager.class);
         mMockPlugin = mock(TestPlugin.class);
-        mInstanceManagerFactory = new PluginInstanceManager.Factory(getContext(), mMockPm,
-                mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager, mMockEnabler,
-                new ArrayList<>())
-                .setInstanceFactory(mPluginInstanceFactory);
+        mPluginInstance = mock(PluginInstance.class);
+        when(mPluginInstance.getComponentName()).thenReturn(mTestPluginComponentName);
+        when(mPluginInstance.getPackage()).thenReturn(mTestPluginComponentName.getPackageName());
+        mActionManagerFactory = new PluginActionManager.Factory(getContext(), mMockPm,
+                mFakeExecutor, mFakeExecutor, mNotificationManager, mMockEnabler,
+                new ArrayList<>(), mPluginInstanceFactory);
 
-        mPluginInstanceManager = mInstanceManagerFactory.create("myAction", mMockListener,
-                true, mMockVersionInfo, true);
+        mPluginActionManager = mActionManagerFactory.create("myAction", mMockListener,
+                TestPlugin.class, true, true);
         when(mMockPlugin.getVersion()).thenReturn(1);
     }
 
@@ -112,7 +115,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNoPlugins() {
         when(mMockPm.queryIntentServices(any(), anyInt())).thenReturn(
                 Collections.emptyList());
-        mPluginInstanceManager.loadAll();
+        mPluginActionManager.loadAll();
 
         mFakeExecutor.runAllReady();
 
@@ -121,68 +124,47 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
 
     @Test
     public void testPluginCreate() throws Exception {
+        //Debug.waitForDebugger();
         createPlugin();
 
         // Verify startup lifecycle
-        verify(mMockPlugin).onCreate(ArgumentCaptor.forClass(Context.class).capture(),
-                ArgumentCaptor.forClass(Context.class).capture());
-        verify(mMockListener).onPluginConnected(any(), any());
+        verify(mPluginInstance).onCreate(mContext, mMockListener);
     }
 
     @Test
     public void testPluginDestroy() throws Exception {
         createPlugin(); // Get into valid created state.
 
-        mPluginInstanceManager.destroy();
+        mPluginActionManager.destroy();
 
         mFakeExecutor.runAllReady();
-
 
         // Verify shutdown lifecycle
-        verify(mMockListener).onPluginDisconnected(ArgumentCaptor.forClass(Plugin.class).capture());
-        verify(mMockPlugin).onDestroy();
-    }
-
-    @Test
-    public void testIncorrectVersion() throws Exception {
-        setupFakePmQuery();
-        doThrow(new InvalidVersionException("", false)).when(mMockVersionInfo).checkVersion(any());
-
-        mPluginInstanceManager.loadAll();
-
-        mFakeExecutor.runAllReady();
-
-        // Plugin shouldn't be connected because it is the wrong version.
-        verify(mMockListener, never()).onPluginConnected(any(), any());
-        verify(mNotificationManager).notify(eq(SystemMessage.NOTE_PLUGIN), any());
+        verify(mPluginInstance).onDestroy(mMockListener);
     }
 
     @Test
     public void testReloadOnChange() throws Exception {
         createPlugin(); // Get into valid created state.
 
-        mPluginInstanceManager.onPackageChange(PRIVILEGED_PACKAGE);
+        mPluginActionManager.reloadPackage(PRIVILEGED_PACKAGE);
 
         mFakeExecutor.runAllReady();
 
         // Verify the old one was destroyed.
-        verify(mMockListener).onPluginDisconnected(ArgumentCaptor.forClass(Plugin.class).capture());
-        verify(mMockPlugin).onDestroy();
-        // Also verify we got a second onCreate.
-        verify(mMockPlugin, Mockito.times(2)).onCreate(
-                ArgumentCaptor.forClass(Context.class).capture(),
-                ArgumentCaptor.forClass(Context.class).capture());
-        verify(mMockListener, Mockito.times(2)).onPluginConnected(any(), any());
+        verify(mPluginInstance).onDestroy(mMockListener);
+        verify(mPluginInstance, Mockito.times(2))
+                .onCreate(mContext, mMockListener);
     }
 
     @Test
     public void testNonDebuggable() throws Exception {
         // Create a version that thinks the build is not debuggable.
-        mPluginInstanceManager = mInstanceManagerFactory.create("myAction", mMockListener,
-                true, mMockVersionInfo, false);
+        mPluginActionManager = mActionManagerFactory.create("myAction", mMockListener,
+                TestPlugin.class, true, false);
         setupFakePmQuery();
 
-        mPluginInstanceManager.loadAll();
+        mPluginActionManager.loadAll();
 
         mFakeExecutor.runAllReady();
 
@@ -193,22 +175,20 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     @Test
     public void testNonDebuggable_privileged() throws Exception {
         // Create a version that thinks the build is not debuggable.
-        PluginInstanceManager.Factory factory = new PluginInstanceManager.Factory(getContext(),
-                mMockPm, mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager,
-                mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE));
-        factory.setInstanceFactory(mPluginInstanceFactory);
-        mPluginInstanceManager = factory.create("myAction", mMockListener,
-                true, mMockVersionInfo, false);
+        PluginActionManager.Factory factory = new PluginActionManager.Factory(getContext(),
+                mMockPm, mFakeExecutor, mFakeExecutor, mNotificationManager,
+                mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE),
+                mPluginInstanceFactory);
+        mPluginActionManager = factory.create("myAction", mMockListener,
+                TestPlugin.class, true, false);
         setupFakePmQuery();
 
-        mPluginInstanceManager.loadAll();
+        mPluginActionManager.loadAll();
 
         mFakeExecutor.runAllReady();
 
         // Verify startup lifecycle
-        verify(mMockPlugin).onCreate(ArgumentCaptor.forClass(Context.class).capture(),
-                ArgumentCaptor.forClass(Context.class).capture());
-        verify(mMockListener).onPluginConnected(any(), any());
+        verify(mPluginInstance).onCreate(mContext, mMockListener);
     }
 
     @Test
@@ -216,12 +196,12 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         createPlugin(); // Get into valid created state.
 
         // Start with an unrelated class.
-        boolean result = mPluginInstanceManager.checkAndDisable(Activity.class.getName());
+        boolean result = mPluginActionManager.checkAndDisable(Activity.class.getName());
         assertFalse(result);
         verify(mMockEnabler, never()).setDisabled(any(ComponentName.class), anyInt());
 
         // Now hand it a real class and make sure it disables the plugin.
-        result = mPluginInstanceManager.checkAndDisable(TestPlugin.class.getName());
+        result = mPluginActionManager.checkAndDisable(TestPlugin.class.getName());
         assertTrue(result);
         verify(mMockEnabler).setDisabled(
                 mTestPluginComponentName, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
@@ -231,24 +211,24 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testDisableAll() throws Exception {
         createPlugin(); // Get into valid created state.
 
-        mPluginInstanceManager.disableAll();
+        mPluginActionManager.disableAll();
 
         verify(mMockEnabler).setDisabled(
                 mTestPluginComponentName, PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
     }
 
     @Test
-    public void testDisableWhitelisted() throws Exception {
-        PluginInstanceManager.Factory factory = new PluginInstanceManager.Factory(getContext(),
-                mMockPm, mFakeExecutor, mFakeExecutor, mInitializer, mNotificationManager,
-                mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE));
-        factory.setInstanceFactory(mPluginInstanceFactory);
-        mPluginInstanceManager = factory.create("myAction", mMockListener,
-                true, mMockVersionInfo, false);
+    public void testDisablePrivileged() throws Exception {
+        PluginActionManager.Factory factory = new PluginActionManager.Factory(getContext(),
+                mMockPm, mFakeExecutor, mFakeExecutor, mNotificationManager,
+                mMockEnabler, Collections.singletonList(PRIVILEGED_PACKAGE),
+                mPluginInstanceFactory);
+        mPluginActionManager = factory.create("myAction", mMockListener,
+                TestPlugin.class, true, false);
 
         createPlugin(); // Get into valid created state.
 
-        mPluginInstanceManager.disableAll();
+        mPluginActionManager.disableAll();
 
         verify(mMockPm, never()).setComponentEnabledSetting(
                 ArgumentCaptor.forClass(ComponentName.class).capture(),
@@ -282,14 +262,14 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private void createPlugin() throws Exception {
         setupFakePmQuery();
 
-        mPluginInstanceManager.loadAll();
+        mPluginActionManager.loadAll();
 
         mFakeExecutor.runAllReady();
     }
 
     // Real context with no registering/unregistering of receivers.
     private static class MyContextWrapper extends SysuiTestableContext {
-        public MyContextWrapper(Context base) {
+        MyContextWrapper(Context base) {
             super(base);
         }
 

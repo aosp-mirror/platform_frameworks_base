@@ -206,6 +206,13 @@ abstract class DisplayDevice {
             DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {}
 
     /**
+     * Sets the user preferred display mode. Removes the user preferred display mode and sets
+     * default display mode as the mode chosen by HAL, if 'mode' is null
+     * Returns true if the mode set by user is supported by the display.
+     */
+    public void setUserPreferredDisplayModeLocked(Display.Mode mode) { }
+
+    /**
      * Sets the requested color mode.
      */
     public void setRequestedColorModeLocked(int colorMode) {

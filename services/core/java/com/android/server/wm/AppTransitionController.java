@@ -844,7 +844,7 @@ public class AppTransitionController {
 
         final AccessibilityController accessibilityController =
                 mDisplayContent.mWmService.mAccessibilityController;
-        if (accessibilityController != null) {
+        if (accessibilityController.hasCallbacks()) {
             accessibilityController.onAppWindowTransition(mDisplayContent.getDisplayId(), transit);
         }
     }

@@ -903,6 +903,16 @@ public final class WindowInsets {
         result.append(mPrivacyIndicatorBounds != null ? "privacyIndicatorBounds="
                 + mPrivacyIndicatorBounds : "");
         result.append("\n    ");
+        result.append("compatInsetsTypes=" + mCompatInsetsTypes);
+        result.append("\n    ");
+        result.append("compatIgnoreVisibility=" + mCompatIgnoreVisibility);
+        result.append("\n    ");
+        result.append("systemWindowInsetsConsumed=" + mSystemWindowInsetsConsumed);
+        result.append("\n    ");
+        result.append("stableInsetsConsumed=" + mStableInsetsConsumed);
+        result.append("\n    ");
+        result.append("displayCutoutConsumed=" + mDisplayCutoutConsumed);
+        result.append("\n    ");
         result.append(isRound() ? "round" : "");
         result.append("}");
         return result.toString();

@@ -16,7 +16,6 @@
 package com.android.systemui.shared.animation
 
 import android.graphics.Point
-import android.util.MathUtils.lerp
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
@@ -27,7 +26,7 @@ import java.lang.ref.WeakReference
  * Creates an animation where all registered views are moved into their final location
  * by moving from the center of the screen to the sides
  */
-class UnfoldMoveFromCenterAnimator(
+class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
     private val windowManager: WindowManager,
     /**
      * Allows to set custom translation applier
@@ -36,14 +35,13 @@ class UnfoldMoveFromCenterAnimator(
      * using custom methods instead of [View.setTranslationX] or
      * [View.setTranslationY]
      */
-    var translationApplier: TranslationApplier = object : TranslationApplier {}
+    private val translationApplier: TranslationApplier = object : TranslationApplier {},
 ) : UnfoldTransitionProgressProvider.TransitionProgressListener {
 
     private val screenSize = Point()
     private var isVerticalFold = false
 
     private val animatedViews: MutableList<AnimatedView> = arrayListOf()
-    private val tmpArray = IntArray(2)
 
     /**
      * Updates display properties in order to calculate the initial position for the views
@@ -82,43 +80,50 @@ class UnfoldMoveFromCenterAnimator(
             it.view.get()?.let { view ->
                 translationApplier.apply(
                     view = view,
-                    x = lerp(it.startTranslationX, it.finishTranslationX, progress),
-                    y = lerp(it.startTranslationY, it.finishTranslationY, progress)
+                    x = it.startTranslationX * (1 - progress),
+                    y = it.startTranslationY * (1 - progress)
                 )
             }
         }
     }
 
     private fun createAnimatedView(view: View): AnimatedView {
-        val viewLocation = tmpArray
-        view.getLocationOnScreen(viewLocation)
+        val viewCenter = getViewCenter(view)
+        val viewCenterX = viewCenter.x
+        val viewCenterY = viewCenter.y
 
-        val viewX = viewLocation[0].toFloat()
-        val viewY = viewLocation[1].toFloat()
-
-        val viewCenterX = viewX + view.width / 2
-        val viewCenterY = viewY + view.height / 2
-
-        val translationXDiff: Float
-        val translationYDiff: Float
+        val translationX: Float
+        val translationY: Float
 
         if (isVerticalFold) {
             val distanceFromScreenCenterToViewCenter = screenSize.x / 2 - viewCenterX
-            translationXDiff = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
-            translationYDiff = 0f
+            translationX = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
+            translationY = 0f
         } else {
             val distanceFromScreenCenterToViewCenter = screenSize.y / 2 - viewCenterY
-            translationXDiff = 0f
-            translationYDiff = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
+            translationX = 0f
+            translationY = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
         }
 
         return AnimatedView(
             view = WeakReference(view),
-            startTranslationX = view.translationX + translationXDiff,
-            startTranslationY = view.translationY + translationYDiff,
-            finishTranslationX = view.translationX,
-            finishTranslationY = view.translationY
+            startTranslationX = translationX,
+            startTranslationY = translationY
         )
+    }
+
+    private fun getViewCenter(view: View): Point {
+        val viewLocation = IntArray(2)
+        view.getLocationOnScreen(viewLocation)
+
+        val viewX = viewLocation[0]
+        val viewY = viewLocation[1]
+
+        val outPoint = Point()
+        outPoint.x = viewX + view.width / 2
+        outPoint.y = viewY + view.height / 2
+
+        return outPoint
     }
 
     /**
@@ -137,9 +142,7 @@ class UnfoldMoveFromCenterAnimator(
     private class AnimatedView(
         val view: WeakReference<View>,
         val startTranslationX: Float,
-        val startTranslationY: Float,
-        val finishTranslationX: Float,
-        val finishTranslationY: Float
+        val startTranslationY: Float
     )
 }
 

@@ -21,6 +21,7 @@ import static android.provider.settings.validators.SettingsValidators.ANY_INTEGE
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_FLOAT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
@@ -321,6 +322,9 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.COMBINED_LOCATION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WRIST_ORIENTATION_MODE,
                        new DiscreteValueValidator(new String[] {"0", "1", "2", "3"}));
+        VALIDATORS.put(Global.USER_PREFERRED_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
+        VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_HEIGHT, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_WIDTH, ANY_INTEGER_VALIDATOR);
     }
 }
 

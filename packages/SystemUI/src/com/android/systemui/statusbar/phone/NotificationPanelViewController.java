@@ -630,6 +630,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mQsClipBottom;
     private boolean mQsVisible;
     private final ContentResolver mContentResolver;
+    private float mMinFraction;
 
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
@@ -1920,6 +1921,15 @@ public class NotificationPanelViewController extends PanelViewController {
         return !mQsTouchAboveFalsingThreshold;
     }
 
+    /**
+     * Percentage of panel expansion offset, caused by pulling down on a heads-up.
+     */
+    @Override
+    public void setMinFraction(float minFraction) {
+        mMinFraction = minFraction;
+        mDepthController.setPanelPullDownMinFraction(mMinFraction);
+    }
+
     private float computeQsExpansionFraction() {
         if (mQSAnimatingHiddenFromCollapsed) {
             // When hiding QS from collapsed state, the expansion can sometimes temporarily
@@ -2393,6 +2403,12 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
             }
             top += mOverStretchAmount;
+            // Correction for instant expansion caused by HUN pull down/
+            if (mMinFraction > 0f && mMinFraction < 1f) {
+                float realFraction =
+                        (getExpandedFraction() - mMinFraction) / (1f - mMinFraction);
+                top *= MathUtils.saturate(realFraction / mMinFraction);
+            }
             bottom = getView().getBottom();
             // notification bounds should take full screen width regardless of insets
             left = 0;
@@ -3465,7 +3481,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void setPanelScrimMinFraction(float minFraction) {
-        mBar.panelScrimMinFractionChanged(minFraction);
+        mBar.onPanelMinFractionChanged(minFraction);
     }
 
     public void clearNotificationEffects() {
