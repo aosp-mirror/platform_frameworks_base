@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"पुढे सुरू ठेवण्यासाठी तुमचे फिंगरप्रिंट किंवा स्क्रीन लॉक वापरा"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिंट आयकन"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलॉकसंबंधित समस्या"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"पुढे सुरू ठेवण्यासाठी तुमचा चेहरा किंवा स्क्रीन लॉक वापरा"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"चेहरा आयकन"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"सिंक सेटिंग्‍ज वाचा"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"खात्याच्या सिंक सेटिंग्ज वाचण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांचा अ‍ॅप संकालित केला आहे किंवा नाही हे निर्धारित करू शकते."</string>
@@ -1020,7 +1018,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"ब्राउझर भौगोलिक स्थान परवानग्या सुधारित करा"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"ब्राउझरच्या भौगोलिक स्थान परवानग्या सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स यादृच्छिक वेबसाइटवर स्थान माहिती पाठविण्यास अनुमती देण्यासाठी याचा वापर करू शकतात."</string>
     <string name="save_password_message" msgid="2146409467245462965">"ब्राउझरने हा पासवर्ड लक्षात ठेवावा असे तुम्ही इच्छिता?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"आत्ता नाही"</string>
+    <string name="save_password_notnow" msgid="2878327088951240061">"आता नको"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"लक्षात ठेवा"</string>
     <string name="save_password_never" msgid="6776808375903410659">"कधीही नाही"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"तुम्हाला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू होतात. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nसध्याची वैशिष्ट्ये:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने <xliff:g id="SERVICE">%1$s</xliff:g>, एक अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होते. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सुरू करा"</string>
@@ -2043,7 +2040,7 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"नाही, नको"</string>
-    <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नाही"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नको"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"कधीही नाही"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"अपडेट करा"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"पुढे सुरू ठेवा"</string>

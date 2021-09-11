@@ -609,8 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"جاری رکھنے کے لیے اپنے فنگر پرنٹ یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_vendor_unknown (4170002184907291065) -->
-    <skip />
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فیس اَنلاک"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"فیس اَنلاک میں مسئلہ"</string>
@@ -663,8 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_error_vendor_unknown (7387005932083302070) -->
-    <skip />
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"چہرے کا آئیکن"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
@@ -1695,8 +1693,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ایکسیسبیلٹی خصوصیات کے لیے شارٹ کٹ آن کریں؟"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"دونوں والیوم کی کلیدوں کو کچھ سیکنڈز تک دبائیں رکھنے سے ایکسیسبیلٹی خصوصیات آن ہو جاتی ہیں۔ اس سے آپ کے آلے کے کام کرنے کا طریقہ تبدیل ہو سکتا ہے۔\n\nموجودہ خصوصیات:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nآپ ترتیبات اور ایکسیسبیلٹی میں منتخب کردہ خصوصیات کو تبدیل کر سکتے ہیں۔"</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (2128323171922023762) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> شارٹ کٹ آن کریں؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"والیوم کی دونوں کلیدوں کو کچھ سیکنڈز تک دبائے رکھنے سے <xliff:g id="SERVICE">%1$s</xliff:g> ایکسیسبیلٹی خصوصیت آن ہو جاتی ہے۔ اس سے آپ کے آلے کے کام کرنے کا طریقہ تبدیل ہو سکتا ہے۔\n\nآپ ترتیبات اور ایکسیسبیلٹی میں دیگر خصوصیت کے لیے اس شارٹ کٹ کو تبدیل کر سکتے ہیں۔"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"آن کریں"</string>

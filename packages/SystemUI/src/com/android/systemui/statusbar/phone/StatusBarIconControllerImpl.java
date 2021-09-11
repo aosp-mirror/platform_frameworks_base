@@ -114,6 +114,14 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    private void refreshIconGroups() {
+        for (int i = mIconGroups.size() - 1; i >= 0; --i) {
+            IconManager group = mIconGroups.get(i);
+            removeIconGroup(group);
+            addIconGroup(group);
+        }
+    }
+
     /** */
     @Override
     public void removeIconGroup(IconManager group) {
@@ -468,5 +476,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     @Override
     public void onDensityOrFontScaleChanged() {
         loadDimens();
+        refreshIconGroups();
     }
 }
