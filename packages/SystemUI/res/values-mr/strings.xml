@@ -248,7 +248,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"द्रुत सेटिंग्ज."</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"क्विक सेटिंग्ज."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"सेटिंग्ज"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"अवलोकन."</string>
@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"हे तुमचा मायक्रोफोन वापरण्याची परवानगी असलेल्या सर्व ॲप्स आणि सेवांसाठी अ‍ॅक्सेस अनब्लॉक करते."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"हे तुमचा कॅमेरा वापरण्याची परवानगी असलेल्या सर्व ॲप्स आणि सेवांसाठी अ‍ॅक्सेस अनब्लॉक करते."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"हे तुमचा कॅमेरा आणि मायक्रोफोन वापरण्याची परवानगी असलेल्या सर्व ॲप्स व सेवांसाठी अ‍ॅक्सेस अनब्लॉक करते."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"डिव्हाइस"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"इतर डिव्हाइस"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"अवलोकन टॉगल करा."</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज झाली"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज होत आहे"</string>
@@ -659,7 +659,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"द्रुत सेटिंग्ज"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"क्विक सेटिंग्ज"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्टेटस बार"</string>
     <string name="overview" msgid="3522318590458536816">"अवलोकन"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI डेमो मोड"</string>
@@ -1165,8 +1165,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट केले आहे"</string>
-    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"मोबाइल डेटा ऑटो-कनेक्ट होणार नाही"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"कोणतेही कनेक्शन नाही"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"इतर कोणतेही नेटवर्क उपलब्ध नाहीत"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"कोणतेही नेटवर्क उपलब्‍ध नाही"</string>
@@ -1180,4 +1179,6 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ला क्विक सेटिंग्जमध्ये पुढील टाइल जोडायची आहे"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"टाइल जोडा"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"टाइल जोडू नका"</string>
+    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
+    <skip />
 </resources>
