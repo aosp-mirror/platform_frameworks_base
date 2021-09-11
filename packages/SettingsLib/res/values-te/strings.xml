@@ -322,8 +322,8 @@
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం నిల్వ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
-    <string name="allow_mock_location" msgid="2102650981552527884">"అనుకృత స్థానాలను అనుమతించు"</string>
-    <string name="allow_mock_location_summary" msgid="179780881081354579">"అనుకృత స్థానాలను అనుమతించు"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"డమ్మీ లొకేషన్లను అనుమతించండి"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"డమ్మీ లొకేషన్లను అనుమతించండి"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"వీక్షణ అట్రిబ్యూట్‌ పర్యవేక్షణను ఎనేబుల్ చేయి"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ఎల్లప్పుడూ మొబైల్ డేటాను యాక్టివ్‌గా ఉంచు, Wi‑Fi యాక్టివ్‌గా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"అందుబాటులో ఉంటే టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధిని ఉపయోగించండి"</string>
