@@ -147,8 +147,12 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
 
             val fadeIn = subProgress(0f, 0.1f, value)
             val fadeOutNoise = subProgress(0.4f, 1f, value)
-            val fadeOutRipple = subProgress(0.3f, 1f, value)
-            val fadeCircle = subProgress(0f, 0.2f, value)
+            var fadeOutRipple = 0f
+            var fadeCircle = 0f
+            if (shouldFadeOutRipple) {
+                fadeCircle = subProgress(0f, 0.2f, value)
+                fadeOutRipple = subProgress(0.3f, 1f, value)
+            }
             setUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
             setUniform("in_fadeCircle", 1 - fadeCircle)
             setUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
@@ -200,4 +204,6 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
             field = value
             setUniform("in_pixelDensity", value)
         }
+
+    var shouldFadeOutRipple: Boolean = true
 }
