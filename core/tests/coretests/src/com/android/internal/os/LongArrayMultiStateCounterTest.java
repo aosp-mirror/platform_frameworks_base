@@ -48,6 +48,53 @@ public class LongArrayMultiStateCounterTest {
     }
 
     @Test
+    public void setEnabled() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+        counter.setState(0, 1000);
+        updateValue(counter, new long[]{0, 0, 0, 0}, 1000);
+        updateValue(counter, new long[]{100, 200, 300, 400}, 2000);
+
+        assertCounts(counter, 0, new long[]{100, 200, 300, 400});
+
+        counter.setEnabled(false, 3000);
+
+        // Partially included, because the counter is disabled after the previous update
+        updateValue(counter, new long[]{200, 300, 400, 500}, 4000);
+
+        // Count only 50%, because the counter was disabled for 50% of the time
+        assertCounts(counter, 0, new long[]{150, 250, 350, 450});
+
+        // Not counted because the counter is disabled
+        updateValue(counter, new long[]{250, 350, 450, 550}, 5000);
+
+        counter.setEnabled(true, 6000);
+
+        updateValue(counter, new long[]{300, 400, 500, 600}, 7000);
+
+        // Again, take 50% of the delta
+        assertCounts(counter, 0, new long[]{175, 275, 375, 475});
+    }
+
+    @Test
+    public void reset() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+        counter.setState(0, 1000);
+        updateValue(counter, new long[]{0, 0, 0, 0}, 1000);
+        updateValue(counter, new long[]{100, 200, 300, 400}, 2000);
+
+        assertCounts(counter, 0, new long[]{100, 200, 300, 400});
+
+        counter.reset();
+
+        assertCounts(counter, 0, new long[]{0, 0, 0, 0});
+
+        updateValue(counter, new long[]{200, 300, 400, 500}, 3000);
+        updateValue(counter, new long[]{300, 400, 500, 600}, 4000);
+
+        assertCounts(counter, 0, new long[]{100, 100, 100, 100});
+    }
+
+    @Test
     public void parceling() {
         LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
         updateValue(counter, new long[]{0, 0, 0, 0}, 1000);
