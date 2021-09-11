@@ -106,6 +106,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsA2dpProfileConnectedFail = false;
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
+    private boolean mUnpairing;
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
     @VisibleForTesting
@@ -142,6 +143,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         fillData();
         mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
         initDrawableCache();
+        mUnpairing = false;
     }
 
     private void initDrawableCache() {
@@ -402,6 +404,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (state != BluetoothDevice.BOND_NONE) {
             final BluetoothDevice dev = mDevice;
             if (dev != null) {
+                mUnpairing = true;
                 final boolean successful = dev.removeBond();
                 if (successful) {
                     releaseLruCache();
@@ -1242,5 +1245,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void releaseLruCache() {
         mDrawableCache.evictAll();
+    }
+
+    boolean getUnpairing() {
+        return mUnpairing;
     }
 }
