@@ -711,4 +711,8 @@
         <item>@drawable/rounded_corner_bottom</item>
         <item>@drawable/rounded_corner_bottom_secondary</item>
     </array>
+
+    <!-- Flag to enable privacy dot views, it shall be true for normal case -->
+    <bool name="config_enablePrivacyDot">true</bool>
+
 </resources>

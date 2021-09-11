@@ -70,6 +70,9 @@ class StatusBarContentInsetsProvider @Inject constructor(
     // (e.g. network displays)
     private val insetsCache = LruCache<CacheKey, Rect>(MAX_CACHE_SIZE)
     private val listeners = mutableSetOf<StatusBarContentInsetsChangedListener>()
+    private val isPrivacyDotEnabled: Boolean by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        context.resources.getBoolean(R.bool.config_enablePrivacyDot)
+    }
 
     init {
         configurationController.addCallback(this)
@@ -152,8 +155,9 @@ class StatusBarContentInsetsProvider @Inject constructor(
         val isRtl = rotatedResources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
         val roundedCornerPadding = rotatedResources
                 .getDimensionPixelSize(R.dimen.rounded_corner_content_padding)
-        val minDotWidth = rotatedResources
-                .getDimensionPixelSize(R.dimen.ongoing_appops_dot_min_padding)
+        val minDotWidth = if (isPrivacyDotEnabled)
+                rotatedResources.getDimensionPixelSize(R.dimen.ongoing_appops_dot_min_padding)
+            else 0
 
         val minLeft: Int
         val minRight: Int

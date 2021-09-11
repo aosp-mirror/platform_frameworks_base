@@ -160,6 +160,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private Handler mHandler;
     private boolean mPendingRotationChange;
     private boolean mIsRoundedCornerMultipleRadius;
+    private boolean mIsPrivacyDotEnabled;
     private int mStatusBarHeightPortrait;
     private int mStatusBarHeightLandscape;
     private Drawable mRoundedCornerDrawable;
@@ -253,6 +254,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mRotation = mContext.getDisplay().getRotation();
         mDisplayUniqueId = mContext.getDisplay().getUniqueId();
         mIsRoundedCornerMultipleRadius = isRoundedCornerMultipleRadius(mContext, mDisplayUniqueId);
+        mIsPrivacyDotEnabled = mContext.getResources().getBoolean(R.bool.config_enablePrivacyDot);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         updateRoundedCornerDrawable();
@@ -312,24 +314,24 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     }
 
     private void setupDecorations() {
-        if (hasRoundedCorners() || shouldDrawCutout()) {
+        if (hasRoundedCorners() || shouldDrawCutout() || mIsPrivacyDotEnabled) {
             updateStatusBarHeight();
             final DisplayCutout cutout = getCutout();
-            final Rect[] bounds = cutout == null ? null : cutout.getBoundingRectsAll();
-            int rotatedPos;
             for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                rotatedPos = getBoundPositionFromRotation(i, mRotation);
-                if ((bounds != null && !bounds[rotatedPos].isEmpty())
-                        || shouldShowRoundedCorner(i)) {
-                    createOverlay(i);
+                if (shouldShowCutout(i, cutout) || shouldShowRoundedCorner(i, cutout)
+                        || shouldShowPrivacyDot(i, cutout)) {
+                    createOverlay(i, cutout);
                 } else {
                     removeOverlay(i);
                 }
             }
-            // Overlays have been created, send the dots to the controller
-            //TODO: need a better way to do this
-            mDotViewController.initialize(
-                    mTopLeftDot, mTopRightDot, mBottomLeftDot, mBottomRightDot);
+
+            if (mIsPrivacyDotEnabled) {
+                // Overlays have been created, send the dots to the controller
+                //TODO: need a better way to do this
+                mDotViewController.initialize(
+                        mTopLeftDot, mTopRightDot, mBottomLeftDot, mBottomRightDot);
+            }
         } else {
             removeAllOverlays();
         }
@@ -416,7 +418,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mOverlays[pos] = null;
     }
 
-    private void createOverlay(@BoundsPosition int pos) {
+    private void createOverlay(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
         if (mOverlays == null) {
             mOverlays = new View[BOUNDS_POSITION_LENGTH];
         }
@@ -437,7 +439,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mOverlays[pos].setAlpha(0);
         mOverlays[pos].setForceDarkAllowed(false);
 
-        updateView(pos);
+        updateView(pos, cutout);
 
         mWindowManager.addView(mOverlays[pos], getWindowLayoutParams(pos));
 
@@ -461,34 +463,19 @@ public class ScreenDecorations extends SystemUI implements Tunable {
      * Allow overrides for top/bottom positions
      */
     private View overlayForPosition(@BoundsPosition int pos) {
-        switch (pos) {
-            case BOUNDS_POSITION_TOP:
-            case BOUNDS_POSITION_LEFT:
-                View top = LayoutInflater.from(mContext)
-                        .inflate(R.layout.rounded_corners_top, null);
-                mTopLeftDot = top.findViewById(R.id.privacy_dot_left_container);
-                mTopRightDot = top.findViewById(R.id.privacy_dot_right_container);
-                return top;
-            case BOUNDS_POSITION_BOTTOM:
-            case BOUNDS_POSITION_RIGHT:
-                View bottom =  LayoutInflater.from(mContext)
-                        .inflate(R.layout.rounded_corners_bottom, null);
-                mBottomLeftDot = bottom.findViewById(R.id.privacy_dot_left_container);
-                mBottomRightDot = bottom.findViewById(R.id.privacy_dot_right_container);
-                return bottom;
-            default:
-                throw new IllegalArgumentException("Unknown bounds position");
-        }
+        final int layoutId = (pos == BOUNDS_POSITION_LEFT || pos == BOUNDS_POSITION_TOP)
+                ? R.layout.rounded_corners_top : R.layout.rounded_corners_bottom;
+        return LayoutInflater.from(mContext).inflate(layoutId, null);
     }
 
-    private void updateView(@BoundsPosition int pos) {
+    private void updateView(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
         if (mOverlays == null || mOverlays[pos] == null) {
             return;
         }
 
         // update rounded corner view rotation
-        updateRoundedCornerView(pos, R.id.left);
-        updateRoundedCornerView(pos, R.id.right);
+        updateRoundedCornerView(pos, R.id.left, cutout);
+        updateRoundedCornerView(pos, R.id.right, cutout);
         updateRoundedCornerSize(mRoundedDefault, mRoundedDefaultTop, mRoundedDefaultBottom);
         updateRoundedCornerImageView();
 
@@ -496,6 +483,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         if (mCutoutViews != null && mCutoutViews[pos] != null) {
             mCutoutViews[pos].setRotation(mRotation);
         }
+
+        updatePrivacyDotView(pos, cutout);
     }
 
     @VisibleForTesting
@@ -671,11 +660,12 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
             if (mOverlays != null) {
                 updateLayoutParams();
+                final DisplayCutout cutout = getCutout();
                 for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
                     if (mOverlays[i] == null) {
                         continue;
                     }
-                    updateView(i);
+                    updateView(i, cutout);
                 }
             }
         }
@@ -807,17 +797,38 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         return drawable;
     }
 
-    private void updateRoundedCornerView(@BoundsPosition int pos, int id) {
+    private void updateRoundedCornerView(@BoundsPosition int pos, int id,
+            @Nullable DisplayCutout cutout) {
         final View rounded = mOverlays[pos].findViewById(id);
         if (rounded == null) {
             return;
         }
         rounded.setVisibility(View.GONE);
-        if (shouldShowRoundedCorner(pos)) {
+        if (shouldShowRoundedCorner(pos, cutout)) {
             final int gravity = getRoundedCornerGravity(pos, id == R.id.left);
             ((FrameLayout.LayoutParams) rounded.getLayoutParams()).gravity = gravity;
             setRoundedCornerOrientation(rounded, gravity);
             rounded.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updatePrivacyDotView(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
+        final ViewGroup viewGroup = (ViewGroup) mOverlays[pos];
+
+        final View left = viewGroup.findViewById(R.id.privacy_dot_left_container);
+        final View right = viewGroup.findViewById(R.id.privacy_dot_right_container);
+        if (shouldShowPrivacyDot(pos, cutout)) {
+            // TODO (b/201481944) Privacy Dots pos and var are wrong with long side cutout enable
+            if (pos == BOUNDS_POSITION_LEFT || pos == BOUNDS_POSITION_TOP) {
+                mTopLeftDot = left;
+                mTopRightDot = right;
+            } else {
+                mBottomLeftDot = left;
+                mBottomRightDot = right;
+            }
+        } else {
+            viewGroup.removeView(left);
+            viewGroup.removeView(right);
         }
     }
 
@@ -872,12 +883,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 || mIsRoundedCornerMultipleRadius;
     }
 
-    private boolean shouldShowRoundedCorner(@BoundsPosition int pos) {
-        if (!hasRoundedCorners()) {
-            return false;
-        }
-
-        DisplayCutout cutout = getCutout();
+    private boolean isDefaultShownOverlayPos(@BoundsPosition int pos,
+            @Nullable DisplayCutout cutout) {
         // for cutout is null or cutout with only waterfall.
         final boolean emptyBoundsOrWaterfall = cutout == null || cutout.isBoundsEmpty();
         // Shows rounded corner on left and right overlays only when there is no top or bottom
@@ -890,6 +897,21 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         } else {
             return pos == BOUNDS_POSITION_LEFT || pos == BOUNDS_POSITION_RIGHT;
         }
+    }
+
+    private boolean shouldShowRoundedCorner(@BoundsPosition int pos,
+            @Nullable DisplayCutout cutout) {
+        return hasRoundedCorners() && isDefaultShownOverlayPos(pos, cutout);
+    }
+
+    private boolean shouldShowPrivacyDot(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
+        return mIsPrivacyDotEnabled && isDefaultShownOverlayPos(pos, cutout);
+    }
+
+    private boolean shouldShowCutout(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
+        final Rect[] bounds = cutout == null ? null : cutout.getBoundingRectsAll();
+        final int rotatedPos = getBoundPositionFromRotation(pos, mRotation);
+        return (bounds != null && !bounds[rotatedPos].isEmpty());
     }
 
     private boolean shouldDrawCutout() {
