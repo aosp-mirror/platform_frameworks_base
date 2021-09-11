@@ -1180,12 +1180,15 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearUserPreferredDisplayMode();
     method @NonNull public int[] getUserDisabledHdrTypes();
+    method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
@@ -2168,6 +2171,9 @@ package android.provider {
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
     field public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
+    field public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
+    field public static final String USER_PREFERRED_RESOLUTION_HEIGHT = "user_preferred_resolution_height";
+    field public static final String USER_PREFERRED_RESOLUTION_WIDTH = "user_preferred_resolution_width";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
@@ -2735,6 +2741,7 @@ package android.view {
   }
 
   public final class Display {
+    method @NonNull public android.view.Display.Mode getDefaultMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
@@ -2746,6 +2753,11 @@ package android.view {
     field public static final int TYPE_UNKNOWN = 0; // 0x0
     field public static final int TYPE_VIRTUAL = 5; // 0x5
     field public static final int TYPE_WIFI = 3; // 0x3
+  }
+
+  public static final class Display.Mode implements android.os.Parcelable {
+    ctor public Display.Mode(int, int, float);
+    method public boolean matches(int, int, float);
   }
 
   public class FocusFinder {

@@ -377,6 +377,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
+import com.android.server.am.ComponentAliasResolver.Resolution;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
@@ -7810,6 +7811,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                         } else {
                             killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                                     "Too many Binders sent to SYSTEM");
+                            // We need to run a GC here, because killing the processes involved
+                            // actually isn't guaranteed to free up the proxies; in fact, if the
+                            // GC doesn't run for a long time, we may even exceed the global
+                            // proxy limit for a process (20000), resulting in system_server itself
+                            // being killed.
+                            // Note that the GC here might not actually clean up all the proxies,
+                            // because the binder reference decrements will come in asynchronously;
+                            // but if new processes belonging to the UID keep adding proxies, we
+                            // will get another callback here, and run the GC again - this time
+                            // cleaning up the old proxies.
+                            VMRuntime.getRuntime().requestConcurrentGC();
                         }
                     }, mHandler);
             t.traceEnd(); // setBinderProxies
@@ -12766,9 +12778,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+            // Replace the alias receivers with their targets.
+            if (newReceivers != null) {
+                for (int i = newReceivers.size() - 1; i >= 0; i--) {
+                    final ResolveInfo ri = newReceivers.get(i);
+                    final Resolution<ResolveInfo> resolution = mComponentAliasResolver
+                            .resolveReceiver(intent, ri, resolvedType, pmFlags, user, callingUid);
+                    if (resolution == null) {
+                        // It was an alias, but the target was not found.
+                        newReceivers.remove(i);
+                        continue;
+                    }
+                    if (resolution.isAlias()) {
+                        newReceivers.set(i, resolution.getTarget());
+                    }
+                }
+            }
             if (newReceivers != null && newReceivers.size() == 0) {
                 newReceivers = null;
             }
+
             if (receivers == null) {
                 receivers = newReceivers;
             } else if (newReceivers != null) {

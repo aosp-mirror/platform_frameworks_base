@@ -16,7 +16,6 @@
 
 package com.android.server.pm.parsing.pkg;
 
-import android.annotation.Nullable;
 import android.content.pm.SigningDetails;
 
 /**
@@ -54,8 +53,6 @@ public interface ParsedPackage extends AndroidPackage {
     ParsedPackage setPackageName(String packageName);
 
     ParsedPackage setPrimaryCpuAbi(String primaryCpuAbi);
-
-    ParsedPackage setRealPackage(@Nullable String realPackage);
 
     ParsedPackage setSecondaryCpuAbi(String secondaryCpuAbi);
 
@@ -100,8 +97,6 @@ public interface ParsedPackage extends AndroidPackage {
     ParsedPackage setRestrictUpdateHash(byte[] restrictUpdateHash);
 
     ParsedPackage setSeInfo(String seInfo);
-
-    ParsedPackage setSeInfoUser(String seInfoUser);
 
     ParsedPackage setSecondaryNativeLibraryDir(String secondaryNativeLibraryDir);
 

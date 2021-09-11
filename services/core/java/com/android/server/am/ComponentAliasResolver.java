@@ -27,7 +27,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -38,6 +40,7 @@ import com.android.server.LocalServices;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Manages and handles component aliases, which is an experimental feature.
@@ -71,6 +74,13 @@ public class ComponentAliasResolver {
 
     private static final String ALIAS_FILTER_ACTION = "android.intent.action.EXPERIMENTAL_IS_ALIAS";
     private static final String META_DATA_ALIAS_TARGET = "alias_target";
+
+    private static final int PACKAGE_QUERY_FLAGS =
+            PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    | PackageManager.MATCH_ANY_USER
+                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.GET_META_DATA;
 
     public ComponentAliasResolver(ActivityManagerService service) {
         mAm = service;
@@ -151,24 +161,29 @@ public class ComponentAliasResolver {
      */
     @GuardedBy("mLock")
     private void loadFromMetadataLocked() {
-        if (DEBUG) Slog.d(TAG, "Scanning aliases...");
+        if (DEBUG) Slog.d(TAG, "Scanning service aliases...");
         Intent i = new Intent(ALIAS_FILTER_ACTION);
 
-        List<ResolveInfo> services = mContext.getPackageManager().queryIntentServicesAsUser(
-                i,
-                PackageManager.MATCH_UNINSTALLED_PACKAGES
-                        | PackageManager.MATCH_ANY_USER
-                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                        | PackageManager.GET_META_DATA,
-                UserHandle.USER_SYSTEM);
+        final List<ResolveInfo> services = mContext.getPackageManager().queryIntentServicesAsUser(
+                i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
 
-        for (ResolveInfo ri : services) {
+        extractAliases(services);
+
+        if (DEBUG) Slog.d(TAG, "Scanning receiver aliases...");
+        final List<ResolveInfo> receivers = mContext.getPackageManager()
+                .queryBroadcastReceiversAsUser(i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
+
+        extractAliases(receivers);
+
+        // TODO: Scan for other component types as well.
+    }
+
+    private void extractAliases(List<ResolveInfo> components) {
+        for (ResolveInfo ri : components) {
             final ComponentInfo ci = ri.getComponentInfo();
             final ComponentName from = ci.getComponentName();
-            final ComponentName to = ComponentName.unflattenFromString(
-                    ci.metaData.getString(META_DATA_ALIAS_TARGET));
-            if (!validateComponentName(to)) {
+            final ComponentName to = unflatten(ci.metaData.getString(META_DATA_ALIAS_TARGET));
+            if (to == null) {
                 continue;
             }
             if (DEBUG) {
@@ -176,8 +191,6 @@ public class ComponentAliasResolver {
             }
             mFromTo.put(from, to);
         }
-
-        // TODO: Scan for other component types as well.
     }
 
     /**
@@ -191,8 +204,11 @@ public class ComponentAliasResolver {
         if (DEBUG) Slog.d(TAG, "Loading aliases overrides ...");
         for (String line : mOverrideString.split("\\,+")) {
             final String[] fields = line.split("\\:+", 2);
-            final ComponentName from = ComponentName.unflattenFromString(fields[0]);
-            if (!validateComponentName(from)) {
+            if (TextUtils.isEmpty(fields[0])) {
+                continue;
+            }
+            final ComponentName from = unflatten(fields[0]);
+            if (from == null) {
                 continue;
             }
 
@@ -200,8 +216,8 @@ public class ComponentAliasResolver {
                 if (DEBUG) Slog.d(TAG, "" + from.flattenToShortString() + " [removed]");
                 mFromTo.remove(from);
             } else {
-                final ComponentName to = ComponentName.unflattenFromString(fields[1]);
-                if (!validateComponentName(to)) {
+                final ComponentName to = unflatten(fields[1]);
+                if (to == null) {
                     continue;
                 }
 
@@ -214,12 +230,13 @@ public class ComponentAliasResolver {
         }
     }
 
-    private boolean validateComponentName(ComponentName cn) {
+    private ComponentName unflatten(String name) {
+        final ComponentName cn = ComponentName.unflattenFromString(name);
         if (cn != null) {
-            return true;
+            return cn;
         }
-        Slog.e(TAG, "Invalid component name detected: " + cn);
-        return false;
+        Slog.e(TAG, "Invalid component name detected: " + name);
+        return null;
     }
 
     /**
@@ -277,10 +294,9 @@ public class ComponentAliasResolver {
         }
     }
 
-    @Nullable
-    public Resolution<ComponentName> resolveService(
-            @NonNull Intent service, @Nullable String resolvedType,
-            int packageFlags, int userId, int callingUid) {
+    @NonNull
+    public Resolution<ComponentName> resolveComponentAlias(
+            @NonNull Supplier<ComponentName> aliasSupplier) {
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -288,28 +304,17 @@ public class ComponentAliasResolver {
                     return new Resolution<>(null, null);
                 }
 
-                PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-
-                ResolveInfo rInfo = pmi.resolveService(service,
-                        resolvedType, packageFlags, userId, callingUid);
-                ServiceInfo sInfo = rInfo != null ? rInfo.serviceInfo : null;
-                if (sInfo == null) {
-                    return null; // Service not found.
-                }
-                final ComponentName alias =
-                        new ComponentName(sInfo.applicationInfo.packageName, sInfo.name);
+                final ComponentName alias = aliasSupplier.get();
                 final ComponentName target = mFromTo.get(alias);
 
                 if (target != null) {
-                    // It's an alias. Keep the original intent, and rewrite it.
-                    service.setOriginalIntent(new Intent(service));
-
-                    service.setPackage(null);
-                    service.setComponent(target);
-
                     if (DEBUG) {
+                        Exception stacktrace = null;
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            stacktrace = new RuntimeException("STACKTRACE");
+                        }
                         Slog.d(TAG, "Alias resolved: " + alias.flattenToShortString()
-                                + " -> " + target.flattenToShortString());
+                                + " -> " + target.flattenToShortString(), stacktrace);
                     }
                 }
                 return new Resolution<>(alias, target);
@@ -317,5 +322,70 @@ public class ComponentAliasResolver {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Nullable
+    public Resolution<ComponentName> resolveService(
+            @NonNull Intent service, @Nullable String resolvedType,
+            int packageFlags, int userId, int callingUid) {
+        Resolution<ComponentName> result = resolveComponentAlias(() -> {
+            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+
+            ResolveInfo rInfo = pmi.resolveService(service,
+                    resolvedType, packageFlags, userId, callingUid);
+            ServiceInfo sInfo = rInfo != null ? rInfo.serviceInfo : null;
+            if (sInfo == null) {
+                return null; // Service not found.
+            }
+            return new ComponentName(sInfo.applicationInfo.packageName, sInfo.name);
+        });
+
+        // TODO: To make it consistent with resolveReceiver(), let's ensure the target service
+        // is resolvable, and if not, return null.
+
+        if (result != null && result.isAlias()) {
+            // It's an alias. Keep the original intent, and rewrite it.
+            service.setOriginalIntent(new Intent(service));
+
+            service.setPackage(null);
+            service.setComponent(result.getTarget());
+        }
+        return result;
+    }
+
+    @Nullable
+    public Resolution<ResolveInfo> resolveReceiver(@NonNull Intent intent,
+            @NonNull ResolveInfo receiver, @Nullable String resolvedType,
+            int packageFlags, int userId, int callingUid) {
+        // Resolve this alias.
+        final Resolution<ComponentName> resolution = resolveComponentAlias(() ->
+                receiver.activityInfo.getComponentName());
+        final ComponentName target = resolution.getTarget();
+        if (target == null) {
+            return new Resolution<>(receiver, null); // It's not an alias.
+        }
+
+        // Convert the target component name to a ResolveInfo.
+
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+
+        // Rewrite the intent to search the target intent.
+        // - We don't actually rewrite the intent we deliver to the receiver here, which is what
+        //  resolveService() does, because this intent many be send to other receivers as well.
+        // - But we don't have to do that here either, because the actual receiver component
+        //   will be set in BroadcastQueue anyway, before delivering the intent to each receiver.
+        // - However, we're not able to set the original intent either, for the time being.
+        Intent i = new Intent(intent);
+        i.setPackage(null);
+        i.setComponent(resolution.getTarget());
+
+        List<ResolveInfo> resolved = pmi.queryIntentReceivers(i,
+                resolvedType, packageFlags, callingUid, userId);
+        if (resolved == null || resolved.size() == 0) {
+            // Target component not found.
+            Slog.w(TAG, "Alias target " + target.flattenToShortString() + " not found");
+            return null;
+        }
+        return new Resolution<>(receiver, resolved.get(0));
     }
 }

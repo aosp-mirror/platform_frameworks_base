@@ -73,7 +73,8 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private final UserManager mUserManager;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
-    private int mSystemIconsBaseMargin;
+    private int mStatusBarPaddingEnd;
+    private int mMinDotWidth;
     private View mSystemIconsContainer;
 
     private View mCutoutSpace;
@@ -125,14 +126,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mMultiUserAvatar.setLayoutParams(lp);
 
         // System icons
-        lp = (MarginLayoutParams) mSystemIconsContainer.getLayoutParams();
-        lp.setMarginStart(getResources().getDimensionPixelSize(
-                R.dimen.system_icons_super_container_margin_start));
-        mSystemIconsContainer.setLayoutParams(lp);
-        mSystemIconsContainer.setPaddingRelative(mSystemIconsContainer.getPaddingStart(),
-                mSystemIconsContainer.getPaddingTop(),
-                getResources().getDimensionPixelSize(R.dimen.system_icons_keyguard_padding_end),
-                mSystemIconsContainer.getPaddingBottom());
+        updateSystemIconsLayoutParams();
 
         // Respect font size setting.
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -162,8 +156,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
         Resources res = getResources();
         mSystemIconsSwitcherHiddenExpandedMargin = res.getDimensionPixelSize(
                 R.dimen.system_icons_switcher_hidden_expanded_margin);
-        mSystemIconsBaseMargin = res.getDimensionPixelSize(
-                R.dimen.system_icons_super_container_avatarless_margin_end);
+        mStatusBarPaddingEnd = res.getDimensionPixelSize(
+                R.dimen.status_bar_padding_end);
+        mMinDotWidth = res.getDimensionPixelSize(
+                R.dimen.ongoing_appops_dot_min_padding);
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
         mShowPercentAvailable = getContext().getResources().getBoolean(
@@ -203,16 +199,24 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private void updateSystemIconsLayoutParams() {
         LinearLayout.LayoutParams lp =
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
-        // If the avatar icon is gone, we need to have some end margin to display the system icons
-        // correctly.
-        int baseMarginEnd = mMultiUserAvatar.getVisibility() == View.GONE
-                ? mSystemIconsBaseMargin
-                : 0;
+
+        int marginStart = getResources().getDimensionPixelSize(
+                R.dimen.system_icons_super_container_margin_start);
+
+        // Use status_bar_padding_end to replace original
+        // system_icons_super_container_avatarless_margin_end to prevent different end alignment
+        // between PhoneStatusBarView and KeyguardStatusBarView
+        int baseMarginEnd = mStatusBarPaddingEnd;
         int marginEnd =
                 mKeyguardUserSwitcherEnabled ? mSystemIconsSwitcherHiddenExpandedMargin
                         : baseMarginEnd;
-        marginEnd = calculateMargin(marginEnd, mPadding.second);
-        if (marginEnd != lp.getMarginEnd()) {
+
+        // Align PhoneStatusBar right margin/padding, only use
+        // 1. status bar layout: mPadding(consider round_corner + privacy dot)
+        // 2. icon container: R.dimen.status_bar_padding_end
+
+        if (marginEnd != lp.getMarginEnd() || marginStart != lp.getMarginStart()) {
+            lp.setMarginStart(marginStart);
             lp.setMarginEnd(marginEnd);
             mSystemIconsContainer.setLayoutParams(lp);
         }
@@ -247,7 +251,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mPadding =
                 StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
                         mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
-        setPadding(mPadding.first, waterfallTop, mPadding.second, 0);
+
+        // consider privacy dot space
+        final int minLeft = isLayoutRtl() ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
+        final int minRight = isLayoutRtl() ? mPadding.second :
+                Math.max(mMinDotWidth, mPadding.second);
+
+        setPadding(minLeft, waterfallTop, minRight, 0);
     }
 
     private boolean updateLayoutParamsNoCutout() {

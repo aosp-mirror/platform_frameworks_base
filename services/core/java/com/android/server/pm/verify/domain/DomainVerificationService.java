@@ -843,7 +843,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void migrateState(@NonNull PackageSetting oldPkgSetting,
             @NonNull PackageSetting newPkgSetting) {
-        String pkgName = newPkgSetting.getName();
+        String pkgName = newPkgSetting.getPackageName();
         boolean sendBroadcast;
 
         synchronized (mLock) {
@@ -936,7 +936,7 @@ public class DomainVerificationService extends SystemService
         //  gains or loses all domains.
 
         UUID domainSetId = newPkgSetting.getDomainSetId();
-        String pkgName = newPkgSetting.getName();
+        String pkgName = newPkgSetting.getPackageName();
 
         boolean sendBroadcast = true;
 
@@ -1032,7 +1032,7 @@ public class DomainVerificationService extends SystemService
             @NonNull ArrayMap<String, Integer> stateMap,
             @NonNull ArraySet<String> autoVerifyDomains) {
         if (pkgSetting.isSystem()
-                && mSystemConfig.getLinkedApps().contains(pkgSetting.getName())) {
+                && mSystemConfig.getLinkedApps().contains(pkgSetting.getPackageName())) {
             int domainsSize = autoVerifyDomains.size();
             for (int index = 0; index < domainsSize; index++) {
                 stateMap.put(autoVerifyDomains.valueAt(index),
@@ -1718,7 +1718,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
             @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
-        String packageName = pkgSetting.getName();
+        String packageName = pkgSetting.getPackageName();
         if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, intent, userId, false, "not valid intent");
@@ -1762,7 +1762,7 @@ public class DomainVerificationService extends SystemService
     private int approvalLevelForDomainInternal(@NonNull PackageSetting pkgSetting,
             @NonNull String host, boolean includeNegative, @UserIdInt int userId,
             @NonNull Object debugObject) {
-        String packageName = pkgSetting.getName();
+        String packageName = pkgSetting.getPackageName();
         final AndroidPackage pkg = pkgSetting.getPkg();
 
         if (pkg != null && includeNegative && !mCollector.containsWebDomain(pkg, host)) {

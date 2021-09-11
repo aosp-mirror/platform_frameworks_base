@@ -97,8 +97,6 @@ public class DisplayModeDirector {
     // specific display.
     private static final int GLOBAL_ID = -1;
 
-    private static final int INVALID_DISPLAY_MODE_ID = -1;
-
     private static final float FLOAT_TOLERANCE = RefreshRateRange.FLOAT_TOLERANCE;
 
     private final Object mLock = new Object();

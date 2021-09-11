@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.eq
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -165,6 +166,22 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.onPanelExpansionChanged(0.6f /* expansion */,
                 true /* tracking */)
         verify(shadeAnimation).animateTo(eq(maxBlur), any())
+    }
+
+    @Test
+    fun onPanelExpansionChanged_respectsMinPanelPullDownFraction() {
+        notificationShadeDepthController.panelPullDownMinFraction = 0.5f
+        notificationShadeDepthController.onPanelExpansionChanged(0.5f /* expansion */,
+                true /* tracking */)
+        assertThat(notificationShadeDepthController.shadeExpansion).isEqualTo(0f)
+
+        notificationShadeDepthController.onPanelExpansionChanged(0.75f /* expansion */,
+                true /* tracking */)
+        assertThat(notificationShadeDepthController.shadeExpansion).isEqualTo(0.5f)
+
+        notificationShadeDepthController.onPanelExpansionChanged(1f /* expansion */,
+                true /* tracking */)
+        assertThat(notificationShadeDepthController.shadeExpansion).isEqualTo(1f)
     }
 
     @Test

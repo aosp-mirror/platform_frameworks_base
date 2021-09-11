@@ -43,7 +43,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.time.Instant;
@@ -323,9 +322,8 @@ class RollbackStore {
                     "extensionVersions", extensionVersionsToJson(rollback.getExtensionVersions()));
 
             fos = file.startWrite();
-            PrintWriter pw = new PrintWriter(fos);
-            pw.println(dataJson.toString());
-            pw.close();
+            fos.write(dataJson.toString().getBytes());
+            fos.flush();
             file.finishWrite(fos);
         } catch (JSONException | IOException e) {
             Slog.e(TAG, "Unable to save rollback for: " + rollback.info.getRollbackId(), e);

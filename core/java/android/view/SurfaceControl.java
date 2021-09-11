@@ -1820,11 +1820,6 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final class DisplayMode {
-        /**
-         * Invalid display config id.
-         */
-        public static final int INVALID_DISPLAY_MODE_ID = -1;
-
         public int id;
         public int width;
         public int height;

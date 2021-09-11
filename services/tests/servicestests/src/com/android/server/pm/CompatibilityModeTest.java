@@ -35,7 +35,7 @@ import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,13 +44,13 @@ import org.junit.Test;
 public class CompatibilityModeTest {
 
     private boolean mCompatibilityModeEnabled;;
-    private AndroidPackage mMockAndroidPackage;
+    private PackageImpl mMockAndroidPackage;
     private PackageUserState mMockUserState;
 
     @Before
     public void setUp() {
         mCompatibilityModeEnabled = ParsingPackageUtils.sCompatibilityModeEnabled;
-        mMockAndroidPackage = mock(AndroidPackage.class);
+        mMockAndroidPackage = mock(PackageImpl.class);
         mMockUserState = mock(PackageUserState.class);
         mMockUserState.installed = true;
         when(mMockUserState.isAvailable(anyInt())).thenReturn(true);

@@ -1113,6 +1113,44 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the default display mode, according to the refresh rate and the resolution chosen by the
+     * user.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setUserPreferredDisplayMode(@NonNull Display.Mode mode) {
+        // Create a new object containing default values for the unused fields like mode ID and
+        // alternative refresh rates.
+        Display.Mode preferredMode = new Display.Mode(mode.getPhysicalWidth(),
+                mode.getPhysicalHeight(), mode.getRefreshRate());
+        mGlobal.setUserPreferredDisplayMode(preferredMode);
+    }
+
+    /**
+     * Removes the user preferred display mode.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void clearUserPreferredDisplayMode() {
+        mGlobal.setUserPreferredDisplayMode(null);
+    }
+
+    /**
+     * Returns the user preferred display mode.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Display.Mode getUserPreferredDisplayMode() {
+        return mGlobal.getUserPreferredDisplayMode();
+    }
+
+    /**
      * When enabled the app requested mode is always selected regardless of user settings and
      * policies for low brightness, low battery, etc.
      *

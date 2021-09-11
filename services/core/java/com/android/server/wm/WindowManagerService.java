@@ -46,6 +46,8 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_270;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -153,6 +155,7 @@ import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -162,6 +165,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.TestUtilityService;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -323,11 +327,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -630,7 +636,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
 
-    AccessibilityController mAccessibilityController;
+    final AccessibilityController mAccessibilityController;
     private RecentsAnimationController mRecentsAnimationController;
 
     Watermark mWatermark;
@@ -1376,6 +1382,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mStartingSurfaceController = new StartingSurfaceController(this);
 
         mBlurController = new BlurController(mContext, mPowerManager);
+        mAccessibilityController = new AccessibilityController(this);
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
@@ -2155,7 +2162,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mWindowPlacerLocked.performSurfacePlacement();
 
                     // We need to report touchable region changes to accessibility.
-                    if (mAccessibilityController != null) {
+                    if (mAccessibilityController.hasCallbacks()) {
                         mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
                                 uid, w.getDisplayContent().getDisplayId());
                     }
@@ -2168,7 +2175,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized (mGlobalLock) {
-            if (mAccessibilityController != null) {
+            if (mAccessibilityController.hasCallbacks()) {
                 WindowState window = mWindowMap.get(token);
                 if (window != null) {
                     mAccessibilityController.onRectangleOnScreenRequested(
@@ -2258,7 +2265,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mActivityRecord.checkKeyguardFlagsChanged();
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
-                        && (mAccessibilityController != null)) {
+                        && (mAccessibilityController.hasCallbacks())) {
                     // No move or resize, but the controller checks for title changes as well
                     mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
                             uid, win.getDisplayContent().getDisplayId());
@@ -2580,7 +2587,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mDestroying = true;
             win.destroySurface(false, stopped);
         }
-        if (mAccessibilityController != null) {
+        if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
         }
 
@@ -6370,7 +6377,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
-        if (mAccessibilityController != null) {
+        if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.dump(pw, "  ");
         }
 
@@ -7390,7 +7397,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void setMagnificationSpec(int displayId, MagnificationSpec spec) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.setMagnificationSpec(displayId, spec);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7401,7 +7408,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void setForceShowMagnifiableBounds(int displayId, boolean show) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.setForceShowMagnifiableBounds(displayId, show);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7412,7 +7419,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     mAccessibilityController.getMagnificationRegion(displayId, magnificationRegion);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
@@ -7428,7 +7435,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
                 MagnificationSpec spec = null;
-                if (mAccessibilityController != null) {
+                if (mAccessibilityController.hasCallbacks()) {
                     spec = mAccessibilityController.getMagnificationSpecForWindow(windowState);
                 }
                 if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
@@ -7447,16 +7454,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public boolean setMagnificationCallbacks(int displayId,
                 @Nullable MagnificationCallbacks callbacks) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController == null) {
-                    mAccessibilityController = new AccessibilityController(
-                            WindowManagerService.this);
-                }
-                boolean result = mAccessibilityController.setMagnificationCallbacks(
-                        displayId, callbacks);
-                if (!mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController = null;
-                }
-                return result;
+                return mAccessibilityController.setMagnificationCallbacks(displayId, callbacks);
             }
         }
 
@@ -7464,15 +7462,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void setWindowsForAccessibilityCallback(int displayId,
                 WindowsForAccessibilityCallback callback) {
             synchronized (mGlobalLock) {
-                if (mAccessibilityController == null) {
-                    mAccessibilityController = new AccessibilityController(
-                            WindowManagerService.this);
-                }
-                mAccessibilityController.setWindowsForAccessibilityCallback(
-                        displayId, callback);
-                if (!mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController = null;
-                }
+                mAccessibilityController.setWindowsForAccessibilityCallback(displayId, callback);
             }
         }
 
@@ -7645,13 +7635,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void computeWindowsForAccessibility(int displayId) {
-            final AccessibilityController accessibilityController;
-            synchronized (mGlobalLock) {
-                accessibilityController = mAccessibilityController;
-            }
-            if (accessibilityController != null) {
-                accessibilityController.performComputeChangedWindowsNot(displayId, true);
-            }
+            mAccessibilityController.performComputeChangedWindowsNot(displayId, true);
         }
 
         @Override
@@ -8451,6 +8435,65 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (packageName == null || !isRecentsComponent(packageName, callingUid)) {
+                    Slog.e(TAG, "Unable to verify uid for package " + packageName
+                            + " for getPossibleMaximumWindowMetrics");
+                    return new ArrayList<>();
+                }
+                // TODO(181127261) DisplayInfo should be pushed from DisplayManager.
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.e(TAG, "Invalid displayId " + displayId
+                            + " for getPossibleMaximumWindowMetrics");
+                    return new ArrayList<>();
+                }
+
+                // TODO(181127261) DisplayManager should provide a DisplayInfo for each rotation
+                DisplayInfo currentDisplayInfo = dc.getDisplayInfo();
+                Set<DisplayInfo> displayInfoSet = new HashSet<>();
+                for (int rotation = ROTATION_0; rotation <= ROTATION_270; rotation++) {
+                    currentDisplayInfo.rotation = rotation;
+                    // TODO(181127261) Retrieve the device state from display stack.
+                    displayInfoSet.add(new DisplayInfo(currentDisplayInfo));
+                }
+                return new ArrayList<DisplayInfo>(displayInfoSet);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Returns {@code true} when the calling package is the recents component.
+     */
+    boolean isRecentsComponent(@NonNull String callingPackageName, int callingUid) {
+        String recentsPackage;
+        try {
+            String recentsComponent = mContext.getResources().getString(
+                    R.string.config_recentsComponentName);
+            if (recentsComponent == null) {
+                return false;
+            }
+            recentsPackage = ComponentName.unflattenFromString(recentsComponent).getPackageName();
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Unable to verify if recents component", e);
+            return false;
+        }
+        try {
+            return callingUid == mContext.getPackageManager().getPackageUid(callingPackageName, 0)
+                    && callingPackageName.equals(recentsPackage);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Unable to verify if recents component", e);
+            return false;
         }
     }
 

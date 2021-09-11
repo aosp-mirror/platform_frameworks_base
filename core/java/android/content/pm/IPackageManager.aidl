@@ -818,4 +818,6 @@ interface IPackageManager {
     ParceledListSlice queryProperty(String propertyName, int componentType);
 
     void setKeepUninstalledPackages(in List<String> packageList);
+
+    boolean mayPackageQuery(String sourcePackageName, String targetPackageName, int userId);
 }

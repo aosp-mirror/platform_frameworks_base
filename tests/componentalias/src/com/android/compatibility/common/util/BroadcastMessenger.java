@@ -57,6 +57,8 @@ public final class BroadcastMessenger {
     private static final String EXTRA_SENT_TIME =
             "com.android.compatibility.common.util.BroadcastMessenger.EXTRA_SENT_TIME";
 
+    public static final int DEFAULT_TIMEOUT_MS = 10_000;
+
     private static long getCurrentTime() {
         return SystemClock.uptimeMillis();
     }
@@ -161,7 +163,7 @@ public final class BroadcastMessenger {
          */
         @NonNull
         public T waitForNextMessage() {
-            return waitForNextMessage(60_000);
+            return waitForNextMessage(DEFAULT_TIMEOUT_MS);
         }
 
         /**
