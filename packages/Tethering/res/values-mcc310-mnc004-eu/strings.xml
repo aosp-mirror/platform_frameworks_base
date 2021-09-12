@@ -20,5 +20,5 @@
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"Ezin dira konektatu gailuak"</string>
     <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Desaktibatu konexioa partekatzeko aukera"</string>
     <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Wifi-gunea edo konexioa partekatzeko aukera aktibatuta dago"</string>
-    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Baliteke kostu gehigarriak ordaindu behar izatea ibiltaritzan"</string>
+    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Baliteke beste zerbait ordaindu behar izatea ibiltaritzan"</string>
 </resources>
