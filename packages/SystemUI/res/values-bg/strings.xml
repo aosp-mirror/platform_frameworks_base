@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват микрофона ви."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват камерата ви."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват камерата или микрофона ви."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Устройство"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Друго устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Превключване на общия преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Заредена"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Зарежда се"</string>

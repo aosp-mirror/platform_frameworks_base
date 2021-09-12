@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ይህ የእርስዎን ማይክሮፎን እንዲጠቀሙ የተፈቀደላቸው የሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻ እገዳን ያነሳል።"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ይህ ካሜራዎን እንዲጠቀሙ ለተፈቀደላቸው ሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻን እገዳ ያነሳል።"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ይህ የእርስዎን ካሜራ ወይም ማይክሮፎን እንዲጠቀሙ የተፈቀደላቸው የሁሉም መተግበሪያዎች እና አገልግሎቶች መዳረሻ እገዳን ያነሳል።"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"መሣሪያ"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"ሌላ መሣሪያ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"አጠቃላይ እይታን ቀያይር"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ባትሪ ሞልቷል"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"ኃይል በመሙላት ላይ"</string>
@@ -1165,8 +1165,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ተገናኝቷል"</string>
-    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"የተንቀሳቃሽ ስልክ ውሂብ በራስ-ሰር አይገናኝም"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ግንኙነት የለም"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ሌላ አውታረ መረብ የሉም"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"ምንም አውታረ መረቦች የሉም"</string>

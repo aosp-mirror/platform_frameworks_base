@@ -439,7 +439,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование микрофона."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры или микрофона."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Устройство"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Другое устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Переключить режим обзора"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Батарея заряжена"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Зарядка батареи"</string>
