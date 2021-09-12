@@ -29,7 +29,14 @@ import com.android.internal.util.StatLogger;
 
 import java.util.Map;
 
-/** @hide */
+/**
+ * Manage binder services as registered with the binder context manager. These services must be
+ * declared statically on an Android device (SELinux access_vector service_manager, w/ service
+ * names in service_contexts files), and they do not follow the activity lifecycle. When
+ * building applications, android.app.Service should be preferred.
+ *
+ * @hide
+ **/
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class ServiceManager {
     private static final String TAG = "ServiceManager";

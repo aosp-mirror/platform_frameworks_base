@@ -102,6 +102,7 @@ import android.os.Environment;
 import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
+import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -172,6 +173,7 @@ import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
+import java.util.concurrent.ExecutionException;
 import libcore.io.IoUtils;
 
 import org.json.JSONArray;
@@ -1731,22 +1733,47 @@ public class StatsPullAtomService extends SystemService {
     int pullModemActivityInfoLocked(int atomTag, List<StatsEvent> pulledData) {
         long token = Binder.clearCallingIdentity();
         try {
-            SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
-            mTelephony.requestModemActivityInfo(modemReceiver);
-            final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
+            CompletableFuture<ModemActivityInfo> modemFuture = new CompletableFuture<>();
+            mTelephony.requestModemActivityInfo(Runnable::run,
+                    new OutcomeReceiver<ModemActivityInfo,
+                            TelephonyManager.ModemActivityInfoException>() {
+                        @Override
+                        public void onResult(ModemActivityInfo result) {
+                            modemFuture.complete(result);
+                        }
+
+                        @Override
+                        public void onError(TelephonyManager.ModemActivityInfoException e) {
+                            Slog.w(TAG, "error reading modem stats:" + e);
+                            modemFuture.complete(null);
+                        }
+                    });
+
+            ModemActivityInfo modemInfo;
+            try {
+                modemInfo = modemFuture.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                        TimeUnit.MILLISECONDS);
+            } catch (TimeoutException | InterruptedException e) {
+                Slog.w(TAG, "timeout or interrupt reading modem stats: " + e);
+                return StatsManager.PULL_SKIP;
+            } catch (ExecutionException e) {
+                Slog.w(TAG, "exception reading modem stats: " + e.getCause());
+                return StatsManager.PULL_SKIP;
+            }
+
             if (modemInfo == null) {
                 return StatsManager.PULL_SKIP;
             }
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeLong(modemInfo.getTimestamp())
+                    .writeLong(modemInfo.getTimestampMillis())
                     .writeLong(modemInfo.getSleepTimeMillis())
                     .writeLong(modemInfo.getIdleTimeMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(0))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(1))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(2))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(3))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(4))
                     .writeLong(modemInfo.getReceiveTimeMillis())
                     .build();
             pulledData.add(e);
