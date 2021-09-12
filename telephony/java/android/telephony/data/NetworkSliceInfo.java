@@ -19,8 +19,6 @@ package android.telephony.data;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -35,10 +33,7 @@ import java.util.Objects;
  * SliceServiceType defines the type of service provided by the slice, and SliceDifferentiator is
  * used to differentiate between multiple slices of the same type. If the devices is not on HPLMN,
  * the mappedHplmn versions of these 2 fields indicate the corresponding values in HPLMN.
- *
- * @hide
  */
-@SystemApi
 public final class NetworkSliceInfo implements Parcelable {
     /**
      * When set on a Slice Differentiator, this value indicates that there is no corresponding
@@ -68,14 +63,14 @@ public final class NetworkSliceInfo implements Parcelable {
 
     /**
      * The min acceptable value for a Slice Differentiator
+     * @hide
      */
-    @SuppressLint("MinMaxConstant")
     public static final int MIN_SLICE_DIFFERENTIATOR = -1;
 
     /**
      * The max acceptable value for a Slice Differentiator
+     * @hide
      */
-    @SuppressLint("MinMaxConstant")
     public static final int MAX_SLICE_DIFFERENTIATOR = 0xFFFFFE;
 
     /** @hide */
@@ -88,6 +83,62 @@ public final class NetworkSliceInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceServiceType {}
 
+    /**
+     * The slice status is unknown. This can happen during IWLAN->cellular handover when the
+     * NetworkSliceInfo is received over IWLAN.
+     */
+    public static final int SLICE_STATUS_UNKNOWN = 0;
+
+    /**
+     * The slice is configured but not allowed or rejected yet.
+     */
+    public static final int SLICE_STATUS_CONFIGURED = 1;
+
+    /**
+     * The slice is allowed to be used.
+     */
+    public static final int SLICE_STATUS_ALLOWED = 2;
+
+    /**
+     * The slice is rejected because not available in PLMN.
+     */
+    public static final int SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_PLMN = 3;
+
+    /**
+     * The slice is rejected because not available in registered area.
+     */
+    public static final int SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_REGISTERED_AREA = 4;
+
+    /**
+     * The slice is configured by home operator(HPLMN) in default and is used if configured/allowed
+     * slices are not available for the serving PLMN.
+     */
+    public static final int SLICE_STATUS_DEFAULT_CONFIGURED = 5;
+
+    /**
+     * The min acceptable value for a slice status.
+     * @hide
+     */
+    public static final int MIN_SLICE_STATUS = SLICE_STATUS_UNKNOWN;
+
+    /**
+     * The max acceptable value for a slice status.
+     * @hide
+     */
+    public static final int MAX_SLICE_STATUS = SLICE_STATUS_DEFAULT_CONFIGURED;
+
+    /** @hide */
+    @IntDef(prefix = { "SLICE_STATUS_" }, value = {
+            SLICE_STATUS_UNKNOWN,
+            SLICE_STATUS_CONFIGURED,
+            SLICE_STATUS_ALLOWED,
+            SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_PLMN,
+            SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_REGISTERED_AREA,
+            SLICE_STATUS_DEFAULT_CONFIGURED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SliceStatus {}
+
 
     @SliceServiceType
     private final int mSliceServiceType;
@@ -97,14 +148,18 @@ public final class NetworkSliceInfo implements Parcelable {
     private final int mMappedHplmnSliceServiceType;
     @IntRange(from = MIN_SLICE_DIFFERENTIATOR, to = MAX_SLICE_DIFFERENTIATOR)
     private final int mMappedHplmnSliceDifferentiator;
+    @SliceStatus
+    @IntRange(from = MIN_SLICE_STATUS, to = MAX_SLICE_STATUS)
+    private final int mStatus;
 
     private NetworkSliceInfo(@SliceServiceType int sliceServiceType,
             int sliceDifferentiator, int mappedHplmnSliceServiceType,
-            int mappedHplmnSliceDifferentiator) {
+            int mappedHplmnSliceDifferentiator, int status) {
         mSliceServiceType = sliceServiceType;
         mSliceDifferentiator = sliceDifferentiator;
         mMappedHplmnSliceDifferentiator = mappedHplmnSliceDifferentiator;
         mMappedHplmnSliceServiceType = mappedHplmnSliceServiceType;
+        mStatus = status;
     }
 
     /**
@@ -157,11 +212,21 @@ public final class NetworkSliceInfo implements Parcelable {
         return mMappedHplmnSliceDifferentiator;
     }
 
+    /**
+     * Field to indicate the current status of the slice.
+     * @return the current status for this slice info.
+     */
+    @SliceStatus
+    public int getStatus() {
+        return mStatus;
+    }
+
     private NetworkSliceInfo(@NonNull Parcel in) {
         mSliceServiceType = in.readInt();
         mSliceDifferentiator = in.readInt();
         mMappedHplmnSliceServiceType = in.readInt();
         mMappedHplmnSliceDifferentiator = in.readInt();
+        mStatus = in.readInt();
     }
 
     @Override
@@ -175,6 +240,7 @@ public final class NetworkSliceInfo implements Parcelable {
         dest.writeInt(mSliceDifferentiator);
         dest.writeInt(mMappedHplmnSliceServiceType);
         dest.writeInt(mMappedHplmnSliceDifferentiator);
+        dest.writeInt(mStatus);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<NetworkSliceInfo> CREATOR =
@@ -200,6 +266,7 @@ public final class NetworkSliceInfo implements Parcelable {
                 + ", mMappedHplmnSliceServiceType="
                 + sliceServiceTypeToString(mMappedHplmnSliceServiceType)
                 + ", mMappedHplmnSliceDifferentiator=" + mMappedHplmnSliceDifferentiator
+                + ", mStatus=" + sliceStatusToString(mStatus)
                 + '}';
     }
 
@@ -218,6 +285,25 @@ public final class NetworkSliceInfo implements Parcelable {
         }
     }
 
+    private static String sliceStatusToString(@SliceStatus int sliceStatus) {
+        switch(sliceStatus) {
+            case SLICE_STATUS_UNKNOWN:
+                return "UNKNOWN";
+            case SLICE_STATUS_CONFIGURED:
+                return "CONFIGURED";
+            case SLICE_STATUS_ALLOWED:
+                return "ALLOWED";
+            case SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_PLMN:
+                return "REJECTED_NOT_AVAILABLE_IN_PLMN";
+            case SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_REGISTERED_AREA:
+                return "REJECTED_NOT_AVAILABLE_IN_REGISTERED_AREA";
+            case SLICE_STATUS_DEFAULT_CONFIGURED:
+                return "DEFAULT_CONFIGURED";
+            default:
+                return Integer.toString(sliceStatus);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -226,13 +312,14 @@ public final class NetworkSliceInfo implements Parcelable {
         return mSliceServiceType == sliceInfo.mSliceServiceType
                 && mSliceDifferentiator == sliceInfo.mSliceDifferentiator
                 && mMappedHplmnSliceServiceType == sliceInfo.mMappedHplmnSliceServiceType
-                && mMappedHplmnSliceDifferentiator == sliceInfo.mMappedHplmnSliceDifferentiator;
+                && mMappedHplmnSliceDifferentiator == sliceInfo.mMappedHplmnSliceDifferentiator
+                && mStatus == sliceInfo.mStatus;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mSliceServiceType, mSliceDifferentiator, mMappedHplmnSliceServiceType,
-                mMappedHplmnSliceDifferentiator);
+                mMappedHplmnSliceDifferentiator, mStatus);
     }
 
     /**
@@ -257,6 +344,9 @@ public final class NetworkSliceInfo implements Parcelable {
         private int mMappedHplmnSliceServiceType = SLICE_SERVICE_TYPE_NONE;
         @IntRange(from = MIN_SLICE_DIFFERENTIATOR, to = MAX_SLICE_DIFFERENTIATOR)
         private int mMappedHplmnSliceDifferentiator = SLICE_DIFFERENTIATOR_NO_SLICE;
+        @SliceStatus
+        @IntRange(from = MIN_SLICE_STATUS, to = MAX_SLICE_STATUS)
+        private int mStatus = SLICE_STATUS_UNKNOWN;
 
         /**
          * Default constructor for Builder.
@@ -281,8 +371,7 @@ public final class NetworkSliceInfo implements Parcelable {
          * A value of {@link #SLICE_DIFFERENTIATOR_NO_SLICE} indicates that there is no
          * corresponding Slice.
          *
-         * @throws IllegalArgumentException if the parameter is not between
-         * {@link #MIN_SLICE_DIFFERENTIATOR} and {@link #MAX_SLICE_DIFFERENTIATOR}.
+         * @throws IllegalArgumentException if the parameter is not in the expected range.
          *
          * @return The same instance of the builder.
          */
@@ -316,8 +405,7 @@ public final class NetworkSliceInfo implements Parcelable {
          * A value of {@link #SLICE_DIFFERENTIATOR_NO_SLICE} indicates that there is no
          * corresponding Slice of the HPLMN.
          *
-         * @throws IllegalArgumentException if the parameter is not between
-         * {@link #MIN_SLICE_DIFFERENTIATOR} and {@link #MAX_SLICE_DIFFERENTIATOR}.
+         * @throws IllegalArgumentException if the parameter is not in the expected range.
          *
          * @return The same instance of the builder.
          */
@@ -334,6 +422,22 @@ public final class NetworkSliceInfo implements Parcelable {
         }
 
         /**
+         * Set the slice status.
+         *
+         * @throws IllegalArgumentException if the status is invalid.
+         *
+         * @return The same instance of the builder.
+         */
+        @NonNull
+        public Builder setStatus(@SliceStatus int status) {
+            if (status < MIN_SLICE_STATUS || status > MAX_SLICE_STATUS) {
+                throw new IllegalArgumentException("The slice status is not valid");
+            }
+            this.mStatus = status;
+            return this;
+        }
+
+        /**
          * Build the {@link NetworkSliceInfo}.
          *
          * @return the {@link NetworkSliceInfo} object.
@@ -341,7 +445,8 @@ public final class NetworkSliceInfo implements Parcelable {
         @NonNull
         public NetworkSliceInfo build() {
             return new NetworkSliceInfo(this.mSliceServiceType, this.mSliceDifferentiator,
-                    this.mMappedHplmnSliceServiceType, this.mMappedHplmnSliceDifferentiator);
+                    this.mMappedHplmnSliceServiceType, this.mMappedHplmnSliceDifferentiator,
+                    this.mStatus);
         }
     }
 }

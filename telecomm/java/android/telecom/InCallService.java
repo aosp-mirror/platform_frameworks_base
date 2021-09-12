@@ -81,7 +81,8 @@ import java.util.List;
  * <pre>
  * {@code
  * <service android:name="your.package.YourInCallServiceImplementation"
- *          android:permission="android.permission.BIND_INCALL_SERVICE">
+ *          android:permission="android.permission.BIND_INCALL_SERVICE"
+ *          android:exported="true">
  *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" />
  *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_RINGING"
  *          android:value="true" />
@@ -91,6 +92,10 @@ import java.util.List;
  * </service>
  * }
  * </pre>
+ *
+ * <em>Note: You should NOT mark your {@link InCallService} with the attribute
+ * {@code android:exported="false"}; doing so can result in a failure to bind to your implementation
+ * during calls.</em>
  * <p>
  * In addition to implementing the {@link InCallService} API, you must also declare an activity in
  * your manifest which handles the {@link Intent#ACTION_DIAL} intent.  The example below illustrates
