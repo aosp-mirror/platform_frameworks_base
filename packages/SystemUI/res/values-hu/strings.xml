@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a mikrofon használatát."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera használatát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera vagy a mikrofon használatát."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Eszköz"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Más eszköz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Áttekintés be- és kikapcsolása"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Feltöltve"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Töltés"</string>
