@@ -537,7 +537,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"तो वापरकर्ता डिव्हाइसजवळ आहे आणि त्याचे स्थान सेट करण्यासाठी उपलब्ध आहे याची खात्री करा"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"आता प्रोफाईल सेट करायचा?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"आता सेट करा"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"आत्ता नाही"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"आता नको"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"जोडा"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"नवीन वापरकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नवीन प्रोफाईल"</string>
