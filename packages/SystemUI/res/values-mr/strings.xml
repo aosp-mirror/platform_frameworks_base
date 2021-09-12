@@ -257,7 +257,7 @@
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"बबल डिसमिस केला."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"द्रुत सेटिंग्ज."</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"क्विक सेटिंग्ज."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"सेटिंग्ज"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"अवलोकन."</string>
@@ -644,7 +644,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"द्रुत सेटिंग्ज"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"क्विक सेटिंग्ज"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्टेटस बार"</string>
     <string name="overview" msgid="3522318590458536816">"अवलोकन"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI डेमो मोड"</string>
