@@ -596,7 +596,7 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"Desativar agora"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Configurações de som"</string>
-    <string name="accessibility_volume_expand" msgid="7653070939304433603">"Expandir"</string>
+    <string name="accessibility_volume_expand" msgid="7653070939304433603">"Abrir"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Recolher"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Transcrição automática"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Dica de legenda"</string>
