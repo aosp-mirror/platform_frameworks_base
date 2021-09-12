@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre micro."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre appareil photo."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Cette action débloque l\'accès pour tous les services et applis autorisés à utiliser votre appareil photo ou votre micro."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Appareil"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Chargé"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"En charge"</string>
@@ -1179,4 +1179,6 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> veut ajouter le bloc suivant aux Réglages rapides"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ajouter un bloc"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter bloc"</string>
+    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
+    <skip />
 </resources>

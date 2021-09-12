@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin mikrofonin tënd."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin kamerën tënde."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin kamerën ose mikrofonin tënd."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Pajisja"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Pajisje tjetër"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kalo te përmbledhja"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"I karikuar"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Po karikohet"</string>
@@ -1165,8 +1165,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Të dhënat celulare"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Lidhur"</string>
-    <!-- no translation found for mobile_data_off_summary (3663995422004150567) -->
-    <skip />
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Të dhënat celulare nuk do të lidhen automatikisht"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nuk ka lidhje"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nuk ofrohet asnjë rrjet tjetër"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nuk ofrohet asnjë rrjet"</string>
@@ -1180,4 +1179,6 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> dëshiron të shtojë pllakëzën e mëposhtme te \"Cilësimet e shpejta\""</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Shto një pllakëz"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Mos e shto pllakëzën"</string>
+    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
+    <skip />
 </resources>
