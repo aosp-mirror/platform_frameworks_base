@@ -272,9 +272,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Tillad, at startindlæseren låses op"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vil du tillade OEM-oplåsning?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ADVARSEL! Funktioner, der beskytter enheden, fungerer ikke på denne enhed, når denne indstilling er aktiveret."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Vælg app til falsk placering"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Der er ikke angivet nogen app til falsk placering"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"App til falsk placering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Vælg app til falsk lokation"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Der er ikke angivet nogen app til falsk lokation"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"App til falsk lokation: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Netværk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivér detaljeret Wi-Fi-logføring"</string>
@@ -322,8 +322,8 @@
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Vælg logbuffere, der skal gemmes permanent på enheden"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Vælg USB-konfiguration"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Vælg USB-konfiguration"</string>
-    <string name="allow_mock_location" msgid="2102650981552527884">"Imiterede placeringer"</string>
-    <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillad imiterede placeringer"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"Imiterede lokationer"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillad imiterede lokationer"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktivér visning af attributinspektion"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Hold altid mobildata aktiveret, selv når Wi-Fi er aktiveret (for at skifte hurtigt mellem netværk)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
@@ -359,7 +359,7 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Overvågning"</string>
     <string name="strict_mode" msgid="889864762140862437">"Striks tilstand aktiveret"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Blink med skærmen, når apps foretager handlinger på hovedtråd"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"Markørens placering"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Markørens lokation"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Skærmoverlejringen viser de aktuelle berøringsdata"</string>
     <string name="show_touches" msgid="8437666942161289025">"Vis tryk"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Vis visuel feedback ved tryk"</string>

@@ -305,7 +305,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G datuen erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datu-konexioa pausatu egin da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datuen erabilera pausatu da"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, baliteke zerbait ordaindu behar izatea datuak erabiltzeagatik."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Jarraitu erabiltzen"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS seinalearen bila"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Kokapena GPS bidez ezarri da"</string>
@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera edo mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dituzte."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Gailua"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Beste gailu bat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aldatu ikuspegi orokorra"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Kargatuta"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Kargatzen"</string>
@@ -999,7 +999,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ukatu"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurrezlea noiz aktibatu programatzeko"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurrezlea bateria agortzeko arriskua dagoenean"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Bateria-aurrezlea aktibatu da"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Bateria-aurrezlea automatikoki aktibatuko da bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ezarpenak"</string>
@@ -1179,4 +1179,5 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak lauza hau gehitu nahi du Ezarpen bizkorrak menuan:"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Gehitu lauza"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ez gehitu lauza"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Hautatu erabiltzaile bat"</string>
 </resources>

@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda mikrofonen."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Detta återaktiverar åtkomsten för alla appar och tjänster som tillåts att använda kameran eller mikrofonen."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Enhet"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Annan enhet"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktivera och inaktivera översikten"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Laddar"</string>
@@ -1179,4 +1179,5 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vill lägga till följande ruta i snabbinställningarna"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Lägg till ruta"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Lägg inte till ruta"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Välj användare"</string>
 </resources>

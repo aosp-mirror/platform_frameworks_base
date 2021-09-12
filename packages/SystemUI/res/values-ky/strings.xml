@@ -435,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофонуңузду колдонууга уруксат алган бардык колдонмолор менен кызматтар бөгөттөн чыгат."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераны колдонууга уруксат алган бардык колдонмолор менен кызматтар бөгөттөн чыгат."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды же микрофонуңузду колдонууга уруксат алган бардык колдонмолор менен кызматтар бөгөттөн чыгат."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Түзмөк"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Башка түзмөк"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Назар режимин өчүрүү/күйгүзүү"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Кубатталды"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Кубатталууда"</string>
@@ -1179,4 +1179,5 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> төмөнкү ыкчам баскычты Ыкчам жөндөөлөргө кошкону жатат"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ыкчам баскыч кошуу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ыкчам баскыч кошулбасын"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Колдонуучуну тандоо"</string>
 </resources>

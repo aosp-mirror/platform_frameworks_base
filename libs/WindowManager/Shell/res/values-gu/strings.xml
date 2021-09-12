@@ -61,7 +61,7 @@
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> સેટિંગ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"બબલને છોડી દો"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"વાતચીતને બબલ કરશો નહીં"</string>
-    <string name="bubbles_user_education_title" msgid="2112319053732691899">"બબલનો ઉપયોગ કરીને ચેટ કરો"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"બબલનો ઉપયોગ કરીને ચૅટ કરો"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"નવી વાતચીત ફ્લોટિંગ આઇકન અથવા બબલ જેવી દેખાશે. બબલને ખોલવા માટે ટૅપ કરો. તેને ખસેડવા માટે ખેંચો."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"બબલને કોઈપણ સમયે નિયંત્રિત કરો"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"આ ઍપમાંથી બબલને બંધ કરવા માટે મેનેજ કરો પર ટૅપ કરો"</string>
