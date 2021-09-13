@@ -3062,6 +3062,10 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.VOLUME_CONTROL) {
             BluetoothVolumeControl vcs = new BluetoothVolumeControl(context, listener, this);
             return true;
+        } else if (profile == BluetoothProfile.CSIP_SET_COORDINATOR) {
+            BluetoothCsipSetCoordinator csipSetCoordinator =
+                    new BluetoothCsipSetCoordinator(context, listener, this);
+            return true;
         } else {
             return false;
         }
@@ -3158,6 +3162,11 @@ public final class BluetoothAdapter {
             case BluetoothProfile.VOLUME_CONTROL:
                 BluetoothVolumeControl vcs = (BluetoothVolumeControl) proxy;
                 vcs.close();
+                break;
+            case BluetoothProfile.CSIP_SET_COORDINATOR:
+                BluetoothCsipSetCoordinator csipSetCoordinator =
+                        (BluetoothCsipSetCoordinator) proxy;
+                csipSetCoordinator.close();
                 break;
         }
     }
