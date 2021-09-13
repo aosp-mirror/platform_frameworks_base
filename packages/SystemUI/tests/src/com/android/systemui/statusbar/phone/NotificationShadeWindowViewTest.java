@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
@@ -97,6 +98,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    @Mock private LockIconViewController mLockIconViewController;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -142,7 +144,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationPanelViewController,
                 mStatusBarViewFactory,
                 mNotificationStackScrollLayoutController,
-                mStatusBarKeyguardViewManager);
+                mStatusBarKeyguardViewManager,
+                mLockIconViewController);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
