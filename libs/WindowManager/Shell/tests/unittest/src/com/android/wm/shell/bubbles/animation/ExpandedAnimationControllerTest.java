@@ -16,10 +16,12 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static org.mockito.Mockito.when;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
@@ -37,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.BubbleStackView;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -56,18 +59,22 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mStackOffset;
     private PointF mExpansionPoint;
     private BubblePositioner mPositioner;
+    private BubbleStackView.StackViewState mStackViewState;
 
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
+        BubbleStackView stackView = mock(BubbleStackView.class);
+        when(stackView.getState()).thenReturn(getStackViewState());
         mPositioner = new BubblePositioner(getContext(), mock(WindowManager.class));
         mPositioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));
         mExpandedController = new ExpandedAnimationController(mPositioner,
-                mOnBubbleAnimatedOutAction);
+                mOnBubbleAnimatedOutAction,
+                stackView);
         spyOn(mExpandedController);
 
         addOneMoreThanBubbleLimitBubbles();
@@ -76,6 +83,13 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         Resources res = mLayout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mExpansionPoint = new PointF(100, 100);
+    }
+
+    public BubbleStackView.StackViewState getStackViewState() {
+        mStackViewState.numberOfBubbles = mLayout.getChildCount();
+        mStackViewState.selectedIndex = 0;
+        mStackViewState.onLeft = mPositioner.isStackOnLeft(mExpansionPoint);
+        return mStackViewState;
     }
 
     @Test
@@ -141,12 +155,10 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     /** Check that children are in the correct positions for being expanded. */
     private void testBubblesInCorrectExpandedPositions() {
-        boolean onLeft = mPositioner.isStackOnLeft(mExpansionPoint);
         // Check all the visible bubbles to see if they're in the right place.
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             PointF expectedPosition = mPositioner.getExpandedBubbleXY(i,
-                    mLayout.getChildCount(),
-                    onLeft);
+                    getStackViewState());
             assertEquals(expectedPosition.x,
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
