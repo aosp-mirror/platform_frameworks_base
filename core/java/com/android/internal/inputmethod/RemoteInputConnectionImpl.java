@@ -16,6 +16,13 @@
 
 package com.android.internal.inputmethod;
 
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetCursorCapsModeProto;
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetExtractedTextProto;
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetSelectedTextProto;
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetSurroundingTextProto;
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetTextAfterCursorProto;
+import static com.android.internal.inputmethod.InputConnectionProtoDumper.buildGetTextBeforeCursorProto;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -29,20 +36,19 @@ import android.view.View;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.DumpableInputConnection;
-import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.view.IInputContext;
 
 import java.lang.ref.WeakReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -225,21 +231,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getTextAfterCursor", future, () -> {
             final InputConnection ic = getInputConnection();
-            final CharSequence result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
-                result = null;
-            } else {
-                result = ic.getTextAfterCursor(length, flags);
+                return null;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(
-                        length, flags, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getTextAfterCursor", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getTextAfterCursor(length, flags);
+        }, useImeTracing() ? result -> buildGetTextAfterCursorProto(length, flags, result) : null);
     }
 
     @Override
@@ -247,42 +244,24 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getTextBeforeCursor", future, () -> {
             final InputConnection ic = getInputConnection();
-            final CharSequence result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
-                result = null;
-            } else {
-                result = ic.getTextBeforeCursor(length, flags);
+                return null;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(
-                        length, flags, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getTextBeforeCursor", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getTextBeforeCursor(length, flags);
+        }, useImeTracing() ? result -> buildGetTextBeforeCursorProto(length, flags, result) : null);
     }
 
     @Override
     public void getSelectedText(int flags, AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getSelectedText", future, () -> {
             final InputConnection ic = getInputConnection();
-            final CharSequence result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getSelectedText on inactive InputConnection");
-                result = null;
-            } else {
-                result = ic.getSelectedText(flags);
+                return null;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(
-                        flags, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getSelectedText", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getSelectedText(flags);
+        }, useImeTracing() ? result -> buildGetSelectedTextProto(flags, result) : null);
     }
 
     @Override
@@ -290,42 +269,25 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             AndroidFuture future /* T=SurroundingText */) {
         dispatchWithTracing("getSurroundingText", future, () -> {
             final InputConnection ic = getInputConnection();
-            final SurroundingText result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getSurroundingText on inactive InputConnection");
-                result = null;
-            } else {
-                result = ic.getSurroundingText(beforeLength, afterLength, flags);
+                return null;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
-                        beforeLength, afterLength, flags, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getSurroundingText", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getSurroundingText(beforeLength, afterLength, flags);
+        }, useImeTracing() ? result -> buildGetSurroundingTextProto(
+                beforeLength, afterLength, flags, result) : null);
     }
 
     @Override
     public void getCursorCapsMode(int reqModes, AndroidFuture future /* T=Integer */) {
         dispatchWithTracing("getCursorCapsMode", future, () -> {
             final InputConnection ic = getInputConnection();
-            final int result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
-                result = 0;
-            } else {
-                result = ic.getCursorCapsMode(reqModes);
+                return 0;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(
-                        reqModes, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getCursorCapsMode", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getCursorCapsMode(reqModes);
+        }, useImeTracing() ? result -> buildGetCursorCapsModeProto(reqModes, result) : null);
     }
 
     @Override
@@ -333,21 +295,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             AndroidFuture future /* T=ExtractedText */) {
         dispatchWithTracing("getExtractedText", future, () -> {
             final InputConnection ic = getInputConnection();
-            final ExtractedText result;
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getExtractedText on inactive InputConnection");
-                result = null;
-            } else {
-                result = ic.getExtractedText(request, flags);
+                return null;
             }
-            if (ImeTracing.getInstance().isEnabled()) {
-                final byte[] icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(
-                        request, flags, result);
-                ImeTracing.getInstance().triggerClientDump(
-                        TAG + "#getExtractedText", mParentInputMethodManager, icProto);
-            }
-            return result;
-        });
+            return ic.getExtractedText(request, flags);
+        }, useImeTracing() ? result -> buildGetExtractedTextProto(request, flags, result) : null);
     }
 
     @Override
@@ -643,6 +596,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     private <T> void dispatchWithTracing(@NonNull String methodName,
             @NonNull AndroidFuture untypedFuture, @NonNull Supplier<T> supplier) {
+        dispatchWithTracing(methodName, untypedFuture, supplier, null /* dumpProtoProvider */);
+    }
+
+    private <T> void dispatchWithTracing(@NonNull String methodName,
+            @NonNull AndroidFuture untypedFuture, @NonNull Supplier<T> supplier,
+            @Nullable Function<T, byte[]> dumpProtoProvider) {
         @SuppressWarnings("unchecked")
         final AndroidFuture<T> future = untypedFuture;
         dispatchWithTracing(methodName, () -> {
@@ -654,6 +613,15 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 throw throwable;
             }
             future.complete(result);
+            if (dumpProtoProvider != null) {
+                final byte[] icProto = dumpProtoProvider.apply(result);
+                ImeTracing.getInstance().triggerClientDump(
+                        TAG + "#" + methodName, mParentInputMethodManager, icProto);
+            }
         });
+    }
+
+    private static boolean useImeTracing() {
+        return ImeTracing.getInstance().isEnabled();
     }
 }
