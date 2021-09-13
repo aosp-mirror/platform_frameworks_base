@@ -439,7 +439,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Spowoduje to odblokowanie dostępu dla wszystkich aplikacji i usług, które mają uprawnienia do korzystania z mikrofonu."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Spowoduje to odblokowanie dostępu dla wszystkich aplikacji i usług, które mają uprawnienia do korzystania z aparatu."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Spowoduje to odblokowanie dostępu dla wszystkich aplikacji i usług, które mają uprawnienia do korzystania z aparatu lub mikrofonu."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Urządzenie"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Inne urządzenie"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Przełącz Przegląd"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Naładowana"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Ładowanie"</string>
@@ -1191,4 +1191,5 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Aplikacja <xliff:g id="APPNAME">%1$s</xliff:g> chce dodać do Szybkich ustawień ten kafelek"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj kafelek"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nie dodawaj kafelka"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Wybierz użytkownika"</string>
 </resources>
