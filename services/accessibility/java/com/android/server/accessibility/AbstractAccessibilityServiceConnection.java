@@ -976,6 +976,25 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return false;
     }
 
+    @Nullable
+    @Override
+    public MagnificationConfig getMagnificationConfig(int displayId) {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getMagnificationConfig", "displayId=" + displayId);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return null;
+            }
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSystemSupport.getMagnificationProcessor().getMagnificationConfig(displayId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @Override
     public float getMagnificationScale(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1084,12 +1103,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
-            float centerY, boolean animate) {
+    public boolean setMagnificationConfig(int displayId,
+            @NonNull MagnificationConfig config, boolean animate) {
         if (svcConnTracingEnabled()) {
-            logTraceSvcConn("setMagnificationScaleAndCenter",
-                    "displayId=" + displayId + ";scale=" + scale + ";centerX=" + centerX
-                    + ";centerY=" + centerY + ";animate=" + animate);
+            logTraceSvcConn("setMagnificationSpec",
+                    "displayId=" + displayId + ", config=" + config.toString());
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -1102,10 +1120,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             try {
                 MagnificationProcessor magnificationProcessor =
                         mSystemSupport.getMagnificationProcessor();
-                final MagnificationConfig config = new MagnificationConfig.Builder()
-                        .setScale(scale)
-                        .setCenterX(centerX)
-                        .setCenterY(centerY).build();
                 return magnificationProcessor.setMagnificationConfig(displayId, config, animate,
                         mId);
             } finally {

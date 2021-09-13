@@ -681,7 +681,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             } else {
                 getWindowMagnificationMgr().enableWindowMagnification(mDisplayId,
                         mCurrentScale, mCurrentCenter.x,
-                        mCurrentCenter.y);
+                        mCurrentCenter.y, mAnimate ? STUB_ANIMATION_CALLBACK : null);
             }
         }
     }

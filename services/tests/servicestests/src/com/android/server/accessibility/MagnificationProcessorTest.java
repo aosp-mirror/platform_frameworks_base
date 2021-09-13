@@ -282,16 +282,13 @@ public class MagnificationProcessorTest {
     }
 
     @Test
-    public void setMagnificationConfig_fullscreenEnabled_expectedConfigValues() {
+    public void getMagnificationConfig_fullscreenEnabled_expectedConfigValues() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
                 .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
-     //   mMockFullScreenMagnificationController.unregister(TEST_DISPLAY);
-        mMagnificationProcessor.setMagnificationConfig(
-                TEST_DISPLAY, config, true, SERVICE_ID);
 
         final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
                 TEST_DISPLAY);
@@ -300,16 +297,13 @@ public class MagnificationProcessorTest {
     }
 
     @Test
-    public void setMagnificationConfig_windowEnabled_expectedConfigValues() {
+    public void getMagnificationConfig_windowEnabled_expectedConfigValues() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
                 .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
-
-        mMagnificationProcessor.setMagnificationConfig(
-                TEST_DISPLAY, config, true, SERVICE_ID);
 
         final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
                 TEST_DISPLAY);
@@ -455,6 +449,9 @@ public class MagnificationProcessorTest {
             doAnswer(enableWindowMagnificationStubAnswer).when(
                     mWindowMagnificationManager).enableWindowMagnification(eq(TEST_DISPLAY),
                     anyFloat(), anyFloat(), anyFloat());
+            doAnswer(enableWindowMagnificationStubAnswer).when(
+                    mWindowMagnificationManager).enableWindowMagnification(eq(TEST_DISPLAY),
+                    anyFloat(), anyFloat(), anyFloat(), any());
         }
 
         public void resetAndStubMethods() {

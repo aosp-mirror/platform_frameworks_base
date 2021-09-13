@@ -21,6 +21,7 @@ import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MOD
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
@@ -112,7 +113,8 @@ public class MagnificationProcessor {
                     animate, id);
         } else if (configMode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().enableWindowMagnification(displayId,
-                    config.getScale(), config.getCenterX(), config.getCenterY());
+                    config.getScale(), config.getCenterX(), config.getCenterY(),
+                    animate ? STUB_ANIMATION_CALLBACK : null);
         }
         return false;
     }
