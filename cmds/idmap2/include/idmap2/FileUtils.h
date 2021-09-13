@@ -17,6 +17,8 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
 #define IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
 
+#include <sys/types.h>
+
 #include <string>
 
 namespace android::idmap2::utils {
