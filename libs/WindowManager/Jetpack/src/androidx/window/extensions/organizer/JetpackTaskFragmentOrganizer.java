@@ -210,17 +210,17 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
     void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder primary, @Nullable IBinder secondary, @Nullable SplitRule splitRule) {
-        WindowContainerTransaction.TaskFragmentAdjacentOptions adjacentOptions = null;
+        WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams = null;
         final boolean finishSecondaryWithPrimary =
                 splitRule != null && SplitContainer.shouldFinishSecondaryWithPrimary(splitRule);
         final boolean finishPrimaryWithSecondary =
                 splitRule != null && SplitContainer.shouldFinishPrimaryWithSecondary(splitRule);
         if (finishSecondaryWithPrimary || finishPrimaryWithSecondary) {
-            adjacentOptions = new WindowContainerTransaction.TaskFragmentAdjacentOptions();
-            adjacentOptions.setDelayPrimaryLastActivityRemoval(finishSecondaryWithPrimary);
-            adjacentOptions.setDelaySecondaryLastActivityRemoval(finishPrimaryWithSecondary);
+            adjacentParams = new WindowContainerTransaction.TaskFragmentAdjacentParams();
+            adjacentParams.setShouldDelayPrimaryLastActivityRemoval(finishSecondaryWithPrimary);
+            adjacentParams.setShouldDelaySecondaryLastActivityRemoval(finishPrimaryWithSecondary);
         }
-        wct.setAdjacentTaskFragments(primary, secondary, adjacentOptions);
+        wct.setAdjacentTaskFragments(primary, secondary, adjacentParams);
     }
 
     TaskFragmentCreationParams createFragmentOptions(IBinder fragmentToken, IBinder ownerToken,
