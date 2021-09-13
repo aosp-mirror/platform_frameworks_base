@@ -1221,7 +1221,8 @@
     <attr name="isFeatureSplit" format="boolean" />
 
     <!-- Flag to specify if this APK requires at least one split [either feature or
-         resource] to be present in order to function. Default value is false. -->
+         resource] to be present in order to function. Default value is false.
+         @deprecated Use {@link android.R.attr#requiredSplitTypes} instead. -->
     <attr name="isSplitRequired" format="boolean" />
 
     <!-- List of split types required by this APK to be present in order to function properly,
