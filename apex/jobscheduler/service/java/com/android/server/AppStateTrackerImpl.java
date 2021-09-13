@@ -621,10 +621,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
             mBackgroundRestrictedUidPackages = Collections.emptySet();
             return;
         }
-        if (mForceAllAppsStandby) {
-            mBackgroundRestrictedUidPackages = null;
-            return;
-        }
         Set<Pair<Integer, String>> fasUidPkgs = new ArraySet<>();
         for (int i = 0, size = mRunAnyRestrictedPackages.size(); i < size; i++) {
             fasUidPkgs.add(mRunAnyRestrictedPackages.valueAt(i));
