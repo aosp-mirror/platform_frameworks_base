@@ -142,4 +142,8 @@
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
+
+    <style name="TextAppearance.Keyguard.BottomArea.Button">
+        <item name="android:shadowRadius">0</item>
+    </style>
 </resources>
