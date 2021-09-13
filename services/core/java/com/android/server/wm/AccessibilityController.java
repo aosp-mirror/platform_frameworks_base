@@ -1590,7 +1590,7 @@ final class AccessibilityController {
                 boolean focusedWindowAdded = false;
 
                 final int visibleWindowCount = visibleWindows.size();
-                HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments = new ArrayList<>();
 
                 ArrayList<ShellRoot> shellRoots = getSortedShellRoots(dc.mShellRoots);
 
@@ -1612,10 +1612,10 @@ final class AccessibilityController {
                     computeWindowRegionInScreen(windowState, regionInScreen);
 
                     if (windowMattersToAccessibility(windowState, regionInScreen, unaccountedSpace,
-                            skipRemainingWindowsForTasks)) {
+                            skipRemainingWindowsForTaskFragments)) {
                         addPopulatedWindowInfo(windowState, regionInScreen, windows, addedWindows);
                         updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
-                                skipRemainingWindowsForTasks);
+                                skipRemainingWindowsForTaskFragments);
                         focusedWindowAdded |= windowState.isFocused();
                     } else if (isUntouchableNavigationBar(windowState, mTempRegion1)) {
                         // If this widow is navigation bar without touchable region, accounting the
@@ -1666,7 +1666,7 @@ final class AccessibilityController {
 
         private boolean windowMattersToAccessibility(WindowState windowState,
                 Region regionInScreen, Region unaccountedSpace,
-                HashSet<Integer> skipRemainingWindowsForTasks) {
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
             final RecentsAnimationController controller = mService.getRecentsAnimationController();
             if (controller != null && controller.shouldIgnoreForAccessibility(windowState)) {
                 return false;
@@ -1677,8 +1677,9 @@ final class AccessibilityController {
             }
 
             // If the window is part of a task that we're finished with - ignore.
-            final Task task = windowState.getTask();
-            if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
+            final TaskFragment taskFragment = windowState.getTaskFragment();
+            if (taskFragment != null
+                    && skipRemainingWindowsForTaskFragments.contains(taskFragment)) {
                 return false;
             }
 
@@ -1704,7 +1705,8 @@ final class AccessibilityController {
         }
 
         private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
-                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+                Region unaccountedSpace,
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
             if (windowState.mAttrs.type
                     != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
 
@@ -1734,11 +1736,11 @@ final class AccessibilityController {
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 
-                    final Task task = windowState.getTask();
-                    if (task != null) {
+                    final TaskFragment taskFragment = windowState.getTaskFragment();
+                    if (taskFragment != null) {
                         // If the window is associated with a particular task, we can skip the
                         // rest of the windows for that task.
-                        skipRemainingWindowsForTasks.add(task.mTaskId);
+                        skipRemainingWindowsForTaskFragments.add(taskFragment);
                     } else if (!windowState.hasTapExcludeRegion()) {
                         // If the window is not associated with a particular task, then it is
                         // globally modal. In this case we can skip all remaining windows when
