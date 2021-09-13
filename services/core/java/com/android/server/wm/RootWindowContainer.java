@@ -3545,14 +3545,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
-        final boolean sendPowerModeLaunch;
-
-        if (forceSend) {
-            sendPowerModeLaunch = true;
-        } else if (targetActivity == null || targetActivity.app == null) {
-            // Set power mode if we don't know what we're launching yet.
-            sendPowerModeLaunch = true;
-        } else {
+        if (!forceSend && targetActivity != null && targetActivity.app != null) {
             // Set power mode when the activity's process is different than the current top resumed
             // activity on all display areas, or if there are no resumed activities in the system.
             boolean[] noResumedActivities = {true};
@@ -3568,13 +3561,28 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             !resumedActivityProcess.equals(targetActivity.app);
                 }
             });
-            sendPowerModeLaunch = noResumedActivities[0] || allFocusedProcessesDiffer[0];
+            if (!noResumedActivities[0] && !allFocusedProcessesDiffer[0]) {
+                // All focused activities are resumed and the process of the target activity is
+                // the same as them, e.g. delivering new intent to the current top.
+                return;
+            }
         }
 
-        if (sendPowerModeLaunch) {
-            mService.startLaunchPowerMode(
-                    ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        int reason = ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY;
+        // If the activity is launching while keyguard is locked (including occluded), the activity
+        // may be visible until its first relayout is done (e.g. apply show-when-lock flag). To
+        // avoid power mode from being cleared before that, add a special reason to consider whether
+        // the unknown visibility is resolved. The case from SystemUI is excluded because it should
+        // rely on keyguard-going-away.
+        if (mService.mKeyguardController.isKeyguardLocked() && targetActivity != null
+                && !targetActivity.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_SYSTEMUI)) {
+            final ActivityOptions opts = targetActivity.getOptions();
+            if (opts == null || opts.getSourceInfo() == null
+                    || opts.getSourceInfo().type != ActivityOptions.SourceInfo.TYPE_LOCKSCREEN) {
+                reason |= ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY;
+            }
         }
+        mService.startLaunchPowerMode(reason);
     }
 
     // TODO(b/191434136): handle this properly when we add multi-window support on secondary
