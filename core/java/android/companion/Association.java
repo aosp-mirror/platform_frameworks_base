@@ -67,8 +67,7 @@ public final class Association implements Parcelable {
             @NonNull List<DeviceId> deviceIds, @Nullable String deviceProfile,
             boolean managedByCompanionApp, boolean notifyOnDeviceNearby, long timeApprovedMs) {
         if (associationId <= 0) {
-            // TODO: uncomment when implementing real IDs
-            // throw new IllegalArgumentException("Association ID should be greater than 0");
+            throw new IllegalArgumentException("Association ID should be greater than 0");
         }
         validateDeviceIds(deviceIds);
 
@@ -155,6 +154,11 @@ public final class Association implements Parcelable {
     /** @hide */
     public long getTimeApprovedMs() {
         return mTimeApprovedMs;
+    }
+
+    /** @hide */
+    public boolean belongsToPackage(@UserIdInt int userId, String packageName) {
+        return mUserId == userId && Objects.equals(mPackageName, packageName);
     }
 
     @Override

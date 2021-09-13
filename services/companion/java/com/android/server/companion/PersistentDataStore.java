@@ -55,6 +55,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,12 +152,17 @@ final class PersistentDataStore {
 
     private static final String XML_TAG_STATE = "state";
     private static final String XML_TAG_ASSOCIATIONS = "associations";
-    private static final String XML_TAG_PREVIOUSLY_USED_IDS = "previously-used-ids";
     private static final String XML_TAG_ASSOCIATION = "association";
     private static final String XML_TAG_DEVICE_ID = "device-id";
+    private static final String XML_TAG_PREVIOUSLY_USED_IDS = "previously-used-ids";
+    private static final String XML_TAG_PACKAGE = "package";
+    private static final String XML_TAG_ID = "id";
 
     private static final String XML_ATTR_PERSISTENCE_VERSION = "persistence-version";
     private static final String XML_ATTR_ID = "id";
+    // Used in <package> elements, nested within <previously-used-ids> elements.
+    private static final String XML_ATTR_PACKAGE_NAME = "package_name";
+    // Used in <association> elements, nested within <associations> elements.
     private static final String XML_ATTR_PACKAGE = "package";
     private static final String XML_ATTR_DEVICE = "device";
     private static final String XML_ATTR_PROFILE = "profile";
@@ -326,14 +332,19 @@ final class PersistentDataStore {
             throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATIONS);
 
-        int associationId;
+        // Before Android T Associations didn't have IDs, so when we are upgrading from S (reading
+        // from V0) we need to generate and assign IDs to the existing Associations.
+        // It's safe to do it here, because CDM cannot create new Associations before it reads
+        // existing ones from the backup files. And the fact that we are reading from a V0 file,
+        // means that CDM hasn't assigned any IDs yet, so we can just start from the first available
+        // id for each user (eg. 1 for user 0; 100 001 - for user 1; 200 001 - for user 2; etc).
+        int associationId = CompanionDeviceManagerService.getFirstAssociationIdForUser(userId);
         while (true) {
             parser.nextTag();
             if (isEndOfTag(parser, XML_TAG_ASSOCIATIONS)) break;
             if (!isStartOfTag(parser, XML_TAG_ASSOCIATION)) continue;
 
-            associationId = 0;
-            readAssociationV0(parser, userId, associationId, out);
+            readAssociationV0(parser, userId, associationId++, out);
         }
     }
 
@@ -400,9 +411,29 @@ final class PersistentDataStore {
     }
 
     private static void readPreviouslyUsedIdsV1(@NonNull TypedXmlPullParser parser,
-            @NonNull Map<String, Set<Integer>> out) throws XmlPullParserException {
+            @NonNull Map<String, Set<Integer>> out) throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_PREVIOUSLY_USED_IDS);
-        // TODO: implement
+
+        while (true) {
+            parser.nextTag();
+            if (isEndOfTag(parser, XML_TAG_PREVIOUSLY_USED_IDS)) break;
+            if (!isStartOfTag(parser, XML_TAG_PACKAGE)) continue;
+
+            final String packageName = readStringAttribute(parser, XML_ATTR_PACKAGE_NAME);
+            final Set<Integer> usedIds = new HashSet<>();
+
+            while (true) {
+                parser.nextTag();
+                if (isEndOfTag(parser, XML_TAG_PACKAGE)) break;
+                if (!isStartOfTag(parser, XML_TAG_ID)) continue;
+
+                parser.nextToken();
+                final int id = Integer.parseInt(parser.getText());
+                usedIds.add(id);
+            }
+
+            out.put(packageName, usedIds);
+        }
     }
 
     private static void writeAssociations(@NonNull XmlSerializer parent,
@@ -443,8 +474,23 @@ final class PersistentDataStore {
     }
 
     private static void writePreviouslyUsedIds(@NonNull XmlSerializer parent,
-            @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
-        // TODO: implement
+            @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) throws IOException {
+        final XmlSerializer serializer = parent.startTag(null, XML_TAG_PREVIOUSLY_USED_IDS);
+        for (Map.Entry<String, Set<Integer>> entry : previouslyUsedIdsPerPackage.entrySet()) {
+            writePreviouslyUsedIdsForPackage(serializer, entry.getKey(), entry.getValue());
+        }
+        serializer.endTag(null, XML_TAG_PREVIOUSLY_USED_IDS);
+    }
+
+    private static void writePreviouslyUsedIdsForPackage(@NonNull XmlSerializer parent,
+            @NonNull String packageName, @NonNull Set<Integer> previouslyUsedIds)
+            throws IOException {
+        final XmlSerializer serializer = parent.startTag(null, XML_TAG_PACKAGE);
+        writeStringAttribute(serializer, XML_ATTR_PACKAGE_NAME, packageName);
+        forEach(previouslyUsedIds, id -> serializer.startTag(null, XML_TAG_ID)
+                .text(Integer.toString(id))
+                .endTag(null, XML_TAG_ID));
+        serializer.endTag(null, XML_TAG_PACKAGE);
     }
 
     private static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)

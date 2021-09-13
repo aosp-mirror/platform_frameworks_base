@@ -38,7 +38,7 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
@@ -108,6 +108,7 @@ import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -118,6 +119,7 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -134,6 +136,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +144,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /** @hide */
 @SuppressLint("LongLogTag")
@@ -157,6 +161,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }
+
+    /** Range of Association IDs allocated for a user.*/
+    static final int ASSOCIATIONS_IDS_PER_USER_RANGE = 100000;
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
             CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
@@ -211,9 +218,17 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private final Handler mMainHandler = Handler.getMain();
     private CompanionDevicePresenceController mCompanionDevicePresenceController;
 
-    /** userId -> [association] */
+    /** Maps a {@link UserIdInt} to a set of associations for the user. */
     @GuardedBy("mLock")
-    private @Nullable SparseArray<Set<Association>> mCachedAssociations = new SparseArray<>();
+    private final SparseArray<Set<Association>> mCachedAssociations = new SparseArray<>();
+    /**
+     * A structure that consist of two nested maps, and effectively maps (userId + packageName) to
+     * a list of IDs that have been previously assigned to associations for that package.
+     * We maintain this structure so that we never re-use association IDs for the same package
+     * (until it's uninstalled).
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<Map<String, Set<Integer>>> mPreviouslyUsedIds = new SparseArray<>();
 
     ActivityTaskManagerInternal mAtmInternal;
     ActivityManagerInternal mAmInternal;
@@ -258,8 +273,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         + ", uid = " + uid + ")");
                 int userId = getChangingUserId();
                 updateAssociations(
-                        as -> filter(as,
-                                a -> !Objects.equals(a.getPackageName(), packageName)),
+                        set -> filterOut(set, it -> it.belongsToPackage(userId, packageName)),
                         userId);
 
                 mCompanionDevicePresenceController.unbindDevicePresenceListener(
@@ -757,10 +771,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private void createAssociationInternal(
             int userId, String deviceMacAddress, String packageName, String deviceProfile) {
-        // TODO: general a valid unique ID.
-        final int associationId = 0;
         final Association association = new Association(
-                associationId,
+                getNewAssociationIdForPackage(userId, packageName),
                 userId,
                 packageName,
                 Arrays.asList(new DeviceId(TYPE_MAC_ADDRESS, deviceMacAddress)),
@@ -773,17 +785,69 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         recordAssociation(association, userId);
     }
 
-    void removeAssociation(int userId, String pkg, String deviceMacAddress) {
-        updateAssociations(associations -> filter(associations, association -> {
-            boolean notMatch = association.getUserId() != userId
-                    || !Objects.equals(association.getDeviceMacAddress(), deviceMacAddress)
-                    || !Objects.equals(association.getPackageName(), pkg);
-            if (!notMatch) {
-                onAssociationPreRemove(association);
+    @GuardedBy("mLock")
+    @NonNull
+    private Set<Integer> getPreviouslyUsedIdsForPackageLocked(
+            @UserIdInt int userId, @NonNull String packageName) {
+        final Set<Integer> previouslyUsedIds = mPreviouslyUsedIds.get(userId).get(packageName);
+        if (previouslyUsedIds != null) return previouslyUsedIds;
+        return emptySet();
+    }
+
+    private int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            readPersistedStateForUserIfNeededLocked(userId);
+
+            // First: collect all IDs currently in use for this user's Associations.
+            final SparseBooleanArray usedIds = new SparseBooleanArray();
+            for (Association it : getAllAssociations(userId)) {
+                usedIds.put(it.getAssociationId(), true);
             }
-            return notMatch;
+
+            // Second: collect all IDs that have been previously used for this package (and user).
+            final Set<Integer> previouslyUsedIds =
+                    getPreviouslyUsedIdsForPackageLocked(userId, packageName);
+
+            int id = getFirstAssociationIdForUser(userId);
+            final int lastAvailableIdForUser = getLastAssociationIdForUser(userId);
+
+            // Find first ID that isn't used now AND has never been used for the given package.
+            while (usedIds.get(id) || previouslyUsedIds.contains(id)) {
+                // Increment and try again
+                id++;
+                // ... but first check if the ID is valid (within the range allocated to the user).
+                if (id > lastAvailableIdForUser) {
+                    throw new RuntimeException("Cannot create a new Association ID for "
+                            + packageName + " for user " + userId);
+                }
+            }
+
+            return id;
+        }
+    }
+
+    void removeAssociation(int userId, String packageName, String deviceMacAddress) {
+        updateAssociations(associations -> filterOut(associations, it -> {
+            final boolean match = it.belongsToPackage(userId, packageName)
+                    && Objects.equals(it.getDeviceMacAddress(), deviceMacAddress);
+            if (match) {
+                onAssociationPreRemove(it);
+                markIdAsPreviouslyUsedForPackage(it.getAssociationId(), userId, packageName);
+            }
+            return match;
         }), userId);
         restartBleScan();
+    }
+
+    private void markIdAsPreviouslyUsedForPackage(
+            int associationId, @UserIdInt int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            // Mark as previously used.
+            readPersistedStateForUserIfNeededLocked(userId);
+            mPreviouslyUsedIds.get(userId)
+                    .computeIfAbsent(packageName, it -> new HashSet<>())
+                    .add(associationId);
+        }
     }
 
     void onAssociationPreRemove(Association association) {
@@ -989,11 +1053,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             mCachedAssociations.put(userId, unmodifiableSet(updatedAssociations));
 
-            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                    // TODO: pass the real used IDs ("mapped" per package) instead of emptyMap()
-                    (associations) -> mPersistentDataStore.persistStateForUser(
-                            userId, associations, emptyMap()),
-                    updatedAssociations));
+            BackgroundThread.getHandler().sendMessage(
+                    PooledLambda.obtainMessage(
+                            (associations, usedIds) ->
+                                    mPersistentDataStore
+                                            .persistStateForUser(userId, associations, usedIds),
+                            updatedAssociations, deepCopy(mPreviouslyUsedIds.get(userId))));
 
             updateAtm(userId, updatedAssociations);
         }
@@ -1030,12 +1095,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private void readPersistedStateForUserIfNeededLocked(@UserIdInt int userId) {
         if (mCachedAssociations.get(userId) != null) return;
 
+        Slog.i(LOG_TAG, "Reading state for user " + userId + "  from the disk");
+
         final Set<Association> associations = new ArraySet<>();
-        // TODO: pass real packageName-to-usedIds map
-        mPersistentDataStore.readStateForUser(userId, associations, emptyMap());
-        Slog.i(LOG_TAG, "Read associations from disk: " + associations);
+        final Map<String, Set<Integer>> previouslyUsedIds = new ArrayMap<>();
+        mPersistentDataStore.readStateForUser(userId, associations, previouslyUsedIds);
+
+        if (DEBUG) {
+            Slog.d(LOG_TAG, "  > associations=" + associations + "\n"
+                    + "  > previouslyUsedIds=" + previouslyUsedIds);
+        }
 
         mCachedAssociations.put(userId, unmodifiableSet(associations));
+        mPreviouslyUsedIds.append(userId, previouslyUsedIds);
     }
 
     private List<UserInfo> getAllUsers() {
@@ -1390,6 +1462,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return result;
     }
 
+    static int getFirstAssociationIdForUser(@UserIdInt int userId) {
+        // We want the IDs to start from 1, not 0.
+        return userId * ASSOCIATIONS_IDS_PER_USER_RANGE + 1;
+    }
+
+    static int getLastAssociationIdForUser(@UserIdInt int userId) {
+        return (userId + 1) * ASSOCIATIONS_IDS_PER_USER_RANGE;
+    }
+
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
                 + "list USER_ID\n"
@@ -1472,5 +1553,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     + BluetoothAdapter.BluetoothConnectionCallback.disconnectReasonText(reason));
             CompanionDeviceManagerService.this.onDeviceDisconnected(device.getAddress());
         }
+    }
+
+    private static @NonNull <T> Set<T> filterOut(
+            @NonNull Set<T> set, @NonNull Predicate<? super T> predicate) {
+        return CollectionUtils.filter(set, predicate.negate());
+    }
+
+    private Map<String, Set<Integer>> deepCopy(Map<String, Set<Integer>> orig) {
+        final Map<String, Set<Integer>> copy = new HashMap<>(orig.size(), 1f);
+        forEach(orig, (key, value) -> copy.put(key, new ArraySet<>(value)));
+        return copy;
     }
 }
