@@ -120,15 +120,16 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
+            Trace.beginSection("ImageWallpaper.Engine#onCreate");
             mEglHelper = getEglHelperInstance();
             // Deferred init renderer because we need to get wallpaper by display context.
             mRenderer = getRendererInstance();
             setFixedSizeAllowed(true);
             updateSurfaceSize();
-
             mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
             getDisplayContext().getSystemService(DisplayManager.class)
                     .registerDisplayListener(this, mWorker.getThreadHandler());
+            Trace.endSection();
         }
 
         @Override
@@ -198,15 +199,22 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @Override
+        public boolean shouldWaitForEngineShown() {
+            return true;
+        }
+
+        @Override
         public void onDestroy() {
             getDisplayContext().getSystemService(DisplayManager.class)
                     .unregisterDisplayListener(this);
             mMiniBitmap = null;
             mWorker.getThreadHandler().post(() -> {
+                Trace.beginSection("ImageWallpaper.Engine#onDestroy");
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
+                Trace.endSection();
             });
         }
 
@@ -340,8 +348,10 @@ public class ImageWallpaper extends WallpaperService {
         public void onSurfaceCreated(SurfaceHolder holder) {
             if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> {
+                Trace.beginSection("ImageWallpaper#onSurfaceCreated");
                 mEglHelper.init(holder, needSupportWideColorGamut());
                 mRenderer.onSurfaceCreated();
+                Trace.endSection();
             });
         }
 
@@ -358,9 +368,11 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrame() {
+            Trace.beginSection("ImageWallpaper#drawFrame");
             preRender();
             requestRender();
             postRender();
+            Trace.endSection();
         }
 
         public void preRender() {
@@ -427,6 +439,7 @@ public class ImageWallpaper extends WallpaperService {
             // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#postRender");
             scheduleFinishRendering();
+            reportEngineShown(false /* waitForEngineShown */);
             Trace.endSection();
         }
 
