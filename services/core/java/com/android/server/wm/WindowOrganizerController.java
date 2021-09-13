@@ -117,7 +117,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
     final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
-    final TransitionController mTransitionController;
+    TransitionController mTransitionController;
     /**
      * A Map which manages the relationship between
      * {@link TaskFragmentCreationParams#getFragmentToken()} and {@link TaskFragment}
@@ -131,7 +131,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mTaskOrganizerController = new TaskOrganizerController(mService);
         mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
         mTaskFragmentOrganizerController = new TaskFragmentOrganizerController(atm);
-        mTransitionController = new TransitionController(atm);
+    }
+
+    void setWindowManager(WindowManagerService wms) {
+        mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController);
     }
 
     TransitionController getTransitionController() {
