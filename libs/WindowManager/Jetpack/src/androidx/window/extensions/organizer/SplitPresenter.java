@@ -153,6 +153,20 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
+     * Creates a new expanded container.
+     */
+    TaskFragmentContainer createNewExpandedContainer(@NonNull Activity launchingActivity) {
+        final TaskFragmentContainer newContainer = mController.newContainer(null);
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        createTaskFragment(wct, newContainer.getTaskFragmentToken(),
+                launchingActivity.getActivityToken(), new Rect(), WINDOWING_MODE_MULTI_WINDOW);
+
+        applyTransaction(wct);
+        return newContainer;
+    }
+
+    /**
      * Creates a new container or resizes an existing container for activity to the provided bounds.
      * @param activity The activity to be re-parented to the container if necessary.
      * @param containerToAvoid Re-parent from this container if an activity is already in it.

@@ -31,18 +31,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Pair;
 import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.window.extensions.embedding.ActivityRule;
+import androidx.window.extensions.embedding.ActivityStack;
 import androidx.window.extensions.embedding.EmbeddingRule;
 import androidx.window.extensions.embedding.SplitInfo;
 import androidx.window.extensions.embedding.SplitPairRule;
 import androidx.window.extensions.embedding.SplitPlaceholderRule;
 import androidx.window.extensions.embedding.SplitRule;
-import androidx.window.extensions.embedding.TaskFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +52,8 @@ import java.util.function.Consumer;
 /**
  * Main controller class that manages split states and presentation.
  */
-public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback {
+public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
+        androidx.window.extensions.embedding.ActivityEmbeddingComponent {
 
     private final SplitPresenter mPresenter;
 
@@ -77,6 +77,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Updates the embedding rules applied to future activity launches. */
+    @Override
     public void setEmbeddingRules(@NonNull Set<EmbeddingRule> rules) {
         mSplitRules.clear();
         mSplitRules.addAll(rules);
@@ -103,7 +104,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Registers the split organizer callback to notify about changes to active splits.
      */
-    public void setEmbeddingCallback(@NonNull Consumer<List<SplitInfo>> callback) {
+    @Override
+    public void setSplitInfoCallback(@NonNull Consumer<List<SplitInfo>> callback) {
         mEmbeddingCallback = callback;
         updateCallbackIfNecessary();
     }
@@ -175,7 +177,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 launchedActivity.getActivityToken(), launchedActivity);
 
         // Check if the activity is configured to always be expanded.
-        if (shouldExpand(launchedActivity, splitRules)) {
+        if (shouldExpand(launchedActivity, null, splitRules)) {
             if (shouldContainerBeExpanded(currentContainer)) {
                 // Make sure that the existing container is expanded
                 mPresenter.expandTaskFragment(currentContainer.getTaskFragmentToken());
@@ -525,11 +527,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private List<SplitInfo> getActiveSplitStates() {
         List<SplitInfo> splitStates = new ArrayList<>();
         for (SplitContainer container : mSplitContainers) {
-            TaskFragment primaryContainer =
-                    new TaskFragment(
+            ActivityStack primaryContainer =
+                    new ActivityStack(
                             container.getPrimaryContainer().collectActivities());
-            TaskFragment secondaryContainer =
-                    new TaskFragment(
+            ActivityStack secondaryContainer =
+                    new ActivityStack(
                             container.getSecondaryContainer().collectActivities());
             SplitInfo splitState = new SplitInfo(primaryContainer,
                     secondaryContainer, container.getSplitRule().getSplitRatio());
@@ -611,7 +613,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns {@code true} if an Activity with the provided component name should always be
      * expanded to occupy full task bounds. Such activity must not be put in a split.
      */
-    private static boolean shouldExpand(@NonNull Activity activity,
+    private static boolean shouldExpand(@Nullable Activity activity, @Nullable Intent intent,
             List<EmbeddingRule> splitRules) {
         if (splitRules == null) {
             return false;
@@ -624,7 +626,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (!activityRule.shouldAlwaysExpand()) {
                 continue;
             }
-            if (activityRule.getActivityPredicate().test(activity)) {
+            if (activity != null && activityRule.getActivityPredicate().test(activity)) {
+                return true;
+            }
+            if (intent != null && activityRule.getIntentPredicate().test(intent)) {
                 return true;
             }
         }
@@ -703,11 +708,23 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
             final Activity launchingActivity = (Activity) who;
 
-            if (!setLaunchingToSideContainer(launchingActivity, intent, options)) {
+            if (shouldExpand(null, intent, getSplitRules())) {
+                setLaunchingInExpandedContainer(launchingActivity, options);
+            } else if (!setLaunchingToSideContainer(launchingActivity, intent, options)) {
                 setLaunchingInSameContainer(launchingActivity, intent, options);
             }
 
             return super.onStartActivity(who, intent, options);
+        }
+
+        private void setLaunchingInExpandedContainer(Activity launchingActivity, Bundle options) {
+            TaskFragmentContainer newContainer = mPresenter.createNewExpandedContainer(
+                    launchingActivity);
+
+            // Amend the request to let the WM know that the activity should be placed in the
+            // dedicated container.
+            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                    newContainer.getTaskFragmentToken());
         }
 
         /**
