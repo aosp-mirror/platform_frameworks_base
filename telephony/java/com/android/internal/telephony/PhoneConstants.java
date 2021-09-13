@@ -171,6 +171,8 @@ public class PhoneConstants {
 
     public static final String SLOT_KEY  = "slot";
 
+    public static final String PORT_KEY = "port";
+
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?
     /**
