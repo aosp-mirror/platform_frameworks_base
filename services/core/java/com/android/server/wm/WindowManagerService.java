@@ -7732,7 +7732,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowState currentFocus = displayContent.mCurrentFocus;
                 if (currentFocus != null && currentFocus.mSession.mUid == uid
                         && currentFocus.mSession.mPid == pid) {
-                    return true;
+                    return currentFocus.canBeImeTarget();
                 }
             }
             return false;
