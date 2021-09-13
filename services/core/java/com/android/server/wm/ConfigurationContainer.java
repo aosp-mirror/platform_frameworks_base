@@ -28,6 +28,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.app.WindowConfigurationProto.WINDOWING_MODE;
+import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
 
 import static com.android.server.wm.ConfigurationContainerProto.FULL_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
@@ -666,20 +668,38 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     @CallSuper
     protected void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
-        // Critical log level logs only visible elements to mitigate performance overheard
-        if (logLevel != WindowTraceLogLevel.ALL && !mHasOverrideConfiguration) {
-            return;
+        final long token = proto.start(fieldId);
+
+        if (logLevel == WindowTraceLogLevel.ALL || mHasOverrideConfiguration) {
+            mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
+                    logLevel == WindowTraceLogLevel.CRITICAL);
         }
 
-        final long token = proto.start(fieldId);
-        mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
-                logLevel == WindowTraceLogLevel.CRITICAL);
+        // Unless trace level is set to `WindowTraceLogLevel.ALL` don't dump anything that isn't
+        // required to mitigate performance overhead
         if (logLevel == WindowTraceLogLevel.ALL) {
             mFullConfiguration.dumpDebug(proto, FULL_CONFIGURATION, false /* critical */);
             mMergedOverrideConfiguration.dumpDebug(proto, MERGED_OVERRIDE_CONFIGURATION,
                     false /* critical */);
         }
+
+        if (logLevel == WindowTraceLogLevel.TRIM) {
+            // Required for Fass to automatically detect pip transitions in Winscope traces
+            dumpDebugWindowingMode(proto);
+        }
+
         proto.end(token);
+    }
+
+    private void dumpDebugWindowingMode(ProtoOutputStream proto) {
+        final long fullConfigToken = proto.start(FULL_CONFIGURATION);
+        final long windowConfigToken = proto.start(WINDOW_CONFIGURATION);
+
+        int windowingMode = mFullConfiguration.windowConfiguration.getWindowingMode();
+        proto.write(WINDOWING_MODE, windowingMode);
+
+        proto.end(windowConfigToken);
+        proto.end(fullConfigToken);
     }
 
     /**
