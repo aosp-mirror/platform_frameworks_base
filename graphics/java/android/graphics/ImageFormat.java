@@ -178,22 +178,8 @@ public class ImageFormat {
      * <p>Android YUV P010 format.</p>
      *
      * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
-     * followed immediately by a Wx(H/2) CbCr plane. Each sample is
-     * represented by a 16-bit little-endian value, with the lower 6 bits set
-     * to zero.
-     *
-     * <p>This format assumes
-     * <ul>
-     * <li>an even height</li>
-     * <li>a vertical stride equal to the height</li>
-     * </ul>
-     * </p>
-     *
-     * <pre>   stride_in_bytes = stride * 2 </pre>
-     * <pre>   y_size = stride_in_bytes * height </pre>
-     * <pre>   cbcr_size = stride_in_bytes * (height / 2) </pre>
-     * <pre>   cb_offset = y_size </pre>
-     * <pre>   cr_offset = cb_offset + 2 </pre>
+     * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
+     * little-endian value, with the lower 6 bits set to zero.
      *
      * <p>For example, the {@link android.media.Image} object can provide data
      * in this format from a {@link android.hardware.camera2.CameraDevice}

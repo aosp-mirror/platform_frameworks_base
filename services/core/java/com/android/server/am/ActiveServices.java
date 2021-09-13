@@ -6314,10 +6314,17 @@ public final class ActiveServices {
             final String msg = "Background started FGS: "
                     + ((r.mAllowStartForeground != REASON_DENIED) ? "Allowed " : "Disallowed ")
                     + r.mInfoAllowStartForeground;
-            Slog.wtfQuiet(TAG, msg);
             if (r.mAllowStartForeground != REASON_DENIED) {
+                if (ActivityManagerUtils.shouldSamplePackageForAtom(r.packageName,
+                        mAm.mConstants.mFgsStartAllowedLogSampleRate)) {
+                    Slog.wtfQuiet(TAG, msg);
+                }
                 Slog.i(TAG, msg);
             } else {
+                if (ActivityManagerUtils.shouldSamplePackageForAtom(r.packageName,
+                        mAm.mConstants.mFgsStartDeniedLogSampleRate)) {
+                    Slog.wtfQuiet(TAG, msg);
+                }
                 Slog.w(TAG, msg);
             }
             r.mLoggedInfoAllowStartForeground = true;

@@ -3306,11 +3306,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 Slog.w(TAG, "Failed to retrieve app info for " + packageName
                         + " userId=" + userId, e);
             }
-            if (newAppInfo == null) {
+            if (newAppInfo == null || provider.info == null
+                    || provider.info.providerInfo == null) {
                 continue;
             }
             ApplicationInfo oldAppInfo = provider.info.providerInfo.applicationInfo;
-            if (!newAppInfo.sourceDir.equals(oldAppInfo.sourceDir)) {
+            if (oldAppInfo == null || !newAppInfo.sourceDir.equals(oldAppInfo.sourceDir)) {
                 // Overlay paths are generated against a particular version of an application.
                 // The overlays paths of a newly upgraded application are incompatible with the
                 // old version of the application.

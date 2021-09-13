@@ -190,7 +190,7 @@
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikon wajah"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tombol perbesar/perkecil kompatibilitas."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"Perbesar dari layar kecil ke besar."</string>
-    <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth tersambung."</string>
+    <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth terhubung."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"Bluetooth terputus."</string>
     <string name="accessibility_no_battery" msgid="3789287732041910804">"Tidak ada baterai."</string>
     <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"Baterai satu batang."</string>
@@ -215,8 +215,8 @@
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Sinyal penuh."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"Aktif."</string>
     <string name="accessibility_desc_off" msgid="8055389500285421408">"Nonaktif."</string>
-    <string name="accessibility_desc_connected" msgid="3082590384032624233">"Tersambung."</string>
-    <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Menyambung."</string>
+    <string name="accessibility_desc_connected" msgid="3082590384032624233">"Terhubung."</string>
+    <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Menghubungkan."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
@@ -271,7 +271,7 @@
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"Bluetooth nonaktif."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth aktif."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="7362294657419149294">"Bluetooth menyambung."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"Bluetooth tersambung."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="5237625393869747261">"Bluetooth terhubung."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="3344226652293797283">"Bluetooth dinonaktifkan."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"Bluetooth diaktifkan."</string>
     <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"Pelaporan lokasi nonaktif."</string>
@@ -389,9 +389,9 @@
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Setelan pengguna"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Selesai"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Tutup"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"Tersambung"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"Terhubung"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Terhubung, baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"Menyambung..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"Menghubungkan..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Mengaktifkan…"</string>
@@ -562,30 +562,30 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Otoritas sertifikat diinstal di perangkat. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di profil kerja, tetapi tidak di profil pribadi."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda tersambung ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profil pribadi Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
+    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda terhubung ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profil pribadi Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Perangkat dikelola oleh <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> menggunakan <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> untuk mengelola perangkat Anda."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"Admin dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Pelajari lebih lanjut"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Buka setelan VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Buka kredensial terpercaya"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat.\n\nUntuk informasi selengkapnya, hubungi admin."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Anda memberikan izin kepada aplikasi untuk menyiapkan sambungan VPN.\n\nAplikasi ini ini dapat memantau aktivitas perangkat dan jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdmin dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi admin.\n\nAnda juga tersambung ke VPN, yang dapat memantau aktivitas jaringan."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdmin dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi admin.\n\nAnda juga terhubung ke VPN, yang dapat memantau aktivitas jaringan."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Perangkat ini dikelola oleh orang tuamu. Orang tuamu bisa melihat dan mengelola berbagai informasi, seperti aplikasi yang kamu gunakan, lokasimu, dan lama pemakaian perangkat."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
-    <string name="monitoring_description_app" msgid="376868879287922929">"Anda tersambung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
-    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Anda tersambung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi, termasuk email, aplikasi, dan situs web."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Anda tersambung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi, termasuk email, aplikasi, dan situs web.."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Profil kerja Anda dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil tersambung ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan kerja, termasuk email, aplikasi, dan situs.\n\nHubungi admin untuk mendapatkan informasi lebih lanjut."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Profil kerja Anda dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil tersambung ke <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs.\n\nAnda juga tersambung ke <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi."</string>
+    <string name="monitoring_description_app" msgid="376868879287922929">"Anda terhubung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
+    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Anda terhubung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi, termasuk email, aplikasi, dan situs web."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Anda terhubung ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi, termasuk email, aplikasi, dan situs web.."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Profil kerja Anda dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil terhubung ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan kerja, termasuk email, aplikasi, dan situs.\n\nHubungi admin untuk mendapatkan informasi lebih lanjut."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Profil kerja Anda dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil terhubung ke <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs.\n\nAnda juga terhubung ke <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, yang dapat memantau aktivitas jaringan pribadi."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Tetap terbuka kuncinya oleh TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Perangkat akan tetap terkunci hingga Anda membukanya secara manual"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>

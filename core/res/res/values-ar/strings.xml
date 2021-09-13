@@ -341,7 +341,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"سيتم قول العناصر التي تم النقر عليها بصوت عال ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"سيتم قول العناصر التي تم النقر عليها بصوت عالٍ ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ملاحظة النص الذي تكتبه"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة"</string>

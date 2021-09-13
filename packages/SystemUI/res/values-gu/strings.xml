@@ -133,7 +133,7 @@
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ઝલક"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"શોધ"</string>
-    <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
+    <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરા"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"વૉલેટ"</string>
@@ -146,7 +146,7 @@
     <string name="accessibility_manage_notification" msgid="582215815790143983">"નોટિફિકેશનને મેનેજ કરો"</string>
     <string name="phone_label" msgid="5715229948920451352">"ફોન ખોલો"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"વૉઇસ સહાય ખોલો"</string>
-    <string name="camera_label" msgid="8253821920931143699">"કૅમેરો ખોલો"</string>
+    <string name="camera_label" msgid="8253821920931143699">"કૅમેરા ખોલો"</string>
     <string name="cancel" msgid="1089011503403416730">"રદ કરો"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"કન્ફર્મ કરો"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ફરી પ્રયાસ કરો"</string>
@@ -982,7 +982,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> સુધી"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"રાખો"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"બદલો"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"પૃષ્ઠભૂમિમાં ચાલી રહેલ ઍપ્લિકેશનો"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>

@@ -22,7 +22,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -91,13 +90,11 @@ public class LockIconView extends FrameLayout implements Dumpable {
                 mLockIconCenter.x + mRadius,
                 mLockIconCenter.y + mRadius);
 
-        setX(mSensorRect.left);
-        setY(mSensorRect.top);
-
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                (int) (mSensorRect.right - mSensorRect.left),
-                (int) (mSensorRect.bottom - mSensorRect.top));
-        lp.gravity = Gravity.CENTER;
+        final FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        lp.width = (int) (mSensorRect.right - mSensorRect.left);
+        lp.height = (int) (mSensorRect.bottom - mSensorRect.top);
+        lp.topMargin = (int) mSensorRect.top;
+        lp.setMarginStart((int) mSensorRect.left);
         setLayoutParams(lp);
     }
 
@@ -114,5 +111,6 @@ public class LockIconView extends FrameLayout implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("Center in px (x, y)= (" + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
         pw.println("Radius in pixels: " + mRadius);
+        pw.println("topLeft= (" + getX() + ", " + getY() + ")");
     }
 }

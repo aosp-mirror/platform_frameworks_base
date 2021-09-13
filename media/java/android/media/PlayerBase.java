@@ -102,6 +102,13 @@ public abstract class PlayerBase {
         mState = AudioPlaybackConfiguration.PLAYER_STATE_IDLE;
     };
 
+    /** @hide */
+    public int getPlayerIId() {
+        synchronized (mLock) {
+            return mPlayerIId;
+        }
+    }
+
     /**
      * Call from derived class when instantiation / initialization is successful
      */

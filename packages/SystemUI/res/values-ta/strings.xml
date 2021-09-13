@@ -122,10 +122,10 @@
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"திரை ரெக்கார்டிங்கை நீக்குவதில் பிழை"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"அனுமதிகளைப் பெற இயலவில்லை"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ஸ்கிரீன் ரெக்கார்டிங்கைத் தொடங்குவதில் பிழை"</string>
-    <string name="usb_preference_title" msgid="1439924437558480718">"USB கோப்பு இடமாற்ற விருப்பங்கள்"</string>
+    <string name="usb_preference_title" msgid="1439924437558480718">"USB ஃபைல் இடமாற்ற விருப்பங்கள்"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"(MTP) மீடியா பிளேயராக ஏற்று"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"(PTP) கேமராவாக ஏற்று"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac க்கான Android கோப்பு இடமாற்ற ஆப்ஸை நிறுவு"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac க்கான Android ஃபைல் இடமாற்ற ஆப்ஸை நிறுவு"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"பின்செல்"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"முகப்பு"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"மெனு"</string>
@@ -451,7 +451,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும்."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"திறக்க, மீண்டும் தட்டவும்"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"அன்லாக் செய்ய, மீண்டும் தட்டவும்"</string>
     <string name="tap_again" msgid="1315420114387908655">"மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_unlock_press" msgid="8488350566398524740">"திறப்பதற்கு அழுத்தவும்"</string>

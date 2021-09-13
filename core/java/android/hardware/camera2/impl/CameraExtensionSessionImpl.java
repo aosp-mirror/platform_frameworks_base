@@ -251,6 +251,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT);
             mPreviewImageProcessor.onResolutionUpdate(new Size(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight));
+            mPreviewImageProcessor.onOutputSurface(null, -1);
             mRepeatingRequestImageReader = ImageReader.newInstance(repeatingSurfaceInfo.mWidth,
                     repeatingSurfaceInfo.mHeight,
                     CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT, PREVIEW_QUEUE_SIZE,

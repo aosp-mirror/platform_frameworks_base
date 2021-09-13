@@ -1193,7 +1193,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 } else if (mCurrentFunctions == UsbManager.FUNCTION_MIDI) {
                     titleRes = com.android.internal.R.string.usb_midi_notification_title;
                     id = SystemMessage.NOTE_USB_MIDI;
-                } else if (mCurrentFunctions == UsbManager.FUNCTION_RNDIS) {
+                } else if ((mCurrentFunctions == UsbManager.FUNCTION_RNDIS)
+                        || (mCurrentFunctions == UsbManager.FUNCTION_NCM)) {
                     titleRes = com.android.internal.R.string.usb_tether_notification_title;
                     id = SystemMessage.NOTE_USB_TETHER;
                 } else if (mCurrentFunctions == UsbManager.FUNCTION_ACCESSORY) {
