@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.UserInfo
+import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
 import android.permission.PermGroupUsage
 import android.permission.PermissionManager
@@ -548,6 +549,21 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_ABORTED)
 
         verify(dialog, never()).dismiss()
+    }
+
+    @Test
+    fun testCallOnSecondaryUser() {
+        // Calls happen in
+        val usage = createMockPermGroupUsage(uid = SYSTEM_UID, isPhoneCall = true)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(userTracker.userProfiles).thenReturn(listOf(
+                UserInfo(ENT_USER_ID, "", 0)
+        ))
+
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        verify(dialog).show()
     }
 
     private fun exhaustExecutors() {

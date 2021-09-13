@@ -155,7 +155,7 @@ class PrivacyDialogController(
             val items = usage.mapNotNull {
                 val type = filterType(permGroupToPrivacyType(it.permGroupName))
                 val userInfo = userInfos.firstOrNull { ui -> ui.id == UserHandle.getUserId(it.uid) }
-                userInfo?.let { ui ->
+                if (userInfo != null || it.isPhoneCall) {
                     type?.let { t ->
                         // Only try to get the app name if we actually need it
                         val appName = if (it.isPhoneCall) {
@@ -171,10 +171,14 @@ class PrivacyDialogController(
                                 it.attribution,
                                 it.lastAccess,
                                 it.isActive,
-                                ui.isManagedProfile,
+                                // If there's no user info, we're in a phoneCall in secondary user
+                                userInfo?.isManagedProfile ?: false,
                                 it.isPhoneCall
                         )
                     }
+                } else {
+                    // No matching user or phone call
+                    null
                 }
             }
             uiExecutor.execute {
