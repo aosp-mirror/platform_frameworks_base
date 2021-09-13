@@ -3546,6 +3546,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void dozeTimeTick() {
+        mLockIconViewController.dozeTimeTick();
         mKeyguardBottomArea.dozeTimeTick();
         mKeyguardStatusViewController.dozeTimeTick();
         if (mInterpolatedDarkAmount > 0) {
@@ -3849,10 +3850,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyExpanded()
                         && mStatusBarKeyguardViewManager.isShowing()) {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
-                }
-
-                if (mLockIconViewController.onTouchEvent(event)) {
-                    return true;
                 }
 
                 handled |= super.onTouch(v, event);

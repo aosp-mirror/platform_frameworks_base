@@ -478,11 +478,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void aodInterrupt() throws RemoteException {
-        // GIVEN that the overlay is showing and screen is on
+        // GIVEN that the overlay is showing and screen is on and fp is running
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
         // THEN illumination begins
@@ -500,6 +501,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it is cancelled
@@ -515,6 +517,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it times out
@@ -533,6 +536,24 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
 
         // WHEN aod interrupt is received
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+
+        // THEN no illumination because screen is off
+        verify(mUdfpsView, never()).startIllumination(any());
+    }
+
+    @Test
+    public void aodInterrupt_fingerprintNotRunning() throws RemoteException {
+        // GIVEN showing overlay
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+                mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
+        mFgExecutor.runAllReady();
+
+        // WHEN aod interrupt is received when the fingerprint service isn't running
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(false);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
 
         // THEN no illumination because screen is off

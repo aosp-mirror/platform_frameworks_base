@@ -42,7 +42,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
-
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
  */
