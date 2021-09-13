@@ -42,6 +42,9 @@ import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import static java.lang.Integer.MIN_VALUE;
+
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -78,6 +81,22 @@ import java.util.function.Function;
 final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     DisplayContent mDisplayContent;
+
+    /**
+     * A color layer that serves as a solid color background to certain animations.
+     */
+    private SurfaceControl mColorBackgroundLayer;
+
+    /**
+     * This counter is used to make sure we don't prematurely clear the background color in the
+     * case that background color animations are interleaved.
+     * NOTE: The last set color will remain until the counter is reset to 0, which means that an
+     * animation background color may sometime remain after the animation has finished through an
+     * animation with a different background color if an animation starts after and ends before
+     * another where both set different background colors. However, this is not a concern as
+     * currently all task animation backgrounds are the same color.
+     */
+    private int mColorLayerCounter = 0;
 
     /**
      * A control placed at the appropriate level for transitions to occur.
@@ -961,6 +980,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         if (getParent() != null) {
             super.onParentChanged(newParent, oldParent, () -> {
+                mColorBackgroundLayer = makeChildSurface(null)
+                        .setColorLayer()
+                        .setName("colorBackgroundLayer")
+                        .setCallsite("TaskDisplayArea.onParentChanged")
+                        .build();
                 mAppAnimationLayer = makeChildSurface(null)
                         .setName("animationLayer")
                         .setCallsite("TaskDisplayArea.onParentChanged")
@@ -977,6 +1001,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                         .setName("splitScreenDividerAnchor")
                         .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
+
                 getSyncTransaction()
                         .show(mAppAnimationLayer)
                         .show(mBoostedAppAnimationLayer)
@@ -986,15 +1011,50 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         } else {
             super.onParentChanged(newParent, oldParent);
             mWmService.mTransactionFactory.get()
+                    .remove(mColorBackgroundLayer)
                     .remove(mAppAnimationLayer)
                     .remove(mBoostedAppAnimationLayer)
                     .remove(mHomeAppAnimationLayer)
                     .remove(mSplitScreenDividerAnchor)
                     .apply();
+            mColorBackgroundLayer = null;
             mAppAnimationLayer = null;
             mBoostedAppAnimationLayer = null;
             mHomeAppAnimationLayer = null;
             mSplitScreenDividerAnchor = null;
+        }
+    }
+
+    void setBackgroundColor(@ColorInt int color) {
+        if (mColorBackgroundLayer == null) {
+            return;
+        }
+
+        float r = ((color >> 16) & 0xff) / 255.0f;
+        float g = ((color >>  8) & 0xff) / 255.0f;
+        float b = ((color >>  0) & 0xff) / 255.0f;
+        float a = ((color >> 24) & 0xff) / 255.0f;
+
+        mColorLayerCounter++;
+
+        getPendingTransaction().setLayer(mColorBackgroundLayer, MIN_VALUE)
+                .setColor(mColorBackgroundLayer, new float[]{r, g, b})
+                .setAlpha(mColorBackgroundLayer, a)
+                .setWindowCrop(mColorBackgroundLayer, getSurfaceWidth(), getSurfaceHeight())
+                .setPosition(mColorBackgroundLayer, 0, 0)
+                .show(mColorBackgroundLayer);
+
+        scheduleAnimation();
+    }
+
+    void clearBackgroundColor() {
+        mColorLayerCounter--;
+
+        // Only clear the color layer if we have received the same amounts of clear as set
+        // requests.
+        if (mColorLayerCounter == 0) {
+            getPendingTransaction().hide(mColorBackgroundLayer);
+            scheduleAnimation();
         }
     }
 
@@ -1006,6 +1066,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
 
         // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
+        t.reparent(mColorBackgroundLayer, mSurfaceControl);
         t.reparent(mAppAnimationLayer, mSurfaceControl);
         t.reparent(mBoostedAppAnimationLayer, mSurfaceControl);
         t.reparent(mHomeAppAnimationLayer, mSurfaceControl);
