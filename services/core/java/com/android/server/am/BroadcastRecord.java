@@ -55,7 +55,6 @@ final class BroadcastRecord extends Binder {
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
-    final int callerUidState; // the sender's UID state when sent this.
     final boolean callerInstantApp; // caller is an Instant App?
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
@@ -245,7 +244,7 @@ final class BroadcastRecord extends Binder {
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             @Nullable String _callerFeatureId, int _callingPid, int _callingUid,
-            int _callerUidState, boolean _callerInstantApp, String _resolvedType,
+            boolean _callerInstantApp, String _resolvedType,
             String[] _requiredPermissions, String[] _excludedPermissions, int _appOp,
             BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
@@ -262,7 +261,6 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = _callerFeatureId;
         callingPid = _callingPid;
         callingUid = _callingUid;
-        this.callerUidState = _callerUidState;
         callerInstantApp = _callerInstantApp;
         resolvedType = _resolvedType;
         requiredPermissions = _requiredPermissions;
@@ -300,7 +298,6 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = from.callerFeatureId;
         callingPid = from.callingPid;
         callingUid = from.callingUid;
-        callerUidState = from.callerUidState;
         callerInstantApp = from.callerInstantApp;
         ordered = from.ordered;
         sticky = from.sticky;
@@ -365,8 +362,7 @@ final class BroadcastRecord extends Binder {
 
         // build a new BroadcastRecord around that single-target list
         BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                callerFeatureId, callingPid, callingUid, callerUidState, callerInstantApp,
-                resolvedType,
+                callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, excludedPermissions, appOp, options, splitReceivers, resultTo,
                 resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                 allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);

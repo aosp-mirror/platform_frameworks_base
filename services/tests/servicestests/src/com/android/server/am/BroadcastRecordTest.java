@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
-
 import static org.junit.Assert.assertNull;
 
 import android.content.Intent;
@@ -183,7 +181,6 @@ public class BroadcastRecordTest {
                 null /* callerFeatureId */,
                 0 /* callingPid */,
                 0 /* callingUid */,
-                PROCESS_STATE_NONEXISTENT,
                 false /* callerInstantApp */,
                 null /* resolvedType */,
                 null /* requiredPermissions */,
@@ -201,6 +198,6 @@ public class BroadcastRecordTest {
                 userId,
                 false /* allowBackgroundActivityStarts */,
                 null /* activityStartsToken */,
-                false /* timeoutExempt */);
+                false /* timeoutExempt */ );
     }
 }

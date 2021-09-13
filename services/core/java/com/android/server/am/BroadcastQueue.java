@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
-import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
@@ -1658,9 +1656,6 @@ public final class BroadcastQueue {
             scheduleBroadcastsLocked();
             return;
         }
-
-        logSendBroadcastFromCachedState(r, component);
-
         r.manifestCount++;
 
         r.delivery[recIdx] = BroadcastRecord.DELIVERY_DELIVERED;
@@ -1753,29 +1748,6 @@ public final class BroadcastQueue {
         maybeAddAllowBackgroundActivityStartsToken(r.curApp, r);
         mPendingBroadcast = r;
         mPendingBroadcastRecvIndex = recIdx;
-    }
-
-    /**
-     * Log a WTF message if the broadcast is sent by a process from a cached proc state.
-     * This WTF log is to debug background restriction, it will be removed in before final release.
-     * @param r the BroadcastRecord.
-     * @param component the broadcast's resolved ComponentName.
-     */
-    private void logSendBroadcastFromCachedState(BroadcastRecord r, ComponentName component) {
-        if (r.callerUidState == PROCESS_STATE_NONEXISTENT
-                || r.callerUidState < PROCESS_STATE_CACHED_ACTIVITY) {
-            return;
-        }
-        final String msg = "sendBroadcast from cached state"
-                + "[callerPackage:" + r.callerPackage
-                + "; callingUid:" + r.callingUid
-                + "; realCallingUid:" + r.callingUid
-                + "; uidState:" + ProcessList.makeProcStateString(r.callerUidState)
-                + "; intent:" + r.intent
-                + "; component:" + component.flattenToShortString()
-                + ";]";
-        Slog.wtfQuiet(TAG, msg);
-        Slog.i(TAG, msg);
     }
 
     private boolean noteOpForManifestReceiver(int appOp, BroadcastRecord r, ResolveInfo info,
