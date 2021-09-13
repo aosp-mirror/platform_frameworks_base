@@ -87,6 +87,7 @@ public class StagingManagerTest {
     @Mock private Context mContext;
     @Mock private IStorageManager mStorageManager;
     @Mock private ApexManager mApexManager;
+    @Mock private PackageManagerService mMockPackageManagerInternal;
 
     private File mTmpDir;
     private StagingManager mStagingManager;
@@ -826,7 +827,7 @@ public class StagingManagerTest {
         PackageInstallerSession session = new PackageInstallerSession(
                 /* callback */ null,
                 /* context */ null,
-                /* pm */ null,
+                /* pm */ mMockPackageManagerInternal,
                 /* sessionProvider */ null,
                 /* silentUpdatePolicy */ null,
                 /* looper */ BackgroundThread.getHandler().getLooper(),
