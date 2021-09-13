@@ -15,25 +15,7 @@
  */
 package com.android.systemui.unfold.config
 
-import android.annotation.IntDef
-
 interface UnfoldTransitionConfig {
     val isEnabled: Boolean
     val isHingeAngleEnabled: Boolean
-
-    @AnimationMode
-    val mode: Int
 }
-
-@IntDef(prefix = ["ANIMATION_MODE_"], value = [
-    ANIMATION_MODE_DISABLED,
-    ANIMATION_MODE_FIXED_TIMING,
-    ANIMATION_MODE_HINGE_ANGLE
-])
-
-@Retention(AnnotationRetention.SOURCE)
-annotation class AnimationMode
-
-const val ANIMATION_MODE_DISABLED = 0
-const val ANIMATION_MODE_FIXED_TIMING = 1
-const val ANIMATION_MODE_HINGE_ANGLE = 2
