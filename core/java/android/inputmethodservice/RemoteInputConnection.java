@@ -393,7 +393,15 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final CompletableFuture<Boolean> value = mInvoker.requestCursorUpdates(cursorUpdateMode);
+
+        final InputMethodServiceInternal ims = mImsInternal.getAndWarnIfNull();
+        if (ims == null) {
+            return false;
+        }
+
+        final int displayId = ims.getContext().getDisplayId();
+        final CompletableFuture<Boolean> value =
+                mInvoker.requestCursorUpdates(cursorUpdateMode, displayId);
         return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
