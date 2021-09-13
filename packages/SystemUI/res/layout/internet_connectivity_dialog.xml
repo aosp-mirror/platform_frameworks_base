@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:textColor="?android:attr/textColorPrimary"
-            android:fontFamily="google-sans"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
             android:textSize="24sp"/>
 
         <TextView
@@ -50,7 +50,7 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:fontFamily="google-sans"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
             android:textSize="14sp"/>
     </LinearLayout>
 
@@ -87,24 +87,49 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <LinearLayout
-                android:id="@+id/internet_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/ethernet_layout"
+                    style="@style/InternetDialog.Network"
+                    android:background="@drawable/settingslib_switch_bar_bg_on"
+                    android:visibility="gone">
+
+                    <FrameLayout
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical|start"
+                        android:clickable="false">
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:autoMirrored="true"
+                            android:src="@drawable/stat_sys_ethernet_fully"
+                            android:tint="@color/connected_network_primary_color"/>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="start|center_vertical"
+                        android:orientation="vertical"
+                        android:clickable="false">
+                        <TextView
+                            android:text="@string/ethernet_label"
+                            style="@style/InternetDialog.NetworkTitle.Active"/>
+                        <TextView
+                            android:text="@string/to_switch_networks_disconnect_ethernet"
+                            style="@style/InternetDialog.NetworkSummary.Active"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/mobile_network_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="88dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:layout_gravity="center_vertical|start"
-                    android:orientation="horizontal"
-                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
-                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                    android:paddingStart="22dp"
-                    android:paddingEnd="22dp">
+                    style="@style/InternetDialog.Network">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -121,7 +146,6 @@
 
                     <LinearLayout
                         android:layout_weight="1"
-                        android:id="@+id/mobile_network_list"
                         android:orientation="vertical"
                         android:clickable="false"
                         android:layout_width="wrap_content"
@@ -129,28 +153,10 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/mobile_title"
-                            android:textDirection="locale"
-                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                            android:layout_marginEnd="7dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|start"
-                            android:ellipsize="end"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="16sp"
-                            android:fontFamily="google-sans"/>
+                            style="@style/InternetDialog.NetworkTitle"/>
                         <TextView
                             android:id="@+id/mobile_summary"
-                            android:textDirection="locale"
-                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                            android:layout_marginEnd="34dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|start"
-                            android:ellipsize="end"
-                            android:textColor="?android:attr/textColorTertiary"
-                            android:textSize="14sp"
-                            android:fontFamily="google-sans"/>
+                            style="@style/InternetDialog.NetworkSummary"/>
                     </LinearLayout>
 
                     <FrameLayout
@@ -172,17 +178,9 @@
 
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
-                    android:layout_width="match_parent"
+                    style="@style/InternetDialog.Network"
                     android:layout_height="72dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
-                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                    android:paddingStart="22dp"
-                    android:paddingEnd="22dp">
+                    android:gravity="center">
 
                     <FrameLayout
                         android:layout_weight="1"
@@ -193,13 +191,10 @@
                         <TextView
                             android:id="@+id/wifi_toggle_title"
                             android:text="@string/turn_on_wifi"
-                            android:textDirection="locale"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="start|center_vertical"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="16sp"
-                            android:fontFamily="google-sans"/>
+                            android:textAppearance="@style/TextAppearance.InternetDialog"/>
                     </FrameLayout>
 
                     <FrameLayout
@@ -222,18 +217,12 @@
 
                 <LinearLayout
                     android:id="@+id/wifi_connected_layout"
-                    android:layout_width="match_parent"
+                    style="@style/InternetDialog.Network"
                     android:layout_height="72dp"
-                    android:layout_gravity="center_vertical|start"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="gone"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:orientation="horizontal"
-                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                    android:layout_marginEnd="@dimen/internet_dialog_network_layout_margin"
                     android:paddingStart="20dp"
-                    android:paddingEnd="24dp">
+                    android:paddingEnd="24dp"
+                    android:background="@drawable/settingslib_switch_bar_bg_on"
+                    android:visibility="gone">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -248,7 +237,6 @@
                     </FrameLayout>
 
                     <LinearLayout
-                        android:id="@+id/wifi_connected_list"
                         android:orientation="vertical"
                         android:clickable="false"
                         android:layout_width="wrap_content"
@@ -258,26 +246,11 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/wifi_connected_title"
-                            android:textDirection="locale"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|start"
-                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                            android:ellipsize="end"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="14sp"
-                            android:fontFamily="google-sans"/>
+                            style="@style/InternetDialog.NetworkTitle.Active"
+                            android:textSize="14sp"/>
                         <TextView
                             android:id="@+id/wifi_connected_summary"
-                            android:textDirection="locale"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|start"
-                            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin"
-                            android:ellipsize="end"
-                            android:textColor="?android:attr/textColorTertiary"
-                            android:textSize="14sp"
-                            android:fontFamily="google-sans"/>
+                            style="@style/InternetDialog.NetworkSummary.Active"/>
                     </LinearLayout>
 
                     <FrameLayout
@@ -340,13 +313,11 @@
                     android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
                     <TextView
                         android:text="@string/see_all_networks"
-                        android:textDirection="locale"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="start|center_vertical"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
-                        android:fontFamily="google-sans"/>
+                        android:textAppearance="@style/TextAppearance.InternetDialog"
+                        android:textSize="14sp"/>
                 </FrameLayout>
 
             </LinearLayout>
@@ -366,7 +337,7 @@
                     android:textColor="?android:attr/textColorPrimary"
                     android:text="@string/inline_done_button"
                     android:textSize="14sp"
-                    android:fontFamily="google-sans"/>
+                    android:fontFamily="@*android:string/config_headlineFontFamily"/>
             </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

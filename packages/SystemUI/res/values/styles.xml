@@ -951,4 +951,60 @@
         <item name="android:maxHeight">4dp</item>
     </style>
 
+    <!-- Internet Dialog -->
+    <style name="InternetDialog">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
+        <item name="android:layout_marginStart">@dimen/internet_dialog_network_layout_margin</item>
+    </style>
+
+    <style name="InternetDialog.Network">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">88dp</item>
+        <item name="android:layout_marginEnd">@dimen/internet_dialog_network_layout_margin</item>
+        <item name="android:paddingStart">22dp</item>
+        <item name="android:paddingEnd">22dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="InternetDialog.NetworkTitle">
+        <item name="android:layout_marginEnd">7dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@style/TextAppearance.InternetDialog</item>
+    </style>
+
+    <style name="InternetDialog.NetworkTitle.Active">
+        <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Active</item>
+    </style>
+
+    <style name="InternetDialog.NetworkSummary">
+        <item name="android:layout_marginEnd">34dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Secondary</item>
+    </style>
+
+    <style name="InternetDialog.NetworkSummary.Active">
+        <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Secondary.Active
+        </item>
+    </style>
+
+    <style name="TextAppearance.InternetDialog">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+    </style>
+
+    <style name="TextAppearance.InternetDialog.Secondary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+
+    <style name="TextAppearance.InternetDialog.Active"/>
+
+    <style name="TextAppearance.InternetDialog.Secondary.Active"/>
+
 </resources>

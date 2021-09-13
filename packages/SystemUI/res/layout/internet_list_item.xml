@@ -24,21 +24,15 @@
 
     <LinearLayout
         android:id="@+id/wifi_list"
-        android:layout_width="match_parent"
+        style="@style/InternetDialog.Network"
         android:layout_height="72dp"
-        android:layout_gravity="center_vertical|start"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?android:attr/selectableItemBackground"
-        android:orientation="horizontal"
         android:paddingStart="20dp"
-        android:paddingEnd="40dp">
+        android:paddingEnd="24dp">
         <FrameLayout
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:clickable="false"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
+            android:layout_gravity="center_vertical|start">
             <ImageView
                 android:id="@+id/wifi_icon"
                 android:layout_width="wrap_content"
@@ -52,31 +46,16 @@
             android:clickable="false"
             android:layout_width="wrap_content"
             android:layout_height="72dp"
+            android:layout_marginEnd="30dp"
             android:layout_weight="1"
-            android:gravity="start|center_vertical"
-            android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
+            android:gravity="start|center_vertical">
             <TextView
                 android:id="@+id/wifi_title"
-                android:textDirection="locale"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:gravity="start|center_vertical"
-                android:ellipsize="end"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="14sp"
-                android:fontFamily="google-sans"
-                android:layout_marginEnd="18dp"/>
+                style="@style/InternetDialog.NetworkTitle"
+                android:textSize="14sp"/>
             <TextView
                 android:id="@+id/wifi_summary"
-                android:textDirection="locale"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start|center_vertical"
-                android:ellipsize="end"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="14sp"
-                android:fontFamily="google-sans"
-                android:layout_marginEnd="18dp"/>
+                style="@style/InternetDialog.NetworkSummary"/>
         </LinearLayout>
 
         <FrameLayout
