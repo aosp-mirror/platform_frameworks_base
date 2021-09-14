@@ -64,7 +64,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // Fade out faster than fade in to finish before QQS hides.
     private static final long QQS_FADE_OUT_DURATION = 50L;
 
-
+    /**
+     * List of all views that will be reset when clearing animation state
+     * see {@link #clearAnimationState()} }
+     */
     private final ArrayList<View> mAllViews = new ArrayList<>();
     /**
      * List of {@link View}s representing Quick Settings that are being animated from the quick QS
@@ -397,6 +400,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     tileView.setClipChildren(true);
                     tileView.setClipToPadding(true);
                     firstPageBuilder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 1);
+                    mAllViews.add(tileView.getSecondaryLabel());
                 }
 
                 mAllViews.add(tileView);
