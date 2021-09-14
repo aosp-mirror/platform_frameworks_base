@@ -52,7 +52,7 @@ import java.util.function.Consumer;
  */
 @SystemService(Context.STATUS_BAR_SERVICE)
 public class StatusBarManager {
-
+    // LINT.IfChange
     /** @hide */
     public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;
     /** @hide */
@@ -150,6 +150,7 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
+    // LINT.ThenChange(frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/DisableFlagsLogger.kt)
 
     /**
      * Default disable flags for setup
