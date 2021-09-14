@@ -96,6 +96,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -152,6 +153,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_REQUEST_WALLPAPER_COLORS = 10050;
     private static final int MSG_ZOOM = 10100;
     private static final int MSG_SCALE_PREVIEW = 10110;
+    private static final int MSG_REPORT_SHOWN = 10150;
     private static final List<Float> PROHIBITED_STEPS = Arrays.asList(0f, Float.POSITIVE_INFINITY,
             Float.NEGATIVE_INFINITY);
 
@@ -524,6 +526,35 @@ public abstract class WallpaperService extends Service {
          */
         public boolean shouldZoomOutWallpaper() {
             return false;
+        }
+
+        /**
+         * This will be called in the end of {@link #updateSurface(boolean, boolean, boolean)}.
+         * If true is returned, the engine will not report shown until rendering finished is
+         * reported. Otherwise, the engine will report shown immediately right after redraw phase
+         * in {@link #updateSurface(boolean, boolean, boolean)}.
+         *
+         * @hide
+         */
+        public boolean shouldWaitForEngineShown() {
+            return false;
+        }
+
+        /**
+         * Reports the rendering is finished, stops waiting, then invokes
+         * {@link IWallpaperEngineWrapper#reportShown()}.
+         *
+         * @hide
+         */
+        public void reportEngineShown(boolean waitForEngineShown) {
+            if (mIWallpaperEngine.mShownReported) return;
+            Message message = mCaller.obtainMessage(MSG_REPORT_SHOWN);
+            if (!waitForEngineShown) {
+                mCaller.removeMessages(MSG_REPORT_SHOWN);
+                mCaller.sendMessage(message);
+            } else {
+                mCaller.sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(1));
+            }
         }
 
         /**
@@ -930,7 +961,7 @@ public abstract class WallpaperService extends Service {
 
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
-                Log.w(TAG, "Ignoring updateSurface: destroyed");
+                Log.w(TAG, "Ignoring updateSurface due to destroyed");
             }
 
             boolean fixedSize = false;
@@ -1197,7 +1228,6 @@ public abstract class WallpaperService extends Service {
                                         + this);
                             onVisibilityChanged(false);
                         }
-
                     } finally {
                         mIsCreating = false;
                         mSurfaceCreated = true;
@@ -1207,7 +1237,7 @@ public abstract class WallpaperService extends Service {
                             processLocalColors(mPendingXOffset, mPendingXOffsetStep);
                         }
                         reposition();
-                        mIWallpaperEngine.reportShown();
+                        reportEngineShown(shouldWaitForEngineShown());
                     }
                 } catch (RemoteException ex) {
                 }
@@ -2200,6 +2230,9 @@ public abstract class WallpaperService extends Service {
                     } catch (RemoteException e) {
                         // Connection went away, nothing to do in here.
                     }
+                } break;
+                case MSG_REPORT_SHOWN: {
+                    reportShown();
                 } break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);

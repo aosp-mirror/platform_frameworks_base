@@ -18,13 +18,18 @@ package com.android.server.wallpaper;
 
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.os.FileObserver.CLOSE_WRITE;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CROP;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -41,6 +47,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,8 +56,10 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
+import android.graphics.Color;
 import android.hardware.display.DisplayManager;
-import android.os.UserHandle;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
@@ -143,7 +152,6 @@ public class WallpaperManagerServiceTests {
         sContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.SET_WALLPAPER,
                 PackageManager.PERMISSION_GRANTED);
-        doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         //Wallpaper components
         sWallpaperService = mock(IWallpaperConnection.Stub.class);
@@ -180,6 +188,7 @@ public class WallpaperManagerServiceTests {
         MockitoAnnotations.initMocks(this);
 
         sContext.addMockSystemService(DisplayManager.class, mDisplayManager);
+        doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         final Display mockDisplay = mock(Display.class);
         doReturn(DISPLAY_SIZE_DIMENSION).when(mockDisplay).getMaximumSizeDimension();
@@ -242,13 +251,13 @@ public class WallpaperManagerServiceTests {
      */
     @Test
     public void testDataCorrectAfterBoot() {
-        mService.switchUser(UserHandle.USER_SYSTEM, null);
+        mService.switchUser(USER_SYSTEM, null);
 
         final WallpaperData fallbackData = mService.mFallbackWallpaper;
         assertEquals("Fallback wallpaper component should be ImageWallpaper.",
                 sImageWallpaperComponentName, fallbackData.wallpaperComponent);
 
-        verifyLastWallpaperData(UserHandle.USER_SYSTEM, sDefaultWallpaperComponent);
+        verifyLastWallpaperData(USER_SYSTEM, sDefaultWallpaperComponent);
         verifyDisplayData();
     }
 
@@ -261,7 +270,7 @@ public class WallpaperManagerServiceTests {
         assumeThat(sDefaultWallpaperComponent,
                 not(CoreMatchers.equalTo(sImageWallpaperComponentName)));
 
-        final int testUserId = UserHandle.USER_SYSTEM;
+        final int testUserId = USER_SYSTEM;
         mService.switchUser(testUserId, null);
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
@@ -281,7 +290,7 @@ public class WallpaperManagerServiceTests {
      */
     @Test
     public void testSetCurrentComponent() throws Exception {
-        final int testUserId = UserHandle.USER_SYSTEM;
+        final int testUserId = USER_SYSTEM;
         mService.switchUser(testUserId, null);
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
@@ -385,6 +394,42 @@ public class WallpaperManagerServiceTests {
             fail("exception occurred while parsing wallpaper");
         }
         assertEquals(systemWallpaperData.primaryColors, shouldMatchSystem.primaryColors);
+    }
+
+    @Test
+    public void testWallpaperManagerCallbackInRightOrder() throws RemoteException {
+        WallpaperData wallpaper = new WallpaperData(
+                USER_SYSTEM, mService.getWallpaperDir(USER_SYSTEM), WALLPAPER, WALLPAPER_CROP);
+        wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+
+        spyOn(wallpaper);
+        doReturn(wallpaper).when(mService).getWallpaperSafeLocked(wallpaper.userId, FLAG_SYSTEM);
+        doNothing().when(mService).switchWallpaper(any(), any());
+        doReturn(true).when(mService)
+                .bindWallpaperComponentLocked(any(), anyBoolean(), anyBoolean(), any(), any());
+        doNothing().when(mService).saveSettingsLocked(wallpaper.userId);
+        doNothing().when(mService).generateCrop(wallpaper);
+
+        // timestamps of {ACTION_WALLPAPER_CHANGED, onWallpaperColorsChanged}
+        final long[] timestamps = new long[2];
+        doAnswer(invocation -> timestamps[0] = SystemClock.elapsedRealtime())
+                .when(sContext).sendBroadcastAsUser(any(), any());
+        doAnswer(invocation -> timestamps[1] = SystemClock.elapsedRealtime())
+                .when(mService).notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+
+        assertNull(wallpaper.wallpaperObserver);
+        mService.switchUser(wallpaper.userId, null);
+        assertNotNull(wallpaper.wallpaperObserver);
+        // We will call onEvent directly, so stop watching the file.
+        wallpaper.wallpaperObserver.stopWatching();
+
+        spyOn(wallpaper.wallpaperObserver);
+        doReturn(wallpaper).when(wallpaper.wallpaperObserver).dataForEvent(true, false);
+        wallpaper.wallpaperObserver.onEvent(CLOSE_WRITE, WALLPAPER);
+
+        // ACTION_WALLPAPER_CHANGED should be invoked before onWallpaperColorsChanged.
+        assertTrue(timestamps[1] > timestamps[0]);
     }
 
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for
