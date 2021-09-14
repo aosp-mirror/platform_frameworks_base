@@ -160,7 +160,7 @@ public abstract class IdentityCredential {
      * not the case, the {@link SessionTranscriptMismatchException} exception is thrown.
      *
      * <p>If not {@code null} the {@code requestMessage} parameter must contain data for the request
-     * from the verifier. The content can be defined in the way appropriate for the credential, byt
+     * from the verifier. The content can be defined in the way appropriate for the credential, but
      * there are three requirements that must be met to work with this API:
      * <ul>
      * <li>The content must be a CBOR-encoded structure.</li>
@@ -205,9 +205,9 @@ public abstract class IdentityCredential {
      * must appear somewhere in {@code sessionTranscript} and ditto for the 32 bytes for the Y
      * coordinate.
      *
-     * <p>If {@code readerAuth} is not {@code null} it must be the bytes of a {@code COSE_Sign1}
-     * structure as defined in RFC 8152. For the payload nil shall be used and the
-     * detached payload is the ReaderAuthenticationBytes CBOR described below.
+     * <p>If {@code readerSignature} is not {@code null} it must be the bytes of a
+     * {@code COSE_Sign1} structure as defined in RFC 8152. For the payload nil shall be used and
+     * the detached payload is the ReaderAuthenticationBytes CBOR described below.
      * <pre>
      *     ReaderAuthentication = [
      *       "ReaderAuthentication",
