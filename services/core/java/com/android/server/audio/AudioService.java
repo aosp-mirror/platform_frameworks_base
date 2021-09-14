@@ -1431,7 +1431,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // TODO check property if feature enabled
-        mSpatializerHelper.reset(/* featureEnabled */ true);
+        mSpatializerHelper.reset(/* featureEnabled */ SPATIALIZER_FEATURE_ENABLED_DEFAULT);
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -7601,7 +7601,7 @@ public class AudioService extends IAudioService.Stub
                 case MSG_INIT_SPATIALIZER:
                     mSpatializerHelper.init();
                     // TODO read property to see if enabled
-                    mSpatializerHelper.setFeatureEnabled(true);
+                    mSpatializerHelper.setFeatureEnabled(SPATIALIZER_FEATURE_ENABLED_DEFAULT);
                     mAudioEventWakeLock.release();
                     break;
 
@@ -8310,6 +8310,7 @@ public class AudioService extends IAudioService.Stub
 
     //==========================================================================================
     private final @NonNull SpatializerHelper mSpatializerHelper;
+    private static final boolean SPATIALIZER_FEATURE_ENABLED_DEFAULT = false;
 
     private void enforceModifyDefaultAudioEffectsPermission() {
         if (mContext.checkCallingOrSelfPermission(

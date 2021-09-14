@@ -124,7 +124,15 @@ public class SpatializerHelper {
                     break;
                 }
             }
-        } catch (RemoteException e) { /* capable level remains at NONE*/ }
+        } catch (RemoteException e) {
+            /* capable level remains at NONE*/
+        } finally {
+            if (spat != null) {
+                try {
+                    spat.release();
+                } catch (RemoteException e) { /* capable level remains at NONE*/ }
+            }
+        }
         if (mCapableSpatLevel == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE) {
             mState = STATE_NOT_SUPPORTED;
             return;
